@@ -8,13 +8,16 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 Class site: [https://haday.vercel.app](https://haday.vercel.app)
 
-## Update the class site
+## Auto-deploy (Vercel)
 
-The live class URL only changes when Vercel rebuilds from this repo.
+This repo is the source of truth. Once Vercel is linked to [adeyholar/haday](https://github.com/adeyholar/haday), every push to `main` rebuilds [haday.vercel.app](https://haday.vercel.app).
 
-1. Open [Vercel](https://vercel.com) and select the **haday** project.
-2. Connect Git to [adeyholar/haday](https://github.com/adeyholar/haday). Leave the root directory empty (this folder *is* the app).
-3. Deploy. When it finishes, [https://haday.vercel.app/listen](https://haday.vercel.app/listen) should list **Tanakh · all 39 books**, not Genesis 1–5.
+Connect the existing class project (keeps the same URL):
+
+1. Open [Import adeyholar/haday](https://vercel.com/new/import?s=https://github.com/adeyholar/haday).
+2. Choose the existing **haday** project if Vercel offers it. Otherwise import as `haday` and assign the domain `haday.vercel.app`.
+3. Leave the root directory empty.
+4. Production branch: `main`. Auto-deploy stays on.
 
 Keep these project env vars:
 
@@ -23,6 +26,8 @@ Keep these project env vars:
 | `DATABASE_URL` | Neon connection string |
 | `BETTER_AUTH_URL` | `https://haday.vercel.app` |
 | `BETTER_AUTH_SECRET` | existing secret — do not rotate unless sign-in is broken |
+
+After the first linked deploy, [https://haday.vercel.app/listen](https://haday.vercel.app/listen) should list **Tanakh · all 39 books**.
 
 ## Scripts
 
