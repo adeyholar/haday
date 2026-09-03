@@ -1,0 +1,87 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { createJiti } from "jiti";
+
+const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const {
+  readingVerses,
+  readingGradeQuiz,
+  parseReadingKey,
+  chapterAudio,
+  verseAtTime,
+  wordAtTime,
+  mediaClockTime,
+  formatPlayTime,
+  HIGHLIGHT_LEAD,
+  READ_RATES,
+} = await jiti.import("/workspace/src/lib/reading.ts");
+
+test("Genesis 1–5 public-domain reading is complete", () => {
+  assert.equal(parseReadingKey("all"), "all");
+  assert.equal(parseReadingKey("3"), 3);
+  const all = readingVerses("all");
+  assert.equal(all.length, 31 + 25 + 24 + 26 + 32);
+  const one = readingVerses(1);
+  assert.equal(one[0]?.he.includes("בְּרֵאשִׁ"), true);
+  assert.equal(one[0]?.en.toLowerCase().includes("beginning"), true);
+  assert.equal(one.at(-1)?.verse, 31);
+  const g3 = readingVerses(3).find((v) => v.verse === 15);
+  assert.ok(g3?.he.includes("אָשִׁ"));
+  assert.ok(!g3?.en.toLowerCase().includes("fire"));
+});
+
+test("grade quiz uses verses from that chapter", () => {
+  const quiz = readingGradeQuiz(1, 10);
+  assert.equal(quiz.length, 10);
+  for (const q of quiz) {
+    assert.equal(q.verse.chapter, 1);
+    assert.ok(q.choices.includes(q.answer));
+    assert.equal(q.choices.length, 4);
+  }
+});
+
+test("recorded chapter audio has a start time for every verse", () => {
+  for (const ch of [1, 2, 3, 4, 5]) {
+    const n = readingVerses(ch).length;
+    const meta = chapterAudio(ch);
+    assert.ok(meta, `missing audio for Genesis ${ch}`);
+    assert.equal(meta.verses.length, n, `Genesis ${ch} starts ${meta.verses.length} vs ${n} verses`);
+    assert.ok(meta.src.endsWith(`01-Gen_0${ch}.mp3`) || meta.src.endsWith(`01-Gen_${String(ch).padStart(2, "0")}.mp3`));
+    assert.equal(verseAtTime(ch, meta.verses[0]), 1);
+    assert.equal(verseAtTime(ch, meta.verses.at(-1)), n);
+    assert.ok(meta.verses[0] > 2, "skip the spoken heading");
+    assert.equal(meta.words?.length, n);
+    const v1 = readingVerses(ch)[0];
+    assert.equal(meta.words?.[0]?.length, v1.words.length);
+    assert.equal(wordAtTime(ch, 1, meta.words[0][0]), 0);
+    if (v1.words.length > 1) {
+      assert.equal(wordAtTime(ch, 1, meta.words[0].at(-1)), v1.words.length - 1);
+    }
+  }
+});
+
+test("slow and fast clocks stay on the recording timeline", () => {
+  const start = { media: 12.72, wall: 1_000, rate: 1 };
+  assert.equal(mediaClockTime(12.72, false, start, 1_000, 400), 12.72);
+  assert.equal(mediaClockTime(12.72, false, { ...start, rate: 0.7 }, 1_000 + 10_000, 400), 12.72 + 7);
+  assert.equal(mediaClockTime(12.72, false, { ...start, rate: 1.25 }, 1_000 + 4_000, 400), 12.72 + 5);
+  assert.equal(mediaClockTime(18, true, { media: 18, wall: 1_000, rate: 0.7 }, 5_000, 400), 18);
+  assert.ok(READ_RATES.some((r) => r.label === "Slow" && r.value === 0.7));
+  assert.ok(READ_RATES.some((r) => r.label === "Faster" && r.value === 1.25));
+});
+
+test("playhead time labels", () => {
+  assert.equal(formatPlayTime(0), "0:00");
+  assert.equal(formatPlayTime(72), "1:12");
+  assert.equal(formatPlayTime(364.04), "6:04");
+});
+
+test("highlight leads the playhead so the mark is not late", () => {
+  assert.ok(HIGHLIGHT_LEAD >= 0.12);
+  const meta = chapterAudio(1);
+  const w1 = meta.words[0][1];
+  assert.equal(wordAtTime(1, 1, w1 - HIGHLIGHT_LEAD), 1);
+  const start = { media: 12.72, wall: 1_000, rate: 1 };
+  assert.ok(Math.abs(mediaClockTime(12.72, false, start, 1_000 + 400, 400) - 13.12) < 1e-6);
+});
+

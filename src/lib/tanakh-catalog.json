@@ -1,0 +1,314 @@
+[
+  {
+    "id": "Gen",
+    "en": "Genesis",
+    "he": "בְּרֵאשִׁית",
+    "section": "torah",
+    "chapters": 50,
+    "verses": 1533
+  },
+  {
+    "id": "Exod",
+    "en": "Exodus",
+    "he": "שְׁמוֹת",
+    "section": "torah",
+    "chapters": 40,
+    "verses": 1213
+  },
+  {
+    "id": "Lev",
+    "en": "Leviticus",
+    "he": "וַיִּקְרָא",
+    "section": "torah",
+    "chapters": 27,
+    "verses": 859
+  },
+  {
+    "id": "Num",
+    "en": "Numbers",
+    "he": "בְּמִדְבַּר",
+    "section": "torah",
+    "chapters": 36,
+    "verses": 1289
+  },
+  {
+    "id": "Deut",
+    "en": "Deuteronomy",
+    "he": "דְּבָרִים",
+    "section": "torah",
+    "chapters": 34,
+    "verses": 959
+  },
+  {
+    "id": "Josh",
+    "en": "Joshua",
+    "he": "יְהוֹשֻׁעַ",
+    "section": "neviim",
+    "chapters": 24,
+    "verses": 658
+  },
+  {
+    "id": "Judg",
+    "en": "Judges",
+    "he": "שׁוֹפְטִים",
+    "section": "neviim",
+    "chapters": 21,
+    "verses": 618
+  },
+  {
+    "id": "1Sam",
+    "en": "1 Samuel",
+    "he": "שְׁמוּאֵל א",
+    "section": "neviim",
+    "chapters": 31,
+    "verses": 811
+  },
+  {
+    "id": "2Sam",
+    "en": "2 Samuel",
+    "he": "שְׁמוּאֵל ב",
+    "section": "neviim",
+    "chapters": 24,
+    "verses": 695
+  },
+  {
+    "id": "1Kgs",
+    "en": "1 Kings",
+    "he": "מְלָכִים א",
+    "section": "neviim",
+    "chapters": 22,
+    "verses": 817
+  },
+  {
+    "id": "2Kgs",
+    "en": "2 Kings",
+    "he": "מְלָכִים ב",
+    "section": "neviim",
+    "chapters": 25,
+    "verses": 719
+  },
+  {
+    "id": "Isa",
+    "en": "Isaiah",
+    "he": "יְשַׁעְיָהוּ",
+    "section": "neviim",
+    "chapters": 66,
+    "verses": 1291
+  },
+  {
+    "id": "Jer",
+    "en": "Jeremiah",
+    "he": "יִרְמְיָהוּ",
+    "section": "neviim",
+    "chapters": 52,
+    "verses": 1364
+  },
+  {
+    "id": "Ezek",
+    "en": "Ezekiel",
+    "he": "יְחֶזְקֵאל",
+    "section": "neviim",
+    "chapters": 48,
+    "verses": 1273
+  },
+  {
+    "id": "Hos",
+    "en": "Hosea",
+    "he": "הוֹשֵׁעַ",
+    "section": "neviim",
+    "chapters": 14,
+    "verses": 197
+  },
+  {
+    "id": "Joel",
+    "en": "Joel",
+    "he": "יוֹאֵל",
+    "section": "neviim",
+    "chapters": 4,
+    "verses": 73
+  },
+  {
+    "id": "Amos",
+    "en": "Amos",
+    "he": "עָמוֹס",
+    "section": "neviim",
+    "chapters": 9,
+    "verses": 146
+  },
+  {
+    "id": "Obad",
+    "en": "Obadiah",
+    "he": "עֹבַדְיָה",
+    "section": "neviim",
+    "chapters": 1,
+    "verses": 21
+  },
+  {
+    "id": "Jonah",
+    "en": "Jonah",
+    "he": "יוֹנָה",
+    "section": "neviim",
+    "chapters": 4,
+    "verses": 48
+  },
+  {
+    "id": "Mic",
+    "en": "Micah",
+    "he": "מִיכָה",
+    "section": "neviim",
+    "chapters": 7,
+    "verses": 105
+  },
+  {
+    "id": "Nah",
+    "en": "Nahum",
+    "he": "נַחוּם",
+    "section": "neviim",
+    "chapters": 3,
+    "verses": 47
+  },
+  {
+    "id": "Hab",
+    "en": "Habakkuk",
+    "he": "חֲבַקּוּק",
+    "section": "neviim",
+    "chapters": 3,
+    "verses": 56
+  },
+  {
+    "id": "Zeph",
+    "en": "Zephaniah",
+    "he": "צְפַנְיָה",
+    "section": "neviim",
+    "chapters": 3,
+    "verses": 53
+  },
+  {
+    "id": "Hag",
+    "en": "Haggai",
+    "he": "חַגַּי",
+    "section": "neviim",
+    "chapters": 2,
+    "verses": 38
+  },
+  {
+    "id": "Zech",
+    "en": "Zechariah",
+    "he": "זְכַרְיָה",
+    "section": "neviim",
+    "chapters": 14,
+    "verses": 211
+  },
+  {
+    "id": "Mal",
+    "en": "Malachi",
+    "he": "מַלְאָכִי",
+    "section": "neviim",
+    "chapters": 3,
+    "verses": 55
+  },
+  {
+    "id": "Ps",
+    "en": "Psalms",
+    "he": "תְּהִלִּים",
+    "section": "ketuvim",
+    "chapters": 150,
+    "verses": 2527
+  },
+  {
+    "id": "Prov",
+    "en": "Proverbs",
+    "he": "מִשְׁלֵי",
+    "section": "ketuvim",
+    "chapters": 31,
+    "verses": 915
+  },
+  {
+    "id": "Job",
+    "en": "Job",
+    "he": "אִיּוֹב",
+    "section": "ketuvim",
+    "chapters": 42,
+    "verses": 1070
+  },
+  {
+    "id": "Song",
+    "en": "Song of Songs",
+    "he": "שִׁיר הַשִּׁירִים",
+    "section": "ketuvim",
+    "chapters": 8,
+    "verses": 117
+  },
+  {
+    "id": "Ruth",
+    "en": "Ruth",
+    "he": "רוּת",
+    "section": "ketuvim",
+    "chapters": 4,
+    "verses": 85
+  },
+  {
+    "id": "Lam",
+    "en": "Lamentations",
+    "he": "אֵיכָה",
+    "section": "ketuvim",
+    "chapters": 5,
+    "verses": 154
+  },
+  {
+    "id": "Eccl",
+    "en": "Ecclesiastes",
+    "he": "קֹהֶלֶת",
+    "section": "ketuvim",
+    "chapters": 12,
+    "verses": 222
+  },
+  {
+    "id": "Esth",
+    "en": "Esther",
+    "he": "אֶסְתֵּר",
+    "section": "ketuvim",
+    "chapters": 10,
+    "verses": 167
+  },
+  {
+    "id": "Dan",
+    "en": "Daniel",
+    "he": "דָּנִיֵּאל",
+    "section": "ketuvim",
+    "chapters": 12,
+    "verses": 357
+  },
+  {
+    "id": "Ezra",
+    "en": "Ezra",
+    "he": "עֶזְרָא",
+    "section": "ketuvim",
+    "chapters": 10,
+    "verses": 280
+  },
+  {
+    "id": "Neh",
+    "en": "Nehemiah",
+    "he": "נְחֶמְיָה",
+    "section": "ketuvim",
+    "chapters": 13,
+    "verses": 405
+  },
+  {
+    "id": "1Chr",
+    "en": "1 Chronicles",
+    "he": "דִּבְרֵי הַיָּמִים א",
+    "section": "ketuvim",
+    "chapters": 29,
+    "verses": 943
+  },
+  {
+    "id": "2Chr",
+    "en": "2 Chronicles",
+    "he": "דִּבְרֵי הַיָּמִים ב",
+    "section": "ketuvim",
+    "chapters": 36,
+    "verses": 822
+  }
+]

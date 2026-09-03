@@ -1,0 +1,17 @@
+node_modules
+.vercel
+.output
+dist
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+artifacts/
+attachments/
+screenshots/
+.grok/
+.tanstack/
+AGENTS.md
+AGENTS.project.md
+startup.sh
