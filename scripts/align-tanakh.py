@@ -236,19 +236,31 @@ def audio_path(book: str, chapter: int) -> Path:
     mapped = (MAP.get(book) or {}).get(str(chapter))
     if mapped:
         local = AUDIO_DIR / mapped
-        if local.exists():
+        if local.exists() and local.stat().st_size > 20_000:
             return local
     CACHE.mkdir(parents=True, exist_ok=True)
-    name = mapped or mechon_file(book, chapter)
+    name = mechon_file(book, chapter)
     cache = CACHE / name
     if cache.exists() and cache.stat().st_size > 20_000:
         return cache
-    url = f"https://mechon-mamre.org/mp3/{mechon_file(book, chapter)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "HaDayHebracicAlign/1.0"})
-    print(f"  download {book} {chapter} {url}")
-    with urllib.request.urlopen(req, timeout=90) as res, cache.open("wb") as fh:
-        fh.write(res.read())
-    return cache
+    url = f"https://mechon-mamre.org/mp3/{name}"
+    req = urllib.request.Request(url, headers={"User-Agent": "HaDayHebraicAlign/1.0"})
+    print(f"  download {book} {chapter} {url}", flush=True)
+    tmp = cache.with_suffix(cache.suffix + ".part")
+    last_err: Exception | None = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=90) as res, tmp.open("wb") as fh:
+                fh.write(res.read())
+            if tmp.stat().st_size < 20_000:
+                tmp.unlink(missing_ok=True)
+                raise RuntimeError(f"tiny file {tmp.stat().st_size if tmp.exists() else 0}")
+            tmp.replace(cache)
+            return cache
+        except Exception as exc:
+            last_err = exc
+            tmp.unlink(missing_ok=True)
+    raise RuntimeError(str(last_err))
 
 
 def silences(energy: np.ndarray, min_dur: float = 0.28) -> list[tuple[float, float, float]]:
@@ -358,8 +370,7 @@ def align_chapter(
     }
 
 
-def main() -> None:
-    book = sys.argv[1] if len(sys.argv) > 1 else "Gen"
+def align_book(book: str) -> None:
     dump = json.loads((ROOT / f"public/tanakh/books/{book}.json").read_text())
     chapters = sorted(dump["chapters"], key=lambda x: int(x))
     ALIGN_DIR.mkdir(parents=True, exist_ok=True)
@@ -371,41 +382,86 @@ def main() -> None:
         except json.JSONDecodeError:
             out = {}
 
-    def fetch(ch: str) -> tuple[str, Path]:
-        return ch, audio_path(book, int(ch))
+    def fetch(ch: str) -> tuple[str, Path | None, str]:
+        try:
+            return ch, audio_path(book, int(ch)), ""
+        except Exception as exc:
+            return ch, None, str(exc)
 
     need = [
         ch
         for ch in chapters
         if not (out.get(ch) or {}).get("aligned") or len((out.get(ch) or {}).get("verses") or []) != len(dump["chapters"][ch])
     ]
-    print(f"{book}: {len(chapters)} chapters, {len(need)} to align")
+    print(f"{book}: {len(chapters)} chapters, {len(need)} to align", flush=True)
+    if not need:
+        print(f"  skip {book} complete", flush=True)
+        return
+
     paths: dict[str, Path] = {}
     with ThreadPoolExecutor(max_workers=4) as pool:
-        futs = [pool.submit(fetch, ch) for ch in (need or chapters[:1])]
-        for fut in as_completed(futs):
-            ch, path = fut.result()
+        for fut in as_completed([pool.submit(fetch, ch) for ch in need]):
+            ch, path, err = fut.result()
+            if path is None:
+                print(f"  FAIL download {book} {ch} {err}", flush=True)
+                continue
+            try:
+                size = path.stat().st_size
+            except FileNotFoundError:
+                print(f"  FAIL missing {book} {ch}", flush=True)
+                continue
             paths[ch] = path
-            print(f"  ready {book} {ch} {path.stat().st_size}")
+            print(f"  ready {book} {ch} {size}", flush=True)
 
-    for ch in chapters:
+    for ch in need:
         rows = dump["chapters"][ch]
-        if ch not in need and out.get(ch):
+        path = paths.get(ch)
+        if path is None:
             continue
-        path = paths.get(ch) or audio_path(book, int(ch))
-        samples = decode(path)
-        energy, flux = features(samples)
-        gold = AUDIO_META[ch]["verses"] if book == "Gen" and ch in AUDIO_META else None
-        meta = align_chapter(book, ch, rows, samples, energy, flux, gold)
-        out[ch] = meta
-        print(f"aligned {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} dur={meta['duration']}")
-        out_path.write_text(json.dumps(out, separators=(",", ":")))
+        try:
+            samples = decode(path)
+            energy, flux = features(samples)
+            gold = AUDIO_META[ch]["verses"] if book == "Gen" and ch in AUDIO_META else None
+            meta = align_chapter(book, ch, rows, samples, energy, flux, gold)
+            out[ch] = meta
+            print(f"aligned {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} dur={meta['duration']}", flush=True)
+            out_path.write_text(json.dumps(out, separators=(",", ":")))
+        except Exception as exc:
+            print(f"  FAIL align {book} {ch} {exc}", flush=True)
+        finally:
+            if CACHE in path.parents and path.exists():
+                path.unlink()
 
     if book == "Gen":
         slim = {k: out[k] for k in ["1", "2", "3", "4", "5"] if k in out}
         (ROOT / "src/lib/tanakh-audio.json").write_text(json.dumps(slim, separators=(",", ":")))
-        print("updated src/lib/tanakh-audio.json for Genesis 1–5 tests")
-    print("wrote", out_path, "bytes", out_path.stat().st_size, "chapters", len(out))
+    print("wrote", out_path, "bytes", out_path.stat().st_size, "chapters", len(out), flush=True)
+
+
+def catalog_ids() -> list[str]:
+    return [b["id"] for b in json.loads((ROOT / "src/lib/tanakh-catalog.json").read_text())]
+
+
+def books_from_args(args: list[str]) -> list[str]:
+    all_ids = catalog_ids()
+    if not args or args == ["all"]:
+        return all_ids
+    if args[0] in {"torah-mal", "to-malachi"}:
+        out = []
+        for bid in all_ids:
+            out.append(bid)
+            if bid == "Mal":
+                break
+        return out
+    return args
+
+
+def main() -> None:
+    books = books_from_args(sys.argv[1:])
+    print("batch", " ".join(books), flush=True)
+    for book in books:
+        align_book(book)
+    print("batch done", flush=True)
 
 
 if __name__ == "__main__":

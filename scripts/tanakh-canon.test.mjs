@@ -118,3 +118,14 @@ test("Genesis waveform alignment covers all 50 chapters", () => {
     assert.ok(meta.duration > 20);
   }
 });
+
+test("every Tanakh book has a waveform map for each chapter", () => {
+  for (const book of TANAKH_BOOKS) {
+    const align = JSON.parse(readFileSync(`/workspace/public/tanakh/align/${book.id}.json`, "utf8"));
+    assert.equal(Object.keys(align).length, book.chapters, book.id);
+    const last = align[String(book.chapters)];
+    assert.ok(last?.aligned, book.id);
+    assert.ok(last.verses.length >= 1, book.id);
+    assert.equal(last.words.length, last.verses.length, book.id);
+  }
+});
