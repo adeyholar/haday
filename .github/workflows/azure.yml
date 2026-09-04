@@ -1,9 +1,11 @@
-# Manual Azure deploy. Add GitHub secrets, then Run workflow.
-# AZURE_WEBAPP_NAME — App Service name (e.g. haday)
-# AZURE_WEBAPP_PUBLISH_PROFILE — Get publish profile from Azure Portal
+# Builds the HaDay container and, when Azure is linked, deploys it.
+# Azure Portal → Web App → Deployment Center adds AZURE_WEBAPP_NAME and
+# AZURE_WEBAPP_PUBLISH_PROFILE as GitHub secrets.
 name: Deploy Azure
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -35,7 +37,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/haday:latest
 
       - uses: azure/webapps-deploy@v3
-        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE != '' }}
+        if: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE != '' && secrets.AZURE_WEBAPP_NAME != '' }}
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
