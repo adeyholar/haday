@@ -23,4 +23,4 @@ COPY --from=build /app/.output ./.output
 COPY migrations ./migrations
 COPY scripts ./scripts
 EXPOSE 8080
-CMD ["sh", "-c", "node scripts/migrate.mjs && node .output/server/index.mjs"]
+CMD ["sh", "-c", "node scripts/migrate.mjs && node scripts/copy-from-neon.mjs && node .output/server/index.mjs"]
