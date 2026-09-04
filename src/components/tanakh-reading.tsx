@@ -97,6 +97,7 @@ export function TanakhReading({
   const wordRef = useRef(0);
   const clusterRef = useRef(0);
   const versesRef = useRef(verses);
+  const chapterRowsRef = useRef<ReadingVerse[]>([]);
   const rateRef = useRef(rate);
   const loopRef = useRef(loop);
   const passageRef = useRef(passage);
@@ -105,7 +106,7 @@ export function TanakhReading({
   const verse = verses[i];
   const pid = isFullChapter(passage) ? progressId(book, chapter) : `${book}.${chapter}.${vw.from}-${vw.to}`;
   const rec = loadReadingProgress()[pid];
-  const aligned = Boolean(audioFor(book, chapter).verses.length);
+  const aligned = Boolean(audioMeta.aligned);
   const win = audioWindow(audioMeta, vw.from, vw.to, tdur);
   iRef.current = i;
   versesRef.current = verses;
@@ -163,7 +164,8 @@ export function TanakhReading({
       setI(next);
     }
     if (item) {
-      const w = wordAtStarts(curMeta.words?.[item.verse - 1] ?? [], t);
+      const starts = curMeta.words?.[item.verse - 1] ?? [];
+      const w = Math.min(Math.max(0, item.words.length - 1), Math.max(0, wordAtStarts(starts, t)));
       if (w !== wordRef.current) {
         wordRef.current = w;
         setWordI(w);
@@ -300,6 +302,7 @@ export function TanakhReading({
     setAudioErr(false);
     halt();
     saveLastRead(book, chapter);
+    chapterRowsRef.current = [];
     const seed = audioFor(book, chapter);
     audioMetaRef.current = seed;
     setAudioMeta(seed);
@@ -314,13 +317,14 @@ export function TanakhReading({
       .then((dump) => {
         if (cancelled) return;
         const rows = versesFromDump(dump, chapter);
+        chapterRowsRef.current = rows;
         const shown = sliceVerses(rows, vw.from, vw.to);
         versesRef.current = shown;
         setVerses(shown);
         if (!shown.length) setLoadErr("This passage is empty.");
         const el = elAudio();
-        const dur = el?.duration || audioMetaRef.current.duration;
-        if (dur && !(audioMetaRef.current.verses.length && audioMetaRef.current.words?.length)) {
+        const dur = el?.duration && el.duration > 2 ? el.duration : audioMetaRef.current.duration;
+        if (dur > 2) {
           const timed = withEstimatedTiming(audioMetaRef.current, rows, dur);
           audioMetaRef.current = timed;
           setAudioMeta(timed);
@@ -361,9 +365,12 @@ export function TanakhReading({
     const onMeta = () => {
       const dur = el.duration || 0;
       setTdur(dur);
-      const next = withEstimatedTiming(audioMetaRef.current, versesRef.current, dur);
-      audioMetaRef.current = next;
-      setAudioMeta(next);
+      const base = chapterRowsRef.current.length ? chapterRowsRef.current : versesRef.current;
+      if (dur > 2 && base.length) {
+        const next = withEstimatedTiming(audioMetaRef.current, base, dur);
+        audioMetaRef.current = next;
+        setAudioMeta(next);
+      }
     };
     const onPlay = () => {
       applyRate(el, rateRef.current);
@@ -538,7 +545,7 @@ export function TanakhReading({
           <p className="mt-2 text-sm text-danger">The recording could not be loaded. Try again when you have a connection.</p>
         ) : null}
         {!aligned && !audioErr ? (
-          <p className="mt-2 text-sm text-muted">Word highlight follows the Hebrew letter-weight for this chapter.</p>
+          <p className="mt-2 text-sm text-muted">Word highlight follows Hebrew syllable weight until this chapter is verse-timed.</p>
         ) : null}
         <VerseClipBar book={book} chapter={chapter} fromV={vw.from} toV={vw.to} loop={loop} />
         <div className="mt-4 grid grid-cols-2 gap-2">

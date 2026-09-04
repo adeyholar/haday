@@ -14,6 +14,10 @@ const {
   formatPlayTime,
   HIGHLIGHT_LEAD,
   READ_RATES,
+  withEstimatedTiming,
+  estimateTiming,
+  repairWordTimes,
+  audioFor,
 } = await jiti.import("/workspace/src/lib/reading.ts");
 
 test("Genesis 1–5 public-domain reading is complete", () => {
@@ -63,9 +67,15 @@ test("recorded chapter audio has a start time for every verse", () => {
 test("slow and fast clocks stay on the recording timeline", () => {
   const start = { media: 12.72, wall: 1_000, rate: 1 };
   assert.equal(mediaClockTime(12.72, false, start, 1_000, 400), 12.72);
-  assert.equal(mediaClockTime(12.72, false, { ...start, rate: 0.7 }, 1_000 + 10_000, 400), 12.72 + 7);
-  assert.equal(mediaClockTime(12.72, false, { ...start, rate: 1.25 }, 1_000 + 4_000, 400), 12.72 + 5);
+  const slow = mediaClockTime(12.72, false, { ...start, rate: 0.7 }, 1_000 + 80, 400);
+  assert.ok(slow > 12.72);
+  assert.ok(slow <= 12.72 + 0.08 + 1e-9);
+  const fast = mediaClockTime(12.72, false, { ...start, rate: 1.25 }, 1_000 + 40, 400);
+  assert.ok(fast > 12.72);
+  assert.ok(fast <= 12.72 + 0.08 + 1e-9);
   assert.equal(mediaClockTime(18, true, { media: 18, wall: 1_000, rate: 0.7 }, 5_000, 400), 18);
+  const runaway = mediaClockTime(12.72, false, { ...start, rate: 1 }, 1_000 + 10_000, 400);
+  assert.ok(runaway <= 12.72 + 0.081);
   assert.ok(READ_RATES.some((r) => r.label === "Slow" && r.value === 0.7));
   assert.ok(READ_RATES.some((r) => r.label === "Faster" && r.value === 1.25));
 });
@@ -77,11 +87,48 @@ test("playhead time labels", () => {
 });
 
 test("highlight leads the playhead so the mark is not late", () => {
-  assert.ok(HIGHLIGHT_LEAD >= 0.12);
+  assert.ok(HIGHLIGHT_LEAD > 0 && HIGHLIGHT_LEAD <= 0.08);
   const meta = chapterAudio(1);
   const w1 = meta.words[0][1];
   assert.equal(wordAtTime(1, 1, w1 - HIGHLIGHT_LEAD), 1);
-  const start = { media: 12.72, wall: 1_000, rate: 1 };
-  assert.ok(Math.abs(mediaClockTime(12.72, false, start, 1_000 + 400, 400) - 13.12) < 1e-6);
 });
+
+test("does not freeze a one-second guess before the MP3 duration is known", () => {
+  const verses = readingVerses(1);
+  const early = withEstimatedTiming(audioFor("Exod", 1), verses, 0);
+  assert.equal(early.aligned, false);
+  assert.equal(early.verses.length, 0);
+  const later = withEstimatedTiming(early, verses, 364);
+  assert.equal(later.verses.length, 31);
+  assert.equal(later.words?.length, 31);
+  assert.equal(later.aligned, false);
+  const locked = withEstimatedTiming(later, verses, 364.2);
+  assert.equal(locked.verses[0], later.verses[0]);
+});
+
+test("packed word stamps inside a gold verse are re-spaced by syllable weight", () => {
+  const verses = readingVerses(1);
+  const packed = {
+    src: "/x.mp3",
+    duration: 40,
+    aligned: true,
+    verses: [10, 12, 20],
+    words: [
+      Array.from({ length: verses[0].words.length }, (_, i) => 10 + i * 0.03),
+      [12, 12.4],
+      [20],
+    ],
+  };
+  const fixed = repairWordTimes(packed, verses.slice(0, 3));
+  assert.equal(fixed[0].length, verses[0].words.length);
+  assert.ok(fixed[0].at(-1) - fixed[0][0] > 1);
+  assert.ok(medianDiff(fixed[0]) > 0.08);
+});
+
+function medianDiff(starts) {
+  const gaps = [];
+  for (let i = 1; i < starts.length; i++) gaps.push(starts[i] - starts[i - 1]);
+  gaps.sort((a, b) => a - b);
+  return gaps[Math.floor(gaps.length / 2)] ?? 0;
+}
 

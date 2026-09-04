@@ -1,4 +1,4 @@
-import { clusterAtTime } from "@/lib/hebrew-phones";
+import { clusterAtTime, clusterWeight } from "@/lib/hebrew-phones";
 import raw from "@/lib/genesis-1-5.json";
 import audioRaw from "@/lib/tanakh-audio.json";
 import { shuffle } from "@/lib/vocab";
@@ -16,7 +16,14 @@ type GenesisDump = {
 
 const data = raw as GenesisDump;
 
-export type ChapterAudio = { src: string; duration: number; verses: number[]; words?: number[][] };
+export type ChapterAudio = {
+  src: string;
+  duration: number;
+  verses: number[];
+  words?: number[][];
+  /** True when verse times came from the chapter map, not a duration guess. */
+  aligned?: boolean;
+};
 const AUDIO = audioRaw as Record<string, ChapterAudio>;
 
 export const AUDIO_CREDIT =
@@ -30,8 +37,11 @@ export const READ_RATES = [
 
 export type MediaClock = { media: number; wall: number; rate: number };
 
-/** Highlight sits this far ahead of the playhead so the mark is on the word as it is spoken. */
-export const HIGHLIGHT_LEAD = 0.14;
+/** Highlight sits slightly ahead of the playhead so the mark is on the spoken word. */
+export const HIGHLIGHT_LEAD = 0.05;
+
+/** How far interpolation may run ahead of the element (seconds of media time). */
+const CLOCK_AHEAD = 0.08;
 
 /** Media-time for highlighting. Independent of Slow / Recorded / Faster wall clock. */
 export function mediaClockTime(
@@ -43,8 +53,8 @@ export function mediaClockTime(
 ): number {
   if (paused || clock.rate <= 0) return currentTime;
   const interpolated = clock.media + ((now - clock.wall) / 1000) * clock.rate;
-  // Never sit behind the element or the wall clock — iOS currentTime often lags.
-  const t = Math.max(currentTime, interpolated);
+  // Cover iOS currentTime lag, but do not race a word ahead of the recording.
+  const t = Math.max(currentTime, Math.min(interpolated, currentTime + CLOCK_AHEAD));
   const cap = duration > 0 ? duration : Number.POSITIVE_INFINITY;
   return Math.min(cap, Math.max(0, t));
 }
@@ -159,25 +169,55 @@ export function chapterAudio(chapter: number): ChapterAudio | undefined {
 
 export function audioFor(book: BookId, chapter: number): ChapterAudio {
   if (book === "Gen") {
-    const aligned = AUDIO[String(chapter)];
-    if (aligned) return aligned;
+    const mapped = AUDIO[String(chapter)];
+    if (mapped) return { ...mapped, aligned: true };
   }
-  return { src: chapterAudioSrc(book, chapter), duration: 0, verses: [] };
+  return { src: chapterAudioSrc(book, chapter), duration: 0, verses: [], aligned: false };
 }
 
-function letterCount(word: string): number {
-  let n = 0;
-  for (const c of word) {
-    if (c >= "\u05d0" && c <= "\u05ea") n += 1;
-  }
-  return n || 1;
+function medianGap(starts: number[]): number {
+  if (starts.length < 2) return 1;
+  const gaps = [];
+  for (let i = 1; i < starts.length; i++) gaps.push((starts[i] ?? 0) - (starts[i - 1] ?? 0));
+  gaps.sort((a, b) => a - b);
+  const mid = Math.floor(gaps.length / 2);
+  return gaps.length % 2 ? (gaps[mid] ?? 1) : ((gaps[mid - 1] ?? 1) + (gaps[mid] ?? 1)) / 2;
+}
+
+function spreadByWeight(words: string[], t0: number, t1: number): number[] {
+  const ww = words.map((w) => clusterWeight(w));
+  const tot = ww.reduce((a, b) => a + b, 0) || 1;
+  const span = Math.max(0.18, t1 - t0);
+  let t = t0;
+  return words.map((_, i) => {
+    const at = Math.round(t * 1000) / 1000;
+    t += span * ((ww[i] ?? 1) / tot);
+    return at;
+  });
+}
+
+/** Keep gold verse starts; re-space words when a verse's stamps are packed or the counts differ. */
+export function repairWordTimes(meta: ChapterAudio, verses: ReadingVerse[]): number[][] {
+  const words = meta.words ?? [];
+  return verses.map((verse, i) => {
+    const starts = words[i] ?? [];
+    const vw = verse.words;
+    const t0 = meta.verses[i] ?? starts[0] ?? 0;
+    const t1 = meta.verses[i + 1] ?? meta.duration ?? (starts.at(-1) ?? t0) + 0.5;
+    if (!vw.length) return starts;
+    if (starts.length !== vw.length) return spreadByWeight(vw, t0, t1);
+    if (vw.length >= 4 && medianGap(starts) < 0.08) return spreadByWeight(vw, t0, t1);
+    return starts;
+  });
 }
 
 export function estimateTiming(verses: ReadingVerse[], duration: number): { verses: number[]; words: number[][] } {
-  const heading = Math.min(10, Math.max(3, duration * 0.035));
-  const weights = verses.map((v) => v.words.reduce((n, w) => n + letterCount(w), 0) || 1);
+  const heading = Math.min(12, Math.max(2.2, duration * 0.03));
+  const weights = verses.map((v) => v.words.reduce((n, w) => n + clusterWeight(w), 0) || 1);
   const total = weights.reduce((a, b) => a + b, 0) || 1;
-  const body = Math.max(0.2, duration - heading);
+  const restCount = Math.max(0, verses.length - 1);
+  const pauseBudget = Math.min(duration * 0.11, restCount * 0.42);
+  const body = Math.max(0.4, duration - heading - pauseBudget);
   const starts: number[] = [];
   const words: number[][] = [];
   let t = heading;
@@ -185,24 +225,34 @@ export function estimateTiming(verses: ReadingVerse[], duration: number): { vers
     starts.push(Math.round(t * 1000) / 1000);
     const span = body * ((weights[i] ?? 1) / total);
     const vw = verses[i]?.words ?? [];
-    const ww = vw.map((w) => letterCount(w));
-    const wtot = ww.reduce((a, b) => a + b, 0) || 1;
-    let wt = t;
-    const wstarts: number[] = [];
-    for (let j = 0; j < vw.length; j++) {
-      wstarts.push(Math.round(wt * 1000) / 1000);
-      wt += span * ((ww[j] ?? 1) / wtot);
-    }
-    words.push(wstarts);
+    words.push(spreadByWeight(vw, t, t + span));
     t += span;
+    if (i < verses.length - 1 && restCount) t += pauseBudget / restCount;
   }
   return { verses: starts, words };
 }
 
 export function withEstimatedTiming(meta: ChapterAudio, verses: ReadingVerse[], duration: number): ChapterAudio {
-  if (meta.verses.length && meta.words?.length) return { ...meta, duration: duration || meta.duration };
-  const est = estimateTiming(verses, duration || meta.duration || 1);
-  return { src: meta.src, duration: duration || meta.duration, verses: est.verses, words: est.words };
+  const dur = duration || meta.duration || 0;
+  if (meta.aligned && meta.verses.length) {
+    return {
+      ...meta,
+      duration: dur || meta.duration,
+      words: repairWordTimes(meta, verses),
+      aligned: true,
+    };
+  }
+  if (dur < 2 || !verses.length) {
+    return { src: meta.src, duration: dur, verses: [], words: [], aligned: false };
+  }
+  const sameShape =
+    !meta.aligned &&
+    meta.verses.length === verses.length &&
+    meta.words?.length === verses.length &&
+    Math.abs((meta.duration || 0) - dur) < 0.45;
+  if (sameShape) return { ...meta, duration: dur, aligned: false };
+  const est = estimateTiming(verses, dur);
+  return { src: meta.src, duration: dur, verses: est.verses, words: est.words, aligned: false };
 }
 
 function indexAt(starts: number[], time: number): number {
@@ -211,7 +261,7 @@ function indexAt(starts: number[], time: number): number {
   for (let i = 0; i < starts.length; i++) {
     const prev = i > 0 ? starts[i - 1] : undefined;
     const gap = prev != null ? (starts[i] ?? 0) - prev : 1;
-    const lead = Math.min(HIGHLIGHT_LEAD, Math.max(0.04, gap * 0.4));
+    const lead = Math.min(HIGHLIGHT_LEAD, Math.max(0.02, gap * 0.18));
     if (time + lead >= (starts[i] ?? 0)) v = i;
     else break;
   }
@@ -270,7 +320,7 @@ export function clusterAtMeta(
   const starts = meta?.words?.[Math.max(0, verse - 1)] ?? [];
   const t0 = starts[word] ?? 0;
   const t1 = wordEndFrom(meta, verse, word);
-  const lead = Math.min(HIGHLIGHT_LEAD, Math.max(0.04, (t1 - t0) * 0.2));
+  const lead = Math.min(0.03, Math.max(0.01, (t1 - t0) * 0.12));
   return clusterAtTime(surface, t0, t1, time + lead);
 }
 
