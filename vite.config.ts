@@ -210,7 +210,12 @@ export default defineConfig(({ command, isPreview }) => {
     ...(command === "build" || isPreview
       ? [
           nitro({
-            preset: "vercel",
+            // Grok / Vercel stay on the vercel preset. Azure/Docker set
+            // NITRO_PRESET=node-server so the same build emits a Node server.
+            preset:
+              process.env.NITRO_PRESET === "node-server"
+                ? "node-server"
+                : "vercel",
             // Auto-registers server/middleware/* (the PWA install page +
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
