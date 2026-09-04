@@ -54,7 +54,12 @@ function Login() {
           password,
           callbackURL: "/",
         });
-        if (signUpError) throw new Error(signUpError.message || "Could not create the account.");
+        if (signUpError) {
+          throw new Error(
+            signUpError.message ||
+              "Could not create the account. The class database may not be connected on Azure yet.",
+          );
+        }
       } else {
         const { error: signInError } = await authClient.signIn.email({
           email: email.trim(),

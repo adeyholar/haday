@@ -1,23 +1,88 @@
 /**
  * Postgres URL for Neon, Azure Flexible Server, or any other host.
  *
- * Azure's Web App + Database wizard injects AZURE_POSTGRESQL_* instead of
- * DATABASE_URL. Build a URL the `pg` driver accepts in that case.
+ * Azure's Web App + Database wizard may inject:
+ * - DATABASE_URL
+ * - AZURE_POSTGRESQL_HOST + USER + PASSWORD + DATABASE
+ * - AZURE_POSTGRESQL_CONNECTIONSTRING (ADO.NET)
+ * - POSTGRESQLCONNSTR_* (App Service connection-string slot)
  */
-export function resolveDatabaseUrl(): string | undefined {
-  const direct =
-    typeof process !== "undefined" ? process.env.DATABASE_URL?.trim() : undefined;
-  if (direct) return direct;
+function firstEnvByPrefix(prefix: string): string | undefined {
+  if (typeof process === "undefined") return undefined;
+  for (const [key, value] of Object.entries(process.env)) {
+    if (!key.startsWith(prefix)) continue;
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed;
+  }
+  return undefined;
+}
 
-  const host =
-    typeof process !== "undefined"
-      ? process.env.AZURE_POSTGRESQL_HOST?.trim()
-      : undefined;
+function env(name: string): string | undefined {
+  if (typeof process === "undefined") return undefined;
+  const value = process.env[name]?.trim();
+  return value || undefined;
+}
+
+function fromAzureSplit(): string | undefined {
+  const host = env("AZURE_POSTGRESQL_HOST");
   if (!host) return undefined;
-
-  const user = process.env.AZURE_POSTGRESQL_USER?.trim() ?? "postgres";
+  const user = env("AZURE_POSTGRESQL_USER") ?? "postgres";
   const password = process.env.AZURE_POSTGRESQL_PASSWORD ?? "";
-  const database = process.env.AZURE_POSTGRESQL_DATABASE?.trim() || "postgres";
-  const port = process.env.AZURE_POSTGRESQL_PORT?.trim() || "5432";
+  const database = env("AZURE_POSTGRESQL_DATABASE") || "postgres";
+  const port = env("AZURE_POSTGRESQL_PORT") || "5432";
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`;
+}
+
+function fromAdoNet(raw: string): string | undefined {
+  const parts: Record<string, string> = {};
+  for (const chunk of raw.split(";")) {
+    const idx = chunk.indexOf("=");
+    if (idx <= 0) continue;
+    const key = chunk.slice(0, idx).trim().toLowerCase();
+    const value = chunk.slice(idx + 1).trim();
+    if (key) parts[key] = value;
+  }
+  const host = parts.server || parts.host || parts["data source"];
+  if (!host) return undefined;
+  const user = parts["user id"] || parts.userid || parts.user || parts.username || "postgres";
+  const password = parts.password || parts.pwd || "";
+  const database = parts.database || parts["initial catalog"] || "postgres";
+  const port = parts.port || "5432";
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`;
+}
+
+function withSsl(url: string): string {
+  if (/sslmode=/i.test(url)) return url;
+  return url.includes("?") ? `${url}&sslmode=require` : `${url}?sslmode=require`;
+}
+
+export function resolveDatabaseUrl(): string | undefined {
+  const direct = env("DATABASE_URL");
+  if (direct) return withSsl(direct);
+
+  const conn =
+    env("AZURE_POSTGRESQL_CONNECTIONSTRING") ||
+    firstEnvByPrefix("POSTGRESQLCONNSTR_") ||
+    firstEnvByPrefix("CUSTOMCONNSTR_");
+  if (conn) {
+    if (/^postgres(ql)?:\/\//i.test(conn)) return withSsl(conn);
+    const ado = fromAdoNet(conn);
+    if (ado) return ado;
+  }
+
+  return fromAzureSplit();
+}
+
+export function pgPoolOptions(connectionString: string): {
+  connectionString: string;
+  ssl: { rejectUnauthorized: false };
+  max: number;
+  connectionTimeoutMillis: number;
+} {
+  return {
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 5,
+    connectionTimeoutMillis: 8000,
+  };
 }

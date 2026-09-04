@@ -18,8 +18,41 @@ import { dirname, join } from "node:path";
 import pg from "pg";
 import { pendingMigrations } from "./migration-plan.mjs";
 
+function firstByPrefix(prefix) {
+  for (const [key, value] of Object.entries(process.env)) {
+    if (key.startsWith(prefix) && value?.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function fromAdo(raw) {
+  const parts = {};
+  for (const chunk of raw.split(";")) {
+    const idx = chunk.indexOf("=");
+    if (idx <= 0) continue;
+    parts[chunk.slice(0, idx).trim().toLowerCase()] = chunk.slice(idx + 1).trim();
+  }
+  const host = parts.server || parts.host;
+  if (!host) return undefined;
+  const user = parts["user id"] || parts.user || parts.username || "postgres";
+  const password = parts.password || "";
+  const database = parts.database || "postgres";
+  const port = parts.port || "5432";
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`;
+}
+
+const conn =
+  process.env.AZURE_POSTGRESQL_CONNECTIONSTRING?.trim() ||
+  firstByPrefix("POSTGRESQLCONNSTR_") ||
+  firstByPrefix("CUSTOMCONNSTR_");
+
 const databaseUrl =
   process.env.DATABASE_URL?.trim() ||
+  (conn
+    ? /^postgres(ql)?:\/\//i.test(conn)
+      ? conn
+      : fromAdo(conn)
+    : undefined) ||
   (process.env.AZURE_POSTGRESQL_HOST
     ? `postgresql://${encodeURIComponent(process.env.AZURE_POSTGRESQL_USER || "postgres")}:${encodeURIComponent(process.env.AZURE_POSTGRESQL_PASSWORD || "")}@${process.env.AZURE_POSTGRESQL_HOST}:${process.env.AZURE_POSTGRESQL_PORT || "5432"}/${process.env.AZURE_POSTGRESQL_DATABASE || "postgres"}?sslmode=require`
     : undefined);
@@ -46,7 +79,12 @@ async function main() {
     return;
   }
 
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 1 });
+  const pool = new pg.Pool({
+    connectionString: databaseUrl,
+    max: 1,
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 8000,
+  });
   const client = await pool.connect();
   try {
     await client.query(
