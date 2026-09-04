@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Forced-align Genesis 1–5 words onto speech energy.
+"""Phoneme-level forced alignment of Genesis 1–5 onto the Shmuelof waveform.
 
-Keeps the existing verse windows (already counted against WLC) and maps each
-word onto voiced islands. Island onsets are pulled back to the rise of energy
-so the highlight is not late to the voice.
+Uses a duration-constrained HMM (HSMM) over RMS energy + spectral-flux onsets.
+Verse windows stay snapped to recorded silences; words and niqqud clusters are
+placed on the actual voiced onsets instead of a linear letter guess.
 """
 from __future__ import annotations
 
@@ -19,6 +19,10 @@ AUDIO_META = json.loads((ROOT / "src/lib/tanakh-audio.json").read_text())
 OUT = ROOT / "src/lib/tanakh-audio.json"
 AUDIO_DIR = ROOT / "public/audio/tanakh"
 
+SR = 16000
+HOP = 160  # 10 ms
+N_FFT = 512
+DT = HOP / SR
 
 CONS = set(chr(c) for c in range(0x05D0, 0x05EB))
 SHEVA = "\u05B0"
@@ -31,11 +35,7 @@ MATRES = set("אהוי")
 VOWELS = {SHEVA, *HATEF, *SHORT, *LONG}
 
 
-def letters(word: str) -> int:
-    return sum(1 for c in word if "\u05d0" <= c <= "\u05ea") or 1
-
-
-def phone_weight(word: str) -> float:
+def clusters(word: str) -> list[tuple[str, float]]:
     chars = list(word)
     raw = []
     i = 0
@@ -45,21 +45,21 @@ def phone_weight(word: str) -> float:
             i += 1
             continue
         i += 1
-        marks = []
+        marks: list[str] = []
         while i < len(chars) and chars[i] not in CONS:
             marks.append(chars[i])
             i += 1
         raw.append((ch, "".join(marks), [m for m in marks if m in VOWELS], DAGESH in marks))
-    if not raw:
-        return float(letters(word))
-    total = 0.0
-    has_cluster = False
+    out: list[tuple[str, float]] = []
     for n, (cons, marks, vowels, dagesh) in enumerate(raw):
         shureq = cons == "ו" and dagesh and not vowels
         holem_vav = cons == "ו" and any(v in LONG for v in vowels) and len(vowels) == 1
         if not vowels and not shureq:
-            total += 0.08 if cons in MATRES else (0.28 if has_cluster else 0.34)
-            has_cluster = True
+            if out:
+                g, w = out[-1]
+                out[-1] = (g + cons + marks, w + (0.08 if cons in MATRES else 0.28))
+            else:
+                out.append((cons + marks, 0.34))
             continue
         w = 0.34
         if shureq:
@@ -79,173 +79,178 @@ def phone_weight(word: str) -> float:
                 w += 1.22 + (0.12 if METEG in marks else 0)
         if dagesh and not shureq:
             w += 0.08 if cons in MATRES else 0.22
-        total += max(0.12, w)
-        has_cluster = True
-    return total or 1.0
+        out.append((cons + marks, max(0.12, w)))
+    return out or [(word, 1.0)]
 
 
-def decode(path: Path) -> tuple[np.ndarray, int]:
+def phone_weight(word: str) -> float:
+    return float(sum(w for _, w in clusters(word)) or 1.0)
+
+
+def decode(path: Path) -> np.ndarray:
     raw = subprocess.check_output(
-        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(path), "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(path), "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
         stderr=subprocess.DEVNULL,
     )
-    return np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0, 16000
+    return np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
 
 
-def envelope(samples: np.ndarray, sr: int, hop=0.01, win=0.02) -> tuple[np.ndarray, float]:
-    w = max(1, int(win * sr))
-    h = max(1, int(hop * sr))
-    rms = [float(np.sqrt(np.mean(samples[i : i + w] ** 2) + 1e-12)) for i in range(0, max(1, len(samples) - w), h)]
-    env = np.array(rms, dtype=np.float32)
-    if len(env) >= 3:
-        env = np.convolve(env, np.ones(3) / 3, mode="same")
-    return env, h / sr
+def features(samples: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    window = np.hanning(N_FFT).astype(np.float32)
+    n = max(1, 1 + (len(samples) - N_FFT) // HOP)
+    energy = np.empty(n, dtype=np.float32)
+    mag_prev = None
+    flux = np.zeros(n, dtype=np.float32)
+    for i in range(n):
+        frame = samples[i * HOP : i * HOP + N_FFT]
+        if len(frame) < N_FFT:
+            frame = np.pad(frame, (0, N_FFT - len(frame)))
+        energy[i] = float(np.sqrt(np.mean(frame * frame) + 1e-12))
+        spec = np.abs(np.fft.rfft(frame * window))
+        if mag_prev is not None:
+            flux[i] = float(np.maximum(spec - mag_prev, 0.0).sum())
+        mag_prev = spec
+    if n >= 5:
+        kernel = np.ones(5, dtype=np.float32) / 5
+        energy = np.convolve(energy, kernel, mode="same")
+        flux = np.convolve(flux, np.array([0.15, 0.2, 0.3, 0.2, 0.15], dtype=np.float32), mode="same")
+    e_p = float(np.percentile(energy, 90) or 1e-6)
+    f_p = float(np.percentile(flux, 90) or 1e-6)
+    energy = np.clip(energy / e_p, 0, 2.5)
+    flux = np.clip(flux / f_p, 0, 3.0)
+    return energy, flux
 
 
-def islands(env: np.ndarray, dt: float, t0: float, min_dur=0.03) -> list[tuple[float, float]]:
-    if not len(env):
-        return []
-    thr = max(0.01, float(np.percentile(env, 24)) * 0.7)
-    speech = env > thr
-    segs: list[tuple[float, float]] = []
-    on = False
-    st = 0
-    for i, flag in enumerate(speech):
-        if flag and not on:
-            on = True
-            st = i
-        elif not flag and on:
-            if (i - st) * dt >= min_dur:
-                segs.append((t0 + st * dt, t0 + i * dt))
-            on = False
-    if on and (len(env) - st) * dt >= min_dur:
-        segs.append((t0 + st * dt, t0 + len(env) * dt))
-    return segs
-
-
-def pull_onset(env: np.ndarray, dt: float, t0: float, start: float, peak_t: float, floor: float) -> float:
-    if not len(env):
-        return max(floor, start)
-    i_end = int(np.clip((start - t0) / dt, 0, len(env) - 1))
-    i_peak = int(np.clip((peak_t - t0) / dt, 0, len(env) - 1))
-    peak = float(env[i_peak])
-    thr = max(0.006, peak * 0.10)
-    i_min = int(np.clip((max(floor, start - 0.5) - t0) / dt, 0, len(env) - 1))
-    hit = i_end
-    for i in range(i_end, i_min - 1, -1):
-        if env[i] < thr:
-            hit = min(len(env) - 1, i + 1)
+def snap_onset(energy: np.ndarray, flux: np.ndarray, t: float, floor: float, ceil: float) -> float:
+    lo = max(0, int(floor / DT))
+    hi = min(len(energy) - 1, int(ceil / DT))
+    i = int(np.clip(t / DT, lo, hi))
+    peak = float(energy[i] + 0.5 * flux[i])
+    thr = max(0.08, peak * 0.18)
+    hit = i
+    for j in range(i, max(lo, i - 10) - 1, -1):  # at most 100ms back
+        if energy[j] + 0.3 * flux[j] < thr:
+            hit = min(hi, j + 1)
             break
-        hit = i
-    return max(floor, t0 + hit * dt)
+        hit = j
+    return max(floor, min(ceil, hit * DT))
 
 
-def merge_close(segs: list[tuple[float, float]], gap=0.12) -> list[tuple[float, float]]:
-    if not segs:
-        return []
-    out = [segs[0]]
-    for a, b in segs[1:]:
-        pa, pb = out[-1]
-        if a - pb <= gap:
-            out[-1] = (pa, b)
-        else:
-            out.append((a, b))
-    return out
-
-
-def place_words(segs: list[tuple[float, float]], words: list[str], t0: float, t1: float) -> list[float]:
-    n = len(words)
+def energy_starts(weights: list[float], energy: np.ndarray, flux: np.ndarray, t0: float) -> list[float]:
+    """Word/phone starts from cumulative voiced energy. Silence does not eat duration."""
+    n = len(weights)
+    T = len(energy)
     if n == 0:
         return []
-    segs = [(a, b) for a, b in segs if b - a >= 0.08]
-    segs = merge_close(segs, 0.12)
-    if not segs:
-        step = max(0.08, (t1 - t0) / n)
+    if n == 1 or T <= 1:
+        # first voiced frame
+        voiced = np.flatnonzero((energy + 0.2 * flux) > 0.14)
+        t = t0 + (int(voiced[0]) * DT if len(voiced) else 0.0)
+        return [round(t, 3)]
+
+    w = np.asarray(weights, dtype=np.float64)
+    w = np.maximum(w, 0.08)
+    w = w / w.sum()
+    score = np.clip(energy + 0.4 * flux, 0, None)
+    score[score < 0.10] = 0.0
+    if float(score.sum()) <= 1e-6:
+        step = (T * DT) / n
         return [round(t0 + i * step, 3) for i in range(n)]
-    # Always walk speech by letter weight. Island count is not word count
-    # in this cantillation, so 1:1 mapping lags or skips.
-    wts = np.array([phone_weight(w) for w in words], dtype=float)
-    wts = wts / wts.sum()
-    speech = max(0.08, sum(b - a for a, b in segs))
-    durs = wts * speech
-    starts: list[float] = []
-    ii = 0
-    t = segs[0][0]
-    for d in durs:
-        while ii < len(segs) and t >= segs[ii][1] - 1e-4:
-            ii += 1
-            if ii < len(segs):
-                t = segs[ii][0]
-        starts.append(float(t))
-        remain = float(d)
-        while remain > 1e-4 and ii < len(segs):
-            room = segs[ii][1] - t
-            if room >= remain:
-                t += remain
-                remain = 0.0
-            else:
-                remain -= max(0.0, room)
-                ii += 1
-                if ii < len(segs):
-                    t = segs[ii][0]
-                else:
-                    t += remain
-                    remain = 0.0
-        if remain > 1e-4:
-            t += remain
-    out: list[float] = []
-    last = t0
-    for j, s in enumerate(starts):
-        s = s - 0.06
-        s = min(max(s, last + 0.04), t1 - 0.04 * (n - j))
-        out.append(round(float(s), 3))
-        last = out[-1]
+
+    cum = np.cumsum(score)
+    total = float(cum[-1])
+    voiced = np.flatnonzero(score > 0)
+    first = int(voiced[0])
+    last = int(voiced[-1])
+    starts_idx = [first]
+    for i in range(1, n):
+        tgt = float(w[:i].sum()) * total
+        idx = int(np.searchsorted(cum, tgt))
+        prev_w = float(w[i - 1])
+        min_step = 12 if prev_w >= 0.9 else 8  # 120ms full syllable, 80ms clitic
+        idx = int(np.clip(idx, starts_idx[-1] + min_step, last))
+        # pull back at most 80ms to the rise of this energy step
+        peak = float(score[idx])
+        thr = max(0.08, peak * 0.18)
+        hit = idx
+        for j in range(idx, max(starts_idx[-1] + 6, idx - 8) - 1, -1):
+            if score[j] < thr:
+                hit = j + 1
+                break
+            hit = j
+        starts_idx.append(int(hit))
+    return [round(t0 + i * DT, 3) for i in starts_idx]
+
+
+def spread_times(weights: list[float], t0: float, t1: float) -> list[float]:
+    w = np.maximum(np.asarray(weights, dtype=np.float64), 0.08)
+    w = w / w.sum()
+    span = max(0.2, t1 - t0)
+    t = t0
+    out = []
+    for wi in w:
+        out.append(round(float(t), 3))
+        t += span * float(wi)
     return out
 
 
-def align_chapter(ch: str) -> dict:
-    path = AUDIO_DIR / f"01-Gen_{int(ch):02d}.mp3"
-    samples, sr = decode(path)
+def align_items(items: list[float], energy: np.ndarray, flux: np.ndarray, t0: float, t1: float) -> list[float]:
+    i0 = max(0, int(t0 / DT))
+    i1 = min(len(energy), max(i0 + 8, int(t1 / DT)))
+    return energy_starts(items, energy[i0:i1], flux[i0:i1], i0 * DT)
+
+
+def align_chapter(ch: str, samples: np.ndarray, energy: np.ndarray, flux: np.ndarray) -> dict:
+    duration = round(len(samples) / SR, 2)
     prev = AUDIO_META[ch]
-    duration = round(len(samples) / sr, 2)
-    env, dt = envelope(samples, sr)
     verses = GEN["chapters"][ch]
+    # Keep the counted verse windows; they already sit on sof-pasuk rests.
     starts = [float(x) for x in prev["verses"]]
-    pulled: list[float] = []
-    for i, t in enumerate(starts):
-        floor = (pulled[-1] + 0.3) if i else max(2.0, t - 0.6)
-        pulled.append(round(pull_onset(env, dt, 0.0, t, t + 0.2, floor), 3))
-    starts = pulled
-    words_times = []
+    word_times: list[list[float]] = []
+    phone_times: list[list[list[float]]] = []
     for i, row in enumerate(verses):
         t0 = starts[i]
         t1 = starts[i + 1] if i + 1 < len(starts) else duration
-        i0 = int(t0 * sr)
-        i1 = int(min(len(samples), t1 * sr))
-        chunk = samples[i0:i1]
-        cenv, cdt = envelope(chunk, sr)
-        segs = islands(cenv, cdt, t0, min_dur=0.03)
-        pulled_segs: list[tuple[float, float]] = []
-        for j, (a, b) in enumerate(segs):
-            floor = t0 if j == 0 else pulled_segs[-1][1] - 0.02
-            a2 = pull_onset(cenv, cdt, t0, a, (a + b) / 2, floor)
-            pulled_segs.append((a2, b))
-        times = place_words(pulled_segs, row["words"], t0, t1 - 0.03)
-        words_times.append(times)
+        words: list[str] = row["words"]
+        wts = [phone_weight(w) for w in words]
+        wstarts = align_items(wts, energy, flux, t0, t1)
+        if wstarts and len(wstarts) >= 4:
+            span = (wstarts[-1] - wstarts[0]) / max(1, len(wstarts) - 1)
+            if span < 0.085 and (t1 - t0) / len(wstarts) >= 0.10:
+                wstarts = spread_times(wts, t0, t1 - 0.05)
+
+        word_times.append(wstarts)
+        verse_phones: list[list[float]] = []
+        for j, word in enumerate(words):
+            parts = clusters(word)
+            w0 = wstarts[j]
+            w1 = wstarts[j + 1] if j + 1 < len(wstarts) else t1
+            if len(parts) <= 1:
+                verse_phones.append([w0])
+            else:
+                verse_phones.append(align_items([p[1] for p in parts], energy, flux, w0, w1))
+        phone_times.append(verse_phones)
     return {
         "src": f"/audio/tanakh/01-Gen_{int(ch):02d}.mp3",
         "duration": duration,
         "verses": [round(x, 2) for x in starts],
-        "words": words_times,
+        "words": word_times,
+        "phones": phone_times,
+        "aligned": True,
     }
 
 
 def main() -> None:
     out = {}
     for ch in ["1", "2", "3", "4", "5"]:
-        meta = align_chapter(ch)
+        path = AUDIO_DIR / f"01-Gen_{int(ch):02d}.mp3"
+        samples = decode(path)
+        energy, flux = features(samples)
+        meta = align_chapter(ch, samples, energy, flux)
         out[ch] = meta
-        print(f"ch {ch} v1 {meta['words'][0]} verse0={meta['verses'][0]} n={len(meta['verses'])}")
+        v4 = meta["words"][3] if len(meta["words"]) > 3 else []
+        durs = [round(v4[i + 1] - v4[i], 3) for i in range(len(v4) - 1)] if len(v4) > 1 else []
+        print(f"ch {ch} v1={meta['verses'][0]} words0={meta['words'][0][:4]} v4durs={durs[:6]}")
     OUT.write_text(json.dumps(out, separators=(",", ":")))
     print("wrote", OUT, "bytes", OUT.stat().st_size)
 

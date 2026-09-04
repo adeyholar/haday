@@ -21,6 +21,8 @@ export type ChapterAudio = {
   duration: number;
   verses: number[];
   words?: number[][];
+  /** Cluster (niqqud) start times: [verse][word][cluster] */
+  phones?: number[][][];
   /** True when verse times came from the chapter map, not a duration guess. */
   aligned?: boolean;
 };
@@ -206,7 +208,7 @@ export function repairWordTimes(meta: ChapterAudio, verses: ReadingVerse[]): num
     const t1 = meta.verses[i + 1] ?? meta.duration ?? (starts.at(-1) ?? t0) + 0.5;
     if (!vw.length) return starts;
     if (starts.length !== vw.length) return spreadByWeight(vw, t0, t1);
-    if (vw.length >= 4 && medianGap(starts) < 0.08) return spreadByWeight(vw, t0, t1);
+    if (vw.length >= 4 && medianGap(starts) < 0.055) return spreadByWeight(vw, t0, t1);
     return starts;
   });
 }
@@ -318,8 +320,14 @@ export function clusterAtMeta(
   surface: string,
 ): number {
   const starts = meta?.words?.[Math.max(0, verse - 1)] ?? [];
-  const t0 = starts[word] ?? 0;
+  const t0 = starts[word] ?? meta?.phones?.[Math.max(0, verse - 1)]?.[word]?.[0] ?? 0;
   const t1 = wordEndFrom(meta, verse, word);
+  // Short spoken words: paint the whole word. Cluster flash looks like jumping.
+  if (t1 - t0 < 0.28) return -1;
+  const phoneStarts = meta?.phones?.[Math.max(0, verse - 1)]?.[word];
+  if (phoneStarts && phoneStarts.length > 1) {
+    return indexAt(phoneStarts, time);
+  }
   const lead = Math.min(0.03, Math.max(0.01, (t1 - t0) * 0.12));
   return clusterAtTime(surface, t0, t1, time + lead);
 }

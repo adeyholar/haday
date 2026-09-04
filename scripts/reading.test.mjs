@@ -125,6 +125,19 @@ test("packed word stamps inside a gold verse are re-spaced by syllable weight", 
   assert.ok(medianDiff(fixed[0]) > 0.08);
 });
 
+test("Genesis 1 word map is timed from the recording, not a 40ms strobe", () => {
+  const meta = chapterAudio(1);
+  assert.equal(meta.words.length, 31);
+  assert.equal(meta.phones?.length, 31);
+  const v1 = meta.words[0];
+  assert.ok(v1[1] - v1[0] >= 0.25, `bereshit ${v1[1] - v1[0]}`);
+  const v4 = meta.words[3];
+  const gaps = v4.slice(1).map((t, i) => t - v4[i]);
+  const median = [...gaps].sort((a, b) => a - b)[Math.floor(gaps.length / 2)];
+  assert.ok(median >= 0.1, `verse 4 median ${median}`);
+  assert.ok(v4[0] >= 35.8 && v4[0] <= 36.2);
+});
+
 function medianDiff(starts) {
   const gaps = [];
   for (let i = 1; i < starts.length; i++) gaps.push(starts[i] - starts[i - 1]);

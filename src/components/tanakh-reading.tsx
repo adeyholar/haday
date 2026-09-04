@@ -742,7 +742,11 @@ function FollowCard({
               {hebrewClusters(w).map((part, pi) => (
                 <span
                   key={`${verse.ref}-${wi}-${pi}`}
-                  className={wi === wordI && pi === clusterI ? "rounded-sm bg-primary px-0.5 text-primary-foreground" : undefined}
+                  className={
+                    wi === wordI && (clusterI < 0 || pi === clusterI)
+                      ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
+                      : undefined
+                  }
                 >
                   {part.glyph}
                 </span>
