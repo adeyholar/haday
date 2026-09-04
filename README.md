@@ -8,45 +8,67 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 Class site today: [https://haday.vercel.app](https://haday.vercel.app)
 
-## Publish on Azure (recommended if you already have compute)
+## Publish on Azure
 
-The app runs as a Linux container. Use **App Service** or **Container Apps** — student / pay-as-you-go credits work. This is not blocked by Vercel’s free plan.
+### 1. Web App (container)
 
-### App Service from this GitHub repo
+On **Create Web App**:
 
-1. In Azure Portal, create a **Web App**: Linux, **Docker Container**, new or existing App Service plan.
-2. **Deployment Center** → GitHub → **adeyholar/haday** → branch `main` → Dockerfile at the repo root.
-3. **Configuration → Application settings** (same names as Vercel):
+| Field | Value |
+|---|---|
+| Name | `haday` (URL becomes `haday.azurewebsites.net`) |
+| Publish | **Container** (not Code) |
+| OS | Linux |
+| Region | Same region as your existing compute / plan |
+| Plan | Existing plan, or cheapest Linux B1 / F1 |
+| Zone redundancy | Disabled |
+| Managed Instance | Off |
+
+Then **Next : Database**.
+
+### 2. Database (Azure PostgreSQL)
+
+Do not keep using Neon if you want everything on Azure.
+
+| Field | Value |
+|---|---|
+| Engine | **Azure Database for PostgreSQL – Flexible Server** |
+| Server name | `haday-pg` |
+| PostgreSQL version | 16 |
+| Compute | Burstable (B1ms / smallest) |
+| Authentication | PostgreSQL admin login + password (save the password) |
+| Connectivity | Public access + **Allow Azure services** |
+
+Skip creating a second database engine (no MySQL / Cosmos). After the server exists, create a database named `haday` on it (or use the default `postgres` database).
+
+App setting `DATABASE_URL` (one line, password URL-encoded if it has special characters):
+
+```
+postgresql://ADMIN:PASSWORD@haday-pg.postgres.database.azure.com:5432/haday?sslmode=require
+```
+
+The container applies the class schema on first boot. Existing Neon accounts do **not** copy over — classmates sign up again on the Azure URL unless you later dump Neon into this server.
+
+### 3. After Create
+
+Deployment Center → GitHub → **adeyholar/haday** → `main`.
 
 | Name | Value |
 |---|---|
-| `DATABASE_URL` | Neon connection string |
-| `BETTER_AUTH_URL` | Your Azure URL, e.g. `https://haday.azurewebsites.net` |
-| `BETTER_AUTH_SECRET` | Long random string (keep it private) |
+| `DATABASE_URL` | Azure Postgres URL above |
+| `BETTER_AUTH_URL` | `https://haday.azurewebsites.net` |
+| `BETTER_AUTH_SECRET` | Long random string |
 | `VITE_AUTH_ENABLED` | `true` |
 | `WEBSITES_PORT` | `8080` |
 
-4. Save and restart. Classmates use the `*.azurewebsites.net` address (or a custom domain you attach).
-
-That GitHub connection auto-rebuilds Azure on every push to `main`.
+Save and restart.
 
 ## Auto-deploy (Vercel)
 
-Hobby is enough. The class URL is stale because the **haday** project is not linked to this repo — not because of the free plan.
-
-1. Open [Import adeyholar/haday](https://vercel.com/new/import?s=https://github.com/adeyholar/haday).
-2. Choose the existing **haday** project if Vercel offers it. Otherwise import as `haday` and assign `haday.vercel.app`.
-3. Leave the root directory empty. Production branch: `main`.
+Hobby is enough if you instead link [adeyholar/haday](https://github.com/adeyholar/haday) to the existing **haday** project.
 
 | Name | Value |
 |---|---|
-| `DATABASE_URL` | Neon connection string |
+| `DATABASE_URL` | Neon or Azure Postgres URL |
 | `BETTER_AUTH_URL` | `https://haday.vercel.app` |
-| `BETTER_AUTH_SECRET` | existing secret — do not rotate unless sign-in is broken |
-
-## Scripts
-
-- `npm run dev` — local app
-- `npm run build` — production build (Vercel) + database migrate
-- `npm run build:azure` — production Node server for Azure/Docker
-- `npm run typecheck` — TypeScript check
+| `BETTER_AUTH_SECRET` | existing secret |
