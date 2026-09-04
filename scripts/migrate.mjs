@@ -41,18 +41,20 @@ function fromAdo(raw) {
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}?sslmode=require`;
 }
 
+function toPgUrl(raw) {
+  if (!raw) return undefined;
+  if (/^postgres(ql)?:\/\//i.test(raw)) return raw;
+  return fromAdo(raw);
+}
+
 const conn =
   process.env.AZURE_POSTGRESQL_CONNECTIONSTRING?.trim() ||
   firstByPrefix("POSTGRESQLCONNSTR_") ||
   firstByPrefix("CUSTOMCONNSTR_");
 
 const databaseUrl =
-  process.env.DATABASE_URL?.trim() ||
-  (conn
-    ? /^postgres(ql)?:\/\//i.test(conn)
-      ? conn
-      : fromAdo(conn)
-    : undefined) ||
+  toPgUrl(process.env.DATABASE_URL?.trim()) ||
+  toPgUrl(conn) ||
   (process.env.AZURE_POSTGRESQL_HOST
     ? `postgresql://${encodeURIComponent(process.env.AZURE_POSTGRESQL_USER || "postgres")}:${encodeURIComponent(process.env.AZURE_POSTGRESQL_PASSWORD || "")}@${process.env.AZURE_POSTGRESQL_HOST}:${process.env.AZURE_POSTGRESQL_PORT || "5432"}/${process.env.AZURE_POSTGRESQL_DATABASE || "postgres"}?sslmode=require`
     : undefined);

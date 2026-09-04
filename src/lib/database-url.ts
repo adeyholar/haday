@@ -58,7 +58,11 @@ function withSsl(url: string): string {
 
 export function resolveDatabaseUrl(): string | undefined {
   const direct = env("DATABASE_URL");
-  if (direct) return withSsl(direct);
+  if (direct) {
+    if (/^postgres(ql)?:\/\//i.test(direct)) return withSsl(direct);
+    const adoDirect = fromAdoNet(direct);
+    if (adoDirect) return adoDirect;
+  }
 
   const conn =
     env("AZURE_POSTGRESQL_CONNECTIONSTRING") ||
