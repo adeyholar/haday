@@ -18,7 +18,11 @@ import { dirname, join } from "node:path";
 import pg from "pg";
 import { pendingMigrations } from "./migration-plan.mjs";
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl =
+  process.env.DATABASE_URL?.trim() ||
+  (process.env.AZURE_POSTGRESQL_HOST
+    ? `postgresql://${encodeURIComponent(process.env.AZURE_POSTGRESQL_USER || "postgres")}:${encodeURIComponent(process.env.AZURE_POSTGRESQL_PASSWORD || "")}@${process.env.AZURE_POSTGRESQL_HOST}:${process.env.AZURE_POSTGRESQL_PORT || "5432"}/${process.env.AZURE_POSTGRESQL_DATABASE || "postgres"}?sslmode=require`
+    : undefined);
 if (!databaseUrl) {
   console.log(
     "[migrate] DATABASE_URL not set — skipping (the PGLite fallback migrates itself).",
