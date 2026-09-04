@@ -1,26 +1,40 @@
 #!/usr/bin/env python3
-"""Phoneme-level forced alignment of Genesis 1–5 onto the Shmuelof waveform.
+"""Waveform-align a Tanakh book (MVP: Genesis) onto Shmuelof audio.
 
-Uses a duration-constrained HMM (HSMM) over RMS energy + spectral-flux onsets.
-Verse windows stay snapped to recorded silences; words and niqqud clusters are
-placed on the actual voiced onsets instead of a linear letter guess.
+Downloads Mechon Mamre MP3s to a cache, finds sof-pasuk rests, then places
+each word on cumulative speech energy. Writes public/tanakh/align/{book}.json.
 """
 from __future__ import annotations
 
 import json
+import sys
 import subprocess
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
 
 ROOT = Path("/workspace")
-GEN = json.loads((ROOT / "src/lib/genesis-1-5.json").read_text())
 AUDIO_META = json.loads((ROOT / "src/lib/tanakh-audio.json").read_text())
-OUT = ROOT / "src/lib/tanakh-audio.json"
 AUDIO_DIR = ROOT / "public/audio/tanakh"
+CACHE = Path("/tmp/tanakh-mp3")
+ALIGN_DIR = ROOT / "public/tanakh/align"
+MAP = json.loads((ROOT / "src/lib/tanakh-audio-map.json").read_text())["files"]
+
+MECHON = {
+    "Gen": "01", "Exod": "02", "Lev": "03", "Num": "04", "Deut": "05",
+    "Josh": "06", "Judg": "07", "1Sam": "08a", "2Sam": "08b",
+    "1Kgs": "09a", "2Kgs": "09b", "Isa": "10", "Jer": "11", "Ezek": "12",
+    "Hos": "13", "Joel": "14", "Amos": "15", "Obad": "16", "Jonah": "17",
+    "Mic": "18", "Nah": "19", "Hab": "20", "Zeph": "21", "Hag": "22",
+    "Zech": "23", "Mal": "24", "1Chr": "25a", "2Chr": "25b", "Ps": "26",
+    "Job": "27", "Prov": "28", "Ruth": "29", "Song": "30", "Eccl": "31",
+    "Lam": "32", "Esth": "33", "Dan": "34", "Ezra": "35a", "Neh": "35b",
+}
 
 SR = 16000
-HOP = 160  # 10 ms
+HOP = 160
 N_FFT = 512
 DT = HOP / SR
 
@@ -200,12 +214,117 @@ def align_items(items: list[float], energy: np.ndarray, flux: np.ndarray, t0: fl
     return energy_starts(items, energy[i0:i1], flux[i0:i1], i0 * DT)
 
 
-def align_chapter(ch: str, samples: np.ndarray, energy: np.ndarray, flux: np.ndarray) -> dict:
+def mechon_file(book: str, chapter: int) -> str:
+    prefix = MECHON[book]
+    if book == "Ps":
+        if chapter < 100:
+            code = f"{chapter:02d}"
+        else:
+            tens, ones = divmod(chapter, 10)
+            code = f"{chr(ord('a') + tens - 10)}{ones}"
+        return f"t26{code}.mp3"
+    return f"t{prefix}{chapter:02d}.mp3"
+
+
+def public_src(book: str, chapter: int) -> str:
+    if book == "Gen" and 1 <= chapter <= 5:
+        return f"/audio/tanakh/01-Gen_{chapter:02d}.mp3"
+    return f"https://mechon-mamre.org/mp3/{mechon_file(book, chapter)}"
+
+
+def audio_path(book: str, chapter: int) -> Path:
+    mapped = (MAP.get(book) or {}).get(str(chapter))
+    if mapped:
+        local = AUDIO_DIR / mapped
+        if local.exists():
+            return local
+    CACHE.mkdir(parents=True, exist_ok=True)
+    name = mapped or mechon_file(book, chapter)
+    cache = CACHE / name
+    if cache.exists() and cache.stat().st_size > 20_000:
+        return cache
+    url = f"https://mechon-mamre.org/mp3/{mechon_file(book, chapter)}"
+    req = urllib.request.Request(url, headers={"User-Agent": "HaDayHebracicAlign/1.0"})
+    print(f"  download {book} {chapter} {url}")
+    with urllib.request.urlopen(req, timeout=90) as res, cache.open("wb") as fh:
+        fh.write(res.read())
+    return cache
+
+
+def silences(energy: np.ndarray, min_dur: float = 0.28) -> list[tuple[float, float, float]]:
+    speech = energy > 0.12
+    segs: list[tuple[float, float, float]] = []
+    on = False
+    st = 0
+    for i, quiet in enumerate(~speech):
+        if quiet and not on:
+            on = True
+            st = i
+        elif not quiet and on:
+            d = (i - st) * DT
+            if d >= min_dur:
+                segs.append((st * DT, i * DT, d))
+            on = False
+    if on:
+        d = (len(energy) - st) * DT
+        if d >= min_dur:
+            segs.append((st * DT, len(energy) * DT, d))
+    return segs
+
+
+def detect_verse_starts(energy: np.ndarray, weights: list[float], duration: float) -> list[float]:
+    n = len(weights)
+    sils = silences(energy, 0.28)
+    voiced = np.flatnonzero(energy > 0.16)
+    t0 = float(voiced[0]) * DT if len(voiced) else 2.0
+    # Spoken heading, then a rest, then verse 1.
+    for a, b, d in sils:
+        if d >= 0.9 and t0 - 0.15 <= a <= t0 + 20 and b >= t0 + 0.8:
+            t0 = b
+            break
+    if t0 < 1.5:
+        later = [b for a, b, d in sils if d >= 0.55 and 1.5 <= b <= 22]
+        t0 = later[0] if later else max(t0, 2.0)
+    if n <= 1:
+        return [round(t0, 3)]
+    w = np.maximum(np.asarray(weights, dtype=np.float64), 0.08)
+    w = w / w.sum()
+    body = max(1.0, duration - t0 - 0.25)
+    expected_end = t0 + np.cumsum(w) * body
+    starts = [round(t0, 3)]
+    for i in range(n - 1):
+        target = float(expected_end[i])
+        prev = starts[-1]
+        lo = prev + 0.55
+        hi = min(duration - 0.35, float(expected_end[min(i + 1, n - 1)]) + 0.4)
+        cands = [(a, b, d) for a, b, d in sils if lo <= b <= hi]
+        if not cands:
+            starts.append(round(max(lo, min(hi, target)), 3))
+            continue
+        best = min(cands, key=lambda s: abs(s[1] - target) - 0.18 * s[2])
+        starts.append(round(best[1], 3))
+    return starts
+
+
+def align_chapter(
+    book: str,
+    ch: str,
+    verses: list[dict],
+    samples: np.ndarray,
+    energy: np.ndarray,
+    flux: np.ndarray,
+    gold: list[float] | None,
+) -> dict:
     duration = round(len(samples) / SR, 2)
-    prev = AUDIO_META[ch]
-    verses = GEN["chapters"][ch]
-    # Keep the counted verse windows; they already sit on sof-pasuk rests.
-    starts = [float(x) for x in prev["verses"]]
+    weights = [sum(phone_weight(w) for w in row["words"]) or 1.0 for row in verses]
+    if gold and len(gold) == len(verses):
+        starts = [float(x) for x in gold]
+    else:
+        starts = detect_verse_starts(energy, weights, duration)
+        if len(starts) != len(verses):
+            starts = starts[: len(verses)]
+            while len(starts) < len(verses):
+                starts.append(round(starts[-1] + (duration - starts[-1]) / (len(verses) - len(starts) + 1), 3))
     word_times: list[list[float]] = []
     phone_times: list[list[list[float]]] = []
     for i, row in enumerate(verses):
@@ -218,7 +337,6 @@ def align_chapter(ch: str, samples: np.ndarray, energy: np.ndarray, flux: np.nda
             span = (wstarts[-1] - wstarts[0]) / max(1, len(wstarts) - 1)
             if span < 0.085 and (t1 - t0) / len(wstarts) >= 0.10:
                 wstarts = spread_times(wts, t0, t1 - 0.05)
-
         word_times.append(wstarts)
         verse_phones: list[list[float]] = []
         for j, word in enumerate(words):
@@ -231,7 +349,7 @@ def align_chapter(ch: str, samples: np.ndarray, energy: np.ndarray, flux: np.nda
                 verse_phones.append(align_items([p[1] for p in parts], energy, flux, w0, w1))
         phone_times.append(verse_phones)
     return {
-        "src": f"/audio/tanakh/01-Gen_{int(ch):02d}.mp3",
+        "src": public_src(book, int(ch)),
         "duration": duration,
         "verses": [round(x, 2) for x in starts],
         "words": word_times,
@@ -241,18 +359,53 @@ def align_chapter(ch: str, samples: np.ndarray, energy: np.ndarray, flux: np.nda
 
 
 def main() -> None:
-    out = {}
-    for ch in ["1", "2", "3", "4", "5"]:
-        path = AUDIO_DIR / f"01-Gen_{int(ch):02d}.mp3"
+    book = sys.argv[1] if len(sys.argv) > 1 else "Gen"
+    dump = json.loads((ROOT / f"public/tanakh/books/{book}.json").read_text())
+    chapters = sorted(dump["chapters"], key=lambda x: int(x))
+    ALIGN_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = ALIGN_DIR / f"{book}.json"
+    out: dict = {}
+    if out_path.exists():
+        try:
+            out = json.loads(out_path.read_text())
+        except json.JSONDecodeError:
+            out = {}
+
+    def fetch(ch: str) -> tuple[str, Path]:
+        return ch, audio_path(book, int(ch))
+
+    need = [
+        ch
+        for ch in chapters
+        if not (out.get(ch) or {}).get("aligned") or len((out.get(ch) or {}).get("verses") or []) != len(dump["chapters"][ch])
+    ]
+    print(f"{book}: {len(chapters)} chapters, {len(need)} to align")
+    paths: dict[str, Path] = {}
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futs = [pool.submit(fetch, ch) for ch in (need or chapters[:1])]
+        for fut in as_completed(futs):
+            ch, path = fut.result()
+            paths[ch] = path
+            print(f"  ready {book} {ch} {path.stat().st_size}")
+
+    for ch in chapters:
+        rows = dump["chapters"][ch]
+        if ch not in need and out.get(ch):
+            continue
+        path = paths.get(ch) or audio_path(book, int(ch))
         samples = decode(path)
         energy, flux = features(samples)
-        meta = align_chapter(ch, samples, energy, flux)
+        gold = AUDIO_META[ch]["verses"] if book == "Gen" and ch in AUDIO_META else None
+        meta = align_chapter(book, ch, rows, samples, energy, flux, gold)
         out[ch] = meta
-        v4 = meta["words"][3] if len(meta["words"]) > 3 else []
-        durs = [round(v4[i + 1] - v4[i], 3) for i in range(len(v4) - 1)] if len(v4) > 1 else []
-        print(f"ch {ch} v1={meta['verses'][0]} words0={meta['words'][0][:4]} v4durs={durs[:6]}")
-    OUT.write_text(json.dumps(out, separators=(",", ":")))
-    print("wrote", OUT, "bytes", OUT.stat().st_size)
+        print(f"aligned {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} dur={meta['duration']}")
+        out_path.write_text(json.dumps(out, separators=(",", ":")))
+
+    if book == "Gen":
+        slim = {k: out[k] for k in ["1", "2", "3", "4", "5"] if k in out}
+        (ROOT / "src/lib/tanakh-audio.json").write_text(json.dumps(slim, separators=(",", ":")))
+        print("updated src/lib/tanakh-audio.json for Genesis 1–5 tests")
+    print("wrote", out_path, "bytes", out_path.stat().st_size, "chapters", len(out))
 
 
 if __name__ == "__main__":

@@ -102,3 +102,19 @@ test("per-book JSON matches the catalog and Genesis 1:1", () => {
   const mal = JSON.parse(readFileSync("/workspace/public/tanakh/books/Mal.json", "utf8"));
   assert.equal(Object.keys(mal.chapters).length, 3);
 });
+
+test("Genesis waveform alignment covers all 50 chapters", () => {
+  const align = JSON.parse(readFileSync("/workspace/public/tanakh/align/Gen.json", "utf8"));
+  const dump = JSON.parse(readFileSync("/workspace/public/tanakh/books/Gen.json", "utf8"));
+  assert.equal(Object.keys(align).length, 50);
+  for (let ch = 1; ch <= 50; ch++) {
+    const meta = align[String(ch)];
+    const rows = dump.chapters[String(ch)];
+    assert.ok(meta?.aligned, `Gen ${ch} aligned`);
+    assert.equal(meta.verses.length, rows.length, `Gen ${ch} verses`);
+    assert.equal(meta.words.length, rows.length, `Gen ${ch} words`);
+    assert.equal(meta.words[0].length, rows[0].words.length);
+    assert.ok(meta.verses[0] >= 1.5, `Gen ${ch} skips the heading ${meta.verses[0]}`);
+    assert.ok(meta.duration > 20);
+  }
+});

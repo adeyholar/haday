@@ -11,7 +11,9 @@ import {
   READ_RATES,
   audioFor,
   audioWindow,
+  chapterFromAlign,
   clusterAtMeta,
+  fetchBookAlign,
   formatPlayTime,
   gradeFromVerses,
   loadReadingProgress,
@@ -313,26 +315,32 @@ export function TanakhReading({
       setTnow(0);
       setTdur(seed.duration);
     }
-    void fetchTanakhBook(book)
-      .then((dump) => {
+    void Promise.all([fetchTanakhBook(book), fetchBookAlign(book)])
+      .then(([dump, align]) => {
         if (cancelled) return;
+        const timed = chapterFromAlign(book, chapter, align);
+        audioMetaRef.current = timed;
+        setAudioMeta(timed);
+        if (el && timed.src && !(el.src.endsWith(timed.src) || el.src.includes(timed.src))) {
+          el.src = timed.src;
+        }
         const rows = versesFromDump(dump, chapter);
         chapterRowsRef.current = rows;
         const shown = sliceVerses(rows, vw.from, vw.to);
         versesRef.current = shown;
         setVerses(shown);
         if (!shown.length) setLoadErr("This passage is empty.");
-        const el = elAudio();
-        const dur = el?.duration && el.duration > 2 ? el.duration : audioMetaRef.current.duration;
-        if (dur > 2) {
-          const timed = withEstimatedTiming(audioMetaRef.current, rows, dur);
-          audioMetaRef.current = timed;
-          setAudioMeta(timed);
+        const node = elAudio();
+        const dur = node?.duration && node.duration > 2 ? node.duration : timed.duration;
+        if (dur > 2 && !timed.aligned) {
+          const guessed = withEstimatedTiming(timed, rows, dur);
+          audioMetaRef.current = guessed;
+          setAudioMeta(guessed);
         }
         const start = verseStartFrom(audioMetaRef.current, shown[0]?.verse ?? vw.from);
-        if (el) {
-          el.currentTime = start;
-          syncClock(el);
+        if (node) {
+          node.currentTime = start;
+          syncClock(node);
           setTnow(start);
         }
         if (takeAutoplay()) {

@@ -177,6 +177,37 @@ export function audioFor(book: BookId, chapter: number): ChapterAudio {
   return { src: chapterAudioSrc(book, chapter), duration: 0, verses: [], aligned: false };
 }
 
+const alignCache = new Map<string, Record<string, ChapterAudio>>();
+
+export async function fetchBookAlign(book: BookId): Promise<Record<string, ChapterAudio>> {
+  const hit = alignCache.get(book);
+  if (hit) return hit;
+  try {
+    const res = await fetch(`/tanakh/align/${book}.json`);
+    if (!res.ok) {
+      alignCache.set(book, {});
+      return {};
+    }
+    const data = (await res.json()) as Record<string, ChapterAudio>;
+    alignCache.set(book, data ?? {});
+    return alignCache.get(book)!;
+  } catch {
+    alignCache.set(book, {});
+    return {};
+  }
+}
+
+export function chapterFromAlign(
+  book: BookId,
+  chapter: number,
+  align: Record<string, ChapterAudio>,
+): ChapterAudio {
+  const seed = audioFor(book, chapter);
+  const hit = align[String(chapter)];
+  if (hit?.verses?.length) return { ...hit, src: seed.src || hit.src, aligned: true };
+  return seed;
+}
+
 function medianGap(starts: number[]): number {
   if (starts.length < 2) return 1;
   const gaps = [];
