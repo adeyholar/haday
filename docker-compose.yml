@@ -1,0 +1,15 @@
+# Same image Azure runs. Any Docker host: copy .env.example to .env and
+#   docker compose up --build
+services:
+  haday:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8080"
+      VITE_AUTH_ENABLED: "true"
+      NITRO_PRESET: node-server
+    restart: unless-stopped

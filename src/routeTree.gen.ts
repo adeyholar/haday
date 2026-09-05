@@ -28,6 +28,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as WriteRouteImport } from './routes/write'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -138,6 +139,11 @@ const WriteRoute = WriteRouteImport.update({
   path: '/write',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/game/',
   path: '/game/',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/api/health': typeof ApiHealthRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/api/health': typeof ApiHealthRoute
   '/game': typeof GameIndexRoute
   '/listen': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/api/health': typeof ApiHealthRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/api/health'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/api/health'
     | '/game'
     | '/listen'
     | '/api/auth/$'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/api/health'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   RulesRoute: typeof RulesRoute
   WriteRoute: typeof WriteRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   GameIndexRoute: typeof GameIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   GameChapterStageRoute: typeof GameChapterStageRoute
@@ -588,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WriteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/': {
       id: '/game/'
       path: '/game'
@@ -726,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRoute,
   RulesRoute: RulesRoute,
   WriteRoute: WriteRoute,
+  ApiHealthRoute: ApiHealthRoute,
   GameIndexRoute: GameIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GameChapterStageRoute: GameChapterStageRoute,

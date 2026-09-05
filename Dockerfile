@@ -1,5 +1,4 @@
-# HaDay on Azure App Service / Container Apps.
-# Default `npm run build` stays Vercel for the Grok preview.
+# HaDay — Node 22 container for Azure App Service and any Docker host.
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./

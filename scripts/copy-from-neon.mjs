@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * One-time copy of class data from the old Neon (Vercel) database into Azure.
+ * One-time copy of class data from a previous Postgres into this host.
  *
- * Set NEON_DATABASE_URL on the Web App to the Vercel DATABASE_URL, restart,
- * then remove NEON_DATABASE_URL after a successful boot.
+ * Set NEON_DATABASE_URL (or any source Postgres URL) on the Web App, restart,
+ * then remove it after a successful boot.
  *
- * Sessions cookies stay on haday.vercel.app — classmates still click Sign in
- * once on the Azure host, but the same Grok account and progress are restored.
+ * Session cookies stay on the old origin — classmates still click Sign in
+ * once on this host, but the same account and progress are restored.
  */
 import pg from "pg";
 

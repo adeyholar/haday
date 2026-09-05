@@ -70,13 +70,14 @@ function isUsablePublicOrigin(origin: string): boolean {
     const host = u.hostname;
     if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return false;
     if (host.endsWith(".grok-sandbox.com") || host.endsWith(".grok.com")) return false;
+    if (host === "haday.vercel.app" || host.endsWith(".vercel.app")) return false;
     return true;
   } catch {
     return false;
   }
 }
 
-/** Prefer the host the classmate will actually open (Azure vs Vercel are different databases). */
+/** Prefer the host the classmate will actually open (this Azure deploy). */
 export function passwordResetPageUrl(token: string, fallbackUrl?: string): string {
   const origins: string[] = [];
   const push = (raw?: string) => {
