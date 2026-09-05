@@ -239,7 +239,12 @@ export function repairWordTimes(meta: ChapterAudio, verses: ReadingVerse[]): num
     const t1 = meta.verses[i + 1] ?? meta.duration ?? (starts.at(-1) ?? t0) + 0.5;
     if (!vw.length) return starts;
     if (starts.length !== vw.length) return spreadByWeight(vw, t0, t1);
-    if (vw.length >= 4 && medianGap(starts) < 0.055) return spreadByWeight(vw, t0, t1);
+    if (vw.length >= 4) {
+      const span = (starts.at(-1) ?? t0) - (starts[0] ?? t0);
+      if (medianGap(starts) < 0.1 || span < 0.42 * Math.max(0.4, t1 - t0)) {
+        return spreadByWeight(vw, t0, t1);
+      }
+    }
     return starts;
   });
 }

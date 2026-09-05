@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { hebrewClusters, clusterWeight, clusterAtTime } = await jiti.import("/workspace/src/lib/hebrew-phones.ts");
-const { chapterAudio, wordAtTime } = await jiti.import("/workspace/src/lib/reading.ts");
+const src = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../src");
+const jiti = createJiti(import.meta.url, { alias: { "@": src } });
+const { hebrewClusters, clusterWeight, clusterAtTime } = await jiti.import(path.join(src, "lib/hebrew-phones.ts"));
+const { chapterAudio, wordAtTime } = await jiti.import(path.join(src, "lib/reading.ts"));
 
 test("shewa is shorter than a long vowel — letter count is not", () => {
   const begin = hebrewClusters("בְּרֵאשִׁ֖ית");
