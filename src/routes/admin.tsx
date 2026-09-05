@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { getAdminStatus, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, issuePasswordReset, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -42,17 +42,19 @@ function AdminPage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const [rows, traffic, inbox, pending] = await Promise.all([
+        const [rowsR, trafficR, inboxR, pendingR] = await Promise.allSettled([
           listRoster(),
           listVisits(),
           listIdeaInbox(),
           listPendingResets(),
         ]);
         if (cancelled) return;
-        setPeople(rows);
-        setVisits(traffic);
-        setIdeas(inbox);
-        setResets(pending);
+        if (rowsR.status === "fulfilled") setPeople(rowsR.value);
+        else setError(rowsR.reason instanceof Error ? rowsR.reason.message : "Could not load roster.");
+        if (trafficR.status === "fulfilled") setVisits(trafficR.value);
+        if (inboxR.status === "fulfilled") setIdeas(inboxR.value);
+        else setIdeas([]);
+        if (pendingR.status === "fulfilled") setResets(pendingR.value);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Could not load roster.");
@@ -108,6 +110,7 @@ function AdminPage() {
         <p className="mt-3 max-w-prose text-sm text-muted">
           {people.length} account{people.length === 1 ? "" : "s"}. Name and email come from sign-in.
           Last login is the most recent session; last study is when they saved progress.
+          If a classmate cannot get mail, issue a reset from their row and send the link privately.
         </p>
       </Panel>
 
@@ -166,7 +169,7 @@ function AdminPage() {
       </Panel>
 
       <div className="overflow-x-auto rounded-[var(--radius-xl)] bg-card shadow-[var(--shadow-border)]">
-        <table className="w-full min-w-[36rem] text-left text-sm">
+        <table className="w-full min-w-[42rem] text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-3 font-semibold">Name</th>
@@ -175,17 +178,29 @@ function AdminPage() {
               <th className="px-4 py-3 font-semibold">Last login</th>
               <th className="px-4 py-3 font-semibold">Last study</th>
               <th className="px-4 py-3 font-semibold tabular-nums">Streak</th>
+              <th className="px-4 py-3 font-semibold">Reset</th>
             </tr>
           </thead>
           <tbody>
             {people.map((p) => (
               <tr key={p.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3 font-medium text-ink">{p.name || "—"}</td>
-                <td className="px-4 py-3 text-muted">{p.email || "—"}</td>
+                <td className="px-4 py-3 text-muted">
+                  <span className="block">{p.email || "—"}</span>
+                  <span className="mt-0.5 block text-xs text-subtle">{signInLabel(p)}</span>
+                </td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">{fmt(p.signedUp)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">{fmt(p.lastLogin)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">{fmt(p.lastStudy)}</td>
                 <td className="px-4 py-3 tabular-nums text-ink">{p.streak}d</td>
+                <td className="px-4 py-3">
+                  <IssueReset
+                    person={p}
+                    onIssued={(reset) => {
+                      setResets((cur) => [reset, ...cur.filter((r) => r.email !== reset.email)]);
+                    }}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -195,13 +210,85 @@ function AdminPage() {
   );
 }
 
+function signInLabel(p: RosterPerson): string {
+  if (p.hasPassword) return "Email password";
+  const raw = (p.providers || "").toLowerCase();
+  if (raw.includes("google")) return "Google";
+  if (raw.includes("twitter") || raw.includes("x")) return "X";
+  if (raw) return raw;
+  return "Sign-in unknown";
+}
+
+function resetUrl(token: string): string {
+  return `${window.location.origin}/reset-password?token=${encodeURIComponent(token)}`;
+}
+
+function IssueReset({
+  person,
+  onIssued,
+}: {
+  person: RosterPerson;
+  onIssued: (reset: PendingReset) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  if (!person.hasPassword) {
+    return <span className="text-xs text-subtle">No password</span>;
+  }
+
+  async function issue() {
+    setBusy(true);
+    setNote(null);
+    try {
+      const result = await issuePasswordReset({ data: { email: person.email } });
+      if (!result.ok) {
+        setNote(result.reason);
+        return;
+      }
+      onIssued({
+        email: person.email,
+        name: person.name,
+        expiresAt: result.expiresAt,
+        token: result.token,
+      });
+      try {
+        await navigator.clipboard.writeText(resetUrl(result.token));
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2000);
+      } catch {
+        setCopied(false);
+      }
+      setNote(result.emailed ? "Link copied. Mail also sent." : "Link copied. Send it privately.");
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Could not issue a reset.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid min-w-[8.5rem] justify-items-start gap-1">
+      <button
+        type="button"
+        disabled={busy}
+        className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-primary shadow-[var(--shadow-border)] disabled:opacity-60"
+        onClick={() => void issue()}
+      >
+        {busy ? "Working…" : copied ? "Copied" : "Issue reset"}
+      </button>
+      {note ? <span className="max-w-[12rem] text-xs leading-snug text-muted">{note}</span> : null}
+    </div>
+  );
+}
+
 function ResetInbox({ resets }: { resets: PendingReset[] }) {
   const [copied, setCopied] = useState<string | null>(null);
 
   async function copyLink(token: string) {
-    const url = `${window.location.origin}/reset-password?token=${encodeURIComponent(token)}`;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(resetUrl(token));
       setCopied(token);
       window.setTimeout(() => setCopied((cur) => (cur === token ? null : cur)), 2000);
     } catch {
@@ -211,13 +298,13 @@ function ResetInbox({ resets }: { resets: PendingReset[] }) {
 
   return (
     <Panel className="mb-4">
-      <h2 className="font-display text-2xl font-bold text-ink">Password reset requests</h2>
+      <h2 className="font-display text-2xl font-bold text-ink">Password reset</h2>
       <p className="mt-1 text-sm text-muted">
-        Links expire in one hour. If Azure mail is not configured, copy the link and send it to the classmate.
-        Do not paste these in a public channel.
+        Classmates can request a link from Sign in. As a last resort, issue one from their roster row
+        and send it privately. Links expire in one hour. Do not paste them in a public channel.
       </p>
       {resets.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">None waiting.</p>
+        <p className="mt-3 text-sm text-muted">None waiting. Use Issue reset on a row when someone is locked out.</p>
       ) : (
         <ul className="mt-3 divide-y divide-border">
           {resets.map((r) => (

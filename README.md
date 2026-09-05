@@ -88,8 +88,9 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | `BETTER_AUTH_SECRET` | Long random string |
 | `VITE_AUTH_ENABLED` | `true` |
 | `WEBSITES_PORT` | `8080` |
+| `HADAY_ADMIN_EMAILS` | Owner emails, comma-separated (Class roster). Also hardcoded for Crown. |
 
-Optional — password reset emails (first match wins). If neither key is set, classmates still request a reset and the course owner copies the link from **Class roster**.
+Optional — password reset emails (first match wins). If neither key is set, classmates still request a reset. As a last resort the course owner issues a link from **Class roster** (More → Class roster) and sends it privately.
 
 | Name | Value |
 |---|---|
