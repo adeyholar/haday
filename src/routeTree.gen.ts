@@ -25,6 +25,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as RulesRouteImport } from './routes/rules'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
@@ -121,6 +122,11 @@ const RewardsRoute = RewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RulesRoute = RulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WriteRoute = WriteRouteImport.update({
   id: '/write',
   path: '/write',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
   '/rewards': typeof RewardsRoute
+  '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
   '/rewards': typeof RewardsRoute
+  '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
   '/game': typeof GameIndexRoute
   '/listen': typeof ListenIndexRoute
@@ -280,6 +288,7 @@ export interface FileRoutesById {
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
   '/rewards': typeof RewardsRoute
+  '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/match'
     | '/quiz'
     | '/rewards'
+    | '/rules'
     | '/write'
     | '/game/'
     | '/listen/'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/match'
     | '/quiz'
     | '/rewards'
+    | '/rules'
     | '/write'
     | '/game'
     | '/listen'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/match'
     | '/quiz'
     | '/rewards'
+    | '/rules'
     | '/write'
     | '/game/'
     | '/listen/'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   MatchRoute: typeof MatchRoute
   QuizRoute: typeof QuizRoute
   RewardsRoute: typeof RewardsRoute
+  RulesRoute: typeof RulesRoute
   WriteRoute: typeof WriteRoute
   GameIndexRoute: typeof GameIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -539,6 +552,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rules': {
+      id: '/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof RulesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/write': {
@@ -683,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   MatchRoute: MatchRoute,
   QuizRoute: QuizRoute,
   RewardsRoute: RewardsRoute,
+  RulesRoute: RulesRoute,
   WriteRoute: WriteRoute,
   GameIndexRoute: GameIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

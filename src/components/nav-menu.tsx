@@ -9,6 +9,7 @@ export type NavHref =
   | "/drill"
   | "/write"
   | "/quiz"
+  | "/rules"
   | "/match"
   | "/browse"
   | "/alphabet"

@@ -6,6 +6,7 @@ const OPTIONS = [
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
   { value: "/quiz", match: (p: string) => p.startsWith("/quiz"), label: "Quiz" },
+  { value: "/rules", match: (p: string) => p.startsWith("/rules"), label: "Rules" },
   { value: "/match", match: (p: string) => p.startsWith("/match"), label: "Match" },
   { value: "/browse", match: (p: string) => p.startsWith("/browse"), label: "Lexicon" },
   { value: "/alphabet", match: (p: string) => p.startsWith("/alphabet"), label: "Alef-bet lesson" },
@@ -28,6 +29,7 @@ export function StudyMenu() {
         else if (to === "/drill") void navigate({ to: "/drill" });
         else if (to === "/write") void navigate({ to: "/write", search: { mode: "write" } });
         else if (to === "/quiz") void navigate({ to: "/quiz" });
+        else if (to === "/rules") void navigate({ to: "/rules" });
         else if (to === "/match") void navigate({ to: "/match" });
         else if (to === "/browse") void navigate({ to: "/browse" });
         else if (to === "/alphabet") void navigate({ to: "/alphabet" });

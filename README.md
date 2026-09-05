@@ -32,6 +32,10 @@ Wait 5–30 minutes. Keep the record DNS-only (not proxied) until Azure validate
 
 Until the certificate and `BETTER_AUTH_URL` are set, the pretty URL can load the site but sign-in will fail. Keep the long Azure URL working during the switch — both origins are already allowed.
 
+## Always ship to `main`
+
+Finished work goes on **`main`**. A push to `main` builds the container and deploys Azure Web App **haday**. Do not leave class features only in a preview sandbox.
+
 ## Publish on Azure
 
 ### 1. Web App (container)

@@ -152,6 +152,37 @@ function Home() {
         <Stat label="Streak" value={`${streak}d`} />
       </div>
 
+      <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar to live by</p>
+        <h2 className="mt-1 font-display text-xl font-semibold text-ink">When does the rule show up?</h2>
+        <p className="mt-1 text-sm text-muted">
+          See each rule in a Tanakh line, then hunt the lemma and the verse, or name the rule from the highlighted
+          form. Shewa and qamets you diagnose on the word itself.
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link to="/rules" search={{ play: "verse" }}>
+            <Button className="w-full" size="lg">
+              Hunt the verse
+            </Button>
+          </Link>
+          <Link to="/rules" search={{ play: "name" }}>
+            <Button className="w-full" variant="outline" size="lg">
+              Name the rule
+            </Button>
+          </Link>
+          <Link to="/rules" search={{ play: "shewa" }}>
+            <Button className="w-full" variant="outline" size="lg">
+              Vocal or silent
+            </Button>
+          </Link>
+          <Link to="/rules" search={{ play: "qamets" }}>
+            <Button className="w-full" variant="outline" size="lg">
+              Qamets or hatuf
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       <div id="study-mode" className="scroll-mt-20">
       {weakList.length > 0 && (
         <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
