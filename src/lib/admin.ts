@@ -107,3 +107,41 @@ function toIso(v: string | Date | null | undefined): string | null {
   const d = v instanceof Date ? v : new Date(v);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
+
+export type PendingReset = {
+  email: string;
+  name: string;
+  expiresAt: string;
+  token: string;
+};
+
+export const listPendingResets = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<PendingReset[]> => {
+    await assertAdmin(context.userId);
+    const sql = await getSql();
+    const rows = await sql<{
+      identifier: string;
+      name: string;
+      email: string;
+      expires_at: string | Date;
+    }>`
+      select
+        v.identifier,
+        u.name,
+        u.email,
+        v."expiresAt" as expires_at
+      from verification v
+      join "user" u on u.id = v.value
+      where v.identifier like ${"reset-password:%"}
+        and v."expiresAt" > now()
+      order by v."expiresAt" desc
+    `;
+    return rows.map((r) => ({
+      email: r.email,
+      name: r.name,
+      expiresAt: toIso(r.expires_at) ?? "",
+      token: r.identifier.replace(/^reset-password:/, ""),
+    }));
+  });
+

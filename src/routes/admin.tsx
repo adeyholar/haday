@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { getAdminStatus, listRoster, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -29,6 +29,7 @@ function shortId(id: string): string {
 function AdminPage() {
   const [admin, setAdmin] = useState<boolean | null>(null);
   const [people, setPeople] = useState<RosterPerson[] | null>(null);
+  const [resets, setResets] = useState<PendingReset[]>([]);
   const [visits, setVisits] = useState<VisitStats | null>(null);
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +42,17 @@ function AdminPage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const [rows, traffic, inbox] = await Promise.all([listRoster(), listVisits(), listIdeaInbox()]);
+        const [rows, traffic, inbox, pending] = await Promise.all([
+          listRoster(),
+          listVisits(),
+          listIdeaInbox(),
+          listPendingResets(),
+        ]);
         if (cancelled) return;
         setPeople(rows);
         setVisits(traffic);
         setIdeas(inbox);
+        setResets(pending);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Could not load roster.");
@@ -103,6 +110,8 @@ function AdminPage() {
           Last login is the most recent session; last study is when they saved progress.
         </p>
       </Panel>
+
+      <ResetInbox resets={resets} />
 
       <IdeaInventory ideas={ideas ?? []} onChange={setIdeas} />
 
@@ -183,6 +192,55 @@ function AdminPage() {
         </table>
       </div>
     </>
+  );
+}
+
+function ResetInbox({ resets }: { resets: PendingReset[] }) {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function copyLink(token: string) {
+    const url = `${window.location.origin}/reset-password?token=${encodeURIComponent(token)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(token);
+      window.setTimeout(() => setCopied((cur) => (cur === token ? null : cur)), 2000);
+    } catch {
+      setCopied(null);
+    }
+  }
+
+  return (
+    <Panel className="mb-4">
+      <h2 className="font-display text-2xl font-bold text-ink">Password reset requests</h2>
+      <p className="mt-1 text-sm text-muted">
+        Links expire in one hour. If Azure mail is not configured, copy the link and send it to the classmate.
+        Do not paste these in a public channel.
+      </p>
+      {resets.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">None waiting.</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border">
+          {resets.map((r) => (
+            <li key={r.token} className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm">
+              <span className="min-w-0">
+                <span className="font-semibold text-ink">{r.name || r.email}</span>
+                <span className="ms-2 text-muted">
+                  {r.email}
+                  {r.expiresAt ? ` · until ${fmt(r.expiresAt)}` : ""}
+                </span>
+              </span>
+              <button
+                type="button"
+                className="min-h-11 shrink-0 rounded-[var(--radius-md)] bg-card px-3 font-semibold text-primary shadow-[var(--shadow-border)]"
+                onClick={() => void copyLink(r.token)}
+              >
+                {copied === r.token ? "Copied" : "Copy link"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }
 

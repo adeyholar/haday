@@ -89,6 +89,14 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | `VITE_AUTH_ENABLED` | `true` |
 | `WEBSITES_PORT` | `8080` |
 
+Optional — password reset emails (first match wins). If neither key is set, classmates still request a reset and the course owner copies the link from **Class roster**.
+
+| Name | Value |
+|---|---|
+| `RESEND_API_KEY` | Resend API key |
+| `SENDGRID_API_KEY` | SendGrid API key |
+| `MAIL_FROM` | `HaDay <noreply@your-domain>` (verified sender) |
+
 Save and restart.
 
 ## Auto-deploy (Vercel)

@@ -37,7 +37,7 @@ import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
 import { ensureDbReady, getPglite } from "../db";
 import { resolveDatabaseUrl, pgPoolOptions } from "../database-url";
-import { emailAndPasswordEnabled } from "./email-password";
+import { emailAndPasswordEnabled, emailAndPassword } from "./email-password";
 import { GROK_PROVIDERS } from "./providers";
 import { pgliteDialect } from "./pglite-dialect";
 import {
@@ -129,6 +129,8 @@ const trustedOrigins: string[] = [
   "https://haday.vercel.app",
   "https://hadayhebbraimentor.jcdisn.com",
   "https://HadayHebbraimentor.jcdisn.com",
+  "https://haday.class.app",
+  "https://www.haday.class.app",
 ];
 
 const databaseUrl = resolveDatabaseUrl() ?? env("DATABASE_URL");
@@ -214,7 +216,7 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
+  ...(emailAndPasswordEnabled ? { emailAndPassword } : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a

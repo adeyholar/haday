@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
-type Mode = "up" | "in";
+type Mode = "up" | "in" | "reset";
 
 function Login() {
   const { user, isPending } = useCurrentUserState();
@@ -18,6 +18,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
 
   if (isPending) {
     return (
@@ -38,6 +39,24 @@ function Login() {
       await signIn(providerId, { callbackURL: "/" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
+      setBusy(false);
+    }
+  }
+
+  async function onForgot(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      const { error: resetError } = await authClient.requestPasswordReset({
+        email: email.trim(),
+        redirectTo: "/reset-password",
+      });
+      if (resetError) throw new Error(resetError.message || "Could not start a password reset.");
+      setResetSent(true);
+      setBusy(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start a password reset.");
       setBusy(false);
     }
   }
@@ -116,7 +135,11 @@ function Login() {
                   "min-h-11 rounded-[var(--radius-sm)] text-sm font-medium",
                   mode === "up" ? "bg-card text-fg shadow-[var(--shadow-border)]" : "text-muted",
                 )}
-                onClick={() => setMode("up")}
+                onClick={() => {
+                  setMode("up");
+                  setResetSent(false);
+                  setError(null);
+                }}
               >
                 Create account
               </button>
@@ -124,14 +147,74 @@ function Login() {
                 type="button"
                 className={cn(
                   "min-h-11 rounded-[var(--radius-sm)] text-sm font-medium",
-                  mode === "in" ? "bg-card text-fg shadow-[var(--shadow-border)]" : "text-muted",
+                  mode === "in" || mode === "reset"
+                    ? "bg-card text-fg shadow-[var(--shadow-border)]"
+                    : "text-muted",
                 )}
-                onClick={() => setMode("in")}
+                onClick={() => {
+                  setMode("in");
+                  setResetSent(false);
+                  setError(null);
+                }}
               >
                 Sign in
               </button>
             </div>
 
+            {mode === "reset" ? (
+              resetSent ? (
+                <div className="grid gap-3">
+                  <p className="text-sm leading-relaxed text-muted">
+                    If that address has a HaDay account, a reset link is on the way. Check your inbox
+                    and spam. The link expires in one hour.
+                  </p>
+                  <p className="text-sm leading-relaxed text-muted">
+                    Nothing arrives? Ask the course owner. They can copy a reset link from the class roster.
+                  </p>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    onClick={() => {
+                      setMode("in");
+                      setResetSent(false);
+                    }}
+                  >
+                    Back to sign in
+                  </button>
+                </div>
+              ) : (
+                <form className="grid gap-3" onSubmit={(event) => void onForgot(event)}>
+                  <p className="text-sm leading-relaxed text-muted">
+                    Enter the email you used to create the account. We will send a reset link if it matches a classmate.
+                  </p>
+                  <label className="grid gap-1 text-sm">
+                    <span className="font-medium text-muted">Email</span>
+                    <input
+                      required
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 rounded-[var(--radius-md)] border border-border bg-parchment px-3 text-fg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </label>
+                  {error && <p className="text-sm text-danger">{error}</p>}
+                  <Button type="submit" className="mt-1 w-full" disabled={busy}>
+                    {busy ? "Sending…" : "Send reset link"}
+                  </Button>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    onClick={() => {
+                      setMode("in");
+                      setError(null);
+                    }}
+                  >
+                    Back to sign in
+                  </button>
+                </form>
+              )
+            ) : (
             <form className="grid gap-3" onSubmit={(event) => void onEmail(event)}>
               {mode === "up" && (
                 <label className="grid gap-1 text-sm">
@@ -172,7 +255,21 @@ function Login() {
               <Button type="submit" className="mt-1 w-full" disabled={busy}>
                 {busy ? "Working…" : mode === "up" ? "Create account" : "Sign in"}
               </Button>
+              {mode === "in" && (
+                <button
+                  type="button"
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  onClick={() => {
+                    setMode("reset");
+                    setError(null);
+                    setResetSent(false);
+                  }}
+                >
+                  Forgot password?
+                </button>
+              )}
             </form>
+            )}
           </>
         )}
       </div>

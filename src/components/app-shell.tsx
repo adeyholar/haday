@@ -80,7 +80,7 @@ function moreItems(admin: boolean): NavItem[] {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isPending } = useCurrentUserState();
-  const isLogin = pathname === "/login";
+  const isLogin = pathname === "/login" || pathname === "/reset-password";
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);

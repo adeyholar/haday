@@ -24,6 +24,7 @@ import { Route as ListenRouteImport } from './routes/listen'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as WriteRouteImport } from './routes/write'
@@ -115,6 +116,11 @@ const MatchRoute = MatchRouteImport.update({
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/match'
     | '/quiz'
+    | '/reset-password'
     | '/rewards'
     | '/rules'
     | '/write'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/match'
     | '/quiz'
+    | '/reset-password'
     | '/rewards'
     | '/rules'
     | '/write'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/match'
     | '/quiz'
+    | '/reset-password'
     | '/rewards'
     | '/rules'
     | '/write'
@@ -425,6 +437,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
   QuizRoute: typeof QuizRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
   RulesRoute: typeof RulesRoute
   WriteRoute: typeof WriteRoute
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz'
       fullPath: '/quiz'
       preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -702,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
   QuizRoute: QuizRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
   RulesRoute: RulesRoute,
   WriteRoute: WriteRoute,
