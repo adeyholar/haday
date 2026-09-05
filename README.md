@@ -8,6 +8,30 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 Class site today: [https://haday.vercel.app](https://haday.vercel.app)
 
+Custom class URL (in progress): [https://hadayhebbraimentor.jcdisn.com](https://hadayhebbraimentor.jcdisn.com)
+
+## Custom domain (CNAME → Azure)
+
+Point a hostname you own at the Azure app. You cannot shorten `*.azurewebsites.net` itself.
+
+### DNS at jcdisn.com
+
+| Type | Host | Value |
+|---|---|---|
+| CNAME | `HadayHebbraimentor` | `haday-bud9cwczfeakh8ce.azurewebsites.net` |
+| TXT | `asuid.HadayHebbraimentor` | (copy from Azure → Custom domains) |
+
+Wait 5–30 minutes. Keep the record DNS-only (not proxied) until Azure validates it.
+
+### Azure
+
+1. Web App → **Custom domains** → Add `hadayhebbraimentor.jcdisn.com`
+2. **TLS/SSL** → Create **App Service managed certificate** (free) and bind it
+3. Application settings: set `BETTER_AUTH_URL` to `https://hadayhebbraimentor.jcdisn.com`
+4. Save and restart
+
+Until the certificate and `BETTER_AUTH_URL` are set, the pretty URL can load the site but sign-in will fail. Keep the long Azure URL working during the switch — both origins are already allowed.
+
 ## Publish on Azure
 
 ### 1. Web App (container)

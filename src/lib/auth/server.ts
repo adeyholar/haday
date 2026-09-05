@@ -127,6 +127,8 @@ const trustedOrigins: string[] = [
   "https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net",
   "https://haday.azurewebsites.net",
   "https://haday.vercel.app",
+  "https://hadayhebbraimentor.jcdisn.com",
+  "https://HadayHebbraimentor.jcdisn.com",
 ];
 
 const databaseUrl = resolveDatabaseUrl() ?? env("DATABASE_URL");
