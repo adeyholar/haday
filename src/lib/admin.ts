@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { sendPasswordResetMail } from "@/lib/mail";
+import { sendPasswordResetMail, mailerConfigured, mailerVia, originFromIncomingRequest } from "@/lib/mail";
 
 /** Sign-in emails that can open /admin. Also set HADAY_ADMIN_EMAILS on Azure. */
 export const ADMIN_EMAILS: string[] = [
@@ -137,6 +137,13 @@ export type PendingReset = {
   token: string;
 };
 
+export const getMailerStatus = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<{ configured: boolean; via: "resend" | "sendgrid" | "smtp" | "none" }> => {
+    await assertAdmin(context.userId);
+    return { configured: mailerConfigured(), via: mailerVia() };
+  });
+
 export const listPendingResets = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<PendingReset[]> => {
@@ -222,10 +229,11 @@ export const issuePasswordReset = createServerFn({ method: "POST" })
 
     let emailed = false;
     try {
+      const origin = await originFromIncomingRequest();
       const mail = await sendPasswordResetMail({
         email: user.email,
         name: user.name,
-        url: "",
+        url: origin ?? "",
         token,
       });
       emailed = mail.sent;

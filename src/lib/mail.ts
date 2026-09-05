@@ -4,32 +4,109 @@
  * Supported (first match wins):
  *   RESEND_API_KEY + optional MAIL_FROM / RESEND_FROM
  *   SENDGRID_API_KEY + optional MAIL_FROM
+ *   SMTP_USER + SMTP_PASS (+ optional SMTP_HOST / SMTP_PORT / MAIL_FROM)
  *
  * If nothing is configured, password-reset still stores a token and the course
  * owner can copy the link from /admin. Never log or return the token to the
  * requester.
  */
 
+export type MailerVia = "resend" | "sendgrid" | "smtp" | "none";
+
 const env = (key: string): string | undefined => {
   const value = process.env[key]?.trim();
   return value ? value : undefined;
 };
 
-export function mailerConfigured(): boolean {
-  return Boolean(env("RESEND_API_KEY") || env("SENDGRID_API_KEY"));
+const AZURE_SHORT = "https://haday.azurewebsites.net";
+const AZURE_LONG = "https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net";
+
+function smtpUser(): string | undefined {
+  return env("SMTP_USER") || env("SMTP_USERNAME");
 }
 
-export function passwordResetPageUrl(token: string, fallbackUrl?: string): string {
-  const fromEnv = env("BETTER_AUTH_URL")?.replace(/\/+$/, "");
-  if (fromEnv) return `${fromEnv}/reset-password?token=${encodeURIComponent(token)}`;
-  if (fallbackUrl) {
-    try {
-      return `${new URL(fallbackUrl).origin}/reset-password?token=${encodeURIComponent(token)}`;
-    } catch {
-      /* ignore malformed Better Auth url */
-    }
+function smtpPass(): string | undefined {
+  return env("SMTP_PASS") || env("SMTP_PASSWORD") || env("SMTP_APP_PASSWORD");
+}
+
+function smtpHostFor(user: string | undefined): string | undefined {
+  const explicit = env("SMTP_HOST");
+  if (explicit) return explicit;
+  const domain = (user ?? "").split("@")[1]?.toLowerCase() ?? "";
+  if (domain === "gmail.com" || domain === "googlemail.com") return "smtp.gmail.com";
+  if (domain === "yahoo.com" || domain === "ymail.com") return "smtp.mail.yahoo.com";
+  if (domain === "outlook.com" || domain === "hotmail.com" || domain === "live.com") {
+    return "smtp.office365.com";
   }
-  return `/reset-password?token=${encodeURIComponent(token)}`;
+  return undefined;
+}
+
+export function mailerVia(): MailerVia {
+  if (env("RESEND_API_KEY")) return "resend";
+  if (env("SENDGRID_API_KEY")) return "sendgrid";
+  if (smtpUser() && smtpPass() && smtpHostFor(smtpUser())) return "smtp";
+  return "none";
+}
+
+export function mailerConfigured(): boolean {
+  return mailerVia() !== "none";
+}
+
+function canonicalizeOrigin(raw: string): string {
+  let value = raw.trim().replace(/\/+$/, "");
+  try {
+    value = new URL(value.includes("://") ? value : `https://${value}`).origin;
+  } catch {
+    return value;
+  }
+  if (value === AZURE_SHORT) return AZURE_LONG;
+  return value;
+}
+
+function isUsablePublicOrigin(origin: string): boolean {
+  try {
+    const u = new URL(origin);
+    if (u.protocol !== "https:") return false;
+    const host = u.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return false;
+    if (host.endsWith(".grok-sandbox.com") || host.endsWith(".grok.com")) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Prefer the host the classmate will actually open (Azure vs Vercel are different databases). */
+export function passwordResetPageUrl(token: string, fallbackUrl?: string): string {
+  const origins: string[] = [];
+  const push = (raw?: string) => {
+    if (!raw) return;
+    const origin = canonicalizeOrigin(raw);
+    if (isUsablePublicOrigin(origin) && !origins.includes(origin)) origins.push(origin);
+  };
+  push(fallbackUrl);
+  push(env("PUBLIC_APP_URL"));
+  push(env("BETTER_AUTH_URL"));
+  const origin = origins[0] ?? AZURE_LONG;
+  return `${origin}/reset-password?token=${encodeURIComponent(token)}`;
+}
+
+export async function originFromIncomingRequest(): Promise<string | undefined> {
+  try {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const request = getRequest();
+    if (!request) return undefined;
+    const host =
+      request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+      request.headers.get("host")?.split(",")[0]?.trim();
+    if (!host) return undefined;
+    const proto =
+      request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
+      (host.includes("localhost") || host.startsWith("127.") ? "http" : "https");
+    return canonicalizeOrigin(`${proto}://${host}`);
+  } catch {
+    return undefined;
+  }
 }
 
 function escapeHtml(value: string): string {
@@ -43,7 +120,8 @@ function escapeHtml(value: string): string {
 }
 
 function fromAddress(): string {
-  return env("MAIL_FROM") || env("RESEND_FROM") || "HaDay <onboarding@resend.dev>";
+  const smtp = smtpUser();
+  return env("MAIL_FROM") || env("RESEND_FROM") || (smtp ? `HaDay <${smtp}>` : "HaDay <onboarding@resend.dev>");
 }
 
 export async function sendPasswordResetMail(opts: {
@@ -51,7 +129,7 @@ export async function sendPasswordResetMail(opts: {
   name: string;
   url: string;
   token: string;
-}): Promise<{ sent: boolean; via: "resend" | "sendgrid" | "none" }> {
+}): Promise<{ sent: boolean; via: MailerVia }> {
   const pageUrl = passwordResetPageUrl(opts.token, opts.url);
   const greeting = opts.name.trim() ? opts.name.trim() : "there";
   const subject = "Reset your HaDay password";
@@ -96,6 +174,23 @@ export async function sendPasswordResetMail(opts: {
         html,
       });
       return { sent: true, via: "sendgrid" };
+    }
+    const user = smtpUser();
+    const pass = smtpPass();
+    const host = smtpHostFor(user);
+    if (user && pass && host) {
+      await sendSmtp({
+        host,
+        port: Number(env("SMTP_PORT") || (host === "smtp.gmail.com" ? "465" : "587")),
+        user,
+        pass,
+        from: fromAddress(),
+        to: opts.email,
+        subject,
+        text,
+        html,
+      });
+      return { sent: true, via: "smtp" };
     }
   } catch (err) {
     console.error("[mail] password reset send failed", err);
@@ -167,4 +262,38 @@ async function sendSendgrid(opts: {
     const body = await res.text().catch(() => "");
     throw new Error(`SendGrid ${res.status}: ${body.slice(0, 300)}`);
   }
+}
+
+async function sendSmtp(opts: {
+  host: string;
+  port: number;
+  user: string;
+  pass: string;
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<void> {
+  const mod = (await import("nodemailer")) as unknown as {
+    createTransport?: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<unknown> };
+    default?: {
+      createTransport: (opts: Record<string, unknown>) => { sendMail: (opts: Record<string, unknown>) => Promise<unknown> };
+    };
+  };
+  const createTransport = mod.createTransport ?? mod.default?.createTransport;
+  if (!createTransport) throw new Error("nodemailer createTransport missing");
+  const transporter = createTransport({
+    host: opts.host,
+    port: opts.port,
+    secure: opts.port === 465,
+    auth: { user: opts.user, pass: opts.pass },
+  });
+  await transporter.sendMail({
+    from: opts.from,
+    to: opts.to,
+    subject: opts.subject,
+    text: opts.text,
+    html: opts.html,
+  });
 }

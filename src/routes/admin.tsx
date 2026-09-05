@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { getAdminStatus, issuePasswordReset, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -32,6 +32,7 @@ function AdminPage() {
   const [resets, setResets] = useState<PendingReset[]>([]);
   const [visits, setVisits] = useState<VisitStats | null>(null);
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
+  const [mailer, setMailer] = useState<{ configured: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,11 +43,12 @@ function AdminPage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const [rowsR, trafficR, inboxR, pendingR] = await Promise.allSettled([
+        const [rowsR, trafficR, inboxR, pendingR, mailerR] = await Promise.allSettled([
           listRoster(),
           listVisits(),
           listIdeaInbox(),
           listPendingResets(),
+          getMailerStatus(),
         ]);
         if (cancelled) return;
         if (rowsR.status === "fulfilled") setPeople(rowsR.value);
@@ -55,6 +57,7 @@ function AdminPage() {
         if (inboxR.status === "fulfilled") setIdeas(inboxR.value);
         else setIdeas([]);
         if (pendingR.status === "fulfilled") setResets(pendingR.value);
+        if (mailerR.status === "fulfilled") setMailer(mailerR.value);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Could not load roster.");
@@ -110,11 +113,15 @@ function AdminPage() {
         <p className="mt-3 max-w-prose text-sm text-muted">
           {people.length} account{people.length === 1 ? "" : "s"}. Name and email come from sign-in.
           Last login is the most recent session; last study is when they saved progress.
-          If a classmate cannot get mail, issue a reset from their row and send the link privately.
+        </p>
+        <p className="mt-2 max-w-prose text-sm text-muted">
+          {mailer?.configured
+            ? "Email reset sends the hour-long link to that classmate. Copy stays as a backup if nothing arrives."
+            : "This host is not sending mail yet. Email reset still creates a link you can copy until a mailer key is on Azure or Vercel."}
         </p>
       </Panel>
 
-      <ResetInbox resets={resets} />
+      <ResetInbox resets={resets} mailerOn={Boolean(mailer?.configured)} />
 
       <IdeaInventory ideas={ideas ?? []} onChange={setIdeas} />
 
@@ -196,6 +203,7 @@ function AdminPage() {
                 <td className="px-4 py-3">
                   <IssueReset
                     person={p}
+                    mailerOn={Boolean(mailer?.configured)}
                     onIssued={(reset) => {
                       setResets((cur) => [reset, ...cur.filter((r) => r.email !== reset.email)]);
                     }}
@@ -225,13 +233,16 @@ function resetUrl(token: string): string {
 
 function IssueReset({
   person,
+  mailerOn,
   onIssued,
 }: {
   person: RosterPerson;
+  mailerOn: boolean;
   onIssued: (reset: PendingReset) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sent, setSent] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
   if (!person.hasPassword) {
@@ -241,6 +252,8 @@ function IssueReset({
   async function issue() {
     setBusy(true);
     setNote(null);
+    setSent(false);
+    setCopied(false);
     try {
       const result = await issuePasswordReset({ data: { email: person.email } });
       if (!result.ok) {
@@ -253,6 +266,11 @@ function IssueReset({
         expiresAt: result.expiresAt,
         token: result.token,
       });
+      if (result.emailed) {
+        setSent(true);
+        setNote(`Sent to ${person.email}. They have one hour.`);
+        return;
+      }
       try {
         await navigator.clipboard.writeText(resetUrl(result.token));
         setCopied(true);
@@ -260,9 +278,13 @@ function IssueReset({
       } catch {
         setCopied(false);
       }
-      setNote(result.emailed ? "Link copied. Mail also sent." : "Link copied. Send it privately.");
+      setNote(
+        mailerOn
+          ? "Mail did not send. Link copied — send it privately."
+          : "Mail is not on this host. Link copied — send it privately.",
+      );
     } catch (err) {
-      setNote(err instanceof Error ? err.message : "Could not issue a reset.");
+      setNote(err instanceof Error ? err.message : "Could not email a reset.");
     } finally {
       setBusy(false);
     }
@@ -276,14 +298,14 @@ function IssueReset({
         className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-primary shadow-[var(--shadow-border)] disabled:opacity-60"
         onClick={() => void issue()}
       >
-        {busy ? "Working…" : copied ? "Copied" : "Issue reset"}
+        {busy ? "Sending…" : sent ? "Emailed" : copied ? "Copied" : "Email reset"}
       </button>
       {note ? <span className="max-w-[12rem] text-xs leading-snug text-muted">{note}</span> : null}
     </div>
   );
 }
 
-function ResetInbox({ resets }: { resets: PendingReset[] }) {
+function ResetInbox({ resets, mailerOn }: { resets: PendingReset[]; mailerOn: boolean }) {
   const [copied, setCopied] = useState<string | null>(null);
 
   async function copyLink(token: string) {
@@ -300,11 +322,15 @@ function ResetInbox({ resets }: { resets: PendingReset[] }) {
     <Panel className="mb-4">
       <h2 className="font-display text-2xl font-bold text-ink">Password reset</h2>
       <p className="mt-1 text-sm text-muted">
-        Classmates can request a link from Sign in. As a last resort, issue one from their roster row
-        and send it privately. Links expire in one hour. Do not paste them in a public channel.
+        Classmates can tap Forgot password on Sign in, or you can email a link from their row.
+        Links expire in one hour. Copy is only a backup if the inbox is empty — do not paste these in a public channel.
       </p>
       {resets.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">None waiting. Use Issue reset on a row when someone is locked out.</p>
+        <p className="mt-3 text-sm text-muted">
+          {mailerOn
+            ? "None waiting. Use Email reset on a row when someone is locked out."
+            : "None waiting. Email reset will copy a link until mail is configured."}
+        </p>
       ) : (
         <ul className="mt-3 divide-y divide-border">
           {resets.map((r) => (

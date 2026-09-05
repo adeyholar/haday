@@ -8,7 +8,7 @@
  * Password reset lives here too (`sendResetPassword`). `server.ts` only spreads
  * this object — do not copy reset logic into that frozen file.
  */
-import { sendPasswordResetMail } from "../mail";
+import { originFromIncomingRequest, sendPasswordResetMail } from "../mail";
 
 export const emailAndPasswordEnabled = true;
 
@@ -20,10 +20,11 @@ export async function sendResetPassword(
   _request?: Request,
 ): Promise<void> {
   try {
+    const origin = (await originFromIncomingRequest()) || data.url;
     await sendPasswordResetMail({
       email: data.user.email,
       name: data.user.name ?? "",
-      url: data.url,
+      url: origin,
       token: data.token,
     });
   } catch (err) {

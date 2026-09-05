@@ -165,11 +165,11 @@ function Login() {
               resetSent ? (
                 <div className="grid gap-3">
                   <p className="text-sm leading-relaxed text-muted">
-                    If that address has a HaDay account, a reset link is on the way. Check your inbox
-                    and spam. The link expires in one hour.
+                    If that address has a HaDay account, a reset email is on the way. Check inbox and
+                    spam. The link expires in one hour.
                   </p>
                   <p className="text-sm leading-relaxed text-muted">
-                    Nothing arrives? Ask the course owner. They can copy a reset link from the class roster.
+                    Nothing arrives? Ask the course owner. They can email a reset from the class roster.
                   </p>
                   <button
                     type="button"
@@ -185,7 +185,7 @@ function Login() {
               ) : (
                 <form className="grid gap-3" onSubmit={(event) => void onForgot(event)}>
                   <p className="text-sm leading-relaxed text-muted">
-                    Enter the email you used to create the account. We will send a reset link if it matches a classmate.
+                    Enter the email you used to create the account. We will email a reset link if it matches a classmate.
                   </p>
                   <label className="grid gap-1 text-sm">
                     <span className="font-medium text-muted">Email</span>

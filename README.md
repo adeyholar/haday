@@ -90,12 +90,14 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | `WEBSITES_PORT` | `8080` |
 | `HADAY_ADMIN_EMAILS` | Owner emails, comma-separated (Class roster). Also hardcoded for Crown. |
 
-Optional — password reset emails (first match wins). If neither key is set, classmates still request a reset. As a last resort the course owner issues a link from **Class roster** (More → Class roster) and sends it privately.
+Optional — password reset emails (first match wins). With a mailer set, Forgot password and **Email reset** on the roster send the hour-long link to the classmate. Copy is only a backup if the inbox is empty.
 
 | Name | Value |
 |---|---|
-| `RESEND_API_KEY` | Resend API key |
+| `RESEND_API_KEY` | Resend API key (preferred) |
 | `SENDGRID_API_KEY` | SendGrid API key |
+| `SMTP_USER` + `SMTP_PASS` | Gmail / Yahoo / Outlook app password |
+| `SMTP_HOST` | Only if the host is not guessed from the user (Gmail/Yahoo/Outlook) |
 | `MAIL_FROM` | `HaDay <noreply@your-domain>` (verified sender) |
 
 Save and restart.
