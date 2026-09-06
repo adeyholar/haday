@@ -119,7 +119,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "A guttural can take silent shewa, not vocal shewa",
     statement:
-      "א ה ח ע can take silent shewa, not vocal shewa. When a reduced vowel is needed they take a hateph instead. Silent shewa is allowed, as in שָׁמַעְתָּ, where ayin closes the syllable.",
+      "א ה ח ע can take silent shewa, not vocal shewa. When a reduced vowel is needed they take a hateph instead. Silent shewa is allowed, as in שָׁמַעְתָּ (Gen 3:17), where ayin closes מַעְ. The dagesh in תּ is lene — silent shewa is not a vowel, so you do not split the tav.",
     aliases: [
       "guttural silent shewa",
       "can take a silent shewa",
@@ -931,10 +931,10 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     book: "Gen",
     chapter: 3,
     verse: 17,
-    he: "וּלְאָדָם אָמַר כִּי שָׁמַעְתָּ לְקוֹל אִשְׁתֶּךָ",
+    he: "וּלְאָדָם אָמַר כִּי שָׁמַעְתָּ לְקוֹל אִשְׁתֶּךָ",
     en: "And to the human he said, “Because you listened to the voice of your wife…”",
-    hit: "שָׁמַעְתָּ",
-    why: "Ayin is a guttural: silent shewa is allowed, vocal shewa is not. Here silent shewa after short pathach closes מַעְ.",
+    hit: "שָׁמַעְתָּ",
+    why: "Shewa rule: short pathach before עְ → silent, closing מַעְ. Split שָׁ | מַעְ | תָּ. Dagesh in ת is lene, not forte — silent shewa is not a vowel.",
   },
   {
     id: "reuben-resh-vocal",

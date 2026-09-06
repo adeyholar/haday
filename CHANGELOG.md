@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
-- **Resh + shewa:** ordinary shewa tests (פַּרְעֹה silent; רְאוּבֵן vocal). Not the guttural hateph rule. Still no dagesh on resh.
+- **Gen 3:17 שָׁמַעְתָּ:** silent shewa closes מַעְ; dagesh in תּ is **lene** (silent shewa is not a vowel). Split שָׁ | מַעְ | תָּ — do not cut the tav.
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.
 - **Revoke reset links** on the class roster; no need to wait out the hour. Forgot password is capped so a flood cannot fill Gmail.
