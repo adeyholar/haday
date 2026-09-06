@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
 import { Panel } from "@/components/panel";
 import { GAME_CHAPTER_TITLES } from "@/lib/vocab";
+import { vocabClip, vocabClipLabel } from "@/lib/vocab-clips";
 import {
   chapterRange,
   firstIndexForChapter,
@@ -44,6 +45,7 @@ function ListenPage() {
   const rateRef = useRef(rate);
   const iRef = useRef(i);
   const item = list[i];
+  const clip = item ? vocabClip(item.id) : undefined;
   const range = item ? chapterRange(list, item.chapter) : { start: 0, end: 0 };
   const chPos = i - range.start + 1;
   const chLen = range.end - range.start + 1;
@@ -180,7 +182,8 @@ function ListenPage() {
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Hands-free</p>
         <p className="mt-3 text-muted">
-          Hebrew name, then English. Avraham, then Abraham. Loop this chapter to stay on it, or loop the whole list.
+          Hebrew from the Tanakh reading when we have that word, then English. Avraham, then Abraham. Loop this
+          chapter to stay on it, or loop the whole list.
         </p>
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">
@@ -210,6 +213,7 @@ function ListenPage() {
         <p className="he-word mt-4 text-5xl sm:text-6xl">{item?.hebrew}</p>
         <p className="mt-3 font-display text-2xl font-semibold text-ink">{item?.gloss}</p>
         <p className="mt-1 text-sm text-muted">{item?.translit}</p>
+        {clip ? <p className="mt-3 text-sm text-primary">From the reading · {vocabClipLabel(clip)}</p> : null}
         <p className="mt-6 text-sm tabular-nums text-muted">
           {chPos} / {chLen}
           {loop === "chapter" ? " in this chapter" : loop === "all" ? " · looping all" : ""}

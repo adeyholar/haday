@@ -1,5 +1,6 @@
 import { alphabetVocab, bbhVocab, GAME_CHAPTER_TITLES, type VocabItem } from "@/lib/vocab";
 import type { ReadingVerse } from "@/lib/reading";
+import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -286,6 +287,7 @@ export function unlockSpeech() {
   const s = synth();
   const ac = ensureAudioCtx();
   if (ac && ac.state === "suspended") void ac.resume();
+  unlockClipAudio();
   if (!s) return;
   try {
     if (s.paused) s.resume();
@@ -298,6 +300,7 @@ export function unlockSpeech() {
 }
 
 export function stopSpeech() {
+  stopClip();
   const s = synth();
   if (!s) return;
   try {
@@ -314,6 +317,121 @@ export function keepSpeechAlive() {
     if (s.paused) s.resume();
   } catch {
     /* ignore */
+  }
+}
+
+let clipEl: HTMLAudioElement | null = null;
+let clipPoll = 0;
+
+function getClipEl(): HTMLAudioElement | null {
+  if (typeof Audio === "undefined") return null;
+  if (!clipEl) {
+    clipEl = new Audio();
+    clipEl.preload = "auto";
+    clipEl.setAttribute("playsinline", "true");
+  }
+  return clipEl;
+}
+
+function stopClip() {
+  if (clipPoll) {
+    window.clearInterval(clipPoll);
+    clipPoll = 0;
+  }
+  if (!clipEl) return;
+  try {
+    clipEl.pause();
+  } catch {
+    /* ignore */
+  }
+}
+
+function unlockClipAudio() {
+  const el = getClipEl();
+  if (!el) return;
+  el.muted = true;
+  void el
+    .play()
+    .then(() => {
+      el.pause();
+      el.muted = false;
+    })
+    .catch(() => {
+      el.muted = false;
+    });
+}
+
+function clipSrcMatches(el: HTMLAudioElement, src: string): boolean {
+  return Boolean(el.getAttribute("src") === src || (el.src && (el.src.endsWith(src) || el.src.includes(src))));
+}
+
+function waitClipMeta(el: HTMLAudioElement): Promise<boolean> {
+  if (el.readyState >= 1) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      el.removeEventListener("loadedmetadata", onOk);
+      el.removeEventListener("error", onErr);
+      window.clearTimeout(t);
+      resolve(ok);
+    };
+    const onOk = () => done(true);
+    const onErr = () => done(false);
+    el.addEventListener("loadedmetadata", onOk);
+    el.addEventListener("error", onErr);
+    const t = window.setTimeout(() => done(el.readyState >= 1), 5000);
+  });
+}
+
+export async function playVocabClip(clip: VocabClip, rate: number, signal: { stop: boolean }): Promise<boolean> {
+  const el = getClipEl();
+  if (!el || signal.stop) return false;
+  stopClip();
+  try {
+    if (!clipSrcMatches(el, clip.src)) {
+      el.src = clip.src;
+      el.load();
+    }
+    const ready = await waitClipMeta(el);
+    if (!ready || signal.stop) return false;
+    const start = Math.max(0, clip.start);
+    const end = Math.max(start + 0.14, clip.end);
+    el.playbackRate = Math.min(1.2, Math.max(0.7, rate));
+    el.currentTime = start;
+    await el.play();
+    return await new Promise<boolean>((resolve) => {
+      let settled = false;
+      const finish = (ok: boolean) => {
+        if (settled) return;
+        settled = true;
+        if (clipPoll) {
+          window.clearInterval(clipPoll);
+          clipPoll = 0;
+        }
+        window.clearTimeout(safety);
+        try {
+          el.pause();
+        } catch {
+          /* ignore */
+        }
+        resolve(ok);
+      };
+      clipPoll = window.setInterval(() => {
+        if (signal.stop) {
+          finish(true);
+          return;
+        }
+        if (el.currentTime >= end - 0.02) finish(true);
+      }, 40);
+      const safety = window.setTimeout(
+        () => finish(true),
+        Math.min(9000, ((end - start) / Math.max(el.playbackRate, 0.5)) * 1000 + 1000),
+      );
+    });
+  } catch {
+    return false;
   }
 }
 
@@ -432,6 +550,11 @@ export function pauseMs(ms: number, signal: { stop: boolean }): Promise<void> {
 }
 
 async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
+  const clip = vocabClip(item.id);
+  if (clip) {
+    const ok = await playVocabClip(clip, rate, signal);
+    if (ok || signal.stop) return;
+  }
   const he = ttsHebrew(item.hebrew);
   const latin = modernLatin(item.translit) || he;
   if (hasHebrewVoice()) {
