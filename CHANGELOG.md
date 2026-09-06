@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
+- **Vocab Listen** no longer cuts words out of a Tanakh sentence. Isolated lemma clips only (none in the bank yet); Hebrew falls back to a clear spoken name until we add a public dictionary set.
+
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.
 - **Revoke reset links** on the class roster; no need to wait out the hour. Forgot password is capped so a flood cannot fill Gmail.

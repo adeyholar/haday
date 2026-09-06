@@ -32,7 +32,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** 406 of 415 BBH lemmas play a clip from the Shmuelof recording (Kaldi word times). Citation consonants only — prefixes `הַ וְ בְּ לְ כְּ` stay TTS. English gloss is still spoken. Card shows *From the reading · Genesis 17:5*.
+**Vocabulary.** Hebrew name, then English. Isolated dictionary clips when we have them (none yet). Tanakh sentence-cuts are not used here — they sounded like a phrase cut in the middle. Prefixes stay TTS.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 

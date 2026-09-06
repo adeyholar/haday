@@ -550,8 +550,9 @@ export function pauseMs(ms: number, signal: { stop: boolean }): Promise<void> {
 }
 
 async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
+  // Isolated lemma audio only. Do not play Tanakh sentence-cuts (they start mid-phrase).
   const clip = vocabClip(item.id);
-  if (clip) {
+  if (clip?.kind === "lemma") {
     const ok = await playVocabClip(clip, rate, signal);
     if (ok || signal.stop) return;
   }
