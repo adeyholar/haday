@@ -39,11 +39,11 @@ export const READ_RATES = [
 
 export type MediaClock = { media: number; wall: number; rate: number };
 
-/** Karaoke: stay on the word whose [start, next) contains the playhead (Murillo TextGrid). */
-export const HIGHLIGHT_LEAD = 0;
+/** Stay on the spoken interval; a small lead covers iPad currentTime lag. */
+export const HIGHLIGHT_LEAD = 0.08;
 
-/** Cover iOS currentTime lag only. Do not run the mark ahead of the recording. */
-const CLOCK_AHEAD = 0.03;
+/** Cover iOS currentTime lag only. Do not run the mark a word ahead. */
+const CLOCK_AHEAD = 0.05;
 
 /** Media-time for highlighting. Independent of Slow / Recorded / Faster wall clock. */
 export function mediaClockTime(
@@ -297,7 +297,10 @@ function indexAt(starts: number[], time: number): number {
   if (!starts.length) return 0;
   let v = 0;
   for (let i = 0; i < starts.length; i++) {
-    if (time >= (starts[i] ?? 0)) v = i;
+    const prev = i > 0 ? starts[i - 1] : undefined;
+    const gap = prev != null ? (starts[i] ?? 0) - prev : 1;
+    const lead = Math.min(HIGHLIGHT_LEAD, Math.max(0.02, gap * 0.12));
+    if (time + lead >= (starts[i] ?? 0)) v = i;
     else break;
   }
   return v;
