@@ -1,6 +1,6 @@
 import { alphabetVocab, bbhVocab, GAME_CHAPTER_TITLES, type VocabItem } from "@/lib/vocab";
 import type { ReadingVerse } from "@/lib/reading";
-import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
+import type { VocabClip } from "@/lib/vocab-clips";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -552,12 +552,7 @@ export function pauseMs(ms: number, signal: { stop: boolean }): Promise<void> {
 }
 
 async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
-  // Isolated lemma audio only. Do not play Tanakh sentence-cuts (they start mid-phrase).
-  const clip = vocabClip(item.id);
-  if (clip?.kind === "lemma") {
-    const ok = await playVocabClip(clip, rate, signal);
-    if (ok || signal.stop) return;
-  }
+  // TTS until we have a checked isolated-word bank. Do not play unverified clips.
   const he = ttsHebrew(item.hebrew);
   const latin = modernLatin(item.translit) || he;
   if (hasHebrewVoice()) {

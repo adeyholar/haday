@@ -5,7 +5,6 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { spokenEnglish, primaryGloss, modernLatin, listenPlaylist, chapterRange, nextListenIndex, prevListenIndex } =
   await jiti.import("/workspace/src/lib/listen.ts");
-const { vocabClip } = await jiti.import("/workspace/src/lib/vocab-clips.ts");
 
 test("Hebrew name then English translation", () => {
   assert.equal(spokenEnglish("Abraham"), "Abraham");
@@ -31,18 +30,4 @@ test("chapter loop stays inside the chapter and wraps", () => {
   assert.equal(nextListenIndex(list, end, "off"), end + 1);
   assert.equal(nextListenIndex(list, list.length - 1, "off"), null);
   assert.equal(nextListenIndex(list, list.length - 1, "all"), 0);
-});
-
-test("vocab clips use citation form from the reading, not prefixed forms", () => {
-  const letters = (s) => [...s].filter((ch) => ch >= "א" && ch <= "ת").join("");
-  const abraham = vocabClip("abraham");
-  assert.ok(abraham, "Abraham has an isolated clip");
-  assert.equal(abraham.kind, "lemma");
-  assert.equal(letters(abraham.he), "אברהם");
-  const yam = vocabClip("yam");
-  assert.ok(yam, "yam has a clip");
-  assert.equal(letters(yam.he), "ים");
-  assert.equal(vocabClip("ha"), undefined);
-  assert.equal(vocabClip("we"), undefined);
-  assert.equal(vocabClip("be"), undefined);
 });

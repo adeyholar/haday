@@ -20,7 +20,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 |---|---|---|
 | **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. |
 | **Game** | BBH path Ch. 1–19, Aleph-bet, Syllables, Nouns, Ultimate Challenge | Stages unlock in order. **90%** to clear a stage. Citation form only (יָם, not בַּיָּם). |
-| **Listen · Vocabulary** | Hebrew from the Tanakh reading, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter or the whole list. |
+| **Listen · Vocabulary** | Hebrew TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter or the whole list. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
@@ -32,7 +32,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** Hebrew as a whole isolated word, then English. **359** lemmas have a dictionary clip: Open Hebrew Bible (Eliran Wong, CC BY-NC) first, Lingua Libre (CC0/CC BY-SA) to fill gaps. Citation form only. Prefixes and a few rare stems stay TTS. Tanakh sentence-cuts are not used here.
+**Vocabulary.** Hebrew name (TTS), then English. Isolated-word clips are off until a bank is checked word-by-word. Tanakh sentence-cuts are not used here.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 
