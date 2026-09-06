@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
-- **Vocab Listen: Open Hebrew Bible lexemes only.** 328 Genesis citation forms, matched on BHS word index (not a verse cut). Lingua Libre is off. Everything else is TTS.
+- **Isaac clip is the name** (Gen 17:19), not the verb “he laughed” (17:17). Same consonants; vowels and dagesh now decide.
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.
 - **Revoke reset links** on the class roster; no need to wait out the hour. Forgot password is capped so a flood cannot fill Gmail.

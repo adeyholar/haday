@@ -32,7 +32,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** Hebrew as an isolated lexeme from Open Hebrew Bible (Eliran Wong, CC BY-NC) when the citation form is in Genesis (**328** lemmas, BHS word index). Otherwise TTS. Lingua Libre is not used. Prefixes are not clipped. Tanakh sentence-cuts are not used here.
+**Vocabulary.** Hebrew as an isolated lexeme from Open Hebrew Bible (Eliran Wong, CC BY-NC) when the citation form is in Genesis (**275** lemmas, BHS word index, vowels/dagesh preferred so Isaac is the name not “he laughed”). Otherwise TTS. Lingua Libre is not used. Prefixes are not clipped. Tanakh sentence-cuts are not used here.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 

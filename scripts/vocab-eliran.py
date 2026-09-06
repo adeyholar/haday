@@ -42,6 +42,19 @@ def cons(s: str) -> str:
     return "".join(ch for ch in unicodedata.normalize("NFC", s) if ch in CONS)
 
 
+def strip_ta(s: str) -> str:
+    """Keep consonants, vowels, and dagesh. Drop te'amim so יִצְחָק ≠ וַיִּצְחָק leftover."""
+    out = []
+    for ch in unicodedata.normalize("NFC", s):
+        o = ord(ch)
+        if 0x0591 <= o <= 0x05AF:
+            continue
+        if o in (0x05BD, 0x05BF, 0x05C0, 0x05C3, 0x05C4, 0x05C5, 0x05BE):
+            continue
+        out.append(ch)
+    return "".join(out)
+
+
 def parse_vocab() -> list[tuple[str, str, str]]:
     text = (ROOT / "src/lib/vocab.ts").read_text()
     start = text.index("export const VOCAB")
@@ -79,11 +92,12 @@ def bhsa_hits() -> dict[str, tuple[str, int, int, int, int, str]]:
     """lemma id -> (book, ch, v, word_in_verse, bhs_sort, hebrew)."""
     counts = json.loads((ROOT / "src/lib/tanakh-verse-counts.json").read_text())
     by_cons: dict[str, list[str]] = {}
-    heb_of: dict[str, str] = {}
+    by_niq: dict[str, list[str]] = {}
     for hid, heb, c in parse_vocab():
         by_cons.setdefault(c, []).append(hid)
-        heb_of[hid] = heb
-    hits: dict[str, tuple[str, int, int, int, int, str]] = {}
+        by_niq.setdefault(strip_ta(heb), []).append(hid)
+    exact: dict[str, tuple[str, int, int, int, int, str]] = {}
+    fuzzy: dict[str, tuple[str, int, int, int, int, str]] = {}
     book_i = ch = v = 1
     wi = 0
     with CSV.open(encoding="utf-8") as f:
@@ -105,9 +119,14 @@ def bhsa_hits() -> dict[str, tuple[str, int, int, int, int, str]]:
                 break
             book = CANON[book_i - 1]
             c = cons(he)
+            niq = strip_ta(he)
+            rec = (book, ch, v, wi, sort_id, he)
+            if niq:
+                for hid in by_niq.get(niq, []):
+                    exact.setdefault(hid, rec)
             if c and not (len(c) == 1 and c in PREFIX):
                 for hid in by_cons.get(c, []):
-                    hits.setdefault(hid, (book, ch, v, wi, sort_id, he))
+                    fuzzy.setdefault(hid, rec)
             if "׃" in line:
                 vmax = counts[book][ch - 1]
                 wi = 0
@@ -120,6 +139,7 @@ def bhsa_hits() -> dict[str, tuple[str, int, int, int, int, str]]:
                     book_i += 1
                     ch = 1
                     v = 1
+    hits = {**fuzzy, **exact}
     return hits
 
 
