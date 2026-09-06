@@ -788,7 +788,7 @@ def run_batch(book: str, dump: dict, chapters: list[str], out: dict, out_path: P
             print(f"  FAIL prepare {book} {ch} {exc}", flush=True)
             failed.append(ch)
     if not stems:
-        return failed or list(chapters)
+        return failed
     dict_path = WORK / "hebrew_arpa.dict"
     write_dict(lab_words, dict_path)
     print(f"  dict {len(dict_path.read_text().splitlines())} entries batch={','.join(c for c,_,_,_ in stems)}", flush=True)
