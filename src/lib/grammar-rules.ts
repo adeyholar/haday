@@ -119,7 +119,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "A guttural can take silent shewa, not vocal shewa",
     statement:
-      "A guttural cannot take a vocal shewa, but it can take a silent shewa — as in שָׁמַעְתָּ, where ayin closes the syllable with silent shewa.",
+      "א ה ח ע can take silent shewa, not vocal shewa. When a reduced vowel is needed they take a hateph instead. Silent shewa is allowed, as in שָׁמַעְתָּ, where ayin closes the syllable.",
     aliases: [
       "guttural silent shewa",
       "can take a silent shewa",
@@ -133,7 +133,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "Resh can take vocal shewa",
     statement:
-      "Unlike the gutturals, the consonant ר can take vocal shewa. Initial רְ is vocal, the way any other consonant’s initial shewa is vocal.",
+      "Resh is with the gutturals in refusing dagesh, but unlike א ה ח ע it can take vocal shewa. Initial רְ is vocal.",
     aliases: [
       "resh can take vocal shewa",
       "resh vocal shewa",
@@ -403,8 +403,9 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "guttural-no-forte",
     group: "guttural",
-    title: "Gutturals (and resh) cannot take dagesh forte",
-    statement: "The gutturals א ה ח ע, including ר, cannot take dagesh lene or dagesh forte. Compensation often lengthens the preceding vowel.",
+    title: "All gutturals cannot take dagesh, including resh",
+    statement:
+      "All gutturals cannot take dagesh — lene or forte. That includes ר. Compensation often lengthens the preceding vowel.",
     aliases: [
       "guttural no dagesh",
       "cannot take forte",
@@ -418,8 +419,9 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "guttural-hateph",
     group: "guttural",
-    title: "Gutturals prefer hateph vowels, not vocal shewa",
-    statement: "Gutturals (excluding ר) cannot take vocal shewa; they prefer hateph (reduced) vowels.",
+    title: "Gutturals excluding resh take a hateph, not vocal shewa",
+    statement:
+      "Gutturals excluding ר cannot take vocal shewa; they take a hateph (reduced vowel) instead. They may still take silent shewa.",
     aliases: [
       "guttural hateph",
       "no vocal shewa guttural",
@@ -932,7 +934,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וּלְאָדָם אָמַר כִּי שָׁמַעְתָּ לְקוֹל אִשְׁתֶּךָ",
     en: "And to the human he said, “Because you listened to the voice of your wife…”",
     hit: "שָׁמַעְתָּ",
-    why: "Ayin is a guttural, so it cannot take vocal shewa — but here it takes silent shewa after short pathach, closing מַעְ. The notes’ form שָׁמַעְתָּ.",
+    why: "Ayin is a guttural: silent shewa is allowed, vocal shewa is not. Here silent shewa after short pathach closes מַעְ.",
   },
   {
     id: "reuben-resh-vocal",

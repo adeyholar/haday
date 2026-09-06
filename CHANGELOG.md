@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
-- **Forte split:** first of the pair is written with shewa, **no dagesh** (the two letters already show the double). הַשָּׁמַיִם is הַשְׁ | שָׁ | מַ | יִם.
+- **Gutturals:** silent shewa yes, vocal shewa no (hateph instead) except resh. No dagesh for any guttural, including resh.
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.
 - **Revoke reset links** on the class roster; no need to wait out the hour. Forgot password is capped so a flood cannot fill Gmail.
