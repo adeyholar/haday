@@ -183,7 +183,8 @@ function ListenPage() {
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Hands-free</p>
         <p className="mt-3 text-muted">
-          Hebrew name, then English. Avraham, then Abraham. Loop this chapter to stay on it, or loop the whole list.
+          Hebrew as a whole word, then English. Avraham, then Abraham. Isolated dictionary audio when we have it.
+          Loop this chapter to stay on it, or loop the whole list.
         </p>
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">

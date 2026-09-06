@@ -396,8 +396,9 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
     }
     const ready = await waitClipMeta(el);
     if (!ready || signal.stop) return false;
-    const start = Math.max(0, clip.start);
-    const end = Math.max(start + 0.14, clip.end);
+    const whole = clip.kind === "lemma" || clip.end <= 0;
+    const start = whole ? 0 : Math.max(0, clip.start);
+    const end = whole ? (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 2.4) : Math.max(start + 0.14, clip.end);
     el.playbackRate = Math.min(1.2, Math.max(0.7, rate));
     el.currentTime = start;
     await el.play();
@@ -423,8 +424,9 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
           finish(true);
           return;
         }
-        if (el.currentTime >= end - 0.02) finish(true);
+        if (el.ended || el.currentTime >= end - 0.02) finish(true);
       }, 40);
+      el.onended = () => finish(true);
       const safety = window.setTimeout(
         () => finish(true),
         Math.min(9000, ((end - start) / Math.max(el.playbackRate, 0.5)) * 1000 + 1000),

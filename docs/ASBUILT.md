@@ -32,7 +32,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** Hebrew name, then English. Isolated dictionary clips when we have them (none yet). Tanakh sentence-cuts are not used here — they sounded like a phrase cut in the middle. Prefixes stay TTS.
+**Vocabulary.** Hebrew as a whole isolated word, then English. **359** lemmas have a dictionary clip: Open Hebrew Bible (Eliran Wong, CC BY-NC) first, Lingua Libre (CC0/CC BY-SA) to fill gaps. Citation form only. Prefixes and a few rare stems stay TTS. Tanakh sentence-cuts are not used here.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 

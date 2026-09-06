@@ -11,6 +11,8 @@ export type VocabClip = {
   he: string;
   /** Isolated dictionary word. Sentence-cuts from Tanakh reading are not this. */
   kind?: "lemma" | "reading";
+  source?: "eliran" | "lingualibre" | "reading";
+  credit?: string;
 };
 
 const CLIPS = raw as Record<string, VocabClip>;
@@ -20,6 +22,8 @@ export function vocabClip(id: string): VocabClip | undefined {
 }
 
 export function vocabClipLabel(clip: VocabClip): string {
+  if (clip.source === "eliran") return "Open Hebrew Bible · isolated word";
+  if (clip.source === "lingualibre") return "Lingua Libre · isolated word";
   if (clip.bookEn && clip.ch && clip.v) return `${clip.bookEn} ${clip.ch}:${clip.v}`;
-  return "lemma";
+  return "isolated word";
 }

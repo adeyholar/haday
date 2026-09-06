@@ -36,8 +36,8 @@ test("chapter loop stays inside the chapter and wraps", () => {
 test("vocab clips use citation form from the reading, not prefixed forms", () => {
   const letters = (s) => [...s].filter((ch) => ch >= "א" && ch <= "ת").join("");
   const abraham = vocabClip("abraham");
-  assert.ok(abraham, "Abraham has a Shmuelof clip");
-  assert.equal(abraham.book, "Gen");
+  assert.ok(abraham, "Abraham has an isolated clip");
+  assert.equal(abraham.kind, "lemma");
   assert.equal(letters(abraham.he), "אברהם");
   const yam = vocabClip("yam");
   assert.ok(yam, "yam has a clip");
