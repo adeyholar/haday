@@ -26,6 +26,14 @@ CACHE = Path("/tmp/tanakh-mp3")
 WORK = Path("/tmp/mfa-tanakh")
 ALIGN_DIR = ROOT / "public/tanakh/align"
 MAP = json.loads((ROOT / "src/lib/tanakh-audio-map.json").read_text())["files"]
+BATCH = 4
+CANON = [
+    "Gen", "Exod", "Lev", "Num", "Deut",
+    "Josh", "Judg", "1Sam", "2Sam", "1Kgs", "2Kgs",
+    "Isa", "Jer", "Ezek",
+    "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic", "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal",
+    "Ps", "Prov", "Job", "Song", "Ruth", "Lam", "Eccl", "Esth", "Dan", "Ezra", "Neh", "1Chr", "2Chr",
+]
 ENGINE = "mfa-kaldi-v1"
 
 MECHON = {
@@ -530,6 +538,92 @@ def find_textgrid(out_dir: Path, stem: str) -> Path | None:
     return hits[0] if hits else None
 
 
+def ingest_textgrids(
+    book: str,
+    stems: list[tuple[str, str, list[dict], float]],
+    speaker: Path,
+    aligned_dir: Path,
+    out: dict,
+    out_path: Path,
+) -> list[str]:
+    failed: list[str] = []
+    for ch, stem, rows, t_head in stems:
+        tg = find_textgrid(aligned_dir, stem)
+        wav = speaker / f"{stem}.wav"
+        if tg is None:
+            print(f"  FAIL no TextGrid {book} {ch}", flush=True)
+            failed.append(ch)
+            wav.unlink(missing_ok=True)
+            continue
+        dur = round(t_head + duration_sec(wav), 2)
+        words_iv, phones_iv = parse_textgrid(tg)
+        shift = max(0.0, t_head - 0.15)
+        words_iv = [(a + shift, b + shift, lab) for a, b, lab in words_iv]
+        phones_iv = [(a + shift, b + shift, lab) for a, b, lab in phones_iv]
+        meta = chapter_meta(book, ch, rows, words_iv, phones_iv, dur)
+        out[ch] = meta
+        spoken = spoken_intervals(words_iv)
+        print(
+            f"  MFA {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} "
+            f"spoken={len(spoken)} lab={sum(len(r['words']) for r in rows)} dur={dur}",
+            flush=True,
+        )
+        out_path.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+        wav.unlink(missing_ok=True)
+        (speaker / f"{stem}.lab").unlink(missing_ok=True)
+    return failed
+
+
+def prepare_chapter(book: str, ch: str, rows: list[dict], speaker: Path) -> tuple[str, str, list[dict], float, list[str]]:
+    flat = [w for row in rows for w in row["words"]]
+    mp3 = audio_mp3(book, int(ch))
+    stem = f"{book}_{int(ch):03d}"
+    full = speaker / f"{stem}_full.wav"
+    wav = speaker / f"{stem}.wav"
+    wav_16k(mp3, full)
+    t_head = heading_end_wav(full)
+    trim_heading(full, wav, max(0.0, t_head - 0.15))
+    full.unlink(missing_ok=True)
+    lab = " ".join(lab_token(w) for w in flat)
+    (speaker / f"{stem}.lab").write_text(lab + "\n", encoding="utf-8")
+    print(f"  prepared {book} {ch} head={t_head:.2f}s {wav.stat().st_size} words={len(flat)}", flush=True)
+    return ch, stem, rows, t_head, flat
+
+
+def run_batch(book: str, dump: dict, chapters: list[str], out: dict, out_path: Path) -> list[str]:
+    speaker = WORK / "corpus" / "shmuelof"
+    if speaker.exists():
+        shutil.rmtree(speaker)
+    speaker.mkdir(parents=True)
+    lab_words: list[str] = []
+    stems: list[tuple[str, str, list[dict], float]] = []
+    for ch in chapters:
+        try:
+            ch, stem, rows, t_head, flat = prepare_chapter(book, ch, dump["chapters"][ch], speaker)
+            lab_words.extend(flat)
+            stems.append((ch, stem, rows, t_head))
+        except Exception as exc:
+            print(f"  FAIL prepare {book} {ch} {exc}", flush=True)
+    if not stems:
+        return list(chapters)
+    dict_path = WORK / "hebrew_arpa.dict"
+    write_dict(lab_words, dict_path)
+    print(f"  dict {len(dict_path.read_text().splitlines())} entries batch={','.join(c for c,_,_,_ in stems)}", flush=True)
+    aligned_dir = WORK / "aligned"
+    try:
+        align_corpus(WORK / "corpus", dict_path, aligned_dir)
+    except subprocess.CalledProcessError as exc:
+        print(f"  FAIL mfa batch {book} {chapters} {exc}", flush=True)
+        if len(stems) == 1:
+            return [stems[0][0]]
+        failed = []
+        for ch, stem, rows, t_head in stems:
+            one = run_batch(book, dump, [ch], out, out_path)
+            failed.extend(one)
+        return failed
+    return ingest_textgrids(book, stems, speaker, aligned_dir, out, out_path)
+
+
 def align_book(book: str, chapters: list[str] | None = None, force: bool = False) -> None:
     dump = json.loads((ROOT / f"public/tanakh/books/{book}.json").read_text())
     all_ch = sorted(dump["chapters"], key=lambda x: int(x))
@@ -553,71 +647,49 @@ def align_book(book: str, chapters: list[str] | None = None, force: bool = False
     if not need:
         return
 
-    speaker = WORK / "corpus" / "shmuelof"
-    if speaker.exists():
-        shutil.rmtree(speaker)
-    speaker.mkdir(parents=True)
-
-    lab_words: list[str] = []
-    stems: list[tuple[str, str, list[dict], float]] = []
-    for ch in need:
-        rows = dump["chapters"][ch]
-        flat = [w for row in rows for w in row["words"]]
-        lab_words.extend(flat)
-        mp3 = audio_mp3(book, int(ch))
-        stem = f"{book}_{int(ch):03d}"
-        full = speaker / f"{stem}_full.wav"
-        wav = speaker / f"{stem}.wav"
-        wav_16k(mp3, full)
-        t_head = heading_end_wav(full)
-        trim_heading(full, wav, max(0.0, t_head - 0.15))
-        full.unlink(missing_ok=True)
-        lab = " ".join(lab_token(w) for w in flat)
-        (speaker / f"{stem}.lab").write_text(lab + "\n", encoding="utf-8")
-        stems.append((ch, stem, rows, t_head))
-        print(f"  prepared {book} {ch} head={t_head:.2f}s {wav.stat().st_size} words={len(flat)}", flush=True)
-
-    dict_path = WORK / "hebrew_arpa.dict"
-    write_dict(lab_words, dict_path)
-    print(f"  dict {dict_path} {len(dict_path.read_text().splitlines())} entries", flush=True)
-
-    aligned_dir = WORK / "aligned"
-    align_corpus(WORK / "corpus", dict_path, aligned_dir)
-
-    for ch, stem, rows, t_head in stems:
-        tg = find_textgrid(aligned_dir, stem)
-        if tg is None:
-            print(f"  FAIL no TextGrid {book} {ch}", flush=True)
-            continue
-        wav = speaker / f"{stem}.wav"
-        dur = round(t_head + duration_sec(wav), 2)
-        words_iv, phones_iv = parse_textgrid(tg)
-        shift = max(0.0, t_head - 0.15)
-        words_iv = [(a + shift, b + shift, lab) for a, b, lab in words_iv]
-        phones_iv = [(a + shift, b + shift, lab) for a, b, lab in phones_iv]
-        meta = chapter_meta(book, ch, rows, words_iv, phones_iv, dur)
-        out[ch] = meta
-        spoken = spoken_intervals(words_iv)
-        print(
-            f"  MFA {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} "
-            f"spoken={len(spoken)} lab={sum(len(r['words']) for r in rows)} dur={dur}",
-            flush=True,
-        )
-        out_path.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    failed: list[str] = []
+    for i in range(0, len(need), BATCH):
+        chunk = need[i : i + BATCH]
+        failed.extend(run_batch(book, dump, chunk, out, out_path))
 
     if book == "Gen":
         slim = {k: out[k] for k in ["1", "2", "3", "4", "5"] if k in out}
         if slim:
             (ROOT / "src/lib/tanakh-audio.json").write_text(json.dumps(slim, separators=(",", ":")), encoding="utf-8")
+    done = sum(1 for ch in dump["chapters"] if (out.get(ch) or {}).get("engine") == ENGINE)
+    print(f"{book}: kaldi {done}/{len(dump['chapters'])} failed={failed}", flush=True)
+
+
+def progress() -> None:
+    n = 0
+    k = 0
+    for book in CANON:
+        path = ALIGN_DIR / f"{book}.json"
+        dump = json.loads((ROOT / f"public/tanakh/books/{book}.json").read_text())
+        n += len(dump["chapters"])
+        if not path.exists():
+            continue
+        out = json.loads(path.read_text())
+        k += sum(1 for ch in dump["chapters"] if (out.get(ch) or {}).get("engine") == ENGINE)
+    print(f"CANON kaldi {k}/{n}", flush=True)
 
 
 def main() -> None:
     args = sys.argv[1:]
     force = "--force" in args
     args = [a for a in args if a != "--force"]
-    book = args[0] if args else "Gen"
+    if not args or args[0] in ("--all", "all"):
+        for book in CANON:
+            try:
+                align_book(book, force=force)
+            except Exception as exc:
+                print(f"FAIL book {book} {exc}", flush=True)
+            progress()
+        return
+    book = args[0]
     chapters = args[1].split(",") if len(args) > 1 else None
     align_book(book, chapters, force=force)
+    progress()
 
 
 if __name__ == "__main__":
