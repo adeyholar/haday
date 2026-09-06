@@ -374,6 +374,112 @@ def trim_heading(src: Path, dest: Path, t0: float) -> None:
     )
 
 
+def extract_span(src: Path, dest: Path, t0: float, t1: float) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.check_call(
+        [
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-ss", f"{max(0.0, t0):.3f}", "-t", f"{max(0.2, t1 - t0):.3f}",
+            "-i", str(src),
+            "-ac", "1", "-ar", "16000", "-acodec", "pcm_s16le", str(dest),
+        ]
+    )
+
+
+def frame_energy(wav: Path, hop: int = 160, n_fft: int = 512):
+    import numpy as np
+    from numpy.lib.stride_tricks import sliding_window_view
+
+    sr = 16000
+    raw = subprocess.check_output(
+        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(wav), "-ac", "1", "-ar", str(sr), "-f", "s16le", "-"],
+        stderr=subprocess.DEVNULL,
+    )
+    samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    if len(samples) < n_fft:
+        samples = np.pad(samples, (0, n_fft - len(samples)))
+    frames = np.ascontiguousarray(sliding_window_view(samples, n_fft)[::hop])
+    energy = np.sqrt(np.mean(frames * frames, axis=1) + 1e-12)
+    energy = np.convolve(energy, np.ones(5) / 5, mode="same")
+    e_p = float(np.percentile(energy, 90) or 1e-6)
+    energy = np.clip(energy / e_p, 0, 2.5)
+    return energy, hop / sr, len(samples) / sr
+
+
+def silence_regions(wav: Path, min_dur: float = 0.22) -> list[tuple[float, float, float]]:
+    energy, dt, _ = frame_energy(wav)
+    speech = energy > 0.12
+    sils: list[tuple[float, float, float]] = []
+    on = False
+    st = 0
+    for i, quiet in enumerate(~speech):
+        if quiet and not on:
+            on, st = True, i
+        elif not quiet and on:
+            d = (i - st) * dt
+            if d >= min_dur:
+                sils.append((st * dt, i * dt, d))
+            on = False
+    return sils
+
+
+def snap_to_silence(sils: list[tuple[float, float, float]], target: float, lo: float, hi: float) -> float:
+    cands = [(a, b, d) for a, b, d in sils if lo <= (a + b) / 2 <= hi]
+    if not cands:
+        return min(max(target, lo), hi)
+    best = min(cands, key=lambda s: (abs((s[0] + s[1]) / 2 - target), -s[2]))
+    return float((best[0] + best[1]) / 2)
+
+
+def split_long_parts(rows: list[dict], wav: Path, max_sec: float = 480.0) -> list[tuple[list[dict], float, float]]:
+    """Cut a long chapter into ~8-minute verse groups at nearby silences."""
+    dur = duration_sec(wav)
+    n_words = sum(len(r["words"]) for r in rows) or 1
+    n_parts = max(2, int(dur // max_sec) + 1)
+    targets = [n_words * (i + 1) / n_parts for i in range(n_parts - 1)]
+    cuts: list[int] = []
+    acc = 0
+    ti = 0
+    for i, row in enumerate(rows):
+        acc += len(row["words"])
+        if ti < len(targets) and acc >= targets[ti] and i + 1 < len(rows):
+            cuts.append(i + 1)
+            ti += 1
+    bounds = [0, *cuts, len(rows)]
+    groups = [rows[bounds[i] : bounds[i + 1]] for i in range(len(bounds) - 1)]
+    word_cuts = []
+    acc = 0
+    for g in groups[:-1]:
+        acc += sum(len(r["words"]) for r in g)
+        word_cuts.append(dur * acc / n_words)
+    sils = silence_regions(wav, min_dur=0.22)
+    times: list[float] = []
+    prev = 8.0
+    for i, t in enumerate(word_cuts):
+        hi = dur - 8.0
+        lo = min(hi - 1.0, prev + 20.0)
+        window_lo = max(lo, t - 25.0)
+        window_hi = min(hi, t + 25.0)
+        if window_hi <= window_lo:
+            snapped = min(max(t, lo), hi)
+        else:
+            snapped = snap_to_silence(sils, t, window_lo, window_hi)
+        times.append(max(lo, min(snapped, hi)))
+        prev = times[-1]
+    parts = []
+    t0 = 0.0
+    for i, g in enumerate(groups):
+        t1 = times[i] if i < len(times) else dur
+        if t1 <= t0 + 5:
+            t1 = min(dur, t0 + max(30.0, dur / n_parts))
+        parts.append((g, t0, t1))
+        t0 = t1
+    if parts:
+        g, a, _ = parts[-1]
+        parts[-1] = (g, a, dur)
+    return parts
+
+
 def write_dict(words: list[str], path: Path) -> None:
     seen: dict[str, str] = {}
     for w in words:
@@ -507,7 +613,7 @@ def mfa_bin() -> list[str]:
     return ["micromamba", "run", "-n", "mfa", "mfa"]
 
 
-def align_corpus(corpus: Path, dict_path: Path, out_dir: Path) -> None:
+def align_corpus(corpus: Path, dict_path: Path, out_dir: Path, num_jobs: int = 2) -> None:
     if out_dir.exists():
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -525,7 +631,7 @@ def align_corpus(corpus: Path, dict_path: Path, out_dir: Path) -> None:
         "--single_speaker",
         "--beam", "100",
         "--retry_beam", "400",
-        "--num_jobs", "2",
+        "--num_jobs", str(num_jobs),
         "--output_format", "long_textgrid",
         "--temporary_directory", "/tmp/mfa-work",
     ]
@@ -574,6 +680,76 @@ def ingest_textgrids(
     return failed
 
 
+LONG_SEC = 540.0  # split chapters longer than 9 minutes to avoid Kaldi OOM
+
+
+def align_long_chapter(
+    book: str,
+    ch: str,
+    rows: list[dict],
+    t_head: float,
+    wav: Path,
+    out: dict,
+    out_path: Path,
+) -> list[str]:
+    parts = split_long_parts(rows, wav, max_sec=480.0)
+    print(
+        f"  split {book} {ch} dur={duration_sec(wav):.0f}s parts={len(parts)} "
+        f"verses={[len(g) for g, _, _ in parts]}",
+        flush=True,
+    )
+    speaker = WORK / "corpus" / "shmuelof"
+    part_dir = WORK / "corpus" / "shmuelof"
+    # Keep original wav; write parts next to it then align only the parts.
+    lab_words: list[str] = []
+    stems: list[tuple[str, list[dict], float]] = []
+    for i, (group, t0, t1) in enumerate(parts):
+        stem = f"{book}_{int(ch):03d}_p{i}"
+        extract_span(wav, part_dir / f"{stem}.wav", t0, t1)
+        flat = [w for r in group for w in r["words"]]
+        (part_dir / f"{stem}.lab").write_text(" ".join(lab_token(w) for w in flat) + "\n", encoding="utf-8")
+        lab_words.extend(flat)
+        stems.append((stem, group, t0))
+    orig_stem = wav.stem
+    (part_dir / f"{orig_stem}.wav").unlink(missing_ok=True)
+    (part_dir / f"{orig_stem}.lab").unlink(missing_ok=True)
+    dict_path = WORK / "hebrew_arpa.dict"
+    write_dict(lab_words, dict_path)
+    aligned_dir = WORK / "aligned"
+    try:
+        align_corpus(WORK / "corpus", dict_path, aligned_dir, num_jobs=1)
+    except subprocess.CalledProcessError as exc:
+        print(f"  FAIL mfa long {book} {ch} {exc}", flush=True)
+        return [ch]
+    words_iv: list[tuple[float, float, str]] = []
+    phones_iv: list[tuple[float, float, str]] = []
+    shift = max(0.0, t_head - 0.15)
+    for stem, group, t0 in stems:
+        tg = find_textgrid(aligned_dir, stem)
+        if tg is None:
+            print(f"  FAIL no TextGrid {book} {ch} {stem}", flush=True)
+            return [ch]
+        w, p = parse_textgrid(tg)
+        off = shift + t0
+        words_iv.extend((a + off, b + off, lab) for a, b, lab in w)
+        phones_iv.extend((a + off, b + off, lab) for a, b, lab in p)
+        (part_dir / f"{stem}.wav").unlink(missing_ok=True)
+        (part_dir / f"{stem}.lab").unlink(missing_ok=True)
+    last = words_iv[-1][1] if words_iv else shift
+    dur = round(max(last + 0.4, shift + parts[-1][2]), 2)
+    meta = chapter_meta(book, ch, rows, words_iv, phones_iv, dur)
+    out[ch] = meta
+    spoken = spoken_intervals(words_iv)
+    print(
+        f"  MFA {book} {ch} v{len(meta['verses'])} start={meta['verses'][0]} "
+        f"spoken={len(spoken)} lab={sum(len(r['words']) for r in rows)} dur={dur} split={len(parts)}",
+        flush=True,
+    )
+    out_path.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    wav.unlink(missing_ok=True)
+    return []
+
+
 def prepare_chapter(book: str, ch: str, rows: list[dict], speaker: Path) -> tuple[str, str, list[dict], float, list[str]]:
     flat = [w for row in rows for w in row["words"]]
     mp3 = audio_mp3(book, int(ch))
@@ -597,15 +773,22 @@ def run_batch(book: str, dump: dict, chapters: list[str], out: dict, out_path: P
     speaker.mkdir(parents=True)
     lab_words: list[str] = []
     stems: list[tuple[str, str, list[dict], float]] = []
+    failed: list[str] = []
     for ch in chapters:
         try:
             ch, stem, rows, t_head, flat = prepare_chapter(book, ch, dump["chapters"][ch], speaker)
+            wav = speaker / f"{stem}.wav"
+            if duration_sec(wav) >= LONG_SEC:
+                print(f"  long {book} {ch} {duration_sec(wav):.0f}s — split path", flush=True)
+                failed.extend(align_long_chapter(book, ch, rows, t_head, wav, out, out_path))
+                continue
             lab_words.extend(flat)
             stems.append((ch, stem, rows, t_head))
         except Exception as exc:
             print(f"  FAIL prepare {book} {ch} {exc}", flush=True)
+            failed.append(ch)
     if not stems:
-        return list(chapters)
+        return failed or list(chapters)
     dict_path = WORK / "hebrew_arpa.dict"
     write_dict(lab_words, dict_path)
     print(f"  dict {len(dict_path.read_text().splitlines())} entries batch={','.join(c for c,_,_,_ in stems)}", flush=True)
@@ -615,13 +798,17 @@ def run_batch(book: str, dump: dict, chapters: list[str], out: dict, out_path: P
     except subprocess.CalledProcessError as exc:
         print(f"  FAIL mfa batch {book} {chapters} {exc}", flush=True)
         if len(stems) == 1:
-            return [stems[0][0]]
-        failed = []
+            ch, stem, rows, t_head = stems[0]
+            wav = speaker / f"{stem}.wav"
+            if wav.exists() and duration_sec(wav) >= 180:
+                print(f"  retry-split {book} {ch}", flush=True)
+                return failed + align_long_chapter(book, ch, rows, t_head, wav, out, out_path)
+            return failed + [ch]
+        more = []
         for ch, stem, rows, t_head in stems:
-            one = run_batch(book, dump, [ch], out, out_path)
-            failed.extend(one)
-        return failed
-    return ingest_textgrids(book, stems, speaker, aligned_dir, out, out_path)
+            more.extend(run_batch(book, dump, [ch], out, out_path))
+        return failed + more
+    return failed + ingest_textgrids(book, stems, speaker, aligned_dir, out, out_path)
 
 
 def align_book(book: str, chapters: list[str] | None = None, force: bool = False) -> None:
