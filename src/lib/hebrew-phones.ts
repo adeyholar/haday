@@ -87,8 +87,8 @@ export function clusterAtTime(word: string, t0: number, t1: number, time: number
   let idx = 0;
   for (let i = 0; i < parts.length; i++) {
     const end = i === parts.length - 1 ? t1 : acc + (parts[i]!.weight / total) * span;
-    if (time + 0.02 >= acc) idx = i;
-    if (time + 0.02 < end) break;
+    if (time >= acc) idx = i;
+    if (time < end) break;
     acc = end;
   }
   return idx;
