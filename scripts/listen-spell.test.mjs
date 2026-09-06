@@ -48,6 +48,7 @@ test("Eliran clips are citation consonants, not prefixes", () => {
   assert.equal(letters(isaac.he), "יצחק");
   assert.equal(isaac.ch, 17);
   assert.equal(isaac.v, 19);
+  const yam = vocabClip("yam");
   assert.ok(yam);
   assert.equal(letters(yam.he), "ים");
   assert.equal(vocabClip("ha"), undefined);
