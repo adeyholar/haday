@@ -10,7 +10,11 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 Azure fallback: [https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net](https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net)
 
+**As-built (what runs today):** [docs/ASBUILT.md](docs/ASBUILT.md)  
+**Each upgrade:** [CHANGELOG.md](CHANGELOG.md)
+
 Source of truth is this GitHub repo, branch **`main`**. A push to `main` builds the Docker image and deploys Azure Web App **haday**. The same Docker image (or `npm run build` + `npm start`) runs on any Node 22 host.
+
 
 ## Always ship to `main`
 
