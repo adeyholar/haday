@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useMemo, useState, type FormEvent } from "react";
+import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,24 @@ type Mode = "up" | "in" | "reset";
 
 function Login() {
   const { user, isPending } = useCurrentUserState();
+  const href = useRouterState({ select: (s) => s.location.href });
+  const linkError = useMemo(() => {
+    try {
+      return new URL(href, "http://local.invalid").searchParams.get("error")?.trim() || "";
+    } catch {
+      return "";
+    }
+  }, [href]);
   const [mode, setMode] = useState<Mode>("up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
+  const [awaitingVerify, setAwaitingVerify] = useState(false);
+  const [resent, setResent] = useState(false);
 
   if (isPending) {
     return (
@@ -61,17 +72,38 @@ function Login() {
     }
   }
 
+  async function resendVerify() {
+    setError(null);
+    setBusy(true);
+    setResent(false);
+    try {
+      const { error: sendError } = await authClient.sendVerificationEmail({
+        email: email.trim(),
+        callbackURL: "/login",
+      });
+      if (sendError) throw new Error(sendError.message || "Could not send the confirmation email.");
+      setResent(true);
+      setBusy(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the confirmation email.");
+      setBusy(false);
+    }
+  }
+
   async function onEmail(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setBusy(true);
     try {
       if (mode === "up") {
+        if (!agreed) {
+          throw new Error("Read Privacy and disclaimer, then tick the box.");
+        }
         const { error: signUpError } = await authClient.signUp.email({
           name: name.trim() || email.split("@")[0] || "Student",
           email: email.trim(),
           password,
-          callbackURL: "/",
+          callbackURL: "/login",
         });
         if (signUpError) {
           throw new Error(
@@ -79,13 +111,24 @@ function Login() {
               "Could not create the account. The class database may not be connected on Azure yet.",
           );
         }
-      } else {
-        const { error: signInError } = await authClient.signIn.email({
-          email: email.trim(),
-          password,
-          callbackURL: "/",
-        });
-        if (signInError) throw new Error(signInError.message || "Could not sign in.");
+        setAwaitingVerify(true);
+        setBusy(false);
+        return;
+      }
+      const { error: signInError } = await authClient.signIn.email({
+        email: email.trim(),
+        password,
+        callbackURL: "/",
+      });
+      if (signInError) {
+        const code = (signInError as { code?: string }).code ?? "";
+        const message = signInError.message || "Could not sign in.";
+        if (code === "EMAIL_NOT_VERIFIED" || /not verified/i.test(message)) {
+          setAwaitingVerify(true);
+          setBusy(false);
+          return;
+        }
+        throw new Error(message);
       }
       await authClient.getSession();
       window.location.assign("/");
@@ -105,6 +148,32 @@ function Login() {
 
         {!authEnabled ? (
           <p className="mt-6 text-sm text-muted">Sign-in is disabled.</p>
+        ) : awaitingVerify ? (
+          <div className="mt-6 grid gap-3">
+            <p className="text-sm leading-relaxed text-muted">
+              Check the inbox for <span className="font-semibold text-ink">{email.trim() || "that address"}</span>.
+              Open the confirmation link in the next 24 hours to finish the account. Check spam too.
+            </p>
+            {resent ? (
+              <p className="text-sm text-muted">Another confirmation email is on the way.</p>
+            ) : null}
+            {error && <p className="text-sm text-danger">{error}</p>}
+            <Button type="button" className="w-full" disabled={busy || !email.trim()} onClick={() => void resendVerify()}>
+              {busy ? "Sending…" : "Send the email again"}
+            </Button>
+            <button
+              type="button"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              onClick={() => {
+                setAwaitingVerify(false);
+                setError(null);
+                setResent(false);
+                setMode("in");
+              }}
+            >
+              Back to sign in
+            </button>
+          </div>
         ) : (
           <>
             <div className="mt-6 grid gap-2">
@@ -251,8 +320,26 @@ function Login() {
                   className="h-11 rounded-[var(--radius-md)] border border-border bg-parchment px-3 text-fg outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </label>
+              {mode === "up" && (
+                <label className="flex items-start gap-2 text-sm leading-snug text-muted">
+                  <input
+                    required
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="mt-1 size-4 shrink-0 rounded border-border"
+                  />
+                  <span>
+                    I am 13 or older. I have read the{" "}
+                    <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
+                      Privacy policy and disclaimer
+                    </Link>
+                    . HaDay does not sell my data.
+                  </span>
+                </label>
+              )}
               {error && <p className="text-sm text-danger">{error}</p>}
-              <Button type="submit" className="mt-1 w-full" disabled={busy}>
+              <Button type="submit" className="mt-1 w-full" disabled={busy || (mode === "up" && !agreed)}>
                 {busy ? "Working…" : mode === "up" ? "Create account" : "Sign in"}
               </Button>
               {mode === "in" && (
@@ -276,6 +363,20 @@ function Login() {
       <p className="mt-5 text-center text-xs text-subtle">
         Classmates each keep their own week, streak, and weak-word list. Sign out from the header when you are done.
       </p>
+      <p className="mt-2 text-center text-xs text-subtle">
+        <Link to="/legal" className="underline-offset-4 hover:underline">
+          Privacy and disclaimer
+        </Link>
+        {" · "}We do not sell your information.
+      </p>
     </main>
   );
+}
+
+function verifyErrorMessage(code: string): string {
+  const upper = code.toUpperCase();
+  if (upper.includes("EXPIRED") || upper.includes("TOKEN")) {
+    return "That confirmation link is missing or expired. Sign in and we will send a new one.";
+  }
+  return "Could not confirm that email. Request a new confirmation from sign in.";
 }

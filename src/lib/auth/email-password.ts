@@ -5,10 +5,12 @@
  * then build sign-up / sign-in forms with `authClient.signUp.email` /
  * `authClient.signIn.email` from `@/lib/auth/client` (see the auth skill).
  *
- * Password reset lives here too (`sendResetPassword`). `server.ts` only spreads
- * this object — do not copy reset logic into that frozen file.
+ * Password reset, email verification, and the sign-up mailbox check live here.
+ * `server.ts` only spreads these objects — do not copy that logic into that frozen file.
  */
-import { originFromIncomingRequest, sendPasswordResetMail } from "../mail";
+import { APIError, createAuthMiddleware } from "better-auth/api";
+import { originFromIncomingRequest, sendPasswordResetMail, sendVerificationMail } from "../mail";
+import { inspectMailbox } from "../mailbox";
 import { pruneOlderResetTokens, resetClientIp, resetSendBlocked } from "../reset-guard";
 
 export const emailAndPasswordEnabled = true;
@@ -40,9 +42,55 @@ export async function sendResetPassword(
   }
 }
 
+/** Must not throw — Better Auth still creates the unverified user. */
+export async function sendVerificationEmail(
+  data: { user: ResetUser; url: string; token: string },
+): Promise<void> {
+  try {
+    await sendVerificationMail({
+      email: data.user.email,
+      name: data.user.name ?? "",
+      url: data.url,
+    });
+  } catch (err) {
+    console.error("[auth] sendVerificationEmail failed", err);
+  }
+}
+
 export const emailAndPassword = {
   enabled: true as const,
+  requireEmailVerification: true,
   sendResetPassword,
   resetPasswordTokenExpiresIn: 60 * 60,
   revokeSessionsOnPasswordReset: true,
+};
+
+export const emailVerification = {
+  sendVerificationEmail,
+  sendOnSignUp: true,
+  sendOnSignIn: true,
+  autoSignInAfterVerification: true,
+  expiresIn: 60 * 60 * 24,
+};
+
+function signupEmailFromBody(body: unknown): string {
+  if (!body || typeof body !== "object") return "";
+  const email = (body as { email?: unknown }).email;
+  return typeof email === "string" ? email : "";
+}
+
+/**
+ * Mailbox check on email/password sign-up only. OAuth (Google / X, including
+ * X's synthetic emails) must not run this — those identities are proven upstream.
+ */
+export const authHooks = {
+  before: createAuthMiddleware(async (ctx) => {
+    const path = ctx.path ?? "";
+    if (path !== "/sign-up/email" && !path.endsWith("/sign-up/email")) return;
+    const email = signupEmailFromBody(ctx.body);
+    if (!email) return;
+    const check = await inspectMailbox(email);
+    if (check.ok) return;
+    throw new APIError("BAD_REQUEST", { message: check.reason });
+  }),
 };

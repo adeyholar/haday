@@ -23,6 +23,7 @@ export type NavHref =
   | "/rewards"
   | "/leaderboard"
   | "/admin"
+  | "/legal"
   | "/game"
   | "/game/alefbet"
   | "/game/syllables"

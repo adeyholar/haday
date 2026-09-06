@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -113,6 +113,7 @@ function AdminPage() {
         <p className="mt-3 max-w-prose text-sm text-muted">
           {people.length} account{people.length === 1 ? "" : "s"}. Name and email come from sign-in.
           Last login is the most recent session; last study is when they saved progress.
+          Email accounts stay waiting until they open the confirmation mail.
         </p>
         <p className="mt-2 max-w-prose text-sm text-muted">
           {mailer?.configured
@@ -176,7 +177,7 @@ function AdminPage() {
       </Panel>
 
       <div className="overflow-x-auto rounded-[var(--radius-xl)] bg-card shadow-[var(--shadow-border)]">
-        <table className="w-full min-w-[42rem] text-left text-sm">
+        <table className="w-full min-w-[52rem] text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-3 font-semibold">Name</th>
@@ -185,7 +186,9 @@ function AdminPage() {
               <th className="px-4 py-3 font-semibold">Last login</th>
               <th className="px-4 py-3 font-semibold">Last study</th>
               <th className="px-4 py-3 font-semibold tabular-nums">Streak</th>
+              <th className="px-4 py-3 font-semibold">Mail</th>
               <th className="px-4 py-3 font-semibold">Reset</th>
+              <th className="px-4 py-3 font-semibold">Remove</th>
             </tr>
           </thead>
           <tbody>
@@ -200,6 +203,9 @@ function AdminPage() {
                 <td className="px-4 py-3 whitespace-nowrap text-muted">{fmt(p.lastLogin)}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">{fmt(p.lastStudy)}</td>
                 <td className="px-4 py-3 tabular-nums text-ink">{p.streak}d</td>
+                <td className="px-4 py-3 whitespace-nowrap text-muted">
+                  {p.hasPassword ? (p.emailVerified ? "Confirmed" : "Waiting") : "OAuth"}
+                </td>
                 <td className="px-4 py-3">
                   <IssueReset
                     person={p}
@@ -207,6 +213,12 @@ function AdminPage() {
                     onIssued={(reset) => {
                       setResets((cur) => [reset, ...cur.filter((r) => r.email !== reset.email)]);
                     }}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <RemoveAccount
+                    person={p}
+                    onRemoved={(id) => setPeople((cur) => (cur ?? []).filter((row) => row.id !== id))}
                   />
                 </td>
               </tr>
@@ -225,6 +237,64 @@ function signInLabel(p: RosterPerson): string {
   if (raw.includes("twitter") || raw.includes("x")) return "X";
   if (raw) return raw;
   return "Sign-in unknown";
+}
+
+function RemoveAccount({
+  person,
+  onRemoved,
+}: {
+  person: RosterPerson;
+  onRemoved: (id: string) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  if (person.protectedAccount) {
+    return <span className="text-xs text-subtle">Owner</span>;
+  }
+
+  async function go() {
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setBusy(true);
+    setNote(null);
+    try {
+      const result = await removeUser({ data: { userId: person.id } });
+      if (!result.ok) {
+        setNote(result.reason);
+        setConfirming(false);
+        return;
+      }
+      onRemoved(person.id);
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Could not remove that account.");
+      setConfirming(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid min-w-[7rem] justify-items-start gap-1">
+      <button
+        type="button"
+        disabled={busy}
+        className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-danger shadow-[var(--shadow-border)] disabled:opacity-60"
+        onClick={() => void go()}
+      >
+        {busy ? "Removing…" : confirming ? "Confirm" : "Remove"}
+      </button>
+      {confirming && !busy ? (
+        <button type="button" className="text-xs text-muted" onClick={() => setConfirming(false)}>
+          Cancel
+        </button>
+      ) : null}
+      {note ? <span className="max-w-[12rem] text-xs leading-snug text-muted">{note}</span> : null}
+    </div>
+  );
 }
 
 function resetUrl(token: string): string {

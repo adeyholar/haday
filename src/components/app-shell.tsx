@@ -5,6 +5,7 @@ import {
   CircleHelp,
   Compass,
   Crown,
+  FileText,
   Headphones,
   House,
   Languages,
@@ -73,6 +74,7 @@ function moreItems(admin: boolean): NavItem[] {
     { to: "/rewards", label: "Rewards", hint: "Ranks and badges", icon: Trophy },
   ];
   if (admin) items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
+  items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
   return items;
 }
@@ -80,7 +82,7 @@ function moreItems(admin: boolean): NavItem[] {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isPending } = useCurrentUserState();
-  const isLogin = pathname === "/login" || pathname === "/reset-password";
+  const isPublic = pathname === "/login" || pathname === "/reset-password" || pathname === "/legal";
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -90,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const honor = board.honor;
 
   useEffect(() => {
-    if (isLogin || !userId) {
+    if (isPublic || !userId) {
       setProgressReady(false);
       setIsAdmin(false);
       return;
@@ -166,9 +168,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       if (timer !== undefined) window.clearTimeout(timer);
       if (handTimer !== undefined) window.clearTimeout(handTimer);
     };
-  }, [isLogin, userId]);
+  }, [isPublic, userId]);
 
-  if (isLogin) {
+  if (isPublic) {
     return (
       <div className="min-h-dvh text-fg">
         <VisitorBeacon />
@@ -237,7 +239,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/ask", "/ideas"].includes(pathname)}
+              active={["/guide", "/rewards", "/leaderboard", "/admin", "/ask", "/ideas", "/legal"].includes(pathname)}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />

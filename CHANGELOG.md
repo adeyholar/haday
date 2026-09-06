@@ -12,6 +12,9 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
+- **Email confirmation:** new email-and-password accounts must open a 24-hour link. Throwaway inboxes and domains that cannot receive mail are blocked. Existing classmates stay signed in.
+- **Roster remove:** the course owner can remove an unwanted account (not their own, not another owner). Progress, sessions, and ideas for that person go with it.
+- **Privacy and disclaimer:** a public page at `/legal` — we do not sell data; Indiana operator; not legal advice; 13+. Sign-up asks you to read it.
 - **Quiz pools:** syllabus (syllables + nouns) and Grammar to live by draw 12 from a large pool and skip the last two rounds in this sitting, so the same twelve do not return immediately.
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.

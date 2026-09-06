@@ -22,6 +22,8 @@ export type RosterPerson = {
   sessions: number;
   streak: number;
   hasPassword: boolean;
+  emailVerified: boolean;
+  protectedAccount: boolean;
   providers: string;
 };
 
@@ -35,6 +37,13 @@ function envAdminEmails(): string[] {
 
 function allowList(): string[] {
   return [...new Set([...ADMIN_EMAILS.map((e) => e.toLowerCase()), ...envAdminEmails()])];
+}
+
+function isProtectedAccount(email: string, name: string): boolean {
+  const allowed = allowList();
+  if (email && allowed.includes(email.toLowerCase())) return true;
+  if (name && OWNER_NAME.test(name)) return true;
+  return false;
 }
 
 export async function assertAdmin(userId: string): Promise<void> {
@@ -82,6 +91,7 @@ export const listRoster = createServerFn({ method: "GET" })
       sessions: number | null;
       streak: number | null;
       has_password: boolean | null;
+      email_verified: boolean | null;
       providers: string | null;
     }>`
       select
@@ -101,6 +111,7 @@ export const listRoster = createServerFn({ method: "GET" })
           select 1 from account a
           where a."userId" = u.id and a."providerId" = 'credential'
         ) as has_password,
+        u."emailVerified" as email_verified,
         (
           select string_agg(distinct a."providerId", ', ')
           from account a
@@ -120,6 +131,8 @@ export const listRoster = createServerFn({ method: "GET" })
       sessions: Number(r.sessions ?? 0),
       streak: Number(r.streak ?? 0),
       hasPassword: Boolean(r.has_password),
+      emailVerified: Boolean(r.email_verified),
+      protectedAccount: isProtectedAccount(r.email, r.name),
       providers: r.providers ?? "",
     }));
   });
@@ -270,4 +283,33 @@ export const revokeAllPasswordResets = createServerFn({ method: "POST" })
       returning identifier
     `;
     return { ok: true, removed: gone.length };
+  });
+
+export type RemoveUserResult = { ok: true } | { ok: false; reason: string };
+
+export const removeUser = createServerFn({ method: "POST" })
+  .validator((input: { userId: string }) => input)
+  .middleware([authMiddleware])
+  .handler(async ({ context, data }): Promise<RemoveUserResult> => {
+    await assertAdmin(context.userId);
+    const id = (data.userId ?? "").trim();
+    if (!id) return { ok: false, reason: "Need a classmate to remove." };
+    if (id === context.userId) {
+      return { ok: false, reason: "You cannot remove your own account from the roster." };
+    }
+    const sql = await getSql();
+    const rows = await sql<{ id: string; email: string; name: string }>`
+      select id, email, name from "user" where id = ${id} limit 1
+    `;
+    const person = rows[0];
+    if (!person) return { ok: false, reason: "No such account." };
+    if (isProtectedAccount(person.email, person.name)) {
+      return { ok: false, reason: "Cannot remove another course owner." };
+    }
+    await sql`delete from study_progress where user_id = ${id}`;
+    await sql`delete from hand_style where user_id = ${id}`;
+    await sql`delete from feature_ideas where user_id = ${id}`;
+    await sql`delete from verification where value = ${id}`;
+    await sql`delete from "user" where id = ${id}`;
+    return { ok: true };
   });

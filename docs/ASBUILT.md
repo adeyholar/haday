@@ -45,10 +45,14 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | Piece | As built |
 |---|---|
 | Sign-in | Google, X (Grok broker), email + password |
+| New email accounts | Domain must accept mail; no throwaway inbox; classmate opens a 24-hour confirmation link before sign-in |
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
-| Roster | Owner sees names, last login, last study, sign-in method, visitor country (from IP on Azure) |
+| Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). **Remove** deletes an unwanted account (not the owner). |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
+| Privacy | Public `/legal` — what we store, that we do not sell it, local/international disclaimer, 13+ |
+
+Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FROM`. Optional Resend / SendGrid instead.
 
 Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FROM`. Optional Resend / SendGrid instead.
 
@@ -63,7 +67,7 @@ Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FR
 | `public/tanakh/books/` | Westminster Leningrad nikkud + WEB English |
 | `public/tanakh/align/` | Kaldi MFA word / phone times, 929/929 |
 | `scripts/mfa-align-tanakh.py` | Murillo-style MFA runner (resume skips finished chapters) |
-| `migrations/*.sql` | Auth, study, game, leaderboard, visits, handwriting, ideas |
+| `migrations/*.sql` | Auth, study, game, leaderboard, visits, handwriting, ideas, existing-user emailVerified backfill |
 
 Postgres on Azure holds users, sessions, progress, ideas, visits. Local preview uses PGLite.
 

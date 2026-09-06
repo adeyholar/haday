@@ -203,6 +203,94 @@ export async function sendPasswordResetMail(opts: {
   return { sent: false, via: "none" };
 }
 
+export async function sendVerificationMail(opts: {
+  email: string;
+  name: string;
+  url: string;
+}): Promise<{ sent: boolean; via: MailerVia }> {
+  const pageUrl = toPublicAppUrl(opts.url);
+  const greeting = opts.name.trim() ? opts.name.trim() : "there";
+  const subject = "Confirm your HaDay email";
+  const text = [
+    `Hi ${greeting},`,
+    "",
+    "Confirm this email to finish your HaDay account.",
+    "Open this link in the next 24 hours:",
+    pageUrl,
+    "",
+    "If you did not create a HaDay account, ignore this message.",
+    "",
+    "— HaDay · BIBL 630",
+  ].join("\n");
+  const html = `<p>Hi ${escapeHtml(greeting)},</p>
+<p>Confirm this email to finish your HaDay account. This link expires in 24 hours:</p>
+<p><a href="${escapeHtml(pageUrl)}">Confirm my email</a></p>
+<p>If you did not create a HaDay account, ignore this message.</p>
+<p>— HaDay · BIBL 630</p>`;
+  const result = await sendAnyMail({ to: opts.email, subject, text, html });
+  if (!result.sent) {
+    console.info(
+      `[mail] verification for ${opts.email} not sent (no mailer or send failed).`,
+    );
+  }
+  return result;
+}
+
+/** Rewrite sandbox/localhost verification links onto the public class host. */
+export function toPublicAppUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (isUsablePublicOrigin(parsed.origin)) return url;
+    const origins: string[] = [];
+    const push = (raw?: string) => {
+      if (!raw) return;
+      const origin = canonicalizeOrigin(raw);
+      if (isUsablePublicOrigin(origin) && !origins.includes(origin)) origins.push(origin);
+    };
+    push(env("PUBLIC_APP_URL"));
+    push(env("BETTER_AUTH_URL"));
+    const origin = origins[0] ?? AZURE_LONG;
+    return `${origin}${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url;
+  }
+}
+
+async function sendAnyMail(opts: { to: string; subject: string; text: string; html: string }): Promise<{ sent: boolean; via: MailerVia }> {
+  try {
+    const resendKey = env("RESEND_API_KEY");
+    if (resendKey) {
+      await sendResend({ apiKey: resendKey, from: fromAddress(), to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+      return { sent: true, via: "resend" };
+    }
+    const sendgridKey = env("SENDGRID_API_KEY");
+    if (sendgridKey) {
+      await sendSendgrid({ apiKey: sendgridKey, from: fromAddress(), to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+      return { sent: true, via: "sendgrid" };
+    }
+    const user = smtpUser();
+    const pass = smtpPass();
+    const host = smtpHostFor(user);
+    if (user && pass && host) {
+      await sendSmtp({
+        host,
+        port: Number(env("SMTP_PORT") || (host === "smtp.gmail.com" ? "465" : "587")),
+        user,
+        pass,
+        from: fromAddress(),
+        to: opts.to,
+        subject: opts.subject,
+        text: opts.text,
+        html: opts.html,
+      });
+      return { sent: true, via: "smtp" };
+    }
+  } catch (err) {
+    console.error("[mail] send failed", err);
+  }
+  return { sent: false, via: "none" };
+}
+
 async function sendResend(opts: {
   apiKey: string;
   from: string;

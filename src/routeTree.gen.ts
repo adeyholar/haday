@@ -20,6 +20,7 @@ import { Route as GuideRouteImport } from './routes/guide'
 import { Route as IdeasRouteImport } from './routes/ideas'
 import { Route as KeepRouteImport } from './routes/keep'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ListenRouteImport } from './routes/listen'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
@@ -97,6 +98,11 @@ const KeepRoute = KeepRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListenRoute = ListenRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/ideas': typeof IdeasRoute
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/listen': typeof ListenRouteWithChildren
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/ideas': typeof IdeasRoute
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/ideas': typeof IdeasRoute
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/listen': typeof ListenRouteWithChildren
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/ideas'
     | '/keep'
     | '/leaderboard'
+    | '/legal'
     | '/listen'
     | '/login'
     | '/match'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/ideas'
     | '/keep'
     | '/leaderboard'
+    | '/legal'
     | '/login'
     | '/match'
     | '/quiz'
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/ideas'
     | '/keep'
     | '/leaderboard'
+    | '/legal'
     | '/listen'
     | '/login'
     | '/match'
@@ -445,6 +457,7 @@ export interface RootRouteChildren {
   IdeasRoute: typeof IdeasRoute
   KeepRoute: typeof KeepRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LegalRoute: typeof LegalRoute
   ListenRoute: typeof ListenRouteWithChildren
   LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
@@ -543,6 +556,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listen': {
@@ -738,6 +758,7 @@ const rootRouteChildren: RootRouteChildren = {
   IdeasRoute: IdeasRoute,
   KeepRoute: KeepRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LegalRoute: LegalRoute,
   ListenRoute: ListenRouteWithChildren,
   LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
