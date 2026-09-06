@@ -243,3 +243,31 @@ export const issuePasswordReset = createServerFn({ method: "POST" })
 
     return { ok: true, token, expiresAt: expiresAt.toISOString(), emailed };
   });
+
+export const revokePasswordReset = createServerFn({ method: "POST" })
+  .validator((input: { token: string }) => input)
+  .middleware([authMiddleware])
+  .handler(async ({ context, data }): Promise<{ ok: true } | { ok: false; reason: string }> => {
+    await assertAdmin(context.userId);
+    const token = (data.token ?? "").trim();
+    if (!token) return { ok: false, reason: "Need a reset token." };
+    const sql = await getSql();
+    await sql`
+      delete from verification
+      where identifier = ${"reset-password:" + token}
+    `;
+    return { ok: true };
+  });
+
+export const revokeAllPasswordResets = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<{ ok: true; removed: number }> => {
+    await assertAdmin(context.userId);
+    const sql = await getSql();
+    const gone = await sql<{ identifier: string }>`
+      delete from verification
+      where identifier like ${"reset-password:%"}
+      returning identifier
+    `;
+    return { ok: true, removed: gone.length };
+  });

@@ -9,24 +9,32 @@
  * this object — do not copy reset logic into that frozen file.
  */
 import { originFromIncomingRequest, sendPasswordResetMail } from "../mail";
+import { pruneOlderResetTokens, resetClientIp, resetSendBlocked } from "../reset-guard";
 
 export const emailAndPasswordEnabled = true;
 
-type ResetUser = { email: string; name?: string | null };
+type ResetUser = { id?: string; email: string; name?: string | null };
 
 /** Better Auth calls this after storing the token. Must not throw (user-exists leak). */
 export async function sendResetPassword(
   data: { user: ResetUser; url: string; token: string },
-  _request?: Request,
+  request?: Request,
 ): Promise<void> {
   try {
+    const email = data.user.email;
+    if (data.user.id) await pruneOlderResetTokens(data.user.id, data.token);
+    if (await resetSendBlocked(email, resetClientIp(request))) {
+      console.info(`[auth] password reset mail skipped (rate limit) for ${email}`);
+      return;
+    }
     const origin = (await originFromIncomingRequest()) || data.url;
     await sendPasswordResetMail({
-      email: data.user.email,
+      email,
       name: data.user.name ?? "",
       url: origin,
       token: data.token,
     });
+    if (data.user.id) await pruneOlderResetTokens(data.user.id, data.token);
   } catch (err) {
     console.error("[auth] sendResetPassword failed", err);
   }

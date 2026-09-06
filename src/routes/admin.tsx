@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -121,7 +121,7 @@ function AdminPage() {
         </p>
       </Panel>
 
-      <ResetInbox resets={resets} mailerOn={Boolean(mailer?.configured)} />
+      <ResetInbox resets={resets} mailerOn={Boolean(mailer?.configured)} onChange={setResets} />
 
       <IdeaInventory ideas={ideas ?? []} onChange={setIdeas} />
 
@@ -305,8 +305,18 @@ function IssueReset({
   );
 }
 
-function ResetInbox({ resets, mailerOn }: { resets: PendingReset[]; mailerOn: boolean }) {
+function ResetInbox({
+  resets,
+  mailerOn,
+  onChange,
+}: {
+  resets: PendingReset[];
+  mailerOn: boolean;
+  onChange: (next: PendingReset[]) => void;
+}) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
 
   async function copyLink(token: string) {
     try {
@@ -318,13 +328,57 @@ function ResetInbox({ resets, mailerOn }: { resets: PendingReset[]; mailerOn: bo
     }
   }
 
+  async function revokeOne(token: string) {
+    setBusy(token);
+    setNote(null);
+    try {
+      const result = await revokePasswordReset({ data: { token } });
+      if (!result.ok) {
+        setNote(result.reason);
+        return;
+      }
+      onChange(resets.filter((r) => r.token !== token));
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Could not revoke that link.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function revokeAll() {
+    setBusy("all");
+    setNote(null);
+    try {
+      const result = await revokeAllPasswordResets();
+      onChange([]);
+      setNote(result.removed ? `Removed ${result.removed} waiting link${result.removed === 1 ? "" : "s"}.` : "None waiting.");
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Could not clear waiting links.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <Panel className="mb-4">
       <h2 className="font-display text-2xl font-bold text-ink">Password reset</h2>
       <p className="mt-1 text-sm text-muted">
         Classmates can tap Forgot password on Sign in, or you can email a link from their row.
-        Links expire in one hour. Copy is only a backup if the inbox is empty — do not paste these in a public channel.
+        Links expire in one hour — or revoke them here right away. Forgot password is limited
+        (a few tries per person and per network) so a flood cannot fill the mailbox.
+        Copy is only a backup if the inbox is empty — do not paste these in a public channel.
       </p>
+      {resets.length > 0 ? (
+        <button
+          type="button"
+          disabled={busy === "all"}
+          className="mt-3 min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-danger shadow-[var(--shadow-border)] disabled:opacity-60"
+          onClick={() => void revokeAll()}
+        >
+          {busy === "all" ? "Revoking…" : "Revoke all waiting"}
+        </button>
+      ) : null}
+      {note ? <p className="mt-2 text-sm text-muted">{note}</p> : null}
       {resets.length === 0 ? (
         <p className="mt-3 text-sm text-muted">
           {mailerOn
@@ -342,13 +396,23 @@ function ResetInbox({ resets, mailerOn }: { resets: PendingReset[]; mailerOn: bo
                   {r.expiresAt ? ` · until ${fmt(r.expiresAt)}` : ""}
                 </span>
               </span>
-              <button
-                type="button"
-                className="min-h-11 shrink-0 rounded-[var(--radius-md)] bg-card px-3 font-semibold text-primary shadow-[var(--shadow-border)]"
-                onClick={() => void copyLink(r.token)}
-              >
-                {copied === r.token ? "Copied" : "Copy link"}
-              </button>
+              <span className="flex shrink-0 flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 font-semibold text-primary shadow-[var(--shadow-border)]"
+                  onClick={() => void copyLink(r.token)}
+                >
+                  {copied === r.token ? "Copied" : "Copy link"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy === r.token}
+                  className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 font-semibold text-danger shadow-[var(--shadow-border)] disabled:opacity-60"
+                  onClick={() => void revokeOne(r.token)}
+                >
+                  {busy === r.token ? "Revoking…" : "Revoke"}
+                </button>
+              </span>
             </li>
           ))}
         </ul>
