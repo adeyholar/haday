@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-06
 
-- **Vocab Listen is TTS again.** The Open Hebrew Bible / Lingua Libre clips were not checked word-by-word and too many pronunciations were wrong. Hebrew name, then English, until we pick a bank you trust.
+- **Vocab Listen: Open Hebrew Bible lexemes only.** 328 Genesis citation forms, matched on BHS word index (not a verse cut). Lingua Libre is off. Everything else is TTS.
 - **Visitor country on Azure** — looks up the classmate’s IP (Vercel’s country header is gone). Blank rows fill on the next visit.
 - **As-built docs** live in GitHub (`docs/ASBUILT.md` + this file) so each upgrade has a place to land.
 - **Revoke reset links** on the class roster; no need to wait out the hour. Forgot password is capped so a flood cannot fill Gmail.

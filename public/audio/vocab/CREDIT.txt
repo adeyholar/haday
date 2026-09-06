@@ -1,3 +1,3 @@
-Isolated Hebrew lemma audio for HaDay Listen.
-Open Hebrew Bible Project by Eliran Wong — CC BY-NC 4.0 (https://github.com/eliranwong/MP3_BHS5_word-by-word).
-Lingua Libre recordings on Wikimedia Commons — CC0 / CC BY-SA.
+Isolated Hebrew lexeme audio from Open Hebrew Bible Project by Eliran Wong,
+CC BY-NC 4.0. https://github.com/eliranwong/MP3_BHS5_word-by-word
+Matched to BBH citation form via BHS word index (not a verse excerpt).

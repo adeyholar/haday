@@ -22,8 +22,10 @@ export function vocabClip(id: string): VocabClip | undefined {
 }
 
 export function vocabClipLabel(clip: VocabClip): string {
-  if (clip.source === "eliran") return "Open Hebrew Bible · isolated word";
-  if (clip.source === "lingualibre") return "Lingua Libre · isolated word";
-  if (clip.bookEn && clip.ch && clip.v) return `${clip.bookEn} ${clip.ch}:${clip.v}`;
+  if (clip.source === "eliran") {
+    if (clip.bookEn && clip.ch && clip.v) return `Open Hebrew Bible · ${clip.bookEn} ${clip.ch}:${clip.v}`;
+    if (clip.book && clip.ch && clip.v) return `Open Hebrew Bible · ${clip.book} ${clip.ch}:${clip.v}`;
+    return "Open Hebrew Bible · isolated word";
+  }
   return "isolated word";
 }
