@@ -515,6 +515,8 @@ def align_corpus(corpus: Path, dict_path: Path, out_dir: Path) -> None:
         "--overwrite",
         "--no_tokenization",
         "--single_speaker",
+        "--beam", "100",
+        "--retry_beam", "400",
         "--num_jobs", "2",
         "--output_format", "long_textgrid",
         "--temporary_directory", "/tmp/mfa-work",
