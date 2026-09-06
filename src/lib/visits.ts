@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { assertAdmin } from "@/lib/admin";
+import { cleanCountry, clientIpFromHeaders, countryFromHeaders } from "@/lib/visit-geo";
+
+export { countryLabel } from "@/lib/visit-geo";
 
 export type VisitPing = {
   visitorId: string;
@@ -78,20 +81,27 @@ function cleanDevice(raw: string): string {
   return "";
 }
 
-function cleanCountry(raw: string | null | undefined): string {
-  const c = (raw ?? "").trim().toUpperCase();
-  if (c === "XX" || c === "T1" || c === "A1" || c === "A2") return "";
-  if (!/^[A-Z]{2}$/.test(c)) return "";
-  return c;
-}
+const geoCache = new Map<string, string>();
 
-export function countryLabel(code: string): string {
-  const c = cleanCountry(code);
-  if (!c) return "";
+async function countryFromIp(ip: string): Promise<string> {
+  if (!ip) return "";
+  const cached = geoCache.get(ip);
+  if (cached !== undefined) return cached;
   try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(c) ?? c;
+    const res = await fetch(`https://api.country.is/${encodeURIComponent(ip)}`, {
+      signal: AbortSignal.timeout(1800),
+    });
+    if (!res.ok) return "";
+    const data = (await res.json()) as { country?: string };
+    const code = cleanCountry(data.country);
+    geoCache.set(ip, code);
+    if (geoCache.size > 2000) {
+      const first = geoCache.keys().next().value;
+      if (first) geoCache.delete(first);
+    }
+    return code;
   } catch {
-    return c;
+    return "";
   }
 }
 
@@ -100,14 +110,9 @@ async function countryFromRequest(): Promise<string> {
     const { getRequest } = await import("@tanstack/react-start/server");
     const request = getRequest();
     if (!request) return "";
-    const h = request.headers;
-    return cleanCountry(
-      h.get("x-vercel-ip-country") ||
-        h.get("cf-ipcountry") ||
-        h.get("cloudfront-viewer-country") ||
-        h.get("x-country-code") ||
-        h.get("x-geo-country"),
-    );
+    const header = countryFromHeaders(request.headers);
+    if (header) return header;
+    return countryFromIp(clientIpFromHeaders(request.headers));
   } catch {
     return "";
   }

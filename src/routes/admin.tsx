@@ -138,7 +138,7 @@ function AdminPage() {
         <h2 className="font-display text-2xl font-bold text-ink">Visitors who did not sign in</h2>
         <p className="mt-1 text-sm text-muted">
           Anonymous browsers on the login page or the site. No names or emails — a cookie id only.
-          Country is from the first request (Vercel / edge), owner-only.
+          Country is from the visitor’s IP on Azure (filled on the next visit if it was blank). Owner-only.
         </p>
         {(visits?.countries.length ?? 0) > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">

@@ -46,7 +46,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 |---|---|
 | Sign-in | Google, X (Grok broker), email + password |
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
-| Roster | Owner sees names, last login, last study, sign-in method |
+| Roster | Owner sees names, last login, last study, sign-in method, visitor country (from IP on Azure) |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
 
