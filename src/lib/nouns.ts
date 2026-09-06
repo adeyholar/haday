@@ -1,3 +1,6 @@
+import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
+import { NOUN_QUIZ_EXTRA } from "@/lib/noun-quiz-extra";
+
 /** Original teaching notes on Hebrew nouns. Public-domain Masoretic examples. Not a textbook reprint. */
 
 export type NounVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string };
@@ -30,7 +33,7 @@ export type NounUnit = {
   quiz: NounQuiz[];
 };
 
-export const NOUN_QUIZ_LEN = 12;
+export const NOUN_QUIZ_LEN = ROUND_LEN;
 export const NOUN_REVIEW = 3;
 export const NOUN_UNIT_MAX = 6;
 
@@ -275,14 +278,19 @@ export function nounUnit(id: number): NounUnit | undefined {
   return NOUN_UNITS.find((u) => u.id === id);
 }
 
+export function nounQuizPool(unit: NounUnit): NounQuiz[] {
+  return [...unit.quiz, ...(NOUN_QUIZ_EXTRA[unit.id] ?? [])];
+}
+
 export function buildNounQuiz(unitId: number): NounQuiz[] {
   const unit = nounUnit(unitId);
   if (!unit) return [];
   const reviewCount = unitId > 1 ? NOUN_REVIEW : 0;
   const freshTake = Math.min(NOUN_QUIZ_LEN - reviewCount, unit.quiz.length);
-  const fresh = shuffle(unit.quiz).slice(0, freshTake);
+  const pool = nounQuizPool(unit);
+  const fresh = drawRound(pool, freshTake, `noun:${unitId}`, quizId);
   const prior = NOUN_UNITS.filter((u) => u.id < unitId).flatMap((u) => u.quiz);
-  const review = reviewCount ? shuffle(prior).slice(0, reviewCount).map((q) => ({ ...q, review: true })) : [];
+  const review = reviewCount ? drawRound(prior, reviewCount, `noun-rev:${unitId}`, quizId).map((q) => ({ ...q, review: true })) : [];
   return shuffle([...fresh, ...review]).map((q) => ({
     ...q,
     choices: shuffle(q.choices),

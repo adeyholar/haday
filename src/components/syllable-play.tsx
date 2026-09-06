@@ -10,6 +10,7 @@ import { lemmaForSurface } from "@/lib/tanakh-pool";
 import {
   shuffleQuiz,
   syllableUnit,
+  syllableQuizPool,
   starsFromSyllableScore,
   SYLLABLE_QUIZ_LEN,
   type SyllableQuiz,
@@ -206,7 +207,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
           </ul>
         </Panel>
         <Button className="mt-4 w-full" onClick={startQuiz}>
-          Quiz this rule · {Math.min(SYLLABLE_QUIZ_LEN, unit.quiz.length)} questions
+          Quiz this rule · {SYLLABLE_QUIZ_LEN} of {syllableQuizPool(unit).length}
         </Button>
       </>
     );

@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { findHitRange } from "@/lib/hebrew";
 import { cn } from "@/lib/cn";
-import { shuffle } from "@/lib/grammar-rules";
+import { drawRound, ROUND_LEN } from "@/lib/quiz-draw";
 import {
   answerLabel,
   itemsForKind,
@@ -18,7 +18,10 @@ type Phase = "ask" | "retry" | "lead" | "done";
 
 export function ClassifyDrill({ kind }: { kind: ClassifyKind }) {
   const [seed, setSeed] = useState(0);
-  const deck = useMemo(() => shuffle(itemsForKind(kind)), [kind, seed]);
+  const deck = useMemo(
+    () => drawRound(itemsForKind(kind), ROUND_LEN, `classify:${kind}`, (item) => item.id),
+    [kind, seed],
+  );
   return <Round key={`${kind}-${seed}`} kind={kind} deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
 }
 

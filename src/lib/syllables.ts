@@ -1,3 +1,6 @@
+import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
+import { SYLLABLE_QUIZ_EXTRA } from "@/lib/syllable-quiz-extra";
+
 /** Public-domain Masoretic examples. Rules are original teaching notes, not a textbook reprint. */
 
 export type SyllableVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string };
@@ -29,7 +32,7 @@ export type SyllableUnit = {
 };
 
 /** Questions drawn per play. Pool is larger so a retry is not the same five. */
-export const SYLLABLE_QUIZ_LEN = 12;
+export const SYLLABLE_QUIZ_LEN = ROUND_LEN;
 
 export const SYLLABLE_UNITS: SyllableUnit[] = [
   {
@@ -351,12 +354,16 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+export function syllableQuizPool(unit: SyllableUnit): SyllableQuiz[] {
+  return [...unit.quiz, ...(SYLLABLE_QUIZ_EXTRA[unit.id] ?? [])];
+}
+
 export function shuffleQuiz(unit: SyllableUnit): SyllableQuiz[] {
-  const items = unit.quiz.map((q) => ({
+  const items = drawRound(syllableQuizPool(unit), SYLLABLE_QUIZ_LEN, `syl:${unit.id}`, quizId);
+  return items.map((q) => ({
     ...q,
     choices: shuffle(q.choices),
   }));
-  return shuffle(items).slice(0, Math.min(SYLLABLE_QUIZ_LEN, items.length));
 }
 
 export function starsFromSyllableScore(pct: number): number {

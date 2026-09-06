@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { ClassifyDrill } from "@/components/classify-drill";
-import { findHitRange } from "@/lib/hebrew";
+import { drawRound } from "@/lib/quiz-draw";
 import { cn } from "@/lib/cn";
 import {
   GRAMMAR_CASES,
@@ -18,6 +18,7 @@ import {
   refMatchesParts,
   ruleById,
   shuffle,
+  HUNT_ROUND_LEN,
   type GrammarCase,
   type GrammarRule,
 } from "@/lib/grammar-rules";
@@ -176,7 +177,7 @@ function VerseHunt() {
       byRule.set(c.ruleId, list);
     }
     const picks = [...byRule.values()].map((list) => shuffle(list)[0]);
-    return shuffle(picks);
+    return drawRound(picks, HUNT_ROUND_LEN, "hunt:verse", (c) => c.id);
   }, [seed]);
 
   return <HuntRound key={seed} mode="verse" deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
@@ -184,7 +185,7 @@ function VerseHunt() {
 
 function NameHunt() {
   const [seed, setSeed] = useState(0);
-  const deck = useMemo(() => shuffle(GRAMMAR_CASES), [seed]);
+  const deck = useMemo(() => drawRound(GRAMMAR_CASES, HUNT_ROUND_LEN, "hunt:name", (c) => c.id), [seed]);
   return <HuntRound key={seed} mode="name" deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
 }
 

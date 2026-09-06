@@ -12,6 +12,7 @@ import {
   NOUN_UNIT_MAX,
   buildNounQuiz,
   nounMatchPairs,
+  nounQuizPool,
   nounUnit,
   starsFromNounScore,
   type NounQuiz,
@@ -346,7 +347,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
         </div>
         {doneMatch ? (
           <Button className="mt-4 w-full" onClick={startQuiz}>
-            Quiz this rule · {NOUN_QUIZ_LEN} questions
+            Quiz this rule · {NOUN_QUIZ_LEN} of {nounQuizPool(unit).length}
           </Button>
         ) : (
           <p className="mt-3 text-center text-sm text-muted">

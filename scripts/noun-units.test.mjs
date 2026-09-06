@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { NOUN_UNITS, NOUN_QUIZ_LEN, NOUN_UNIT_MAX, buildNounQuiz } = await jiti.import("/workspace/src/lib/nouns.ts");
+const { NOUN_UNITS, NOUN_QUIZ_LEN, NOUN_UNIT_MAX, buildNounQuiz, nounQuizPool } = await jiti.import("/workspace/src/lib/nouns.ts");
 
 test("six units, Tanakh verses, long quiz pools", () => {
   assert.equal(NOUN_UNITS.length, NOUN_UNIT_MAX);
@@ -11,11 +11,12 @@ test("six units, Tanakh verses, long quiz pools", () => {
   for (const u of NOUN_UNITS) {
     assert.ok(u.verses.length >= 3, `unit ${u.id} verses`);
     assert.ok(u.samples.length >= 4, `unit ${u.id} samples`);
-    assert.ok(u.quiz.length >= 14, `unit ${u.id} quiz pool ${u.quiz.length}`);
     for (const v of u.verses) {
       assert.ok(v.he.includes(v.hit), `unit ${u.id} ${v.ref} missing hit ${v.hit}`);
     }
-    for (const q of u.quiz) {
+    const pool = nounQuizPool(u);
+    assert.ok(pool.length >= 24, `unit ${u.id} quiz pool ${pool.length}`);
+    for (const q of pool) {
       assert.ok(q.choices.includes(q.answer), `unit ${u.id} ${q.q}`);
       assert.equal(new Set(q.choices).size, q.choices.length, `dup choices: ${q.q}`);
     }
