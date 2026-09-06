@@ -77,7 +77,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "Dagesh forte doubles the consonant and is divided",
     statement:
-      "A dagesh forte doubles the consonant and must be divided: the first of the pair takes shewa and closes the previous syllable; the second takes the vowel and opens the next. So הַשָּׁמַיִם is הַשּׁ | שָׁ | מַ | יִם — not a single shin.",
+      "A dagesh forte doubles the consonant and must be divided: write the first of the pair with shewa (no dagesh — the two letters already show the double) to close the previous syllable; the second takes the vowel and opens the next. So הַשָּׁמַיִם is הַשְׁ | שָׁ | מַ | יִם.",
     aliases: [
       "dagesh forte doubles",
       "forte doubles",
@@ -890,7 +890,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "הַשָּׁמַיִם",
-    why: "Dagesh forte in shin doubles it and must be split: הַשּׁ | שָׁ | מַ | יִם. The first shin closes the article; the second opens the next syllable.",
+    why: "Dagesh forte in shin doubles it and must be split: הַשְׁ | שָׁ | מַ | יִם. First shin takes shewa and closes (no dagesh after the split); the second takes qamets.",
   },
   {
     id: "appayim-hard",

@@ -35,23 +35,23 @@ test("wayyar splits through doubled yod; quiescent alef stays in the last slice"
   const unit = SYLLABLE_UNITS.find((u) => u.id === 6);
   assert.ok(unit);
   const sample = unit.samples.find((s) => s.word === "וַיַּרְא");
-  assert.equal(sample.split, "וַיּ | יַרְא");
+  assert.equal(sample.split, "וַיְ | יַרְא");
   assert.notEqual(sample.split, "וַיַּרְ | א");
   const q = unit.quiz.find((item) => item.q === "How does וַיַּרְא split?");
   assert.ok(q);
-  assert.equal(q.answer, "וַיּ | יַרְא");
+  assert.equal(q.answer, "וַיְ | יַרְא");
 });
 
 test("dagesh forte: first of the pair shewa-closes, second takes the vowel", () => {
   const unit = SYLLABLE_UNITS.find((u) => u.id === 2);
   assert.ok(unit);
   const shamayim = unit.samples.find((s) => s.word === "הַשָּׁמַיִם");
-  assert.equal(shamayim.split, "הַשּׁ | שָׁ | מַ | יִם");
+  assert.equal(shamayim.split, "הַשְׁ | שָׁ | מַ | יִם");
   const attah = unit.samples.find((s) => s.word === "אַתָּה");
-  assert.equal(attah.split, "אַתּ | תָּה");
+  assert.equal(attah.split, "אַתְ | תָּה");
   const q = unit.quiz.find((item) => item.q === "How does הַשָּׁמַיִם split?");
   assert.ok(q);
-  assert.equal(q.answer, "הַשּׁ | שָׁ | מַ | יִם");
+  assert.equal(q.answer, "הַשְׁ | שָׁ | מַ | יִם");
 });
 
 test("diphthong rule names whole words, not shredded niqqud", () => {
