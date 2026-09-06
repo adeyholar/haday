@@ -131,9 +131,9 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "resh-vocal-shewa",
     group: "syllable",
-    title: "Resh can take vocal shewa",
+    title: "Resh with shewa follows the shewa rules",
     statement:
-      "Resh is with the gutturals in refusing dagesh, but unlike א ה ח ע it can take vocal shewa. Initial רְ is vocal.",
+      "When ר takes shewa, silent vs vocal is the ordinary shewa test — not the guttural hateph rule. After a short vowel the shewa is silent (פַּרְעֹה). At the start of a word, as the second of two, or after an unaccented long vowel, it is vocal (רְאוּבֵן). Resh still cannot take dagesh.",
     aliases: [
       "resh can take vocal shewa",
       "resh vocal shewa",
@@ -948,7 +948,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַתַּהַר לֵאָה וַתֵּלֶד בֵּן וַתִּקְרָא שְׁמוֹ רְאוּבֵן",
     en: "Leah conceived and bore a son, and she called his name Reuben.",
     hit: "רְאוּבֵן",
-    why: "Resh takes vocal shewa at the start of the name. A guttural in this seat would have needed a hateph; resh does not.",
+    why: "Shewa on resh follows the shewa rules: it starts the word, so it is vocal. Do not replace it with a hateph.",
   },
   {
     id: "barkhi-resh-vocal",
@@ -962,7 +962,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בָּרְכִי נַפְשִׁי אֶת־יְהוָה וְכָל־קְרָבַי אֶת־שֵׁם קָדְשׁוֹ",
     en: "Bless YHWH, O my soul, and all that is within me, his holy name.",
     hit: "בָּרְכִי",
-    why: "Shewa under resh is vocal (בָּ | רְ | כִי). Unlike א ה ח ע, resh may carry vocal shewa.",
+    why: "Shewa under resh is vocal (בָּ | רְ | כִי) because it follows an unaccented long vowel — the ordinary shewa rule, not a guttural hateph.",
   },
   {
     id: "batim-metheg",

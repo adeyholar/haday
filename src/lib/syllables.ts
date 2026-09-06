@@ -111,9 +111,9 @@ export const SYLLABLE_UNITS: SyllableUnit[] = [
     title: "Silent and vocal shewa",
     short: "Shewa",
     rule:
-      "Shewa is silent when a short vowel stands immediately before it — it then closes that syllable. Shewa is vocal in every other case: at the start of a word, as the second of two shewas in a row, under a letter with dagesh forte, or after an unaccented long vowel. A shewa, silent or vocal, marks a syllable boundary. א ה ח ע can take silent shewa, not vocal shewa; they take a hateph (reduced vowel) instead. Resh can take vocal shewa.",
+      "Shewa is silent when a short vowel stands immediately before it — it then closes that syllable. Shewa is vocal in every other case: at the start of a word, as the second of two shewas in a row, under a letter with dagesh forte, or after an unaccented long vowel. A shewa, silent or vocal, marks a syllable boundary. א ה ח ע can take silent shewa, not vocal shewa; they take a hateph (reduced vowel) instead. When ר has shewa, use these same shewa tests — not the guttural hateph rule.",
     samples: [
-      { word: "פַּרְעֹה", split: "פַּרְ | עֹה", note: "Shewa under ר follows short pathach, so it is silent and closes the first syllable.", ref: "Exod 5:1" },
+      { word: "פַּרְעֹה", split: "פַּרְ | עֹה", note: "Shewa under ר follows short pathach, so it is silent — the ordinary shewa rule, not a guttural hateph.", ref: "Exod 5:1" },
       { word: "בְּרֵאשִׁית", split: "בְּ | רֵא | שִׁית", note: "Initial shewa is always vocal.", ref: "Gen 1:1" },
       { word: "יִשְׂרָאֵל", split: "יִשְׂ | רָ | אֵל", note: "Shewa under שׂ follows short hireq, so it is silent.", ref: "Deut 6:4" },
       { word: "שְׁמוּאֵל", split: "שְׁ | מוּ | אֵל", note: "Word-initial shewa is vocal; then a closed holem slice; then אֵל.", ref: "1 Sam 3:10" },
@@ -129,7 +129,7 @@ export const SYLLABLE_UNITS: SyllableUnit[] = [
     quiz: [
       { q: "Shewa after a short vowel is…", choices: ["Silent — it closes the syllable", "Vocal — it opens the next syllable", "Always hateph"], answer: "Silent — it closes the syllable", why: "Short vowel + shewa = closed syllable, silent shewa." },
       { q: "A shewa at the beginning of a word is…", choices: ["Always vocal", "Always silent", "Forte"], answer: "Always vocal", why: "Nothing short stands before it, so it is vocal." },
-      { q: "In פַּרְעֹה, the shewa under ר is…", he: "פַּרְעֹה", ref: "Exod 5:1", choices: ["Silent", "Vocal", "Hateph pathach"], answer: "Silent", why: "It follows short pathach under פּ." },
+      { q: "In פַּרְעֹה, the shewa under ר is…", he: "פַּרְעֹה", ref: "Exod 5:1", choices: ["Silent", "Vocal", "Hateph pathach"], answer: "Silent", why: "Resh follows the shewa rules: short pathach before it, so the shewa is silent." },
       { q: "How does פַּרְעֹה split?", he: "פַּרְעֹה", ref: "Exod 5:1", choices: ["פַּרְ | עֹה", "פַּ | רְעֹה", "פַּרְעֹה (one)"], answer: "פַּרְ | עֹה", why: "Silent shewa closes the first slice." },
       { q: "In בְּרֵאשִׁית, the first shewa is…", he: "בְּרֵאשִׁית", ref: "Gen 1:1", choices: ["Vocal — it starts the word", "Silent — every shewa is silent", "Hateph"], answer: "Vocal — it starts the word", why: "Initial shewa is always vocal." },
       { q: "How does יִשְׂרָאֵל split?", he: "יִשְׂרָאֵל", ref: "Deut 6:4", choices: ["יִשְׂ | רָ | אֵל", "יִ | שְׂרָאֵל", "יִשְׂרָ | אֵל"], answer: "יִשְׂ | רָ | אֵל", why: "Silent shewa after hireq closes the first slice; then רָ; then אֵל." },
@@ -139,8 +139,9 @@ export const SYLLABLE_UNITS: SyllableUnit[] = [
       { q: "Shewa under a letter with dagesh forte is…", choices: ["Vocal", "Silent", "Not allowed"], answer: "Vocal", why: "The doubled letter begins a new syllable, so its shewa is vocal." },
       { q: "In שְׁמַע, the shewa under ש is…", he: "שְׁמַע", ref: "Deut 6:4", choices: ["Vocal — start of the word", "Silent — it follows nothing", "Forte"], answer: "Vocal — start of the word", why: "First letter of the word: vocal shewa." },
       { q: "A silent shewa does what to the syllable before it?", choices: ["Closes it", "Opens the next one only", "Deletes a vowel"], answer: "Closes it", why: "Silent shewa is the closing consonant of the previous slice." },
-      { q: "Gutturals take vocal shewa?", choices: ["No — א ה ח ע take a hateph; silent shewa is allowed", "Yes, always", "No — they cannot take any shewa"], answer: "No — א ה ח ע take a hateph; silent shewa is allowed", why: "Vocal shewa is replaced by a hateph. Silent shewa is fine (שָׁמַעְתָּ). Resh may take vocal shewa." },
+      { q: "Gutturals take vocal shewa?", choices: ["No — א ה ח ע take a hateph; silent shewa is allowed", "Yes, always", "No — they cannot take any shewa"], answer: "No — א ה ח ע take a hateph; silent shewa is allowed", why: "Vocal shewa is replaced by a hateph. Silent shewa is fine (שָׁמַעְתָּ). Resh is not under that hateph rule — its shewa is silent or vocal by the shewa tests." },
       { q: "May א ה ח ע take silent shewa?", he: "שָׁמַעְתָּ", ref: "Gen 3:17", choices: ["Yes", "No — only a hateph", "No — only vocal shewa"], answer: "Yes", why: "A guttural can take silent shewa, not vocal shewa. In שָׁמַעְתָּ ayin closes מַעְ." },
+      { q: "Shewa under ר is judged by…", he: "פַּרְעֹה", ref: "Exod 5:1", choices: ["The ordinary shewa rules", "The guttural hateph rule", "Always vocal"], answer: "The ordinary shewa rules", why: "Resh does not take a hateph. In פַּרְעֹה the shewa is silent because a short vowel stands before it." },
       { q: "Does a shewa (silent or vocal) mark a syllable boundary?", choices: ["Yes", "No — only vowels do", "Only vocal shewa"], answer: "Yes", why: "Both kinds of shewa sit at a cut." },
     ],
   },
@@ -299,7 +300,7 @@ export const SYLLABLE_UNITS: SyllableUnit[] = [
     title: "Gutturals and vowel seats",
     short: "Advanced",
     rule:
-      "Short vowels prefer a closed unaccented seat or an open accented seat. Long vowels prefer a closed accented seat or an open pretonic seat. Vocal shewa and hatephs prefer an open propretonic seat. All gutturals cannot take dagesh, including ר. Gutturals excluding ר cannot take vocal shewa — they take a hateph (reduced vowel) instead — but they can take silent shewa. ר may take vocal shewa.",
+      "Short vowels prefer a closed unaccented seat or an open accented seat. Long vowels prefer a closed accented seat or an open pretonic seat. Vocal shewa and hatephs prefer an open propretonic seat. All gutturals cannot take dagesh, including ר. Gutturals excluding ר cannot take vocal shewa — they take a hateph instead — but they can take silent shewa. Shewa on ר follows the shewa rules, not the guttural hateph rule.",
     samples: [
       { word: "עֶבֶד", split: "עֶ | בֶד", note: "Short e in an open first slice, and short e in a closed second.", ref: "Josh 1:1" },
       { word: "אֱלֹהִים", split: "אֱ | לֹ | הִים", note: "Hateph under guttural א in an open propretonic syllable.", ref: "Gen 1:1" },
@@ -318,7 +319,7 @@ export const SYLLABLE_UNITS: SyllableUnit[] = [
       { q: "Vocal shewa and hatephs prefer…", choices: ["Open, propretonic syllables", "Closed, accented syllables", "The end of the word"], answer: "Open, propretonic syllables", why: "Two seats back from the accent, and open." },
       { q: "Gutturals cannot take dagesh. Does that include ר?", choices: ["Yes — all gutturals, including resh", "No — resh may take dagesh", "Only forte, not lene"], answer: "Yes — all gutturals, including resh", why: "א ה ח ע and ר refuse both lene and forte." },
       { q: "Instead of vocal shewa, א ה ח ע take…", choices: ["A hateph (reduced) vowel", "Nothing — they stay vowelless", "Dagesh forte"], answer: "A hateph (reduced) vowel", why: "Gutturals excluding resh cannot take vocal shewa. Silent shewa is still allowed." },
-      { q: "ר is unlike א ה ח ע in that it…", choices: ["May take vocal shewa", "Takes dagesh forte freely", "Never appears with a-class vowels"], answer: "May take vocal shewa", why: "Resh refuses dagesh, like the other gutturals, but vocal shewa is allowed." },
+      { q: "ר is unlike א ה ח ע in that shewa on resh…", choices: ["Follows the shewa rules, not hateph", "Takes dagesh forte freely", "Is always a hateph"], answer: "Follows the shewa rules, not hateph", why: "No dagesh on resh. Silent or vocal is the ordinary shewa test (פַּרְעֹה silent; רְאוּבֵן vocal)." },
       { q: "How does אֱלֹהִים split?", he: "אֱלֹהִים", ref: "Gen 1:1", choices: ["אֱ | לֹ | הִים", "אֱלֹ | הִים", "אֱלֹהִים (one)"], answer: "אֱ | לֹ | הִים", why: "Hateph opens; holem; then hiriq-yod." },
       { q: "How does עֶבֶד split?", he: "עֶבֶד", ref: "Josh 1:1", choices: ["עֶ | בֶד", "עֶב | ֶד", "עֶבֶד (one)"], answer: "עֶ | בֶד", why: "Two short e vowels: open, then closed." },
       { q: "How does יַעֲקֹב split?", he: "יַעֲקֹב", ref: "Gen 32:29", choices: ["יַ | עֲ | קֹב", "יַעֲ | קֹב", "יַ | עֲקֹב"], answer: "יַ | עֲ | קֹב", why: "Hateph under ע is its own open slice. Do not treat it as silent shewa." },
