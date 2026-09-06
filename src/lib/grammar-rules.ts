@@ -77,7 +77,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "Dagesh forte doubles the consonant and is divided",
     statement:
-      "A dagesh forte doubles the consonant in which it occurs and must be divided in syllabification: the first of the pair closes the previous syllable; the second opens the next.",
+      "A dagesh forte doubles the consonant and must be divided: the first of the pair takes shewa and closes the previous syllable; the second takes the vowel and opens the next. So הַשָּׁמַיִם is הַשּׁ | שָׁ | מַ | יִם — not a single shin.",
     aliases: [
       "dagesh forte doubles",
       "forte doubles",
