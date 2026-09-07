@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu groups BBH vocabulary, Aleph-bet mastery, Syllables, Nouns, Article & vav, and Ultimate Challenge.
+            class book. The Game menu groups BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, and Ultimate Challenge.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -65,6 +65,15 @@ function GuidePage() {
             body="Same typing, but the verse is hidden and there is no live grade. Check first — the word appears after you submit."
           />
         </ol>
+      </Panel>
+
+      <Panel className="mb-3">
+        <h2 className="font-display text-2xl font-bold text-ink">Custom mix</h2>
+        <p className="mt-2 text-sm text-muted">
+          After you clear a chapter at 90%, it is available under Game → Custom mix. Tick any of those finished levels,
+          pick Recognize, Gloss, or Spell, and play the combined list in one sitting. Review only — it does not change
+          the chapter path.
+        </p>
       </Panel>
 
       <Panel className="mb-3">

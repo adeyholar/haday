@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
+- **Custom mix.** Under Game: pick chapters you have already cleared and play that combined list in one sitting (Recognize, Gloss, or Spell). Does not unlock or lock the path.
+
 - **Old Vercel address closed.** [haday.vercel.app](https://haday.vercel.app) now only points classmates to the class site: [hadayhebbraimentor.jcdisn.com](https://hadayhebbraimentor.jcdisn.com). The app itself also refuses to run on `*.vercel.app`.
 
 - **Don’t know on every quiz.** Recognize, Gloss, Spell, Aleph-bet, Syllables, Nouns, Article, Study quiz, Write, Match, Drill, Rules, Classify, closed-book exam, and Ultimate Challenge. The word is shown (except Ultimate, which stays closed-book) and returns later in the round.

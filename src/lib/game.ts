@@ -626,6 +626,43 @@ export function chapterPlayPool(chapter: number, _stage?: GameStageId): VocabIte
   return chapterPool(chapter);
 }
 
+/** BBH chapters whose four stages are all cleared at 90%. */
+export function clearedChapters(game: GameSnapshot): number[] {
+  const out: number[] = [];
+  for (let n = 1; n <= GAME_CHAPTER_MAX; n++) {
+    if (chapterRecord(game, n).cleared) out.push(n);
+  }
+  return out;
+}
+
+export function parseChapterList(raw: string | undefined | null): number[] {
+  if (!raw) return [];
+  const seen = new Set<number>();
+  const out: number[] = [];
+  for (const part of raw.split(/[,+\s]+/)) {
+    const n = Number(part);
+    if (!Number.isFinite(n)) continue;
+    const c = clampChapter(n);
+    if (seen.has(c)) continue;
+    seen.add(c);
+    out.push(c);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+export function mixPlayPool(chapters: number[]): VocabItem[] {
+  const seen = new Set<string>();
+  const items: VocabItem[] = [];
+  for (const c of chapters) {
+    for (const v of chapterPlayPool(c)) {
+      if (seen.has(v.id)) continue;
+      seen.add(v.id);
+      items.push(v);
+    }
+  }
+  return items;
+}
+
 export function runOrdinal(n: number): string {
   const words = [
     "",

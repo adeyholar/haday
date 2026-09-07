@@ -16,6 +16,7 @@ import {
   chapterPlayPool,
   chapterRecord,
   continueTarget,
+  mixPlayPool,
   runOrdinal,
   starsForRate,
   stageMeta,
@@ -48,18 +49,25 @@ function shuffleCopy(items: VocabItem[]) {
 type Props = {
   chapter: number;
   stage: GameStageId;
+  /** Combined review of already-cleared chapters. Does not change the path. */
+  mixChapters?: number[];
 };
 
 type Phase = "play" | "done";
 
-export function GameStagePlay({ chapter, stage }: Props) {
+export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const navigate = useNavigate();
   const completeGameStage = useStudy((s) => s.completeGameStage);
   const rate = useStudy((s) => s.rate);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const [deal, setDeal] = useState(0);
-  const pool = useMemo(() => chapterPlayPool(chapter, stage), [chapter, stage, deal]);
+  const mixKey = mixChapters?.join(",") ?? "";
+  const isMix = Boolean(mixChapters?.length);
+  const pool = useMemo(
+    () => (mixChapters?.length ? mixPlayPool(mixChapters) : chapterPlayPool(chapter, stage)),
+    [chapter, stage, deal, mixChapters, mixKey],
+  );
   const [queue, setQueue] = useState<VocabItem[]>(() => shuffleCopy(pool));
   const [total, setTotal] = useState(pool.length);
   const [picked, setPicked] = useState<string | null>(null);
@@ -84,7 +92,7 @@ export function GameStagePlay({ chapter, stage }: Props) {
     setFirstSeen(0);
     setPhase("play");
     setStars(1);
-  }, [chapter, stage, pool]);
+  }, [chapter, stage, pool, mixKey]);
 
   const item = queue[0];
   const spell = item ? spellTargets(item, stage) : { target: "", alts: [] as string[] };
@@ -107,7 +115,7 @@ export function GameStagePlay({ chapter, stage }: Props) {
     const score = Math.round(rateValue * 100);
     setStars(earned);
     setPhase("done");
-    completeGameStage(chapter, stage, { stars: earned, score, firstTryRate: rateValue });
+    if (!isMix) completeGameStage(chapter, stage, { stars: earned, score, firstTryRate: rateValue });
   }
 
   function succeed(firstTry: boolean) {
@@ -208,16 +216,21 @@ export function GameStagePlay({ chapter, stage }: Props) {
     const chapterCleared = Boolean(game.chapters[String(chapter)]?.cleared);
     const board = scoreboard(game, streak);
     const rec = chapterRecord(game, chapter).stages[stage];
-    const run = rec.attempts || 1;
+    const run = isMix ? 1 : rec.attempts || 1;
     const pct = Math.round((firstSeen ? firstHits / firstSeen : 1) * 100);
     const passed = pct >= GAME_STAGE_PASS;
+    const mixLabel = mixChapters?.length
+      ? mixChapters.length === 1
+        ? `Ch. ${mixChapters[0]}`
+        : `Ch. ${mixChapters[0]}–${mixChapters[mixChapters.length - 1]} · ${mixChapters.length} levels`
+      : "";
     return (
       <Panel className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Chapter {chapter} · {meta.name}
+          {isMix ? `Custom mix · ${mixLabel}` : `Chapter ${chapter}`} · {meta.name}
         </p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">
-          {passed ? "Stage cleared" : `Need ${GAME_STAGE_PASS}% to clear`}
+          {isMix ? "Mix complete" : passed ? "Stage cleared" : `Need ${GAME_STAGE_PASS}% to clear`}
         </h1>
         <p className="mt-3 text-3xl tracking-widest text-primary" aria-label={`${stars} stars`}>
           {"★".repeat(stars)}
@@ -226,25 +239,39 @@ export function GameStagePlay({ chapter, stage }: Props) {
         <p className="mt-3 font-display text-2xl font-bold capitalize text-ink">{runOrdinal(run)} run</p>
         <p className="mt-2 text-sm text-muted">
           {pct}% this round · {firstHits}/{firstSeen} clean on first answer
-          {rec.best ? ` · best ${rec.best}%` : ""}
+          {!isMix && rec.best ? ` · best ${rec.best}%` : ""}
         </p>
         <p className="mt-1 text-sm text-muted">
           Level {board.level} · {board.points.toLocaleString()} pts
         </p>
-        {chapterCleared && (
+        {isMix && (
+          <p className="mt-3 text-sm text-muted">Review only — this mix does not unlock or lock the chapter path.</p>
+        )}
+        {!isMix && chapterCleared && (
           <p className="mt-3 text-sm font-medium text-good">
             Chapter {chapter} cleared
             {chapter < 19 ? ` · Chapter ${chapter + 1} unlocked` : " · path complete"}
           </p>
         )}
-        {!passed && (
+        {!isMix && !passed && (
           <p className="mt-3 text-sm text-muted">
             First-answer score must be {GAME_STAGE_PASS}% or better to open the next stage.
           </p>
         )}
         <NewBadges ids={game.justEarned ?? []} />
         <div className="mt-6 flex flex-col gap-2">
-          {passed && nextStage && !chapterCleared ? (
+          {isMix ? (
+            <>
+              <Button className="w-full" size="lg" onClick={replayStage}>
+                Mix again
+              </Button>
+              <Link to="/game/custom">
+                <Button className="w-full" variant="outline">
+                  Change levels
+                </Button>
+              </Link>
+            </>
+          ) : passed && nextStage && !chapterCleared ? (
             <Link to="/game/$chapter/$stage" params={{ chapter: String(chapter), stage: nextStage.id }}>
               <Button className="w-full" size="lg">
                 Continue · {nextStage.name}
@@ -264,12 +291,12 @@ export function GameStagePlay({ chapter, stage }: Props) {
               Try again
             </Button>
           )}
-          <Link to="/game">
+          <Link to={isMix ? "/game/custom" : "/game"}>
             <Button className="w-full" variant="outline">
-              Chapter map
+              {isMix ? "Custom mix" : "Chapter map"}
             </Button>
           </Link>
-          {passed && (
+          {passed && !isMix && (
             <Button className="w-full" variant="outline" onClick={replayStage}>
               New round
             </Button>
@@ -291,8 +318,9 @@ export function GameStagePlay({ chapter, stage }: Props) {
     <>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Chapter {chapter}
-          {chapterMeta ? ` · ${chapterMeta.title}` : ""}
+          {isMix
+            ? `Custom mix · ${mixChapters!.length} level${mixChapters!.length === 1 ? "" : "s"}`
+            : `Chapter ${chapter}${chapterMeta ? ` · ${chapterMeta.title}` : ""}`}
         </p>
         <div className="mt-1 flex items-baseline justify-between gap-3">
           <h1 className="font-display text-2xl font-bold text-ink">{meta.name}</h1>
@@ -509,9 +537,13 @@ export function GameStagePlay({ chapter, stage }: Props) {
         <button
           type="button"
           className="min-h-11 text-sm font-medium text-muted"
-          onClick={() => navigate({ to: "/game/$chapter", params: { chapter: String(chapter) } })}
+          onClick={() =>
+            isMix
+              ? navigate({ to: "/game/custom" })
+              : navigate({ to: "/game/$chapter", params: { chapter: String(chapter) } })
+          }
         >
-          Back to chapter
+          {isMix ? "Change levels" : "Back to chapter"}
         </button>
       </p>
     </>

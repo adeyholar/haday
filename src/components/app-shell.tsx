@@ -52,6 +52,7 @@ const STUDY: NavItem[] = [
 
 const GAME: NavItem[] = [
   { to: "/game", label: "BBH vocabulary", hint: "Chapter path", icon: Compass },
+  { to: "/game/custom", label: "Custom mix", hint: "Cleared levels, one sitting", icon: Repeat },
   { to: "/game/alefbet", label: "Aleph-bet mastery", hint: "Letter games", icon: Languages },
   { to: "/game/syllables", label: "Syllables", hint: "Open, closed, shewa", icon: Layers },
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },

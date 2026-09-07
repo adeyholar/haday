@@ -39,6 +39,8 @@ import { Route as GameAlefbetIndexRouteImport } from './routes/game/alefbet/inde
 import { Route as GameAlefbetLevelRouteImport } from './routes/game/alefbet/$level'
 import { Route as GameArticleIndexRouteImport } from './routes/game/article/index'
 import { Route as GameArticleUnitRouteImport } from './routes/game/article/$unit'
+import { Route as GameCustomIndexRouteImport } from './routes/game/custom/index'
+import { Route as GameCustomPlayRouteImport } from './routes/game/custom/play'
 import { Route as GameNounsIndexRouteImport } from './routes/game/nouns/index'
 import { Route as GameNounsUnitRouteImport } from './routes/game/nouns/$unit'
 import { Route as GameSyllablesIndexRouteImport } from './routes/game/syllables/index'
@@ -197,6 +199,16 @@ const GameArticleUnitRoute = GameArticleUnitRouteImport.update({
   path: '/game/article/$unit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameCustomIndexRoute = GameCustomIndexRouteImport.update({
+  id: '/game/custom/',
+  path: '/game/custom/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameCustomPlayRoute = GameCustomPlayRouteImport.update({
+  id: '/game/custom/play',
+  path: '/game/custom/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameNounsIndexRoute = GameNounsIndexRouteImport.update({
   id: '/game/nouns/',
   path: '/game/nouns/',
@@ -261,11 +273,13 @@ export interface FileRoutesByFullPath {
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
   '/game/article/$unit': typeof GameArticleUnitRoute
+  '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
+  '/game/custom/': typeof GameCustomIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
@@ -299,11 +313,13 @@ export interface FileRoutesByTo {
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
   '/game/article/$unit': typeof GameArticleUnitRoute
+  '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
   '/game/article': typeof GameArticleIndexRoute
+  '/game/custom': typeof GameCustomIndexRoute
   '/game/nouns': typeof GameNounsIndexRoute
   '/game/syllables': typeof GameSyllablesIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
@@ -339,11 +355,13 @@ export interface FileRoutesById {
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
   '/game/article/$unit': typeof GameArticleUnitRoute
+  '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
+  '/game/custom/': typeof GameCustomIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
@@ -380,11 +398,13 @@ export interface FileRouteTypes {
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
     | '/game/article/$unit'
+    | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
+    | '/game/custom/'
     | '/game/nouns/'
     | '/game/syllables/'
     | '/listen/read/'
@@ -418,11 +438,13 @@ export interface FileRouteTypes {
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
     | '/game/article/$unit'
+    | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter'
     | '/game/alefbet'
     | '/game/article'
+    | '/game/custom'
     | '/game/nouns'
     | '/game/syllables'
     | '/listen/read'
@@ -457,11 +479,13 @@ export interface FileRouteTypes {
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
     | '/game/article/$unit'
+    | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
+    | '/game/custom/'
     | '/game/nouns/'
     | '/game/syllables/'
     | '/listen/read/'
@@ -496,11 +520,13 @@ export interface RootRouteChildren {
   GameChapterStageRoute: typeof GameChapterStageRoute
   GameAlefbetLevelRoute: typeof GameAlefbetLevelRoute
   GameArticleUnitRoute: typeof GameArticleUnitRoute
+  GameCustomPlayRoute: typeof GameCustomPlayRoute
   GameNounsUnitRoute: typeof GameNounsUnitRoute
   GameSyllablesUnitRoute: typeof GameSyllablesUnitRoute
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
   GameArticleIndexRoute: typeof GameArticleIndexRoute
+  GameCustomIndexRoute: typeof GameCustomIndexRoute
   GameNounsIndexRoute: typeof GameNounsIndexRoute
   GameSyllablesIndexRoute: typeof GameSyllablesIndexRoute
 }
@@ -717,6 +743,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameArticleUnitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/custom/': {
+      id: '/game/custom/'
+      path: '/game/custom'
+      fullPath: '/game/custom/'
+      preLoaderRoute: typeof GameCustomIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/custom/play': {
+      id: '/game/custom/play'
+      path: '/game/custom/play'
+      fullPath: '/game/custom/play'
+      preLoaderRoute: typeof GameCustomPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/nouns/': {
       id: '/game/nouns/'
       path: '/game/nouns'
@@ -813,11 +853,13 @@ const rootRouteChildren: RootRouteChildren = {
   GameChapterStageRoute: GameChapterStageRoute,
   GameAlefbetLevelRoute: GameAlefbetLevelRoute,
   GameArticleUnitRoute: GameArticleUnitRoute,
+  GameCustomPlayRoute: GameCustomPlayRoute,
   GameNounsUnitRoute: GameNounsUnitRoute,
   GameSyllablesUnitRoute: GameSyllablesUnitRoute,
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
   GameArticleIndexRoute: GameArticleIndexRoute,
+  GameCustomIndexRoute: GameCustomIndexRoute,
   GameNounsIndexRoute: GameNounsIndexRoute,
   GameSyllablesIndexRoute: GameSyllablesIndexRoute,
 }
