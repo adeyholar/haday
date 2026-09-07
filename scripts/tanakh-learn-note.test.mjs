@@ -56,13 +56,14 @@ test("bare noun stays the citation lemma", () => {
   assert.match(e.note, /king of glory|bare noun|no article/i);
 });
 
-test("nugget cites Gesenius on the ordinary article", () => {
+test("nugget states the ordinary article without a source tag", () => {
   const n = learnNugget("article", {
     ref: "Exod 14:21",
     he: "עַל הַיָּם",
     en: "over the sea",
     hit: "הַיָּם",
   });
-  assert.match(n, /Gesenius §35a/);
-  assert.match(n, /Davidson §11/);
+  assert.match(n, /הַ/);
+  assert.match(n, /dagesh/i);
+  assert.doesNotMatch(n, /Gesenius|Davidson|§/);
 });

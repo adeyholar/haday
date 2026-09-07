@@ -59,10 +59,6 @@ export function TanakhLearnVerse({
       </p>
       <p className="mt-1 text-sm text-muted">{explained.note}</p>
       <p className="mt-3 border-s-2 border-primary ps-3 text-sm text-ink">{nugget}</p>
-      <p className="mt-2 text-xs text-muted">
-        Grammar nugget from Gesenius–Kautzsch–Cowley and A. B. Davidson, Introductory Hebrew Grammar — both public
-        domain. Summarized, not a page reprint.
-      </p>
     </li>
   );
 }
