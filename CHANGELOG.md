@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
-- **Learn · In the Tanakh.** Each verse now explains what the passage is doing and how the marked word is the rule at work there — not only a quote plus a lemma.
+- **Learn · In the Tanakh.** Passage note plus a short Gesenius / Davidson nugget (public domain), so the rule is seen doing work in that verse.
 
 - **Don’t know on Game.** Same full-width button as Rules, under the answers — not buried under the verse.
 

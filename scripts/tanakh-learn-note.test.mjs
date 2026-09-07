@@ -4,6 +4,7 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { learnVerseExplain } = await jiti.import("/workspace/src/lib/tanakh-learn-note.ts");
+const { learnNugget } = await jiti.import("/workspace/src/lib/tanakh-learn-nugget.ts");
 
 test("article verse names citation lemma יָם not הַיָּם", () => {
   const e = learnVerseExplain(
@@ -53,4 +54,15 @@ test("bare noun stays the citation lemma", () => {
   assert.match(e.lemmaHe, /מֶ.?לֶךְ/);
   assert.match(e.lemmaGloss.toLowerCase(), /king/);
   assert.match(e.note, /king of glory|bare noun|no article/i);
+});
+
+test("nugget cites Gesenius on the ordinary article", () => {
+  const n = learnNugget("article", {
+    ref: "Exod 14:21",
+    he: "עַל הַיָּם",
+    en: "over the sea",
+    hit: "הַיָּם",
+  });
+  assert.match(n, /Gesenius §35a/);
+  assert.match(n, /Davidson §11/);
 });

@@ -1,4 +1,5 @@
 import { findEnglishHitRange, findHitRange } from "@/lib/hebrew";
+import { learnNugget } from "@/lib/tanakh-learn-nugget";
 import {
   learnVerseExplain,
   type LearnKind,
@@ -17,6 +18,7 @@ export function TanakhLearnVerse({
 }) {
   const heRange = findHitRange(verse.he, verse.hit);
   const explained = learnVerseExplain(verse, kind, samples);
+  const nugget = learnNugget(kind, verse);
   const enRange = findEnglishHitRange(verse.en, {
     hitEn: verse.hitEn,
     gloss: explained.lemmaGloss,
@@ -56,7 +58,11 @@ export function TanakhLearnVerse({
         {explained.lemmaTranslit ? <span className="text-muted"> · {explained.lemmaTranslit}</span> : null}
       </p>
       <p className="mt-1 text-sm text-muted">{explained.note}</p>
-      <p className="mt-1 text-xs text-muted">The marked word is the rule at work in this verse.</p>
+      <p className="mt-3 border-s-2 border-primary ps-3 text-sm text-ink">{nugget}</p>
+      <p className="mt-2 text-xs text-muted">
+        Grammar nugget from Gesenius–Kautzsch–Cowley and A. B. Davidson, Introductory Hebrew Grammar — both public
+        domain. Summarized, not a page reprint.
+      </p>
     </li>
   );
 }
