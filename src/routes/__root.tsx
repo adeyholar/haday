@@ -1,13 +1,27 @@
+import { useEffect, useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppShell } from "@/components/app-shell";
 import { ScrollBackdrop } from "@/components/scroll-backdrop";
+import { MovedSignpost } from "@/components/moved-signpost";
 import { AppErrorComponent } from "@/lib/error-component";
+import { isRetiredVercelHost } from "@/lib/class-site";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "HaDay";
+
+const fetchRetiredHost = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const request = getRequest();
+    const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+    return isRetiredVercelHost(host);
+  } catch {
+    return false;
+  }
+});
 
 const fetchSessionUser = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -23,10 +37,12 @@ const fetchSessionUser = createServerFn({ method: "GET" }).handler(async () => {
 export const Route = createRootRoute({
   beforeLoad: async () => {
     try {
-      return { sessionUser: await fetchSessionUser() };
+      const retiredHost = await fetchRetiredHost();
+      if (retiredHost) return { sessionUser: null, retiredHost: true };
+      return { sessionUser: await fetchSessionUser(), retiredHost: false };
     } catch (err) {
       console.error("[root beforeLoad]", err);
-      return { sessionUser: null };
+      return { sessionUser: null, retiredHost: false };
     }
   },
   errorComponent: AppErrorComponent,
@@ -45,7 +61,34 @@ export const Route = createRootRoute({
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
     ],
   }),
-  component: () => (
+  component: RootDocument,
+});
+
+function RootDocument() {
+  const { retiredHost } = Route.useRouteContext();
+  const [retired, setRetired] = useState(retiredHost);
+  useEffect(() => {
+    if (typeof window !== "undefined" && isRetiredVercelHost(window.location.host)) {
+      setRetired(true);
+    }
+  }, []);
+
+  if (retired) {
+    return (
+      <html lang="en" className="antialiased" suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          <ScrollBackdrop />
+          <MovedSignpost />
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+
+  return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
@@ -61,5 +104,5 @@ export const Route = createRootRoute({
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}
