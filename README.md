@@ -8,6 +8,8 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 **Class site:** [https://hadayhebbraimentor.jcdisn.com](https://hadayhebbraimentor.jcdisn.com)
 
+The old Vercel URL ([https://haday.vercel.app](https://haday.vercel.app)) is shut down. It only shows a signpost page that links to the class site.
+
 Azure fallback: [https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net](https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net)
 
 **As-built (what runs today):** [docs/ASBUILT.md](docs/ASBUILT.md)  

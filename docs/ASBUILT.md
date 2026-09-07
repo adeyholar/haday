@@ -5,6 +5,7 @@ Living picture of **what the class site is today**. Not a wish list.
 | | |
 |---|---|
 | **Class site** | https://hadayhebbraimentor.jcdisn.com |
+| **Old Vercel URL** | https://haday.vercel.app — signpost only; not the app |
 | **Repo** | https://github.com/adeyholar/haday (`main`) |
 | **Host** | Azure Web App `haday` (Linux container) + Azure Postgres `haday-pg` |
 | **Course** | BIBL 630 · *Basics of Biblical Hebrew*, 3rd ed. |
