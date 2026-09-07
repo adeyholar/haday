@@ -21,7 +21,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 |---|---|---|
 | **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. |
 | **Game** | BBH path Ch. 1–19, Custom mix of open chapters (every student), Aleph-bet, Syllables, Nouns, Article & vav, Ultimate Challenge | Stages and grammar units unlock in order. **90%** to clear and open the next. Custom mix reviews open levels in one sitting. Citation form only (יָם, not בַּיָּם). |
-| **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter or the whole list. |
+| **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
