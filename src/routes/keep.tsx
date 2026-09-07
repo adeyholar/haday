@@ -87,9 +87,9 @@ function KeepPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">זָכוֹר · Zakhor</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Daily keep</h1>
         <p className="mt-3 text-muted">
-          This round only uses lemmas you have already recalled correctly — from Game chapters you have opened, not new vocabulary.
+          This round uses lemmas you have already met — a hit, a miss, or a Tell me — from Game chapters you have opened.
         </p>
-        <p className="mt-3 text-sm text-muted">Play a Game stage or Drill first. Then Keep has a storehouse to draw from.</p>
+        <p className="mt-3 text-sm text-muted">Play a Game stage or Drill first. High weak (told) come first in the mix.</p>
         <Link to="/game" className="mt-4 inline-block">
           <Button>Open Game</Button>
         </Link>
@@ -124,7 +124,8 @@ function KeepPage() {
   const why = ui.why[current.id];
   const total = ui.round.items.length;
   const cleared = ui.round.done.length;
-  const whyLabel = why === "cool" ? "Cooling — old lemma" : why === "weak" ? "Needs work" : "Due today";
+  const whyLabel =
+    why === "high" ? "High weak — I had to be told" : why === "cool" ? "Cooling — old lemma" : why === "weak" ? "Weak — missed" : "Due today";
 
   return (
     <>

@@ -1,18 +1,18 @@
-import { isMastered, isWeak, startOfDay, type CardState } from "@/lib/srs";
+import { isHighWeak, isMastered, isWeak, startOfDay, weaknessScore, type CardState } from "@/lib/srs";
 import { shuffle, bbhVocab, type VocabItem } from "@/lib/vocab";
 import { type GameSnapshot } from "@/lib/game";
 
 export type KeepFace = "he-en" | "en-he";
-export type KeepWhy = "due" | "weak" | "cool";
+export type KeepWhy = "due" | "weak" | "high" | "cool";
 
 export type KeepCard = VocabItem & { face: KeepFace; why: KeepWhy };
 
 const DAY = 86_400_000;
 
-/** Right at least once — a miss on a brand-new card does not count as met. */
+/** Met the word: a hit, a miss, or a Tell-me reveal all count. */
 export function hasMet(card: CardState | undefined): boolean {
   if (!card) return false;
-  return card.hits >= 1 && card.last > 0;
+  return card.hits >= 1 || card.misses >= 1 || card.reveals >= 1 || card.last > 0;
 }
 
 /** If they play Game, stay inside unlocked chapters. Study-only: any hit word. */
@@ -43,19 +43,21 @@ export function keepStats(cards: Record<string, CardState>, game?: GameSnapshot,
   const pool = keepPool(cards, game);
   let due = 0;
   let weak = 0;
+  let high = 0;
   let mastered = 0;
   let cooling = 0;
   for (const item of pool) {
     const c = cards[item.id];
     if (!c) continue;
     if (c.due <= now) due += 1;
-    if (isWeak(c)) weak += 1;
+    if (isHighWeak(c)) high += 1;
+    else if (isWeak(c)) weak += 1;
     if (isMastered(c)) {
       mastered += 1;
       if (c.last > 0 && now - c.last >= 3 * DAY) cooling += 1;
     }
   }
-  return { seen: pool.length, due, weak, mastered, cooling, waiting: due + cooling + weak };
+  return { seen: pool.length, due, weak, high, mastered, cooling, waiting: due + cooling + weak + high };
 }
 
 export function pickKeepRound(
@@ -67,6 +69,7 @@ export function pickKeepRound(
   const seen = keepPool(cards, game);
   if (!seen.length) return [];
 
+  const high: VocabItem[] = [];
   const weak: VocabItem[] = [];
   const due: VocabItem[] = [];
   const cool: VocabItem[] = [];
@@ -75,20 +78,23 @@ export function pickKeepRound(
   for (const item of seen) {
     const c = cards[item.id];
     if (!c) continue;
-    if (isWeak(c)) weak.push(item);
+    if (isHighWeak(c)) high.push(item);
+    else if (isWeak(c)) weak.push(item);
     else if (c.due <= now) due.push(item);
     else if (isMastered(c)) cool.push(item);
     else rest.push(item);
   }
 
-  weak.sort((a, b) => (cards[b.id]?.misses ?? 0) - (cards[a.id]?.misses ?? 0));
+  high.sort((a, b) => weaknessScore(cards[b.id]) - weaknessScore(cards[a.id]));
+  weak.sort((a, b) => weaknessScore(cards[b.id]) - weaknessScore(cards[a.id]));
   due.sort((a, b) => (cards[a.id]?.due ?? 0) - (cards[b.id]?.due ?? 0));
   cool.sort((a, b) => (cards[a.id]?.last ?? 0) - (cards[b.id]?.last ?? 0));
 
   const n = Math.min(limit, seen.length);
-  const takeWeak = Math.min(weak.length, Math.ceil(n * 0.35));
-  const takeDue = Math.min(due.length, Math.ceil(n * 0.25));
-  const takeCool = Math.min(cool.length, n - takeWeak - takeDue);
+  const takeHigh = Math.min(high.length, Math.ceil(n * 0.4));
+  const takeWeak = Math.min(weak.length, Math.ceil(n * 0.25));
+  const takeDue = Math.min(due.length, Math.ceil(n * 0.2));
+  const takeCool = Math.min(cool.length, n - takeHigh - takeWeak - takeDue);
 
   const picked: Array<{ item: VocabItem; why: KeepWhy }> = [];
   const used = new Set<string>();
@@ -102,11 +108,12 @@ export function pickKeepRound(
       count -= 1;
     }
   }
+  add(high, "high", takeHigh);
   add(weak, "weak", takeWeak);
   add(due, "due", takeDue);
   add(cool, "cool", takeCool);
   add(shuffle(rest), "due", n - picked.length);
-  add(shuffle([...due, ...weak, ...cool]), "cool", n - picked.length);
+  add(shuffle([...high, ...weak, ...due, ...cool]), "cool", n - picked.length);
 
   return shuffle(picked).map(({ item, why }, i) => ({
     ...item,

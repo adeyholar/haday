@@ -7,11 +7,12 @@ export function FocusToggle() {
   const cards = useStudy((s) => s.cards);
   const focus = useStudy((s) => s.focus);
   const setFocus = useStudy((s) => s.setFocus);
-  const weak = statsFor(itemsForWeek(week), cards).weak;
+  const st = statsFor(itemsForWeek(week), cards);
+  const weak = (st.weak ?? 0) + (st.high ?? 0);
 
   const options: Array<{ id: FocusMode; label: string; hint: string }> = [
     { id: "due", label: "Due + weak first", hint: "Spaced review, misses on top" },
-    { id: "weak", label: `Weak only${weak ? ` · ${weak}` : ""}`, hint: "Repeat what you miss" },
+    { id: "weak", label: `Weak book${weak ? ` · ${weak}` : ""}`, hint: "Told first, then misses" },
   ];
 
   return (

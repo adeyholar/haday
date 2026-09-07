@@ -100,7 +100,7 @@ function QuizPage() {
   function admitNoIdea() {
     if (!item || picked || revealed) return;
     playGrade(false);
-    rate(item.id, "again");
+    rate(item.id, "reveal");
     setGaveUp(true);
     if (mode === "choice") {
       setPicked("__noidea__");

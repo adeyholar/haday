@@ -4,6 +4,7 @@ import { ALL_GAME_WEEK, shuffle, type VocabItem } from "./vocab";
 import {
   applyRating,
   hydrateCard,
+  isHighWeak,
   isMastered,
   isWeak,
   nudgeDue,
@@ -117,18 +118,18 @@ export const useStudy = create<StudyState>()(
         const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
         const game = stampRewards(get().game, streakInfo.streak, get().keepStreak);
         const cards = { ...get().cards, [id]: next };
-        if (rating === "again") {
+        if (rating === "again" || rating === "reveal") {
           for (const twin of twinsOf(id)) {
             if (twin === id) continue;
             cards[twin] = nudgeDue(cards[twin], now);
           }
         }
         if (id.startsWith("alef:") || id.startsWith("ch1-")) {
-          observeBkt(id, rating !== "again");
+          observeBkt(id, rating !== "again" && rating !== "reveal");
         }
         const item = findStudyItem(id);
         if (item && item.chapter >= 2) {
-          updateElo(item, rating !== "again");
+          updateElo(item, rating !== "again" && rating !== "reveal");
         }
         set({
           cards,
@@ -297,6 +298,7 @@ export function statsFor(items: VocabItem[], cards: ProgressMap, now = Date.now(
   let mastered = 0;
   let seen = 0;
   let weak = 0;
+  let high = 0;
   for (const item of items) {
     const c = cards[item.id];
     if (!c) {
@@ -306,9 +308,10 @@ export function statsFor(items: VocabItem[], cards: ProgressMap, now = Date.now(
     seen += 1;
     if (c.due <= now) due += 1;
     if (isMastered(c)) mastered += 1;
-    if (isWeak(c)) weak += 1;
+    if (isHighWeak(c)) high += 1;
+    else if (isWeak(c)) weak += 1;
   }
-  return { due, mastered, seen, weak, total: items.length };
+  return { due, mastered, seen, weak, high, total: items.length };
 }
 
 function byWeakness(cards: ProgressMap) {
@@ -349,11 +352,11 @@ export function pickStudyRound(
 ): VocabItem[] {
   if (!pool.length) return [];
   const n = Math.min(limit, pool.length);
-  const weak = shuffle(pool.filter((item) => isWeak(cards[item.id])));
+  const weak = pool.filter((item) => isWeak(cards[item.id])).sort(byWeakness(cards));
   if (focus === "weak" && weak.length) {
     if (weak.length >= n) return weak.slice(0, n);
     const rest = shuffle(pool.filter((item) => !weak.some((w) => w.id === item.id)));
-    return shuffle([...weak, ...rest].slice(0, n));
+    return [...weak, ...rest].slice(0, n);
   }
   const weakIds = new Set(weak.map((item) => item.id));
   const due = shuffle(
@@ -365,7 +368,7 @@ export function pickStudyRound(
   );
   const dueIds = new Set(due.map((item) => item.id));
   const rest = shuffle(pool.filter((item) => !weakIds.has(item.id) && !dueIds.has(item.id)));
-  return shuffle([...weak, ...due, ...rest].slice(0, n));
+  return [...weak, ...due, ...rest].slice(0, n);
 }
 
 /** Adaptive: weak cards float to the front of whatever is due. */

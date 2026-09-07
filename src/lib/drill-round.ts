@@ -40,7 +40,7 @@ export function applyDrillGrade(round: DrillRound, rating: Rating): DrillRound {
     cur = round.items[pos];
   }
   if (!cur) return { ...round, pos: -1 };
-  if (rating === "again") {
+  if (rating === "again" || rating === "reveal") {
     const open: number[] = [];
     for (let j = 0; j < round.items.length; j++) {
       const item = round.items[j];

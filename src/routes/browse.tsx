@@ -5,7 +5,7 @@ import { VerseCard } from "@/components/verse-card";
 import { Panel } from "@/components/panel";
 import { AppErrorComponent } from "@/lib/error-component";
 import { POS_LABEL, bbhVocab, itemsForWeek, type Pos } from "@/lib/vocab";
-import { hydrateCard, isMastered, isWeak } from "@/lib/srs";
+import { hydrateCard, isHighWeak, isMastered, isWeak } from "@/lib/srs";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
 
@@ -94,6 +94,7 @@ function BrowsePage() {
         {list.map((item) => {
           const card = cards[item.id];
           const mastered = isMastered(card);
+          const high = isHighWeak(card);
           const weak = isWeak(card);
           const misses = hydrateCard(card).misses;
           const expanded = open === item.id;
@@ -111,8 +112,8 @@ function BrowsePage() {
                     {item.translit} · {POS_LABEL[item.pos] ?? item.pos} · Ch. {item.chapter}
                   </p>
                 </div>
-                <span className={cn("text-xs font-medium", mastered ? "text-good" : weak ? "text-danger" : "text-subtle")}>
-                  {mastered ? "Mastered" : weak ? `${misses} miss` : card ? "Learning" : "New"}
+                <span className={cn("text-xs font-medium", mastered ? "text-good" : high ? "text-danger" : weak ? "text-danger" : "text-subtle")}>
+                  {mastered ? "Mastered" : high ? "High weak" : weak ? `${misses} miss` : card ? "Learning" : "New"}
                 </span>
               </button>
               {expanded && (

@@ -75,6 +75,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const [typed, setTyped] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [tries, setTries] = useState(0);
+  const [gaveUp, setGaveUp] = useState(false);
   const [firstHits, setFirstHits] = useState(0);
   const [firstSeen, setFirstSeen] = useState(0);
   const [phase, setPhase] = useState<Phase>("play");
@@ -133,7 +134,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
 
   function failAndRecycle() {
     if (!item) return;
-    rate(item.id, "again");
+    rate(item.id, gaveUp || picked === "__noidea__" ? "reveal" : "again");
     const nextSeen = firstSeen + 1;
     setFirstSeen(nextSeen);
     const rest = queue.slice(1);
@@ -154,12 +155,14 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     setTyped("");
     setRevealed(false);
     setTries(0);
+    setGaveUp(false);
   }
 
   function admitNoIdea() {
     if (!item || revealed || picked) return;
     if (stage !== "recognize" && typedOk) return;
     playGrade(false);
+    setGaveUp(true);
     if (stage === "recognize") {
       setPicked("__noidea__");
       return;

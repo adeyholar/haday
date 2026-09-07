@@ -1,4 +1,4 @@
-export type Rating = "again" | "good" | "easy";
+export type Rating = "again" | "good" | "easy" | "reveal";
 
 export type CardState = {
   ease: number;
@@ -9,6 +9,8 @@ export type CardState = {
   last: number;
   hits: number;
   misses: number;
+  /** Times the answer was shown (Tell me / gave up) — high weak. */
+  reveals: number;
   recent: Array<"h" | "m">;
 };
 
@@ -17,7 +19,18 @@ const DAY = 86_400_000;
 const RECENT_CAP = 8;
 
 export function newCard(now = Date.now()): CardState {
-  return { ease: 2.5, interval: 0, due: now, reps: 0, lapses: 0, last: 0, hits: 0, misses: 0, recent: [] };
+  return {
+    ease: 2.5,
+    interval: 0,
+    due: now,
+    reps: 0,
+    lapses: 0,
+    last: 0,
+    hits: 0,
+    misses: 0,
+    reveals: 0,
+    recent: [],
+  };
 }
 
 /** Fill fields added after v1 persist snapshots. */
@@ -35,6 +48,7 @@ export function hydrateCard(card: Partial<CardState> | undefined, now = Date.now
     last: Number(card.last) || 0,
     hits: Number(card.hits) || 0,
     misses: Number(card.misses) || 0,
+    reveals: Number(card.reveals) || 0,
     recent,
   };
 }
@@ -50,6 +64,20 @@ function pushRecent(recent: Array<"h" | "m">, mark: "h" | "m"): Array<"h" | "m">
 
 export function applyRating(card: CardState, rating: Rating, now = Date.now()): CardState {
   const prev = hydrateCard(card, now);
+  if (rating === "reveal") {
+    return {
+      ...prev,
+      ease: Math.max(1.3, prev.ease - 0.35),
+      interval: 0,
+      due: now + 2 * MINUTE,
+      reps: 0,
+      lapses: prev.lapses + 2,
+      last: now,
+      misses: prev.misses + 1,
+      reveals: prev.reveals + 1,
+      recent: pushRecent(prev.recent, "m"),
+    };
+  }
   if (rating === "again") {
     return {
       ...prev,
@@ -94,18 +122,38 @@ export function weaknessScore(card: CardState | undefined): number {
   const c = hydrateCard(card);
   const attempts = c.hits + c.misses;
   if (attempts === 0) return 0.12;
-  const missRate = c.misses / attempts;
+  const told = Math.max(0, c.reveals);
+  const missOnly = Math.max(0, c.misses - told);
+  const revealShare = told / attempts;
+  const missShare = missOnly / attempts;
   const recentMiss = c.recent.length ? c.recent.filter((x) => x === "m").length / c.recent.length : 0;
-  const lapse = Math.min(1, c.lapses / 5);
+  const lapse = Math.min(1, c.lapses / 6);
   const easeGap = Math.max(0, (2.5 - c.ease) / 1.2);
-  const freshMiss = c.misses > 0 && Date.now() - c.last < 2 * 86_400_000 ? 0.12 : 0;
-  return Math.min(1, lapse * 0.28 + missRate * 0.32 + recentMiss * 0.22 + easeGap * 0.12 + freshMiss);
+  const freshTold = told > 0 && Date.now() - c.last < 2 * DAY ? 0.16 : 0;
+  const freshMiss = missOnly > 0 && told === 0 && Date.now() - c.last < 2 * DAY ? 0.08 : 0;
+  return Math.min(
+    1,
+    revealShare * 0.42 +
+      missShare * 0.22 +
+      recentMiss * 0.14 +
+      lapse * 0.1 +
+      easeGap * 0.08 +
+      freshTold +
+      freshMiss,
+  );
 }
 
 export function isWeak(card: CardState | undefined): boolean {
   if (!card) return false;
   const c = hydrateCard(card);
-  return c.misses > 0 || c.lapses > 0 || weaknessScore(c) >= 0.28;
+  return c.misses > 0 || c.lapses > 0 || c.reveals > 0 || weaknessScore(c) >= 0.28;
+}
+
+/** Told the answer — highest slot in the weak book. */
+export function isHighWeak(card: CardState | undefined): boolean {
+  if (!card) return false;
+  const c = hydrateCard(card);
+  return c.reveals > 0 && weaknessScore(c) >= 0.4;
 }
 
 /** Queue a look-alike without counting a miss on it. */

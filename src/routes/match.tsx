@@ -221,7 +221,7 @@ function MatchPage() {
           <DontKnowButton
             onClick={() => {
               playGrade(false);
-              rate(item.id, "again");
+              rate(item.id, "reveal");
               setGaveUp(true);
               setPickSel("__noidea__");
               setWrongN((n) => n + 1);

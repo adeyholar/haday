@@ -9,9 +9,11 @@ import { LeaderboardTeaser } from "@/components/leaderboard-teaser";
 import { RewardsBar } from "@/components/rewards-bar";
 import { COURSE_WEEKS, bbhVocab, itemsForWeek, studySetMeta } from "@/lib/vocab";
 import { statsFor, useStudy, weakestOf } from "@/lib/store";
+import { isHighWeak } from "@/lib/srs";
 import { keepDoneToday, keepStats } from "@/lib/keep";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { continueLabel } from "@/lib/game";
+import { cn } from "@/lib/cn";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -28,7 +30,7 @@ function Home() {
   const all = statsFor(bbhVocab(), cards);
   const meta = studySetMeta(week);
   const pct = s.total ? Math.round((s.mastered / s.total) * 100) : 0;
-  const weakList = weakestOf(items, cards, 5);
+  const weakList = weakestOf(items, cards, 8);
   const lastKeepDay = useStudy((s) => s.lastKeepDay);
   const keepStreak = useStudy((s) => s.keepStreak);
   const keep = keepStats(cards, game);
@@ -147,7 +149,7 @@ function Home() {
 
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="Due" value={s.due} />
-        <Stat label="Weak" value={s.weak} />
+        <Stat label="Weak" value={(s.weak ?? 0) + (s.high ?? 0)} />
         <Stat label="Mastered" value={`${s.mastered}/${s.total}`} />
         <Stat label="Streak" value={`${streak}d`} />
       </div>
@@ -187,7 +189,7 @@ function Home() {
       {weakList.length > 0 && (
         <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
           <div className="flex items-baseline justify-between gap-2">
-            <h2 className="font-display text-xl font-semibold">Needs work</h2>
+            <h2 className="font-display text-xl font-semibold">Weak book</h2>
             <button
               type="button"
               className="text-sm font-medium text-primary"
@@ -196,9 +198,13 @@ function Home() {
               Focus these
             </button>
           </div>
+          <p className="mt-1 text-sm text-muted">
+            Told (high) sit above a miss. Drill these until they leave the book.
+          </p>
           <ul className="mt-3 divide-y divide-border">
             {weakList.map((item) => {
               const c = cards[item.id];
+              const high = isHighWeak(c);
               const misses = c?.misses ?? 0;
               return (
                 <li key={item.id} className="flex items-center justify-between gap-3 py-2">
@@ -206,8 +212,8 @@ function Home() {
                     <p className="he-word text-xl leading-tight">{item.hebrew}</p>
                     <p className="truncate text-sm text-muted">{item.gloss}</p>
                   </div>
-                  <span className="shrink-0 text-xs tabular-nums text-danger">
-                    {misses} miss{misses === 1 ? "" : "es"}
+                  <span className={cn("shrink-0 text-xs font-semibold", high ? "text-danger" : "text-muted")}>
+                    {high ? "High · told" : `${misses} miss${misses === 1 ? "" : "es"}`}
                   </span>
                 </li>
               );
@@ -216,12 +222,12 @@ function Home() {
           <div className="mt-3 flex gap-2">
             <Link to="/drill" className="flex-1">
               <Button className="w-full" size="sm" onClick={() => setFocus("weak")}>
-                Drill weak
+                Drill weak book
               </Button>
             </Link>
             <Link to="/write" search={{ mode: "memorize" }} className="flex-1">
               <Button className="w-full" size="sm" variant="outline" onClick={() => setFocus("weak")}>
-                Memorize weak
+                Memorize
               </Button>
             </Link>
           </div>
@@ -312,7 +318,7 @@ function Home() {
                     </span>
                     <span className={`text-xs tabular-nums ${active ? "text-primary-foreground/80" : "text-muted"}`}>
                       {st.mastered}/{st.total}
-                      {st.weak ? ` · ${st.weak} weak` : ""}
+                      {(st.weak || st.high) ? ` · ${(st.weak ?? 0) + (st.high ?? 0)} weak` : ""}
                     </span>
                   </div>
                   <p className={`mt-1 text-sm ${active ? "text-primary-foreground/80" : "text-muted"}`}>{w.hint}</p>
@@ -326,7 +332,7 @@ function Home() {
 
       <Panel className="mt-8">
         <p className="text-xs text-muted">
-          Full lexicon {bbhVocab().length} BBH lemmas (Ch. 2–19, same as Game) · {all.mastered} mastered · {all.weak} weak overall.
+          Full lexicon {bbhVocab().length} BBH lemmas (Ch. 2–19, same as Game) · {all.mastered} mastered · {(all.weak ?? 0) + (all.high ?? 0)} weak overall.
         </p>
         <button
           type="button"

@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
+- **Weak book.** A Tell me / revealed answer is high weak. A miss after trying is still weak, but less so. High weak lead Daily keep, Drill, and the home Weak book.
+
 - **Tell me.** The old Don’t know button now reads Tell me. First tap asks for one more try before the answer is shown; a second tap (or a miss after that) reveals it.
 
 - **Don’t know on Game.** Same full-width button as Rules, under the answers — not buried under the verse.

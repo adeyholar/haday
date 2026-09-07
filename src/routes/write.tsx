@@ -125,7 +125,7 @@ function WritePage() {
     ratedRef.current = true;
     if (match === "exact") rate(item.id, attempt <= 1 ? "easy" : "good");
     else if (match === "close") rate(item.id, "good");
-    else rate(item.id, "again");
+    else rate(item.id, gaveUp ? "reveal" : "again");
   }
 
   function nextCard() {
@@ -401,6 +401,10 @@ function WritePage() {
                   onClick={() => {
                     if (!item || result) return;
                     setGaveUp(true);
+                    if (!ratedRef.current) {
+                      ratedRef.current = true;
+                      rate(item.id, "reveal");
+                    }
                     applyCheck("wrong", item.hebrew);
                   }}
                 />
@@ -452,6 +456,10 @@ function WritePage() {
                   onClick={() => {
                     if (!item || result) return;
                     setGaveUp(true);
+                    if (!ratedRef.current) {
+                      ratedRef.current = true;
+                      rate(item.id, "reveal");
+                    }
                     applyCheck("wrong", item.hebrew);
                   }}
                 />
