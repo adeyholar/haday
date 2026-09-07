@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { learnVerseExplain } = await jiti.import("/workspace/src/lib/tanakh-learn-note.ts");
+const { learnVerseExplain, classVocabInText, learnUnitVerses } = await jiti.import("/workspace/src/lib/tanakh-learn-note.ts");
 const { learnNugget } = await jiti.import("/workspace/src/lib/tanakh-learn-nugget.ts");
 
 test("article verse names citation lemma יָם not הַיָּם", () => {
@@ -66,4 +66,15 @@ test("nugget states the ordinary article without a source tag", () => {
   assert.match(n, /הַ/);
   assert.match(n, /dagesh/i);
   assert.doesNotMatch(n, /Gesenius|Davidson|§/);
+});
+
+test("class vocab in a verse lists BBH lemmas students already drill", () => {
+  const hits = classVocabInText("בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ");
+  const ids = hits.map((v) => v.id);
+  assert.ok(ids.includes("elohim"));
+  assert.ok(ids.includes("erets"));
+  assert.ok(ids.includes("shamayim"));
+  const extra = learnUnitVerses([], [{ word: "מֶלֶךְ", gloss: "king" }]);
+  assert.equal(extra[0]?.vocabId, "melek");
+  assert.match(extra[0]?.hit ?? "", /מֶלֶךְ/);
 });

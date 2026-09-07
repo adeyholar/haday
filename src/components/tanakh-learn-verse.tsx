@@ -1,7 +1,9 @@
 import { findEnglishHitRange, findHitRange } from "@/lib/hebrew";
 import { learnNugget } from "@/lib/tanakh-learn-nugget";
 import {
+  classVocabInText,
   learnVerseExplain,
+  shortGloss,
   type LearnKind,
   type LearnSample,
   type LearnVerse,
@@ -23,6 +25,7 @@ export function TanakhLearnVerse({
     hitEn: verse.hitEn,
     gloss: explained.lemmaGloss,
   });
+  const also = classVocabInText(verse.he).filter((v) => v.id !== explained.vocabId);
 
   return (
     <li className="rounded-[var(--radius-md)] bg-surface px-3 py-3">
@@ -50,14 +53,35 @@ export function TanakhLearnVerse({
         )}
       </p>
       <p className="mt-3 text-sm text-ink">
-        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Lemma</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          {explained.chapter ? `Class vocab · Ch. ${explained.chapter}` : "Lemma"}
+        </span>
         <span className="he-word ms-2 text-xl" dir="rtl" lang="he">
           {explained.lemmaHe}
         </span>
         {explained.lemmaGloss ? <span> · {explained.lemmaGloss}</span> : null}
         {explained.lemmaTranslit ? <span className="text-muted"> · {explained.lemmaTranslit}</span> : null}
       </p>
-      <p className="mt-1 text-sm text-muted">{explained.note}</p>
+      {also.length > 0 ? (
+        <div className="mt-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Also class vocab in this verse</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {also.map((v) => (
+              <li
+                key={v.id}
+                className="rounded-[var(--radius-md)] bg-card px-2 py-1 text-sm text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="he-word text-lg" dir="rtl" lang="he">
+                  {v.hebrew}
+                </span>
+                <span> · {shortGloss(v.gloss)}</span>
+                <span className="text-xs text-muted"> · Ch. {v.chapter}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <p className="mt-2 text-sm text-muted">{explained.note}</p>
       <p className="mt-3 border-s-2 border-primary ps-3 text-sm text-ink">{nugget}</p>
     </li>
   );

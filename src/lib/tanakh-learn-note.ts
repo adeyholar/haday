@@ -1,6 +1,8 @@
 import { LEARN_WHY, learnWhyKey } from "@/lib/tanakh-learn-why";
 import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { lemmaForSurface } from "@/lib/tanakh-pool";
+import { verseFor } from "@/lib/verses";
+import { VOCAB, type VocabItem } from "@/lib/vocab";
 
 export type LearnKind = "article" | "noun" | "syllable";
 
@@ -20,6 +22,8 @@ export type LearnVerse = {
   hit: string;
   hitEn?: string;
   why?: string;
+  /** Pin to a BBH lemma when the surface is inflected or a homograph. */
+  vocabId?: string;
 };
 
 function letters(s: string): string {
@@ -29,6 +33,8 @@ function letters(s: string): string {
 function shortGloss(raw: string): string {
   return raw.split(/[;,]/)[0]?.replace(/\s+/g, " ").trim() ?? "";
 }
+
+export { shortGloss };
 
 export function matchingSample(verse: LearnVerse, samples: LearnSample[] = []): LearnSample | undefined {
   const hit = letters(verse.hit);
@@ -43,12 +49,66 @@ export function matchingSample(verse: LearnVerse, samples: LearnSample[] = []): 
   );
 }
 
+/** BBH lemmas that appear in this Hebrew line — same words students drill in Game. */
+export function classVocabInText(he: string): VocabItem[] {
+  const seen = new Set<string>();
+  const out: VocabItem[] = [];
+  for (const chunk of he.split(/[\s,;:.!?]+/)) {
+    if (!chunk) continue;
+    for (const part of chunk.split(/[־–—]/)) {
+      const surface = part.replace(/[־–—]$/, "");
+      if (letters(surface).length < 2) continue;
+      const v = lemmaForSurface(surface);
+      if (!v || seen.has(v.id)) continue;
+      seen.add(v.id);
+      out.push(v);
+    }
+  }
+  return out.sort((a, b) => a.chapter - b.chapter || b.freq - a.freq);
+}
+
+function pinVocab(verse: LearnVerse): LearnVerse {
+  if (verse.vocabId) return verse;
+  const lemma = lemmaForSurface(verse.hit);
+  return lemma ? { ...verse, vocabId: lemma.id } : verse;
+}
+
+/**
+ * Unit verses, each pinned to class vocab when possible, plus the canonical
+ * Tanakh verse for each sample lemma so the same BBH words keep showing up.
+ */
+export function learnUnitVerses(verses: LearnVerse[], samples: LearnSample[] = [], extraCap = 4): LearnVerse[] {
+  const base = verses.map(pinVocab);
+  const seen = new Set(base.map((v) => `${v.ref}|${letters(v.hit)}`));
+  const extra: LearnVerse[] = [];
+  for (const s of samples) {
+    if (extra.length >= extraCap) break;
+    const lemma = lemmaForSurface(s.word);
+    if (!lemma) continue;
+    const vx = verseFor(lemma.id);
+    if (!vx?.he) continue;
+    const key = `${vx.ref}|${letters(vx.hit)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    extra.push({ ...vx, vocabId: lemma.id });
+  }
+  return [...base, ...extra];
+}
+
 export function learnVerseExplain(
   verse: LearnVerse,
   kind: LearnKind,
   samples: LearnSample[] = [],
-): { lemmaHe: string; lemmaGloss: string; lemmaTranslit?: string; note: string } {
-  const lemma = lemmaForSurface(verse.hit);
+): {
+  lemmaHe: string;
+  lemmaGloss: string;
+  lemmaTranslit?: string;
+  note: string;
+  chapter?: number;
+  vocabId?: string;
+} {
+  const pinned = verse.vocabId ? VOCAB.find((v) => v.id === verse.vocabId) : undefined;
+  const lemma = pinned ?? lemmaForSurface(verse.hit);
   const sample = matchingSample(verse, samples);
   const lemmaHe = lemma?.hebrew ?? sample?.word ?? verse.hit;
   const lemmaGloss = shortGloss(lemma?.gloss ?? sample?.gloss ?? verse.hitEn ?? "");
@@ -56,7 +116,15 @@ export function learnVerseExplain(
   const named = lemmaGloss ? `${lemmaHe} “${lemmaGloss}”` : lemmaHe;
   const passage = LEARN_WHY[learnWhyKey(kind, verse.ref, verse.hit)] ?? verse.why;
 
-  if (passage) return { lemmaHe, lemmaGloss, lemmaTranslit, note: passage };
+  const meta = {
+    lemmaHe,
+    lemmaGloss,
+    lemmaTranslit,
+    chapter: lemma?.chapter,
+    vocabId: lemma?.id,
+  };
+
+  if (passage) return { ...meta, note: passage };
 
   const hitL = letters(verse.hit);
   const lemL = letters(lemmaHe);
@@ -83,8 +151,8 @@ export function learnVerseExplain(
   } else if (sample?.note) {
     note = sample.tag ? `${sample.tag}. ${sample.note}` : sample.note;
   } else {
-    note = `Name the ending on the marked form. Gender and number live there. Look it up as ${named} — the citation form in a Hebrew lexicon.`;
+    note = `${named} wears the ending you are learning. Name gender and number from that ending, then look the word up in the singular.`;
   }
 
-  return { lemmaHe, lemmaGloss, lemmaTranslit, note };
+  return { ...meta, note };
 }

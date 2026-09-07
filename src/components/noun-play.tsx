@@ -5,6 +5,7 @@ import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
+import { learnUnitVerses } from "@/lib/tanakh-learn-note";
 import { playGrade } from "@/lib/sfx";
 import { cn } from "@/lib/cn";
 import {
@@ -234,10 +235,11 @@ export function NounPlay({ unitId }: { unitId: number }) {
         <Panel className="mt-3">
           <h2 className="font-display text-xl font-bold text-ink">In the Tanakh</h2>
           <p className="mt-1 text-sm text-muted">
-            The hit word is marked. Then a short note: what the passage is doing, and how the rule lives in that word.
+            The marked word is class vocabulary when it is on the BBH list. Other class words in the same verse are
+            listed so you meet them again.
           </p>
           <ul className="mt-3 space-y-4">
-            {unit.verses.map((v) => (
+            {learnUnitVerses(unit.verses, unit.samples).map((v) => (
               <TanakhLearnVerse key={`${v.ref}-${v.hit}`} verse={v} kind="noun" samples={unit.samples} />
             ))}
           </ul>
