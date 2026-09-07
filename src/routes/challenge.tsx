@@ -8,6 +8,7 @@ import { bbhVocab, glossMatches, shuffle, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
 import { AppErrorComponent } from "@/lib/error-component";
 import { cn } from "@/lib/cn";
+import { DontKnowButton } from "@/components/dont-know-button";
 
 export const Route = createFileRoute("/challenge")({
   component: ChallengePage,
@@ -41,10 +42,10 @@ function ChallengePage() {
     startUltimate(ids);
   }
 
-  function submitCurrent() {
+  function submitCurrent(override?: string) {
     if (!run) return;
     const answers = [...run.answers];
-    answers[run.i] = typed;
+    answers[run.i] = override !== undefined ? override : typed;
     const nextI = run.i + 1;
     if (nextI >= run.ids.length) {
       const map = new Map(bbhVocab().map((item) => [item.id, item]));
@@ -219,6 +220,23 @@ function ChallengePage() {
         <Button className="mt-3 w-full" type="submit">
           {run.i + 1 >= run.ids.length ? "Finish and grade" : "Next"}
         </Button>
+        <DontKnowButton
+          onClick={() => {
+            if (!run) return;
+            if (run.i + 1 >= run.ids.length) {
+              submitCurrent("");
+              return;
+            }
+            const cur = run.ids[run.i];
+            const without = run.ids.filter((_, idx) => idx !== run.i);
+            const insertAt = run.i + Math.floor(Math.random() * (without.length - run.i + 1));
+            const ids = [...without.slice(0, insertAt), cur, ...without.slice(insertAt)];
+            const answers = run.answers.filter((_, idx) => idx !== run.i);
+            saveUltimateRun({ ids, answers, i: run.i });
+            setTyped(answers[run.i] ?? "");
+          }}
+        />
+        <p className="mt-2 text-center text-sm text-muted">Don’t know sends this lemma later in the scroll. No peek.</p>
       </form>
     </>
   );

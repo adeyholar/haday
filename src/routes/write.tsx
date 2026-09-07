@@ -19,6 +19,8 @@ import { takeWriteCheck, writeChecksLeft, WRITE_DAILY_LIMIT } from "@/lib/write-
 import { cn } from "@/lib/cn";
 import { GradeBanner } from "@/components/grade-banner";
 import { playGrade } from "@/lib/sfx";
+import { DontKnowButton } from "@/components/dont-know-button";
+import { spliceLater } from "@/lib/quiz-draw";
 
 function studyLetterId(item: VocabItem): string | undefined {
   if (item.id.startsWith("ch1-")) return item.id.slice(4);
@@ -65,6 +67,8 @@ function WritePage() {
   const [handNote, setHandNote] = useState<string | null>(null);
   const [handI, setHandI] = useState(0);
   const ratedRef = useRef(false);
+  const [gaveUp, setGaveUp] = useState(false);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     setRound(shuffle(queueForFocus(pool, useStudy.getState().cards, focus, 12)));
@@ -75,6 +79,8 @@ function WritePage() {
     setTyped("");
     setTries(0);
     ratedRef.current = false;
+    setGaveUp(false);
+    setRetryIds(new Set());
     setReady(true);
   }, [week, focus, pool]);
 
@@ -95,6 +101,7 @@ function WritePage() {
     setHandNote(null);
     setHandI(0);
     ratedRef.current = false;
+    setGaveUp(false);
     if (!memorize) {
       setRecallLeft(0);
       return;
@@ -123,6 +130,11 @@ function WritePage() {
 
   function nextCard() {
     if (result) commitRate(result.match);
+    if (gaveUp && item && !retryIds.has(item.id)) {
+      setRetryIds((s) => new Set(s).add(item.id));
+      setRound((r) => spliceLater(r, i, item));
+    }
+    setGaveUp(false);
     setResult(null);
     pad.current?.clear();
     setEmpty(true);
@@ -384,6 +396,15 @@ function WritePage() {
           {inputMethod === "type" ? (
             <div className="mt-4 rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
               <HebrewType value={typed} onChange={setTyped} target={item.hebrew} alts={item.hebrewAlts} disabled={locked} hideHint={Boolean(result)} />
+              {!result && (
+                <DontKnowButton
+                  onClick={() => {
+                    if (!item || result) return;
+                    setGaveUp(true);
+                    applyCheck("wrong", item.hebrew);
+                  }}
+                />
+              )}
               <Button className="mt-3 w-full" onClick={checkType} disabled={locked || !typed.trim()}>
                 Check
               </Button>
@@ -426,6 +447,15 @@ function WritePage() {
                   {busy ? "Checking…" : "Check writing"}
                 </Button>
               </div>
+              {!result && !letterPad && (
+                <DontKnowButton
+                  onClick={() => {
+                    if (!item || result) return;
+                    setGaveUp(true);
+                    applyCheck("wrong", item.hebrew);
+                  }}
+                />
+              )}
               {letterPad && (
                 <>
                   {strokeModelCount(item.hebrew) > 1 && (

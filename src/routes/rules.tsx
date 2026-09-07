@@ -3,7 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { ClassifyDrill } from "@/components/classify-drill";
-import { drawRound } from "@/lib/quiz-draw";
+import { drawRound, spliceLater } from "@/lib/quiz-draw";
+import { DontKnowButton } from "@/components/dont-know-button";
 import { cn } from "@/lib/cn";
 import { findHitRange } from "@/lib/hebrew";
 import {
@@ -211,8 +212,11 @@ function HuntRound({
   const [ok, setOk] = useState(false);
   const [matched, setMatched] = useState<GrammarCase | null>(null);
   const [score, setScore] = useState({ right: 0, wrong: 0 });
+  const [items, setItems] = useState(deck);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
+  const [gaveUp, setGaveUp] = useState(false);
 
-  const item = deck[i];
+  const item = items[i];
   const rule = item ? ruleById(item.ruleId) : undefined;
   const siblings = item ? casesForRule(item.ruleId) : [];
 
@@ -227,6 +231,17 @@ function HuntRound({
     setRevealed(false);
     setOk(false);
     setMatched(null);
+    setGaveUp(false);
+  }
+
+  function admitNoIdea() {
+    if (!item || revealed) return;
+    setOk(false);
+    setMatched(item);
+    setRevealed(true);
+    setHint("");
+    setGaveUp(true);
+    setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
   }
 
   function check() {
@@ -279,6 +294,10 @@ function HuntRound({
   }
 
   function next() {
+    if (gaveUp && item && !retryIds.has(item.id)) {
+      setRetryIds((s) => new Set(s).add(item.id));
+      setItems((list) => spliceLater(list, i, item));
+    }
     resetFields();
     setI((n) => n + 1);
   }
@@ -302,7 +321,7 @@ function HuntRound({
   return (
     <>
       <p className="mb-3 text-sm font-medium tabular-nums text-ink">
-        {i + 1} / {deck.length} · {score.right} correct
+        {i + 1} / {items.length} · {score.right} correct
       </p>
 
       {mode === "verse" ? (
@@ -404,6 +423,10 @@ function HuntRound({
         )}
 
         {revealed && <AnswerPanel item={matched ?? item} rule={rule} ok={ok} mode={mode} siblings={siblings} />}
+        {gaveUp && revealed && (
+          <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+        )}
+        {!revealed && <DontKnowButton onClick={admitNoIdea} />}
 
         <Button type="submit" size="lg" className="w-full">
           {revealed ? "Next" : "Check"}

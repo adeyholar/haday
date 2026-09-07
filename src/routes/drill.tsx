@@ -9,6 +9,7 @@ import { VerseCard } from "@/components/verse-card";
 import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
+import { DontKnowButton } from "@/components/dont-know-button";
 import type { Rating } from "@/lib/srs";
 
 export const Route = createFileRoute("/drill")({ component: DrillPage });
@@ -197,6 +198,13 @@ function DrillPage() {
 
       <VerseCard item={current} showEnglish={ui.flipped} />
 
+      {!ui.flipped && (
+        <DontKnowButton
+          onClick={() => {
+            dispatch({ type: "flip" });
+          }}
+        />
+      )}
       {ui.flipped && (
         <div className="mt-4 grid grid-cols-3 gap-2">
           <Button type="button" variant="danger" onClick={() => grade("again")}>

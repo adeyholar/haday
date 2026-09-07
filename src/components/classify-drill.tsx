@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DontKnowButton } from "@/components/dont-know-button";
 import { findHitRange } from "@/lib/hebrew";
 import { cn } from "@/lib/cn";
-import { drawRound, ROUND_LEN } from "@/lib/quiz-draw";
+import { drawRound, ROUND_LEN, spliceLater } from "@/lib/quiz-draw";
 import {
   answerLabel,
   itemsForKind,
@@ -41,8 +42,11 @@ function Round({
   const [picked, setPicked] = useState<ClassifyAnswer | null>(null);
   const [score, setScore] = useState({ right: 0, wrong: 0 });
   const lastTap = useRef(0);
+  const [items, setItems] = useState(deck);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
+  const [gaveUp, setGaveUp] = useState(false);
 
-  const item = deck[i];
+  const item = items[i];
   const revealed = phase === "done";
   const live = item ? liveClassify(item, typed) : "empty";
 
@@ -52,6 +56,15 @@ function Round({
     setOk(false);
     setPicked(null);
     lastTap.current = 0;
+    setGaveUp(false);
+  }
+
+  function admitNoIdea() {
+    if (!item || revealed) return;
+    setOk(false);
+    setPhase("done");
+    setGaveUp(true);
+    setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
   }
 
   function grade(choice: ClassifyAnswer) {
@@ -91,6 +104,10 @@ function Round({
   }
 
   function next() {
+    if (gaveUp && item && !retryIds.has(item.id)) {
+      setRetryIds((s) => new Set(s).add(item.id));
+      setItems((list) => spliceLater(list, i, item));
+    }
     reset();
     setI((n) => n + 1);
   }
@@ -125,7 +142,7 @@ function Round({
   return (
     <>
       <p className="mb-3 text-sm font-medium tabular-nums text-ink">
-        {i + 1} / {deck.length} · {score.right} correct
+        {i + 1} / {items.length} · {score.right} correct
       </p>
 
       <div className="rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
@@ -236,6 +253,11 @@ function Round({
         )}
 
         {revealed && <Result item={item} ok={ok} />}
+        {gaveUp && revealed && (
+          <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+        )}
+
+        {!revealed && <DontKnowButton onClick={admitNoIdea} />}
 
         {(revealed || parseClassifyInput(kind, typed)) && (
           <Button type="submit" size="lg" className="w-full">

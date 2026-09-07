@@ -51,3 +51,10 @@ export function drawRound<T>(pool: T[], n: number, key: string, idOf: (item: T) 
 export function quizId(q: { q: string; he?: string }): string {
   return `${q.q}|${q.he ?? ""}`;
 }
+
+/** Put `item` back among the cards after `fromIndex` so it is served again. */
+export function spliceLater<T>(list: T[], fromIndex: number, item: T): T[] {
+  const rest = list.slice(fromIndex + 1);
+  const at = rest.length ? Math.floor(Math.random() * (rest.length + 1)) : 0;
+  return [...list.slice(0, fromIndex + 1), ...rest.slice(0, at), item, ...rest.slice(at)];
+}

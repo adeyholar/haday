@@ -18,6 +18,8 @@ import {
 } from "@/lib/alefbet-game";
 import { useStudy } from "@/lib/store";
 import { GAME_STAGE_PASS } from "@/lib/game";
+import { DontKnowButton } from "@/components/dont-know-button";
+import { spliceLater } from "@/lib/quiz-draw";
 import type { HebrewLetter } from "@/lib/alphabet";
 
 function LetterPad({
@@ -101,13 +103,15 @@ function promptOf(q: AlefBetQuestion): { title: string; showHe?: string; showEn?
 export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
   const complete = useStudy((s) => s.completeAlefBetLevel);
   const meta = ALEF_BET_LEVELS[level - 1];
-  const [round] = useState(() => buildAlefBetRound(level));
+  const [round, setRound] = useState(() => buildAlefBetRound(level));
   const [pos, setPos] = useState(0);
   const [tries, setTries] = useState(0);
   const [firstHits, setFirstHits] = useState(0);
   const [done, setDone] = useState(0);
   const [grade, setGrade] = useState<null | boolean>(null);
   const [lock, setLock] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
+  const [retryKeys, setRetryKeys] = useState<Set<string>>(() => new Set());
   const [keys, setKeys] = useState(() => shuffledLine());
   const [names, setNames] = useState(() => shuffledNames());
   const q = round[pos];
@@ -119,6 +123,51 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
   function reshuffle() {
     setKeys(shuffledLine());
     setNames(shuffledNames());
+  }
+
+  function qKey(item: AlefBetQuestion): string {
+    if (item.kind === "neighbor") return `${item.kind}:${item.letter.id}:${item.delta}`;
+    return `${item.kind}:${item.letter.id}`;
+  }
+
+  function shownAnswer(item: AlefBetQuestion): string {
+    if (item.kind === "name-of") return item.letter.name;
+    if (item.kind === "number-of") return String(item.index);
+    return expectedLetter(item).letter;
+  }
+
+  function admitNoIdea() {
+    if (lock || !q || gaveUp) return;
+    playGrade(false);
+    setGrade(false);
+    setGaveUp(true);
+    setLock(true);
+  }
+
+  function advanceGaveUp() {
+    if (!q) return;
+    const key = qKey(q);
+    let nextRound = round;
+    if (!retryKeys.has(key)) {
+      setRetryKeys((s) => new Set(s).add(key));
+      nextRound = spliceLater(round, pos, q);
+      setRound(nextRound);
+    }
+    const nextPos = pos + 1;
+    if (nextPos >= nextRound.length) {
+      const rate = nextRound.length ? firstHits / nextRound.length : 0;
+      complete(level, {
+        stars: starsFromRate(rate),
+        score: Math.round(rate * 100),
+        firstTryRate: rate,
+      });
+    }
+    setPos(nextPos);
+    setTries(0);
+    setGrade(null);
+    setLock(false);
+    setGaveUp(false);
+    reshuffle();
   }
 
   function mark(ok: boolean) {
@@ -225,15 +274,36 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
         {grade != null ? (
           <div className="mt-4">
             <GradeBanner ok={grade} />
+            {gaveUp ? (
+              <p className="mt-3 text-lg font-semibold text-ink">
+                {q.kind === "name-of" || q.kind === "number-of" ? (
+                  shownAnswer(q)
+                ) : (
+                  <span className="he-word text-5xl">{shownAnswer(q)}</span>
+                )}
+              </p>
+            ) : null}
+            {gaveUp ? (
+              <p className="mt-2 text-sm text-muted">Back in the pool — you will see it again.</p>
+            ) : null}
           </div>
         ) : null}
       </div>
 
-      <div className="mt-4">
-        {useLetterPad ? <LetterPad letters={keys} disabled={lock} onPick={onLetter} /> : null}
-        {useNamePad ? <NamePad letters={names} disabled={lock} onPick={onLetter} /> : null}
-        {useNumPad ? <NumberPad disabled={lock} onPick={onNumber} /> : null}
-      </div>
+      {gaveUp ? (
+        <Button className="mt-4 w-full" size="lg" onClick={advanceGaveUp}>
+          Next
+        </Button>
+      ) : (
+        <>
+          <div className="mt-4">
+            {useLetterPad ? <LetterPad letters={keys} disabled={lock} onPick={onLetter} /> : null}
+            {useNamePad ? <NamePad letters={names} disabled={lock} onPick={onLetter} /> : null}
+            {useNumPad ? <NumberPad disabled={lock} onPick={onNumber} /> : null}
+          </div>
+          <DontKnowButton onClick={admitNoIdea} />
+        </>
+      )}
     </>
   );
 }

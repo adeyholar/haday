@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
-- **No idea.** On Game (Recognize, Gloss, Spell), Study quiz, and the grammar quizzes, No idea shows the answer and puts that word back in the pool so it is served again.
+- **Don’t know on every quiz.** Recognize, Gloss, Spell, Aleph-bet, Syllables, Nouns, Article, Study quiz, Write, Match, Drill, Rules, Classify, closed-book exam, and Ultimate Challenge. The word is shown (except Ultimate, which stays closed-book) and returns later in the round.
 
 ## 2026-09-06
 

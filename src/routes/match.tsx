@@ -10,6 +10,8 @@ import { pickEloDeck } from "@/lib/elo";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { useStudy } from "@/lib/store";
 import { playGrade } from "@/lib/sfx";
+import { DontKnowButton } from "@/components/dont-know-button";
+import { spliceLater } from "@/lib/quiz-draw";
 import { cn } from "@/lib/cn";
 
 export const Route = createFileRoute("/match")({ component: MatchPage });
@@ -40,6 +42,8 @@ function MatchPage() {
   const [pickSel, setPickSel] = useState<string | null>(null);
   const [right, setRight] = useState(0);
   const [wrongN, setWrongN] = useState(0);
+  const [gaveUp, setGaveUp] = useState(false);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     const picked = pickEloDeck(pool, useStudy.getState().cards, 10);
@@ -65,6 +69,8 @@ function MatchPage() {
     setPickSel(null);
     setRight(0);
     setWrongN(0);
+    setGaveUp(false);
+    setRetryIds(new Set());
   }, [pool, seed, focus]);
 
   const wrongIds = wrong ? wrong.split(":") : [];
@@ -119,7 +125,15 @@ function MatchPage() {
   }
 
   function nextPick() {
-    if (pickI + 1 >= pickOrder.length) {
+    const card = pickOrder[pickI];
+    let order = pickOrder;
+    if (gaveUp && card && !retryIds.has(card.id)) {
+      setRetryIds((s) => new Set(s).add(card.id));
+      order = spliceLater(pickOrder, pickI, card);
+      setPickOrder(order);
+    }
+    setGaveUp(false);
+    if (pickI + 1 >= order.length) {
       setPhase("done");
       return;
     }
@@ -195,10 +209,24 @@ function MatchPage() {
         {pickSel && (
           <div className="mt-3">
             <GradeBanner ok={ok} />
+            {gaveUp && (
+              <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+            )}
             <Button className="mt-3 w-full" onClick={nextPick}>
-              {pickI + 1 >= pickOrder.length ? "See score" : "Next"}
+              {pickI + 1 >= pickOrder.length && !(gaveUp && item && !retryIds.has(item.id)) ? "See score" : "Next"}
             </Button>
           </div>
+        )}
+        {!pickSel && item && (
+          <DontKnowButton
+            onClick={() => {
+              playGrade(false);
+              rate(item.id, "again");
+              setGaveUp(true);
+              setPickSel("__noidea__");
+              setWrongN((n) => n + 1);
+            }}
+          />
         )}
       </>
     );

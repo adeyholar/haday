@@ -23,6 +23,7 @@ import { HandTrain } from "@/components/hand-train";
 import { ClosedBook } from "@/components/closed-book";
 import { playGrade } from "@/lib/sfx";
 import { useStudy } from "@/lib/store";
+import { DontKnowButton } from "@/components/dont-know-button";
 
 export const Route = createFileRoute("/alphabet")({
   validateSearch: (s: Record<string, unknown>): { tab?: AlefTab; letter?: string } => {
@@ -178,6 +179,9 @@ function FoundationQuiz() {
   const [missedId, setMissedId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [inkKey, setInkKey] = useState(0);
+  const [gaveUp, setGaveUp] = useState(false);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
+  const [follow, setFollow] = useState<(HebrewLetter | HebrewVowel)[]>([]);
 
   const isScribble = kind === "letter-scribble" || kind === "vowel-scribble";
   const isLetter = kind.startsWith("letter") || kind === "translit-letter";
@@ -204,20 +208,23 @@ function FoundationQuiz() {
       10,
     ).map((x) => x.vowel);
   }, [seed, kind, queue, isLetter]);
-  const total = isLetter ? letterDeck.length : vowelDeck.length;
 
   useEffect(() => {
     setI(0);
     setPicked(null);
     setRight(0);
     setMissedId(null);
+    setGaveUp(false);
+    setRetryIds(new Set());
+    setFollow([]);
     setInkKey((n) => n + 1);
     setReady(true);
   }, [seed, kind]);
 
-  const letter = letterDeck[i];
-  const vowel = vowelDeck[i];
-  const done = isLetter ? i >= letterDeck.length : i >= vowelDeck.length;
+  const letter = (i < letterDeck.length ? letterDeck[i] : follow[i - letterDeck.length]) as HebrewLetter | undefined;
+  const vowel = (i < vowelDeck.length ? vowelDeck[i] : follow[i - vowelDeck.length]) as HebrewVowel | undefined;
+  const total = (isLetter ? letterDeck.length : vowelDeck.length) + follow.length;
+  const done = i >= total;
 
   const prompt = isLetter ? letter : vowel;
   const options = useMemo(() => {
@@ -316,19 +323,33 @@ function FoundationQuiz() {
         )}
       </div>
       {isScribble && prompt && (
-        <GlyphInk
-          key={`${kind}-${i}-${inkKey}`}
-          expected={"letter" in prompt ? prompt.letter : prompt.mark}
-          mode={kind === "vowel-scribble" ? "vowel" : "letter"}
-          allowSample={false}
-          onPass={(ok) => {
-            const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
-            if (key) rate(key, ok ? "good" : "again");
-            if (ok) setRight((r) => r + 1);
-            setI((n) => n + 1);
-            setInkKey((n) => n + 1);
-          }}
-        />
+        <>
+          <GlyphInk
+            key={`${kind}-${i}-${inkKey}`}
+            expected={"letter" in prompt ? prompt.letter : prompt.mark}
+            mode={kind === "vowel-scribble" ? "vowel" : "letter"}
+            allowSample={false}
+            onPass={(ok) => {
+              const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
+              if (key) rate(key, ok ? "good" : "again");
+              if (ok) setRight((r) => r + 1);
+              setI((n) => n + 1);
+              setInkKey((n) => n + 1);
+            }}
+          />
+          <DontKnowButton
+            onClick={() => {
+              const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
+              if (key) rate(key, "again");
+              if (prompt && !retryIds.has(prompt.id)) {
+                setRetryIds((s) => new Set(s).add(prompt.id));
+                setFollow((f) => [...f, prompt]);
+              }
+              setI((n) => n + 1);
+              setInkKey((n) => n + 1);
+            }}
+          />
+        </>
       )}
       {!isScribble && (
         <>
@@ -390,19 +411,41 @@ function FoundationQuiz() {
         </>
       )}
       {picked && (
-        <GradeBanner className="mt-4" ok={picked === prompt.id} />
+        <>
+          <GradeBanner className="mt-4" ok={picked === prompt.id} />
+          {gaveUp && (
+            <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+          )}
+        </>
       )}
       {picked && (
         <Button
           className="mt-4 w-full"
           onClick={() => {
+            if (gaveUp && prompt && !retryIds.has(prompt.id)) {
+              setRetryIds((s) => new Set(s).add(prompt.id));
+              setFollow((f) => [...f, prompt]);
+            }
             setPicked(null);
             setMissedId(null);
+            setGaveUp(false);
             setI((n) => n + 1);
           }}
         >
           Next
         </Button>
+      )}
+      {!picked && !isScribble && (
+        <DontKnowButton
+          onClick={() => {
+            if (!prompt) return;
+            playGrade(false);
+            setGaveUp(true);
+            setPicked(prompt.id);
+            const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
+            if (key) rate(key, "again");
+          }}
+        />
       )}
         </>
       )}

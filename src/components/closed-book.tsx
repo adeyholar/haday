@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GlyphInk } from "@/components/glyph-ink";
 import { alefAll, alefByKeys, alefLetters, alefVowels, shuffleAlef, type AlefItem } from "@/lib/alef";
 import { useStudy } from "@/lib/store";
+import { DontKnowButton } from "@/components/dont-know-button";
+import { spliceLater } from "@/lib/quiz-draw";
 
 type Scope = "letters" | "vowels" | "both";
 
@@ -13,21 +15,29 @@ export function ClosedBook({ onPractice }: { onPractice: (tab: "write" | "drill"
   const [i, setI] = useState(0);
   const [misses, setMisses] = useState<string[]>([]);
   const [hits, setHits] = useState(0);
-  const deck = useMemo(() => {
+  const built = useMemo(() => {
     if (scope === "letters") return shuffleAlef(alefLetters());
     if (scope === "vowels") return shuffleAlef(alefVowels());
     if (scope === "both") return shuffleAlef(alefAll());
     return [];
   }, [scope]);
+  const [items, setItems] = useState(built);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
-  const item = deck[i];
-  const done = scope !== null && i >= deck.length;
+  useEffect(() => {
+    setItems(built);
+    setI(0);
+  }, [built]);
+
+  const item = items[i];
+  const done = scope !== null && i >= items.length;
 
   function start(next: Scope) {
     setScope(next);
     setI(0);
     setMisses([]);
     setHits(0);
+    setRetryIds(new Set());
   }
 
   function grade(ok: boolean, current: AlefItem) {
@@ -64,7 +74,7 @@ export function ClosedBook({ onPractice }: { onPractice: (tab: "write" | "drill"
       <div className="mt-5 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">Closed book</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink">
-          {hits} / {deck.length}
+          {hits} / {items.length}
         </h2>
         <p className="mt-2 text-sm text-muted">
           {missedItems.length
@@ -119,7 +129,7 @@ export function ClosedBook({ onPractice }: { onPractice: (tab: "write" | "drill"
   return (
     <div className="mt-5">
       <p className="text-sm tabular-nums text-muted">
-        Closed book · {i + 1} / {deck.length} · {hits} correct
+        Closed book · {i + 1} / {items.length} · {hits} correct
       </p>
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-6 text-center shadow-[var(--shadow-border)]">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -134,6 +144,17 @@ export function ClosedBook({ onPractice }: { onPractice: (tab: "write" | "drill"
         mode={item.kind}
         allowSample={false}
         onPass={(ok) => grade(ok, item)}
+      />
+      <DontKnowButton
+        onClick={() => {
+          rate(item.key, "again");
+          setMisses((keys) => [...keys, item.key]);
+          if (!retryIds.has(item.key)) {
+            setRetryIds((s) => new Set(s).add(item.key));
+            setItems((list) => spliceLater(list, i, item));
+          }
+          setI((n) => n + 1);
+        }}
       />
     </div>
   );
