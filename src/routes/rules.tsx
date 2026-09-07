@@ -419,6 +419,7 @@ function HuntRound({
           <div className="rounded-[var(--radius-md)] bg-danger/10 px-3 py-2 text-center">
             <p className="try-flash text-xl font-bold uppercase tracking-wide text-danger">One more try</p>
             {hint && <p className="mt-1 text-sm font-medium text-ink">{hint}</p>}
+            <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
           </div>
         )}
 
@@ -426,7 +427,15 @@ function HuntRound({
         {gaveUp && revealed && (
           <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
         )}
-        {!revealed && <DontKnowButton onClick={admitNoIdea} />}
+        {!revealed && (
+          <DontKnowButton
+            usedTry={tries > 0}
+            onNudge={() => {
+              if (tries < 1) setTries(1);
+            }}
+            onClick={admitNoIdea}
+          />
+        )}
 
         <Button type="submit" size="lg" className="w-full">
           {revealed ? "Next" : "Check"}

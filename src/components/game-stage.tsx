@@ -376,7 +376,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
                         playGrade(true);
                         return;
                       }
-                      if (!missedChoice) {
+                      if (!missedChoice && tries < 1) {
                         setMissedChoice(c);
                         setTries(1);
                         playGrade(false);
@@ -400,12 +400,13 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               );
             })}
           </ul>
-          {missedChoice && !picked && (
+          {(missedChoice || tries >= 1) && !picked && (
             <>
-              <GradeBanner className="mt-4" ok={false} />
+              {missedChoice && missedChoice !== "__nudge__" ? <GradeBanner className="mt-4" ok={false} /> : null}
               <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
                 One more try
               </p>
+              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
             </>
           )}
           {picked && (
@@ -419,7 +420,16 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               </Button>
             </>
           )}
-          {!picked && <DontKnowButton onClick={admitNoIdea} />}
+          {!picked && (
+            <DontKnowButton
+              usedTry={tries >= 1 || Boolean(missedChoice)}
+              onNudge={() => {
+                if (tries < 1) setTries(1);
+                if (!missedChoice) setMissedChoice("__nudge__");
+              }}
+              onClick={admitNoIdea}
+            />
+          )}
         </>
       ) : stage === "gloss" ? (
         <form
@@ -456,9 +466,12 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             <p className="mt-2 text-center text-sm font-medium text-muted">Type the English gloss — no list.</p>
           )}
           {tries >= 1 && !revealed && (
-            <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-              One more try
-            </p>
+            <>
+              <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+                One more try
+              </p>
+              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </>
           )}
           {revealed && (
             <div className="mt-3">
@@ -469,7 +482,15 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               )}
             </div>
           )}
-          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
+          {!revealed && (
+            <DontKnowButton
+              usedTry={tries >= 1}
+              onNudge={() => {
+                if (tries < 1) setTries(1);
+              }}
+              onClick={admitNoIdea}
+            />
+          )}
           <Button className="mt-3 w-full" type="submit">
             {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
           </Button>
@@ -496,9 +517,12 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             liveGrade={stage !== "spell-strict"}
           />
           {tries >= 1 && !revealed && (
-            <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
-              One more try
-            </p>
+            <>
+              <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
+                One more try
+              </p>
+              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </>
           )}
           {revealed && (
             <div className="mt-3">
@@ -524,7 +548,15 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               )}
             </div>
           )}
-          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
+          {!revealed && (
+            <DontKnowButton
+              usedTry={tries >= 1}
+              onNudge={() => {
+                if (tries < 1) setTries(1);
+              }}
+              onClick={admitNoIdea}
+            />
+          )}
           <Button className="mt-3 w-full" type="submit" disabled={!revealed && !typed.trim()}>
             {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
           </Button>

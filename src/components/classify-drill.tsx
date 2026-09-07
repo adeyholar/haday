@@ -237,9 +237,12 @@ function Round({
         </ul>
 
         {phase === "retry" && (
-          <p className="try-flash mt-1 text-center text-xl font-bold uppercase tracking-wide text-danger sm:text-2xl">
-            One more try
-          </p>
+          <>
+            <p className="try-flash mt-1 text-center text-xl font-bold uppercase tracking-wide text-danger sm:text-2xl">
+              One more try
+            </p>
+            <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
+          </>
         )}
 
         {phase === "lead" && (
@@ -257,7 +260,15 @@ function Round({
           <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
         )}
 
-        {!revealed && <DontKnowButton onClick={admitNoIdea} />}
+        {!revealed && (
+          <DontKnowButton
+            usedTry={phase !== "ask"}
+            onNudge={() => {
+              if (phase === "ask") setPhase("retry");
+            }}
+            onClick={admitNoIdea}
+          />
+        )}
 
         {(revealed || parseClassifyInput(kind, typed)) && (
           <Button type="submit" size="lg" className="w-full">

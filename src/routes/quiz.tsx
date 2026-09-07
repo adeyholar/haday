@@ -219,10 +219,11 @@ function QuizPage() {
         </ul>
         {missedChoice && !picked && (
           <>
-            <GradeBanner className="mt-4" ok={false} />
+            {missedChoice !== "__nudge__" ? <GradeBanner className="mt-4" ok={false} /> : null}
             <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
               One more try
             </p>
+            <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
           </>
         )}
         {picked && (
@@ -285,9 +286,12 @@ function QuizPage() {
             <p className="mt-2 text-center text-sm font-medium text-muted">Type the English gloss.</p>
           )}
           {typeTries >= 1 && !revealed && (
-            <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-              One more try
-            </p>
+            <>
+              <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+                One more try
+              </p>
+              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </>
           )}
           {revealed && (
             <div className="mt-3">
@@ -298,7 +302,15 @@ function QuizPage() {
               )}
             </div>
           )}
-          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
+          {!revealed && (
+            <DontKnowButton
+              usedTry={typeTries >= 1}
+              onNudge={() => {
+                if (typeTries < 1) setTypeTries(1);
+              }}
+              onClick={admitNoIdea}
+            />
+          )}
           <Button className="mt-3 w-full" type="submit">
             {revealed ? "Next" : typeTries >= 1 ? "Check retry" : "Check"}
           </Button>
@@ -312,7 +324,15 @@ function QuizPage() {
           Next
         </Button>
       )}
-      {mode === "choice" && !picked && <DontKnowButton onClick={admitNoIdea} />}
+      {mode === "choice" && !picked && (
+        <DontKnowButton
+          usedTry={Boolean(missedChoice)}
+          onNudge={() => {
+            if (!missedChoice) setMissedChoice("__nudge__");
+          }}
+          onClick={admitNoIdea}
+        />
+      )}
     </>
   );
 }

@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
-- **Learn · In the Tanakh.** Passage note plus a short Gesenius / Davidson nugget (public domain), so the rule is seen doing work in that verse.
+- **Tell me.** The old Don’t know button now reads Tell me. First tap asks for one more try before the answer is shown; a second tap (or a miss after that) reveals it.
 
 - **Don’t know on Game.** Same full-width button as Rules, under the answers — not buried under the verse.
 
