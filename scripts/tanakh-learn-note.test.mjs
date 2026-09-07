@@ -19,7 +19,23 @@ test("article verse names citation lemma יָם not הַיָּם", () => {
   );
   assert.equal(e.lemmaHe, "יָם");
   assert.match(e.lemmaGloss.toLowerCase(), /sea/);
-  assert.match(e.note, /יָם/);
+  assert.match(e.note, /crossing|Reed|body of water|that sea|the sea they/i);
+});
+
+test("note ties the rule to the passage, not only the lemma", () => {
+  const e = learnVerseExplain(
+    {
+      ref: "Deut 6:4",
+      he: "שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד",
+      en: "Hear, Israel: YHWH our God, YHWH is one.",
+      hit: "יִשְׂרָאֵל",
+      hitEn: "Israel",
+    },
+    "article",
+    [],
+  );
+  assert.match(e.note, /Shema|Hear|name/i);
+  assert.doesNotMatch(e.note, /Strip the ה/);
 });
 
 test("bare noun stays the citation lemma", () => {
@@ -36,5 +52,5 @@ test("bare noun stays the citation lemma", () => {
   );
   assert.match(e.lemmaHe, /מֶ.?לֶךְ/);
   assert.match(e.lemmaGloss.toLowerCase(), /king/);
-  assert.match(e.note, /indefinite|citation/i);
+  assert.match(e.note, /king of glory|bare noun|no article/i);
 });

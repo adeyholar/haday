@@ -1,3 +1,4 @@
+import { LEARN_WHY, learnWhyKey } from "@/lib/tanakh-learn-why";
 import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { lemmaForSurface } from "@/lib/tanakh-pool";
 
@@ -53,8 +54,9 @@ export function learnVerseExplain(
   const lemmaGloss = shortGloss(lemma?.gloss ?? sample?.gloss ?? verse.hitEn ?? "");
   const lemmaTranslit = lemma?.translit;
   const named = lemmaGloss ? `${lemmaHe} “${lemmaGloss}”` : lemmaHe;
+  const passage = LEARN_WHY[learnWhyKey(kind, verse.ref, verse.hit)] ?? verse.why;
 
-  if (verse.why) return { lemmaHe, lemmaGloss, lemmaTranslit, note: verse.why };
+  if (passage) return { lemmaHe, lemmaGloss, lemmaTranslit, note: passage };
 
   const hitL = letters(verse.hit);
   const lemL = letters(lemmaHe);

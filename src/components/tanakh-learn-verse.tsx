@@ -56,9 +56,7 @@ export function TanakhLearnVerse({
         {explained.lemmaTranslit ? <span className="text-muted"> · {explained.lemmaTranslit}</span> : null}
       </p>
       <p className="mt-1 text-sm text-muted">{explained.note}</p>
-      <p className="mt-1 text-xs text-muted">
-        Citation form as in public Hebrew lexica — look the word up without the article or a suffix.
-      </p>
+      <p className="mt-1 text-xs text-muted">The marked word is the rule at work in this verse.</p>
     </li>
   );
 }

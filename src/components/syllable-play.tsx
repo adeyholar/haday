@@ -189,7 +189,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
         <Panel className="mt-3">
           <h2 className="font-display text-xl font-bold text-ink">In the Tanakh</h2>
           <p className="mt-1 text-sm text-muted">
-            The hit word is marked. Under it: the citation lemma, the split, and why this form is here.
+            The hit word is marked. Then a short note: what the passage is doing, and how the split lives in that word.
           </p>
           <ul className="mt-3 space-y-4">
             {unit.verses.map((v) => (
