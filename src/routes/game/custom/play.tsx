@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { GameStagePlay } from "@/components/game-stage";
-import { clearedChapters, isStageId, parseChapterList } from "@/lib/game";
+import { mixableChapters, isStageId, parseChapterList } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
 type Search = { chapters?: string; stage?: string };
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/game/custom/play")({
 function CustomMixPlayPage() {
   const { chapters: raw, stage: rawStage } = Route.useSearch();
   const game = useStudy((s) => s.game);
-  const allowed = new Set(clearedChapters(game));
+  const allowed = new Set(mixableChapters(game));
   const chapters = parseChapterList(raw).filter((n) => allowed.has(n));
   const stage = isStageId(rawStage) ? rawStage : "recognize";
 

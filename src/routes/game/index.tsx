@@ -42,7 +42,7 @@ function GameMapPage() {
           <Link to="/game/custom" className="font-semibold text-primary">
             Custom mix
           </Link>
-          <span className="text-muted"> — pick chapters you have already cleared and play them in one sitting.</span>
+          <span className="text-muted"> — every student: pick open chapters and play them in one sitting.</span>
         </p>
         <p className="mt-3 text-sm">
           <Link to="/challenge" className="font-semibold text-primary">

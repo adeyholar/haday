@@ -70,9 +70,9 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Custom mix</h2>
         <p className="mt-2 text-sm text-muted">
-          After you clear a chapter at 90%, it is available under Game → Custom mix. Tick any of those finished levels,
-          pick Recognize, Gloss, or Spell, and play the combined list in one sitting. Review only — it does not change
-          the chapter path.
+          After you open a chapter on the path (Chapter 1 is open for everyone), it is available under Game → Custom mix.
+          Tick any of those levels, pick Recognize, Gloss, or Spell, and play the combined list in one sitting. Review
+          only — it does not change the chapter path. Every signed-in student can use it.
         </p>
       </Panel>
 

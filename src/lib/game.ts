@@ -635,6 +635,15 @@ export function clearedChapters(game: GameSnapshot): number[] {
   return out;
 }
 
+/** Chapters this student can put in a mix — unlocked on their path. Chapter 1 is always open. */
+export function mixableChapters(game: GameSnapshot): number[] {
+  const out: number[] = [];
+  for (let n = 1; n <= GAME_CHAPTER_MAX; n++) {
+    if (isChapterUnlocked(game, n)) out.push(n);
+  }
+  return out.length ? out : [1];
+}
+
 export function parseChapterList(raw: string | undefined | null): number[] {
   if (!raw) return [];
   const seen = new Set<number>();
