@@ -416,6 +416,7 @@ export function ArticlePlay({ unitId }: { unitId: number }) {
           );
         })}
       </ul>
+      {!picked && <DontKnowButton onClick={admitNoIdea} />}
       {picked && (
         <div className="mt-3">
           <GradeBanner ok={ok} />
@@ -430,7 +431,6 @@ export function ArticlePlay({ unitId }: { unitId: number }) {
           </Button>
         </div>
       )}
-      {!picked && <DontKnowButton onClick={admitNoIdea} />}
     </>
   );
 }

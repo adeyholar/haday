@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
-- **Listen mix.** Vocabulary Listen can loop a group of chapters you pick — same idea as Game Custom mix. Off / this chapter / mix / all.
+- **Don’t know on Game.** Same full-width button as Rules, under the answers — not buried under the verse.
 
 - **Custom mix.** Under Game, for every student: pick open BBH chapters and play that combined list in one sitting (Recognize, Gloss, or Spell). Chapter 1 starts open. Does not unlock or lock the path.
 

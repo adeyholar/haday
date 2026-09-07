@@ -355,9 +355,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
         )}
       </div>
 
-      {(stage !== "spell-strict" || revealed) && (
-        <VerseCard item={item} showEnglish={showEnglish} />
-      )}
+      {stage === "spell-lenient" && <VerseCard item={item} showEnglish={showEnglish} />}
 
       {stage === "recognize" ? (
         <>
@@ -531,6 +529,10 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
           </Button>
         </form>
+      )}
+
+      {(stage === "recognize" || stage === "gloss" || (stage === "spell-strict" && revealed)) && (
+        <VerseCard item={item} showEnglish={showEnglish} />
       )}
 
       <p className="mt-4 text-center">
