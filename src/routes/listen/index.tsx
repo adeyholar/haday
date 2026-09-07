@@ -15,11 +15,15 @@ import {
   listenPlaylist,
   loadListenIndex,
   loadListenLoop,
+  loadListenMix,
+  mixIndexList,
+  mixPosition,
   nextListenIndex,
   playListenChime,
   prevListenIndex,
   saveListenIndex,
   saveListenLoop,
+  saveListenMix,
   speakCard,
   speechSupported,
   stopSpeech,
@@ -35,6 +39,7 @@ function ListenPage() {
   const [i, setI] = useState(() => Math.min(loadListenIndex(), Math.max(0, list.length - 1)));
   const [playing, setPlaying] = useState(false);
   const [loop, setLoop] = useState<ListenLoop>(() => loadListenLoop());
+  const [mixChapters, setMixChapters] = useState<number[]>(() => loadListenMix());
   const [rate, setRate] = useState(0.8);
   const [heVoice, setHeVoice] = useState(true);
   const [supported] = useState(() => speechSupported());
@@ -42,6 +47,7 @@ function ListenPage() {
   const stopRef = useRef({ stop: false });
   const playGen = useRef(0);
   const loopRef = useRef(loop);
+  const mixRef = useRef(mixChapters);
   const rateRef = useRef(rate);
   const iRef = useRef(i);
   const item = list[i];
@@ -50,7 +56,9 @@ function ListenPage() {
   const range = item ? chapterRange(list, item.chapter) : { start: 0, end: 0 };
   const chPos = i - range.start + 1;
   const chLen = range.end - range.start + 1;
+  const mixPos = mixPosition(list, i, mixChapters);
   loopRef.current = loop;
+  mixRef.current = mixChapters;
   rateRef.current = rate;
   iRef.current = i;
 
@@ -65,6 +73,10 @@ function ListenPage() {
   useEffect(() => {
     saveListenLoop(loop);
   }, [loop]);
+
+  useEffect(() => {
+    saveListenMix(mixChapters);
+  }, [mixChapters]);
 
   useEffect(() => {
     return () => {
@@ -144,7 +156,7 @@ function ListenPage() {
         iRef.current = at;
         await speakCard(card, rateRef.current, stopRef.current);
         if (stopRef.current.stop || gen !== playGen.current) break;
-        const next = nextListenIndex(list, at, loopRef.current);
+        const next = nextListenIndex(list, at, loopRef.current, mixRef.current);
         if (next == null) break;
         at = next;
       }
@@ -157,14 +169,21 @@ function ListenPage() {
 
   function toggle() {
     if (playing) halt();
-    else startFrom(i, true);
+    else {
+      let at = i;
+      if (loop === "mix") {
+        const idx = mixIndexList(list, mixChapters, item?.chapter);
+        if (idx.length && !idx.includes(at)) at = idx[0];
+      }
+      startFrom(at, true);
+    }
   }
 
   function step(delta: number) {
     const next =
       delta < 0
-        ? prevListenIndex(list, iRef.current, loopRef.current)
-        : (nextListenIndex(list, iRef.current, loopRef.current) ?? iRef.current);
+        ? prevListenIndex(list, iRef.current, loopRef.current, mixRef.current)
+        : (nextListenIndex(list, iRef.current, loopRef.current, mixRef.current) ?? iRef.current);
     setI(next);
     iRef.current = next;
     if (playing) startFrom(next, false);
@@ -184,7 +203,7 @@ function ListenPage() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Hands-free</p>
         <p className="mt-3 text-muted">
           Hebrew as a whole word, then English. Avraham, then Abraham. Isolated Open Hebrew Bible audio when we have
-          that lemma; otherwise a spoken name. Loop this chapter to stay on it, or loop the whole list.
+          that lemma; otherwise a spoken name. Loop this chapter, a group of chapters you pick, or the whole list.
         </p>
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">
@@ -218,8 +237,9 @@ function ListenPage() {
           <p className="mt-3 text-sm text-primary">{vocabClipLabel(lemmaClip)}</p>
         ) : null}
         <p className="mt-6 text-sm tabular-nums text-muted">
-          {chPos} / {chLen}
-          {loop === "chapter" ? " in this chapter" : loop === "all" ? " · looping all" : ""}
+          {loop === "mix"
+            ? `${mixPos.pos} / ${mixPos.len} in mix`
+            : `${chPos} / ${chLen}${loop === "chapter" ? " in this chapter" : loop === "all" ? " · looping all" : ""}`}
         </p>
       </div>
 
@@ -238,11 +258,12 @@ function ListenPage() {
         </Button>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {(
           [
             ["off", "Off"],
             ["chapter", "Chapter"],
+            ["mix", "Mix"],
             ["all", "All"],
           ] as const
         ).map(([value, label]) => (
@@ -252,6 +273,11 @@ function ListenPage() {
             onClick={() => {
               setLoop(value);
               loopRef.current = value;
+              if (value === "mix" && !mixChapters.length && item) {
+                const seed = [item.chapter];
+                setMixChapters(seed);
+                mixRef.current = seed;
+              }
             }}
             className={`min-h-12 rounded-[var(--radius-md)] px-2 text-sm font-semibold shadow-[var(--shadow-border)] ${
               loop === value ? "bg-ink text-parchment" : "bg-card text-ink"
@@ -264,9 +290,13 @@ function ListenPage() {
       <p className="mt-1.5 text-center text-xs text-muted">
         {loop === "chapter"
           ? `Looping chapter ${item?.chapter ?? ""} — stays on this chapter.`
-          : loop === "all"
-            ? "Looping the whole list."
-            : "Stops at the end."}
+          : loop === "mix"
+            ? mixChapters.length
+              ? `Looping chapters ${mixChapters.join(", ")}.`
+              : "Tick chapters below, then Play."
+            : loop === "all"
+              ? "Looping the whole list."
+              : "Stops at the end."}
       </p>
       <label className="mt-2 flex min-h-12 items-center justify-between gap-2 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold shadow-[var(--shadow-border)]">
           Speed
@@ -287,20 +317,68 @@ function ListenPage() {
         </label>
 
       <Panel className="mt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">Jump to chapter</p>
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            {loop === "mix" ? "Chapters in this mix" : "Jump to chapter"}
+          </p>
+          {loop === "mix" ? (
+            <div className="flex gap-3 text-xs font-semibold">
+              <button
+                type="button"
+                className="text-primary"
+                onClick={() => {
+                  const all = Array.from({ length: 19 }, (_, n) => n + 1);
+                  setMixChapters(all);
+                  mixRef.current = all;
+                }}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className="text-muted"
+                onClick={() => {
+                  setMixChapters([]);
+                  mixRef.current = [];
+                }}
+              >
+                None
+              </button>
+            </div>
+          ) : null}
+        </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {Array.from({ length: 19 }, (_, n) => n + 1).map((ch) => (
-            <button
-              key={ch}
-              type="button"
-              onClick={() => jumpChapter(ch)}
-              className={`min-h-11 min-w-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold ${
-                item?.chapter === ch ? "bg-ink text-parchment" : "bg-card shadow-[var(--shadow-border)]"
-              }`}
-            >
-              {ch}
-            </button>
-          ))}
+          {Array.from({ length: 19 }, (_, n) => n + 1).map((ch) => {
+            const inMix = mixChapters.includes(ch);
+            const current = item?.chapter === ch;
+            return (
+              <button
+                key={ch}
+                type="button"
+                onClick={() => {
+                  if (loop === "mix") {
+                    const next = inMix ? mixChapters.filter((n) => n !== ch) : [...mixChapters, ch].sort((a, b) => a - b);
+                    setMixChapters(next);
+                    mixRef.current = next;
+                    if (!inMix) jumpChapter(ch);
+                    return;
+                  }
+                  jumpChapter(ch);
+                }}
+                className={`min-h-11 min-w-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold ${
+                  loop === "mix"
+                    ? inMix
+                      ? "bg-ink text-parchment"
+                      : "bg-card shadow-[var(--shadow-border)]"
+                    : current
+                      ? "bg-ink text-parchment"
+                      : "bg-card shadow-[var(--shadow-border)]"
+                }`}
+              >
+                {ch}
+              </button>
+            );
+          })}
         </div>
         <p className="mt-3 text-xs text-muted">
           Turn the ringer and media volume up. You should hear a short chime, then the words. Keep the screen on.

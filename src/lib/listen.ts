@@ -4,8 +4,9 @@ import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
+const MIX_KEY = "haday-listen-mix-ch";
 
-export type ListenLoop = "off" | "chapter" | "all";
+export type ListenLoop = "off" | "chapter" | "all" | "mix";
 export type ListenItem = VocabItem & { announce?: string };
 
 export function listenPlaylist(): ListenItem[] {
@@ -55,8 +56,20 @@ export function chapterRange(list: ListenItem[], chapter: number): { start: numb
   return { start, end };
 }
 
-export function nextListenIndex(list: ListenItem[], i: number, loop: ListenLoop): number | null {
+export function nextListenIndex(
+  list: ListenItem[],
+  i: number,
+  loop: ListenLoop,
+  mixChapters: number[] = [],
+): number | null {
   const cur = list[i];
+  if (loop === "mix") {
+    const idx = mixIndexList(list, mixChapters, cur?.chapter);
+    if (!idx.length) return nextListenIndex(list, i, "chapter");
+    const pos = idx.indexOf(i);
+    if (pos < 0) return idx.find((n) => n > i) ?? idx[0] ?? null;
+    return idx[(pos + 1) % idx.length];
+  }
   if (!cur) return loop === "all" && list.length ? 0 : null;
   if (loop === "chapter") {
     const { start, end } = chapterRange(list, cur.chapter);
@@ -67,8 +80,23 @@ export function nextListenIndex(list: ListenItem[], i: number, loop: ListenLoop)
   return null;
 }
 
-export function prevListenIndex(list: ListenItem[], i: number, loop: ListenLoop): number {
+export function prevListenIndex(
+  list: ListenItem[],
+  i: number,
+  loop: ListenLoop,
+  mixChapters: number[] = [],
+): number {
   const cur = list[i];
+  if (loop === "mix") {
+    const idx = mixIndexList(list, mixChapters, cur?.chapter);
+    if (!idx.length) return prevListenIndex(list, i, "chapter");
+    const pos = idx.indexOf(i);
+    if (pos < 0) {
+      const before = [...idx].reverse().find((n) => n < i);
+      return before ?? idx[idx.length - 1] ?? Math.max(0, i);
+    }
+    return idx[(pos - 1 + idx.length) % idx.length];
+  }
   if (loop === "chapter" && cur) {
     const { start, end } = chapterRange(list, cur.chapter);
     return i > start ? i - 1 : end;
@@ -78,10 +106,31 @@ export function prevListenIndex(list: ListenItem[], i: number, loop: ListenLoop)
   return Math.max(0, i);
 }
 
+export function mixIndexList(list: ListenItem[], chapters: number[], fallbackChapter?: number): number[] {
+  const set = new Set(chapters.filter((n) => n >= 1 && n <= 19));
+  if (!set.size && fallbackChapter) set.add(fallbackChapter);
+  const idx: number[] = [];
+  for (let n = 0; n < list.length; n++) {
+    if (set.has(list[n].chapter)) idx.push(n);
+  }
+  return idx;
+}
+
+export function mixPosition(
+  list: ListenItem[],
+  i: number,
+  chapters: number[],
+): { pos: number; len: number } {
+  const idx = mixIndexList(list, chapters, list[i]?.chapter);
+  if (!idx.length) return { pos: 1, len: 1 };
+  const pos = idx.indexOf(i);
+  return { pos: (pos < 0 ? 0 : pos) + 1, len: idx.length };
+}
+
 export function loadListenLoop(): ListenLoop {
   try {
     const v = localStorage.getItem(LOOP_KEY);
-    if (v === "off" || v === "chapter" || v === "all") return v;
+    if (v === "off" || v === "chapter" || v === "all" || v === "mix") return v;
   } catch {
     /* ignore */
   }
@@ -91,6 +140,32 @@ export function loadListenLoop(): ListenLoop {
 export function saveListenLoop(loop: ListenLoop) {
   try {
     localStorage.setItem(LOOP_KEY, loop);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function loadListenMix(): number[] {
+  try {
+    const raw = localStorage.getItem(MIX_KEY) ?? "";
+    const seen = new Set<number>();
+    const out: number[] = [];
+    for (const part of raw.split(/[,+\s]+/)) {
+      const n = Number(part);
+      if (!Number.isInteger(n) || n < 1 || n > 19 || seen.has(n)) continue;
+      seen.add(n);
+      out.push(n);
+    }
+    return out.sort((a, b) => a - b);
+  } catch {
+    return [];
+  }
+}
+
+export function saveListenMix(chapters: number[]) {
+  try {
+    const clean = [...new Set(chapters.filter((n) => n >= 1 && n <= 19))].sort((a, b) => a - b);
+    localStorage.setItem(MIX_KEY, clean.join(","));
   } catch {
     /* ignore */
   }

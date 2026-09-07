@@ -33,6 +33,17 @@ test("chapter loop stays inside the chapter and wraps", () => {
   assert.equal(nextListenIndex(list, list.length - 1, "all"), 0);
 });
 
+test("mix loop walks selected chapters then wraps", () => {
+  const list = listenPlaylist();
+  const ch2 = chapterRange(list, 2);
+  const ch4 = chapterRange(list, 4);
+  const mix = [2, 4];
+  assert.equal(nextListenIndex(list, ch2.end, "mix", mix), ch4.start);
+  assert.equal(nextListenIndex(list, ch4.end, "mix", mix), ch2.start);
+  assert.equal(prevListenIndex(list, ch2.start, "mix", mix), ch4.end);
+  assert.equal(nextListenIndex(list, ch2.start, "mix", mix), ch2.start + 1);
+});
+
 test("Eliran clips are citation consonants, not prefixes", () => {
   const letters = (s) => [...s].filter((ch) => ch >= "א" && ch <= "ת").join("");
   const abraham = vocabClip("abraham");
