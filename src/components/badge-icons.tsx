@@ -1,4 +1,4 @@
-import { BookMarked, Crown, Flame, Flag, Footprints, Languages, Medal, Mountain, Repeat, Scissors, Scroll, Star, Trophy, type LucideIcon } from "lucide-react";
+import { BookMarked, Crown, Flame, Flag, Footprints, Hash, Languages, Medal, Mountain, Repeat, Scissors, Scroll, Star, Trophy, type LucideIcon } from "lucide-react";
 import type { BadgeId } from "@/lib/rewards";
 
 export const BADGE_ICONS: Record<BadgeId, LucideIcon> = {
@@ -23,6 +23,8 @@ export const BADGE_ICONS: Record<BadgeId, LucideIcon> = {
   "syllables-master": Scissors,
   "nouns-open": BookMarked,
   "nouns-master": BookMarked,
+  "article-open": Hash,
+  "article-master": Hash,
 };
 
 export function BadgeGlyph({ id, className }: { id: string; className?: string }) {

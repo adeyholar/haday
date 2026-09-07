@@ -6,6 +6,7 @@ import { Panel } from "@/components/panel";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
 import { GradeBanner } from "@/components/grade-banner";
+import { DontKnowButton } from "@/components/dont-know-button";
 import { NewBadges } from "@/components/rewards-bar";
 import { playGrade } from "@/lib/sfx";
 import {
@@ -145,6 +146,19 @@ export function GameStagePlay({ chapter, stage }: Props) {
     setTyped("");
     setRevealed(false);
     setTries(0);
+  }
+
+  function admitNoIdea() {
+    if (!item || revealed || picked) return;
+    if (stage !== "recognize" && typedOk) return;
+    playGrade(false);
+    if (stage === "recognize") {
+      setPicked("__noidea__");
+      return;
+    }
+    setRevealed(true);
+    setPicked("miss");
+    setTries(2);
   }
 
   function checkTyped(ok: boolean) {
@@ -371,11 +385,15 @@ export function GameStagePlay({ chapter, stage }: Props) {
           {picked && (
             <>
               <GradeBanner className="mt-4" ok={picked === item.gloss} />
+              {picked !== item.gloss && (
+                <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              )}
               <Button className="mt-4 w-full" onClick={advanceAfterReveal}>
                 Next
               </Button>
             </>
           )}
+          {!picked && <DontKnowButton onClick={admitNoIdea} />}
         </>
       ) : stage === "gloss" ? (
         <form
@@ -420,8 +438,12 @@ export function GameStagePlay({ chapter, stage }: Props) {
             <div className="mt-3">
               <GradeBanner ok={typedOk} />
               <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
+              {!typedOk && (
+                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              )}
             </div>
           )}
+          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
           <Button className="mt-3 w-full" type="submit">
             {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
           </Button>
@@ -445,6 +467,7 @@ export function GameStagePlay({ chapter, stage }: Props) {
             alts={spell.alts}
             disabled={revealed}
             strict
+            liveGrade={stage !== "spell-strict"}
           />
           {tries >= 1 && !revealed && (
             <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
@@ -470,8 +493,12 @@ export function GameStagePlay({ chapter, stage }: Props) {
                   ) : null}
                 </p>
               )}
+              {!typedOk && (
+                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              )}
             </div>
           )}
+          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
           <Button className="mt-3 w-full" type="submit" disabled={!revealed && !typed.trim()}>
             {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
           </Button>

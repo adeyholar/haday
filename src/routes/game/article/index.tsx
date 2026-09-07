@@ -3,35 +3,38 @@ import { Check, Lock } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { NOUN_UNITS } from "@/lib/nouns";
-import { isNounUnitUnlocked, nounUnitRecord } from "@/lib/game";
+import { ARTICLE_UNITS } from "@/lib/article";
+import { isArticleUnitUnlocked, articleUnitRecord } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
-export const Route = createFileRoute("/game/nouns/")({ component: NounMapPage });
+export const Route = createFileRoute("/game/article/")({ component: ArticleMapPage });
 
-function NounMapPage() {
+function ArticleMapPage() {
   const game = useStudy((s) => s.game);
 
   return (
     <>
       <Panel className="mb-4">
         <GameMenu />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Nouns</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Read the ending</h1>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Article & vav</p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Name the prefix</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Six units: learn the rule with Tanakh words and verses, pair each form to its ending, then a 12-question quiz.
-          Misses come back later in the same round. Later units mix in a few from the ones you already cleared. Score 90%
-          held to open the next unit. Week 3 also reads chapter 5 — play{" "}
-          <Link to="/game/article" className="font-semibold text-primary">
-            Article & vav
-          </Link>{" "}
-          as its own path.
+          Chapter 5 game: the article הַ and the conjunction וְ. Six units — learn the spelling with Tanakh words and
+          verses, pair each form, then a 12-question quiz. Misses come back later. Later units mix a few from the ones
+          you already cleared. Score 90% held to open the next unit. Week 3 of the course reads this together with
+          chapter 4 (nouns). The games stay chapter by chapter.
+        </p>
+        <p className="mt-2 text-sm">
+          <Link to="/game/nouns" className="font-semibold text-primary">
+            Nouns · chapter 4
+          </Link>
+          <span className="text-muted"> · then this path.</span>
         </p>
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
-        {NOUN_UNITS.map((u) => {
-          const rec = nounUnitRecord(game, u.id);
-          const unlocked = isNounUnitUnlocked(game, u.id);
+        {ARTICLE_UNITS.map((u) => {
+          const rec = articleUnitRecord(game, u.id);
+          const unlocked = isArticleUnitUnlocked(game, u.id);
           const current = unlocked && !rec.cleared;
           const inner = (
             <>
@@ -63,7 +66,7 @@ function NounMapPage() {
           return (
             <li key={u.id}>
               {unlocked ? (
-                <Link to="/game/nouns/$unit" params={{ unit: String(u.id) }} className={cls}>
+                <Link to="/game/article/$unit" params={{ unit: String(u.id) }} className={cls}>
                   {inner}
                 </Link>
               ) : (

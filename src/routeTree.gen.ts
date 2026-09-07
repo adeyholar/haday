@@ -37,6 +37,8 @@ import { Route as GameChapterIndexRouteImport } from './routes/game/$chapter/ind
 import { Route as GameChapterStageRouteImport } from './routes/game/$chapter/$stage'
 import { Route as GameAlefbetIndexRouteImport } from './routes/game/alefbet/index'
 import { Route as GameAlefbetLevelRouteImport } from './routes/game/alefbet/$level'
+import { Route as GameArticleIndexRouteImport } from './routes/game/article/index'
+import { Route as GameArticleUnitRouteImport } from './routes/game/article/$unit'
 import { Route as GameNounsIndexRouteImport } from './routes/game/nouns/index'
 import { Route as GameNounsUnitRouteImport } from './routes/game/nouns/$unit'
 import { Route as GameSyllablesIndexRouteImport } from './routes/game/syllables/index'
@@ -185,6 +187,16 @@ const GameAlefbetLevelRoute = GameAlefbetLevelRouteImport.update({
   path: '/game/alefbet/$level',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameArticleIndexRoute = GameArticleIndexRouteImport.update({
+  id: '/game/article/',
+  path: '/game/article/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameArticleUnitRoute = GameArticleUnitRouteImport.update({
+  id: '/game/article/$unit',
+  path: '/game/article/$unit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameNounsIndexRoute = GameNounsIndexRouteImport.update({
   id: '/game/nouns/',
   path: '/game/nouns/',
@@ -248,10 +260,12 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
+  '/game/article/$unit': typeof GameArticleUnitRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
+  '/game/article/': typeof GameArticleIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
@@ -284,10 +298,12 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
+  '/game/article/$unit': typeof GameArticleUnitRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
+  '/game/article': typeof GameArticleIndexRoute
   '/game/nouns': typeof GameNounsIndexRoute
   '/game/syllables': typeof GameSyllablesIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
@@ -322,10 +338,12 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
+  '/game/article/$unit': typeof GameArticleUnitRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
+  '/game/article/': typeof GameArticleIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
@@ -361,10 +379,12 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
+    | '/game/article/$unit'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
+    | '/game/article/'
     | '/game/nouns/'
     | '/game/syllables/'
     | '/listen/read/'
@@ -397,10 +417,12 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
+    | '/game/article/$unit'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter'
     | '/game/alefbet'
+    | '/game/article'
     | '/game/nouns'
     | '/game/syllables'
     | '/listen/read'
@@ -434,10 +456,12 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
+    | '/game/article/$unit'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
+    | '/game/article/'
     | '/game/nouns/'
     | '/game/syllables/'
     | '/listen/read/'
@@ -471,10 +495,12 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   GameChapterStageRoute: typeof GameChapterStageRoute
   GameAlefbetLevelRoute: typeof GameAlefbetLevelRoute
+  GameArticleUnitRoute: typeof GameArticleUnitRoute
   GameNounsUnitRoute: typeof GameNounsUnitRoute
   GameSyllablesUnitRoute: typeof GameSyllablesUnitRoute
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
+  GameArticleIndexRoute: typeof GameArticleIndexRoute
   GameNounsIndexRoute: typeof GameNounsIndexRoute
   GameSyllablesIndexRoute: typeof GameSyllablesIndexRoute
 }
@@ -677,6 +703,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameAlefbetLevelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/article/': {
+      id: '/game/article/'
+      path: '/game/article'
+      fullPath: '/game/article/'
+      preLoaderRoute: typeof GameArticleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/article/$unit': {
+      id: '/game/article/$unit'
+      path: '/game/article/$unit'
+      fullPath: '/game/article/$unit'
+      preLoaderRoute: typeof GameArticleUnitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/nouns/': {
       id: '/game/nouns/'
       path: '/game/nouns'
@@ -772,10 +812,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GameChapterStageRoute: GameChapterStageRoute,
   GameAlefbetLevelRoute: GameAlefbetLevelRoute,
+  GameArticleUnitRoute: GameArticleUnitRoute,
   GameNounsUnitRoute: GameNounsUnitRoute,
   GameSyllablesUnitRoute: GameSyllablesUnitRoute,
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
+  GameArticleIndexRoute: GameArticleIndexRoute,
   GameNounsIndexRoute: GameNounsIndexRoute,
   GameSyllablesIndexRoute: GameSyllablesIndexRoute,
 }

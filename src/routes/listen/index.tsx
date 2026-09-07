@@ -189,7 +189,7 @@ function ListenPage() {
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">
             On iPad: open this page in Safari, turn the volume up, and make sure the side Silent switch is not orange.
-            Then tap Play. You should hear “Listen.” first.
+            Then tap Play. Chapter first if you are at the start of one, then the word.
           </p>
         )}
         {!supported && (

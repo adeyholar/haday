@@ -5,6 +5,7 @@ import { Panel } from "@/components/panel";
 import { ClassifyDrill } from "@/components/classify-drill";
 import { drawRound } from "@/lib/quiz-draw";
 import { cn } from "@/lib/cn";
+import { findHitRange } from "@/lib/hebrew";
 import {
   GRAMMAR_CASES,
   GRAMMAR_GROUPS,
@@ -51,8 +52,8 @@ function RulesPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar to live by</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">When the rule shows up</h1>
         <p className="mt-2 max-w-prose text-muted">
-          These syllabification rules are not a chart to memorize. See them in the Tanakh, then hunt the lemma and
-          the verse — or name the rule from the highlighted form — so the text itself teaches the rule.
+          These rules are not a chart to memorize. See them in the Tanakh — syllables, the article הַ, and the
+          conjunction וְ — then hunt the lemma and the verse, or name the rule from the highlighted form.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <TabBtn active={tab === "study"} onClick={() => setTab("study")}>

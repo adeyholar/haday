@@ -55,6 +55,7 @@ const GAME: NavItem[] = [
   { to: "/game/alefbet", label: "Aleph-bet mastery", hint: "Letter games", icon: Languages },
   { to: "/game/syllables", label: "Syllables", hint: "Open, closed, shewa", icon: Layers },
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
+  { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 

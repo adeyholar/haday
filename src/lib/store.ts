@@ -14,6 +14,7 @@ import {
 } from "./srs";
 import {
   applyAlefBetResult,
+  applyArticleResult,
   applyNounResult,
   applyStageResult,
   applySyllableResult,
@@ -71,6 +72,10 @@ type StudyState = StudySnapshot & {
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
   completeNounUnit: (
+    unit: number,
+    result: { stars: number; score: number; firstTryRate: number },
+  ) => void;
+  completeArticleUnit: (
     unit: number,
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
@@ -170,6 +175,16 @@ export const useStudy = create<StudyState>()(
         const now = Date.now();
         const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
         const game = stampRewards(applyNounResult(get().game, unit, result), streakInfo.streak, get().keepStreak);
+        set({
+          game,
+          ...streakInfo,
+          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
+      },
+      completeArticleUnit: (unit, result) => {
+        const now = Date.now();
+        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
+        const game = stampRewards(applyArticleResult(get().game, unit, result), streakInfo.streak, get().keepStreak);
         set({
           game,
           ...streakInfo,

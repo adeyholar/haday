@@ -28,7 +28,9 @@ function GameMapPage() {
         <p className="mt-3 max-w-prose text-muted">
           Each BBH chapter is a level. Clear Recognize, Gloss, Spell (lenient), then Spell (strict) to unlock the next.
           Cards use the citation form from the class book. Both spell stages need the right consonants and vowels. Lenient
-          still shows the verse; strict does not. Chapter 1 starts open. 90% first-answer clears a stage.{" "}
+          still shows the verse and grades as you type; strict hides the verse and waits for Check before it says
+          correct or shows the word. No idea shows the answer and puts the card back in the round. Chapter 1 starts
+          open. 90% first-answer clears a stage.{" "}
           <Link to="/guide" className="font-semibold text-primary">
             How to play
           </Link>

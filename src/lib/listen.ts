@@ -267,11 +267,15 @@ function dummySpeak(lang: string, voice?: SpeechSynthesisVoice) {
   const s = synth();
   if (!s) return;
   try {
-    const u = new SpeechSynthesisUtterance("Listen.");
+    // Must speak inside the Play click so Safari keeps the session.
+    // Do not say "Listen." — chapter announce and the lemma come next.
+    // A space at full volume is inaudible but still counts as a real speak
+    // (volume 0 is skipped and later lines never play on iPad).
+    const u = new SpeechSynthesisUtterance("\u00a0");
     u.lang = lang;
     u.volume = 1;
-    u.rate = 1;
-    u.pitch = 1.1;
+    u.rate = 2;
+    u.pitch = 1;
     if (voice) {
       u.voice = voice;
       if (voice.lang) u.lang = voice.lang;

@@ -3,14 +3,15 @@ import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
 export const NOUN_UNIT_MAX = 6;
-/** First-try percent required to clear a Game stage and open the next one. */
+export const ARTICLE_UNIT_MAX = 6;
+/** Percent required to clear a Game stage or grammar unit and open the next one. */
 export const GAME_STAGE_PASS = 90;
 
 export const GAME_STAGES = [
   { id: "recognize", name: "Recognize", short: "Recognize", prompt: "Hebrew → English" },
   { id: "gloss", name: "Gloss", short: "Gloss", prompt: "Type the English gloss" },
   { id: "spell-lenient", name: "Spell (lenient)", short: "Spell · lenient", prompt: "Type each consonant and its vowel" },
-  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Type each consonant and its vowel — no verse" },
+  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Type each consonant and its vowel — Check first, no verse" },
 ] as const;
 
 export type GameStageId = (typeof GAME_STAGES)[number]["id"];
@@ -53,6 +54,7 @@ export type GameSnapshot = {
   alefBet: AlefBetProgress;
   syllables: SyllableProgress;
   nouns: SyllableProgress;
+  article: SyllableProgress;
 };
 
 export type AlefBetProgress = {
@@ -72,7 +74,7 @@ export const CHAPTER_META: Record<number, { title: string; blurb: string }> = {
   2: { title: "Names", blurb: "Frequent proper names" },
   3: { title: "Nouns", blurb: "Father, son, house, God" },
   4: { title: "More nouns", blurb: "Nation, king, city, Torah" },
-  5: { title: "Article & nouns", blurb: "The, and, fire, heaven, gold" },
+  5: { title: "Article & vav", blurb: "The, and, fire, heaven, gold" },
   6: { title: "Prepositions", blurb: "In, to, from, with, before" },
   7: { title: "Adjectives", blurb: "Good, holy, great, very" },
   8: { title: "Pronouns", blurb: "I, you, this, who, why" },
@@ -124,6 +126,7 @@ export function defaultGame(): GameSnapshot {
     alefBet: emptyAlefBet(),
     syllables: emptySyllables(),
     nouns: emptyNouns(),
+    article: emptyArticle(),
   };
 }
 
@@ -136,6 +139,10 @@ export function emptySyllables(): SyllableProgress {
 }
 
 export function emptyNouns(): SyllableProgress {
+  return { unlockedUnit: 1, currentUnit: 1, units: {} };
+}
+
+export function emptyArticle(): SyllableProgress {
   return { unlockedUnit: 1, currentUnit: 1, units: {} };
 }
 
@@ -175,6 +182,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     alefBet: hydrateAlefBet(r.alefBet),
     syllables: hydrateSyllables(r.syllables),
     nouns: hydrateNouns(r.nouns),
+    article: hydrateArticle(r.article),
   };
 }
 
@@ -228,6 +236,28 @@ function hydrateNouns(raw: unknown): SyllableProgress {
   const r = raw as Partial<SyllableProgress>;
   const unlocked = Math.min(NOUN_UNIT_MAX, Math.max(1, Number(r.unlockedUnit) || 1));
   const current = Math.min(NOUN_UNIT_MAX, Math.max(1, Number(r.currentUnit) || 1));
+  const units: Record<string, StageRecord> = {};
+  if (r.units && typeof r.units === "object") {
+    for (const [key, val] of Object.entries(r.units)) {
+      if (!val || typeof val !== "object") continue;
+      const rec = val as Partial<StageRecord>;
+      units[key] = {
+        stars: Number(rec.stars) || 0,
+        best: Number(rec.best) || 0,
+        cleared: Boolean(rec.cleared),
+        attempts: Math.max(Number(rec.attempts) || 0, rec.cleared ? 1 : 0),
+      };
+    }
+  }
+  return { unlockedUnit: unlocked, currentUnit: current, units };
+}
+
+function hydrateArticle(raw: unknown): SyllableProgress {
+  const base = emptyArticle();
+  if (!raw || typeof raw !== "object") return base;
+  const r = raw as Partial<SyllableProgress>;
+  const unlocked = Math.min(ARTICLE_UNIT_MAX, Math.max(1, Number(r.unlockedUnit) || 1));
+  const current = Math.min(ARTICLE_UNIT_MAX, Math.max(1, Number(r.currentUnit) || 1));
   const units: Record<string, StageRecord> = {};
   if (r.units && typeof r.units === "object") {
     for (const [key, val] of Object.entries(r.units)) {
@@ -425,13 +455,14 @@ export function applyAlefBetResult(
   const n = Math.min(3, Math.max(1, Math.round(level) || 1));
   const ab = next.alefBet ?? emptyAlefBet();
   const prev = ab.levels[String(n)] ?? emptyAlefLevel();
+  const passed = result.score >= GAME_STAGE_PASS;
   ab.levels[String(n)] = {
     stars: Math.max(prev.stars, result.stars),
     best: Math.max(prev.best, result.score),
-    cleared: true,
+    cleared: prev.cleared || passed,
     attempts: (prev.attempts || 0) + 1,
   };
-  if (n >= ab.unlockedLevel && n < 3) ab.unlockedLevel = n + 1;
+  if (passed && n >= ab.unlockedLevel && n < 3) ab.unlockedLevel = n + 1;
   ab.currentLevel = ab.unlockedLevel;
   next.alefBet = ab;
   next.lastPlayDay = Date.now();
@@ -462,7 +493,7 @@ export function applySyllableResult(
   const n = Math.min(SYLLABLE_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
   const sy = next.syllables ?? emptySyllables();
   const prev = sy.units[String(n)] ?? emptyAlefLevel();
-  const passed = result.score >= 70;
+  const passed = result.score >= GAME_STAGE_PASS;
   sy.units[String(n)] = {
     stars: Math.max(prev.stars, result.stars),
     best: Math.max(prev.best, result.score),
@@ -500,7 +531,7 @@ export function applyNounResult(
   const n = Math.min(NOUN_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
   const nn = next.nouns ?? emptyNouns();
   const prev = nn.units[String(n)] ?? emptyAlefLevel();
-  const passed = result.score >= 70;
+  const passed = result.score >= GAME_STAGE_PASS;
   nn.units[String(n)] = {
     stars: Math.max(prev.stars, result.stars),
     best: Math.max(prev.best, result.score),
@@ -510,6 +541,44 @@ export function applyNounResult(
   if (passed && n >= nn.unlockedUnit && n < NOUN_UNIT_MAX) nn.unlockedUnit = n + 1;
   nn.currentUnit = nn.unlockedUnit;
   next.nouns = nn;
+  next.lastPlayDay = Date.now();
+  if (result.firstTryRate >= 0.4) {
+    next.winStreak = (next.winStreak || 0) + 1;
+    next.bestWinStreak = Math.max(next.bestWinStreak || 0, next.winStreak);
+  } else {
+    next.winStreak = 0;
+  }
+  return next;
+}
+
+export function articleUnitRecord(game: GameSnapshot, unit: number): StageRecord {
+  return game.article?.units?.[String(unit)] ?? emptyAlefLevel();
+}
+
+export function isArticleUnitUnlocked(game: GameSnapshot, unit: number): boolean {
+  const n = Math.min(ARTICLE_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  return n <= (game.article?.unlockedUnit || 1);
+}
+
+export function applyArticleResult(
+  game: GameSnapshot,
+  unit: number,
+  result: { stars: number; score: number; firstTryRate: number },
+): GameSnapshot {
+  const next = cloneGame(hydrateGame(game));
+  const n = Math.min(ARTICLE_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  const ar = next.article ?? emptyArticle();
+  const prev = ar.units[String(n)] ?? emptyAlefLevel();
+  const passed = result.score >= GAME_STAGE_PASS;
+  ar.units[String(n)] = {
+    stars: Math.max(prev.stars, result.stars),
+    best: Math.max(prev.best, result.score),
+    cleared: prev.cleared || passed,
+    attempts: (prev.attempts || 0) + 1,
+  };
+  if (passed && n >= ar.unlockedUnit && n < ARTICLE_UNIT_MAX) ar.unlockedUnit = n + 1;
+  ar.currentUnit = ar.unlockedUnit;
+  next.article = ar;
   next.lastPlayDay = Date.now();
   if (result.firstTryRate >= 0.4) {
     next.winStreak = (next.winStreak || 0) + 1;

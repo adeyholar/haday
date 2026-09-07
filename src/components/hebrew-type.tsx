@@ -120,9 +120,20 @@ type Props = {
   disabled?: boolean;
   strict?: boolean;
   hideHint?: boolean;
+  /** When false, no live Correct / Not correct / rings until the parent grades a submit. */
+  liveGrade?: boolean;
 };
 
-export function HebrewType({ value, onChange, target, alts, disabled, strict = false, hideHint = false }: Props) {
+export function HebrewType({
+  value,
+  onChange,
+  target,
+  alts,
+  disabled,
+  strict = false,
+  hideHint = false,
+  liveGrade = true,
+}: Props) {
   const live = liveMatchAny(target, value, alts, strict);
   const extra = live === "off" ? pointingHint(target, value) : null;
   const offLabel = extra === "Use the final form" ? extra : "Not correct";
@@ -141,6 +152,8 @@ export function HebrewType({ value, onChange, target, alts, disabled, strict = f
         : live === "prefix"
           ? "Keep going — that prefix is right."
           : offLabel;
+  const showLive = (liveGrade || Boolean(disabled)) && !hideHint;
+  const paint = liveGrade || Boolean(disabled);
 
   function add(chunk: string) {
     if (disabled) return;
@@ -165,17 +178,22 @@ export function HebrewType({ value, onChange, target, alts, disabled, strict = f
         spellCheck={false}
         className={cn(
           "h-14 w-full rounded-[var(--radius-md)] border border-border bg-parchment px-4 text-center font-hebrew text-3xl text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          live === "exact" && "ring-2 ring-good",
-          live === "off" && value && "ring-2 ring-danger",
+          paint && live === "exact" && "ring-2 ring-good",
+          paint && live === "off" && value && "ring-2 ring-danger",
         )}
       />
-      {!disabled && !hideHint && (live === "exact" || live === "off") && (
+      {!disabled && !liveGrade && (
+        <p className="mt-2 text-center text-sm font-medium text-muted">
+          Type the full word, then Check. No live grade.
+        </p>
+      )}
+      {!disabled && showLive && (live === "exact" || live === "off") && (
         <GradeBanner className="mt-3" ok={live === "exact"} label={hint} size="live" />
       )}
-      {!disabled && !hideHint && live === "off" && extra && extra !== offLabel && (
+      {!disabled && showLive && live === "off" && extra && extra !== offLabel && (
         <p className="mt-1 text-center text-sm font-semibold text-danger">{extra}</p>
       )}
-      {!disabled && !hideHint && live !== "exact" && live !== "off" && (
+      {!disabled && showLive && live !== "exact" && live !== "off" && (
         <p className="mt-2 text-center text-sm font-medium text-muted">{hint}</p>
       )}
 

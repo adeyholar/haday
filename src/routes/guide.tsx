@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu groups BBH vocabulary, Aleph-bet mastery, Syllables, Nouns, and Ultimate Challenge.
+            class book. The Game menu groups BBH vocabulary, Aleph-bet mastery, Syllables, Nouns, Article & vav, and Ultimate Challenge.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -52,7 +52,7 @@ function GuidePage() {
         <h2 className="font-display text-2xl font-bold text-ink">Game stages</h2>
         <p className="mt-2 text-sm text-muted">Clear all four to unlock the next chapter. Chapter 1 starts open.</p>
         <ol className="mt-3 space-y-2 text-sm">
-          <Stage n="1" name="Recognize" body="Hebrew on the card. Pick the English gloss." />
+          <Stage n="1" name="Recognize" body="Hebrew on the card. Pick the English gloss. No idea shows the answer and puts the word back in the round." />
           <Stage n="2" name="Gloss" body="Read the Hebrew. Type the English meaning." />
           <Stage
             n="3"
@@ -62,7 +62,7 @@ function GuidePage() {
           <Stage
             n="4"
             name="Spell · strict"
-            body="Same typing, but the verse is hidden so you cannot copy from it."
+            body="Same typing, but the verse is hidden and there is no live grade. Check first — the word appears after you submit."
           />
         </ol>
       </Panel>
@@ -175,7 +175,7 @@ function GuidePage() {
           <li>
             <strong>Class vocab stays the book form.</strong> Game, Quiz, and Match show the citation lemma (יָם, not
             בַּיָּם). A Tanakh verse can still sit under the card so you see the word in Scripture, but the prompt is
-            the word from the list. Inflected forms belong in Syllables and Nouns, where that is the lesson.
+            the word from the list. Inflected forms belong in Syllables, Nouns, and Article & vav, where that is the lesson.
           </li>
         </ul>
       </Panel>

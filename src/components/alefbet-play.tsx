@@ -17,6 +17,7 @@ import {
   type AlefBetQuestion,
 } from "@/lib/alefbet-game";
 import { useStudy } from "@/lib/store";
+import { GAME_STAGE_PASS } from "@/lib/game";
 import type { HebrewLetter } from "@/lib/alphabet";
 
 function LetterPad({
@@ -164,6 +165,7 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
   }
 
   const score = round.length ? Math.round((firstHits / round.length) * 100) : 0;
+  const passed = score >= GAME_STAGE_PASS;
 
   if (finished || pos >= round.length) {
     const rate = round.length ? firstHits / round.length : 0;
@@ -171,7 +173,9 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
     return (
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{meta.title}</p>
-        <h1 className="mt-1 font-display text-4xl font-bold text-ink">Level cleared</h1>
+        <h1 className="mt-1 font-display text-4xl font-bold text-ink">
+          {passed ? "Level cleared" : `Need ${GAME_STAGE_PASS}% to unlock the next level`}
+        </h1>
         <p className="mt-3 font-display text-5xl font-bold tabular-nums text-ink">{score}%</p>
         <p className="mt-1 tracking-widest text-primary">{"★".repeat(stars)}</p>
         <p className="mt-3 text-sm text-muted">
@@ -179,15 +183,16 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
           give it away.
         </p>
         <div className="mt-6 flex flex-col gap-2">
-          {nextLevel ? (
+          {passed && nextLevel ? (
             <Link to="/game/alefbet/$level" params={{ level: String(nextLevel) }}>
               <Button className="w-full" size="lg">
                 Next: {ALEF_BET_LEVELS[nextLevel - 1].title}
               </Button>
             </Link>
-          ) : (
+          ) : null}
+          {passed && !nextLevel ? (
             <p className="text-sm font-semibold text-good">Aleph-bet mastery complete.</p>
-          )}
+          ) : null}
           <Link to="/game/alefbet">
             <Button variant="outline" className="w-full" size="lg">
               Aleph-bet map

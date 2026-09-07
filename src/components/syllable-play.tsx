@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { GradeBanner } from "@/components/grade-banner";
+import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { playGrade } from "@/lib/sfx";
 import { cn } from "@/lib/cn";
@@ -17,6 +18,9 @@ import {
   type SyllableVerse,
 } from "@/lib/syllables";
 import { useStudy } from "@/lib/store";
+import { GAME_STAGE_PASS } from "@/lib/game";
+
+type PlayQ = SyllableQuiz & { key: string; retry?: boolean };
 
 function MixHe({ text, className }: { text: string; className?: string }) {
   const re = /[\u0590-\u05FF]+/g;
@@ -109,18 +113,29 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
   const unit = syllableUnit(unitId);
   const complete = useStudy((s) => s.completeSyllableUnit);
   const [step, setStep] = useState<"learn" | "quiz">("learn");
-  const [items, setItems] = useState<SyllableQuiz[]>([]);
+  const [items, setItems] = useState<PlayQ[]>([]);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [right, setRight] = useState(0);
   const [done, setDone] = useState(false);
 
   const q = items[i];
-  const pct = useMemo(() => (items.length ? Math.round((right / items.length) * 100) : 0), [right, items.length]);
+  const unique = items.filter((x) => !x.retry).length || items.length;
+  const pct = useMemo(() => (unique ? Math.round((right / unique) * 100) : 0), [right, unique]);
+
+  function shuffleIn<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let n = a.length - 1; n > 0; n--) {
+      const j = Math.floor(Math.random() * (n + 1));
+      [a[n], a[j]] = [a[j], a[n]];
+    }
+    return a;
+  }
 
   function startQuiz() {
     if (!unit) return;
-    setItems(shuffleQuiz(unit));
+    const built = shuffleQuiz(unit).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
+    setItems(built);
     setI(0);
     setPicked(null);
     setRight(0);
@@ -136,14 +151,29 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
     playGrade(ok);
   }
 
+  function admitNoIdea() {
+    if (!q || picked) return;
+    setPicked("__noidea__");
+    playGrade(false);
+  }
+
   function next() {
     if (!picked || !q) return;
-    if (i + 1 >= items.length) {
-      const finalPct = Math.round((right / items.length) * 100);
+    const ok = picked === q.answer;
+    let nextItems = items;
+    if (!ok && !q.retry) {
+      const later: PlayQ = { ...q, key: `${q.key}-retry`, retry: true, choices: shuffleIn(q.choices) };
+      const insertAt = Math.min(items.length, i + 2 + Math.floor(Math.random() * 3));
+      nextItems = [...items.slice(0, insertAt), later, ...items.slice(insertAt)];
+      setItems(nextItems);
+    }
+    if (i + 1 >= nextItems.length) {
+      const orig = nextItems.filter((x) => !x.retry).length || nextItems.length;
+      const finalPct = Math.round((right / orig) * 100);
       complete(unitId, {
         stars: starsFromSyllableScore(finalPct),
         score: finalPct,
-        firstTryRate: right / items.length,
+        firstTryRate: right / orig,
       });
       setDone(true);
       return;
@@ -214,12 +244,12 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
   }
 
   if (done) {
-    const passed = pct >= 70;
+    const passed = pct >= GAME_STAGE_PASS;
     return (
       <Panel className="text-center">
         <p className="font-display text-4xl font-bold text-ink">{pct}%</p>
         <p className="mt-2 text-sm text-muted">
-          {right} / {items.length} · {passed ? "Unit cleared." : "Need 70% to unlock the next unit."}
+          {right} / {unique} · {passed ? "Unit cleared." : `Need ${GAME_STAGE_PASS}% to unlock the next unit.`}
         </p>
         <div className="mt-4 flex flex-col gap-2">
           {passed && unitId < 8 ? (
@@ -240,12 +270,14 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
 
   if (!q) return null;
   const ok = picked === q.answer;
+  const lastNow = i + 1 >= items.length && (ok || Boolean(q.retry));
 
   return (
     <>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Unit {unit.id} · Quiz · {i + 1} / {items.length}
+          {q.retry ? " · again" : ""}
         </p>
         <h1 className="mt-1 font-display text-2xl font-bold text-ink">
           <MixHe text={q.q} />
@@ -289,11 +321,15 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>
+          {!ok && !q.retry ? (
+            <p className="mt-1 text-sm text-muted">You will see this one again in a moment.</p>
+          ) : null}
           <Button className="mt-3 w-full" onClick={next}>
-            {i + 1 >= items.length ? "See score" : "Next"}
+            {lastNow ? "See score" : "Next"}
           </Button>
         </div>
       )}
+      {!picked && <DontKnowButton onClick={admitNoIdea} />}
     </>
   );
 }

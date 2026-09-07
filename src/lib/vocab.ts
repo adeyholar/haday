@@ -532,7 +532,7 @@ export const GAME_CHAPTER_TITLES: Record<number, string> = {
   2: "Names",
   3: "Nouns",
   4: "More nouns",
-  5: "Article & nouns",
+  5: "Article & vav",
   6: "Prepositions",
   7: "Adjectives",
   8: "Pronouns",

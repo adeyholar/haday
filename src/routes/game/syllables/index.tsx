@@ -20,7 +20,7 @@ function SyllableMapPage() {
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Cut the word</h1>
         <p className="mt-3 max-w-prose text-muted">
           Each unit has two beats: learn the rule with Tanakh words and verses (the hit is marked), then a 12-question
-          quiz drawn from that unit’s pool. Score 70% to open the next unit.
+          quiz drawn from that unit’s pool. Score 90% to open the next unit.
         </p>
       </Panel>
       <ol className="grid grid-cols-1 gap-2">

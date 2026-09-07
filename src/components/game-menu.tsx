@@ -6,6 +6,7 @@ const OPTIONS = [
   { value: "/game/alefbet", match: (p: string) => p.startsWith("/game/alefbet"), label: "Aleph-bet mastery" },
   { value: "/game/syllables", match: (p: string) => p.startsWith("/game/syllables"), label: "Syllables" },
   { value: "/game/nouns", match: (p: string) => p.startsWith("/game/nouns"), label: "Nouns" },
+  { value: "/game/article", match: (p: string) => p.startsWith("/game/article"), label: "Article & vav" },
   { value: "/challenge", match: (p: string) => p.startsWith("/challenge"), label: "Ultimate Challenge" },
 ] as const;
 
@@ -24,6 +25,7 @@ export function GameMenu() {
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });
         else if (to === "/game/syllables") void navigate({ to: "/game/syllables" });
         else if (to === "/game/nouns") void navigate({ to: "/game/nouns" });
+        else if (to === "/game/article") void navigate({ to: "/game/article" });
         else if (to === "/challenge") void navigate({ to: "/challenge" });
       }}
     />

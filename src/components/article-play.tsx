@@ -9,20 +9,20 @@ import { cn } from "@/lib/cn";
 import { findEnglishHitRange, findHitRange } from "@/lib/hebrew";
 import { lemmaForSurface } from "@/lib/tanakh-pool";
 import {
-  NOUN_QUIZ_LEN,
-  NOUN_UNIT_MAX,
-  buildNounQuiz,
-  nounMatchPairs,
-  nounQuizPool,
-  nounUnit,
-  starsFromNounScore,
-  type NounQuiz,
-  type NounVerse,
-} from "@/lib/nouns";
+  ARTICLE_QUIZ_LEN,
+  ARTICLE_UNIT_MAX,
+  articleMatchPairs,
+  articleQuizPool,
+  articleUnit,
+  buildArticleQuiz,
+  starsFromArticleScore,
+  type ArticleQuiz,
+  type ArticleVerse,
+} from "@/lib/article";
 import { useStudy } from "@/lib/store";
 import { GAME_STAGE_PASS } from "@/lib/game";
 
-type PlayQ = NounQuiz & { key: string; retry?: boolean };
+type PlayQ = ArticleQuiz & { key: string; retry?: boolean };
 
 function MixHe({ text, className }: { text: string; className?: string }) {
   const re = /[\u0590-\u05FF]+/g;
@@ -43,32 +43,7 @@ function MixHe({ text, className }: { text: string; className?: string }) {
   return <span className={className}>{nodes}</span>;
 }
 
-function SplitWord({ split }: { split: string }) {
-  const parts = split.split(" | ").filter(Boolean);
-  if (parts.length < 2) {
-    return (
-      <span className="he-word text-lg" dir="rtl" lang="he">
-        {split}
-      </span>
-    );
-  }
-  return (
-    <span className="he-word inline-flex items-center justify-start gap-2 text-lg" dir="rtl" lang="he">
-      {parts.flatMap((part, i) => [
-        i > 0 ? (
-          <span
-            key={`bar-${i}`}
-            className="inline-block h-[1.05em] w-0.5 shrink-0 self-center rounded-full bg-current"
-            aria-hidden
-          />
-        ) : null,
-        <span key={`p-${i}`}>{part}</span>,
-      ])}
-    </span>
-  );
-}
-
-function VerseHit({ verse }: { verse: NounVerse }) {
+function VerseHit({ verse }: { verse: ArticleVerse }) {
   const heRange = findHitRange(verse.he, verse.hit);
   const lemma = lemmaForSurface(verse.hit);
   const enRange = findEnglishHitRange(verse.en, {
@@ -104,9 +79,9 @@ function VerseHit({ verse }: { verse: NounVerse }) {
   );
 }
 
-export function NounPlay({ unitId }: { unitId: number }) {
-  const unit = nounUnit(unitId);
-  const complete = useStudy((s) => s.completeNounUnit);
+export function ArticlePlay({ unitId }: { unitId: number }) {
+  const unit = articleUnit(unitId);
+  const complete = useStudy((s) => s.completeArticleUnit);
   const [step, setStep] = useState<"learn" | "match" | "quiz">("learn");
   const [items, setItems] = useState<PlayQ[]>([]);
   const [i, setI] = useState(0);
@@ -116,7 +91,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
   const [firstSeen, setFirstSeen] = useState(0);
   const [done, setDone] = useState(false);
 
-  const pairs = useMemo(() => (unit ? nounMatchPairs(unit) : []), [unit]);
+  const pairs = useMemo(() => (unit ? articleMatchPairs(unit) : []), [unit]);
   const [heTiles, setHeTiles] = useState(pairs);
   const [labTiles, setLabTiles] = useState(pairs);
   const [tap, setTap] = useState<{ side: "he" | "lab"; id: string } | null>(null);
@@ -138,7 +113,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
 
   function startMatch() {
     if (!unit) return;
-    const p = nounMatchPairs(unit);
+    const p = articleMatchPairs(unit);
     setHeTiles(shuffleIn(p));
     setLabTiles(shuffleIn(p));
     setTap(null);
@@ -149,7 +124,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
 
   function startQuiz() {
     if (!unit) return;
-    const built = buildNounQuiz(unitId).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
+    const built = buildArticleQuiz(unitId).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
     setItems(built);
     setI(0);
     setPicked(null);
@@ -192,7 +167,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
       const scorePct = Math.round((held.size / keys.size) * 100);
       const firstPct = firstSeen ? firstTry / firstSeen : 0;
       complete(unitId, {
-        stars: starsFromNounScore(scorePct),
+        stars: starsFromArticleScore(scorePct),
         score: scorePct,
         firstTryRate: firstPct,
       });
@@ -231,8 +206,8 @@ export function NounPlay({ unitId }: { unitId: number }) {
     return (
       <Panel>
         <p className="text-muted">That unit is missing.</p>
-        <Link to="/game/nouns" className="mt-3 inline-block font-semibold text-primary">
-          Back to nouns
+        <Link to="/game/article" className="mt-3 inline-block font-semibold text-primary">
+          Back to article & vav
         </Link>
       </Panel>
     );
@@ -282,7 +257,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
           </ul>
         </Panel>
         <Button className="mt-4 w-full" onClick={startMatch}>
-          Pair the endings
+          Pair the forms
         </Button>
       </>
     );
@@ -296,7 +271,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Unit {unit.id} · Pair
           </p>
-          <h1 className="mt-1 font-display text-2xl font-bold text-ink">Match the word to its ending</h1>
+          <h1 className="mt-1 font-display text-2xl font-bold text-ink">Match the form to its spelling</h1>
           <p className="mt-2 text-sm text-muted">
             Tap a Hebrew form, then its tag. A miss stays on the board — try again.
           </p>
@@ -355,7 +330,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
         </div>
         {doneMatch ? (
           <Button className="mt-4 w-full" onClick={startQuiz}>
-            Quiz this rule · {NOUN_QUIZ_LEN} of {nounQuizPool(unit).length}
+            Quiz this rule · {ARTICLE_QUIZ_LEN} of {articleQuizPool(unit).length}
           </Button>
         ) : (
           <p className="mt-3 text-center text-sm text-muted">
@@ -379,16 +354,16 @@ export function NounPlay({ unitId }: { unitId: number }) {
         </p>
         <p className="mt-2 text-sm text-muted">Misses came back later. A later hit still counts as held.</p>
         <div className="mt-4 flex flex-col gap-2">
-          {passed && unitId < NOUN_UNIT_MAX ? (
-            <Link to="/game/nouns/$unit" params={{ unit: String(unitId + 1) }} className="block">
+          {passed && unitId < ARTICLE_UNIT_MAX ? (
+            <Link to="/game/article/$unit" params={{ unit: String(unitId + 1) }} className="block">
               <Button className="w-full">Next unit</Button>
             </Link>
           ) : null}
           <Button variant="outline" onClick={startMatch}>
             Pair and quiz again
           </Button>
-          <Link to="/game/nouns" className="text-sm font-semibold text-primary">
-            Noun map
+          <Link to="/game/article" className="text-sm font-semibold text-primary">
+            Article map
           </Link>
         </div>
       </Panel>
@@ -435,7 +410,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
                   picked && !chosen && !rightChoice && "bg-card text-muted",
                 )}
               >
-                {c.includes(" | ") ? <SplitWord split={c} /> : <MixHe text={c} />}
+                <MixHe text={c} />
               </button>
             </li>
           );

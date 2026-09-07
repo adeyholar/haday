@@ -10,8 +10,14 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+## 2026-09-07
+
+- **No idea.** On Game (Recognize, Gloss, Spell), Study quiz, and the grammar quizzes, No idea shows the answer and puts that word back in the pool so it is served again.
+
 ## 2026-09-06
 
+- **Spell · strict waits for Check.** No green ring, no “Correct,” no prefix coaching, and the Hebrew is not shown until you submit. Lenient still grades as you type.
+- **Article & vav game (Ch. 5):** six units — definite vs indefinite, ordinary הַ + dagesh, guttural spellings (הָ / הַ / הֶ), dropped dagesh and vowel-changing nouns, conjunction וְ (bump, hateph, וֵאלֹהִים), then Tanakh reading. Pair the form, then 12 questions from a large pool with review from earlier units. Week 3 study still reads chapters 4 and 5 together; games stay chapter by chapter. Grammar to live by now hunts the same prefixes.
 - **Email confirmation:** new email-and-password accounts must open a 24-hour link. Throwaway inboxes and domains that cannot receive mail are blocked. Existing classmates stay signed in.
 - **Roster remove:** the course owner can remove an unwanted account (not their own, not another owner). Progress, sessions, and ideas for that person go with it.
 - **Privacy and disclaimer:** a public page at `/legal` — we do not sell data; Indiana operator; not legal advice; 13+. Sign-up asks you to read it.

@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { GradeBanner } from "@/components/grade-banner";
+import { DontKnowButton } from "@/components/dont-know-button";
 import { playGrade } from "@/lib/sfx";
 
 export const Route = createFileRoute("/quiz")({ component: QuizPage });
@@ -34,6 +35,8 @@ function QuizPage() {
   const [typeTries, setTypeTries] = useState(0);
   const [score, setScore] = useState({ right: 0, wrong: 0 });
   const [ready, setReady] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
+  const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     const snapshot = useStudy.getState().cards;
@@ -44,6 +47,8 @@ function QuizPage() {
     setTyped("");
     setRevealed(false);
     setTypeTries(0);
+    setGaveUp(false);
+    setRetryIds(new Set());
     setReady(true);
   }, [pool, seed, focus]);
 
@@ -58,6 +63,8 @@ function QuizPage() {
     setTyped("");
     setRevealed(false);
     setTypeTries(0);
+    setGaveUp(false);
+    setRetryIds(new Set());
     setScore({ right: 0, wrong: 0 });
     setSeed((s) => s + 1);
   }
@@ -69,12 +76,38 @@ function QuizPage() {
   }
 
   function next() {
+    const card = item;
+    const practiceAgain = Boolean(gaveUp && card && !retryIds.has(card.id));
+    const dropGaveUp = Boolean(gaveUp && card && retryIds.has(card.id));
+    if (dropGaveUp) mark(false);
     setPicked(null);
     setMissedChoice(null);
     setTyped("");
     setRevealed(false);
     setTypeTries(0);
+    setGaveUp(false);
+    if (practiceAgain && card) {
+      setRetryIds((s) => new Set(s).add(card.id));
+      setDeck((d) => {
+        const rest = d.slice(i + 1);
+        const at = rest.length ? Math.floor(Math.random() * (rest.length + 1)) : 0;
+        return [...d.slice(0, i + 1), ...rest.slice(0, at), card, ...rest.slice(at)];
+      });
+    }
     setI((n) => n + 1);
+  }
+
+  function admitNoIdea() {
+    if (!item || picked || revealed) return;
+    playGrade(false);
+    rate(item.id, "again");
+    setGaveUp(true);
+    if (mode === "choice") {
+      setPicked("__noidea__");
+      return;
+    }
+    setRevealed(true);
+    setTypeTries(2);
   }
 
   if (!pool.length) {
@@ -193,7 +226,12 @@ function QuizPage() {
           </>
         )}
         {picked && (
-          <GradeBanner className="mt-4" ok={picked === item.gloss} />
+          <>
+            <GradeBanner className="mt-4" ok={picked === item.gloss} />
+            {gaveUp && (
+              <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+            )}
+          </>
         )}
         </>
       ) : (
@@ -255,8 +293,12 @@ function QuizPage() {
             <div className="mt-3">
               <GradeBanner ok={glossMatches(item, typed)} />
               <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
+              {gaveUp && (
+                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              )}
             </div>
           )}
+          {!revealed && <DontKnowButton onClick={admitNoIdea} />}
           <Button className="mt-3 w-full" type="submit">
             {revealed ? "Next" : typeTries >= 1 ? "Check retry" : "Check"}
           </Button>
@@ -270,6 +312,7 @@ function QuizPage() {
           Next
         </Button>
       )}
+      {mode === "choice" && !picked && <DontKnowButton onClick={admitNoIdea} />}
     </>
   );
 }
