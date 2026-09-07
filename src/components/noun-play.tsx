@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
+import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
 import { playGrade } from "@/lib/sfx";
 import { cn } from "@/lib/cn";
-import { findEnglishHitRange, findHitRange } from "@/lib/hebrew";
-import { lemmaForSurface } from "@/lib/tanakh-pool";
 import {
   NOUN_QUIZ_LEN,
   NOUN_UNIT_MAX,
@@ -17,7 +16,6 @@ import {
   nounUnit,
   starsFromNounScore,
   type NounQuiz,
-  type NounVerse,
 } from "@/lib/nouns";
 import { useStudy } from "@/lib/store";
 import { GAME_STAGE_PASS } from "@/lib/game";
@@ -65,42 +63,6 @@ function SplitWord({ split }: { split: string }) {
         <span key={`p-${i}`}>{part}</span>,
       ])}
     </span>
-  );
-}
-
-function VerseHit({ verse }: { verse: NounVerse }) {
-  const heRange = findHitRange(verse.he, verse.hit);
-  const lemma = lemmaForSurface(verse.hit);
-  const enRange = findEnglishHitRange(verse.en, {
-    hitEn: verse.hitEn,
-    gloss: lemma?.gloss,
-    alts: lemma?.alts,
-  });
-  return (
-    <>
-      <p className="he-word mt-3 text-2xl leading-relaxed" dir="rtl" lang="he">
-        {heRange ? (
-          <>
-            {verse.he.slice(0, heRange.start)}
-            <mark className="he-hit">{verse.he.slice(heRange.start, heRange.end)}</mark>
-            {verse.he.slice(heRange.end)}
-          </>
-        ) : (
-          verse.he
-        )}
-      </p>
-      <p className="mt-2 text-sm text-muted" lang="en" dir="ltr">
-        {enRange ? (
-          <>
-            {verse.en.slice(0, enRange.start)}
-            <mark className="he-hit">{verse.en.slice(enRange.start, enRange.end)}</mark>
-            {verse.en.slice(enRange.end)}
-          </>
-        ) : (
-          verse.en
-        )}
-      </p>
-    </>
   );
 }
 
@@ -271,13 +233,12 @@ export function NounPlay({ unitId }: { unitId: number }) {
         </Panel>
         <Panel className="mt-3">
           <h2 className="font-display text-xl font-bold text-ink">In the Tanakh</h2>
-          <p className="mt-1 text-sm text-muted">The hit word is marked in Hebrew and in English.</p>
+          <p className="mt-1 text-sm text-muted">
+            The hit word is marked. Under it: the citation lemma, a public-lexicon gloss, and why this form is here.
+          </p>
           <ul className="mt-3 space-y-4">
             {unit.verses.map((v) => (
-              <li key={`${v.ref}-${v.hit}`} className="rounded-[var(--radius-md)] bg-surface px-3 py-3">
-                <p className="text-sm font-semibold text-muted">{v.ref}</p>
-                <VerseHit verse={v} />
-              </li>
+              <TanakhLearnVerse key={`${v.ref}-${v.hit}`} verse={v} kind="noun" samples={unit.samples} />
             ))}
           </ul>
         </Panel>

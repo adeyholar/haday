@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
+- **Learn · In the Tanakh.** Syllables, Nouns, and Article units now name the citation lemma (public-lexicon form, no article or suffix), mark the hit in Hebrew and English, and give a short why-this-form note.
+
 - **Don’t know on Game.** Same full-width button as Rules, under the answers — not buried under the verse.
 
 - **Custom mix.** Under Game, for every student: pick open BBH chapters and play that combined list in one sitting (Recognize, Gloss, or Spell). Chapter 1 starts open. Does not unlock or lock the path.

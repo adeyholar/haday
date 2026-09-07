@@ -3,7 +3,7 @@ import { NOUN_QUIZ_EXTRA } from "@/lib/noun-quiz-extra";
 
 /** Original teaching notes on Hebrew nouns. Public-domain Masoretic examples. Not a textbook reprint. */
 
-export type NounVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string };
+export type NounVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string; why?: string };
 
 export type NounSample = {
   word: string;

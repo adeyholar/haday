@@ -3,7 +3,7 @@ import { SYLLABLE_QUIZ_EXTRA } from "@/lib/syllable-quiz-extra";
 
 /** Public-domain Masoretic examples. Rules are original teaching notes, not a textbook reprint. */
 
-export type SyllableVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string };
+export type SyllableVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string; why?: string };
 
 export type SyllableSample = {
   word: string;
