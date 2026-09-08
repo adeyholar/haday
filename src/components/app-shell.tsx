@@ -37,6 +37,8 @@ import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
 import { NavTip } from "@/components/nav-tip";
 import { NavMenu, type NavItem } from "@/components/nav-menu";
+import { grammarChapterLabel } from "@/lib/grammar";
+import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 
 const STUDY: NavItem[] = [
   { to: "/drill", label: "Drill", hint: "Flip cards", icon: Layers },
@@ -57,7 +59,13 @@ const GAME: NavItem[] = [
   { to: "/game/syllables", label: "Syllables", hint: "Open, closed, shewa", icon: Layers },
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
   { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },
-  { to: "/game/lessons", label: "Ch. 6–11 grammar", hint: "Prep to numbers", icon: ScrollText },
+  ...GRAMMAR_TRACKS.map((t) => ({
+    to: "/game/lessons/$track" as const,
+    params: { track: t.id },
+    label: grammarChapterLabel(t),
+    hint: t.short,
+    icon: ScrollText,
+  })),
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 

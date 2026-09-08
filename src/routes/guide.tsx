@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu groups BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, Ch. 6–11 grammar (prepositions through numbers), and Ultimate Challenge.
+            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, then each grammar chapter by number and title (Ch. 6 Prepositions through Ch. 11 Numbers), and Ultimate Challenge.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -184,7 +184,7 @@ function GuidePage() {
           <li>
             <strong>Class vocab stays the book form.</strong> Game, Quiz, and Match show the citation lemma (יָם, not
             בַּיָּם). A Tanakh verse can still sit under the card so you see the word in Scripture, but the prompt is
-            the word from the list. Inflected forms belong in Syllables, Nouns, Article & vav, and Ch. 6–11 grammar, where that is the lesson.
+            the word from the list. Inflected forms belong in Syllables, Nouns, Article & vav, and the grammar chapters (Ch. 6 Prepositions through Ch. 11 Numbers), where that is the lesson.
           </li>
         </ul>
       </Panel>

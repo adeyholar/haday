@@ -22,13 +22,16 @@ test("six grammar tracks, four units, Tanakh verses, class vocab ids", () => {
     [6, 7, 8, 9, 10, 11],
   );
   for (const t of GRAMMAR_TRACKS) {
+    assert.ok(t.intro.length > 200, `${t.id} intro`);
+    assert.match(t.intro, new RegExp(`chapter ${t.chapter}`, "i"));
     assert.ok(isGrammarTrackId(t.id), t.id);
     assert.equal(t.units.length, 4, `${t.id} units`);
     for (const u of t.units) {
       assert.ok(u.verses.length >= 3, `${t.id} ${u.id} verses`);
       assert.ok(u.samples.length >= 3, `${t.id} ${u.id} samples`);
       assert.ok(u.rule.length > 80, `${t.id} ${u.id} rule`);
-      assert.doesNotMatch(u.rule, /Gesenius|Davidson/i);
+      assert.ok(u.teach.length > 60, `${t.id} ${u.id} teach`);
+      assert.doesNotMatch(u.rule + u.teach, /Gesenius|Davidson/i);
       for (const v of u.verses) {
         assert.ok(v.he.includes(v.hit), `${t.id} ${u.id} ${v.ref} missing hit ${v.hit}`);
         if (v.vocabId) {

@@ -31,12 +31,13 @@ export type NavHref =
   | "/game/nouns"
   | "/game/article"
   | "/game/lessons"
+  | "/game/lessons/$track"
   | "/ask"
   | "/ideas";
 
 export type NavItem = {
   to: NavHref;
-  params?: { book?: string; ch?: string };
+  params?: { book?: string; ch?: string; track?: string };
   hash?: string;
   label: string;
   hint?: string;

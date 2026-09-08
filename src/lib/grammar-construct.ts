@@ -8,6 +8,8 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
     short: "Two nouns, one idea",
     rule:
       "A construct chain is “the X of Y”: דְּבַר־יְהוָה “the word of YHWH,” אִישׁ מִלְחָמָה “a man of war.” The first noun is construct (bound); the last is absolute (free). English “of” is often not a separate Hebrew word. The chain is definite if the last member is definite (name, article, or suffix).",
+    teach:
+      "Two nouns in a row: ask “X of Y?” If yes, the first is bound, the last is free. Definite if the last is a name, has הַ, or has a suffix. Do not put הַ on the construct noun.",
     samples: [
       { word: "דְּבַר־יְהוָה", gloss: "the word of YHWH", tag: "construct + name", note: "Definite because the name is definite.", ref: "Gen 15:1" },
       { word: "אִישׁ מִלְחָמָה", gloss: "a man of war", tag: "indefinite chain", note: "Last noun has no article.", ref: "Exod 15:3" },
@@ -41,6 +43,8 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
     short: "Vowels tighten",
     rule:
       "Masculine singular construct often shortens vowels: דָּבָר → דְּבַר, יָד → יַד, מָוֶת → מוֹת in some forms. Masculine plural ִים becomes ֵי: מְלָכִים → מַלְכֵי “kings of.” The consonants of the lemma are still there — look them up in the absolute singular.",
+    teach:
+      "ִים → ֵי is the mp construct reflex: מַלְכֵי. Vowels often tighten (דָּבָר → דְּבַר). Look it up as the absolute singular.",
     samples: [
       { word: "דְּבַר", gloss: "word of", tag: "ms construct", note: "From דָּבָר.", ref: "Gen 15:1" },
       { word: "מַלְכֵי", gloss: "kings of", tag: "mp construct", note: "ִים → ֵי.", ref: "Ps 2:2" },
@@ -74,6 +78,8 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
     short: "ָה often becomes ַת",
     rule:
       "Feminine singular ָה frequently becomes ַת in construct: תּוֹרָה → תּוֹרַת, מִלְחָמָה → מִלְחֶמֶת in some patterns, בְּרָכָה → בִּרְכַּת. Feminine plural וֹת often stays, with vowel work. You still look the word up as the absolute singular.",
+    teach:
+      "Feminine ָה → ַת when bound: תּוֹרַת. Prep plus construct is normal: בְּאֶרֶץ־, מִבֵּית. Still look up תּוֹרָה, אֶרֶץ, בַּיִת.",
     samples: [
       { word: "תּוֹרַת", gloss: "instruction of", tag: "fs construct", note: "From תּוֹרָה.", ref: "Ps 19:8" },
       { word: "בְּרִית", gloss: "covenant", tag: "fs-like", note: "Already ִית — construct may look similar.", ref: "Gen 9:9" },
@@ -107,6 +113,8 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
     short: "Hand, field, wilderness, time",
     rule:
       "Chapter 10 nouns love construct: יָד hand, שָׂדֶה field, מִדְבָּר wilderness, בְּרִית covenant, חֶסֶד loyalty, עֵת time, חֹדֶשׁ month, מַטֶּה tribe/staff, גְּבוּל border. Read the chain, restore each lemma, say the English “of.” Fun test: if you can swap in “of” and it still makes sense, you found a chain.",
+    teach:
+      "Fun test: if English “of” still makes sense, you found a chain. Restore יָד, שָׂדֶה, מִדְבָּר, בְּרִית, חֶסֶד, עֵת and say the chain out loud.",
     samples: [
       { word: "חֶסֶד", gloss: "loyalty, steadfast love", tag: "class", note: "Often חֶסֶד יי.", ref: "Exod 34:6" },
       { word: "מִדְבָּר", gloss: "wilderness", tag: "class", note: "בַּמִּדְבָּר = in the wilderness.", ref: "Exod 3:1" },

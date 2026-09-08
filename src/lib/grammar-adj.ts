@@ -8,6 +8,8 @@ export const ADJ_UNITS: GrammarUnit[] = [
     short: "Same clothes as nouns",
     rule:
       "An adjective inflects for gender and number with the same endings you already know on nouns: טוֹב, טוֹבָה, טוֹבִים, טוֹבוֹת. It agrees with the noun it talks about. Masculine singular is endingless — that is the citation form in the lexicon and in class vocab.",
+    teach:
+      "Write the four clothes every time: טוֹב טוֹבָה טוֹבִים טוֹבוֹת. Citation is the endingless ms. Class for this chapter: טוֹב, גָּדוֹל, קָדוֹשׁ, רַע, חָכָם, קָטֹן.",
     samples: [
       { word: "טוֹב", gloss: "good (ms)", tag: "ms", note: "Citation form. Class vocab.", ref: "Gen 1:4" },
       { word: "טוֹבָה", gloss: "good (fs)", tag: "fs", note: "ָה like a feminine noun.", ref: "Gen 1:31" },
@@ -42,6 +44,8 @@ export const ADJ_UNITS: GrammarUnit[] = [
     short: "The adjective rides behind",
     rule:
       "Attributive: the adjective describes the noun as a bundle — “the good king.” In Hebrew it usually follows the noun and takes the same definiteness: הַמֶּלֶךְ הַטּוֹב. Both have the article, or neither does. Read it as one phrase, not two sentences.",
+    teach:
+      "Matching articles (or matching zero) = one phrase, the good king. The adjective usually sits after the noun. הַמְּאֹרֹת הַגְּדֹלִים is the drill from Genesis 1.",
     samples: [
       { word: "הַמֶּלֶךְ הַטּוֹב", gloss: "the good king", tag: "both definite", note: "Article on noun and adjective.", ref: "2 Kgs 18:3" },
       { word: "אֵל גָּדוֹל", gloss: "a great God", tag: "both indefinite", note: "No article on either.", ref: "Deut 7:21" },
@@ -75,6 +79,8 @@ export const ADJ_UNITS: GrammarUnit[] = [
     short: "The adjective makes a sentence",
     rule:
       "Predicate: the adjective is the news — “the king is good.” It often comes first, and it does not take the article even when the noun does: טוֹב הַמֶּלֶךְ. English supplies “is.” You already saw this in Gen 1:4 כִּי־טוֹב — “that it was good.”",
+    teach:
+      "Mismatched article → a sentence: the king is good. English “is” is supplied. Gen 1:4 כִּי־טוֹב is the picture you already know from the start of the book.",
     samples: [
       { word: "כִּי־טוֹב", gloss: "that it was good", tag: "predicate", note: "No article on טוֹב.", ref: "Gen 1:4" },
       { word: "קָדוֹשׁ אֲנִי", gloss: "I am holy", tag: "predicate + pronoun", note: "Adjective then the subject.", ref: "Lev 19:2" },
@@ -106,6 +112,8 @@ export const ADJ_UNITS: GrammarUnit[] = [
     short: "The adjective can stand alone",
     rule:
       "Hebrew often lets an adjective stand as a noun: צַדִּיק “a righteous one,” רְשָׁעִים “the wicked.” Endings still tell gender and number. מְאֹד “very” does not inflect — it just intensifies. Comparative ideas often use מִן (last chapter): טוֹב … מִן “better than.”",
+    teach:
+      "If there is no noun, the adjective may be the person: the righteous, the wise. מְאֹד never takes endings. Comparative still uses מִן from chapter 6.",
     samples: [
       { word: "צַדִּיק", gloss: "righteous (one)", tag: "substantive", note: "Person or quality from the verse.", ref: "Ps 1:6" },
       { word: "רָשָׁע", gloss: "wicked (one)", tag: "substantive", note: "Class vocab.", ref: "Ps 1:1" },

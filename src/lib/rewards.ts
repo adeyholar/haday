@@ -24,8 +24,8 @@ export const BADGES = [
   { id: "nouns-master", title: "Reader of endings", hint: "Clear all six noun units" },
   { id: "article-open", title: "The and and", hint: "Clear the first article unit" },
   { id: "article-master", title: "Name the prefix", hint: "Clear all six article & vav units" },
-  { id: "lessons-open", title: "Grammar in the text", hint: "Clear the first chapter 6–11 unit" },
-  { id: "lessons-master", title: "Six paths", hint: "Clear all chapter 6–11 grammar units" },
+  { id: "lessons-open", title: "Grammar in the text", hint: "Clear the first unit of Ch. 6 Prepositions" },
+  { id: "lessons-master", title: "Six chapters", hint: "Clear every unit of Ch. 6–11, each as its own path" },
 ] as const;
 
 export type BadgeId = (typeof BADGES)[number]["id"];

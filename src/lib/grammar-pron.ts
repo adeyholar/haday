@@ -8,6 +8,8 @@ export const PRON_UNITS: GrammarUnit[] = [
     short: "Independent pronouns",
     rule:
       "Independent pronouns stand as their own words: אֲנִי / אָנֹכִי “I,” אַתָּה “you” (ms), הוּא “he,” הִיא “she,” אֲנַחְנוּ “we,” אַתֶּם “you” (mp), הֵם “they.” They often add emphasis or complete a predicate: קָדוֹשׁ אֲנִי. Hebrew verbs already hide their subject, so a written pronoun is doing extra work — stress, contrast, or a verbless clause.",
+    teach:
+      "A written pronoun is extra work — stress, contrast, or a verbless clause. Memorize אֲנִי / אָנֹכִי, אַתָּה, הוּא, הִיא, אֲנַחְנוּ, אַתֶּם, הֵם as this chapter’s set.",
     samples: [
       { word: "אֲנִי", gloss: "I", tag: "1cs", note: "Class. Shorter cousin of אָנֹכִי.", ref: "Lev 19:2" },
       { word: "אָנֹכִי", gloss: "I", tag: "1cs", note: "Heavier “I.” Exod 20:2.", ref: "Exod 20:2" },
@@ -42,6 +44,8 @@ export const PRON_UNITS: GrammarUnit[] = [
     short: "Near demonstratives",
     rule:
       "זֶה “this” (ms), זֹאת “this” (fs), אֵלֶּה “these.” They point to something near. Like adjectives they can sit after a noun and match gender/number/definiteness (הַיּוֹם הַזֶּה “this day”), or stand alone (“this is…”). הוּא / הִיא / הֵם can point farther: “that / those.”",
+    teach:
+      "Treat זֶה / זֹאת / אֵלֶּה like adjectives for agreement: הַיּוֹם הַזֶּה. Standing first they mean “this is… / these are…”",
     samples: [
       { word: "זֶה", gloss: "this (ms)", tag: "near", note: "Class.", ref: "Ps 24:8" },
       { word: "זֹאת", gloss: "this (fs)", tag: "near", note: "Class.", ref: "Gen 2:23" },
@@ -75,6 +79,8 @@ export const PRON_UNITS: GrammarUnit[] = [
     short: "Questions",
     rule:
       "מִי “who,” מָה / מַה “what,” לָמָּה / מַדּוּעַ “why.” הֲ in front of a clause asks a yes/no question and is not the article הַ (different vowel). The article is הַ with pathach; the interrogative is הֲ with ḥateph-pathach. Ps 24:8 מִי זֶה — “who is this?”",
+    teach:
+      "Name the question word, then the rest of the clause. הֲ is ḥateph-pathach and asks yes/no; הַ is the article. Do not mix them.",
     samples: [
       { word: "מִי", gloss: "who", tag: "question", note: "Class.", ref: "Ps 24:8" },
       { word: "מָה", gloss: "what", tag: "question", note: "Also מַה, מֶה.", ref: "Gen 4:10" },
@@ -109,6 +115,8 @@ export const PRON_UNITS: GrammarUnit[] = [
     short: "אֲשֶׁר, כִּי, שֶׁ",
     rule:
       "אֲשֶׁר links a clause: who, that, which. כִּי is a small word with a big job — because, that, indeed, but. שֶׁ is a prefixed relative (later style, also Qohelet and Song). None of these is a noun. Read them as glue between clauses, then name the class nouns around them.",
+    teach:
+      "אֲשֶׁר and כִּי are glue, not nouns. Read the clause they open, then pick the English from context (who / that / which; because / that / indeed).",
     samples: [
       { word: "אֲשֶׁר", gloss: "who, that, which", tag: "relative", note: "Class. Very frequent.", ref: "Exod 20:2" },
       { word: "כִּי", gloss: "that, because, indeed", tag: "conjunction", note: "Class. Context picks the gloss.", ref: "Gen 1:4" },

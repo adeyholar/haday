@@ -24,7 +24,7 @@ function lessonBrief(): string {
 Syllable units: ${syl}.
 Noun units: ${nouns}.
 Article and vav units: ${article}.
-Grammar paths chapters 6–11: ${grammar}.
+Grammar chapters (each is its own path): ${grammar}.
 Vocab chapter names: ${Object.entries(GAME_CHAPTER_TITLES)
     .map(([n, t]) => `${n}=${t}`)
     .join(", ")}.

@@ -8,6 +8,8 @@ export const EXIST_UNITS: GrammarUnit[] = [
     short: "Behold, here, now",
     rule:
       "הִנֵּה (and lighter הֵן) is a pointer: look, behold, here. It often marks a new sight or a surprise. It is not a verb and not the article. Gen 1:31 וְהִנֵּה־טוֹב מְאֹד — “and look: very good.” Class nouns around it are the thing you are being shown.",
+    teach:
+      "הִנֵּה points at a sight. Look at the whole clause it introduces. וְהִנֵּה is just ו plus the same lemma. הִנְנִי is “here I am.”",
     samples: [
       { word: "הִנֵּה", gloss: "behold, look", tag: "pointer", note: "Class. Also הִנְנִי “here I am.”", ref: "Gen 1:31" },
       { word: "הֵן", gloss: "behold, if", tag: "pointer", note: "Shorter cousin.", ref: "Gen 3:22" },
@@ -41,6 +43,8 @@ export const EXIST_UNITS: GrammarUnit[] = [
     short: "יֵשׁ and אֵין",
     rule:
       "יֵשׁ “there is / there are.” אֵין “there is not / none.” They are particles of existence, not verbs with tense. English will still say “is/are.” Pair them in the mind: presence vs absence. They like a noun after them — often class vocab.",
+    teach:
+      "Pair יֵשׁ and אֵין as presence vs absence. They are particles, not Qal verbs. The noun after them is often class vocab (מָקוֹם, אֱלֹהִים, אָדָם).",
     samples: [
       { word: "יֵשׁ", gloss: "there is, there are", tag: "existence", note: "Class.", ref: "Gen 28:16" },
       { word: "אֵין", gloss: "there is not, none", tag: "non-existence", note: "Class. Also אַיִן.", ref: "Gen 2:5" },
@@ -74,6 +78,8 @@ export const EXIST_UNITS: GrammarUnit[] = [
     short: "Little words, big traffic",
     rule:
       "גַּם “also, even.” אוֹ “or.” לְבַד “alone.” סָבִיב “around.” They are small and everywhere. Train the eye to name them fast so the nouns can stay in focus.",
+    teach:
+      "Name גַּם, אוֹ, לְבַד, סָבִיב in one glance so the nouns stay in focus. לְבַדּוֹ is לְבַד plus a suffix.",
     samples: [
       { word: "גַּם", gloss: "also, even", tag: "particle", note: "Class.", ref: "Gen 3:6" },
       { word: "אוֹ", gloss: "or", tag: "particle", note: "Class.", ref: "Exod 21:4" },
@@ -107,6 +113,8 @@ export const EXIST_UNITS: GrammarUnit[] = [
     short: "People, bread, glory, war",
     rule:
       "This chapter’s nouns are high-traffic: עַם people, לֶחֶם bread, כָּבוֹד glory, מִלְחָמָה war, מִשְׁפָּחָה family, עֵץ tree, בְּרָכָה blessing, חַטָּאת sin. Meet them inside the particles you just learned. Strip article, ו, and inseparable preps — then look up the singular.",
+    teach:
+      "Strip article, ו, and inseparable preps, restore the singular, look up עַם, לֶחֶם, כָּבוֹד, מִלְחָמָה, עֵץ, חַטָּאת as this chapter’s nouns — not last chapter’s pronouns.",
     samples: [
       { word: "עַם", gloss: "people", tag: "noun", note: "Class. Frequent.", ref: "Exod 19:5" },
       { word: "כָּבוֹד", gloss: "glory, honor", tag: "noun", note: "Class.", ref: "Ps 24:8" },

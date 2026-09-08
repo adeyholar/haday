@@ -8,6 +8,8 @@ export const PREP_UNITS: GrammarUnit[] = [
     short: "A word, or a word plus ־",
     rule:
       "A preposition names a relationship: place (on, under), time (after, until), or company (with). Many Hebrew prepositions stand alone, just as in English: עִם דָּוִד “with David.” Some almost always take a raised stroke, the maqqef: עַל־, אֶל־, עַד־, מִן־. The stroke is spelling, not extra meaning. The next word is the object of the preposition.",
+    teach:
+      "On a living line, say the preposition out loud, then name its object. If you see ־, it is glue, not extra meaning. Keep אַחַר, עִם, תַּחַת, עַל, אֶל, עַד as class lemmas for this chapter.",
     samples: [
       { word: "אַחַר", gloss: "after, behind", tag: "independent", note: "Stands alone. Class vocab.", ref: "Gen 15:1" },
       { word: "עִם", gloss: "with", tag: "independent", note: "Company. Do not mix with אֵת “with” until you see the verse.", ref: "Gen 39:2" },
@@ -43,6 +45,8 @@ export const PREP_UNITS: GrammarUnit[] = [
     short: "Glued to the next word",
     rule:
       "Three prepositions never stand alone: בְּ in/by/with, כְּ like/as, לְ to/for. Before most letters they take vocal shewa. Before a ḥateph they copy that short vowel (בֶּאֱמֶת). Before another vocal shewa they take hireq (the rule of shewa). When the noun already has the article, the ה drops and the preposition keeps the article’s vowel and dagesh: הַמֶּלֶךְ → לַמֶּלֶךְ “to the king.” The noun is still definite.",
+    teach:
+      "Strip to the noun: בַּמִּדְבָּר is בְּ + הַ + מִדְבָּר. Pathach and dagesh on בַּ are the article hitchhiking. Citation stays מִדְבָּר. Class: בְּ in, כְּ like, לְ to/for.",
     samples: [
       { word: "בְּ", gloss: "in, at, with, by", tag: "inseparable", note: "Citation form with shewa.", ref: "Gen 1:1" },
       { word: "כְּ", gloss: "as, like", tag: "inseparable", note: "Comparison.", ref: "Gen 1:26" },
@@ -78,6 +82,8 @@ export const PREP_UNITS: GrammarUnit[] = [
     short: "Maqqef, or the נ hides",
     rule:
       "מִן can stand with maqqef (מִן־הַבַּיִת) or prefix. When it prefixes, the נ assimilates and shows as dagesh in the next letter: מִן + מֶלֶךְ → מִמֶּלֶךְ. A guttural will not take that dagesh, so hireq often lengthens to tsere: מֵאִישׁ, מֵעִיר. With the article the ה stays: מֵהָאָרֶץ. מִן also does extra jobs: comparative (“better than”), with כֹּל a superlative flavor (“from all” → most), and partitive (“some of”).",
+    teach:
+      "Two looks for מִן: מִן־ with the stroke, or fused with dagesh (or tsere before a guttural). Then ask: from a place, than something, or some of? Class מִן and כֹּל meet in מִכֹּל.",
     samples: [
       { word: "מִן", gloss: "from, out of", tag: "citation", note: "Class vocab. Also “than.”", ref: "Gen 2:7" },
       { word: "מִן־הָאָרֶץ", gloss: "from the land", tag: "maqqef + article", note: "ה stays when מִן is not fused.", ref: "Gen 2:6" },
@@ -112,6 +118,8 @@ export const PREP_UNITS: GrammarUnit[] = [
     short: "אֵת the marker vs אֵת “with”",
     rule:
       "In prose, a definite direct object is usually marked with אֵת / אֶת־. It is not translated. Definite means: article, a name, or a suffix. Indefinite objects take no marker. The preposition אֵת “with” looks the same in many spellings — the verse tells you which job it has. Compounds are just two pieces: לִפְנֵי (לְ + פָּנִים) “before”; בְּתוֹךְ “in the midst of”; מֵעַל “from upon.”",
+    teach:
+      "First question on אֵת: object marker (not translated) or “with”? A name, an article, or a suffix on the object → marker. Compounds are two pieces you already know: לְ + פָּנִים, בְּ + תָּוֶךְ.",
     samples: [
       { word: "אֵת", gloss: "object marker (not translated)", tag: "marker", note: "Class particle. Marks a definite object.", ref: "Gen 1:1" },
       { word: "אֵת", gloss: "with, beside", tag: "preposition", note: "Same letters, different job. Context decides.", ref: "Gen 39:2" },

@@ -186,14 +186,20 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
       <>
         <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            Ch. {track.chapter} · Unit {unit.id} · Learn
+            Chapter {track.chapter} · {track.title}
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold text-ink">{unit.title}</h1>
+          <p className="mt-1 text-sm text-muted">
+            Unit {unit.id} of {unitMax} · Learn
+          </p>
           <p className="mt-3 rounded-[var(--radius-md)] bg-surface px-3 py-2 font-display text-xl text-primary">
             <MixHe text={unit.short} />
           </p>
           <p className="mt-3 max-w-prose text-ink">
             <MixHe text={unit.rule} />
+          </p>
+          <p className="mt-3 max-w-prose text-ink">
+            <MixHe text={unit.teach} />
           </p>
         </Panel>
         <Panel className="mt-3">
@@ -240,7 +246,7 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
       <>
         <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            Ch. {track.chapter} · Unit {unit.id} · Pair
+            Chapter {track.chapter} · {track.title} · Unit {unit.id} · Pair
           </p>
           <h1 className="mt-1 font-display text-2xl font-bold text-ink">{track.matchPrompt}</h1>
           <p className="mt-2 text-sm text-muted">
@@ -353,7 +359,7 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
     <>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Ch. {track.chapter} · Unit {unit.id} · Quiz · {i + 1} / {items.length}
+          Chapter {track.chapter} · {track.title} · Unit {unit.id} · Quiz · {i + 1} / {items.length}
           {q.review ? " · review" : ""}
           {q.retry ? " · again" : ""}
         </p>

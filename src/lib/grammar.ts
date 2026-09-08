@@ -19,6 +19,8 @@ export type GrammarUnit = {
   title: string;
   short: string;
   rule: string;
+  /** Extra how-to after the rule, so each unit can be digested on its own. */
+  teach: string;
   samples: LearnSample[];
   verses: LearnVerse[];
   quiz: GrammarQuiz[];
@@ -30,6 +32,8 @@ export type GrammarTrack = {
   title: string;
   short: string;
   blurb: string;
+  /** Longer chapter teaching. Shown on the chapter map so 6–11 are not one blob. */
+  intro: string;
   kind: LearnKind;
   matchPrompt: string;
   units: GrammarUnit[];
@@ -59,6 +63,16 @@ function shuffle<T>(arr: T[]): T[] {
 
 export function grammarQuizId(q: GrammarQuiz): string {
   return `${q.q}|${q.answer}`;
+}
+
+export function grammarChapterLabel(track: Pick<GrammarTrack, "chapter" | "title">): string {
+  return `Ch. ${track.chapter} ${track.title}`;
+}
+
+export function grammarNeighborId(id: GrammarTrackId, dir: -1 | 1): GrammarTrackId | undefined {
+  const i = GRAMMAR_TRACK_IDS.indexOf(id);
+  if (i < 0) return undefined;
+  return GRAMMAR_TRACK_IDS[i + dir];
 }
 
 export function isGrammarTrackId(v: unknown): v is GrammarTrackId {

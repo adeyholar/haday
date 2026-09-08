@@ -3,33 +3,100 @@ import { Check, Lock } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
+import { grammarChapterLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
 import { grammarUnitRecord, isGrammarUnitUnlocked } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/game/lessons/$track/")({ component: GrammarTrackMapPage });
 
+function MixHe({ text }: { text: string }) {
+  const re = /[\u0590-\u05FF]+/g;
+  const nodes: Array<string | { he: string; k: number }> = [];
+  let last = 0;
+  let i = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    nodes.push({ he: m[0], k: i++ });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return (
+    <>
+      {nodes.map((n, idx) =>
+        typeof n === "string" ? (
+          <span key={idx}>{n}</span>
+        ) : (
+          <span key={n.k} className="he-word" dir="rtl" lang="he">
+            {n.he}
+          </span>
+        ),
+      )}
+    </>
+  );
+}
+
 function GrammarTrackMapPage() {
   const { track: raw } = Route.useParams();
   const track = grammarTrack(raw);
   const game = useStudy((s) => s.game);
 
-  if (!track) return <Navigate to="/game/lessons" />;
+  if (!track) return <Navigate to="/game/article" />;
+
+  const prevId = grammarNeighborId(track.id, -1);
+  const nextId = grammarNeighborId(track.id, 1);
+  const prev = prevId ? grammarTrack(prevId) : undefined;
+  const next = nextId ? grammarTrack(nextId) : undefined;
 
   return (
     <>
       <Panel className="mb-4">
         <GameMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Chapter {track.chapter} · {track.short}
+          Chapter {track.chapter}
         </p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">{track.title}</h1>
-        <p className="mt-3 max-w-prose text-muted">{track.blurb}</p>
+        <p className="mt-1 text-sm font-semibold text-primary">{track.short}</p>
+        <div className="mt-3 max-w-prose space-y-3 text-ink">
+          {track.intro.split(/\n\n+/).map((p) => (
+            <p key={p.slice(0, 24)}>
+              <MixHe text={p} />
+            </p>
+          ))}
+        </div>
+        <p className="mt-3 text-sm text-muted">
+          Four units in this chapter: learn with real verses, pair the forms, then a 12-question quiz. 90% held
+          unlocks the next unit. Games stay chapter by chapter.
+        </p>
         <p className="mt-2 text-sm">
-          <Link to="/game/lessons" className="font-semibold text-primary">
-            All grammar paths
-          </Link>
-          <span className="text-muted"> · 90% held unlocks the next unit.</span>
+          {prev ? (
+            <Link
+              to="/game/lessons/$track"
+              params={{ track: prev.id }}
+              className="font-semibold text-primary"
+            >
+              {grammarChapterLabel(prev)}
+            </Link>
+          ) : (
+            <Link to="/game/article" className="font-semibold text-primary">
+              Article & vav · chapter 5
+            </Link>
+          )}
+          {next ? (
+            <>
+              <span className="text-muted"> · next </span>
+              <Link
+                to="/game/lessons/$track"
+                params={{ track: next.id }}
+                className="font-semibold text-primary"
+              >
+                {grammarChapterLabel(next)}
+              </Link>
+            </>
+          ) : (
+            <span className="text-muted"> · last grammar chapter.</span>
+          )}
         </p>
       </Panel>
       <ol className="grid grid-cols-1 gap-2">

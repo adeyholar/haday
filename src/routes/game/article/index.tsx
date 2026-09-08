@@ -29,8 +29,8 @@ function ArticleMapPage() {
             Nouns · chapter 4
           </Link>
           <span className="text-muted"> · then this path · then </span>
-          <Link to="/game/lessons" className="font-semibold text-primary">
-            chapters 6–11
+          <Link to="/game/lessons/$track" params={{ track: "prep" }} className="font-semibold text-primary">
+            Ch. 6 Prepositions
           </Link>
           <span className="text-muted">.</span>
         </p>

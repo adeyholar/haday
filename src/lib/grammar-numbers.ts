@@ -8,6 +8,8 @@ export const NUMBER_UNITS: GrammarUnit[] = [
     short: "The odd pair",
     rule:
       "Hebrew writes numbers as words. אֶחָד (fs אַחַת) “one” behaves like an adjective: it follows the noun and agrees. שְׁנַיִם / שְׁתַּיִם “two” is dual in form. Two can sit before or after the noun. Memorize these two tightly — they are the irregulars.",
+    teach:
+      "One follows and agrees like an adjective (יוֹם אֶחָד). Two is dual-shaped (שְׁנַיִם / שְׁתַּיִם). Memorize these two as the irregulars before the gender flip in the next unit.",
     samples: [
       { word: "אֶחָד", gloss: "one (ms)", tag: "cardinal", note: "Class. fs אַחַת.", ref: "Gen 1:5" },
       { word: "אַחַת", gloss: "one (fs)", tag: "cardinal", note: "ת not ד.", ref: "Gen 11:6" },
@@ -41,6 +43,8 @@ export const NUMBER_UNITS: GrammarUnit[] = [
     short: "The gender flip",
     rule:
       "Numbers three–ten are nouns. They often show the opposite gender ending from the counted noun: שְׁלֹשָׁה בָּנִים “three sons” (feminine-looking number, masculine noun). The counted noun is plural. Memorize the masculine absolute: שָׁלֹשׁ, אַרְבַּע, חָמֵשׁ, שֵׁשׁ, שֶׁבַע, שְׁמֹנֶה, תֵּשַׁע, עֶשֶׂר — and meet the rest as family resemblances.",
+    teach:
+      "Three–ten: the number often looks the opposite gender of the noun, and the noun is plural. Citation is שָׁלֹשׁ, אַרְבַּע, חָמֵשׁ, שֵׁשׁ, שֶׁבַע. Tens (thirty, forty) are plural shapes of the digit.",
     samples: [
       { word: "שָׁלֹשׁ", gloss: "three", tag: "cardinal", note: "Class. Thirty is שְׁלֹשִׁים.", ref: "Gen 6:10" },
       { word: "אַרְבַּע", gloss: "four", tag: "cardinal", note: "Class. Forty אַרְבָּעִים.", ref: "Gen 2:10" },
@@ -75,6 +79,8 @@ export const NUMBER_UNITS: GrammarUnit[] = [
     short: "Ten-and-a-bit, then tens",
     rule:
       "Eleven–nineteen are “one/two/… + ten”: אַחַד עָשָׂר. Twenty is עֶשְׂרִים (plural of ten). Thirty–ninety are the plural shapes you already met. A hundred is מֵאָה, two hundred מָאתַיִם (dual), a thousand אֶלֶף. “Twenty-one” is often “twenty and one.”",
+    teach:
+      "Teens are digit + ten. Twenty is the plural of ten. Hundred מֵאָה, thousand אֶלֶף. “Ninety and nine” is how Hebrew stacks. Stay in this chapter — this is not construct ֵי.",
     samples: [
       { word: "עֶשְׂרִים", gloss: "twenty", tag: "ten’s plural", note: "From עֶשֶׂר.", ref: "Gen 31:41" },
       { word: "מֵאָה", gloss: "hundred", tag: "cardinal", note: "Class. Dual מָאתַיִם.", ref: "Gen 6:15" },
@@ -109,6 +115,8 @@ export const NUMBER_UNITS: GrammarUnit[] = [
     short: "Ordinals sit like adjectives",
     rule:
       "Ordinals mark position: רִאשׁוֹן first (from רֹאשׁ), שֵׁנִי second, שְׁלִישִׁי third, שְׁבִיעִי seventh. They behave like adjectives: after the noun, agreeing, often with matching article — בַּיּוֹם הַשְּׁבִיעִי “on the seventh day.” After tenth, Hebrew often just uses cardinals for “the 13th year.”",
+    teach:
+      "Ordinals sit like adjectives: יוֹם שֵׁנִי, בַּיּוֹם הַשְּׁבִיעִי. Do not mix שֵׁנִי (second) with שְׁנַיִם (two), or שְׁבִיעִי with שַׁבָּת. Creation week in Genesis 1 is the drill.",
     samples: [
       { word: "רִאשׁוֹן", gloss: "first, former", tag: "ordinal", note: "Class. From רֹאשׁ.", ref: "Exod 12:2" },
       { word: "שֵׁנִי", gloss: "second", tag: "ordinal", note: "Class.", ref: "Gen 1:8" },
