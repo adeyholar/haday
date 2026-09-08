@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-08
 
+- **Ocean letters.** Balloons drop toward the water; a voice calls the letter name; tap the matching glyph before it splashes. Three lives, +1 life per wave (cap 6). Five waves: first line, middle, last, look-alikes, then finals. Streak of four slows the fall. Hear again if the name is missed.
+
 - **Grammar mix, vocab mix stay apart.** Custom mix has two tabs: Vocabulary (BBH lemmas only) and Grammar (topics only). Grammar mix plays open units from the topics you tick. Neither mix unlocks the path.
 
 - **Game menu grouped.** Header Game has one Grammar item (opens the six topics). The in-page Game picker uses native groups — Play, Letters & forms, Grammar — so the list is not a long flat dump on a phone.

@@ -39,6 +39,7 @@ import { Route as GameAlefbetIndexRouteImport } from './routes/game/alefbet/inde
 import { Route as GameAlefbetLevelRouteImport } from './routes/game/alefbet/$level'
 import { Route as GameArticleIndexRouteImport } from './routes/game/article/index'
 import { Route as GameArticleUnitRouteImport } from './routes/game/article/$unit'
+import { Route as GameBalloonsIndexRouteImport } from './routes/game/balloons/index'
 import { Route as GameCustomIndexRouteImport } from './routes/game/custom/index'
 import { Route as GameCustomPlayRouteImport } from './routes/game/custom/play'
 import { Route as GameLessonsIndexRouteImport } from './routes/game/lessons/index'
@@ -202,6 +203,11 @@ const GameArticleUnitRoute = GameArticleUnitRouteImport.update({
   path: '/game/article/$unit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameBalloonsIndexRoute = GameBalloonsIndexRouteImport.update({
+  id: '/game/balloons/',
+  path: '/game/balloons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameCustomIndexRoute = GameCustomIndexRouteImport.update({
   id: '/game/custom/',
   path: '/game/custom/',
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
+  '/game/balloons/': typeof GameBalloonsIndexRoute
   '/game/custom/': typeof GameCustomIndexRoute
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
   '/game/article': typeof GameArticleIndexRoute
+  '/game/balloons': typeof GameBalloonsIndexRoute
   '/game/custom': typeof GameCustomIndexRoute
   '/game/lessons': typeof GameLessonsIndexRoute
   '/game/nouns': typeof GameNounsIndexRoute
@@ -385,6 +393,7 @@ export interface FileRoutesById {
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
+  '/game/balloons/': typeof GameBalloonsIndexRoute
   '/game/custom/': typeof GameCustomIndexRoute
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
+    | '/game/balloons/'
     | '/game/custom/'
     | '/game/lessons/'
     | '/game/nouns/'
@@ -474,6 +484,7 @@ export interface FileRouteTypes {
     | '/game/$chapter'
     | '/game/alefbet'
     | '/game/article'
+    | '/game/balloons'
     | '/game/custom'
     | '/game/lessons'
     | '/game/nouns'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
+    | '/game/balloons/'
     | '/game/custom/'
     | '/game/lessons/'
     | '/game/nouns/'
@@ -562,6 +574,7 @@ export interface RootRouteChildren {
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
   GameArticleIndexRoute: typeof GameArticleIndexRoute
+  GameBalloonsIndexRoute: typeof GameBalloonsIndexRoute
   GameCustomIndexRoute: typeof GameCustomIndexRoute
   GameLessonsIndexRoute: typeof GameLessonsIndexRoute
   GameNounsIndexRoute: typeof GameNounsIndexRoute
@@ -782,6 +795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameArticleUnitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/balloons/': {
+      id: '/game/balloons/'
+      path: '/game/balloons'
+      fullPath: '/game/balloons/'
+      preLoaderRoute: typeof GameBalloonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/custom/': {
       id: '/game/custom/'
       path: '/game/custom'
@@ -919,6 +939,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
   GameArticleIndexRoute: GameArticleIndexRoute,
+  GameBalloonsIndexRoute: GameBalloonsIndexRoute,
   GameCustomIndexRoute: GameCustomIndexRoute,
   GameLessonsIndexRoute: GameLessonsIndexRoute,
   GameNounsIndexRoute: GameNounsIndexRoute,

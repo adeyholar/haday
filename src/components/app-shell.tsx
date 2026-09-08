@@ -21,6 +21,7 @@ import {
   Lightbulb,
   Trophy,
   Users,
+  Waves,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { snapshotOf, useStudy } from "@/lib/store";
@@ -54,6 +55,7 @@ const GAME: NavItem[] = [
   { to: "/game", label: "BBH vocabulary", hint: "Chapter path", icon: Compass },
   { to: "/game/custom", label: "Custom mix", hint: "Your levels, one sitting", icon: Repeat },
   { to: "/game/alefbet", label: "Aleph-bet mastery", hint: "Letter games", icon: Languages },
+  { to: "/game/balloons", label: "Ocean letters", hint: "Catch the name", icon: Waves },
   { to: "/game/syllables", label: "Syllables", hint: "Open, closed, shewa", icon: Layers },
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
   { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },

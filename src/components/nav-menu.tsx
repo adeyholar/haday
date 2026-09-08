@@ -27,6 +27,7 @@ export type NavHref =
   | "/game"
   | "/game/custom"
   | "/game/alefbet"
+  | "/game/balloons"
   | "/game/syllables"
   | "/game/nouns"
   | "/game/article"

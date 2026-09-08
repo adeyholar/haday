@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, Grammar (six topics on the next screen), and Ultimate Challenge. The Game picker groups those same topics so the list stays short on a phone.
+            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar (six topics on the next screen), and Ultimate Challenge. The Game picker groups those same topics so the list stays short on a phone.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -65,6 +65,16 @@ function GuidePage() {
             body="Same typing, but the verse is hidden and there is no live grade. Check first — the word appears after you submit."
           />
         </ol>
+      </Panel>
+
+      <Panel className="mb-3">
+        <h2 className="font-display text-2xl font-bold text-ink">Ocean letters</h2>
+        <p className="mt-2 text-sm text-muted">
+          A fun ear-and-eye drill. Balloons fall toward the water. A voice calls the letter (Alef, Bet, Gimel…). Tap
+          that Hebrew letter before it splashes. Three lives to start; clear a wave and you gain a life (up to six).
+          Later waves put look-alikes in the sky (ב/כ, ד/ר, ה/ח, שׁ/שׂ) and then the five final forms. Hear again if the
+          name did not land. This does not replace Aleph-bet mastery — it trains the sound-to-glyph link.
+        </p>
       </Panel>
 
       <Panel className="mb-3">

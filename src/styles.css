@@ -17,7 +17,11 @@
   --color-danger: #8f3d35;
   --color-good: #3d5c49;
   --color-foreground: #1c1814;
-  --color-background: #f3eee4;
+  --color-sky: #c5d6e4;
+  --color-sky-deep: #7fa3bd;
+  --color-ocean: #2a5a6e;
+  --color-ocean-foam: #d7e8ef;
+  --color-balloon: #e8c46a;
 
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Cormorant Garamond", "Times New Roman", serif;
@@ -194,6 +198,89 @@
 
 .try-flash {
   animation: try-flash 0.75s ease-in-out infinite;
+}
+
+.ocean-play {
+  height: min(72vh, 34rem);
+  min-height: 22rem;
+  background:
+    linear-gradient(
+      180deg,
+      var(--color-sky) 0%,
+      var(--color-sky-deep) 62%,
+      var(--color-ocean) 62.2%,
+      color-mix(in oklab, var(--color-ocean) 80%, black) 100%
+    );
+}
+
+.ocean-water {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 18%;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 20% 0%, var(--color-ocean-foam) 0%, transparent 46%),
+    radial-gradient(90% 70% at 80% 10%, color-mix(in oklab, var(--color-ocean-foam) 50%, transparent) 0%, transparent 40%);
+  opacity: 0.55;
+}
+
+.ocean-splash {
+  position: absolute;
+  inset-inline: 18%;
+  bottom: 14%;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-ocean-foam);
+  opacity: 0.7;
+  animation: ocean-splash-pop 420ms var(--ease-out) both;
+}
+
+@keyframes ocean-splash-pop {
+  from { transform: scaleX(0.4) scaleY(0.6); opacity: 0.9; }
+  to { transform: scaleX(1.4) scaleY(1); opacity: 0; }
+}
+
+.letter-balloon {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 4.4rem;
+  min-width: 3.6rem;
+  min-height: 4.4rem;
+  border: 0;
+  border-radius: 50% 50% 50% 50% / 54% 54% 46% 46%;
+  color: var(--color-ink);
+  box-shadow:
+    inset 0 -10px 16px color-mix(in oklab, #1c1814 14%, transparent),
+    0 8px 16px color-mix(in oklab, #1c1814 18%, transparent);
+}
+
+.letter-balloon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 2px;
+  height: 0.7rem;
+  background: color-mix(in oklab, var(--color-ink) 35%, transparent);
+  transform: translateX(-50%);
+}
+
+.balloon-skin-0 { background: var(--color-balloon); }
+.balloon-skin-1 { background: color-mix(in oklab, var(--color-parchment) 55%, var(--color-primary)); }
+.balloon-skin-2 { background: color-mix(in oklab, var(--color-card) 40%, var(--color-sky-deep)); }
+.balloon-skin-3 { background: color-mix(in oklab, var(--color-good) 45%, var(--color-parchment)); }
+
+@media (min-width: 640px) {
+  .letter-balloon {
+    width: 4.2rem;
+    height: 5.1rem;
+    min-width: 4.2rem;
+    min-height: 5.1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

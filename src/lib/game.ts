@@ -58,6 +58,14 @@ export type GameSnapshot = {
   nouns: SyllableProgress;
   article: SyllableProgress;
   lessons: Record<GrammarTrackId, SyllableProgress>;
+  balloons: BalloonProgress;
+};
+
+export type BalloonProgress = {
+  bestWave: number;
+  bestScore: number;
+  cleared: boolean;
+  attempts: number;
 };
 
 export type AlefBetProgress = {
@@ -131,7 +139,12 @@ export function defaultGame(): GameSnapshot {
     nouns: emptyNouns(),
     article: emptyArticle(),
     lessons: emptyLessons(),
+    balloons: emptyBalloons(),
   };
+}
+
+export function emptyBalloons(): BalloonProgress {
+  return { bestWave: 0, bestScore: 0, cleared: false, attempts: 0 };
 }
 
 export function emptyAlefBet(): AlefBetProgress {
@@ -203,6 +216,19 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     nouns: hydrateNouns(r.nouns),
     article: hydrateArticle(r.article),
     lessons: hydrateLessons(r.lessons),
+    balloons: hydrateBalloons(r.balloons),
+  };
+}
+
+function hydrateBalloons(raw: unknown): BalloonProgress {
+  const base = emptyBalloons();
+  if (!raw || typeof raw !== "object") return base;
+  const r = raw as Partial<BalloonProgress>;
+  return {
+    bestWave: Math.max(0, Math.min(5, Number(r.bestWave) || 0)),
+    bestScore: Math.max(0, Number(r.bestScore) || 0),
+    cleared: Boolean(r.cleared),
+    attempts: Math.max(0, Number(r.attempts) || 0),
   };
 }
 
@@ -524,6 +550,22 @@ export function applyAlefBetResult(
   } else {
     next.winStreak = 0;
   }
+  return next;
+}
+
+export function applyBalloonResult(
+  game: GameSnapshot,
+  result: { wave: number; score: number; cleared: boolean },
+): GameSnapshot {
+  const next = cloneGame(hydrateGame(game));
+  const prev = next.balloons ?? emptyBalloons();
+  next.balloons = {
+    bestWave: Math.max(prev.bestWave, Math.max(0, result.wave)),
+    bestScore: Math.max(prev.bestScore, Math.max(0, result.score)),
+    cleared: prev.cleared || result.cleared,
+    attempts: (prev.attempts || 0) + 1,
+  };
+  next.lastPlayDay = Date.now();
   return next;
 }
 

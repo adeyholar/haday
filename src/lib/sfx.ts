@@ -155,6 +155,42 @@ export function playGrade(ok: boolean) {
   else playCrowdAww(ac, master);
 }
 
+export function playPop() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  const t0 = ac.currentTime;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(520, t0);
+  o.frequency.exponentialRampToValueAtTime(180, t0 + 0.12);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(0.22, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.14);
+  o.connect(g);
+  g.connect(master);
+  o.start(t0);
+  o.stop(t0 + 0.16);
+}
+
+export function playSplash() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  const t0 = ac.currentTime;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(220, t0);
+  o.frequency.exponentialRampToValueAtTime(70, t0 + 0.22);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(0.18, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
+  o.connect(g);
+  g.connect(master);
+  o.start(t0);
+  o.stop(t0 + 0.3);
+}
+
 if (typeof window !== "undefined") {
   const unlock = () => unlockSfx();
   window.addEventListener("pointerdown", unlock, { once: true });

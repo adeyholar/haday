@@ -26,6 +26,8 @@ export const BADGES = [
   { id: "article-master", title: "Name the prefix", hint: "Clear all six article & vav units" },
   { id: "lessons-open", title: "Grammar in the text", hint: "Clear the first Prepositions unit" },
   { id: "lessons-master", title: "Six topics", hint: "Clear every unit of the six grammar topics" },
+  { id: "balloons-open", title: "First catch", hint: "Score a catch in Ocean letters" },
+  { id: "balloons-clear", title: "Above the water", hint: "Clear all five Ocean letters waves" },
 ] as const;
 
 export type BadgeId = (typeof BADGES)[number]["id"];
@@ -145,6 +147,8 @@ export function evaluateBadges(game: GameSnapshot, dailyStreak: number, keepStre
     );
     if (allTracks) out.push("lessons-master");
   }
+  if ((game.balloons?.bestScore ?? 0) >= 1) out.push("balloons-open");
+  if (game.balloons?.cleared) out.push("balloons-clear");
   return out;
 }
 

@@ -16,7 +16,9 @@ export function GameMenu() {
       ? "/game"
       : pathname.startsWith("/game/custom")
         ? "/game/custom"
-        : pathname.startsWith("/game/alefbet")
+        : pathname.startsWith("/game/balloons")
+          ? "/game/balloons"
+          : pathname.startsWith("/game/alefbet")
           ? "/game/alefbet"
           : pathname.startsWith("/game/syllables")
             ? "/game/syllables"
@@ -49,6 +51,7 @@ export function GameMenu() {
           label: "Letters & forms",
           options: [
             { value: "/game/alefbet", label: "Aleph-bet mastery" },
+            { value: "/game/balloons", label: "Ocean letters" },
             { value: "/game/syllables", label: "Syllables" },
             { value: "/game/nouns", label: "Nouns" },
             { value: "/game/article", label: "Article & vav" },
@@ -75,6 +78,7 @@ export function GameMenu() {
         else if (to === "/game") void navigate({ to: "/game" });
         else if (to === "/game/custom") void navigate({ to: "/game/custom" });
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });
+        else if (to === "/game/balloons") void navigate({ to: "/game/balloons" });
         else if (to === "/game/syllables") void navigate({ to: "/game/syllables" });
         else if (to === "/game/nouns") void navigate({ to: "/game/nouns" });
         else if (to === "/game/article") void navigate({ to: "/game/article" });
