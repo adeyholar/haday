@@ -1,5 +1,6 @@
 import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
 import { SYLLABLE_QUIZ_EXTRA } from "@/lib/syllable-quiz-extra";
+import { hardenQuizChoices } from "@/lib/close-quiz";
 
 /** Public-domain Masoretic examples. Rules are original teaching notes, not a textbook reprint. */
 
@@ -360,10 +361,10 @@ export function syllableQuizPool(unit: SyllableUnit): SyllableQuiz[] {
 
 export function shuffleQuiz(unit: SyllableUnit): SyllableQuiz[] {
   const items = drawRound(syllableQuizPool(unit), SYLLABLE_QUIZ_LEN, `syl:${unit.id}`, quizId);
-  return items.map((q) => ({
-    ...q,
-    choices: shuffle(q.choices),
-  }));
+  return items.map((q) => {
+    const hard = hardenQuizChoices(q);
+    return { ...hard, choices: shuffle(hard.choices) };
+  });
 }
 
 export function starsFromSyllableScore(pct: number): number {

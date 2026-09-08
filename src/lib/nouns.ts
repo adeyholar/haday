@@ -1,5 +1,6 @@
 import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
 import { NOUN_QUIZ_EXTRA } from "@/lib/noun-quiz-extra";
+import { hardenQuizChoices } from "@/lib/close-quiz";
 
 /** Original teaching notes on Hebrew nouns. Public-domain Masoretic examples. Not a textbook reprint. */
 
@@ -291,10 +292,10 @@ export function buildNounQuiz(unitId: number): NounQuiz[] {
   const fresh = drawRound(pool, freshTake, `noun:${unitId}`, quizId);
   const prior = NOUN_UNITS.filter((u) => u.id < unitId).flatMap((u) => u.quiz);
   const review = reviewCount ? drawRound(prior, reviewCount, `noun-rev:${unitId}`, quizId).map((q) => ({ ...q, review: true })) : [];
-  return shuffle([...fresh, ...review]).map((q) => ({
-    ...q,
-    choices: shuffle(q.choices),
-  }));
+  return shuffle([...fresh, ...review]).map((q) => {
+    const hard = hardenQuizChoices(q);
+    return { ...hard, choices: shuffle(hard.choices) };
+  });
 }
 
 export function starsFromNounScore(pct: number): number {

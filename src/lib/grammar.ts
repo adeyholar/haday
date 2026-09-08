@@ -1,4 +1,5 @@
 import { drawRound, ROUND_LEN } from "@/lib/quiz-draw";
+import { hardenQuizChoices } from "@/lib/close-quiz";
 import type { LearnKind, LearnSample, LearnVerse } from "@/lib/tanakh-learn-note";
 
 export type GrammarTrackId = "prep" | "adj" | "pron" | "exist" | "construct" | "numbers";
@@ -90,7 +91,10 @@ export function buildGrammarQuiz(track: GrammarTrack, unitId: number): GrammarQu
         review: true,
       }))
     : [];
-  return shuffle([...fresh, ...review]).map((q) => ({ ...q, choices: shuffle(q.choices) }));
+  return shuffle([...fresh, ...review]).map((q) => {
+    const hard = hardenQuizChoices(q);
+    return { ...hard, choices: shuffle(hard.choices) };
+  });
 }
 
 export function starsFromGrammarScore(pct: number): number {

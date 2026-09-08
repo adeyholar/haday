@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-07
 
+- **Closer quiz traps.** Recognize and Study quiz now mix look-alikes and same-family glosses (man/woman, sea/water/heaven). Grammar games drop giveaways like “A verb” / “Heaven” for a wrong reading of the same form — compensatory vs regular article, dual vs plural — so the right pick needs a second look.
+
 - **Hebrew letters in explanations.** Learn notes, Rules, and grammar quizzes now name letters with the glyph (ה, א, ש), not English “He / Alef / Shin,” so “He” is never confused with the English pronoun.
 
 - **Ch. 6–11 grammar games.** Six paths under Game → Ch. 6–11 grammar: prepositions, adjectives, pronouns, existence particles + ch. 9 nouns, construct nouns, numbers. Original notes, Masoretic verses, class vocab marked. Learn → pair → 12-question quiz. 90% held opens the next unit.

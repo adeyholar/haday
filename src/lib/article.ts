@@ -1,5 +1,6 @@
 import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
 import { ARTICLE_QUIZ_EXTRA } from "@/lib/article-quiz-extra";
+import { hardenQuizChoices } from "@/lib/close-quiz";
 
 /** Original teaching notes on the Hebrew article and conjunction ו. Public-domain Masoretic examples. Not a textbook reprint. */
 
@@ -315,10 +316,10 @@ export function buildArticleQuiz(unitId: number): ArticleQuiz[] {
   const fresh = drawRound(pool, freshTake, `article:${unitId}`, quizId);
   const prior = ARTICLE_UNITS.filter((u) => u.id < unitId).flatMap((u) => u.quiz);
   const review = reviewCount ? drawRound(prior, reviewCount, `article-rev:${unitId}`, quizId).map((q) => ({ ...q, review: true })) : [];
-  return shuffle([...fresh, ...review]).map((q) => ({
-    ...q,
-    choices: shuffle(q.choices),
-  }));
+  return shuffle([...fresh, ...review]).map((q) => {
+    const hard = hardenQuizChoices(q);
+    return { ...hard, choices: shuffle(hard.choices) };
+  });
 }
 
 export function starsFromArticleScore(pct: number): number {

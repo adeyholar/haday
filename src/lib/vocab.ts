@@ -1,4 +1,5 @@
 import { CONSONANTS } from "./alphabet";
+import { foldFinals, lettersOnly } from "./hebrew";
 
 export type Pos = "noun" | "verb" | "adj" | "prep" | "particle" | "name" | "pron";
 
@@ -657,13 +658,127 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+const GLOSS_STOP = new Set(["the", "a", "an", "and", "or", "of", "to", "in", "on", "for"]);
+
+const LOOK_PAIRS: [string, string][] = [
+  ["ה", "ח"],
+  ["ד", "ר"],
+  ["ב", "כ"],
+  ["כ", "פ"],
+  ["ו", "ז"],
+  ["ו", "ן"],
+  ["ס", "ם"],
+  ["ע", "א"],
+];
+
+const LOOKALIKE = new Map<string, Set<string>>();
+for (const [a, b] of LOOK_PAIRS) {
+  if (!LOOKALIKE.has(a)) LOOKALIKE.set(a, new Set());
+  if (!LOOKALIKE.has(b)) LOOKALIKE.set(b, new Set());
+  LOOKALIKE.get(a)!.add(b);
+  LOOKALIKE.get(b)!.add(a);
+}
+
+const FAMILIES: string[][] = [
+  ["abraham", "isaac", "jacob", "israel", "esau"],
+  ["moses", "aaron", "joshua", "samuel", "pharaoh"],
+  ["david", "saul", "solomon", "judah"],
+  ["jerusalem", "zion", "canaan", "israel", "egypt"],
+  ["joseph", "jacob", "israel"],
+  ["ab", "em", "ah", "achot", "ben", "bat", "ish", "ishah"],
+  ["adam", "ish", "ishah", "naar", "naarah"],
+  ["el-god", "elohim", "adon", "yhwh"],
+  ["erets", "adamah", "ir", "har"],
+  ["yom", "laylah"],
+  ["melek", "kohen", "nabi", "ebed"],
+  ["mayim", "yam", "shamayim"],
+  ["ayin", "yad", "regel", "rosh"],
+  ["qol", "dabar"],
+  ["bayit", "ir", "shaar"],
+];
+
+const FAMILY_OF = new Map<string, Set<string>>();
+for (const group of FAMILIES) {
+  for (const id of group) {
+    if (!FAMILY_OF.has(id)) FAMILY_OF.set(id, new Set());
+    for (const other of group) FAMILY_OF.get(id)!.add(other);
+  }
+}
+
+function glossTokens(item: VocabItem): Set<string> {
+  const raw = `${item.gloss} ${item.alts.join(" ")}`.toLowerCase();
+  const out = new Set<string>();
+  for (const w of raw.split(/[^a-z]+/)) {
+    if (w.length < 3 || GLOSS_STOP.has(w)) continue;
+    out.add(w);
+  }
+  return out;
+}
+
+function oneLookalike(a: string, b: string): boolean {
+  const x = foldFinals(a);
+  const y = foldFinals(b);
+  if (x.length !== y.length || x === y) return false;
+  let diffs = 0;
+  for (let i = 0; i < x.length; i++) {
+    if (x[i] === y[i]) continue;
+    if (LOOKALIKE.get(x[i])?.has(y[i])) diffs += 1;
+    else return false;
+  }
+  return diffs === 1;
+}
+
+function distractorScore(item: VocabItem, other: VocabItem): number {
+  let s = 0;
+  const a = foldFinals(lettersOnly(item.hebrew));
+  const b = foldFinals(lettersOnly(other.hebrew));
+  if (oneLookalike(a, b)) s += 42;
+  if (a === b) s += 36;
+  if (FAMILY_OF.get(item.id)?.has(other.id)) s += 22;
+  if (other.pos === item.pos) s += 8;
+  if (other.chapter === item.chapter) s += 8;
+  else if (Math.abs(other.chapter - item.chapter) === 1) s += 3;
+  if (a[0] && a[0] === b[0]) s += 6;
+  if (Math.abs(a.length - b.length) <= 1) s += 4;
+  const mine = glossTokens(item);
+  let overlap = 0;
+  for (const t of glossTokens(other)) if (mine.has(t)) overlap += 1;
+  if (overlap) s += 11 * overlap;
+  const ta = item.translit.slice(0, 2);
+  if (ta && other.translit.startsWith(ta)) s += 3;
+  return s;
+}
+
+/** Four glosses: the lemma plus two close traps and one same-POS neighbor. */
 export function quizChoices(item: VocabItem, pool: VocabItem[], n = 4): string[] {
-  const same = pool.filter((x) => x.id !== item.id && x.pos === item.pos);
-  const rest = pool.filter((x) => x.id !== item.id && x.pos !== item.pos);
-  const distractors = shuffle([...same, ...rest])
-    .map((x) => x.gloss)
-    .filter((g, i, arr) => g !== item.gloss && arr.indexOf(g) === i)
-    .slice(0, n - 1);
+  const nearby = VOCAB.filter(
+    (v) => v.id !== item.id && (Math.abs(v.chapter - item.chapter) <= 3 || v.pos === item.pos),
+  );
+  const byId = new Map<string, VocabItem>();
+  for (const v of [...pool, ...nearby]) {
+    if (v.id === item.id) continue;
+    byId.set(v.id, v);
+  }
+  const scored = [...byId.values()]
+    .map((x) => ({ x, s: distractorScore(item, x) }))
+    .sort((a, b) => b.s - a.s);
+
+  const seen = new Set<string>([item.gloss]);
+  const hard: string[] = [];
+  const rest: string[] = [];
+  for (const { x, s } of scored) {
+    if (seen.has(x.gloss)) continue;
+    seen.add(x.gloss);
+    (s >= 14 ? hard : rest).push(x.gloss);
+  }
+
+  const need = Math.max(1, n - 1);
+  const closeTake = Math.min(2, need, hard.length);
+  const distractors = hard.slice(0, closeTake);
+  for (const g of shuffle([...hard.slice(closeTake), ...rest])) {
+    if (distractors.length >= need) break;
+    if (!distractors.includes(g)) distractors.push(g);
+  }
   return shuffle([item.gloss, ...distractors]);
 }
 

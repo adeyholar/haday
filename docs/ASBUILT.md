@@ -20,7 +20,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 | Area | What it does | Why it helps |
 |---|---|---|
 | **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. Learn / Rules name letters with the Hebrew glyph (ה not “He”). |
-| **Game** | BBH path Ch. 1–19, Custom mix of open chapters (every student), Aleph-bet, Syllables, Nouns, Article & vav, Ch. 6–11 grammar (prep → numbers), Ultimate Challenge | Stages and grammar units unlock in order. **90%** to clear and open the next. Custom mix reviews open levels in one sitting. Citation form only (יָם, not בַּיָּם). |
+| **Game** | BBH path Ch. 1–19, Custom mix of open chapters (every student), Aleph-bet, Syllables, Nouns, Article & vav, Ch. 6–11 grammar (prep → numbers), Ultimate Challenge | Stages and grammar units unlock in order. **90%** to clear and open the next. Custom mix reviews open levels in one sitting. Citation form only (יָם, not בַּיָּם). Recognize uses close traps (look-alike / same family), not giveaways. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
