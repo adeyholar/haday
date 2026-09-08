@@ -517,7 +517,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             alts={spell.alts}
             disabled={revealed}
             strict
-            liveGrade={stage !== "spell-strict"}
+            liveGrade
           />
           {tries >= 1 && !revealed && (
             <>

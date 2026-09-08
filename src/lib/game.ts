@@ -13,7 +13,7 @@ export const GAME_STAGES = [
   { id: "recognize", name: "Recognize", short: "Recognize", prompt: "Hebrew → English" },
   { id: "gloss", name: "Gloss", short: "Gloss", prompt: "Type the English gloss" },
   { id: "spell-lenient", name: "Spell (lenient)", short: "Spell · lenient", prompt: "Type each consonant and its vowel" },
-  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Type each consonant and its vowel — Check first, no verse" },
+  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Type each consonant and its vowel — live grade, no verse" },
 ] as const;
 
 export type GameStageId = (typeof GAME_STAGES)[number]["id"];

@@ -62,7 +62,7 @@ function GuidePage() {
           <Stage
             n="4"
             name="Spell · strict"
-            body="Same typing, but the verse is hidden and there is no live grade. Check first — the word appears after you submit."
+            body="Same typing, live grade as you type, but the verse stays hidden until you submit. Vowels required."
           />
         </ol>
       </Panel>
