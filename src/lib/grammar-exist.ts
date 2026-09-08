@@ -12,7 +12,7 @@ export const EXIST_UNITS: GrammarUnit[] = [
       { word: "הִנֵּה", gloss: "behold, look", tag: "pointer", note: "Class. Also הִנְנִי “here I am.”", ref: "Gen 1:31" },
       { word: "הֵן", gloss: "behold, if", tag: "pointer", note: "Shorter cousin.", ref: "Gen 3:22" },
       { word: "הִנְנִי", gloss: "here I am", tag: "plus pronoun", note: "הִנֵּה + me.", ref: "Exod 3:4" },
-      { word: "וְהִנֵּה", gloss: "and look", tag: "vav + pointer", note: "Chapter 5 vav still applies.", ref: "Gen 1:31" },
+      { word: "וְהִנֵּה", gloss: "and look", tag: "ו + pointer", note: "Chapter 5 ו still applies.", ref: "Gen 1:31" },
     ],
     verses: [
       { ref: "Gen 1:31", he: "וַיַּרְא אֱלֹהִים אֶת־כָּל־אֲשֶׁר עָשָׂה וְהִנֵּה־טוֹב מְאֹד", en: "God saw all that he had made, and look — it was very good.", hit: "הִנֵּה", hitEn: "look", vocabId: "hinneh" },
@@ -29,7 +29,7 @@ export const EXIST_UNITS: GrammarUnit[] = [
       { q: "When you see הִנֵּה, next…", choices: ["Look at the clause it introduces — that is the sight", "Skip the next noun", "Always add מִן"], answer: "Look at the clause it introduces — that is the sight", why: "Pointer." },
       { q: "Class name אַבְרָהָם often answers…", he: "אַבְרָהָם", choices: ["הִנֵּנִי", "מִן", "זֶה only"], answer: "הִנֵּנִי", why: "Here I am." },
       { q: "Do not parse הִנֵּה as…", choices: ["הַ + נֵה a noun", "A particle", "“Look”"], answer: "הַ + נֵה a noun", why: "One lemma." },
-      { q: "וְהִנֵּה is simply…", he: "וְהִנֵּה", choices: ["And look — vav plus הִנֵּה", "The article on look", "A dual"], answer: "And look — vav plus הִנֵּה", why: "Chapter 5 vav still applies." },
+      { q: "וְהִנֵּה is simply…", he: "וְהִנֵּה", choices: ["And look — ו plus הִנֵּה", "The article on look", "A dual"], answer: "And look — ו plus הִנֵּה", why: "Chapter 5 ו still applies." },
       { q: "Isa 7:14 opens the sight with…", he: "הִנֵּה", ref: "Isa 7:14", choices: ["הִנֵּה", "אֵין", "יֵשׁ"], answer: "הִנֵּה", why: "Look…" },
       { q: "הִנֵּה can sit before…", choices: ["A whole clause, not only one noun", "Only numbers", "Only duals"], answer: "A whole clause, not only one noun", why: "Behold, X is happening." },
       { q: "Chapter 9 vocab you will keep meeting beside הִנֵּה includes…", choices: ["לֶחֶם, עַם, כָּבוֹד, בֹּקֶר", "Only Qal verbs", "Only dual endings"], answer: "לֶחֶם, עַם, כָּבוֹד, בֹּקֶר", why: "This chapter’s nouns live in the same verses." },
@@ -97,7 +97,7 @@ export const EXIST_UNITS: GrammarUnit[] = [
       { q: "לֶחֶם is…", he: "לֶחֶם", choices: ["Bread, food", "War", "Glory"], answer: "Bread, food", why: "Class ch. 9." },
       { q: "These particles should be named in…", choices: ["One glance, so the nouns stay in memory", "The verb chart only", "Construct chains only"], answer: "One glance, so the nouns stay in memory", why: "Speed for exposure." },
       { q: "לֹא־טוֹב … לְבַדּוֹ recycles…", ref: "Gen 2:18", choices: ["טוֹב (ch. 7) and לְבַד (ch. 9) and אָדָם (ch. 3)", "Only numbers", "Only duals"], answer: "טוֹב (ch. 7) and לְבַד (ch. 9) and אָדָם (ch. 3)", why: "Old words in a new particle frame." },
-      { q: "גַּם is not…", choices: ["גַּן “garden”", "Also/even", "A particle"], answer: "גַּן “garden”", why: "One extra nun." },
+      { q: "גַּם is not…", choices: ["גַּן “garden”", "Also/even", "A particle"], answer: "גַּן “garden”", why: "One extra נ." },
       { q: "Look up לְבַדּוֹ as…", he: "לְבַדּוֹ", choices: ["לְבַד — then read the suffix", "בדד a new verb always", "The dual of בד"], answer: "לְבַד — then read the suffix", why: "Citation plus ending." },
     ],
   },
@@ -106,7 +106,7 @@ export const EXIST_UNITS: GrammarUnit[] = [
     title: "Chapter 9 nouns in the verse",
     short: "People, bread, glory, war",
     rule:
-      "This chapter’s nouns are high-traffic: עַם people, לֶחֶם bread, כָּבוֹד glory, מִלְחָמָה war, מִשְׁפָּחָה family, עֵץ tree, בְּרָכָה blessing, חַטָּאת sin. Meet them inside the particles you just learned. Strip article, vav, and inseparable preps — then look up the singular.",
+      "This chapter’s nouns are high-traffic: עַם people, לֶחֶם bread, כָּבוֹד glory, מִלְחָמָה war, מִשְׁפָּחָה family, עֵץ tree, בְּרָכָה blessing, חַטָּאת sin. Meet them inside the particles you just learned. Strip article, ו, and inseparable preps — then look up the singular.",
     samples: [
       { word: "עַם", gloss: "people", tag: "noun", note: "Class. Frequent.", ref: "Exod 19:5" },
       { word: "כָּבוֹד", gloss: "glory, honor", tag: "noun", note: "Class.", ref: "Ps 24:8" },

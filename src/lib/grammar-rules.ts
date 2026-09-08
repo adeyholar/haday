@@ -122,7 +122,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "A guttural can take silent shewa, not vocal shewa",
     statement:
-      "The real rule is not “gutturals never take shewa.” א ה ח ע cannot take vocal shewa (they take a hateph, a reduced vowel, instead). Silent shewa is not a vowel, so a guttural may take it. Tanakh proves it: שָׁמַעְתָּ (Gen 3:17) has silent shewa under ayin, closing מַעְ. The dagesh in תּ is lene — that silent shewa is not a vowel, so you do not split the tav.",
+      "The real rule is not “gutturals never take shewa.” א ה ח ע cannot take vocal shewa (they take a hateph, a reduced vowel, instead). Silent shewa is not a vowel, so a guttural may take it. Tanakh proves it: שָׁמַעְתָּ (Gen 3:17) has silent shewa under ע, closing מַעְ. The dagesh in תּ is lene — that silent shewa is not a vowel, so you do not split the ת.",
     aliases: [
       "guttural silent shewa",
       "can take a silent shewa",
@@ -130,22 +130,22 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       "silent shewa guttural",
       "cannot take a vocal shewa but it can take a silent",
       "gutturals never take shewa",
-      "ayin never take shewa",
+      "ע never take shewa",
       "guttural no shewa",
     ],
   },
   {
     id: "resh-vocal-shewa",
     group: "syllable",
-    title: "Resh with shewa follows the shewa rules",
+    title: "ר with shewa follows the shewa rules",
     statement:
-      "When ר takes shewa, silent vs vocal is the ordinary shewa test — not the guttural hateph rule. After a short vowel the shewa is silent (פַּרְעֹה). At the start of a word, as the second of two, or after an unaccented long vowel, it is vocal (רְאוּבֵן). Resh still cannot take dagesh.",
+      "When ר takes shewa, silent vs vocal is the ordinary shewa test — not the guttural hateph rule. After a short vowel the shewa is silent (פַּרְעֹה). At the start of a word, as the second of two, or after an unaccented long vowel, it is vocal (רְאוּבֵן). ר still cannot take dagesh.",
     aliases: [
-      "resh can take vocal shewa",
-      "resh vocal shewa",
+      "ר can take vocal shewa",
+      "ר vocal shewa",
       "unlike the gutturals",
-      "resh vocal",
-      "resh shewa",
+      "ר vocal",
+      "ר shewa",
     ],
   },
   {
@@ -182,14 +182,14 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "quiescent-alef",
     group: "syllable",
-    title: "Alef without a vowel is quiescent",
+    title: "א without a vowel is quiescent",
     statement:
       "When א occurs without a vowel, it is quiescent (silent) — as in חַטָּאת “sin.” It does not begin a new syllable.",
     aliases: [
-      "quiescent alef",
-      "alef without a vowel",
+      "quiescent א",
+      "א without a vowel",
       "quiescent",
-      "silent alef",
+      "silent א",
       "chatat",
       "chattat",
       "sin quiescent",
@@ -200,12 +200,12 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "syllable",
     title: "A diphthong syllable is closed",
     statement:
-      "Syllables that contain the diphthong (patah + yod, as in בַּ֫יִת) are considered closed because they always end with a consonant.",
+      "Syllables that contain the diphthong (patah + י, as in בַּ֫יִת) are considered closed because they always end with a consonant.",
     aliases: [
       "diphthong",
       "diphthong closed",
       "bayit diphthong",
-      "patah yod",
+      "patah י",
       "closed because they always end with a consonant",
     ],
   },
@@ -409,13 +409,13 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "guttural-no-forte",
     group: "guttural",
-    title: "All gutturals cannot take dagesh, including resh",
+    title: "All gutturals cannot take dagesh, including ר",
     statement:
       "All gutturals cannot take dagesh — lene or forte. That includes ר. Compensation often lengthens the preceding vowel.",
     aliases: [
       "guttural no dagesh",
       "cannot take forte",
-      "resh no dagesh",
+      "ר no dagesh",
       "gutturals cannot take dagesh forte",
       "cannot take daghesh forte",
       "cannot take dagesh lene",
@@ -425,7 +425,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "guttural-hateph",
     group: "guttural",
-    title: "Gutturals excluding resh take a hateph, not vocal shewa",
+    title: "Gutturals excluding ר take a hateph, not vocal shewa",
     statement:
       "Gutturals excluding ר cannot take vocal shewa; they take a hateph (reduced vowel) instead. They may still take silent shewa.",
     aliases: [
@@ -466,20 +466,20 @@ export const GRAMMAR_RULES: GrammarRule[] = [
   {
     id: "article-compensatory",
     group: "article",
-    title: "Alef, ayin, and resh: compensatory הָ",
+    title: "א, ע, and ר: compensatory הָ",
     statement:
-      "Gutturals and resh cannot take dagesh. When the noun begins with א, ע, or ר, the article’s pathach lengthens to qamets: הָאִישׁ, הָעִיר, הָרֹאשׁ.",
+      "Gutturals and ר cannot take dagesh. When the noun begins with א, ע, or ר, the article’s pathach lengthens to qamets: הָאִישׁ, הָעִיר, הָרֹאשׁ.",
     aliases: [
       "compensatory lengthening",
       "article qamets",
       "ha becomes qamets",
-      "alef ayin resh article",
+      "א ע ר article",
     ],
   },
   {
     id: "article-virtual",
     group: "article",
-    title: "He and het: virtual doubling הַ",
+    title: "ה and ח: virtual doubling הַ",
     statement:
       "When the noun begins with ה or ח, the article usually keeps pathach and still has no dagesh: הַהֵיכָל, הַחֶרֶב. That is virtual doubling.",
     aliases: [
@@ -498,7 +498,7 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     aliases: [
       "seghol article",
       "irregular seghol",
-      "he-seghol",
+      "ה-seghol",
       "article before unaccented",
     ],
   },
@@ -507,11 +507,11 @@ export const GRAMMAR_RULES: GrammarRule[] = [
     group: "vav",
     title: "Conjunction וְ is always prefixed",
     statement:
-      "וְ (and, but, also, even, then) is always prefixed. Default spelling is shewa. An initial vav is the conjunction well over ninety-nine times in a hundred.",
+      "וְ (and, but, also, even, then) is always prefixed. Default spelling is shewa. An initial ו is the conjunction well over ninety-nine times in a hundred.",
     aliases: [
-      "conjunction vav",
-      "vav always prefixed",
-      "default shewa vav",
+      "conjunction ו",
+      "ו always prefixed",
+      "default shewa ו",
       "and but also",
     ],
   },
@@ -523,22 +523,22 @@ export const GRAMMAR_RULES: GrammarRule[] = [
       "Before the labials ב, מ, or פ the conjunction is shureq: וּמֶלֶךְ, וּבַיִת, וּפַרְעֹה. An initial begadkephat then loses dagesh lene.",
     aliases: [
       "bump rule",
-      "shureq vav",
-      "labial vav",
-      "bet mem pe conjunction",
+      "shureq ו",
+      "labial ו",
+      "ב מ פ conjunction",
     ],
   },
   {
     id: "vav-hateph",
     group: "vav",
-    title: "Vav matches a hateph; יְ contracts to וִי; אֱלֹהִים is וֵאלֹהִים",
+    title: "ו matches a hateph; יְ contracts to וִי; אֱלֹהִים is וֵאלֹהִים",
     statement:
-      "Before a hateph, vav takes the matching short vowel (וַאֲ, וֶאֱ, וָחֳ). יְ + וְ contracts to וִי (וִיהוּדָה). אֱלֹהִים with the conjunction is the special form וֵאלֹהִים. Short and initially accented words often take וָ (וָלֶחֶם, וָבֹהוּ).",
+      "Before a hateph, ו takes the matching short vowel (וַאֲ, וֶאֱ, וָחֳ). יְ + וְ contracts to וִי (וִיהוּדָה). אֱלֹהִים with the conjunction is the special form וֵאלֹהִים. Short and initially accented words often take וָ (וָלֶחֶם, וָבֹהוּ).",
     aliases: [
-      "hateph vav",
+      "hateph ו",
       "yehudah contraction",
       "velohim",
-      "qamets vav",
+      "qamets ו",
       "and God",
     ],
   },
@@ -557,7 +557,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "אָנֹכִי יְהוָה אֱלֹהֶיךָ אֲשֶׁר הוֹצֵאתִיךָ מֵאֶרֶץ מִצְרַיִם",
     en: "I am YHWH your God, who brought you out from the land of Egypt.",
     hit: "מִצְרַיִם",
-    why: "The hireq under mem sits in a closed, unaccented syllable (מִצְ).",
+    why: "The hireq under מ sits in a closed, unaccented syllable (מִצְ).",
   },
   {
     id: "melek-seghol",
@@ -627,7 +627,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "אֵלֶּה הַדְּבָרִים אֲשֶׁר דִּבֶּר מֹשֶׁה אֶל־כָּל־יִשְׂרָאֵל",
     en: "These are the words that Moses spoke to all Israel.",
     hit: "הַדְּבָרִים",
-    why: "Vocal shewa under dalet in דְּבָרִים is in an open, propretonic syllable.",
+    why: "Vocal shewa under ד in דְּבָרִים is in an open, propretonic syllable.",
   },
   {
     id: "elohim-hateph",
@@ -641,7 +641,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "אֱלֹהִים",
-    why: "Hateph seghol under alef is a reduced vowel in an open, propretonic syllable. It is never silent.",
+    why: "Hateph seghol under א is a reduced vowel in an open, propretonic syllable. It is never silent.",
   },
   {
     id: "hokmah-hatuf",
@@ -683,7 +683,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וִהְיִיתֶם לִי סְגֻלָּה מִכָּל־הָעַמִּים",
     en: "You shall be my treasured possession out of all the peoples.",
     hit: "מִכָּל",
-    why: "In מִכָּל־ the qamets under kaf is Hatuf (short o) in a closed, unaccented syllable.",
+    why: "In מִכָּל־ the qamets under כ is Hatuf (short o) in a closed, unaccented syllable.",
   },
   {
     id: "dabar-qamets",
@@ -711,7 +711,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "גַּם וַשְׁתִּי הַמַּלְכָּה עָשְׂתָה מִשְׁתֵּה נָשִׁים",
     en: "Vashti the queen also made a feast for the women.",
     hit: "הַמַּלְכָּה",
-    why: "Shewa under lamed is silent: it is immediately preceded by short pathach and closes the syllable מַלְ. This is the notes’ word “queen.”",
+    why: "Shewa under ל is silent: it is immediately preceded by short pathach and closes the syllable מַלְ. This is the notes’ word “queen.”",
   },
   {
     id: "malkah-silent-kgs",
@@ -725,7 +725,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וּמַלְכַּת־שְׁבָא שֹׁמַעַת אֶת־שֵׁמַע שְׁלֹמֹה",
     en: "The queen of Sheba heard the report of Solomon.",
     hit: "וּמַלְכַּת",
-    why: "Shewa under lamed is silent after short pathach, closing מַלְ.",
+    why: "Shewa under ל is silent after short pathach, closing מַלְ.",
   },
   {
     id: "vayyishmeu-two",
@@ -739,7 +739,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיִּשְׁמְעוּ אֶת־קוֹל יְהוָה אֱלֹהִים מִתְהַלֵּךְ בַּגָּן",
     en: "They heard the voice of YHWH God walking in the garden.",
     hit: "וַיִּשְׁמְעוּ",
-    why: "Two shewas in a row: under shin (silent, after hireq) then under mem (vocal). Syllabified יִשְׁ | מְ | עוּ.",
+    why: "Two shewas in a row: under ש (silent, after hireq) then under מ (vocal). Syllabified יִשְׁ | מְ | עוּ.",
   },
   {
     id: "yaladt-final",
@@ -767,7 +767,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "בְּרֵאשִׁית",
-    why: "The shewa under bet is initial, so it is vocal.",
+    why: "The shewa under ב is initial, so it is vocal.",
   },
   {
     id: "samuel-initial",
@@ -781,7 +781,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיֹּאמֶר שְׁמוּאֵל דַּבֵּר כִּי שֹׁמֵעַ עַבְדֶּךָ",
     en: "Samuel said, “Speak, for your servant is listening.”",
     hit: "שְׁמוּאֵל",
-    why: "Initial shewa under shin is always vocal.",
+    why: "Initial shewa under ש is always vocal.",
   },
   {
     id: "melakhim-forte-shewa",
@@ -795,7 +795,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיְהִי לִתְשׁוּבַת הַשָּׁנָה לְעֵת צֵאת הַמְּלָכִים",
     en: "At the turn of the year, the time when kings go out to battle.",
     hit: "הַמְּלָכִים",
-    why: "Shewa under mem in הַמְּלָכִים is vocal because that mem has dagesh forte.",
+    why: "Shewa under מ in הַמְּלָכִים is vocal because that מ has dagesh forte.",
   },
   {
     id: "shophetim-long",
@@ -837,7 +837,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "יְהוּדָה אַתָּה יוֹדוּךָ אַחֶיךָ",
     en: "Judah, your brothers will praise you.",
     hit: "אַתָּה",
-    why: "Dagesh in tav of אַתָּה is forte because a vowel (pathach) precedes it.",
+    why: "Dagesh in ת of אַתָּה is forte because a vowel (pathach) precedes it.",
   },
   {
     id: "midbar-lene",
@@ -851,7 +851,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וּמֹשֶׁה הָיָה רֹעֶה אֶת־צֹאן יִתְרוֹ חֹתְנוֹ אַחַר הַמִּדְבָּר",
     en: "Moses was shepherding the flock of Jethro his father-in-law, behind the wilderness.",
     hit: "הַמִּדְבָּר",
-    why: "Dagesh in bet of מִדְבָּר is lene: it is preceded by a consonant with silent shewa, not a vowel.",
+    why: "Dagesh in ב of מִדְבָּר is lene: it is preceded by a consonant with silent shewa, not a vowel.",
   },
   {
     id: "bereshit-lene",
@@ -865,7 +865,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "בְּרֵאשִׁית",
-    why: "Bet at the beginning of בְּרֵאשִׁית takes dagesh lene (no previous word ending in a vowel).",
+    why: "ב at the beginning of בְּרֵאשִׁית takes dagesh lene (no previous word ending in a vowel).",
   },
   {
     id: "haarets-guttural",
@@ -879,7 +879,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "הָאָרֶץ",
-    why: "Alef cannot take dagesh forte, so the article is הָ (lengthened) rather than a doubled consonant.",
+    why: "א cannot take dagesh forte, so the article is הָ (lengthened) rather than a doubled consonant.",
   },
   {
     id: "elohim-hateph-g",
@@ -893,7 +893,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "אֱלֹהִים",
-    why: "Alef is a guttural, so it takes hateph seghol rather than a simple vocal shewa.",
+    why: "א is a guttural, so it takes hateph seghol rather than a simple vocal shewa.",
   },
   {
     id: "adamah-hateph",
@@ -907,7 +907,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיִּיצֶר יְהוָה אֱלֹהִים אֶת־הָאָדָם עָפָר מִן־הָאֲדָמָה",
     en: "YHWH God formed the human of dust from the ground.",
     hit: "הָאֲדָמָה",
-    why: "Hateph pathach under alef: gutturals prefer a reduced vowel, not vocal shewa.",
+    why: "Hateph pathach under א: gutturals prefer a reduced vowel, not vocal shewa.",
   },
   {
     id: "yaaqob-a-class",
@@ -921,7 +921,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "לֹא יַעֲקֹב יֵאָמֵר עוֹד שִׁמְךָ כִּי אִם־יִשְׂרָאֵל",
     en: "Your name shall no longer be said Jacob, but Israel.",
     hit: "יַעֲקֹב",
-    why: "Ayin takes pathach then hateph pathach — a-class vowels with the guttural.",
+    why: "ע takes pathach then hateph pathach — a-class vowels with the guttural.",
   },
   {
     id: "am-a-class",
@@ -935,7 +935,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וִהְיִיתֶם לִי סְגֻלָּה מִכָּל־הָעַמִּים",
     en: "You shall be my treasured possession out of all the peoples.",
     hit: "הָעַמִּים",
-    why: "Ayin prefers the a-class pathach in עַם / עַמִּים.",
+    why: "ע prefers the a-class pathach in עַם / עַמִּים.",
   },
   {
     id: "israel-one-vowel",
@@ -963,7 +963,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "לֹא תֹסִפוּ עַל־הַדָּבָר אֲשֶׁר אָנֹכִי מְצַוֶּה אֶתְכֶם",
     en: "You shall not add to the word that I command you.",
     hit: "הַדָּבָר",
-    why: "דָּ | בָר — first syllable open (ends with a vowel), second closed (ends with resh). Only these two kinds exist.",
+    why: "דָּ | בָר — first syllable open (ends with a vowel), second closed (ends with ר). Only these two kinds exist.",
   },
   {
     id: "melek-open-closed",
@@ -991,7 +991,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "הַשָּׁמַיִם",
-    why: "Dagesh forte in shin doubles it and must be split: הַשְׁ | שָׁ | מַ | יִם. First shin takes shewa and closes (no dagesh after the split); the second takes qamets.",
+    why: "Dagesh forte in ש doubles it and must be split: הַשְׁ | שָׁ | מַ | יִם. First ש takes shewa and closes (no dagesh after the split); the second takes qamets.",
   },
   {
     id: "appayim-hard",
@@ -1019,7 +1019,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "גַּם וַשְׁתִּי הַמַּלְכָּה עָשְׂתָה מִשְׁתֵּה נָשִׁים",
     en: "Vashti the queen also made a feast for the women.",
     hit: "הַמַּלְכָּה",
-    why: "The silent shewa under lamed ends the syllable מַלְ. Whether silent or vocal, a shewa always marks a syllable boundary.",
+    why: "The silent shewa under ל ends the syllable מַלְ. Whether silent or vocal, a shewa always marks a syllable boundary.",
   },
   {
     id: "shamata-guttural-silent",
@@ -1033,7 +1033,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וּלְאָדָם אָמַר כִּי שָׁמַעְתָּ לְקוֹל אִשְׁתֶּךָ",
     en: "And to the human he said, “Because you listened to the voice of your wife…”",
     hit: "שָׁמַעְתָּ",
-    why: "The precise rule: gutturals refuse vocal shewa, not shewa itself. Silent shewa is not a vowel, so ayin takes it here. Short pathach → silent, שָׁ | מַעְ | תָּ. Dagesh in ת is lene.",
+    why: "The precise rule: gutturals refuse vocal shewa, not shewa itself. Silent shewa is not a vowel, so ע takes it here. Short pathach → silent, שָׁ | מַעְ | תָּ. Dagesh in ת is lene.",
   },
   {
     id: "reuben-resh-vocal",
@@ -1047,7 +1047,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַתַּהַר לֵאָה וַתֵּלֶד בֵּן וַתִּקְרָא שְׁמוֹ רְאוּבֵן",
     en: "Leah conceived and bore a son, and she called his name Reuben.",
     hit: "רְאוּבֵן",
-    why: "Shewa on resh follows the shewa rules: it starts the word, so it is vocal. Do not replace it with a hateph.",
+    why: "Shewa on ר follows the shewa rules: it starts the word, so it is vocal. Do not replace it with a hateph.",
   },
   {
     id: "barkhi-resh-vocal",
@@ -1061,7 +1061,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בָּרְכִי נַפְשִׁי אֶת־יְהוָה וְכָל־קְרָבַי אֶת־שֵׁם קָדְשׁוֹ",
     en: "Bless YHWH, O my soul, and all that is within me, his holy name.",
     hit: "בָּרְכִי",
-    why: "Shewa under resh is vocal (בָּ | רְ | כִי) because it follows an unaccented long vowel — the ordinary shewa rule, not a guttural hateph.",
+    why: "Shewa under ר is vocal (בָּ | רְ | כִי) because it follows an unaccented long vowel — the ordinary shewa rule, not a guttural hateph.",
   },
   {
     id: "batim-metheg",
@@ -1117,7 +1117,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "הֲלוֹא אִם־תֵּיטִיב שְׂאֵת וְאִם לֹא תֵיטִיב לַפֶּתַח חַטָּאת רֹבֵץ",
     en: "If you do well, lifting. If you do not do well, sin is crouching at the door.",
     hit: "חַטָּאת",
-    why: "The alef of חַטָּאת has no vowel — it is quiescent. It does not open a new syllable; the word is חַטָּאת, not ḥaṭ-ṭā-ʾat.",
+    why: "The א of חַטָּאת has no vowel — it is quiescent. It does not open a new syllable; the word is חַטָּאת, not ḥaṭ-ṭā-ʾat.",
   },
   {
     id: "bayit-diphthong",
@@ -1131,7 +1131,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "אִם־יְהוָה לֹא־יִבְנֶה בַיִת שָׁוְא עָמְלוּ בוֹנָיו בּוֹ",
     en: "Unless YHWH builds the house, the builders labor in vain.",
     hit: "בַיִת",
-    why: "The patah+yod diphthong (בַ֫יִ) makes a closed syllable — it ends with a consonant. בַּ֫יִת is not ba-yit as two open vowels.",
+    why: "The patah+י diphthong (בַ֫יִ) makes a closed syllable — it ends with a consonant. בַּ֫יִת is not ba-yit as two open vowels.",
   },
   {
     id: "bayit-diphthong-sam",
@@ -1145,7 +1145,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "הוּא יִבְנֶה־בַּיִת לִשְׁמִי וְכֹנַנְתִּי אֶת־כִּסֵּא מַמְלַכְתּוֹ עַד־עוֹלָם",
     en: "He shall build a house for my name, and I will establish the throne of his kingdom forever.",
     hit: "בַּיִת",
-    why: "בַּ֫יִת is a closed diphthong syllable (patah + yod), always ending with a consonant — the notes’ example.",
+    why: "בַּ֫יִת is a closed diphthong syllable (patah + י), always ending with a consonant — the notes’ example.",
   },
   {
     id: "erets-open-closed",
@@ -1187,7 +1187,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "זָכוֹר אֶת־יוֹם הַשַּׁבָּת לְקַדְּשׁוֹ",
     en: "Remember the sabbath day, to keep it holy.",
     hit: "הַשַּׁבָּת",
-    why: "Dagesh forte in bet: first bet shewa-closes (no dagesh); second takes the vowel — שַׁבְ | בָת.",
+    why: "Dagesh forte in ב: first ב shewa-closes (no dagesh); second takes the vowel — שַׁבְ | בָת.",
   },
   {
     id: "bayit-lene-initial",
@@ -1201,7 +1201,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בַּחָכְמָה יִבָּנֶה בָּיִת וּבִתְבוּנָה יִתְכּוֹנָן",
     en: "By wisdom a house is built.",
     hit: "בָּיִת",
-    why: "Word-initial bet takes dagesh lene. Hard b, not a double — do not split through it.",
+    why: "Word-initial ב takes dagesh lene. Hard b, not a double — do not split through it.",
   },
   {
     id: "shema-initial-shewa",
@@ -1215,7 +1215,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד",
     en: "Hear, Israel: YHWH our God, YHWH is one.",
     hit: "שְׁמַע",
-    why: "Shewa under shin starts the word, so it is vocal.",
+    why: "Shewa under ש starts the word, so it is vocal.",
   },
   {
     id: "kol-hatuf-deut",
@@ -1299,7 +1299,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "אֱלֹהִים",
-    why: "Alef takes hateph segol, not vocal shewa. אֱ | לֹ | הִים.",
+    why: "א takes hateph segol, not vocal shewa. אֱ | לֹ | הִים.",
   },
   {
     id: "yisrael-silent-shewa",
@@ -1327,7 +1327,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וְלֹא־יִקָּרֵא עוֹד אֶת־שִׁמְךָ אַבְרָם וְהָיָה שִׁמְךָ אַבְרָהָם",
     en: "Your name shall no longer be called Abram, but your name shall be Abraham.",
     hit: "אַבְרָהָם",
-    why: "Pathach is short, so shewa under bet is silent: אַבְ | רָ | הָם.",
+    why: "Pathach is short, so shewa under ב is silent: אַבְ | רָ | הָם.",
   },
   {
     id: "paroh-resh-shewa",
@@ -1341,7 +1341,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וְאַחַר בָּאוּ מֹשֶׁה וְאַהֲרֹן וַיֹּאמְרוּ אֶל־פַּרְעֹה",
     en: "Afterward Moses and Aaron came and said to Pharaoh.",
     hit: "פַּרְעֹה",
-    why: "Shewa on resh follows the shewa rules: short pathach before it, so it is silent — not a guttural hateph.",
+    why: "Shewa on ר follows the shewa rules: short pathach before it, so it is silent — not a guttural hateph.",
   },
   {
     id: "hayam-regular-article",
@@ -1355,7 +1355,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיֵּט מֹשֶׁה אֶת יָדוֹ עַל הַיָּם",
     en: "Moses stretched out his hand over the sea.",
     hit: "הַיָּם",
-    why: "Ordinary article: הַ plus dagesh forte in yod. Strip it and look up יָם.",
+    why: "Ordinary article: הַ plus dagesh forte in י. Strip it and look up יָם.",
   },
   {
     id: "haadam-compensatory",
@@ -1369,7 +1369,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיִּיצֶר יְהוָה אֱלֹהִים אֶת הָאָדָם עָפָר מִן הָאֲדָמָה",
     en: "YHWH God formed the man from the dust of the ground.",
     hit: "הָאָדָם",
-    why: "Alef refuses dagesh, so the article’s pathach lengthens to qamets: הָ.",
+    why: "א refuses dagesh, so the article’s pathach lengthens to qamets: הָ.",
   },
   {
     id: "haerev-virtual",
@@ -1383,7 +1383,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיַּשְׁכֵּן מִקֶּדֶם לְגַן עֵדֶן אֶת הַכְּרֻבִים וְאֵת לַהַט הַחֶרֶב הַמִּתְהַפֶּכֶת",
     en: "He placed cherubim at the east of the garden of Eden, and the flame of the sword that turned.",
     hit: "הַחֶרֶב",
-    why: "Het refuses dagesh but the pathach stays: virtual doubling הַחֶרֶב, not הָחֶרֶב.",
+    why: "ח refuses dagesh but the pathach stays: virtual doubling הַחֶרֶב, not הָחֶרֶב.",
   },
   {
     id: "heanan-seghol",
@@ -1404,14 +1404,14 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     ruleId: "vav-default",
     lemma: "וְ",
     lemmaName: "we",
-    lemmaAlts: ["we", "ve", "and", "vav", "waw", "ו"],
+    lemmaAlts: ["we", "ve", "and", "ו", "ו", "ו"],
     book: "Gen",
     chapter: 1,
     verse: 1,
     he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
     en: "In the beginning God created the heavens and the earth.",
     hit: "וְאֵת",
-    why: "Default conjunction: shewa on vav, always prefixed. וְאֵת = and + object marker.",
+    why: "Default conjunction: shewa on ו, always prefixed. וְאֵת = and + object marker.",
   },
   {
     id: "ubakar-bump",
@@ -1425,7 +1425,7 @@ export const GRAMMAR_CASES: GrammarCase[] = [
     he: "וַיִּתֶּן לוֹ צֹאן וּבָקָר וְכֶסֶף וְזָהָב",
     en: "He has given him flocks and herds, silver and gold.",
     hit: "וּבָקָר",
-    why: "Bet is a bump letter, so the conjunction is shureq וּ. Begadkephat loses dagesh lene.",
+    why: "ב is a bump letter, so the conjunction is shureq וּ. Begadkephat loses dagesh lene.",
   },
   {
     id: "velohim-special",

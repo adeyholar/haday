@@ -92,9 +92,9 @@ export const VOWEL_GROUPS: Array<{ id: VowelKind; title: string; blurb: string }
   { id: "short", title: "Short vowels", blurb: "All five classes: a, e, i, o, u." },
   { id: "reduced", title: "Reduced vowels", blurb: "Hateph vowels. No i-class or u-class." },
   { id: "shewa", title: "Shewa", blurb: "Not a full vowel. Vocal shewa is a brief murmur; silent shewa has no sound." },
-  { id: "he", title: "Vowel letters with he", blurb: "He is a vowel letter only at the end of a word." },
-  { id: "waw", title: "Vowel letters with vav", blurb: "Unchangeable. Shureq is û — the dot in the vav, not dagesh forte." },
-  { id: "yod", title: "Vowel letters with yod", blurb: "Unchangeable long vowels with yod." },
+  { id: "he", title: "Vowel letters with ה", blurb: "ה is a vowel letter only at the end of a word." },
+  { id: "waw", title: "Vowel letters with ו", blurb: "Unchangeable. Shureq is û — the dot in the ו, not dagesh forte." },
+  { id: "yod", title: "Vowel letters with י", blurb: "Unchangeable long vowels with י." },
 ];
 
 export type QuizKind =

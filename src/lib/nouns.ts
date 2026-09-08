@@ -43,7 +43,7 @@ export const NOUN_UNITS: NounUnit[] = [
     title: "Gender and number",
     short: "What a noun wears",
     rule:
-      "A Hebrew noun names a person, place, thing, or idea. Each one also wears gender — masculine or feminine — and number — one, many, or a pair. Gender here is the ending-set the word follows, not always natural sex: תּוֹרָה is feminine because it takes feminine endings. Dual number marks a pair, used often for things that come in twos (eyes, hands). A dual ending must hold the ay diphthong — the same tight cluster as in בַּיִת — then ם. Yod-mem without that diphthong is many, not a pair. You read both facts off the ending.",
+      "A Hebrew noun names a person, place, thing, or idea. Each one also wears gender — masculine or feminine — and number — one, many, or a pair. Gender here is the ending-set the word follows, not always natural sex: תּוֹרָה is feminine because it takes feminine endings. Dual number marks a pair, used often for things that come in twos (eyes, hands). A dual ending must hold the ay diphthong — the same tight cluster as in בַּיִת — then ם. י-ם without that diphthong is many, not a pair. You read both facts off the ending.",
     samples: [
       { word: "מֶלֶךְ", gloss: "king", tag: "masculine singular", note: "No extra ending. Masculine singular is usually the bare stem.", ref: "Ps 24:8" },
       { word: "מְלָכִים", gloss: "kings", tag: "masculine plural", note: "The ending ִים marks many on a masculine noun.", ref: "Ps 2:2" },
@@ -61,7 +61,7 @@ export const NOUN_UNITS: NounUnit[] = [
       { q: "Gender on a Hebrew noun tells you…", choices: ["Which ending-set the word usually follows", "Whether the thing is male or female in nature", "How many there are"], answer: "Which ending-set the word usually follows", why: "Grammatical gender is a clothing size. תּוֹרָה is feminine because of its endings, not because law is female." },
       { q: "Hebrew number can be…", choices: ["Singular, plural, or dual", "Only singular or plural", "Only dual for people"], answer: "Singular, plural, or dual", why: "One, many, or a pair. Dual is its own ending." },
       { q: "Dual number means…", choices: ["A pair — two of them", "Any plural", "A feminine singular"], answer: "A pair — two of them", why: "Eyes, hands, ears — things that come in twos — often wear the dual." },
-      { q: "A form is dual only if the ending holds…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ay diphthong (as in בַּיִת) plus ם", "Any yod-mem", "A hireq before the yod"], answer: "The ay diphthong (as in בַּיִת) plus ם", why: "No diphthong, no dual. ִים without the ay-cluster is just many." },
+      { q: "A form is dual only if the ending holds…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ay diphthong (as in בַּיִת) plus ם", "Any י-ם", "A hireq before the י"], answer: "The ay diphthong (as in בַּיִת) plus ם", why: "No diphthong, no dual. ִים without the ay-cluster is just many." },
       { q: "תּוֹרָה is feminine because…", he: "תּוֹרָה", ref: "Ps 19:8", choices: ["It takes feminine endings", "Instruction is a woman", "Every abstract noun is feminine"], answer: "It takes feminine endings", why: "Natural sex and grammatical gender often agree, but the ending is what you trust." },
       { q: "מֶלֶךְ is…", he: "מֶלֶךְ", ref: "Ps 24:8", choices: ["Masculine singular", "Masculine plural", "Feminine singular"], answer: "Masculine singular", why: "Bare stem, no plural or dual ending." },
       { q: "מְלָכִים is…", he: "מְלָכִים", choices: ["Masculine plural", "Masculine dual", "Feminine plural"], answer: "Masculine plural", why: "ִים is the usual masculine many-ending." },
@@ -80,7 +80,7 @@ export const NOUN_UNITS: NounUnit[] = [
     title: "Masculine endings",
     short: "Bare, ִים, ay-dual",
     rule:
-      "A masculine singular noun is usually bare — no extra ending: דָּבָר, מֶלֶךְ, יוֹם. Many masculine nouns add ִים (hireq-yod-mem): דְּבָרִים, מְלָכִים. A pair adds the ay diphthong plus ם — the same tight cluster as in בַּיִת, then mem: עֵינַיִם, סוּסַיִם. Accent sits on the pathach of that cluster. The diphthong is required. Yod-mem with hireq (ִים) is many, not a pair. Do not cut the cluster.",
+      "A masculine singular noun is usually bare — no extra ending: דָּבָר, מֶלֶךְ, יוֹם. Many masculine nouns add ִים (hireq-י-ם): דְּבָרִים, מְלָכִים. A pair adds the ay diphthong plus ם — the same tight cluster as in בַּיִת, then מ: עֵינַיִם, סוּסַיִם. Accent sits on the pathach of that cluster. The diphthong is required. י-ם with hireq (ִים) is many, not a pair. Do not cut the cluster.",
     samples: [
       { word: "דָּבָר", gloss: "word", tag: "masculine singular", note: "Bare stem. This is also the lexical form you look up.", ref: "1 Kgs 8:56" },
       { word: "דְּבָרִים", gloss: "words", tag: "masculine plural", note: "ִים on a masculine noun. The first vowel has reduced — that is the next unit.", ref: "Gen 15:1" },
@@ -97,8 +97,8 @@ export const NOUN_UNITS: NounUnit[] = [
     ],
     quiz: [
       { q: "The usual masculine singular ending is…", choices: ["None — the stem stands bare", "ִים", "וֹת"], answer: "None — the stem stands bare", why: "Masculine singular is endingless. You see the stem itself." },
-      { q: "The usual masculine plural ending is…", choices: ["ִים", "ַיִם", "וֹת"], answer: "ִים", why: "Hireq-yod-mem. Many, not a pair." },
-      { q: "The usual masculine dual ending is…", choices: ["The ay diphthong plus ם", "ִים", "וֹת"], answer: "The ay diphthong plus ם", why: "Same cluster as in בַּיִת, then mem. Accent on that pathach." },
+      { q: "The usual masculine plural ending is…", choices: ["ִים", "ַיִם", "וֹת"], answer: "ִים", why: "Hireq-י-ם. Many, not a pair." },
+      { q: "The usual masculine dual ending is…", choices: ["The ay diphthong plus ם", "ִים", "וֹת"], answer: "The ay diphthong plus ם", why: "Same cluster as in בַּיִת, then מ. Accent on that pathach." },
       { q: "דְּבָרִים is…", he: "דְּבָרִים", ref: "Gen 15:1", choices: ["Masculine plural", "Masculine dual", "Feminine plural"], answer: "Masculine plural", why: "ִים. Many words, not a pair of words. No ay diphthong." },
       { q: "How do you tell many from a pair on a masculine noun?", choices: ["Dual requires the ay diphthong; ִים has hireq and is many", "Count the letters after the stem", "Dual always has a dagesh"], answer: "Dual requires the ay diphthong; ִים has hireq and is many", why: "No diphthong, no dual. Train the ear and the eye on the ay-cluster from בַּיִת." },
       { q: "יוֹם is…", he: "יוֹם", ref: "Gen 1:5", choices: ["Masculine singular", "Masculine plural", "Dual"], answer: "Masculine singular", why: "Bare stem. One day." },
@@ -108,10 +108,10 @@ export const NOUN_UNITS: NounUnit[] = [
       { q: "What is the lexical form of דְּבָרִים?", he: "דְּבָרִים", choices: ["דָּבָר — the singular", "דְּבָרִים — leave the plural", "דבר without vowels"], answer: "דָּבָר — the singular", why: "You look nouns up in the singular. Strip the many-ending first." },
       { q: "A pair of horses would wear…", choices: ["The ay diphthong plus ם", "ִים", "וֹת"], answer: "The ay diphthong plus ם", why: "סוּסַיִם. Many horses wear ִים, with no diphthong." },
       { q: "Is יוֹם feminine because day is not a person?", he: "יוֹם", ref: "Gen 1:5", choices: ["No — it is masculine; it takes ִים in the plural", "Yes — abstracts are feminine", "It is dual"], answer: "No — it is masculine; it takes ִים in the plural", why: "Natural sense does not pick the gender. The ending-set does. יָמִים is the proof." },
-      { q: "Masculine dual and masculine plural both have a yod-mem. Dual is dual only when…", choices: ["The ending holds the ay diphthong", "The word names a body part", "The mem has dagesh"], answer: "The ending holds the ay diphthong", why: "That cluster is required. Hireq-yod-mem is many." },
+      { q: "Masculine dual and masculine plural both have a י-ם. Dual is dual only when…", choices: ["The ending holds the ay diphthong", "The word names a body part", "The מ has dagesh"], answer: "The ending holds the ay diphthong", why: "That cluster is required. Hireq-י-ם is many." },
       { q: "How does סוּסַיִם split?", he: "סוּסַיִם", choices: ["סוּ | סַיִם", "סוּסַ | יִם", "סוּ | סַ | יִם"], answer: "סוּ | סַיִם", why: "Keep the ay diphthong in one closed slice. Do not cut it." },
       { q: "In Exod 15:1, סוּס is…", he: "סוּס", ref: "Exod 15:1", choices: ["Masculine singular", "Masculine plural", "Feminine singular"], answer: "Masculine singular", why: "Bare stem. One horse, then its rider." },
-      { q: "In Prov 6:17, עֵינַיִם is dual because…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ending is the ay diphthong plus ם", "Every yod-mem is dual", "Eyes are always dual even as עַיִן"], answer: "The ending is the ay diphthong plus ם", why: "Same cluster as בַּיִת. That is the requirement." },
+      { q: "In Prov 6:17, עֵינַיִם is dual because…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ending is the ay diphthong plus ם", "Every י-ם is dual", "Eyes are always dual even as עַיִן"], answer: "The ending is the ay diphthong plus ם", why: "Same cluster as בַּיִת. That is the requirement." },
     ],
   },
   {
@@ -119,9 +119,9 @@ export const NOUN_UNITS: NounUnit[] = [
     title: "Feminine endings",
     short: "ָה, ת, וֹת",
     rule:
-      "Feminine singular nouns usually wear a mark. The most common is ָה (qamets-he), as in תּוֹרָה and מַלְכָּה. Other singular marks use ת: בַּת, תִּפְאֶרֶת, בְּרִית, מַלְכוּת. Many feminine nouns add וֹת (holem-waw-tav): תּוֹרוֹת, מְלָכוֹת. A pair still uses the same dual as the masculine: the ay diphthong plus ם, required, often on body parts — יָדַיִם, רַגְלַיִם. In תּוֹרָתַיִם the ת belongs to the stem; the diphthong plus ם is still the dual. No diphthong, no dual.",
+      "Feminine singular nouns usually wear a mark. The most common is ָה (qamets-ה), as in תּוֹרָה and מַלְכָּה. Other singular marks use ת: בַּת, תִּפְאֶרֶת, בְּרִית, מַלְכוּת. Many feminine nouns add וֹת (holem-ו-ת): תּוֹרוֹת, מְלָכוֹת. A pair still uses the same dual as the masculine: the ay diphthong plus ם, required, often on body parts — יָדַיִם, רַגְלַיִם. In תּוֹרָתַיִם the ת belongs to the stem; the diphthong plus ם is still the dual. No diphthong, no dual.",
     samples: [
-      { word: "תּוֹרָה", gloss: "instruction", tag: "feminine singular · ָה", note: "Qamets-he. The everyday feminine singular mark.", ref: "Ps 19:8" },
+      { word: "תּוֹרָה", gloss: "instruction", tag: "feminine singular · ָה", note: "Qamets-ה. The everyday feminine singular mark.", ref: "Ps 19:8" },
       { word: "בַּת", gloss: "daughter", tag: "feminine singular · ַת", note: "A ת ending, not ָה. Still feminine singular.", ref: "Gen 30:21" },
       { word: "בְּרִית", gloss: "covenant", tag: "feminine singular · ִית", note: "ִית is another feminine singular mark.", ref: "Gen 9:9" },
       { word: "מַלְכוּת", gloss: "kingdom", tag: "feminine singular · וּת", note: "וּת names a state or realm. Feminine singular.", ref: "Ps 145:13" },
@@ -134,12 +134,12 @@ export const NOUN_UNITS: NounUnit[] = [
       { ref: "Prov 6:17", he: "עֵינַיִם רָמוֹת לְשׁוֹן שָׁקֶר וְיָדַיִם שֹׁפְכוֹת דָּם־נָקִי", en: "Haughty eyes, a lying tongue, and hands that shed innocent blood.", hit: "וְיָדַיִם", hitEn: "hands" },
     ],
     quiz: [
-      { q: "The most common feminine singular ending is…", choices: ["ָה (qamets-he)", "ִים", "ַיִם"], answer: "ָה (qamets-he)", why: "תּוֹרָה, מַלְכָּה. Learn this first; the ת-family comes next." },
-      { q: "The usual feminine plural ending is…", choices: ["וֹת", "ִים", "ָה"], answer: "וֹת", why: "Holem-waw-tav. Many on a feminine noun." },
+      { q: "The most common feminine singular ending is…", choices: ["ָה (qamets-ה)", "ִים", "ַיִם"], answer: "ָה (qamets-ה)", why: "תּוֹרָה, מַלְכָּה. Learn this first; the ת-family comes next." },
+      { q: "The usual feminine plural ending is…", choices: ["וֹת", "ִים", "ָה"], answer: "וֹת", why: "Holem-ו-ת. Many on a feminine noun." },
       { q: "בַּת is feminine because of…", he: "בַּת", ref: "Gen 30:21", choices: ["The ת ending", "The pathach alone", "Natural sex only — no ending"], answer: "The ת ending", why: "Several feminine singular marks use ת: ַת, ֶת, ִית, וּת." },
       { q: "בְּרִית wears which singular mark?", he: "בְּרִית", ref: "Gen 9:9", choices: ["ִית", "ָה", "ִים"], answer: "ִית", why: "Covenant is feminine singular with ִית." },
       { q: "מַלְכוּת is…", he: "מַלְכוּת", ref: "Ps 145:13", choices: ["Feminine singular", "Feminine plural", "Masculine plural"], answer: "Feminine singular", why: "וּת is a singular mark (a realm), not the plural וֹת." },
-      { q: "Do not confuse וּת with וֹת. וּת is…", choices: ["A feminine singular mark (kingdom, witness)", "The feminine plural", "The dual"], answer: "A feminine singular mark (kingdom, witness)", why: "Shureq-tav vs holem-waw-tav. Different number." },
+      { q: "Do not confuse וּת with וֹת. וּת is…", choices: ["A feminine singular mark (kingdom, witness)", "The feminine plural", "The dual"], answer: "A feminine singular mark (kingdom, witness)", why: "Shureq-ת vs holem-ו-ת. Different number." },
       { q: "יָדַיִם is…", he: "יָדַיִם", ref: "Prov 6:17", choices: ["Feminine dual — a pair of hands", "Masculine plural", "Feminine plural"], answer: "Feminine dual — a pair of hands", why: "Body parts that come in twos take the ay diphthong plus ם. יָד itself is feminine." },
       { q: "תּוֹרוֹת is…", he: "תּוֹרוֹת", choices: ["Feminine plural", "Feminine singular", "Masculine plural"], answer: "Feminine plural", why: "וֹת on the תּוֹרָה stem." },
       { q: "A feminine dual uses…", choices: ["The same ay diphthong plus ם as the masculine pair", "וֹת twice", "ָה on both copies"], answer: "The same ay diphthong plus ם as the masculine pair", why: "Dual is one ending for both genders. The diphthong is required either way." },
@@ -157,7 +157,7 @@ export const NOUN_UNITS: NounUnit[] = [
     title: "Exceptions you will meet",
     short: "Odd endings",
     rule:
-      "A few feminine singulars have no ending at all: אֶרֶץ, עִיר, אֶבֶן. Look them up once. A few nouns take the other gender’s plural: אָב → אָבוֹת, שָׁנָה → שָׁנִים. Trust the ending you see. Three common words are dual in form but not ‘two of’: שָׁמַיִם, מִצְרַיִם, מַיִם — they still wear the ay diphthong plus ם; that is why they look dual. And וֹת is sometimes written with holem only, no waw — עֵדֹת. Same ending, shorter spelling.",
+      "A few feminine singulars have no ending at all: אֶרֶץ, עִיר, אֶבֶן. Look them up once. A few nouns take the other gender’s plural: אָב → אָבוֹת, שָׁנָה → שָׁנִים. Trust the ending you see. Three common words are dual in form but not ‘two of’: שָׁמַיִם, מִצְרַיִם, מַיִם — they still wear the ay diphthong plus ם; that is why they look dual. And וֹת is sometimes written with holem only, no ו — עֵדֹת. Same ending, shorter spelling.",
     samples: [
       { word: "אֶרֶץ", gloss: "land", tag: "feminine, no ending", note: "Endingless, yet feminine. Plural אֲרָצוֹת still wears וֹת.", ref: "Gen 1:1" },
       { word: "אָבוֹת", gloss: "fathers", tag: "masculine noun, feminine plural ending", note: "אָב is masculine. The many-form takes וֹת. Still ‘fathers’.", ref: "Exod 3:15" },
@@ -180,11 +180,11 @@ export const NOUN_UNITS: NounUnit[] = [
       { q: "מַיִם is…", he: "מַיִם", ref: "Gen 1:2", choices: ["Dual in form, ‘water’ in sense", "Masculine plural ‘waters’ only when there are two", "Feminine singular"], answer: "Dual in form, ‘water’ in sense", why: "Same club as שָׁמַיִם and מִצְרַיִם." },
       { q: "מִצְרַיִם is…", he: "מִצְרַיִם", ref: "Exod 20:2", choices: ["Egypt — dual in form, one land", "Two Egypts", "A feminine plural"], answer: "Egypt — dual in form, one land", why: "Place name in dual clothing." },
       { q: "The three special duals to memorize are…", choices: ["שָׁמַיִם, מַיִם, מִצְרַיִם", "יָדַיִם, רַגְלַיִם, עֵינַיִם", "סוּסַיִם, תּוֹרָתַיִם, יוֹמַיִם"], answer: "שָׁמַיִם, מַיִם, מִצְרַיִם", why: "True duals (hands, eyes) really mean two. These three usually do not." },
-      { q: "עֵדֹת with holem (no waw) is…", he: "עֵדֹת", choices: ["The same feminine plural as עֵדוֹת", "A new singular ending", "A dual"], answer: "The same feminine plural as עֵדוֹת", why: "Defective spelling: the vowel is there, the vowel letter is not. Pronounced the same." },
+      { q: "עֵדֹת with holem (no ו) is…", he: "עֵדֹת", choices: ["The same feminine plural as עֵדוֹת", "A new singular ending", "A dual"], answer: "The same feminine plural as עֵדוֹת", why: "Defective spelling: the vowel is there, the vowel letter is not. Pronounced the same." },
       { q: "In Gen 1:1, הָאָרֶץ is…", he: "הָאָרֶץ", ref: "Gen 1:1", choices: ["Feminine singular plus the article", "Masculine plural", "Dual"], answer: "Feminine singular plus the article", why: "Bare feminine. The article הָ does not change gender or number." },
       { q: "If a masculine noun takes וֹת, do you change the gloss to a feminine idea?", choices: ["No — אָבוֹת is still fathers", "Yes — it becomes a feminine noun", "Only in construct"], answer: "No — אָבוֹת is still fathers", why: "Ending-set can cross. Meaning follows the stem you memorized." },
       { q: "How do you know אֶרֶץ is feminine the first time you meet it?", he: "אֶרֶץ", choices: ["The lexicon, then the plural אֲרָצוֹת", "It must be masculine because it is bare", "All lands are feminine in every language"], answer: "The lexicon, then the plural אֲרָצוֹת", why: "Endingless feminine is an exception. You store it, then the וֹת plural confirms it." },
-      { q: "In Exod 3:15, אֲבֹתֵיכֶם shows which plural spelling?", he: "אֲבֹתֵיכֶם", ref: "Exod 3:15", choices: ["Defective וֹת (holem, no waw) plus a suffix", "Masculine ִים", "Dual ַיִם"], answer: "Defective וֹת (holem, no waw) plus a suffix", why: "אֲבֹת is אָבוֹת in short spelling, then ‘your’." },
+      { q: "In Exod 3:15, אֲבֹתֵיכֶם shows which plural spelling?", he: "אֲבֹתֵיכֶם", ref: "Exod 3:15", choices: ["Defective וֹת (holem, no ו) plus a suffix", "Masculine ִים", "Dual ַיִם"], answer: "Defective וֹת (holem, no ו) plus a suffix", why: "אֲבֹת is אָבוֹת in short spelling, then ‘your’." },
       { q: "Why do שָׁמַיִם, מַיִם, and מִצְרַיִם look dual?", choices: ["They hold the ay diphthong plus ם", "They name pairs of lands", "They take ִים with hireq"], answer: "They hold the ay diphthong plus ם", why: "That diphthong is the dual’s required shape. The gloss is usually not ‘two of’." },
       { q: "True dual (hands) vs special dual (water): the difference is…", choices: ["True dual means two; special dual is just the shape", "Special dual always means two", "True dual never appears on body parts"], answer: "True dual means two; special dual is just the shape", why: "יָדַיִם = two hands. מַיִם = water. Both still have the ay diphthong." },
     ],
@@ -214,7 +214,7 @@ export const NOUN_UNITS: NounUnit[] = [
       { q: "דָּבָר → דְּבָרִים is…", he: "דְּבָרִים", ref: "Gen 15:1", choices: ["Propretonic reduction — first qamets becomes shewa", "A segholate pattern", "Irregular stem change"], answer: "Propretonic reduction — first qamets becomes shewa", why: "Two-syllable, stress on the end. The first vowel is now two seats back and open, so it reduces." },
       { q: "A segholate is a two-syllable noun stressed on…", choices: ["The first syllable", "The last syllable", "Both equally"], answer: "The first syllable", why: "מֶלֶךְ, אֶרֶץ, סֵפֶר. The name comes from the frequent seghol vowels, but the stress is the test." },
       { q: "Every segholate plural, whatever the singular vowels, lands on…", choices: ["Shewa (or hateph) then qamets, then the ending", "Two qamets", "No vowel change"], answer: "Shewa (or hateph) then qamets, then the ending", why: "מֶלֶךְ → מְלָכִים, נֶפֶשׁ → נְפָשׁוֹת, סֵפֶר → סְפָרִים. One pattern." },
-      { q: "עַם → עַמִּים writes the lost twin as…", he: "עַמִּים", choices: ["Dagesh forte in the מ", "An extra מ letter beside it", "A holem waw"], answer: "Dagesh forte in the מ", why: "Geminates once had two identical consonants. The dagesh is the twin." },
+      { q: "עַם → עַמִּים writes the lost twin as…", he: "עַמִּים", choices: ["Dagesh forte in the מ", "An extra מ letter beside it", "A holem ו"], answer: "Dagesh forte in the מ", why: "Geminates once had two identical consonants. The dagesh is the twin." },
       { q: "שָׂדֶה → שָׂדוֹת: what dropped?", he: "שָׂדוֹת", choices: ["The ֶה of the singular", "The first consonant", "The plural ending"], answer: "The ֶה of the singular", why: "Masculine nouns in ֶה shed that ֶה, then take a plural ending (often וֹת)." },
       { q: "אִישׁ → אֲנָשִׁים is…", he: "אֲנָשִׁים", choices: ["An irregular stem change — memorize the pair", "Ordinary ִים on אִישׁ", "Dual"], answer: "An irregular stem change — memorize the pair", why: "Letters are added. Same family: אִשָּׁה → נָשִׁים, בַּיִת → בָּתִּים." },
       { q: "Gutturals in the first seat of a reduced plural prefer…", choices: ["A hateph, not a plain shewa", "Hireq", "No vowel"], answer: "A hateph, not a plain shewa", why: "עָנָן → עֲנָנִים. Gutturals excluding ר cannot take vocal shewa; they take a hateph." },
@@ -230,7 +230,7 @@ export const NOUN_UNITS: NounUnit[] = [
     title: "Read it on the page",
     short: "Tanakh forms",
     rule:
-      "On a real line you name what you see: ending first, then stem. Ask whether the ending holds the ay diphthong before you call it dual — yod-mem with hireq is many, not a pair. Strip an article or a suffix after you have the noun’s own ending. The form you look up is still the singular. Defective וֹת and full וֹת are the same ending. If the stem looks new, check the irregular pairs you already stored (אִישׁ, אִשָּׁה, בַּיִת, בַּת, עִיר, יוֹם).",
+      "On a real line you name what you see: ending first, then stem. Ask whether the ending holds the ay diphthong before you call it dual — י-ם with hireq is many, not a pair. Strip an article or a suffix after you have the noun’s own ending. The form you look up is still the singular. Defective וֹת and full וֹת are the same ending. If the stem looks new, check the irregular pairs you already stored (אִישׁ, אִשָּׁה, בַּיִת, בַּת, עִיר, יוֹם).",
     samples: [
       { word: "הַשָּׁמַיִם", gloss: "the heavens", tag: "article + special dual", note: "Article הַ, then שָּׁמַיִם. Dual shape, ‘heaven’ in sense.", ref: "Gen 1:1" },
       { word: "בָּנוֹת", gloss: "daughters", tag: "feminine plural, irregular stem", note: "From בַּת. Ending וֹת is the tell.", ref: "Gen 5:4" },
@@ -260,7 +260,7 @@ export const NOUN_UNITS: NounUnit[] = [
       { q: "In Gen 1:1 you meet both הַשָּׁמַיִם and הָאָרֶץ. That pair is…", he: "הַשָּׁמַיִם", ref: "Gen 1:1", choices: ["Special dual + endingless feminine", "Two masculine plurals", "Two true duals meaning ‘two’"], answer: "Special dual + endingless feminine", why: "Heaven (special dual) and land (bare feminine). Both exceptions from unit 4, now on the first line of the Torah." },
       { q: "Best first move on a new noun form…", choices: ["Name the ending, then find the singular to look up", "Guess from English word order", "Ignore vowels"], answer: "Name the ending, then find the singular to look up", why: "That is the whole chapter, used on a living verse." },
       { q: "יָמִים in Gen 1:14 is…", he: "יָמִים", ref: "Gen 1:14", choices: ["Days — plural of יוֹם, not dual", "Two days exactly", "Feminine plural"], answer: "Days — plural of יוֹם, not dual", why: "Hireq, no ay diphthong. Dual of day would be יוֹמַיִם." },
-      { q: "Call a form dual only when you can point to…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ay diphthong plus ם", "Any yod and mem at the end", "A body-part meaning"], answer: "The ay diphthong plus ם", why: "That cluster is required. Meaning helps, but the diphthong is the mark." },
+      { q: "Call a form dual only when you can point to…", he: "עֵינַיִם", ref: "Prov 6:17", choices: ["The ay diphthong plus ם", "Any י and מ at the end", "A body-part meaning"], answer: "The ay diphthong plus ם", why: "That cluster is required. Meaning helps, but the diphthong is the mark." },
     ],
   },
 ];

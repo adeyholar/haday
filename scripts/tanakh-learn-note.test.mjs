@@ -56,6 +56,24 @@ test("bare noun stays the citation lemma", () => {
   assert.match(e.note, /king of glory|bare noun|no article/i);
 });
 
+test("temple note names the letter ה, not English He", () => {
+  const e = learnVerseExplain(
+    {
+      ref: "Isa 6:1",
+      he: "וָאֶרְאֶה אֶת אֲדֹנָי יֹשֵׁב עַל כִּסֵּא רָם וְנִשָּׂא וְשׁוּלָיו מְלֵאִים אֶת הַהֵיכָל",
+      en: "I saw the Lord sitting on a throne; and his train filled the temple.",
+      hit: "הַהֵיכָל",
+      hitEn: "temple",
+    },
+    "article",
+    [],
+  );
+  assert.match(e.note, /ה is a guttural/);
+  assert.match(e.note, /no dagesh in ה/);
+  assert.doesNotMatch(e.note, /\bHe is a guttural\b/);
+  assert.doesNotMatch(e.note, /dagesh in he/i);
+});
+
 test("nugget states the ordinary article without a source tag", () => {
   const n = learnNugget("article", {
     ref: "Exod 14:21",

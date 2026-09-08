@@ -142,7 +142,7 @@ export function learnVerseExplain(
     else if (prefixed && hitL.startsWith("ה")) {
       note = `The marked word is the article on ${named}. Strip the ה and any doubling, then look the noun up in a lexicon as the citation form.`;
     } else if (prefixed && hitL.startsWith("ו")) {
-      note = `The marked word is the conjunction וְ on ${named}. Strip the vav to find the citation form.`;
+      note = `The marked word is the conjunction וְ on ${named}. Strip the ו to find the citation form.`;
     } else if (lemma?.pos === "name") {
       note = `${named} is a proper name. Names are definite without הַ.`;
     } else {
@@ -153,7 +153,7 @@ export function learnVerseExplain(
     else if (prefixed && (hitL.startsWith("ב") || hitL.startsWith("כ") || hitL.startsWith("ל"))) {
       note = `An inseparable preposition is glued to ${named}. Strip בְּ / כְּ / לְ (and the article’s vowel if you see pathach + dagesh) to find the citation form.`;
     } else if (prefixed && hitL.startsWith("מ")) {
-      note = `מִן is fused here on ${named}. The nun hid as dagesh, or the vowel lengthened before a guttural. Look the noun up without מִן.`;
+      note = `מִן is fused here on ${named}. The נ hid as dagesh, or the vowel lengthened before a guttural. Look the noun up without מִן.`;
     } else {
       note = `${named} is the object of a preposition, or the preposition itself. Name the relationship (in, to, from, with, before), then look up the class lemma.`;
     }

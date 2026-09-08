@@ -19,7 +19,7 @@ export function learnNugget(kind: LearnKind, verse: LearnVerse): string {
         return "וְ plus יְ often coalesces to וִ (as in וִיהוּדָה).";
       }
       if (raw.startsWith("וֶ") || raw.startsWith("וֵ") || raw.startsWith("וַֽ") || raw.startsWith("וַ")) {
-        return "Before a guttural with ḥateph, the vav takes that ḥateph’s vowel (וֶ / וֵ / וַ).";
+        return "Before a guttural with ḥateph, the ו takes that ḥateph’s vowel (וֶ / וֵ / וַ).";
       }
       if (raw.startsWith("וָ")) {
         return "Before the tone, especially a pair of kindred words, the copula is often וָ — as in תֹהוּ וָבֹהוּ.";
@@ -63,7 +63,7 @@ export function learnNugget(kind: LearnKind, verse: LearnVerse): string {
       return "A preposition plus the article often fuses (לַ = לְ + הַ). The noun is still definite.";
     }
     if (raw.startsWith("מֵ") || raw.startsWith("מִ")) {
-      return "Prefixed מִן hides its nun as dagesh, or lengthens to tsere before a guttural. With the article the ה often stays (מֵהָאָרֶץ).";
+      return "Prefixed מִן hides its נ as dagesh, or lengthens to tsere before a guttural. With the article the ה often stays (מֵהָאָרֶץ).";
     }
     if (raw.includes("־")) {
       return "The maqqef is spelling glue, not extra meaning. The next word is the object of the preposition.";

@@ -5,7 +5,7 @@ export const LEARN_WHY: Record<string, string> = {
   "article|Ps 24:8|מֶלֶךְ":
     "The psalm asks who this king of glory is. מֶלֶךְ has no article — “king / a king.” Right beside it הַכָּבוֹד wears הַ. One line shows both: a bare noun, then a marked “the.”",
   "article|Ps 24:8|הַכָּבוֹד":
-    "The question is not about glory in general. הַכָּבוֹד is כָּבוֹד “glory, weight” with the article — that known glory of YHWH. Pathach plus dagesh in kaf is the rule doing the verse’s work.",
+    "The question is not about glory in general. הַכָּבוֹד is כָּבוֹד “glory, weight” with the article — that known glory of YHWH. Pathach plus dagesh in כ is the rule doing the verse’s work.",
   "article|Gen 1:1|הָאָרֶץ":
     "Creation names the whole known earth, not “a land.” הָאָרֶץ is the lemma אֶרֶץ with the article (qamets before the guttural). The verse needs “the earth” as the other half of “the heavens.”",
   "article|Deut 6:4|יִשְׂרָאֵל":
@@ -13,29 +13,29 @@ export const LEARN_WHY: Record<string, string> = {
 
   // Article 2 — everyday הַ + dagesh
   "article|Exod 14:21|הַיָּם":
-    "Moses stretches his hand over הַיָּם. Not a sea: the sea they are crossing. יָם is the citation lemma; the article plus dagesh in yod points to that body of water in the story.",
+    "Moses stretches his hand over הַיָּם. Not a sea: the sea they are crossing. יָם is the citation lemma; the article plus dagesh in י points to that body of water in the story.",
   "article|Lev 1:7|הַמִּזְבֵּחַ":
-    "Aaron’s sons put fire on הַמִּזְבֵּחַ. The altar of the offering is a known place in the camp. מִזְבֵּחַ takes הַ and a dagesh in mem — “the altar,” the one this rite uses.",
+    "Aaron’s sons put fire on הַמִּזְבֵּחַ. The altar of the offering is a known place in the camp. מִזְבֵּחַ takes הַ and a dagesh in מ — “the altar,” the one this rite uses.",
   "article|Ruth 4:1|הַשַּׁעַר":
-    "Boaz goes up הַשַּׁעַר and sits. The city gate is where legal business happens. שַׁעַר with הַ and dagesh in shin is that public gate, not any doorway.",
+    "Boaz goes up הַשַּׁעַר and sits. The city gate is where legal business happens. שַׁעַר with הַ and dagesh in ש is that public gate, not any doorway.",
   "article|Josh 1:8|הַתּוֹרָה":
-    "This book of הַתּוֹרָה is not to leave Joshua’s mouth. תּוֹרָה “instruction” plus the article names that known teaching — the book in his hand — tav taking the article’s dagesh.",
+    "This book of הַתּוֹרָה is not to leave Joshua’s mouth. תּוֹרָה “instruction” plus the article names that known teaching — the book in his hand — ת taking the article’s dagesh.",
 
   // Article 3 — gutturals
   "article|Gen 2:7|הָאָדָם":
-    "YHWH forms הָאָדָם from the dust. Not “a human” in the abstract: the human of this scene. Alef cannot take dagesh, so the article lengthens to הָ on אָדָם.",
+    "YHWH forms הָאָדָם from the dust. Not “a human” in the abstract: the human of this scene. א cannot take dagesh, so the article lengthens to הָ on אָדָם.",
   "article|Gen 22:6|הָאֵשׁ":
-    "Abraham carries הָאֵשׁ and the knife up the mountain. The fire for the offering is a definite thing in his hand. אֵשׁ begins with alef — guttural — so the article is הָ, no dagesh.",
+    "Abraham carries הָאֵשׁ and the knife up the mountain. The fire for the offering is a definite thing in his hand. אֵשׁ begins with א — guttural — so the article is הָ, no dagesh.",
   "article|Isa 6:1|הַהֵיכָל":
-    "Isaiah sees the Lord’s train filling הַהֵיכָל. He is in that temple. He is a guttural, so there is no doubling after הַ — compensatory pathach stays, no dagesh in he.",
+    "Isaiah sees the Lord’s train filling הַהֵיכָל. The noun begins with ה. ה is a guttural, so there is no doubling after הַ — pathach stays, no dagesh in ה.",
   "article|Gen 3:24|הַחֶרֶב":
-    "East of the garden stands the flame of הַחֶרֶב that turns. The sword is the known guard on that path. Chet is a guttural: article הַ, no dagesh in chet.",
+    "East of the garden stands the flame of הַחֶרֶב that turns. The sword is the known guard on that path. ח is a guttural: article הַ, no dagesh in ח.",
   "article|Exod 13:22|הֶעָנָן":
-    "The pillar of הֶעָנָן does not leave the people. Ayin often takes seghol on the article (הֶ). The cloud is that guiding pillar — “the cloud,” not weather in general.",
+    "The pillar of הֶעָנָן does not leave the people. ע often takes seghol on the article (הֶ). The cloud is that guiding pillar — “the cloud,” not weather in general.",
   "article|Eccl 2:14|הֶחָכָם":
-    "הֶחָכָם has his eyes in his head; the fool walks in darkness. Chet here takes the seghol article. The wise man is a type the verse sets against the fool — definite by the article.",
+    "הֶחָכָם has his eyes in his head; the fool walks in darkness. ח here takes the seghol article. The wise man is a type the verse sets against the fool — definite by the article.",
 
-  // Article 4 — vocal shewa / yod
+  // Article 4 — vocal shewa / י
   "article|1 Kgs 12:8|הַיְלָדִים":
     "Rehoboam leaves the elders and takes counsel with הַיְלָדִים who grew up with him. The article sits on a shewa: הַיְ. Those young men are a known circle at court.",
   "article|Josh 6:22|הַמְרַגְּלִים":
@@ -43,39 +43,39 @@ export const LEARN_WHY: Record<string, string> = {
   "article|Gen 2:10|הַגָּן":
     "A river goes out of Eden to water הַגָּן. Not a garden: the garden God planted. גַּן with הַ and dagesh is that enclosed place.",
   "article|Exod 19:16|הָהָר":
-    "Thunder and a thick cloud sit on הָהָר. Sinai is “the mountain” of this meeting. He cannot take dagesh, so the article is הָ on הַר.",
+    "Thunder and a thick cloud sit on הָהָר. Sinai is “the mountain” of this meeting. ה cannot take dagesh, so the article is הָ on הַר.",
   "article|Deut 12:2|הֶהָרִים":
-    "Israel must destroy the high places of the nations on הֶהָרִים. “The mountains” where they served other gods. He as a guttural takes the seghol article in the plural.",
+    "Israel must destroy the high places of the nations on הֶהָרִים. “The mountains” where they served other gods. ה as a guttural takes the seghol article in the plural.",
 
-  // Article 5 — vav
+  // Article 5 — ו
   "article|Gen 1:1|וְאֵת":
     "The heavens and the earth are a pair. וְאֵת is וְ “and” plus אֵת, joining the second object to the first. The conjunction is how the verse holds both halves of creation together.",
   "article|Gen 24:35|וּבָקָר":
-    "YHWH has given Abraham flocks וּבָקָר, silver and gold. Labial bet after vav takes the shureq spelling וּ. The “and” stacks the gifts in one list.",
+    "YHWH has given Abraham flocks וּבָקָר, silver and gold. Labial ב after ו takes the shureq spelling וּ. The “and” stacks the gifts in one list.",
   "article|2 Kgs 3:9|וּמֶלֶךְ":
-    "Three kings go out: Israel, Judah, וּמֶלֶךְ Edom. Each וּ adds another king to the campaign. Mem is labial, so the conjunction is וּ, not וְ.",
+    "Three kings go out: Israel, Judah, וּמֶלֶךְ Edom. Each וּ adds another king to the campaign. מ is labial, so the conjunction is וּ, not וְ.",
   "article|Exod 1:1|וּבֵיתוֹ":
-    "Each man of Jacob came to Egypt וּבֵיתוֹ — and his house. The vav ties household to the man. Labial bet: וּ.",
+    "Each man of Jacob came to Egypt וּבֵיתוֹ — and his house. The ו ties household to the man. Labial ב: וּ.",
   "article|1 Sam 18:16|וִיהוּדָה":
-    "All Israel וִיהוּדָה loved David. Before yod the conjunction is often וִ. The “and” makes Judah stand with Israel as one love.",
+    "All Israel וִיהוּדָה loved David. Before י the conjunction is often וִ. The “and” makes Judah stand with Israel as one love.",
   "article|Exod 34:6|וֶאֱמֶת":
-    "YHWH is abundant in ḥesed וֶאֱמֶת. Before alef with a hateph the vav takes seghol (וֶ). Love and truth are joined as one character of God.",
+    "YHWH is abundant in ḥesed וֶאֱמֶת. Before א with a hateph the ו takes seghol (וֶ). Love and truth are joined as one character of God.",
   "article|Gen 50:24|וֵאלֹהִים":
-    "Joseph is dying, וֵאלֹהִים will surely visit them. Before elohim the vav is וֵ. The “and/but” turns the deathbed into a promise: God, not Joseph, will act.",
+    "Joseph is dying, וֵאלֹהִים will surely visit them. Before elohim the ו is וֵ. The “and/but” turns the deathbed into a promise: God, not Joseph, will act.",
   "article|Gen 1:2|וָבֹהוּ":
-    "The earth was tohu וָבֹהוּ — waste and void. Before bet with qamets the vav can be וָ. The pair is one picture of unformed earth.",
+    "The earth was tohu וָבֹהוּ — waste and void. Before ב with qamets the ו can be וָ. The pair is one picture of unformed earth.",
 
   // Article 6 — mix
   "article|Gen 1:1|הַשָּׁמַיִם":
-    "God creates הַשָּׁמַיִם and the earth. Dual-looking שָׁמַיִם is “the heavens” as the known sky-vault. Article plus dagesh in shin: not some heavens, the heavens of this world.",
+    "God creates הַשָּׁמַיִם and the earth. Dual-looking שָׁמַיִם is “the heavens” as the known sky-vault. Article plus dagesh in ש: not some heavens, the heavens of this world.",
   "article|Gen 1:2|וְהָאָרֶץ":
-    "וְהָאָרֶץ was waste and void. Vav plus the article on אֶרֶץ: “and the earth.” The same earth named in 1:1 is now described. Conjunction and article both sit on one word.",
+    "וְהָאָרֶץ was waste and void. ו plus the article on אֶרֶץ: “and the earth.” The same earth named in 1:1 is now described. Conjunction and article both sit on one word.",
   "article|Deut 6:6|הַיּוֹם":
     "These words I command you הַיּוֹם shall be on your heart. “This day” is the day of the command. יוֹם with the article is that today, not a day in general.",
   "article|1 Sam 24:9|הַמֶּלֶךְ":
     "David calls after Saul, “My lord הַמֶּלֶךְ.” The article on מֶלֶךְ is how you address the known king in the cave — not a king, the king.",
   "article|Gen 1:5|לָאוֹר":
-    "God called לָאוֹר Day. Lamed plus the article (often fused as לָ before a guttural) marks the light he just made. The naming needs a definite object: that light.",
+    "God called לָאוֹר Day. ל plus the article (often fused as לָ before a guttural) marks the light he just made. The naming needs a definite object: that light.",
   "article|Jonah 1:9|הַיָּם":
     "Jonah fears the God who made הַיָּם and the dry land. On the ship, “the sea” is the sea under them. Same lemma יָם, article pointing at the created sea that is about to storm.",
 
@@ -149,49 +149,49 @@ export const LEARN_WHY: Record<string, string> = {
 
   // Syllables 2 — dagesh
   "syllable|Gen 49:8|אַתָּה":
-    "Judah, אַתָּה — your brothers will praise you. The dagesh in tav is forte: אַתּ | תָּה. The split runs through the doubled tav. “You” is that marked word of address.",
+    "Judah, אַתָּה — your brothers will praise you. The dagesh in ת is forte: אַתּ | תָּה. The split runs through the doubled ת. “You” is that marked word of address.",
   "syllable|Gen 1:1|הַשָּׁמַיִם":
-    "הַשָּׁמַיִם: article’s dagesh in shin. הַשּׁ | שָׁ | מַ | יִם — first shin takes shewa and closes, the second takes the vowel. The heavens of 1:1 wear that doubling.",
+    "הַשָּׁמַיִם: article’s dagesh in ש. הַשּׁ | שָׁ | מַ | יִם — first ש takes shewa and closes, the second takes the vowel. The heavens of 1:1 wear that doubling.",
   "syllable|Gen 2:23|אִשָּׁה":
-    "This one shall be called אִשָּׁה. Dagesh forte in shin: split through it. The name “woman” in the naming verse is that doubled shin.",
+    "This one shall be called אִשָּׁה. Dagesh forte in ש: split through it. The name “woman” in the naming verse is that doubled ש.",
   "syllable|Exod 20:12|כַּבֵּד":
-    "כַּבֵּד your father and mother. Dagesh in bet is the piel doubling. Honor is a doubled middle letter — the command’s first word.",
+    "כַּבֵּד your father and mother. Dagesh in ב is the piel doubling. Honor is a doubled middle letter — the command’s first word.",
   "syllable|Gen 3:17|שָׁמַעְתָּ":
-    "Because you שָׁמַעְתָּ to your wife’s voice. Silent shewa on ayin: שָׁ | מַעְ | תָּ. Dagesh in tav after silent shewa is lene, not a split. The listening that brought the ground’s curse is this form.",
+    "Because you שָׁמַעְתָּ to your wife’s voice. Silent shewa on ע: שָׁ | מַעְ | תָּ. Dagesh in ת after silent shewa is lene, not a split. The listening that brought the ground’s curse is this form.",
 
   // Syllables 3 — shewa
   "syllable|Exod 5:1|פַּרְעֹה":
-    "Moses and Aaron speak to פַּרְעֹה. Silent shewa on resh: פַּרְ | עֹה. Pharaoh in the confrontation is a closed first slice, then the rest of the name.",
+    "Moses and Aaron speak to פַּרְעֹה. Silent shewa on ר: פַּרְ | עֹה. Pharaoh in the confrontation is a closed first slice, then the rest of the name.",
   "syllable|Gen 1:1|בְּרֵאשִׁית":
-    "בְּרֵאשִׁית — vocal shewa on bet is not a full vowel. The “in beginning” that opens the Torah starts with a reduced slice, then רֵא | שִׁית.",
+    "בְּרֵאשִׁית — vocal shewa on ב is not a full vowel. The “in beginning” that opens the Torah starts with a reduced slice, then רֵא | שִׁית.",
   "syllable|Deut 6:4|יִשְׂרָאֵל":
-    "Hear, יִשְׂרָאֵל. Silent shewa on sin: יִשְׂ | רָאֵל. The name you are commanded to hear is cut after that silent close.",
+    "Hear, יִשְׂרָאֵל. Silent shewa on שׂ: יִשְׂ | רָאֵל. The name you are commanded to hear is cut after that silent close.",
   "syllable|1 Sam 3:10|שְׁמוּאֵל":
-    "שְׁמוּאֵל said, Speak, your servant is listening. Vocal shewa on shin: a short first slice in the name of the boy who learns to hear.",
+    "שְׁמוּאֵל said, Speak, your servant is listening. Vocal shewa on ש: a short first slice in the name of the boy who learns to hear.",
 
   // Syllables 4 — furtive / reduced
   "syllable|Prov 1:7|חָכְמָה":
-    "Fear of YHWH is the beginning of knowledge; fools despise חָכְמָה. Vocal shewa on kaf: חָ | כְ | מָה. Wisdom in this motto is three slices, the middle reduced.",
+    "Fear of YHWH is the beginning of knowledge; fools despise חָכְמָה. Vocal shewa on כ: חָ | כְ | מָה. Wisdom in this motto is three slices, the middle reduced.",
   "syllable|Exod 19:5|מִכָּל":
     "A treasured possession מִכָּל the peoples. מִ | כָּל — closed, then closed. “Out of all” is how Israel is set apart at Sinai.",
   "syllable|Deut 6:5|בְּכָל":
-    "Love YHWH בְּכָל your heart. Vocal shewa on bet, then כָּל. “With all” is the measure of the love command.",
+    "Love YHWH בְּכָל your heart. Vocal shewa on ב, then כָּל. “With all” is the measure of the love command.",
   "syllable|Gen 1:5|קָרָא":
     "God קָרָא the light Day. קָ | רָא — open, open. The naming act is two open slices in the first week.",
 
   // Syllables 5 — qamets / hateph
   "syllable|Gen 1:2|וְרוּחַ":
-    "וְרוּחַ of God hovering on the water. Furtive pathach on chet: the vowel is sounded before the guttural at the end. “And the spirit” is that marked breath over the deep.",
+    "וְרוּחַ of God hovering on the water. Furtive pathach on ח: the vowel is sounded before the guttural at the end. “And the spirit” is that marked breath over the deep.",
   "syllable|Gen 1:6|רָקִיעַ":
-    "Let there be a רָקִיעַ in the midst of the waters. Furtive pathach on ayin. The expanse of day two ends with that little vowel before the guttural.",
+    "Let there be a רָקִיעַ in the midst of the waters. Furtive pathach on ע. The expanse of day two ends with that little vowel before the guttural.",
   "syllable|Gen 6:9|נֹחַ":
-    "נֹחַ was a righteous man. Furtive pathach on chet in a one-syllable name. Noah in his toledot wears that final sneak-vowel.",
+    "נֹחַ was a righteous man. Furtive pathach on ח in a one-syllable name. Noah in his toledot wears that final sneak-vowel.",
   "syllable|Isa 19:20|מוֹשִׁיעַ":
-    "He will send them a מוֹשִׁיעַ. Furtive pathach on ayin. “Savior” at the end of the word is still one last vowel before the guttural.",
+    "He will send them a מוֹשִׁיעַ. Furtive pathach on ע. “Savior” at the end of the word is still one last vowel before the guttural.",
 
   // Syllables 6 — long / diphthong
   "syllable|Ps 51:5|וְחַטָּאתִי":
-    "My sin is ever before me: וְחַטָּאתִי. Dagesh forte in tet, suffix ִי. The confession’s “my sin” is that marked form — split through the doubled letter, then the ending.",
+    "My sin is ever before me: וְחַטָּאתִי. Dagesh forte in ט, suffix ִי. The confession’s “my sin” is that marked form — split through the doubled letter, then the ending.",
   "syllable|Gen 1:1|בָּרָא":
     "God בָּרָא the heavens and the earth. בָּ | רָא. The creating verb of the opening line is two open syllables — one vowel each.",
   "syllable|Gen 1:4|וַיַּרְא":
@@ -201,23 +201,23 @@ export const LEARN_WHY: Record<string, string> = {
 
   // Syllables 7 — mix / diphthong
   "syllable|Prov 24:3|בָּיִת":
-    "By wisdom a בָּיִת is built. The ay-diphthong in בַּיִת is one cluster, not two vowels to split apart. “House” in this proverb is that diphthong closed by tav.",
+    "By wisdom a בָּיִת is built. The ay-diphthong in בַּיִת is one cluster, not two vowels to split apart. “House” in this proverb is that diphthong closed by ת.",
   "syllable|Ps 23:4|צַלְמָוֶת":
     "The valley of צַלְמָוֶת. Compound “shadow-death.” Walk through that marked place: more than one vowel, so more than one slice, in the psalm of not fearing.",
   "syllable|Gen 9:21|הַיַּיִן":
-    "Noah drank of הַיַּיִן and became drunk. Article plus יַיִן. The wine of the vineyard after the flood is this definite form — yod with the article’s dagesh.",
+    "Noah drank of הַיַּיִן and became drunk. Article plus יַיִן. The wine of the vineyard after the flood is this definite form — י with the article’s dagesh.",
   "syllable|Prov 6:17|יָדַיִם":
     "יָדַיִם that shed innocent blood. Dual diphthong plus ם: a pair of hands. The hated thing is those two hands, not a long plural.",
 
   // Syllables 8 — names / mix
   "syllable|Gen 1:1|אֱלֹהִים":
-    "אֱלֹהִים created. Hateph seghol on alef is reduced, not a full vowel count in the same way. The subject of 1:1 is this name — look it up as אֱלֹהִים.",
+    "אֱלֹהִים created. Hateph seghol on א is reduced, not a full vowel count in the same way. The subject of 1:1 is this name — look it up as אֱלֹהִים.",
   "syllable|Josh 1:1|עֶבֶד":
     "After the death of Moses עֶבֶד YHWH. Segolate: two vowels, typically two slices עֶ | בֶד. “Servant of YHWH” is Moses’ title as the book of Joshua opens.",
   "syllable|Gen 32:29|יַעֲקֹב":
-    "Your name shall no longer be יַעֲקֹב but Israel. Hateph patach on ayin. The old name in the renaming scene is that reduced guttural slice.",
+    "Your name shall no longer be יַעֲקֹב but Israel. Hateph patach on ע. The old name in the renaming scene is that reduced guttural slice.",
   "syllable|Exod 4:14|אַהֲרֹן":
-    "Is not אַהֲרֹן your brother? Hateph patach on he. Aaron is named into the mission — the reduced vowel sits in the middle of the brother’s name.",
+    "Is not אַהֲרֹן your brother? Hateph patach on ה. Aaron is named into the mission — the reduced vowel sits in the middle of the brother’s name.",
 };
 
 export function learnWhyKey(kind: string, ref: string, hit: string): string {
