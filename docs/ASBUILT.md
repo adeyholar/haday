@@ -9,7 +9,7 @@ Living picture of **what the class site is today**. Not a wish list.
 | **Repo** | https://github.com/adeyholar/haday (`main`) |
 | **Host** | Azure Web App `haday` (Linux container) + Azure Postgres `haday-pg` |
 | **Course** | BIBL 630 · *Basics of Biblical Hebrew*, 3rd ed. |
-| **Snapshot** | 6 September 2026 |
+| **Snapshot** | 7 September 2026 |
 
 Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the section here that changed.
 
@@ -20,7 +20,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 | Area | What it does | Why it helps |
 |---|---|---|
 | **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. |
-| **Game** | BBH path Ch. 1–19, Custom mix of open chapters (every student), Aleph-bet, Syllables, Nouns, Article & vav, Ultimate Challenge | Stages and grammar units unlock in order. **90%** to clear and open the next. Custom mix reviews open levels in one sitting. Citation form only (יָם, not בַּיָּם). |
+| **Game** | BBH path Ch. 1–19, Custom mix of open chapters (every student), Aleph-bet, Syllables, Nouns, Article & vav, Ch. 6–11 grammar (prep → numbers), Ultimate Challenge | Stages and grammar units unlock in order. **90%** to clear and open the next. Custom mix reviews open levels in one sitting. Citation form only (יָם, not בַּיָּם). |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |

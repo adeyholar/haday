@@ -142,17 +142,20 @@ export function formFitsLemma(surface: string, lemma: VocabItem): boolean {
 export function lemmaForSurface(surface: string): VocabItem | undefined {
   const surf = foldFinals(lettersOnly(surface));
   if (surf.length < 2) return undefined;
+  const bodies = afterClitics(surf);
   let exact: VocabItem | undefined;
   let best: VocabItem | undefined;
   let bestLen = 0;
   for (const v of VOCAB) {
-    const root = foldFinals(lettersOnly(v.hebrew));
-    if (root.length < 2) continue;
-    if (surf === root) {
+    const keys = [v.hebrew, ...(v.hebrewAlts ?? [])]
+      .map((h) => foldFinals(lettersOnly(h)))
+      .filter((root) => root.length >= 2);
+    if (keys.some((root) => bodies.includes(root))) {
       if (!exact || v.freq > exact.freq) exact = v;
       continue;
     }
     if (!formFitsLemma(surface, v)) continue;
+    const root = keys[0] ?? "";
     if (!best || root.length > bestLen || (root.length === bestLen && v.freq > best.freq)) {
       best = v;
       bestLen = root.length;

@@ -57,6 +57,7 @@ const GAME: NavItem[] = [
   { to: "/game/syllables", label: "Syllables", hint: "Open, closed, shewa", icon: Layers },
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
   { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },
+  { to: "/game/lessons", label: "Ch. 6–11 grammar", hint: "Prep to numbers", icon: ScrollText },
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 

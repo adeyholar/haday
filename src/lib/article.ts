@@ -3,7 +3,7 @@ import { ARTICLE_QUIZ_EXTRA } from "@/lib/article-quiz-extra";
 
 /** Original teaching notes on the Hebrew article and conjunction vav. Public-domain Masoretic examples. Not a textbook reprint. */
 
-export type ArticleVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string; why?: string };
+export type ArticleVerse = { ref: string; he: string; en: string; hit: string; hitEn?: string; why?: string; vocabId?: string };
 
 export type ArticleSample = {
   word: string;
@@ -52,10 +52,12 @@ export const ARTICLE_UNITS: ArticleUnit[] = [
       { word: "הָאָרֶץ", gloss: "the land / the earth", tag: "article", note: "Article is present. The vowel under he is qamets here — that spelling is a later unit.", ref: "Gen 1:1" },
     ],
     verses: [
-      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "מֶלֶךְ", hitEn: "king" },
-      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "הַכָּבוֹד", hitEn: "glory" },
-      { ref: "Gen 1:1", he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ", en: "In the beginning God created the heavens and the earth.", hit: "הָאָרֶץ", hitEn: "earth" },
-      { ref: "Deut 6:4", he: "שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד", en: "Hear, Israel: YHWH our God, YHWH is one.", hit: "יִשְׂרָאֵל", hitEn: "Israel" },
+      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "מֶלֶךְ", hitEn: "king", vocabId: "melek" },
+      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "הַכָּבוֹד", hitEn: "glory", vocabId: "kavod" },
+      { ref: "Gen 1:1", he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ", en: "In the beginning God created the heavens and the earth.", hit: "הָאָרֶץ", hitEn: "earth", vocabId: "erets" },
+      { ref: "Deut 6:4", he: "שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד", en: "Hear, Israel: YHWH our God, YHWH is one.", hit: "יִשְׂרָאֵל", hitEn: "Israel", vocabId: "israel" },
+      { ref: "Exod 20:2", he: "אָנֹכִי יְהוָה אֱלֹהֶיךָ אֲשֶׁר הוֹצֵאתִיךָ מֵאֶרֶץ מִצְרַיִם", en: "I am YHWH your God, who brought you out from the land of Egypt.", hit: "מִצְרַיִם", hitEn: "Egypt", vocabId: "egypt" },
+      { ref: "Gen 2:24", he: "עַל־כֵּן יַעֲזָב־אִישׁ אֶת־אָבִיו וְאֶת־אִמּוֹ", en: "Therefore a man leaves his father and his mother.", hit: "אִישׁ", hitEn: "man", vocabId: "ish" },
     ],
     quiz: [
       { q: "Hebrew has an indefinite article like English “a / an.”", choices: ["False — there is no indefinite article", "True — it is אֶ", "True — it is הַ"], answer: "False — there is no indefinite article", why: "מֶלֶךְ is “king” or “a king.” Bare usually means indefinite." },
@@ -91,11 +93,13 @@ export const ARTICLE_UNITS: ArticleUnit[] = [
       { word: "הַשַּׁעַר", gloss: "the gate", tag: "הַ + dagesh", note: "Shin takes dagesh after הַ.", ref: "Ruth 4:1" },
     ],
     verses: [
-      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "הַכָּבוֹד", hitEn: "glory" },
-      { ref: "Exod 14:21", he: "וַיֵּט מֹשֶׁה אֶת יָדוֹ עַל הַיָּם", en: "Moses stretched out his hand over the sea.", hit: "הַיָּם", hitEn: "sea" },
-      { ref: "Lev 1:7", he: "וְנָתְנוּ בְּנֵי אַהֲרֹן הַכֹּהֵן אֵשׁ עַל הַמִּזְבֵּחַ", en: "The sons of Aaron the priest shall put fire on the altar.", hit: "הַמִּזְבֵּחַ", hitEn: "altar" },
-      { ref: "Ruth 4:1", he: "וּבֹעַז עָלָה הַשַּׁעַר וַיֵּשֶׁב שָׁם", en: "Boaz went up to the gate and sat down there.", hit: "הַשַּׁעַר", hitEn: "gate" },
-      { ref: "Josh 1:8", he: "לֹא יָמוּשׁ סֵפֶר הַתּוֹרָה הַזֶּה מִפִּיךָ", en: "This book of the instruction shall not depart from your mouth.", hit: "הַתּוֹרָה", hitEn: "instruction" },
+      { ref: "Ps 24:8", he: "מִי זֶה מֶלֶךְ הַכָּבוֹד יְהוָה עִזּוּז וְגִבּוֹר", en: "Who is this king of glory? YHWH, strong and mighty.", hit: "הַכָּבוֹד", hitEn: "glory", vocabId: "kavod" },
+      { ref: "Exod 14:21", he: "וַיֵּט מֹשֶׁה אֶת יָדוֹ עַל הַיָּם", en: "Moses stretched out his hand over the sea.", hit: "הַיָּם", hitEn: "sea", vocabId: "yam" },
+      { ref: "Lev 1:7", he: "וְנָתְנוּ בְּנֵי אַהֲרֹן הַכֹּהֵן אֵשׁ עַל הַמִּזְבֵּחַ", en: "The sons of Aaron the priest shall put fire on the altar.", hit: "הַמִּזְבֵּחַ", hitEn: "altar", vocabId: "mizbeah" },
+      { ref: "Ruth 4:1", he: "וּבֹעַז עָלָה הַשַּׁעַר וַיֵּשֶׁב שָׁם", en: "Boaz went up to the gate and sat down there.", hit: "הַשַּׁעַר", hitEn: "gate", vocabId: "shaar" },
+      { ref: "Josh 1:8", he: "לֹא יָמוּשׁ סֵפֶר הַתּוֹרָה הַזֶּה מִפִּיךָ", en: "This book of the instruction shall not depart from your mouth.", hit: "הַתּוֹרָה", hitEn: "instruction", vocabId: "torah" },
+      { ref: "Exod 25:11", he: "וְצִפִּיתָ אֹתוֹ זָהָב טָהוֹר מִבַּיִת וּמִחוּץ תְּצַפֶּנּוּ", en: "You shall overlay it with pure gold; inside and outside you shall overlay it.", hit: "זָהָב", hitEn: "gold", vocabId: "zahav" },
+      { ref: "Ps 1:6", he: "כִּי־יוֹדֵעַ יְהוָה דֶּרֶךְ צַדִּיקִים", en: "For YHWH knows the way of the righteous.", hit: "דֶּרֶךְ", hitEn: "way", vocabId: "derek" },
     ],
     quiz: [
       { q: "The ordinary article is…", choices: ["הַ plus dagesh forte in the first letter of the noun", "הָ plus no dagesh always", "וְ plus shewa"], answer: "הַ plus dagesh forte in the first letter of the noun", why: "Pathach under he, doubling on the next consonant." },

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { ARTICLE_UNITS } from "@/lib/article";
 import { CHAPTER_META } from "@/lib/game";
+import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 import { NOUN_UNITS } from "@/lib/nouns";
 import { SYLLABLE_UNITS } from "@/lib/syllables";
 import { GAME_CHAPTER_TITLES } from "@/lib/vocab";
@@ -16,10 +17,14 @@ function lessonBrief(): string {
   const syl = SYLLABLE_UNITS.map((u) => `${u.id}. ${u.title}`).join("; ");
   const nouns = NOUN_UNITS.map((u) => `${u.id}. ${u.title}`).join("; ");
   const article = ARTICLE_UNITS.map((u) => `${u.id}. ${u.title}`).join("; ");
+  const grammar = GRAMMAR_TRACKS.map(
+    (t) => `Ch ${t.chapter} ${t.title}: ${t.units.map((u) => `${u.id}. ${u.title}`).join("; ")}`,
+  ).join(" | ");
   return `BBH chapter titles: ${vocab}.
 Syllable units: ${syl}.
 Noun units: ${nouns}.
 Article and vav units: ${article}.
+Grammar paths chapters 6–11: ${grammar}.
 Vocab chapter names: ${Object.entries(GAME_CHAPTER_TITLES)
     .map(([n, t]) => `${n}=${t}`)
     .join(", ")}.
@@ -51,7 +56,7 @@ export const askHaday = createServerFn({ method: "POST" })
         messages: [
           {
             role: "system",
-            content: `You are HaDay Hebraic AI, a tutor for a first-year Biblical Hebrew class using Basics of Biblical Hebrew (Pratico / Van Pelt). Be clear, brief, and kind. Answer from the lesson: letters, syllables, nouns, the article הַ, the conjunction וְ, and the BBH vocabulary. Hebrew you cite must match the actual word (do not mix fire אֵשׁ with אשית “I will put”). Dual needs the ay diphthong. Game and Quiz use citation lemmas (יָם, not בַּיָּם). The ordinary article is הַ plus dagesh; gutturals and resh refuse dagesh (compensatory הָ on א ע ר, virtual הַ on ה ח, seghol הֶ before unaccented הָ חָ עָ). Vav is always prefixed: default וְ, bump וּ before ב מ פ, hateph match, יְ → וִי, אֱלֹהִים → וֵאלֹהִים. Week 3 reads chapters 4 and 5 together; games stay chapter by chapter. Genesis 1–5 is the first reading, public-domain Masoretic text. If you are not sure, say so. Do not reprint copyrighted textbook pages.
+            content: `You are HaDay Hebraic AI, a tutor for a first-year Biblical Hebrew class using Basics of Biblical Hebrew (Pratico / Van Pelt). Be clear, brief, and kind. Answer from the lesson: letters, syllables, nouns, the article הַ, the conjunction וְ, prepositions, adjectives, pronouns, existence particles, construct chains, numbers, and the BBH vocabulary. Hebrew you cite must match the actual word (do not mix fire אֵשׁ with אשית “I will put”). Dual needs the ay diphthong. Game and Quiz use citation lemmas (יָם, not בַּיָּם). The ordinary article is הַ plus dagesh; gutturals and resh refuse dagesh (compensatory הָ on א ע ר, virtual הַ on ה ח, seghol הֶ before unaccented הָ חָ עָ). Vav is always prefixed: default וְ, bump וּ before ב מ פ, hateph match, יְ → וִי, אֱלֹהִים → וֵאלֹהִים. Inseparable prepositions are בְּ כְּ לְ; מִן may assimilate. Adjectives agree and follow attributively, or predicate without matching article. Independent pronouns add emphasis. Construct is X of Y. Numbers 3–10 often flip gender. Week 3 reads chapters 4 and 5 together; games stay chapter by chapter. Genesis 1–5 is the first reading, public-domain Masoretic text. If you are not sure, say so. Do not reprint copyrighted textbook pages.
 
 ${lessonBrief()}`,
           },

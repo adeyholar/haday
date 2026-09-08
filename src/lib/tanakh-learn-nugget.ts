@@ -58,6 +58,60 @@ export function learnNugget(kind: LearnKind, verse: LearnVerse): string {
     return "Read gender and number off the ending. Masculine singular is usually endingless — that is the citation form in the lexicon.";
   }
 
+  if (kind === "prep") {
+    if (raw.startsWith("לָ") || raw.startsWith("בָּ") || raw.startsWith("כָּ") || raw.startsWith("בַּ") || raw.startsWith("לַ") || raw.startsWith("כַּ")) {
+      return "A preposition plus the article often fuses (לַ = לְ + הַ). The noun is still definite.";
+    }
+    if (raw.startsWith("מֵ") || raw.startsWith("מִ")) {
+      return "Prefixed מִן hides its nun as dagesh, or lengthens to tsere before a guttural. With the article the ה often stays (מֵהָאָרֶץ).";
+    }
+    if (raw.includes("־")) {
+      return "The maqqef is spelling glue, not extra meaning. The next word is the object of the preposition.";
+    }
+    return "Name the relationship (place, time, company), then the object. Inseparable בְּ כְּ לְ never stand alone.";
+  }
+
+  if (kind === "adj") {
+    if (raw.startsWith("הַ") || raw.startsWith("הָ") || raw.startsWith("הֶ")) {
+      return "Matching articles on noun and adjective usually mean attributive — “the good king,” one phrase.";
+    }
+    return "Same endings as nouns. Same article as the noun = attributive. No article while the noun has one = predicate (“is good”).";
+  }
+
+  if (kind === "pron") {
+    if (raw.startsWith("הֲ")) {
+      return "הֲ with ḥateph-pathach asks a yes/no question. It is not the article הַ.";
+    }
+    return "Pronouns, demonstratives, and question words are their own lemmas. A written “I / you / this” is extra work — stress, a verbless clause, or a pointer.";
+  }
+
+  if (kind === "exist") {
+    if (hit.startsWith("הנה") || hit.startsWith("הננ") || hit === "הן") {
+      return "הִנֵּה is a pointer — look, here — not the article and not a verb “to see.”";
+    }
+    if (hit === "יש") {
+      return "יֵשׁ “there is.” A particle of existence, not a conjugated verb.";
+    }
+    if (hit === "אין") {
+      return "אֵין “there is not / none.” Pair it with יֵשׁ in the mind.";
+    }
+    return "Small particles (behold, there is, also, or, alone) keep the nouns in focus. Name the particle first.";
+  }
+
+  if (kind === "construct") {
+    if (raw.endsWith("ֵי") || raw.endsWith("ֵי־") || hit.endsWith("י")) {
+      return "Masculine plural construct often ends in ֵי — “kings of.” The last noun of the chain is still absolute.";
+    }
+    if (raw.endsWith("ַת") || raw.endsWith("ַת־")) {
+      return "Feminine ָה often becomes ַת in construct. Look the word up as the absolute singular.";
+    }
+    return "An “X of Y” chain: first noun bound, last noun free. The chain is definite if the last member is (name, article, or suffix).";
+  }
+
+  if (kind === "numbers") {
+    return "Cardinals count; ordinals (first, second, seventh) sit like adjectives after the noun. Three–ten often wear the opposite gender ending from the counted noun.";
+  }
+
   const rawS = verse.hit;
   if (/ּ/.test(rawS) && /[בגדכפת]/.test(lettersOnly(rawS))) {
     return "Dagesh forte doubles the letter — split through it. Dagesh lene (begadkephat after a consonant) does not double and you do not split.";

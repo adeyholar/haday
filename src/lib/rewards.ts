@@ -24,6 +24,8 @@ export const BADGES = [
   { id: "nouns-master", title: "Reader of endings", hint: "Clear all six noun units" },
   { id: "article-open", title: "The and and", hint: "Clear the first article unit" },
   { id: "article-master", title: "Name the prefix", hint: "Clear all six article & vav units" },
+  { id: "lessons-open", title: "Grammar in the text", hint: "Clear the first chapter 6–11 unit" },
+  { id: "lessons-master", title: "Six paths", hint: "Clear all chapter 6–11 grammar units" },
 ] as const;
 
 export type BadgeId = (typeof BADGES)[number]["id"];
@@ -132,6 +134,17 @@ export function evaluateBadges(game: GameSnapshot, dailyStreak: number, keepStre
   if (ar["1"]?.cleared) out.push("article-open");
   const articleAll = [1, 2, 3, 4, 5, 6].every((n) => ar[String(n)]?.cleared);
   if (articleAll) out.push("article-master");
+  const lessons = game.lessons;
+  if (lessons) {
+    const anyOpen = (["prep", "adj", "pron", "exist", "construct", "numbers"] as const).some(
+      (id) => lessons[id]?.units?.["1"]?.cleared,
+    );
+    if (anyOpen) out.push("lessons-open");
+    const allTracks = (["prep", "adj", "pron", "exist", "construct", "numbers"] as const).every((id) =>
+      [1, 2, 3, 4].every((n) => lessons[id]?.units?.[String(n)]?.cleared),
+    );
+    if (allTracks) out.push("lessons-master");
+  }
   return out;
 }
 

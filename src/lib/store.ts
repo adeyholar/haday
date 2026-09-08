@@ -16,6 +16,7 @@ import {
 import {
   applyAlefBetResult,
   applyArticleResult,
+  applyGrammarResult,
   applyNounResult,
   applyStageResult,
   applySyllableResult,
@@ -34,6 +35,7 @@ import { twinsOf } from "./confusion";
 import { observeBkt } from "./bkt";
 import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
+import type { GrammarTrackId } from "./grammar";
 
 type ProgressMap = Record<string, CardState>;
 export type FocusMode = "due" | "weak";
@@ -77,6 +79,11 @@ type StudyState = StudySnapshot & {
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
   completeArticleUnit: (
+    unit: number,
+    result: { stars: number; score: number; firstTryRate: number },
+  ) => void;
+  completeGrammarUnit: (
+    trackId: GrammarTrackId,
     unit: number,
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
@@ -186,6 +193,16 @@ export const useStudy = create<StudyState>()(
         const now = Date.now();
         const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
         const game = stampRewards(applyArticleResult(get().game, unit, result), streakInfo.streak, get().keepStreak);
+        set({
+          game,
+          ...streakInfo,
+          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
+      },
+      completeGrammarUnit: (trackId, unit, result) => {
+        const now = Date.now();
+        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
+        const game = stampRewards(applyGrammarResult(get().game, trackId, unit, result), streakInfo.streak, get().keepStreak);
         set({
           game,
           ...streakInfo,

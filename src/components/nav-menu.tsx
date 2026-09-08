@@ -30,6 +30,7 @@ export type NavHref =
   | "/game/syllables"
   | "/game/nouns"
   | "/game/article"
+  | "/game/lessons"
   | "/ask"
   | "/ideas";
 

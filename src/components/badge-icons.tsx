@@ -25,6 +25,8 @@ export const BADGE_ICONS: Record<BadgeId, LucideIcon> = {
   "nouns-master": BookMarked,
   "article-open": Hash,
   "article-master": Hash,
+  "lessons-open": Scroll,
+  "lessons-master": Scroll,
 };
 
 export function BadgeGlyph({ id, className }: { id: string; className?: string }) {

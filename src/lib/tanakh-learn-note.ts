@@ -4,7 +4,7 @@ import { lemmaForSurface } from "@/lib/tanakh-pool";
 import { verseFor } from "@/lib/verses";
 import { VOCAB, type VocabItem } from "@/lib/vocab";
 
-export type LearnKind = "article" | "noun" | "syllable";
+export type LearnKind = "article" | "noun" | "syllable" | "prep" | "adj" | "pron" | "exist" | "construct" | "numbers";
 
 export type LearnSample = {
   word: string;
@@ -147,6 +147,40 @@ export function learnVerseExplain(
       note = `${named} is a proper name. Names are definite without הַ.`;
     } else {
       note = `${named} is the citation lemma here — no article. Hebrew has no “a,” so a bare noun is indefinite unless a name or a suffix makes it definite.`;
+    }
+  } else if (kind === "prep") {
+    if (sample?.note) note = sample.note;
+    else if (prefixed && (hitL.startsWith("ב") || hitL.startsWith("כ") || hitL.startsWith("ל"))) {
+      note = `An inseparable preposition is glued to ${named}. Strip בְּ / כְּ / לְ (and the article’s vowel if you see pathach + dagesh) to find the citation form.`;
+    } else if (prefixed && hitL.startsWith("מ")) {
+      note = `מִן is fused here on ${named}. The nun hid as dagesh, or the vowel lengthened before a guttural. Look the noun up without מִן.`;
+    } else {
+      note = `${named} is the object of a preposition, or the preposition itself. Name the relationship (in, to, from, with, before), then look up the class lemma.`;
+    }
+  } else if (kind === "adj") {
+    if (sample?.note) note = sample.note;
+    else {
+      note = `${named} is an adjective. Check the ending for gender and number, then ask: same article as the noun (attributive) or no article while the noun has one (predicate “is…”)?`;
+    }
+  } else if (kind === "pron") {
+    if (sample?.note) note = sample.note;
+    else {
+      note = `${named} is a pronoun, demonstrative, or question word. It is its own lemma — do not strip it like a noun with הַ.`;
+    }
+  } else if (kind === "exist") {
+    if (sample?.note) note = sample.note;
+    else {
+      note = `${named} is a particle of pointing or existence (הִנֵּה, יֵשׁ, אֵין) or a chapter-9 noun around it. Particles do not conjugate.`;
+    }
+  } else if (kind === "construct") {
+    if (sample?.note) note = sample.note;
+    else {
+      note = `${named} sits in an “X of Y” chain. The first noun is bound (construct); the last is free (absolute). Look each up as the absolute singular.`;
+    }
+  } else if (kind === "numbers") {
+    if (sample?.note) note = sample.note;
+    else {
+      note = `${named} is a number. Cardinals count; ordinals (first, second, seventh) sit like adjectives. Look up the citation form you memorized, not every inflected shape.`;
     }
   } else if (sample?.note) {
     note = sample.tag ? `${sample.tag}. ${sample.note}` : sample.note;

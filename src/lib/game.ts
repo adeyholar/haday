@@ -1,9 +1,11 @@
 import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
+import { GRAMMAR_TRACK_IDS, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
 export const NOUN_UNIT_MAX = 6;
 export const ARTICLE_UNIT_MAX = 6;
+export const GRAMMAR_UNIT_MAX = 4;
 /** Percent required to clear a Game stage or grammar unit and open the next one. */
 export const GAME_STAGE_PASS = 90;
 
@@ -55,6 +57,7 @@ export type GameSnapshot = {
   syllables: SyllableProgress;
   nouns: SyllableProgress;
   article: SyllableProgress;
+  lessons: Record<GrammarTrackId, SyllableProgress>;
 };
 
 export type AlefBetProgress = {
@@ -127,6 +130,7 @@ export function defaultGame(): GameSnapshot {
     syllables: emptySyllables(),
     nouns: emptyNouns(),
     article: emptyArticle(),
+    lessons: emptyLessons(),
   };
 }
 
@@ -144,6 +148,21 @@ export function emptyNouns(): SyllableProgress {
 
 export function emptyArticle(): SyllableProgress {
   return { unlockedUnit: 1, currentUnit: 1, units: {} };
+}
+
+export function emptyLessonTrack(): SyllableProgress {
+  return { unlockedUnit: 1, currentUnit: 1, units: {} };
+}
+
+export function emptyLessons(): Record<GrammarTrackId, SyllableProgress> {
+  return {
+    prep: emptyLessonTrack(),
+    adj: emptyLessonTrack(),
+    pron: emptyLessonTrack(),
+    exist: emptyLessonTrack(),
+    construct: emptyLessonTrack(),
+    numbers: emptyLessonTrack(),
+  };
 }
 
 function emptyAlefLevel(): StageRecord {
@@ -183,6 +202,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     syllables: hydrateSyllables(r.syllables),
     nouns: hydrateNouns(r.nouns),
     article: hydrateArticle(r.article),
+    lessons: hydrateLessons(r.lessons),
   };
 }
 
@@ -272,6 +292,38 @@ function hydrateArticle(raw: unknown): SyllableProgress {
     }
   }
   return { unlockedUnit: unlocked, currentUnit: current, units };
+}
+
+function hydrateLessonTrack(raw: unknown): SyllableProgress {
+  const base = emptyLessonTrack();
+  if (!raw || typeof raw !== "object") return base;
+  const r = raw as Partial<SyllableProgress>;
+  const unlocked = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Number(r.unlockedUnit) || 1));
+  const current = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Number(r.currentUnit) || 1));
+  const units: Record<string, StageRecord> = {};
+  if (r.units && typeof r.units === "object") {
+    for (const [key, val] of Object.entries(r.units)) {
+      if (!val || typeof val !== "object") continue;
+      const rec = val as Partial<StageRecord>;
+      units[key] = {
+        stars: Number(rec.stars) || 0,
+        best: Number(rec.best) || 0,
+        cleared: Boolean(rec.cleared),
+        attempts: Math.max(Number(rec.attempts) || 0, rec.cleared ? 1 : 0),
+      };
+    }
+  }
+  return { unlockedUnit: unlocked, currentUnit: current, units };
+}
+
+function hydrateLessons(raw: unknown): Record<GrammarTrackId, SyllableProgress> {
+  const base = emptyLessons();
+  if (!raw || typeof raw !== "object") return base;
+  const r = raw as Partial<Record<GrammarTrackId, SyllableProgress>>;
+  for (const id of GRAMMAR_TRACK_IDS) {
+    base[id] = hydrateLessonTrack(r[id]);
+  }
+  return base;
 }
 
 function hydrateUltimateRun(raw: unknown): UltimateRun | null {
@@ -579,6 +631,52 @@ export function applyArticleResult(
   if (passed && n >= ar.unlockedUnit && n < ARTICLE_UNIT_MAX) ar.unlockedUnit = n + 1;
   ar.currentUnit = ar.unlockedUnit;
   next.article = ar;
+  next.lastPlayDay = Date.now();
+  if (result.firstTryRate >= 0.4) {
+    next.winStreak = (next.winStreak || 0) + 1;
+    next.bestWinStreak = Math.max(next.bestWinStreak || 0, next.winStreak);
+  } else {
+    next.winStreak = 0;
+  }
+  return next;
+}
+
+export function lessonProgress(game: GameSnapshot, trackId: GrammarTrackId): SyllableProgress {
+  return game.lessons?.[trackId] ?? emptyLessonTrack();
+}
+
+export function grammarUnitRecord(game: GameSnapshot, trackId: GrammarTrackId, unit: number): StageRecord {
+  return lessonProgress(game, trackId).units?.[String(unit)] ?? emptyAlefLevel();
+}
+
+export function isGrammarUnitUnlocked(game: GameSnapshot, trackId: GrammarTrackId, unit: number): boolean {
+  const n = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  return n <= (lessonProgress(game, trackId).unlockedUnit || 1);
+}
+
+export function applyGrammarResult(
+  game: GameSnapshot,
+  trackId: GrammarTrackId,
+  unit: number,
+  result: { stars: number; score: number; firstTryRate: number },
+): GameSnapshot {
+  if (!isGrammarTrackId(trackId)) return cloneGame(hydrateGame(game));
+  const next = cloneGame(hydrateGame(game));
+  const n = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  const lessons = next.lessons ?? emptyLessons();
+  const track = lessons[trackId] ?? emptyLessonTrack();
+  const prev = track.units[String(n)] ?? emptyAlefLevel();
+  const passed = result.score >= GAME_STAGE_PASS;
+  track.units[String(n)] = {
+    stars: Math.max(prev.stars, result.stars),
+    best: Math.max(prev.best, result.score),
+    cleared: prev.cleared || passed,
+    attempts: (prev.attempts || 0) + 1,
+  };
+  if (passed && n >= track.unlockedUnit && n < GRAMMAR_UNIT_MAX) track.unlockedUnit = n + 1;
+  track.currentUnit = track.unlockedUnit;
+  lessons[trackId] = track;
+  next.lessons = lessons;
   next.lastPlayDay = Date.now();
   if (result.firstTryRate >= 0.4) {
     next.winStreak = (next.winStreak || 0) + 1;

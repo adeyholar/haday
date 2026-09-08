@@ -1,44 +1,41 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Check, Lock } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { ARTICLE_UNITS } from "@/lib/article";
-import { isArticleUnitUnlocked, articleUnitRecord } from "@/lib/game";
+import { grammarTrack } from "@/lib/grammar-tracks";
+import { grammarUnitRecord, isGrammarUnitUnlocked } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
-export const Route = createFileRoute("/game/article/")({ component: ArticleMapPage });
+export const Route = createFileRoute("/game/lessons/$track/")({ component: GrammarTrackMapPage });
 
-function ArticleMapPage() {
+function GrammarTrackMapPage() {
+  const { track: raw } = Route.useParams();
+  const track = grammarTrack(raw);
   const game = useStudy((s) => s.game);
+
+  if (!track) return <Navigate to="/game/lessons" />;
 
   return (
     <>
       <Panel className="mb-4">
         <GameMenu />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Article & vav</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Name the prefix</h1>
-        <p className="mt-3 max-w-prose text-muted">
-          Chapter 5 game: the article הַ and the conjunction וְ. Six units — learn the spelling with Tanakh words and
-          verses, pair each form, then a 12-question quiz. Misses come back later. Later units mix a few from the ones
-          you already cleared. Score 90% held to open the next unit. Week 3 of the course reads this together with
-          chapter 4 (nouns). The games stay chapter by chapter.
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          Chapter {track.chapter} · {track.short}
         </p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">{track.title}</h1>
+        <p className="mt-3 max-w-prose text-muted">{track.blurb}</p>
         <p className="mt-2 text-sm">
-          <Link to="/game/nouns" className="font-semibold text-primary">
-            Nouns · chapter 4
-          </Link>
-          <span className="text-muted"> · then this path · then </span>
           <Link to="/game/lessons" className="font-semibold text-primary">
-            chapters 6–11
+            All grammar paths
           </Link>
-          <span className="text-muted">.</span>
+          <span className="text-muted"> · 90% held unlocks the next unit.</span>
         </p>
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
-        {ARTICLE_UNITS.map((u) => {
-          const rec = articleUnitRecord(game, u.id);
-          const unlocked = isArticleUnitUnlocked(game, u.id);
+        {track.units.map((u) => {
+          const rec = grammarUnitRecord(game, track.id, u.id);
+          const unlocked = isGrammarUnitUnlocked(game, track.id, u.id);
           const current = unlocked && !rec.cleared;
           const inner = (
             <>
@@ -70,7 +67,7 @@ function ArticleMapPage() {
           return (
             <li key={u.id}>
               {unlocked ? (
-                <Link to="/game/article/$unit" params={{ unit: String(u.id) }} className={cls}>
+                <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(u.id) }} className={cls}>
                   {inner}
                 </Link>
               ) : (
