@@ -7,12 +7,13 @@ import {
   BALLOON_MAX_LIVES,
   BALLOON_OCEAN_Y,
   BALLOON_START_LIVES,
-  BALLOON_WAVE_COUNT,
-  BALLOON_WAVES,
   balloonWave,
+  balloonWaves,
+  bumpWeak,
   gainLife,
   spawnCall,
   spokenLetterName,
+  type BalloonPack,
   type BalloonSprite,
 } from "@/lib/balloon-game";
 import { speakLine } from "@/lib/listen";
@@ -22,6 +23,7 @@ import { useStudy } from "@/lib/store";
 type Phase = "ready" | "playing" | "wave" | "over" | "win";
 
 type World = {
+  pack: BalloonPack;
   wave: number;
   lives: number;
   score: number;
@@ -31,12 +33,21 @@ type World = {
   frozen: boolean;
   lastTarget?: string;
   splashAt: number | null;
-  popIds: string[];
+  weak: Record<string, number>;
+  intro: boolean;
+  blind: boolean;
+  duo: boolean;
 };
 
-function emptyWorld(wave = 1): World {
+function emptyWorld(opts: {
+  pack: BalloonPack;
+  blind: boolean;
+  duo: boolean;
+  weak: Record<string, number>;
+}): World {
   return {
-    wave,
+    pack: opts.pack,
+    wave: 1,
     lives: BALLOON_START_LIVES,
     score: 0,
     caught: 0,
@@ -44,7 +55,10 @@ function emptyWorld(wave = 1): World {
     balloons: [],
     frozen: false,
     splashAt: null,
-    popIds: [],
+    weak: { ...opts.weak },
+    intro: true,
+    blind: opts.blind || opts.duo,
+    duo: opts.duo,
   };
 }
 
@@ -54,13 +68,18 @@ export function BalloonDrop() {
   const [phase, setPhase] = useState<Phase>("ready");
   const [tick, setTick] = useState(0);
   const [heard, setHeard] = useState("");
-  const world = useRef<World>(emptyWorld());
+  const [pack, setPack] = useState<BalloonPack>("letters");
+  const [blind, setBlind] = useState(false);
+  const [duo, setDuo] = useState(false);
+  const world = useRef<World>(emptyWorld({ pack: "letters", blind: false, duo: false, weak: {} }));
   const voice = useRef({ stop: false });
   const saved = useRef(false);
   const last = useRef(0);
 
   const w = world.current;
-  const wave = balloonWave(w.wave) ?? BALLOON_WAVES[0];
+  const waves = balloonWaves(w.pack);
+  const wave = balloonWave(w.pack, w.wave) ?? waves[0];
+  const hideName = w.blind || w.duo;
 
   function bump() {
     setTick((n) => n + 1);
@@ -76,34 +95,57 @@ export function BalloonDrop() {
     }
   }
 
-  function callName(name: string) {
+  function callName(name: string, slow = false) {
     hush();
-    void speakLine(name, "en", 0.8, voice.current);
+    void speakLine(name, "en", slow ? 0.62 : 0.8, voice.current);
     setHeard(name);
   }
 
   function nextCall(avoidId?: string) {
-    const current = balloonWave(world.current.wave) ?? BALLOON_WAVES[0];
-    const next = spawnCall(current, w.combo, avoidId);
+    const w = world.current;
+    const current = balloonWave(w.pack, w.wave) ?? balloonWaves(w.pack)[0];
+    const intro = w.intro;
+    const next = spawnCall({
+      wave: current,
+      combo: w.combo,
+      avoidId,
+      weak: w.weak,
+      hint: intro,
+    });
     w.balloons = next;
     w.frozen = true;
     w.splashAt = null;
-    w.popIds = [];
     const target = next.find((b) => b.target);
-    if (target) callName(spokenLetterName(target.letter));
+    if (target) callName(spokenLetterName(target.item), intro);
     bump();
-    window.setTimeout(() => {
-      w.frozen = false;
-    }, 420);
+    window.setTimeout(
+      () => {
+        if (intro) {
+          for (const b of w.balloons) b.hint = false;
+          w.intro = false;
+        }
+        w.frozen = false;
+        bump();
+      },
+      intro ? 1600 : 420,
+    );
   }
 
   function persist(cleared: boolean) {
+    const w = world.current;
     if (saved.current) return;
     saved.current = true;
-    complete({ wave: w.wave, score: w.score, cleared });
+    complete({
+      wave: w.wave,
+      score: w.score,
+      cleared,
+      pack: w.pack,
+      weak: w.weak,
+    });
   }
 
   function dieOrContinue() {
+    const w = world.current;
     if (w.lives <= 0) {
       hush();
       persist(false);
@@ -115,18 +157,20 @@ export function BalloonDrop() {
   }
 
   function catchTarget(b: BalloonSprite) {
+    const w = world.current;
     playPop();
     w.score += 1;
     w.caught += 1;
     w.combo += 1;
-    w.lastTarget = b.letter.id;
-    w.popIds = [b.id];
+    w.lastTarget = b.item.id;
+    w.weak = bumpWeak(w.weak, b.item.id, -1);
     w.balloons = w.balloons.filter((x) => x.id !== b.id);
     bump();
-    if (w.caught >= wave.catches) {
+    const need = (balloonWave(w.pack, w.wave) ?? wave).catches;
+    if (w.caught >= need) {
       hush();
       w.lives = gainLife(w.lives);
-      if (w.wave >= BALLOON_WAVE_COUNT) {
+      if (w.wave >= balloonWaves(w.pack).length) {
         persist(true);
         setPhase("win");
       } else {
@@ -135,10 +179,11 @@ export function BalloonDrop() {
       bump();
       return;
     }
-    window.setTimeout(() => nextCall(b.letter.id), 180);
+    window.setTimeout(() => nextCall(b.item.id), 180);
   }
 
   function missSplash() {
+    const w = world.current;
     if (w.frozen) return;
     w.frozen = true;
     playSplash();
@@ -146,13 +191,15 @@ export function BalloonDrop() {
     w.combo = 0;
     w.splashAt = Date.now();
     const target = w.balloons.find((b) => b.target);
-    w.lastTarget = target?.letter.id;
+    w.lastTarget = target?.item.id;
+    if (target) w.weak = bumpWeak(w.weak, target.item.id, 2);
     w.balloons = [];
     bump();
     window.setTimeout(() => dieOrContinue(), 520);
   }
 
   function tapBalloon(b: BalloonSprite) {
+    const w = world.current;
     if (phase !== "playing" || w.frozen) return;
     if (b.target) {
       catchTarget(b);
@@ -161,6 +208,9 @@ export function BalloonDrop() {
     playSplash();
     w.lives -= 1;
     w.combo = 0;
+    const target = w.balloons.find((x) => x.target);
+    w.weak = bumpWeak(w.weak, b.item.id, 1);
+    if (target) w.weak = bumpWeak(w.weak, target.item.id, 2);
     w.balloons = w.balloons.filter((x) => x.id !== b.id);
     bump();
     if (w.lives <= 0) {
@@ -174,16 +224,23 @@ export function BalloonDrop() {
     unlockSfx();
     hush();
     saved.current = false;
-    world.current = emptyWorld(1);
+    world.current = emptyWorld({
+      pack,
+      blind: duo ? true : blind,
+      duo,
+      weak: best.weak ?? {},
+    });
     setHeard("");
     setPhase("playing");
     nextCall();
   }
 
   function startNextWave() {
+    const w = world.current;
     w.wave += 1;
     w.caught = 0;
     w.combo = 0;
+    w.intro = true;
     setPhase("playing");
     nextCall();
   }
@@ -193,6 +250,7 @@ export function BalloonDrop() {
     last.current = performance.now();
     let raf = 0;
     const loop = (now: number) => {
+      const w = world.current;
       const raw = (now - last.current) / 1000;
       last.current = now;
       const dt = Math.min(raw, 0.1);
@@ -205,9 +263,7 @@ export function BalloonDrop() {
         }
         w.balloons = w.balloons.filter((b) => b.target || b.y < BALLOON_OCEAN_Y + 8);
         bump();
-        if (splash) {
-          missSplash();
-        }
+        if (splash) missSplash();
       }
       raf = requestAnimationFrame(loop);
     };
@@ -219,20 +275,62 @@ export function BalloonDrop() {
   useEffect(() => () => hush(), []);
 
   if (phase === "ready") {
+    const letterBest = best.bestScore;
+    const vowelBest = best.vowelBest;
     return (
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Ocean letters</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Catch the name</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Balloons drop toward the water. A voice calls a letter. Tap that Hebrew letter before it splashes. You start
-          with three lives. Clear a wave — gain a life, up to six. Look-alikes show up later so you have to look twice.
+          Balloons drop toward the water. A voice calls the name. Tap that glyph before it splashes. Three lives; clear
+          a wave and gain one, up to six. The first call of each wave is slow and highlighted — then the real drop.
         </p>
-        {best.bestScore ? (
-          <p className="mt-2 text-sm text-muted">
-            Best {best.bestScore} catches · wave {best.bestWave}
-            {best.cleared ? " · all five waves" : ""}
+
+        <fieldset className="mt-4">
+          <legend className="text-sm font-semibold text-ink">What to catch</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice on={pack === "letters"} onClick={() => setPack("letters")} label="Letters" hint="Alef to Tav" />
+            <Choice on={pack === "vowels"} onClick={() => setPack("vowels")} label="Vowels" hint="Qamets vs Pathach" />
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-4">
+          <legend className="text-sm font-semibold text-ink">Who plays</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice on={!duo} onClick={() => setDuo(false)} label="Solo" hint="You hear and tap" />
+            <Choice on={duo} onClick={() => setDuo(true)} label="Two players" hint="One hears, one taps" />
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-4">
+          <legend className="text-sm font-semibold text-ink">The name on screen</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice
+              on={!blind && !duo}
+              onClick={() => {
+                setBlind(false);
+                setDuo(false);
+              }}
+              label="Show it"
+              hint="Help if the voice is quiet"
+            />
+            <Choice
+              on={blind || duo}
+              onClick={() => setBlind(true)}
+              label="Listen only"
+              hint={duo ? "Two-player hides the name" : "Blind round — ear only"}
+            />
+          </div>
+        </fieldset>
+
+        {(letterBest || vowelBest) ? (
+          <p className="mt-3 text-sm text-muted">
+            {letterBest ? `Letters best ${letterBest}${best.cleared ? " · five waves" : ""}` : null}
+            {letterBest && vowelBest ? " · " : null}
+            {vowelBest ? `Vowels best ${vowelBest}${best.vowelCleared ? " · five waves" : ""}` : null}
           </p>
         ) : null}
+
         <Button className="mt-4 w-full" size="lg" onClick={startRun}>
           Hear and catch
         </Button>
@@ -241,7 +339,7 @@ export function BalloonDrop() {
   }
 
   if (phase === "wave") {
-    const next = balloonWave(w.wave + 1);
+    const next = balloonWave(w.pack, w.wave + 1);
     return (
       <Panel className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Wave {w.wave} clear</p>
@@ -263,10 +361,11 @@ export function BalloonDrop() {
           {phase === "win" ? "Five waves" : "Splashed"}
         </p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">
-          {phase === "win" ? "The letters held" : `${w.score} catches`}
+          {phase === "win" ? (w.pack === "vowels" ? "The vowels held" : "The letters held") : `${w.score} catches`}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Wave {w.wave} · {wave.title}. The voice said the name; the glyph had to match.
+          {w.pack === "vowels" ? "Vowels" : "Letters"} · wave {w.wave} · {wave.title}. Missed marks will come back next
+          run.
         </p>
         <Button className="mt-4 w-full" size="lg" onClick={startRun}>
           Play again
@@ -281,7 +380,7 @@ export function BalloonDrop() {
     <div className="overflow-hidden rounded-[var(--radius-lg)] bg-sky shadow-[var(--shadow-border)]">
       <div className="flex items-center justify-between gap-2 px-3 py-2 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-          Wave {w.wave} · {w.caught}/{wave.catches}
+          {w.pack === "vowels" ? "Vowels" : "Letters"} · wave {w.wave} · {w.caught}/{wave.catches}
         </p>
         <div className="flex items-center gap-1" aria-label={`${w.lives} lives`}>
           {Array.from({ length: BALLOON_MAX_LIVES }, (_, i) => (
@@ -294,29 +393,28 @@ export function BalloonDrop() {
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 px-3 pb-2">
-        <p className="text-sm font-semibold text-ink">{heard ? `“${heard}”` : "Listen…"}</p>
+        <p className="text-sm font-semibold text-ink">
+          {w.duo ? "Caller hears · catcher taps" : hideName ? "Listen…" : heard ? `“${heard}”` : "Listen…"}
+        </p>
         <button
           type="button"
           className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           onClick={() => {
             const t = w.balloons.find((b) => b.target);
-            if (t) callName(spokenLetterName(t.letter));
+            if (t) callName(spokenLetterName(t.item), w.intro);
           }}
         >
           <Volume2 className="size-4" />
           Hear again
         </button>
       </div>
-      <div
-        className="ocean-play relative w-full touch-none select-none"
-        onContextMenu={(e) => e.preventDefault()}
-      >
+      <div className="ocean-play relative w-full touch-none select-none" onContextMenu={(e) => e.preventDefault()}>
         {w.balloons.map((b) => (
           <button
             key={b.id}
             type="button"
-            aria-label={b.letter.name}
-            className={cn("letter-balloon", `balloon-skin-${b.hue % 4}`)}
+            aria-label={hideName ? "balloon" : b.item.name}
+            className={cn("letter-balloon", `balloon-skin-${b.hue % 4}`, b.hint && "balloon-hint")}
             style={{
               left: `${b.x}%`,
               top: `${b.y}%`,
@@ -327,18 +425,50 @@ export function BalloonDrop() {
               tapBalloon(b);
             }}
           >
-            <span className="he-word text-3xl" dir="rtl" lang="he">
-              {b.letter.letter}
+            <span className={cn("he-word", b.item.kind === "vowel" ? "text-2xl" : "text-3xl")} dir="rtl" lang="he">
+              {b.item.glyph}
             </span>
           </button>
         ))}
         <div className="ocean-water" aria-hidden />
         {w.splashAt ? <div className="ocean-splash" /> : null}
+        {w.intro && w.frozen ? (
+          <p className="pointer-events-none absolute inset-x-0 top-2 text-center text-xs font-semibold text-ink">
+            This is the one — then it drops
+          </p>
+        ) : null}
       </div>
       <p className="px-3 py-2 text-center text-xs text-muted">
         {wave.title}
         {w.combo >= 4 ? " · streak: slower fall" : ""}
+        {Object.keys(w.weak).length ? " · weak marks in the sky" : ""}
       </p>
     </div>
+  );
+}
+
+function Choice({
+  on,
+  onClick,
+  label,
+  hint,
+}: {
+  on: boolean;
+  onClick: () => void;
+  label: string;
+  hint: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-[var(--radius-md)] px-3 py-3 text-left shadow-[var(--shadow-border)]",
+        on ? "bg-ink text-parchment" : "bg-card text-ink",
+      )}
+    >
+      <span className="block font-semibold">{label}</span>
+      <span className={cn("block text-xs", on ? "text-parchment/70" : "text-muted")}>{hint}</span>
+    </button>
   );
 }

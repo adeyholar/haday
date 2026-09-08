@@ -70,10 +70,12 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Ocean letters</h2>
         <p className="mt-2 text-sm text-muted">
-          A fun ear-and-eye drill. Balloons fall toward the water. A voice calls the letter (Alef, Bet, Gimel…). Tap
-          that Hebrew letter before it splashes. Three lives to start; clear a wave and you gain a life (up to six).
-          Later waves put look-alikes in the sky (ב/כ, ד/ר, ה/ח, שׁ/שׂ) and then the five final forms. Hear again if the
-          name did not land. This does not replace Aleph-bet mastery — it trains the sound-to-glyph link.
+          A fun ear-and-eye drill. Balloons fall toward the water. A voice calls the name. Tap that glyph before it
+          splashes. Three lives; clear a wave and gain a life (up to six). Pick <strong>Letters</strong> or{" "}
+          <strong>Vowels</strong> (Qamets vs Pathach). <strong>Listen only</strong> hides the name so the ear has to
+          work. <strong>Two players</strong>: one hears, one taps — the name stays off the screen. The first call of
+          each wave is slow and highlighted, then the real drop. Missed letters and vowels come back more often (weak
+          sky). Hear again if the name did not land. This does not replace Aleph-bet mastery.
         </p>
       </Panel>
 

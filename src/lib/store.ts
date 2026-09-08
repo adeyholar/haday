@@ -71,7 +71,13 @@ type StudyState = StudySnapshot & {
     level: number,
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
-  completeBalloonRun: (result: { wave: number; score: number; cleared: boolean }) => void;
+  completeBalloonRun: (result: {
+    wave: number;
+    score: number;
+    cleared: boolean;
+    pack: "letters" | "vowels";
+    weak: Record<string, number>;
+  }) => void;
   completeSyllableUnit: (
     unit: number,
     result: { stars: number; score: number; firstTryRate: number },

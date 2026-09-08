@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-08
 
-- **Ocean letters.** Balloons drop toward the water; a voice calls the letter name; tap the matching glyph before it splashes. Three lives, +1 life per wave (cap 6). Five waves: first line, middle, last, look-alikes, then finals. Streak of four slows the fall. Hear again if the name is missed.
+- **Ocean letters.** Balloons drop toward the water; a voice calls the letter name; tap the matching glyph before it splashes. Three lives, +1 life per wave (cap 6). Five waves: first line, middle, last, look-alikes, then finals. Streak of four slows the fall. Hear again if the name is missed. Letters or vowels, listen-only (blind), two-player (one hears / one taps), weak marks return, and the first call of each wave is slow and highlighted.
 
 - **Grammar mix, vocab mix stay apart.** Custom mix has two tabs: Vocabulary (BBH lemmas only) and Grammar (topics only). Grammar mix plays open units from the topics you tick. Neither mix unlocks the path.
 

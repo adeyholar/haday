@@ -66,6 +66,9 @@ export type BalloonProgress = {
   bestScore: number;
   cleared: boolean;
   attempts: number;
+  weak: Record<string, number>;
+  vowelBest: number;
+  vowelCleared: boolean;
 };
 
 export type AlefBetProgress = {
@@ -144,7 +147,7 @@ export function defaultGame(): GameSnapshot {
 }
 
 export function emptyBalloons(): BalloonProgress {
-  return { bestWave: 0, bestScore: 0, cleared: false, attempts: 0 };
+  return { bestWave: 0, bestScore: 0, cleared: false, attempts: 0, weak: {}, vowelBest: 0, vowelCleared: false };
 }
 
 export function emptyAlefBet(): AlefBetProgress {
@@ -229,7 +232,20 @@ function hydrateBalloons(raw: unknown): BalloonProgress {
     bestScore: Math.max(0, Number(r.bestScore) || 0),
     cleared: Boolean(r.cleared),
     attempts: Math.max(0, Number(r.attempts) || 0),
+    weak: hydrateWeak(r.weak),
+    vowelBest: Math.max(0, Number(r.vowelBest) || 0),
+    vowelCleared: Boolean(r.vowelCleared),
   };
+}
+
+function hydrateWeak(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    const n = Math.max(0, Math.min(12, Number(v) || 0));
+    if (n) out[k] = n;
+  }
+  return out;
 }
 
 function hydrateAlefBet(raw: unknown): AlefBetProgress {
@@ -555,15 +571,25 @@ export function applyAlefBetResult(
 
 export function applyBalloonResult(
   game: GameSnapshot,
-  result: { wave: number; score: number; cleared: boolean },
+  result: {
+    wave: number;
+    score: number;
+    cleared: boolean;
+    pack?: "letters" | "vowels";
+    weak?: Record<string, number>;
+  },
 ): GameSnapshot {
   const next = cloneGame(hydrateGame(game));
   const prev = next.balloons ?? emptyBalloons();
+  const pack = result.pack === "vowels" ? "vowels" : "letters";
   next.balloons = {
-    bestWave: Math.max(prev.bestWave, Math.max(0, result.wave)),
-    bestScore: Math.max(prev.bestScore, Math.max(0, result.score)),
-    cleared: prev.cleared || result.cleared,
+    bestWave: pack === "letters" ? Math.max(prev.bestWave, Math.max(0, result.wave)) : prev.bestWave,
+    bestScore: pack === "letters" ? Math.max(prev.bestScore, Math.max(0, result.score)) : prev.bestScore,
+    cleared: prev.cleared || (pack === "letters" && result.cleared),
     attempts: (prev.attempts || 0) + 1,
+    weak: hydrateWeak(result.weak ?? prev.weak),
+    vowelBest: pack === "vowels" ? Math.max(prev.vowelBest, Math.max(0, result.score)) : prev.vowelBest,
+    vowelCleared: prev.vowelCleared || (pack === "vowels" && result.cleared),
   };
   next.lastPlayDay = Date.now();
   return next;

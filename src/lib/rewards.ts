@@ -147,8 +147,8 @@ export function evaluateBadges(game: GameSnapshot, dailyStreak: number, keepStre
     );
     if (allTracks) out.push("lessons-master");
   }
-  if ((game.balloons?.bestScore ?? 0) >= 1) out.push("balloons-open");
-  if (game.balloons?.cleared) out.push("balloons-clear");
+  if ((game.balloons?.bestScore ?? 0) >= 1 || (game.balloons?.vowelBest ?? 0) >= 1) out.push("balloons-open");
+  if (game.balloons?.cleared || game.balloons?.vowelCleared) out.push("balloons-clear");
   return out;
 }
 
