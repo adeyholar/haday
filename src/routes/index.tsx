@@ -71,7 +71,7 @@ function Home() {
         >
           <Compass className="size-6" />
           <p className="mt-3 font-display text-3xl font-bold">Game mode</p>
-          <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, Aleph-bet, Syllables, Nouns, Article & vav, then each grammar chapter on its own (Ch. 6 Prepositions through Ch. 11 Numbers), or Ultimate. Pick from the Game menu.</p>
+          <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, Aleph-bet, Syllables, Nouns, Article & vav, then grammar topics (Prepositions through Numbers), or Ultimate. Pick from the Game menu.</p>
         </Link>
         <a
           href="#study-mode"

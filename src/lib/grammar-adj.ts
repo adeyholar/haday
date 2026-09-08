@@ -9,7 +9,7 @@ export const ADJ_UNITS: GrammarUnit[] = [
     rule:
       "An adjective inflects for gender and number with the same endings you already know on nouns: טוֹב, טוֹבָה, טוֹבִים, טוֹבוֹת. It agrees with the noun it talks about. Masculine singular is endingless — that is the citation form in the lexicon and in class vocab.",
     teach:
-      "Write the four clothes every time: טוֹב טוֹבָה טוֹבִים טוֹבוֹת. Citation is the endingless ms. Class for this chapter: טוֹב, גָּדוֹל, קָדוֹשׁ, רַע, חָכָם, קָטֹן.",
+      "Write the four clothes every time: טוֹב טוֹבָה טוֹבִים טוֹבוֹת. Citation is the endingless ms. Class for this topic: טוֹב, גָּדוֹל, קָדוֹשׁ, רַע, חָכָם, קָטֹן.",
     samples: [
       { word: "טוֹב", gloss: "good (ms)", tag: "ms", note: "Citation form. Class vocab.", ref: "Gen 1:4" },
       { word: "טוֹבָה", gloss: "good (fs)", tag: "fs", note: "ָה like a feminine noun.", ref: "Gen 1:31" },
@@ -29,7 +29,7 @@ export const ADJ_UNITS: GrammarUnit[] = [
       { q: "An adjective agrees with its noun in…", choices: ["Gender and number", "Person only", "Tense"], answer: "Gender and number", why: "סוּס טוֹב, מַלְכָּה טוֹבָה." },
       { q: "טוֹב in Gen 1:4 is…", he: "טוֹב", ref: "Gen 1:4", choices: ["Masculine singular — “good”", "Feminine plural", "A preposition"], answer: "Masculine singular — “good”", why: "The light was good." },
       { q: "צַדִּיקִים in Ps 1:6 is…", he: "צַדִּיקִים", ref: "Ps 1:6", choices: ["Masculine plural of צַדִּיק", "Feminine singular", "A verb"], answer: "Masculine plural of צַדִּיק", why: "The righteous. Class lemma." },
-      { q: "קָדוֹשׁ is class vocab for…", he: "קָדוֹשׁ", choices: ["Holy, set apart", "Evil", "Small"], answer: "Holy, set apart", why: "Chapter 7." },
+      { q: "קָדוֹשׁ is class vocab for…", he: "קָדוֹשׁ", choices: ["Holy, set apart", "Evil", "Small"], answer: "Holy, set apart", why: "Class vocab." },
       { q: "גָּדוֹל is…", he: "גָּדוֹל", choices: ["Great, big, large", "Near", "Few"], answer: "Great, big, large", why: "Class." },
       { q: "רַע is…", he: "רַע", choices: ["Bad, evil, wicked", "Holy", "Wise"], answer: "Bad, evil, wicked", why: "Opposite of טוֹב in many verses." },
       { q: "חָכָם is…", he: "חָכָם", choices: ["Wise, skillful", "Wicked", "Far"], answer: "Wise, skillful", why: "Class." },
@@ -113,7 +113,7 @@ export const ADJ_UNITS: GrammarUnit[] = [
     rule:
       "Hebrew often lets an adjective stand as a noun: צַדִּיק “a righteous one,” רְשָׁעִים “the wicked.” Endings still tell gender and number. מְאֹד “very” does not inflect — it just intensifies. Comparative ideas often use מִן (last chapter): טוֹב … מִן “better than.”",
     teach:
-      "If there is no noun, the adjective may be the person: the righteous, the wise. מְאֹד never takes endings. Comparative still uses מִן from chapter 6.",
+      "If there is no noun, the adjective may be the person: the righteous, the wise. מְאֹד never takes endings. Comparative still uses מִן from the prepositions topic.",
     samples: [
       { word: "צַדִּיק", gloss: "righteous (one)", tag: "substantive", note: "Person or quality from the verse.", ref: "Ps 1:6" },
       { word: "רָשָׁע", gloss: "wicked (one)", tag: "substantive", note: "Class vocab.", ref: "Ps 1:1" },
@@ -131,10 +131,10 @@ export const ADJ_UNITS: GrammarUnit[] = [
       { q: "צַדִּיקִים in Ps 1:6 names…", he: "צַדִּיקִים", ref: "Ps 1:6", choices: ["People — the righteous ones", "A feminine singular quality only", "A preposition"], answer: "People — the righteous ones", why: "Way of the righteous." },
       { q: "מְאֹד in Gen 1:31…", he: "מְאֹד", ref: "Gen 1:31", choices: ["Very — does not take gender endings", "Feminine of טוֹב", "The article"], answer: "Very — does not take gender endings", why: "טוֹב מְאֹד. Class particle." },
       { q: "זָקֵן can be…", he: "זָקֵן", choices: ["The adjective “old” or the noun “elder”", "Only a verb “to be old”", "A dual of זֶה"], answer: "The adjective “old” or the noun “elder”", why: "Class vocab lists both." },
-      { q: "Better than gold uses…", choices: ["מִן after the adjective", "Always מְאֹד", "The object marker"], answer: "מִן after the adjective", why: "Chapter 6 comparative still works here." },
+      { q: "Better than gold uses…", choices: ["מִן after the adjective", "Always מְאֹד", "The object marker"], answer: "מִן after the adjective", why: "The comparative מִן still works here." },
       { q: "חָכָם as a subject means…", he: "חָכָם", choices: ["A wise person", "Wisdom as a fs noun חָכְמָה", "The verb “hear”"], answer: "A wise person", why: "Let the wise hear." },
       { q: "רַבִּים can mean…", he: "רַבִּים", choices: ["Many (people) — mp of רַב", "Only “great king”", "A name"], answer: "Many (people) — mp of רַב", why: "Substantive or attributive from the verse." },
-      { q: "קָרוֹב and רָחוֹק are class opposites…", choices: ["Near / far", "Good / evil", "Holy / wicked"], answer: "Near / far", why: "Chapter 7 pair." },
+      { q: "קָרוֹב and רָחוֹק are class opposites…", choices: ["Near / far", "Good / evil", "Holy / wicked"], answer: "Near / far", why: "Class pair." },
       { q: "יָשָׁר means…", he: "יָשָׁר", choices: ["Upright, just", "Strange", "Little"], answer: "Upright, just", why: "Class." },
       { q: "זָר means…", he: "זָר", choices: ["Foreign, strange", "Living", "Old"], answer: "Foreign, strange", why: "Class." },
       { q: "חַי means…", he: "חַי", choices: ["Living, alive", "Evil", "Small"], answer: "Living, alive", why: "Class. Living God." },

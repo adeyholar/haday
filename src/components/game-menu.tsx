@@ -1,6 +1,6 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
-import { grammarChapterLabel } from "@/lib/grammar";
+import { grammarTopicLabel } from "@/lib/grammar";
 import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 
 const BASE = [
@@ -15,7 +15,7 @@ const BASE = [
 const GRAMMAR = GRAMMAR_TRACKS.map((t) => ({
   value: `/game/lessons/${t.id}`,
   match: (p: string) => p === `/game/lessons/${t.id}` || p.startsWith(`/game/lessons/${t.id}/`),
-  label: grammarChapterLabel(t),
+  label: grammarTopicLabel(t),
   track: t.id,
 }));
 

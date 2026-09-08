@@ -10,15 +10,19 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+## 2026-09-08
+
+- **Grammar topics, not textbook chapters.** Game lists Prepositions, Adjectives, Pronouns, Existence & nouns, Construct nouns, and Numbers by topic name only. No “Ch. 6–11” labels, so the paths do not look like a reprint of the class book.
+
 ## 2026-09-07
 
-- **Grammar chapters stand alone.** Game lists Ch. 6 Prepositions, Ch. 7 Adjectives, Ch. 8 Pronouns, Ch. 9 Existence & nouns, Ch. 10 Construct nouns, and Ch. 11 Numbers as separate paths — each with its own title, intro, and units. No more one “Ch. 6–11 grammar” bundle.
+- **Grammar topics stand alone.** Game lists Prepositions through Numbers as separate paths — each with its own title, intro, and units.
 
 - **Closer quiz traps.** Recognize and Study quiz now mix look-alikes and same-family glosses (man/woman, sea/water/heaven). Grammar games drop giveaways like “A verb” / “Heaven” for a wrong reading of the same form — compensatory vs regular article, dual vs plural — so the right pick needs a second look.
 
 - **Hebrew letters in explanations.** Learn notes, Rules, and grammar quizzes now name letters with the glyph (ה, א, ש), not English “He / Alef / Shin,” so “He” is never confused with the English pronoun.
 
-- **Ch. 6–11 grammar games.** Six independent chapter paths (see “Grammar chapters stand alone” above): original notes, Masoretic verses, class vocab marked. Learn → pair → 12-question quiz. 90% held opens the next unit.
+- **Grammar topic games.** Six independent paths (see “Grammar topics stand alone” above): original notes, Masoretic verses, class vocab marked. Learn → pair → 12-question quiz. 90% held opens the next unit.
 
 - **Learn · class vocab in the verse.** In the Tanakh cards name the BBH lemma, list other class words in that verse, and add the sample-word verses so the same vocabulary keeps coming back.
 

@@ -18,13 +18,13 @@ function lessonBrief(): string {
   const nouns = NOUN_UNITS.map((u) => `${u.id}. ${u.title}`).join("; ");
   const article = ARTICLE_UNITS.map((u) => `${u.id}. ${u.title}`).join("; ");
   const grammar = GRAMMAR_TRACKS.map(
-    (t) => `Ch ${t.chapter} ${t.title}: ${t.units.map((u) => `${u.id}. ${u.title}`).join("; ")}`,
+    (t) => `${t.title}: ${t.units.map((u) => `${u.id}. ${u.title}`).join("; ")}`,
   ).join(" | ");
   return `BBH chapter titles: ${vocab}.
 Syllable units: ${syl}.
 Noun units: ${nouns}.
 Article and vav units: ${article}.
-Grammar chapters (each is its own path): ${grammar}.
+Grammar topics (original notes, Tanakh examples — not textbook chapters): ${grammar}.
 Vocab chapter names: ${Object.entries(GAME_CHAPTER_TITLES)
     .map(([n, t]) => `${n}=${t}`)
     .join(", ")}.

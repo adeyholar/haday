@@ -32,7 +32,7 @@ export type GrammarTrack = {
   title: string;
   short: string;
   blurb: string;
-  /** Longer chapter teaching. Shown on the chapter map so 6–11 are not one blob. */
+  /** Longer teaching for this topic map. Original notes — not a textbook chapter. */
   intro: string;
   kind: LearnKind;
   matchPrompt: string;
@@ -65,8 +65,8 @@ export function grammarQuizId(q: GrammarQuiz): string {
   return `${q.q}|${q.answer}`;
 }
 
-export function grammarChapterLabel(track: Pick<GrammarTrack, "chapter" | "title">): string {
-  return `Ch. ${track.chapter} ${track.title}`;
+export function grammarTopicLabel(track: Pick<GrammarTrack, "title">): string {
+  return track.title;
 }
 
 export function grammarNeighborId(id: GrammarTrackId, dir: -1 | 1): GrammarTrackId | undefined {

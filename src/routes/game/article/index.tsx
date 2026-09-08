@@ -19,18 +19,17 @@ function ArticleMapPage() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Article & vav</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Name the prefix</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Chapter 5 game: the article הַ and the conjunction וְ. Six units — learn the spelling with Tanakh words and
-          verses, pair each form, then a 12-question quiz. Misses come back later. Later units mix a few from the ones
-          you already cleared. Score 90% held to open the next unit. Week 3 of the course reads this together with
-          chapter 4 (nouns). The games stay chapter by chapter.
+          The article הַ and the conjunction וְ. Six units — learn the spelling with Tanakh words and verses, pair each
+          form, then a 12-question quiz. Misses come back later. Later units mix a few from the ones you already
+          cleared. Score 90% held to open the next unit. Original notes, not a textbook reprint.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/game/nouns" className="font-semibold text-primary">
-            Nouns · chapter 4
+            Nouns
           </Link>
           <span className="text-muted"> · then this path · then </span>
           <Link to="/game/lessons/$track" params={{ track: "prep" }} className="font-semibold text-primary">
-            Ch. 6 Prepositions
+            Prepositions
           </Link>
           <span className="text-muted">.</span>
         </p>

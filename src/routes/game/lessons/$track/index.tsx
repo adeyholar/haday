@@ -3,7 +3,7 @@ import { Check, Lock } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { grammarChapterLabel, grammarNeighborId } from "@/lib/grammar";
+import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
 import { grammarUnitRecord, isGrammarUnitUnlocked } from "@/lib/game";
 import { useStudy } from "@/lib/store";
@@ -54,7 +54,7 @@ function GrammarTrackMapPage() {
       <Panel className="mb-4">
         <GameMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Chapter {track.chapter}
+          Grammar topic
         </p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">{track.title}</h1>
         <p className="mt-1 text-sm font-semibold text-primary">{track.short}</p>
@@ -66,8 +66,8 @@ function GrammarTrackMapPage() {
           ))}
         </div>
         <p className="mt-3 text-sm text-muted">
-          Four units in this chapter: learn with real verses, pair the forms, then a 12-question quiz. 90% held
-          unlocks the next unit. Games stay chapter by chapter.
+          Four units: learn with real verses, pair the forms, then a 12-question quiz. 90% held unlocks the next
+          unit. Original notes and Masoretic examples — not a textbook reprint.
         </p>
         <p className="mt-2 text-sm">
           {prev ? (
@@ -76,11 +76,11 @@ function GrammarTrackMapPage() {
               params={{ track: prev.id }}
               className="font-semibold text-primary"
             >
-              {grammarChapterLabel(prev)}
+              {grammarTopicLabel(prev)}
             </Link>
           ) : (
             <Link to="/game/article" className="font-semibold text-primary">
-              Article & vav · chapter 5
+              Article & vav
             </Link>
           )}
           {next ? (
@@ -91,11 +91,11 @@ function GrammarTrackMapPage() {
                 params={{ track: next.id }}
                 className="font-semibold text-primary"
               >
-                {grammarChapterLabel(next)}
+                {grammarTopicLabel(next)}
               </Link>
             </>
           ) : (
-            <span className="text-muted"> · last grammar chapter.</span>
+            <span className="text-muted"> · last grammar topic.</span>
           )}
         </p>
       </Panel>

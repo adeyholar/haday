@@ -23,7 +23,7 @@ test("six grammar tracks, four units, Tanakh verses, class vocab ids", () => {
   );
   for (const t of GRAMMAR_TRACKS) {
     assert.ok(t.intro.length > 200, `${t.id} intro`);
-    assert.match(t.intro, new RegExp(`chapter ${t.chapter}`, "i"));
+    assert.doesNotMatch(t.intro, /BBH chapter|Ch\.\s*\d|Chapter\s*\d/i, `${t.id} intro must not look like a textbook chapter`);
     assert.ok(isGrammarTrackId(t.id), t.id);
     assert.equal(t.units.length, 4, `${t.id} units`);
     for (const u of t.units) {
@@ -31,7 +31,7 @@ test("six grammar tracks, four units, Tanakh verses, class vocab ids", () => {
       assert.ok(u.samples.length >= 3, `${t.id} ${u.id} samples`);
       assert.ok(u.rule.length > 80, `${t.id} ${u.id} rule`);
       assert.ok(u.teach.length > 60, `${t.id} ${u.id} teach`);
-      assert.doesNotMatch(u.rule + u.teach, /Gesenius|Davidson/i);
+      assert.doesNotMatch(u.rule + u.teach, /Gesenius|Davidson|BBH chapter|Ch\.\s*\d/i);
       for (const v of u.verses) {
         assert.ok(v.he.includes(v.hit), `${t.id} ${u.id} ${v.ref} missing hit ${v.hit}`);
         if (v.vocabId) {
@@ -45,7 +45,7 @@ test("six grammar tracks, four units, Tanakh verses, class vocab ids", () => {
       for (const q of pool) {
         assert.ok(q.choices.includes(q.answer), `${t.id} ${u.id} ${q.q}`);
         assert.equal(new Set(q.choices).size, q.choices.length, `dup choices: ${q.q}`);
-        assert.doesNotMatch(q.q + q.why + q.answer, /Gesenius|Davidson/i);
+        assert.doesNotMatch(q.q + q.why + q.answer, /Gesenius|Davidson|BBH chapter/i);
       }
     }
   }

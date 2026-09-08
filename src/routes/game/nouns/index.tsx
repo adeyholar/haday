@@ -21,7 +21,7 @@ function NounMapPage() {
         <p className="mt-3 max-w-prose text-muted">
           Six units: learn the rule with Tanakh words and verses, pair each form to its ending, then a 12-question quiz.
           Misses come back later in the same round. Later units mix in a few from the ones you already cleared. Score 90%
-          held to open the next unit. Week 3 also reads chapter 5 — play{" "}
+          held to open the next unit. The article path is separate — play{" "}
           <Link to="/game/article" className="font-semibold text-primary">
             Article & vav
           </Link>{" "}

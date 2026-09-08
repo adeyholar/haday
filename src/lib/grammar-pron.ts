@@ -9,7 +9,7 @@ export const PRON_UNITS: GrammarUnit[] = [
     rule:
       "Independent pronouns stand as their own words: אֲנִי / אָנֹכִי “I,” אַתָּה “you” (ms), הוּא “he,” הִיא “she,” אֲנַחְנוּ “we,” אַתֶּם “you” (mp), הֵם “they.” They often add emphasis or complete a predicate: קָדוֹשׁ אֲנִי. Hebrew verbs already hide their subject, so a written pronoun is doing extra work — stress, contrast, or a verbless clause.",
     teach:
-      "A written pronoun is extra work — stress, contrast, or a verbless clause. Memorize אֲנִי / אָנֹכִי, אַתָּה, הוּא, הִיא, אֲנַחְנוּ, אַתֶּם, הֵם as this chapter’s set.",
+      "A written pronoun is extra work — stress, contrast, or a verbless clause. Memorize אֲנִי / אָנֹכִי, אַתָּה, הוּא, הִיא, אֲנַחְנוּ, אַתֶּם, הֵם as this topic’s set.",
     samples: [
       { word: "אֲנִי", gloss: "I", tag: "1cs", note: "Class. Shorter cousin of אָנֹכִי.", ref: "Lev 19:2" },
       { word: "אָנֹכִי", gloss: "I", tag: "1cs", note: "Heavier “I.” Exod 20:2.", ref: "Exod 20:2" },
@@ -68,8 +68,8 @@ export const PRON_UNITS: GrammarUnit[] = [
       { q: "Far “that” often uses…", choices: ["הוּא / הִיא / הֵם", "זֶה only", "אֲנִי"], answer: "הוּא / הִיא / הֵם", why: "Same pronouns, pointing job." },
       { q: "A demonstrative standing first can mean…", choices: ["This is… / these are…", "Always a verb", "The article"], answer: "This is… / these are…", why: "וְאֵלֶּה שְׁמוֹת." },
       { q: "Agreement: זֹאת goes with…", choices: ["A feminine singular noun", "Masculine plural only", "Dual only"], answer: "A feminine singular noun", why: "Same as adjectives." },
-      { q: "Class vocab “this” (ms) is…", choices: ["זֶה", "אֵלֶּה", "מָה"], answer: "זֶה", why: "Chapter 8." },
-      { q: "אַחֵר means…", he: "אַחֵר", choices: ["Other, another", "This", "Who"], answer: "Other, another", why: "Class adjective in this chapter’s list." },
+      { q: "Class vocab “this” (ms) is…", choices: ["זֶה", "אֵלֶּה", "מָה"], answer: "זֶה", why: "Class vocab." },
+      { q: "אַחֵר means…", he: "אַחֵר", choices: ["Other, another", "This", "Who"], answer: "Other, another", why: "Class adjective in this list." },
       { q: "Do not confuse זֶה with…", choices: ["שֶׁ the prefixed relative (next units)", "טוֹב", "מִן"], answer: "שֶׁ the prefixed relative (next units)", why: "Different lemmas." },
     ],
   },
@@ -103,7 +103,7 @@ export const PRON_UNITS: GrammarUnit[] = [
       { q: "Ps 24:8 מִי זֶה uses two chapter-8 words plus…", ref: "Ps 24:8", choices: ["מֶלֶךְ and כָּבוֹד from the noun list", "Only a number", "Only מִן"], answer: "מֶלֶךְ and כָּבוֹד from the noun list", why: "Maximum exposure in one line." },
       { q: "מֶה עָשִׂיתָ is…", he: "מֶה", ref: "Gen 4:10", choices: ["What have you done?", "Who have you done?", "Why a bush?"], answer: "What have you done?", why: "מָה/מֶה = what." },
       { q: "A הֲ question expects…", choices: ["Yes or no (or a shocked “am I…?”)", "A name only", "A number"], answer: "Yes or no (or a shocked “am I…?”)", why: "Am I my brother’s keeper?" },
-      { q: "Class vocab for “who” is…", choices: ["מִי", "מָה", "הֲ"], answer: "מִי", why: "Chapter 8." },
+      { q: "Class vocab for “who” is…", choices: ["מִי", "מָה", "הֲ"], answer: "מִי", why: "Class vocab." },
       { q: "Do not treat interrogative הֲ as…", choices: ["The definite article", "A question", "A particle"], answer: "The definite article", why: "Different lemma, different vowel." },
       { q: "מַדּוּעַ in Exod 3:3 asks…", he: "מַדּוּעַ", ref: "Exod 3:3", choices: ["Why the bush is not burned", "Who Moses is", "What gold is"], answer: "Why the bush is not burned", why: "Class “why.”" },
       { q: "Question words are class particles — look them up…", choices: ["As themselves, not stripped of a prefix they do not have", "Under the verb always", "As dual of מָה"], answer: "As themselves, not stripped of a prefix they do not have", why: "Citation = what you see, with spelling variants." },
@@ -140,7 +140,7 @@ export const PRON_UNITS: GrammarUnit[] = [
       { q: "Do not look up אֲשֶׁר under…", choices: ["אִישׁ or שַׁעַר", "אֲשֶׁר itself", "The particle list"], answer: "אִישׁ or שַׁעַר", why: "It is its own lemma." },
       { q: "כִּי־אִם in some verses is…", choices: ["A listed spelling variant of כִּי with a stronger “but / except”", "The dual of כִּי", "The article"], answer: "A listed spelling variant of כִּי with a stronger “but / except”", why: "Class hebrewAlts." },
       { q: "After you name אֲשֶׁר, next…", choices: ["Read the clause it introduces, then the class nouns in it", "Stop", "Always add “the”"], answer: "Read the clause it introduces, then the class nouns in it", why: "Glue, then vocabulary." },
-      { q: "Which is a relative?", choices: ["אֲשֶׁר", "טוֹב", "מִן"], answer: "אֲשֶׁר", why: "Chapter 8." },
+      { q: "Which is a relative?", choices: ["אֲשֶׁר", "טוֹב", "מִן"], answer: "אֲשֶׁר", why: "Class vocab." },
     ],
   },
 ];

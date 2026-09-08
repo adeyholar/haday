@@ -80,7 +80,7 @@ export const NUMBER_UNITS: GrammarUnit[] = [
     rule:
       "Eleven–nineteen are “one/two/… + ten”: אַחַד עָשָׂר. Twenty is עֶשְׂרִים (plural of ten). Thirty–ninety are the plural shapes you already met. A hundred is מֵאָה, two hundred מָאתַיִם (dual), a thousand אֶלֶף. “Twenty-one” is often “twenty and one.”",
     teach:
-      "Teens are digit + ten. Twenty is the plural of ten. Hundred מֵאָה, thousand אֶלֶף. “Ninety and nine” is how Hebrew stacks. Stay in this chapter — this is not construct ֵי.",
+      "Teens are digit + ten. Twenty is the plural of ten. Hundred מֵאָה, thousand אֶלֶף. “Ninety and nine” is how Hebrew stacks. Stay on this topic — this is not construct ֵי.",
     samples: [
       { word: "עֶשְׂרִים", gloss: "twenty", tag: "ten’s plural", note: "From עֶשֶׂר.", ref: "Gen 31:41" },
       { word: "מֵאָה", gloss: "hundred", tag: "cardinal", note: "Class. Dual מָאתַיִם.", ref: "Gen 6:15" },

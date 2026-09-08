@@ -9,7 +9,7 @@ export const PREP_UNITS: GrammarUnit[] = [
     rule:
       "A preposition names a relationship: place (on, under), time (after, until), or company (with). Many Hebrew prepositions stand alone, just as in English: עִם דָּוִד “with David.” Some almost always take a raised stroke, the maqqef: עַל־, אֶל־, עַד־, מִן־. The stroke is spelling, not extra meaning. The next word is the object of the preposition.",
     teach:
-      "On a living line, say the preposition out loud, then name its object. If you see ־, it is glue, not extra meaning. Keep אַחַר, עִם, תַּחַת, עַל, אֶל, עַד as class lemmas for this chapter.",
+      "On a living line, say the preposition out loud, then name its object. If you see ־, it is glue, not extra meaning. Keep אַחַר, עִם, תַּחַת, עַל, אֶל, עַד as class lemmas for this topic.",
     samples: [
       { word: "אַחַר", gloss: "after, behind", tag: "independent", note: "Stands alone. Class vocab.", ref: "Gen 15:1" },
       { word: "עִם", gloss: "with", tag: "independent", note: "Company. Do not mix with אֵת “with” until you see the verse.", ref: "Gen 39:2" },
@@ -63,7 +63,7 @@ export const PREP_UNITS: GrammarUnit[] = [
     ],
     quiz: [
       { q: "The three inseparable prepositions are…", choices: ["בְּ, כְּ, לְ", "עַל, אֶל, עַד", "מִן, עִם, אֵת"], answer: "בְּ, כְּ, לְ", why: "They prefix. They never walk alone." },
-      { q: "Citation בְּ means…", he: "בְּ", choices: ["In, at, with, by, against", "Like", "From"], answer: "In, at, with, by, against", why: "Class vocab, chapter 6." },
+      { q: "Citation בְּ means…", he: "בְּ", choices: ["In, at, with, by, against", "Like", "From"], answer: "In, at, with, by, against", why: "Class vocab." },
       { q: "Citation כְּ means…", he: "כְּ", choices: ["As, like, according to", "To, for", "Under"], answer: "As, like, according to", why: "Comparison." },
       { q: "Citation לְ means…", he: "לְ", choices: ["To, toward, for", "On", "After"], answer: "To, toward, for", why: "Not the same as אֶל, though both can gloss “to.”" },
       { q: "Before a ḥateph, inseparable preps…", choices: ["Take that ḥateph’s short vowel", "Always stay shewa", "Drop out"], answer: "Take that ḥateph’s short vowel", why: "Same pattern you learned on וְ." },
@@ -109,7 +109,7 @@ export const PREP_UNITS: GrammarUnit[] = [
       { q: "מֵהָאָרֶץ keeps ה because…", he: "מֵהָאָרֶץ", choices: ["מִן plus the article does not swallow the ה the way בְּ does", "There is no article", "It is a dual"], answer: "מִן plus the article does not swallow the ה the way בְּ does", why: "Different fusion rule than בַּ / לַ / כַּ." },
       { q: "Look up מֵאִישׁ as…", he: "מֵאִישׁ", choices: ["אִישׁ — strip מִן", "מֵאִישׁ as the lemma", "אִשָּׁה"], answer: "אִישׁ — strip מִן", why: "Citation is the noun." },
       { q: "Begadkephat after prefixed מִן often shows…", choices: ["Dagesh forte (the hidden נ) which also closes lene", "No dagesh ever", "Maqqef only"], answer: "Dagesh forte (the hidden נ) which also closes lene", why: "מִבַּיִת." },
-      { q: "Class vocab for “all, each, every” is…", he: "כֹּל", choices: ["כֹּל (construct כָּל־)", "כְּ", "קוֹל"], answer: "כֹּל (construct כָּל־)", why: "Chapter 6 lemma. Pairs with מִן in מִכֹּל." },
+      { q: "Class vocab for “all, each, every” is…", he: "כֹּל", choices: ["כֹּל (construct כָּל־)", "כְּ", "קוֹל"], answer: "כֹּל (construct כָּל־)", why: "Class lemma. Pairs with מִן in מִכֹּל." },
     ],
   },
   {
@@ -141,7 +141,7 @@ export const PREP_UNITS: GrammarUnit[] = [
       { q: "An indefinite object (a temple, a house) usually…", choices: ["Takes no object marker", "Must have אֵת", "Must have הַ"], answer: "Takes no object marker", why: "No “the,” no name, no suffix — no marker." },
       { q: "לִפְנֵי is built from…", he: "לִפְנֵי", choices: ["לְ + פָּנִים (face) in construct", "מִן + עַל", "The article"], answer: "לְ + פָּנִים (face) in construct", why: "Before / in the presence of. Class פָּנִים." },
       { q: "בְּתוֹךְ means…", he: "בְּתוֹךְ", choices: ["In the midst of, inside", "From under", "Until"], answer: "In the midst of, inside", why: "Class vocab." },
-      { q: "כֹּל / כָּל־ means…", he: "כֹּל", choices: ["All, each, every", "Like", "Holy"], answer: "All, each, every", why: "Chapter 6 noun." },
+      { q: "כֹּל / כָּל־ means…", he: "כֹּל", choices: ["All, each, every", "Like", "Holy"], answer: "All, each, every", why: "Class noun." },
       { q: "Proper names as objects (David loved Jonathan) take אֵת because…", choices: ["Names are definite", "Names are indefinite", "All objects take אֵת"], answer: "Names are definite", why: "A name is already “the” person." },
       { q: "Two אֵת in Gen 1:1 mark…", ref: "Gen 1:1", choices: ["Two definite objects: the heavens and the earth", "Two prepositions “with”", "The dual"], answer: "Two definite objects: the heavens and the earth", why: "וְאֵת stacks the marker with ו." },
       { q: "מֵעַל is the compound…", choices: ["מִן + עַל “from upon”", "בְּ + תָּוֶךְ", "לְ + פָּנִים"], answer: "מִן + עַל “from upon”", why: "Two preps, one idea." },

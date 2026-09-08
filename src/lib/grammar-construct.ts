@@ -31,8 +31,8 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
       { q: "Do not put הַ on the construct noun when…", choices: ["The chain’s definiteness comes from the last member", "You always must", "It is a name"], answer: "The chain’s definiteness comes from the last member", why: "Not הַדְּבַר יְהוָה." },
       { q: "Class בְּרִית in בְּרִיתִי is…", he: "בְּרִיתִי", choices: ["My covenant — noun plus suffix (suffix makes it definite)", "Covenant of I", "A dual"], answer: "My covenant — noun plus suffix (suffix makes it definite)", why: "Suffix = definite." },
       { q: "English “of” in these phrases is…", choices: ["Usually not a separate Hebrew word", "Always מִן", "Always אֵת"], answer: "Usually not a separate Hebrew word", why: "The chain itself is “of.”" },
-      { q: "יָד as class vocab will often appear as…", he: "יָד", choices: ["Hand / power, and in construct יַד", "Only a verb", "The article"], answer: "Hand / power, and in construct יַד", why: "Chapter 10." },
-      { q: "Two class nouns in אִישׁ מִלְחָמָה…", ref: "Exod 15:3", choices: ["אִישׁ and מִלְחָמָה", "Only YHWH", "Only a number"], answer: "אִישׁ and מִלְחָמָה", why: "Ch. 3 and ch. 9." },
+      { q: "יָד as class vocab will often appear as…", he: "יָד", choices: ["Hand / power, and in construct יַד", "Only a verb", "The article"], answer: "Hand / power, and in construct יַד", why: "Class." },
+      { q: "Two class nouns in אִישׁ מִלְחָמָה…", ref: "Exod 15:3", choices: ["אִישׁ and מִלְחָמָה", "Only YHWH", "Only a number"], answer: "אִישׁ and מִלְחָמָה", why: "Two class nouns." },
       { q: "A chain can have more than two nouns…", choices: ["Yes — still only the last is absolute", "No — illegal", "Only if dual"], answer: "Yes — still only the last is absolute", why: "All but the last are construct." },
       { q: "First question on two nouns in a row…", choices: ["Are they a chain (X of Y) or adjective + noun?", "Always a verb", "Always numbers"], answer: "Are they a chain (X of Y) or adjective + noun?", why: "Different jobs." },
     ],
@@ -66,10 +66,10 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
       { q: "Look up מַלְכֵי as…", he: "מַלְכֵי", choices: ["מֶלֶךְ", "מַלְכֵי as the only form", "מְלָאכָה"], answer: "מֶלֶךְ", why: "Singular citation." },
       { q: "Construct is not…", choices: ["A new lemma — it is a state of the same noun", "Bound to the next noun", "Often shorter in vowels"], answer: "A new lemma — it is a state of the same noun", why: "Same dictionary word." },
       { q: "עֶבֶד יְהוָה is…", he: "עֶבֶד יְהוָה", ref: "Josh 1:1", choices: ["Servant of YHWH", "YHWH is a servant (predicate)", "The article on servant"], answer: "Servant of YHWH", why: "Chain. Class name." },
-      { q: "יָד / יַד is chapter 10 vocab for…", he: "יָד", choices: ["Hand, power", "Foot", "Stone"], answer: "Hand, power", why: "Class." },
+      { q: "יָד / יַד is class vocab for…", he: "יָד", choices: ["Hand, power", "Foot", "Stone"], answer: "Hand, power", why: "Class." },
       { q: "מָוֶת is…", he: "מָוֶת", choices: ["Death", "Covenant", "Wilderness"], answer: "Death", why: "Class." },
       { q: "If ֵי is on a noun before another noun…", choices: ["Likely mp construct “Xs of Y”", "Always dual", "Always a verb"], answer: "Likely mp construct “Xs of Y”", why: "Train that reflex." },
-      { q: "הַיָּד הַגְּדֹלָה is NOT a construct chain because…", he: "הַיָּד הַגְּדֹלָה", ref: "Exod 14:31", choices: ["It is noun + attributive adjective (both have הַ)", "It is X of Y", "It is a relative clause"], answer: "It is noun + attributive adjective (both have הַ)", why: "The great hand. Ch. 7 still applies." },
+      { q: "הַיָּד הַגְּדֹלָה is NOT a construct chain because…", he: "הַיָּד הַגְּדֹלָה", ref: "Exod 14:31", choices: ["It is noun + attributive adjective (both have הַ)", "It is X of Y", "It is a relative clause"], answer: "It is noun + attributive adjective (both have הַ)", why: "The great hand. Attributive adjective still applies." },
     ],
   },
   {
@@ -99,7 +99,7 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
       { q: "בְּאֶרֶץ־כְּנָעַן is…", he: "בְּאֶרֶץ־כְּנָעַן", ref: "Gen 13:12", choices: ["In the land of Canaan — בְּ + construct אֶרֶץ + name", "From Canaan", "The Canaan is land"], answer: "In the land of Canaan — בְּ + construct אֶרֶץ + name", why: "Prep plus chain. Two class names/nouns." },
       { q: "מִבֵּית עֲבָדִים is…", he: "מִבֵּית", ref: "Exod 20:2", choices: ["From the house of slaves — מִן fused + construct בַּיִת", "In a house", "The object marker"], answer: "From the house of slaves — מִן fused + construct בַּיִת", why: "Class בַּיִת." },
       { q: "A name as the last member makes the whole chain…", choices: ["Definite", "Indefinite", "Dual"], answer: "Definite", why: "Land of Canaan = that land." },
-      { q: "בְּרִית as class vocab is…", he: "בְּרִית", choices: ["Covenant", "Field", "Staff"], answer: "Covenant", why: "Chapter 10." },
+      { q: "בְּרִית as class vocab is…", he: "בְּרִית", choices: ["Covenant", "Field", "Staff"], answer: "Covenant", why: "Class." },
       { q: "שָׂדֶה is…", he: "שָׂדֶה", choices: ["Field, pastureland", "Stone", "Enemy"], answer: "Field, pastureland", why: "Class. Construct שְׂדֵה / שְׂדֵה־." },
       { q: "אֶבֶן is…", he: "אֶבֶן", choices: ["Stone", "Flesh", "Month"], answer: "Stone", why: "Class." },
       { q: "Do not treat תּוֹרַת as a verb…", choices: ["It is a noun in construct", "It is Qal perfect", "It is the article"], answer: "It is a noun in construct", why: "Ending ַת on a known lemma." },
@@ -112,7 +112,7 @@ export const CONSTRUCT_UNITS: GrammarUnit[] = [
     title: "Chains in the wild",
     short: "Hand, field, wilderness, time",
     rule:
-      "Chapter 10 nouns love construct: יָד hand, שָׂדֶה field, מִדְבָּר wilderness, בְּרִית covenant, חֶסֶד loyalty, עֵת time, חֹדֶשׁ month, מַטֶּה tribe/staff, גְּבוּל border. Read the chain, restore each lemma, say the English “of.” Fun test: if you can swap in “of” and it still makes sense, you found a chain.",
+      "These nouns love construct: יָד hand, שָׂדֶה field, מִדְבָּר wilderness, בְּרִית covenant, חֶסֶד loyalty, עֵת time, חֹדֶשׁ month, מַטֶּה tribe/staff, גְּבוּל border. Read the chain, restore each lemma, say the English “of.” Fun test: if you can swap in “of” and it still makes sense, you found a chain.",
     teach:
       "Fun test: if English “of” still makes sense, you found a chain. Restore יָד, שָׂדֶה, מִדְבָּר, בְּרִית, חֶסֶד, עֵת and say the chain out loud.",
     samples: [

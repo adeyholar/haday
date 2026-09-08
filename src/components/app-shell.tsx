@@ -37,7 +37,7 @@ import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
 import { NavTip } from "@/components/nav-tip";
 import { NavMenu, type NavItem } from "@/components/nav-menu";
-import { grammarChapterLabel } from "@/lib/grammar";
+import { grammarTopicLabel } from "@/lib/grammar";
 import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 
 const STUDY: NavItem[] = [
@@ -62,7 +62,7 @@ const GAME: NavItem[] = [
   ...GRAMMAR_TRACKS.map((t) => ({
     to: "/game/lessons/$track" as const,
     params: { track: t.id },
-    label: grammarChapterLabel(t),
+    label: grammarTopicLabel(t),
     hint: t.short,
     icon: ScrollText,
   })),

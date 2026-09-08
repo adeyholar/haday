@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { grammarChapterLabel } from "@/lib/grammar";
+import { grammarTopicLabel } from "@/lib/grammar";
 import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 import { grammarUnitRecord, lessonProgress } from "@/lib/game";
 import { useStudy } from "@/lib/store";
@@ -17,20 +17,20 @@ function LessonsHubPage() {
     <>
       <Panel className="mb-4">
         <GameMenu />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar chapters</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">One chapter at a time</h1>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar topics</p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">One topic at a time</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Each BBH chapter is its own path with its own title — not one 6–11 bundle. Open the chapter you are reading
-          this week. Four units: learn with real verses, pair the forms, then a 12-question quiz. 90% held opens the
-          next unit inside that chapter.
+          Prepositions, adjectives, pronouns, existence particles, construct nouns, numbers — each is its own path
+          with original notes and Tanakh verses, not a reprint of the class book. Four units: learn, pair, then a
+          12-question quiz. 90% held opens the next unit on that topic.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/game/article" className="font-semibold text-primary">
-            Article & vav · chapter 5
+            Article & vav
           </Link>
           <span className="text-muted"> · then </span>
           <Link to="/game/lessons/$track" params={{ track: "prep" }} className="font-semibold text-primary">
-            Ch. 6 Prepositions
+            Prepositions
           </Link>
           <span className="text-muted">.</span>
         </p>
@@ -46,10 +46,7 @@ function LessonsHubPage() {
           const inner = (
             <>
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-sm font-semibold">
-                  Chapter {t.chapter}
-                  <span className="ms-2 font-display text-2xl font-bold">{t.title}</span>
-                </span>
+                <span className="font-display text-2xl font-bold">{t.title}</span>
                 {allClear ? <Check className="size-4 shrink-0 text-good" /> : null}
               </div>
               <p className={cn("mt-1 text-sm", current && !allClear ? "text-primary-foreground/80" : "text-muted")}>
@@ -71,7 +68,7 @@ function LessonsHubPage() {
           );
           return (
             <li key={t.id}>
-              <Link to="/game/lessons/$track" params={{ track: t.id }} className={cls} aria-label={grammarChapterLabel(t)}>
+              <Link to="/game/lessons/$track" params={{ track: t.id }} className={cls} aria-label={grammarTopicLabel(t)}>
                 {inner}
               </Link>
             </li>
