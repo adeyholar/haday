@@ -28,6 +28,10 @@ function LessonsHubPage() {
           <Link to="/game/article" className="font-semibold text-primary">
             Article & vav
           </Link>
+          <span className="text-muted"> · </span>
+          <Link to="/game/custom" search={{ kind: "grammar" }} className="font-semibold text-primary">
+            Mix grammar topics
+          </Link>
           <span className="text-muted"> · then </span>
           <Link to="/game/lessons/$track" params={{ track: "prep" }} className="font-semibold text-primary">
             Prepositions

@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-08
 
+- **Grammar mix, vocab mix stay apart.** Custom mix has two tabs: Vocabulary (BBH lemmas only) and Grammar (topics only). Grammar mix plays open units from the topics you tick. Neither mix unlocks the path.
+
 - **Game menu grouped.** Header Game has one Grammar item (opens the six topics). The in-page Game picker uses native groups — Play, Letters & forms, Grammar — so the list is not a long flat dump on a phone.
 
 - **Grammar topics, not textbook chapters.** Game lists Prepositions, Adjectives, Pronouns, Existence & nouns, Construct nouns, and Numbers by topic name only. No “Ch. 6–11” labels, so the paths do not look like a reprint of the class book.

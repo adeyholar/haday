@@ -757,6 +757,22 @@ export function parseChapterList(raw: string | undefined | null): number[] {
   return out.sort((a, b) => a - b);
 }
 
+export function mixableGrammarTracks(game: GameSnapshot): GrammarTrackId[] {
+  return GRAMMAR_TRACK_IDS.filter((id) => isGrammarUnitUnlocked(game, id, 1));
+}
+
+export function parseTrackList(raw: string | undefined | null): GrammarTrackId[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  const out: GrammarTrackId[] = [];
+  for (const part of raw.split(/[,+\s]+/)) {
+    if (!isGrammarTrackId(part) || seen.has(part)) continue;
+    seen.add(part);
+    out.push(part);
+  }
+  return GRAMMAR_TRACK_IDS.filter((id) => out.includes(id));
+}
+
 export function mixPlayPool(chapters: number[]): VocabItem[] {
   const seen = new Set<string>();
   const items: VocabItem[] = [];

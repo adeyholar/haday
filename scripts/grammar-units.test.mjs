@@ -4,11 +4,11 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { GRAMMAR_TRACKS } = await jiti.import("/workspace/src/lib/grammar-tracks.ts");
-const { GRAMMAR_QUIZ_LEN, buildGrammarQuiz, grammarQuizPool, isGrammarTrackId } = await jiti.import(
+const { GRAMMAR_QUIZ_LEN, buildGrammarQuiz, buildGrammarMixQuiz, grammarMixPool, grammarQuizPool, isGrammarTrackId } = await jiti.import(
   "/workspace/src/lib/grammar.ts",
 );
 const { VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, isGrammarUnitUnlocked } = await jiti.import(
+const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
   "/workspace/src/lib/game.ts",
 );
 
@@ -89,3 +89,21 @@ test("prepositions teach inseparable fusion and min; numbers distinguish cardina
   const n2 = numbers.units.find((u) => u.id === 2);
   assert.ok(n2.verses.every((v) => v.vocabId !== "sheba" || !v.hit.includes("שַׁבָּת")));
 });
+
+test("grammar mix is topics only; unit 1 of each track is always in the open pool", () => {
+  assert.deepEqual(parseTrackList("prep,adj,nope,prep"), ["prep", "adj"]);
+  const prep = GRAMMAR_TRACKS.find((t) => t.id === "prep");
+  const adj = GRAMMAR_TRACKS.find((t) => t.id === "adj");
+  const g = defaultGame();
+  const open = grammarMixPool([prep, adj], (id, unit) => isGrammarUnitUnlocked(g, id, unit));
+  assert.ok(open.length >= 12);
+  const u1 = new Set(
+    [...grammarQuizPool(prep, prep.units[0]), ...grammarQuizPool(adj, adj.units[0])].map((q) => q.q),
+  );
+  assert.ok(open.every((q) => u1.has(q.q)));
+  const built = buildGrammarMixQuiz([prep], (id, unit) => isGrammarUnitUnlocked(g, id, unit));
+  assert.equal(built.length, 12);
+  const locked = grammarMixPool([prep], (id, unit) => isGrammarUnitUnlocked(g, id, unit) && unit > 1);
+  assert.equal(locked.length, 0);
+});
+

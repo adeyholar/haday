@@ -65,6 +65,39 @@ export function grammarQuizId(q: GrammarQuiz): string {
   return `${q.q}|${q.answer}`;
 }
 
+export function grammarMixPool(
+  tracks: GrammarTrack[],
+  unitUnlocked: (trackId: GrammarTrackId, unitId: number) => boolean,
+): GrammarQuiz[] {
+  const seen = new Set<string>();
+  const out: GrammarQuiz[] = [];
+  for (const track of tracks) {
+    for (const unit of track.units) {
+      if (!unitUnlocked(track.id, unit.id)) continue;
+      for (const q of grammarQuizPool(track, unit)) {
+        const id = grammarQuizId(q);
+        if (seen.has(id)) continue;
+        seen.add(id);
+        out.push(q);
+      }
+    }
+  }
+  return out;
+}
+
+export function buildGrammarMixQuiz(
+  tracks: GrammarTrack[],
+  unitUnlocked: (trackId: GrammarTrackId, unitId: number) => boolean,
+): GrammarQuiz[] {
+  const pool = grammarMixPool(tracks, unitUnlocked);
+  if (!pool.length) return [];
+  const key = `grammar-mix:${tracks.map((t) => t.id).join(",")}`;
+  return drawRound(pool, GRAMMAR_QUIZ_LEN, key, grammarQuizId).map((q) => {
+    const hard = hardenQuizChoices(q);
+    return { ...hard, choices: shuffle(hard.choices) };
+  });
+}
+
 export function grammarTopicLabel(track: Pick<GrammarTrack, "title">): string {
   return track.title;
 }
