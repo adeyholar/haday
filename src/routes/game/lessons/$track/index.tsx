@@ -70,18 +70,27 @@ function GrammarTrackMapPage() {
           unit. Original notes and Masoretic examples — not a textbook reprint.
         </p>
         <p className="mt-2 text-sm">
+          <Link to="/game/lessons" className="font-semibold text-primary">
+            All grammar topics
+          </Link>
           {prev ? (
-            <Link
-              to="/game/lessons/$track"
-              params={{ track: prev.id }}
-              className="font-semibold text-primary"
-            >
-              {grammarTopicLabel(prev)}
-            </Link>
+            <>
+              <span className="text-muted"> · </span>
+              <Link
+                to="/game/lessons/$track"
+                params={{ track: prev.id }}
+                className="font-semibold text-primary"
+              >
+                {grammarTopicLabel(prev)}
+              </Link>
+            </>
           ) : (
-            <Link to="/game/article" className="font-semibold text-primary">
-              Article & vav
-            </Link>
+            <>
+              <span className="text-muted"> · </span>
+              <Link to="/game/article" className="font-semibold text-primary">
+                Article & vav
+              </Link>
+            </>
           )}
           {next ? (
             <>
@@ -94,9 +103,7 @@ function GrammarTrackMapPage() {
                 {grammarTopicLabel(next)}
               </Link>
             </>
-          ) : (
-            <span className="text-muted"> · last grammar topic.</span>
-          )}
+          ) : null}
         </p>
       </Panel>
       <ol className="grid grid-cols-1 gap-2">

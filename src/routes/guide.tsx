@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, then grammar topics by name (Prepositions, Adjectives, Pronouns, Existence, Construct, Numbers), and Ultimate Challenge.
+            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Syllables, Nouns, Article & vav, Grammar (six topics on the next screen), and Ultimate Challenge. The Game picker groups those same topics so the list stays short on a phone.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
