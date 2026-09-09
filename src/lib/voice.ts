@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { assertAdmin } from "@/lib/admin";
-import { alphabetVocab, bbhVocab } from "@/lib/vocab";
+import { corpusIds } from "@/lib/voice-corpus";
 
 export type VoicePart = "he" | "en";
 
@@ -21,7 +21,7 @@ export type VoiceClipPayload = {
 };
 
 const MAX_B64 = 380_000;
-const VOCAB_IDS = new Set([...alphabetVocab(), ...bbhVocab()].map((v) => v.id));
+const VOCAB_IDS = corpusIds();
 
 let tableReady: Promise<void> | null = null;
 

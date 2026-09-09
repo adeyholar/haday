@@ -2,6 +2,8 @@ import { alphabetVocab, bbhVocab, GAME_CHAPTER_TITLES, type VocabItem } from "@/
 import type { ReadingVerse } from "@/lib/reading";
 import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
+import { loadNeuralManifest, neuralSrc } from "@/lib/neural-voice";
+import { clipLookupIds } from "@/lib/voice-corpus";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -659,11 +661,17 @@ export async function playAdminVoice(
   const key = `${vocabId}:${part}`;
   let payload = voiceClipCache.get(key);
   if (payload === undefined) {
-    try {
-      const row = await getVoiceClip({ data: { vocabId, part } });
-      payload = row ? { mime: row.mime, b64: row.b64 } : null;
-    } catch {
-      payload = null;
+    payload = null;
+    for (const cid of clipLookupIds(vocabId)) {
+      try {
+        const row = await getVoiceClip({ data: { vocabId: cid, part } });
+        if (row) {
+          payload = { mime: row.mime, b64: row.b64 };
+          break;
+        }
+      } catch {
+        /* try alias */
+      }
     }
     voiceClipCache.set(key, payload);
   }
@@ -676,9 +684,23 @@ export async function playAdminVoice(
   );
 }
 
+export async function playNeuralVoice(
+  vocabId: string,
+  part: VoicePart,
+  rate: number,
+  signal: { stop: boolean },
+): Promise<boolean> {
+  await loadNeuralManifest();
+  const src = neuralSrc(vocabId, part);
+  if (!src || signal.stop) return false;
+  return playVocabClip({ src, start: 0, end: 0, he: "", kind: "lemma", source: "eliran" }, rate, signal);
+}
+
 async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
   const own = await playAdminVoice(item.id, "he", rate, signal);
   if (own || signal.stop) return;
+  const neural = await playNeuralVoice(item.id, "he", rate, signal);
+  if (neural || signal.stop) return;
   const clip = vocabClip(item.id);
   if (clip?.source === "eliran" && clip.kind === "lemma") {
     const ok = await playVocabClip(clip, rate, signal);
@@ -698,7 +720,8 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
   if (signal.stop) return;
   const apple = isAppleMobile();
   if (item.announce) {
-    await speakLine(item.announce, "en", Math.min(rate, 1), signal);
+    const neuralAnn = await playNeuralVoice(`announce-${item.chapter}`, "en", Math.min(rate, 1), signal);
+    if (!neuralAnn && !signal.stop) await speakLine(item.announce, "en", Math.min(rate, 1), signal);
     if (signal.stop) return;
     if (!apple) await pauseMs(restFor(rate, 420), signal);
   }
@@ -712,7 +735,10 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
   const en = spokenEnglish(item.gloss);
   if (en) {
     const ownEn = await playAdminVoice(item.id, "en", rate, signal);
-    if (!ownEn && !signal.stop) await speakLine(en, "en", rate, signal);
+    if (!ownEn && !signal.stop) {
+      const neuralEn = await playNeuralVoice(item.id, "en", rate, signal);
+      if (!neuralEn && !signal.stop) await speakLine(en, "en", rate, signal);
+    }
   }
   if (signal.stop) return;
   await pauseMs(restFor(rate, apple ? 280 : 720), signal);

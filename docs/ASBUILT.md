@@ -34,7 +34,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** Hebrew as an isolated lexeme from Open Hebrew Bible (Eliran Wong, CC BY-NC) when the citation form is in Genesis (**275** lemmas, BHS word index, vowels/dagesh preferred so Isaac is the name not “he laughed”). Otherwise TTS. Lingua Libre is not used. Prefixes are not clipped. Tanakh sentence-cuts are not used here.
+**Vocabulary.** Playback order: owner Voice-bank take → neural Hila/Jenny clip for the closed corpus → isolated Eliran lexeme when the citation form is in Genesis → TTS. Lingua Libre is not used. Prefixes are not clipped. Tanakh sentence-cuts are not used here.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 
@@ -50,7 +50,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | New email accounts | Domain must accept mail; no throwaway inbox; classmate opens a 24-hour confirmation link before sign-in |
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
 | Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). **Remove** deletes an unwanted account (not the owner). |
-| Voice bank | Owner records Hebrew / English takes of class lemmas. Alive Pet and Listen use them first. |
+| Voice bank | Owner records Hebrew / English takes of the corpus (letters, vowels, names, lemmas). Alive Pet, Listen, and Ocean letters use them first. Neural Hila/Jenny fills every line that has no owner take. Corpus text: `/audio/neural/corpus.txt`. |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
 | Privacy | Public `/legal` — what we store, that we do not sell it, local/international disclaimer, 13+ |

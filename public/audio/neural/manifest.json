@@ -1,0 +1,1643 @@
+{
+"alef": {
+"en": "/audio/neural/alef.en.mp3",
+"he": "/audio/neural/alef.he.mp3"
+},
+"ch1-alef": {
+"en": "/audio/neural/alef.en.mp3",
+"he": "/audio/neural/alef.he.mp3"
+},
+"bet": {
+"en": "/audio/neural/bet.en.mp3",
+"he": "/audio/neural/bet.he.mp3"
+},
+"ch1-bet": {
+"en": "/audio/neural/bet.en.mp3",
+"he": "/audio/neural/bet.he.mp3"
+},
+"gimel": {
+"en": "/audio/neural/gimel.en.mp3",
+"he": "/audio/neural/gimel.he.mp3"
+},
+"ch1-gimel": {
+"en": "/audio/neural/gimel.en.mp3",
+"he": "/audio/neural/gimel.he.mp3"
+},
+"dalet": {
+"en": "/audio/neural/dalet.en.mp3",
+"he": "/audio/neural/dalet.he.mp3"
+},
+"ch1-dalet": {
+"en": "/audio/neural/dalet.en.mp3",
+"he": "/audio/neural/dalet.he.mp3"
+},
+"he": {
+"en": "/audio/neural/he.en.mp3",
+"he": "/audio/neural/he.he.mp3"
+},
+"ch1-he": {
+"en": "/audio/neural/he.en.mp3",
+"he": "/audio/neural/he.he.mp3"
+},
+"vav": {
+"en": "/audio/neural/vav.en.mp3",
+"he": "/audio/neural/vav.he.mp3"
+},
+"ch1-vav": {
+"en": "/audio/neural/vav.en.mp3",
+"he": "/audio/neural/vav.he.mp3"
+},
+"zayin": {
+"en": "/audio/neural/zayin.en.mp3",
+"he": "/audio/neural/zayin.he.mp3"
+},
+"ch1-zayin": {
+"en": "/audio/neural/zayin.en.mp3",
+"he": "/audio/neural/zayin.he.mp3"
+},
+"het": {
+"he": "/audio/neural/het.he.mp3",
+"en": "/audio/neural/het.en.mp3"
+},
+"ch1-het": {
+"he": "/audio/neural/het.he.mp3",
+"en": "/audio/neural/het.en.mp3"
+},
+"tet": {
+"en": "/audio/neural/tet.en.mp3",
+"he": "/audio/neural/tet.he.mp3"
+},
+"ch1-tet": {
+"en": "/audio/neural/tet.en.mp3",
+"he": "/audio/neural/tet.he.mp3"
+},
+"yod": {
+"en": "/audio/neural/yod.en.mp3",
+"he": "/audio/neural/yod.he.mp3"
+},
+"ch1-yod": {
+"en": "/audio/neural/yod.en.mp3",
+"he": "/audio/neural/yod.he.mp3"
+},
+"kaf": {
+"en": "/audio/neural/kaf.en.mp3",
+"he": "/audio/neural/kaf.he.mp3"
+},
+"ch1-kaf": {
+"en": "/audio/neural/kaf.en.mp3",
+"he": "/audio/neural/kaf.he.mp3"
+},
+"lamed": {
+"en": "/audio/neural/lamed.en.mp3",
+"he": "/audio/neural/lamed.he.mp3"
+},
+"ch1-lamed": {
+"en": "/audio/neural/lamed.en.mp3",
+"he": "/audio/neural/lamed.he.mp3"
+},
+"mem": {
+"en": "/audio/neural/mem.en.mp3",
+"he": "/audio/neural/mem.he.mp3"
+},
+"ch1-mem": {
+"en": "/audio/neural/mem.en.mp3",
+"he": "/audio/neural/mem.he.mp3"
+},
+"nun": {
+"en": "/audio/neural/nun.en.mp3",
+"he": "/audio/neural/nun.he.mp3"
+},
+"ch1-nun": {
+"en": "/audio/neural/nun.en.mp3",
+"he": "/audio/neural/nun.he.mp3"
+},
+"samekh": {
+"en": "/audio/neural/samekh.en.mp3",
+"he": "/audio/neural/samekh.he.mp3"
+},
+"ch1-samekh": {
+"en": "/audio/neural/samekh.en.mp3",
+"he": "/audio/neural/samekh.he.mp3"
+},
+"ayin": {
+"en": "/audio/neural/ayin.en.mp3",
+"he": "/audio/neural/ayin.he.mp3"
+},
+"ch1-ayin": {
+"en": "/audio/neural/ayin.en.mp3",
+"he": "/audio/neural/ayin.he.mp3"
+},
+"pe": {
+"en": "/audio/neural/pe.en.mp3",
+"he": "/audio/neural/pe.he.mp3"
+},
+"ch1-pe": {
+"en": "/audio/neural/pe.en.mp3",
+"he": "/audio/neural/pe.he.mp3"
+},
+"tsade": {
+"en": "/audio/neural/tsade.en.mp3",
+"he": "/audio/neural/tsade.he.mp3"
+},
+"ch1-tsade": {
+"en": "/audio/neural/tsade.en.mp3",
+"he": "/audio/neural/tsade.he.mp3"
+},
+"qof": {
+"en": "/audio/neural/qof.en.mp3",
+"he": "/audio/neural/qof.he.mp3"
+},
+"ch1-qof": {
+"en": "/audio/neural/qof.en.mp3",
+"he": "/audio/neural/qof.he.mp3"
+},
+"resh": {
+"en": "/audio/neural/resh.en.mp3",
+"he": "/audio/neural/resh.he.mp3"
+},
+"ch1-resh": {
+"en": "/audio/neural/resh.en.mp3",
+"he": "/audio/neural/resh.he.mp3"
+},
+"shin": {
+"en": "/audio/neural/shin.en.mp3",
+"he": "/audio/neural/shin.he.mp3"
+},
+"ch1-shin": {
+"en": "/audio/neural/shin.en.mp3",
+"he": "/audio/neural/shin.he.mp3"
+},
+"sin": {
+"en": "/audio/neural/sin.en.mp3",
+"he": "/audio/neural/sin.he.mp3"
+},
+"ch1-sin": {
+"en": "/audio/neural/sin.en.mp3",
+"he": "/audio/neural/sin.he.mp3"
+},
+"tav": {
+"en": "/audio/neural/tav.en.mp3",
+"he": "/audio/neural/tav.he.mp3"
+},
+"ch1-tav": {
+"en": "/audio/neural/tav.en.mp3",
+"he": "/audio/neural/tav.he.mp3"
+},
+"kaf-final": {
+"en": "/audio/neural/kaf-final.en.mp3",
+"he": "/audio/neural/kaf-final.he.mp3"
+},
+"ch1-kaf-final": {
+"en": "/audio/neural/kaf-final.en.mp3",
+"he": "/audio/neural/kaf-final.he.mp3"
+},
+"mem-final": {
+"en": "/audio/neural/mem-final.en.mp3",
+"he": "/audio/neural/mem-final.he.mp3"
+},
+"ch1-mem-final": {
+"en": "/audio/neural/mem-final.en.mp3",
+"he": "/audio/neural/mem-final.he.mp3"
+},
+"nun-final": {
+"en": "/audio/neural/nun-final.en.mp3",
+"he": "/audio/neural/nun-final.he.mp3"
+},
+"ch1-nun-final": {
+"en": "/audio/neural/nun-final.en.mp3",
+"he": "/audio/neural/nun-final.he.mp3"
+},
+"pe-final": {
+"he": "/audio/neural/pe-final.he.mp3",
+"en": "/audio/neural/pe-final.en.mp3"
+},
+"ch1-pe-final": {
+"he": "/audio/neural/pe-final.he.mp3",
+"en": "/audio/neural/pe-final.en.mp3"
+},
+"tsade-final": {
+"en": "/audio/neural/tsade-final.en.mp3",
+"he": "/audio/neural/tsade-final.he.mp3"
+},
+"ch1-tsade-final": {
+"en": "/audio/neural/tsade-final.en.mp3",
+"he": "/audio/neural/tsade-final.he.mp3"
+},
+"qamets": {
+"he": "/audio/neural/qamets.he.mp3",
+"en": "/audio/neural/qamets.en.mp3"
+},
+"tsere": {
+"en": "/audio/neural/tsere.en.mp3",
+"he": "/audio/neural/tsere.he.mp3"
+},
+"holem": {
+"en": "/audio/neural/holem.en.mp3",
+"he": "/audio/neural/holem.he.mp3"
+},
+"pathach": {
+"he": "/audio/neural/pathach.he.mp3",
+"en": "/audio/neural/pathach.en.mp3"
+},
+"seghol": {
+"en": "/audio/neural/seghol.en.mp3",
+"he": "/audio/neural/seghol.he.mp3"
+},
+"qamets-hatuf": {
+"he": "/audio/neural/qamets-hatuf.he.mp3",
+"en": "/audio/neural/qamets-hatuf.en.mp3"
+},
+"hireq": {
+"en": "/audio/neural/hireq.en.mp3",
+"he": "/audio/neural/hireq.he.mp3"
+},
+"qibbuts": {
+"en": "/audio/neural/qibbuts.en.mp3",
+"he": "/audio/neural/qibbuts.he.mp3"
+},
+"shewa": {
+"en": "/audio/neural/shewa.en.mp3",
+"he": "/audio/neural/shewa.he.mp3"
+},
+"hateph-pathach": {
+"en": "/audio/neural/hateph-pathach.en.mp3",
+"he": "/audio/neural/hateph-pathach.he.mp3"
+},
+"hateph-seghol": {
+"en": "/audio/neural/hateph-seghol.en.mp3",
+"he": "/audio/neural/hateph-seghol.he.mp3"
+},
+"hateph-qamets": {
+"en": "/audio/neural/hateph-qamets.en.mp3",
+"he": "/audio/neural/hateph-qamets.he.mp3"
+},
+"qamets-he": {
+"en": "/audio/neural/qamets-he.en.mp3",
+"he": "/audio/neural/qamets-he.he.mp3"
+},
+"tsere-he": {
+"he": "/audio/neural/tsere-he.he.mp3",
+"en": "/audio/neural/tsere-he.en.mp3"
+},
+"seghol-he": {
+"en": "/audio/neural/seghol-he.en.mp3",
+"he": "/audio/neural/seghol-he.he.mp3"
+},
+"holem-waw": {
+"en": "/audio/neural/holem-waw.en.mp3",
+"he": "/audio/neural/holem-waw.he.mp3"
+},
+"holem-he": {
+"en": "/audio/neural/holem-he.en.mp3",
+"he": "/audio/neural/holem-he.he.mp3"
+},
+"shureq": {
+"en": "/audio/neural/shureq.en.mp3",
+"he": "/audio/neural/shureq.he.mp3"
+},
+"tsere-yod": {
+"en": "/audio/neural/tsere-yod.en.mp3",
+"he": "/audio/neural/tsere-yod.he.mp3"
+},
+"seghol-yod": {
+"en": "/audio/neural/seghol-yod.en.mp3",
+"he": "/audio/neural/seghol-yod.he.mp3"
+},
+"hireq-yod": {
+"en": "/audio/neural/hireq-yod.en.mp3",
+"he": "/audio/neural/hireq-yod.he.mp3"
+},
+"abraham": {
+"he": "/audio/neural/abraham.he.mp3",
+"en": "/audio/neural/abraham.en.mp3"
+},
+"david": {
+"en": "/audio/neural/david.en.mp3",
+"he": "/audio/neural/david.he.mp3"
+},
+"aaron": {
+"en": "/audio/neural/aaron.en.mp3",
+"he": "/audio/neural/aaron.he.mp3"
+},
+"judah": {
+"en": "/audio/neural/judah.en.mp3",
+"he": "/audio/neural/judah.he.mp3"
+},
+"yhwh": {
+"en": "/audio/neural/yhwh.en.mp3",
+"he": "/audio/neural/yhwh.he.mp3"
+},
+"joshua": {
+"en": "/audio/neural/joshua.en.mp3",
+"he": "/audio/neural/joshua.he.mp3"
+},
+"joseph": {
+"en": "/audio/neural/joseph.en.mp3",
+"he": "/audio/neural/joseph.he.mp3"
+},
+"jacob": {
+"en": "/audio/neural/jacob.en.mp3",
+"he": "/audio/neural/jacob.he.mp3"
+},
+"isaac": {
+"en": "/audio/neural/isaac.en.mp3",
+"he": "/audio/neural/isaac.he.mp3"
+},
+"jerusalem": {
+"en": "/audio/neural/jerusalem.en.mp3",
+"he": "/audio/neural/jerusalem.he.mp3"
+},
+"jeremiah": {
+"en": "/audio/neural/jeremiah.en.mp3",
+"he": "/audio/neural/jeremiah.he.mp3"
+},
+"israel": {
+"en": "/audio/neural/israel.en.mp3",
+"he": "/audio/neural/israel.he.mp3"
+},
+"canaan": {
+"en": "/audio/neural/canaan.en.mp3",
+"he": "/audio/neural/canaan.he.mp3"
+},
+"egypt": {
+"en": "/audio/neural/egypt.en.mp3",
+"he": "/audio/neural/egypt.he.mp3"
+},
+"esau": {
+"en": "/audio/neural/esau.en.mp3",
+"he": "/audio/neural/esau.he.mp3"
+},
+"moses": {
+"he": "/audio/neural/moses.he.mp3",
+"en": "/audio/neural/moses.en.mp3"
+},
+"zion": {
+"en": "/audio/neural/zion.en.mp3",
+"he": "/audio/neural/zion.he.mp3"
+},
+"pharaoh": {
+"en": "/audio/neural/pharaoh.en.mp3",
+"he": "/audio/neural/pharaoh.he.mp3"
+},
+"saul": {
+"en": "/audio/neural/saul.en.mp3",
+"he": "/audio/neural/saul.he.mp3"
+},
+"solomon": {
+"he": "/audio/neural/solomon.he.mp3",
+"en": "/audio/neural/solomon.en.mp3"
+},
+"samuel": {
+"he": "/audio/neural/samuel.he.mp3",
+"en": "/audio/neural/samuel.en.mp3"
+},
+"ab": {
+"en": "/audio/neural/ab.en.mp3",
+"he": "/audio/neural/ab.he.mp3"
+},
+"adon": {
+"en": "/audio/neural/adon.en.mp3",
+"he": "/audio/neural/adon.he.mp3"
+},
+"adam": {
+"en": "/audio/neural/adam.en.mp3",
+"he": "/audio/neural/adam.he.mp3"
+},
+"adamah": {
+"en": "/audio/neural/adamah.en.mp3",
+"he": "/audio/neural/adamah.he.mp3"
+},
+"ah": {
+"he": "/audio/neural/ah.he.mp3",
+"en": "/audio/neural/ah.en.mp3"
+},
+"achot": {
+"en": "/audio/neural/achot.en.mp3",
+"he": "/audio/neural/achot.he.mp3"
+},
+"ish": {
+"en": "/audio/neural/ish.en.mp3",
+"he": "/audio/neural/ish.he.mp3"
+},
+"el-god": {
+"en": "/audio/neural/el-god.en.mp3",
+"he": "/audio/neural/el-god.he.mp3"
+},
+"elohim": {
+"en": "/audio/neural/elohim.en.mp3",
+"he": "/audio/neural/elohim.he.mp3"
+},
+"em": {
+"en": "/audio/neural/em.en.mp3",
+"he": "/audio/neural/em.he.mp3"
+},
+"erets": {
+"en": "/audio/neural/erets.en.mp3",
+"he": "/audio/neural/erets.he.mp3"
+},
+"ishah": {
+"en": "/audio/neural/ishah.en.mp3",
+"he": "/audio/neural/ishah.he.mp3"
+},
+"bayit": {
+"en": "/audio/neural/bayit.en.mp3",
+"he": "/audio/neural/bayit.he.mp3"
+},
+"ben": {
+"en": "/audio/neural/ben.en.mp3",
+"he": "/audio/neural/ben.he.mp3"
+},
+"bat": {
+"en": "/audio/neural/bat.en.mp3",
+"he": "/audio/neural/bat.he.mp3"
+},
+"dabar": {
+"en": "/audio/neural/dabar.en.mp3",
+"he": "/audio/neural/dabar.he.mp3"
+},
+"yom": {
+"en": "/audio/neural/yom.en.mp3",
+"he": "/audio/neural/yom.he.mp3"
+},
+"laylah": {
+"en": "/audio/neural/laylah.en.mp3",
+"he": "/audio/neural/laylah.he.mp3"
+},
+"naar": {
+"en": "/audio/neural/naar.en.mp3",
+"he": "/audio/neural/naar.he.mp3"
+},
+"naarah": {
+"en": "/audio/neural/naarah.en.mp3",
+"he": "/audio/neural/naarah.he.mp3"
+},
+"goy": {
+"en": "/audio/neural/goy.en.mp3",
+"he": "/audio/neural/goy.he.mp3"
+},
+"derek": {
+"en": "/audio/neural/derek.en.mp3",
+"he": "/audio/neural/derek.he.mp3"
+},
+"har": {
+"en": "/audio/neural/har.en.mp3",
+"he": "/audio/neural/har.he.mp3"
+},
+"kohen": {
+"en": "/audio/neural/kohen.en.mp3",
+"he": "/audio/neural/kohen.he.mp3"
+},
+"leb": {
+"en": "/audio/neural/leb.en.mp3",
+"he": "/audio/neural/leb.he.mp3"
+},
+"mayim": {
+"en": "/audio/neural/mayim.en.mp3",
+"he": "/audio/neural/mayim.he.mp3"
+},
+"melek": {
+"en": "/audio/neural/melek.en.mp3",
+"he": "/audio/neural/melek.he.mp3"
+},
+"nephesh": {
+"en": "/audio/neural/nephesh.en.mp3",
+"he": "/audio/neural/nephesh.he.mp3"
+},
+"nabi": {
+"en": "/audio/neural/nabi.en.mp3",
+"he": "/audio/neural/nabi.he.mp3"
+},
+"sus": {
+"en": "/audio/neural/sus.en.mp3",
+"he": "/audio/neural/sus.he.mp3"
+},
+"sefer": {
+"en": "/audio/neural/sefer.en.mp3",
+"he": "/audio/neural/sefer.he.mp3"
+},
+"ebed": {
+"en": "/audio/neural/ebed.en.mp3",
+"he": "/audio/neural/ebed.he.mp3"
+},
+"ir": {
+"en": "/audio/neural/ir.en.mp3",
+"he": "/audio/neural/ir.he.mp3"
+},
+"tsaba": {
+"en": "/audio/neural/tsaba.en.mp3",
+"he": "/audio/neural/tsaba.he.mp3"
+},
+"qol": {
+"en": "/audio/neural/qol.en.mp3",
+"he": "/audio/neural/qol.he.mp3"
+},
+"rosh": {
+"en": "/audio/neural/rosh.en.mp3",
+"he": "/audio/neural/rosh.he.mp3"
+},
+"shem": {
+"en": "/audio/neural/shem.en.mp3",
+"he": "/audio/neural/shem.he.mp3"
+},
+"shanah": {
+"he": "/audio/neural/shanah.he.mp3",
+"en": "/audio/neural/shanah.en.mp3"
+},
+"torah": {
+"en": "/audio/neural/torah.en.mp3",
+"he": "/audio/neural/torah.he.mp3"
+},
+"esh": {
+"en": "/audio/neural/esh.en.mp3",
+"he": "/audio/neural/esh.he.mp3"
+},
+"hekal": {
+"en": "/audio/neural/hekal.en.mp3",
+"he": "/audio/neural/hekal.he.mp3"
+},
+"zahav": {
+"en": "/audio/neural/zahav.en.mp3",
+"he": "/audio/neural/zahav.he.mp3"
+},
+"hereb": {
+"en": "/audio/neural/hereb.en.mp3",
+"he": "/audio/neural/hereb.he.mp3"
+},
+"yeled": {
+"en": "/audio/neural/yeled.en.mp3",
+"he": "/audio/neural/yeled.he.mp3"
+},
+"yam": {
+"en": "/audio/neural/yam.en.mp3",
+"he": "/audio/neural/yam.he.mp3"
+},
+"kesef": {
+"en": "/audio/neural/kesef.en.mp3",
+"he": "/audio/neural/kesef.he.mp3"
+},
+"mizbeah": {
+"en": "/audio/neural/mizbeah.en.mp3",
+"he": "/audio/neural/mizbeah.he.mp3"
+},
+"maqom": {
+"en": "/audio/neural/maqom.en.mp3",
+"he": "/audio/neural/maqom.he.mp3"
+},
+"mishpat": {
+"en": "/audio/neural/mishpat.en.mp3",
+"he": "/audio/neural/mishpat.he.mp3"
+},
+"neum": {
+"he": "/audio/neural/neum.he.mp3",
+"en": "/audio/neural/neum.en.mp3"
+},
+"olam": {
+"en": "/audio/neural/olam.en.mp3",
+"he": "/audio/neural/olam.he.mp3"
+},
+"anan": {
+"he": "/audio/neural/anan.he.mp3",
+"en": "/audio/neural/anan.en.mp3"
+},
+"ruah": {
+"en": "/audio/neural/ruah.en.mp3",
+"he": "/audio/neural/ruah.he.mp3"
+},
+"sar": {
+"en": "/audio/neural/sar.en.mp3",
+"he": "/audio/neural/sar.he.mp3"
+},
+"shamayim": {
+"en": "/audio/neural/shamayim.en.mp3",
+"he": "/audio/neural/shamayim.he.mp3"
+},
+"shaar": {
+"en": "/audio/neural/shaar.en.mp3",
+"he": "/audio/neural/shaar.he.mp3"
+},
+"ha": {
+"en": "/audio/neural/ha.en.mp3",
+"he": "/audio/neural/ha.he.mp3"
+},
+"we": {
+"en": "/audio/neural/we.en.mp3",
+"he": "/audio/neural/we.he.mp3"
+},
+"achar": {
+"en": "/audio/neural/achar.en.mp3",
+"he": "/audio/neural/achar.he.mp3"
+},
+"el": {
+"en": "/audio/neural/el.en.mp3",
+"he": "/audio/neural/el.he.mp3"
+},
+"et-with": {
+"en": "/audio/neural/et-with.en.mp3",
+"he": "/audio/neural/et-with.he.mp3"
+},
+"be": {
+"en": "/audio/neural/be.en.mp3",
+"he": "/audio/neural/be.he.mp3"
+},
+"ben-prep": {
+"en": "/audio/neural/ben-prep.en.mp3",
+"he": "/audio/neural/ben-prep.he.mp3"
+},
+"betokh": {
+"en": "/audio/neural/betokh.en.mp3",
+"he": "/audio/neural/betokh.he.mp3"
+},
+"ke": {
+"en": "/audio/neural/ke.en.mp3",
+"he": "/audio/neural/ke.he.mp3"
+},
+"le": {
+"en": "/audio/neural/le.en.mp3",
+"he": "/audio/neural/le.he.mp3"
+},
+"min": {
+"en": "/audio/neural/min.en.mp3",
+"he": "/audio/neural/min.he.mp3"
+},
+"lemaan": {
+"en": "/audio/neural/lemaan.en.mp3",
+"he": "/audio/neural/lemaan.he.mp3"
+},
+"maal": {
+"en": "/audio/neural/maal.en.mp3",
+"he": "/audio/neural/maal.he.mp3"
+},
+"ever": {
+"en": "/audio/neural/ever.en.mp3",
+"he": "/audio/neural/ever.he.mp3"
+},
+"ad": {
+"he": "/audio/neural/ad.he.mp3",
+"en": "/audio/neural/ad.en.mp3"
+},
+"al": {
+"en": "/audio/neural/al.en.mp3",
+"he": "/audio/neural/al.he.mp3"
+},
+"im": {
+"en": "/audio/neural/im.en.mp3",
+"he": "/audio/neural/im.he.mp3"
+},
+"panim": {
+"en": "/audio/neural/panim.en.mp3",
+"he": "/audio/neural/panim.he.mp3"
+},
+"tahat": {
+"en": "/audio/neural/tahat.en.mp3",
+"he": "/audio/neural/tahat.he.mp3"
+},
+"et": {
+"he": "/audio/neural/et.he.mp3",
+"en": "/audio/neural/et.en.mp3"
+},
+"kol": {
+"en": "/audio/neural/kol.en.mp3",
+"he": "/audio/neural/kol.he.mp3"
+},
+"qodesh": {
+"en": "/audio/neural/qodesh.en.mp3",
+"he": "/audio/neural/qodesh.he.mp3"
+},
+"raah-evil": {
+"he": "/audio/neural/raah-evil.he.mp3",
+"en": "/audio/neural/raah-evil.en.mp3"
+},
+"gadol": {
+"en": "/audio/neural/gadol.en.mp3",
+"he": "/audio/neural/gadol.he.mp3"
+},
+"zaqen": {
+"en": "/audio/neural/zaqen.en.mp3",
+"he": "/audio/neural/zaqen.he.mp3"
+},
+"zar": {
+"en": "/audio/neural/zar.en.mp3",
+"he": "/audio/neural/zar.he.mp3"
+},
+"hay": {
+"en": "/audio/neural/hay.en.mp3",
+"he": "/audio/neural/hay.he.mp3"
+},
+"hakam": {
+"en": "/audio/neural/hakam.en.mp3",
+"he": "/audio/neural/hakam.he.mp3"
+},
+"tov": {
+"en": "/audio/neural/tov.en.mp3",
+"he": "/audio/neural/tov.he.mp3"
+},
+"yashar": {
+"en": "/audio/neural/yashar.en.mp3",
+"he": "/audio/neural/yashar.he.mp3"
+},
+"meat": {
+"en": "/audio/neural/meat.en.mp3",
+"he": "/audio/neural/meat.he.mp3"
+},
+"qadosh": {
+"en": "/audio/neural/qadosh.en.mp3",
+"he": "/audio/neural/qadosh.he.mp3"
+},
+"tsaddiq": {
+"en": "/audio/neural/tsaddiq.en.mp3",
+"he": "/audio/neural/tsaddiq.he.mp3"
+},
+"qaton": {
+"en": "/audio/neural/qaton.en.mp3",
+"he": "/audio/neural/qaton.he.mp3"
+},
+"qarov": {
+"en": "/audio/neural/qarov.en.mp3",
+"he": "/audio/neural/qarov.he.mp3"
+},
+"rab": {
+"en": "/audio/neural/rab.en.mp3",
+"he": "/audio/neural/rab.he.mp3"
+},
+"rachoq": {
+"en": "/audio/neural/rachoq.en.mp3",
+"he": "/audio/neural/rachoq.he.mp3"
+},
+"ra": {
+"en": "/audio/neural/ra.en.mp3",
+"he": "/audio/neural/ra.he.mp3"
+},
+"rasha": {
+"en": "/audio/neural/rasha.en.mp3",
+"he": "/audio/neural/rasha.he.mp3"
+},
+"anahnu": {
+"en": "/audio/neural/anahnu.en.mp3",
+"he": "/audio/neural/anahnu.he.mp3"
+},
+"meod": {
+"en": "/audio/neural/meod.en.mp3",
+"he": "/audio/neural/meod.he.mp3"
+},
+"ani": {
+"en": "/audio/neural/ani.en.mp3",
+"he": "/audio/neural/ani.he.mp3"
+},
+"anoki": {
+"en": "/audio/neural/anoki.en.mp3",
+"he": "/audio/neural/anoki.he.mp3"
+},
+"attah": {
+"en": "/audio/neural/attah.en.mp3",
+"he": "/audio/neural/attah.he.mp3"
+},
+"attem": {
+"en": "/audio/neural/attem.en.mp3",
+"he": "/audio/neural/attem.he.mp3"
+},
+"hu": {
+"en": "/audio/neural/hu.en.mp3",
+"he": "/audio/neural/hu.he.mp3"
+},
+"hi": {
+"en": "/audio/neural/hi.en.mp3",
+"he": "/audio/neural/hi.he.mp3"
+},
+"hem": {
+"en": "/audio/neural/hem.en.mp3",
+"he": "/audio/neural/hem.he.mp3"
+},
+"elleh": {
+"en": "/audio/neural/elleh.en.mp3",
+"he": "/audio/neural/elleh.he.mp3"
+},
+"zot": {
+"en": "/audio/neural/zot.en.mp3",
+"he": "/audio/neural/zot.he.mp3"
+},
+"zeh": {
+"en": "/audio/neural/zeh.en.mp3",
+"he": "/audio/neural/zeh.he.mp3"
+},
+"ha-int": {
+"en": "/audio/neural/ha-int.en.mp3",
+"he": "/audio/neural/ha-int.he.mp3"
+},
+"lama": {
+"en": "/audio/neural/lama.en.mp3",
+"he": "/audio/neural/lama.he.mp3"
+},
+"mah": {
+"en": "/audio/neural/mah.en.mp3",
+"he": "/audio/neural/mah.he.mp3"
+},
+"maddua": {
+"en": "/audio/neural/maddua.en.mp3",
+"he": "/audio/neural/maddua.he.mp3"
+},
+"mi": {
+"en": "/audio/neural/mi.en.mp3",
+"he": "/audio/neural/mi.he.mp3"
+},
+"acher": {
+"en": "/audio/neural/acher.en.mp3",
+"he": "/audio/neural/acher.he.mp3"
+},
+"asher": {
+"en": "/audio/neural/asher.en.mp3",
+"he": "/audio/neural/asher.he.mp3"
+},
+"ki": {
+"en": "/audio/neural/ki.en.mp3",
+"he": "/audio/neural/ki.he.mp3"
+},
+"she": {
+"en": "/audio/neural/she.en.mp3",
+"he": "/audio/neural/she.he.mp3"
+},
+"aph": {
+"en": "/audio/neural/aph.en.mp3",
+"he": "/audio/neural/aph.he.mp3"
+},
+"baqar": {
+"en": "/audio/neural/baqar.en.mp3",
+"he": "/audio/neural/baqar.he.mp3"
+},
+"boqer": {
+"en": "/audio/neural/boqer.en.mp3",
+"he": "/audio/neural/boqer.he.mp3"
+},
+"berakah": {
+"en": "/audio/neural/berakah.en.mp3",
+"he": "/audio/neural/berakah.he.mp3"
+},
+"hattat": {
+"en": "/audio/neural/hattat.en.mp3",
+"he": "/audio/neural/hattat.he.mp3"
+},
+"kavod": {
+"en": "/audio/neural/kavod.en.mp3",
+"he": "/audio/neural/kavod.he.mp3"
+},
+"keli": {
+"en": "/audio/neural/keli.en.mp3",
+"he": "/audio/neural/keli.he.mp3"
+},
+"lehem": {
+"en": "/audio/neural/lehem.en.mp3",
+"he": "/audio/neural/lehem.he.mp3"
+},
+"milhamah": {
+"en": "/audio/neural/milhamah.en.mp3",
+"he": "/audio/neural/milhamah.he.mp3"
+},
+"mishpahah": {
+"en": "/audio/neural/mishpahah.en.mp3",
+"he": "/audio/neural/mishpahah.he.mp3"
+},
+"am": {
+"en": "/audio/neural/am.en.mp3",
+"he": "/audio/neural/am.he.mp3"
+},
+"o": {
+"en": "/audio/neural/o.en.mp3",
+"he": "/audio/neural/o.he.mp3"
+},
+"ets": {
+"en": "/audio/neural/ets.en.mp3",
+"he": "/audio/neural/ets.he.mp3"
+},
+"ein": {
+"en": "/audio/neural/ein.en.mp3",
+"he": "/audio/neural/ein.he.mp3"
+},
+"gam": {
+"en": "/audio/neural/gam.en.mp3",
+"he": "/audio/neural/gam.he.mp3"
+},
+"hen": {
+"en": "/audio/neural/hen.en.mp3",
+"he": "/audio/neural/hen.he.mp3"
+},
+"hinneh": {
+"en": "/audio/neural/hinneh.en.mp3",
+"he": "/audio/neural/hinneh.he.mp3"
+},
+"yesh": {
+"en": "/audio/neural/yesh.en.mp3",
+"he": "/audio/neural/yesh.he.mp3"
+},
+"levad": {
+"en": "/audio/neural/levad.en.mp3",
+"he": "/audio/neural/levad.he.mp3"
+},
+"saviv": {
+"en": "/audio/neural/saviv.en.mp3",
+"he": "/audio/neural/saviv.he.mp3"
+},
+"eben": {
+"en": "/audio/neural/eben.en.mp3",
+"he": "/audio/neural/eben.he.mp3"
+},
+"oyeb": {
+"en": "/audio/neural/oyeb.en.mp3",
+"he": "/audio/neural/oyeb.he.mp3"
+},
+"berit": {
+"en": "/audio/neural/berit.en.mp3",
+"he": "/audio/neural/berit.he.mp3"
+},
+"basar": {
+"en": "/audio/neural/basar.en.mp3",
+"he": "/audio/neural/basar.he.mp3"
+},
+"gebul": {
+"en": "/audio/neural/gebul.en.mp3",
+"he": "/audio/neural/gebul.he.mp3"
+},
+"hodesh": {
+"en": "/audio/neural/hodesh.en.mp3",
+"he": "/audio/neural/hodesh.he.mp3"
+},
+"hayil": {
+"en": "/audio/neural/hayil.en.mp3",
+"he": "/audio/neural/hayil.he.mp3"
+},
+"hesed": {
+"en": "/audio/neural/hesed.en.mp3",
+"he": "/audio/neural/hesed.he.mp3"
+},
+"yad": {
+"en": "/audio/neural/yad.en.mp3",
+"he": "/audio/neural/yad.he.mp3"
+},
+"mavet": {
+"en": "/audio/neural/mavet.en.mp3",
+"he": "/audio/neural/mavet.he.mp3"
+},
+"midbar": {
+"en": "/audio/neural/midbar.en.mp3",
+"he": "/audio/neural/midbar.he.mp3"
+},
+"matteh": {
+"en": "/audio/neural/matteh.en.mp3",
+"he": "/audio/neural/matteh.he.mp3"
+},
+"olah": {
+"en": "/audio/neural/olah.en.mp3",
+"he": "/audio/neural/olah.he.mp3"
+},
+"et-time": {
+"en": "/audio/neural/et-time.en.mp3",
+"he": "/audio/neural/et-time.he.mp3"
+},
+"tson": {
+"en": "/audio/neural/tson.en.mp3",
+"he": "/audio/neural/tson.he.mp3"
+},
+"regel": {
+"en": "/audio/neural/regel.en.mp3",
+"he": "/audio/neural/regel.he.mp3"
+},
+"sadeh": {
+"he": "/audio/neural/sadeh.he.mp3",
+"en": "/audio/neural/sadeh.en.mp3"
+},
+"ammah": {
+"he": "/audio/neural/ammah.he.mp3",
+"en": "/audio/neural/ammah.en.mp3"
+},
+"orek": {
+"en": "/audio/neural/orek.en.mp3",
+"he": "/audio/neural/orek.he.mp3"
+},
+"hatsi": {
+"en": "/audio/neural/hatsi.en.mp3",
+"he": "/audio/neural/hatsi.he.mp3"
+},
+"rohab": {
+"en": "/audio/neural/rohab.en.mp3",
+"he": "/audio/neural/rohab.he.mp3"
+},
+"ehad": {
+"en": "/audio/neural/ehad.en.mp3",
+"he": "/audio/neural/ehad.he.mp3"
+},
+"shenayim": {
+"en": "/audio/neural/shenayim.en.mp3",
+"he": "/audio/neural/shenayim.he.mp3"
+},
+"shalosh": {
+"en": "/audio/neural/shalosh.en.mp3",
+"he": "/audio/neural/shalosh.he.mp3"
+},
+"arba": {
+"en": "/audio/neural/arba.en.mp3",
+"he": "/audio/neural/arba.he.mp3"
+},
+"hamesh": {
+"en": "/audio/neural/hamesh.en.mp3",
+"he": "/audio/neural/hamesh.he.mp3"
+},
+"shesh": {
+"en": "/audio/neural/shesh.en.mp3",
+"he": "/audio/neural/shesh.he.mp3"
+},
+"sheba": {
+"en": "/audio/neural/sheba.en.mp3",
+"he": "/audio/neural/sheba.he.mp3"
+},
+"shemoneh": {
+"en": "/audio/neural/shemoneh.en.mp3",
+"he": "/audio/neural/shemoneh.he.mp3"
+},
+"tesha": {
+"en": "/audio/neural/tesha.en.mp3",
+"he": "/audio/neural/tesha.he.mp3"
+},
+"eser": {
+"en": "/audio/neural/eser.en.mp3",
+"he": "/audio/neural/eser.he.mp3"
+},
+"meah": {
+"he": "/audio/neural/meah.he.mp3",
+"en": "/audio/neural/meah.en.mp3"
+},
+"eleph": {
+"en": "/audio/neural/eleph.en.mp3",
+"he": "/audio/neural/eleph.he.mp3"
+},
+"rishon": {
+"en": "/audio/neural/rishon.en.mp3",
+"he": "/audio/neural/rishon.he.mp3"
+},
+"sheni": {
+"he": "/audio/neural/sheni.he.mp3",
+"en": "/audio/neural/sheni.en.mp3"
+},
+"shelishi": {
+"en": "/audio/neural/shelishi.en.mp3",
+"he": "/audio/neural/shelishi.he.mp3"
+},
+"shebii": {
+"en": "/audio/neural/shebii.en.mp3",
+"he": "/audio/neural/shebii.he.mp3"
+},
+"akol": {
+"en": "/audio/neural/akol.en.mp3",
+"he": "/audio/neural/akol.he.mp3"
+},
+"amar": {
+"en": "/audio/neural/amar.en.mp3",
+"he": "/audio/neural/amar.he.mp3"
+},
+"halak": {
+"en": "/audio/neural/halak.en.mp3",
+"he": "/audio/neural/halak.he.mp3"
+},
+"hayah": {
+"en": "/audio/neural/hayah.en.mp3",
+"he": "/audio/neural/hayah.he.mp3"
+},
+"yatsa": {
+"en": "/audio/neural/yatsa.en.mp3",
+"he": "/audio/neural/yatsa.he.mp3"
+},
+"yashab": {
+"en": "/audio/neural/yashab.en.mp3",
+"he": "/audio/neural/yashab.he.mp3"
+},
+"nagash": {
+"en": "/audio/neural/nagash.en.mp3",
+"he": "/audio/neural/nagash.he.mp3"
+},
+"natan": {
+"en": "/audio/neural/natan.en.mp3",
+"he": "/audio/neural/natan.he.mp3"
+},
+"asah": {
+"en": "/audio/neural/asah.en.mp3",
+"he": "/audio/neural/asah.he.mp3"
+},
+"raah": {
+"en": "/audio/neural/raah.en.mp3",
+"he": "/audio/neural/raah.he.mp3"
+},
+"shama": {
+"en": "/audio/neural/shama.en.mp3",
+"he": "/audio/neural/shama.he.mp3"
+},
+"ak": {
+"en": "/audio/neural/ak.en.mp3",
+"he": "/audio/neural/ak.he.mp3"
+},
+"al-neg": {
+"en": "/audio/neural/al-neg.en.mp3",
+"he": "/audio/neural/al-neg.he.mp3"
+},
+"im-if": {
+"en": "/audio/neural/im-if.en.mp3",
+"he": "/audio/neural/im-if.he.mp3"
+},
+"bal": {
+"en": "/audio/neural/bal.en.mp3",
+"he": "/audio/neural/bal.he.mp3"
+},
+"lo": {
+"en": "/audio/neural/lo.en.mp3",
+"he": "/audio/neural/lo.he.mp3"
+},
+"attah-now": {
+"en": "/audio/neural/attah-now.en.mp3",
+"he": "/audio/neural/attah-now.he.mp3"
+},
+"tamid": {
+"en": "/audio/neural/tamid.en.mp3",
+"he": "/audio/neural/tamid.he.mp3"
+},
+"barak": {
+"en": "/audio/neural/barak.en.mp3",
+"he": "/audio/neural/barak.he.mp3"
+},
+"zakar-v": {
+"en": "/audio/neural/zakar-v.en.mp3",
+"he": "/audio/neural/zakar-v.he.mp3"
+},
+"hazaq": {
+"en": "/audio/neural/hazaq.en.mp3",
+"he": "/audio/neural/hazaq.he.mp3"
+},
+"yada": {
+"en": "/audio/neural/yada.en.mp3",
+"he": "/audio/neural/yada.he.mp3"
+},
+"kaved": {
+"en": "/audio/neural/kaved.en.mp3",
+"he": "/audio/neural/kaved.he.mp3"
+},
+"katab": {
+"en": "/audio/neural/katab.en.mp3",
+"he": "/audio/neural/katab.he.mp3"
+},
+"male": {
+"en": "/audio/neural/male.en.mp3",
+"he": "/audio/neural/male.he.mp3"
+},
+"malak": {
+"en": "/audio/neural/malak.en.mp3",
+"he": "/audio/neural/malak.he.mp3"
+},
+"natsa": {
+"en": "/audio/neural/natsa.en.mp3",
+"he": "/audio/neural/natsa.he.mp3"
+},
+"paqad": {
+"en": "/audio/neural/paqad.en.mp3",
+"he": "/audio/neural/paqad.he.mp3"
+},
+"shakab": {
+"en": "/audio/neural/shakab.en.mp3",
+"he": "/audio/neural/shakab.he.mp3"
+},
+"shalach": {
+"en": "/audio/neural/shalach.en.mp3",
+"he": "/audio/neural/shalach.he.mp3"
+},
+"shamar": {
+"he": "/audio/neural/shamar.he.mp3",
+"en": "/audio/neural/shamar.en.mp3"
+},
+"koh": {
+"en": "/audio/neural/koh.en.mp3",
+"he": "/audio/neural/koh.he.mp3"
+},
+"ken": {
+"en": "/audio/neural/ken.en.mp3",
+"he": "/audio/neural/ken.he.mp3"
+},
+"od": {
+"en": "/audio/neural/od.en.mp3",
+"he": "/audio/neural/od.he.mp3"
+},
+"bo": {
+"en": "/audio/neural/bo.en.mp3",
+"he": "/audio/neural/bo.he.mp3"
+},
+"banah": {
+"en": "/audio/neural/banah.en.mp3",
+"he": "/audio/neural/banah.he.mp3"
+},
+"yalad": {
+"en": "/audio/neural/yalad.en.mp3",
+"he": "/audio/neural/yalad.he.mp3"
+},
+"yare": {
+"en": "/audio/neural/yare.en.mp3",
+"he": "/audio/neural/yare.he.mp3"
+},
+"yarad": {
+"en": "/audio/neural/yarad.en.mp3",
+"he": "/audio/neural/yarad.he.mp3"
+},
+"laqah": {
+"en": "/audio/neural/laqah.en.mp3",
+"he": "/audio/neural/laqah.he.mp3"
+},
+"mut": {
+"en": "/audio/neural/mut.en.mp3",
+"he": "/audio/neural/mut.he.mp3"
+},
+"naphal": {
+"en": "/audio/neural/naphal.en.mp3",
+"he": "/audio/neural/naphal.he.mp3"
+},
+"natan-nasa": {
+"en": "/audio/neural/natan-nasa.en.mp3",
+"he": "/audio/neural/natan-nasa.he.mp3"
+},
+"abar": {
+"en": "/audio/neural/abar.en.mp3",
+"he": "/audio/neural/abar.he.mp3"
+},
+"alah": {
+"en": "/audio/neural/alah.en.mp3",
+"he": "/audio/neural/alah.he.mp3"
+},
+"amad": {
+"en": "/audio/neural/amad.en.mp3",
+"he": "/audio/neural/amad.he.mp3"
+},
+"qum": {
+"en": "/audio/neural/qum.en.mp3",
+"he": "/audio/neural/qum.he.mp3"
+},
+"qara": {
+"en": "/audio/neural/qara.en.mp3",
+"he": "/audio/neural/qara.he.mp3"
+},
+"sim": {
+"en": "/audio/neural/sim.en.mp3",
+"he": "/audio/neural/sim.he.mp3"
+},
+"poh": {
+"en": "/audio/neural/poh.en.mp3",
+"he": "/audio/neural/poh.he.mp3"
+},
+"shub": {
+"en": "/audio/neural/shub.en.mp3",
+"he": "/audio/neural/shub.he.mp3"
+},
+"raq": {
+"en": "/audio/neural/raq.en.mp3",
+"he": "/audio/neural/raq.he.mp3"
+},
+"hayah-live": {
+"en": "/audio/neural/hayah-live.en.mp3",
+"he": "/audio/neural/hayah-live.he.mp3"
+},
+"yakol": {
+"en": "/audio/neural/yakol.en.mp3",
+"he": "/audio/neural/yakol.he.mp3"
+},
+"karat": {
+"en": "/audio/neural/karat.en.mp3",
+"he": "/audio/neural/karat.he.mp3"
+},
+"sur": {
+"en": "/audio/neural/sur.en.mp3",
+"he": "/audio/neural/sur.he.mp3"
+},
+"abad": {
+"en": "/audio/neural/abad.en.mp3",
+"he": "/audio/neural/abad.he.mp3"
+},
+"anah": {
+"en": "/audio/neural/anah.en.mp3",
+"he": "/audio/neural/anah.he.mp3"
+},
+"ozen": {
+"en": "/audio/neural/ozen.en.mp3",
+"he": "/audio/neural/ozen.he.mp3"
+},
+"ayil": {
+"en": "/audio/neural/ayil.en.mp3",
+"he": "/audio/neural/ayil.he.mp3"
+},
+"zebah": {
+"en": "/audio/neural/zebah.en.mp3",
+"he": "/audio/neural/zebah.he.mp3"
+},
+"hayyim": {
+"en": "/audio/neural/hayyim.en.mp3",
+"he": "/audio/neural/hayyim.he.mp3"
+},
+"tsedaqah": {
+"en": "/audio/neural/tsedaqah.en.mp3",
+"he": "/audio/neural/tsedaqah.he.mp3"
+},
+"tsaphon": {
+"en": "/audio/neural/tsaphon.en.mp3",
+"he": "/audio/neural/tsaphon.he.mp3"
+},
+"az": {
+"en": "/audio/neural/az.en.mp3",
+"he": "/audio/neural/az.he.mp3"
+},
+"aph-also": {
+"he": "/audio/neural/aph-also.he.mp3",
+"en": "/audio/neural/aph-also.en.mp3"
+},
+"gibbor": {
+"en": "/audio/neural/gibbor.en.mp3",
+"he": "/audio/neural/gibbor.he.mp3"
+},
+"pen": {
+"en": "/audio/neural/pen.en.mp3",
+"he": "/audio/neural/pen.he.mp3"
+},
+"gaal": {
+"en": "/audio/neural/gaal.en.mp3",
+"he": "/audio/neural/gaal.he.mp3"
+},
+"hata": {
+"en": "/audio/neural/hata.en.mp3",
+"he": "/audio/neural/hata.he.mp3"
+},
+"yasaph": {
+"en": "/audio/neural/yasaph.en.mp3",
+"he": "/audio/neural/yasaph.he.mp3"
+},
+"yarash": {
+"en": "/audio/neural/yarash.en.mp3",
+"he": "/audio/neural/yarash.he.mp3"
+},
+"kipper": {
+"en": "/audio/neural/kipper.en.mp3",
+"he": "/audio/neural/kipper.he.mp3"
+},
+"natah": {
+"en": "/audio/neural/natah.en.mp3",
+"he": "/audio/neural/natah.he.mp3"
+},
+"azab": {
+"en": "/audio/neural/azab.en.mp3",
+"he": "/audio/neural/azab.he.mp3"
+},
+"qarab": {
+"en": "/audio/neural/qarab.en.mp3",
+"he": "/audio/neural/qarab.he.mp3"
+},
+"rabah": {
+"en": "/audio/neural/rabah.en.mp3",
+"he": "/audio/neural/rabah.he.mp3"
+},
+"shatah": {
+"en": "/audio/neural/shatah.en.mp3",
+"he": "/audio/neural/shatah.he.mp3"
+},
+"kaph": {
+"en": "/audio/neural/kaph.en.mp3",
+"he": "/audio/neural/kaph.he.mp3"
+},
+"peh": {
+"en": "/audio/neural/peh.en.mp3",
+"he": "/audio/neural/peh.he.mp3"
+},
+"rea": {
+"en": "/audio/neural/rea.en.mp3",
+"he": "/audio/neural/rea.he.mp3"
+},
+"neged": {
+"en": "/audio/neural/neged.en.mp3",
+"he": "/audio/neural/neged.he.mp3"
+},
+"sham": {
+"en": "/audio/neural/sham.en.mp3",
+"he": "/audio/neural/sham.he.mp3"
+},
+"abad-perish": {
+"en": "/audio/neural/abad-perish.en.mp3",
+"he": "/audio/neural/abad-perish.he.mp3"
+},
+"ahab": {
+"he": "/audio/neural/ahab.he.mp3",
+"en": "/audio/neural/ahab.en.mp3"
+},
+"asaph": {
+"en": "/audio/neural/asaph.en.mp3",
+"he": "/audio/neural/asaph.he.mp3"
+},
+"galah": {
+"en": "/audio/neural/galah.en.mp3",
+"he": "/audio/neural/galah.he.mp3"
+},
+"taher": {
+"en": "/audio/neural/taher.en.mp3",
+"he": "/audio/neural/taher.he.mp3"
+},
+"kalah": {
+"en": "/audio/neural/kalah.en.mp3",
+"he": "/audio/neural/kalah.he.mp3"
+},
+"rum": {
+"en": "/audio/neural/rum.en.mp3",
+"he": "/audio/neural/rum.he.mp3"
+},
+"shaphat": {
+"en": "/audio/neural/shaphat.en.mp3",
+"he": "/audio/neural/shaphat.he.mp3"
+},
+"ohel": {
+"en": "/audio/neural/ohel.en.mp3",
+"he": "/audio/neural/ohel.he.mp3"
+},
+"emet": {
+"en": "/audio/neural/emet.en.mp3",
+"he": "/audio/neural/emet.he.mp3"
+},
+"dam": {
+"en": "/audio/neural/dam.en.mp3",
+"he": "/audio/neural/dam.he.mp3"
+},
+"kisse": {
+"en": "/audio/neural/kisse.en.mp3",
+"he": "/audio/neural/kisse.he.mp3"
+},
+"mispar": {
+"en": "/audio/neural/mispar.en.mp3",
+"he": "/audio/neural/mispar.he.mp3"
+},
+"shemesh": {
+"en": "/audio/neural/shemesh.en.mp3",
+"he": "/audio/neural/shemesh.he.mp3"
+},
+"bahar": {
+"en": "/audio/neural/bahar.en.mp3",
+"he": "/audio/neural/bahar.he.mp3"
+},
+"bin": {
+"en": "/audio/neural/bin.en.mp3",
+"he": "/audio/neural/bin.he.mp3"
+},
+"darash": {
+"en": "/audio/neural/darash.en.mp3",
+"he": "/audio/neural/darash.he.mp3"
+},
+"harag": {
+"en": "/audio/neural/harag.en.mp3",
+"he": "/audio/neural/harag.he.mp3"
+},
+"haphets": {
+"en": "/audio/neural/haphets.en.mp3",
+"he": "/audio/neural/haphets.he.mp3"
+},
+"qadash": {
+"en": "/audio/neural/qadash.en.mp3",
+"he": "/audio/neural/qadash.he.mp3"
+},
+"raah-pasture": {
+"en": "/audio/neural/raah-pasture.en.mp3",
+"he": "/audio/neural/raah-pasture.he.mp3"
+},
+"shaal": {
+"en": "/audio/neural/shaal.en.mp3",
+"he": "/audio/neural/shaal.he.mp3"
+},
+"baal": {
+"en": "/audio/neural/baal.en.mp3",
+"he": "/audio/neural/baal.he.mp3"
+},
+"shebet": {
+"en": "/audio/neural/shebet.en.mp3",
+"he": "/audio/neural/shebet.he.mp3"
+},
+"shalom": {
+"en": "/audio/neural/shalom.en.mp3",
+"he": "/audio/neural/shalom.he.mp3"
+},
+"baad": {
+"en": "/audio/neural/baad.en.mp3",
+"he": "/audio/neural/baad.he.mp3"
+},
+"na": {
+"en": "/audio/neural/na.en.mp3",
+"he": "/audio/neural/na.he.mp3"
+},
+"yaan": {
+"en": "/audio/neural/yaan.en.mp3",
+"he": "/audio/neural/yaan.he.mp3"
+},
+"batah": {
+"he": "/audio/neural/batah.he.mp3",
+"en": "/audio/neural/batah.en.mp3"
+},
+"bakah": {
+"en": "/audio/neural/bakah.en.mp3",
+"he": "/audio/neural/bakah.he.mp3"
+},
+"labash": {
+"en": "/audio/neural/labash.en.mp3",
+"he": "/audio/neural/labash.he.mp3"
+},
+"saraf": {
+"en": "/audio/neural/saraf.en.mp3",
+"he": "/audio/neural/saraf.he.mp3"
+},
+"shillem": {
+"en": "/audio/neural/shillem.en.mp3",
+"he": "/audio/neural/shillem.he.mp3"
+},
+"zera": {
+"en": "/audio/neural/zera.en.mp3",
+"he": "/audio/neural/zera.he.mp3"
+},
+"huts": {
+"en": "/audio/neural/huts.en.mp3",
+"he": "/audio/neural/huts.he.mp3"
+},
+"dor": {
+"en": "/audio/neural/dor.en.mp3",
+"he": "/audio/neural/dor.he.mp3"
+},
+"melakah": {
+"en": "/audio/neural/melakah.en.mp3",
+"he": "/audio/neural/melakah.he.mp3"
+},
+"avon": {
+"en": "/audio/neural/avon.en.mp3",
+"he": "/audio/neural/avon.he.mp3"
+},
+"par": {
+"en": "/audio/neural/par.en.mp3",
+"he": "/audio/neural/par.he.mp3"
+},
+"petah": {
+"en": "/audio/neural/petah.en.mp3",
+"he": "/audio/neural/petah.he.mp3"
+},
+"rob": {
+"en": "/audio/neural/rob.en.mp3",
+"he": "/audio/neural/rob.he.mp3"
+},
+"safah": {
+"en": "/audio/neural/safah.en.mp3",
+"he": "/audio/neural/safah.he.mp3"
+},
+"announce-1": {
+"en": "/audio/neural/announce-1.en.mp3"
+},
+"announce-3": {
+"en": "/audio/neural/announce-3.en.mp3"
+},
+"announce-2": {
+"en": "/audio/neural/announce-2.en.mp3"
+},
+"announce-5": {
+"en": "/audio/neural/announce-5.en.mp3"
+},
+"announce-6": {
+"en": "/audio/neural/announce-6.en.mp3"
+},
+"announce-4": {
+"en": "/audio/neural/announce-4.en.mp3"
+},
+"announce-7": {
+"en": "/audio/neural/announce-7.en.mp3"
+},
+"announce-8": {
+"en": "/audio/neural/announce-8.en.mp3"
+},
+"announce-9": {
+"en": "/audio/neural/announce-9.en.mp3"
+},
+"announce-11": {
+"en": "/audio/neural/announce-11.en.mp3"
+},
+"announce-10": {
+"en": "/audio/neural/announce-10.en.mp3"
+},
+"announce-14": {
+"en": "/audio/neural/announce-14.en.mp3"
+},
+"announce-13": {
+"en": "/audio/neural/announce-13.en.mp3"
+},
+"announce-12": {
+"en": "/audio/neural/announce-12.en.mp3"
+},
+"announce-16": {
+"en": "/audio/neural/announce-16.en.mp3"
+},
+"announce-15": {
+"en": "/audio/neural/announce-15.en.mp3"
+},
+"announce-18": {
+"en": "/audio/neural/announce-18.en.mp3"
+},
+"announce-17": {
+"en": "/audio/neural/announce-17.en.mp3"
+},
+"announce-19": {
+"en": "/audio/neural/announce-19.en.mp3"
+}
+}

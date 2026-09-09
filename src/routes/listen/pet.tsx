@@ -15,6 +15,7 @@ import {
   unlockSpeech,
 } from "@/lib/listen";
 import { firstNameOf, petQueue } from "@/lib/pet";
+import { loadNeuralManifest } from "@/lib/neural-voice";
 import { useStudy } from "@/lib/store";
 import type { VocabItem } from "@/lib/vocab";
 
@@ -36,6 +37,7 @@ function AlivePetPage() {
 
   useEffect(() => {
     void recordedHeIds().then(setRecorded);
+    void loadNeuralManifest();
   }, []);
 
   useEffect(() => {

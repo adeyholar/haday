@@ -16,7 +16,8 @@ import {
   type BalloonPack,
   type BalloonSprite,
 } from "@/lib/balloon-game";
-import { speakLine } from "@/lib/listen";
+import { playNeuralVoice, speakLine, stopSpeech } from "@/lib/listen";
+import { loadNeuralManifest } from "@/lib/neural-voice";
 import { playPop, playSplash, unlockSfx } from "@/lib/sfx";
 import { useStudy } from "@/lib/store";
 
@@ -88,17 +89,16 @@ export function BalloonDrop() {
   function hush() {
     voice.current.stop = true;
     voice.current = { stop: false };
-    try {
-      window.speechSynthesis?.cancel();
-    } catch {
-      /* ignore */
-    }
+    stopSpeech();
   }
 
-  function callName(name: string, slow = false) {
+  function callName(id: string, name: string, slow = false) {
     hush();
-    void speakLine(name, "en", slow ? 0.62 : 0.8, voice.current);
     setHeard(name);
+    void (async () => {
+      const ok = await playNeuralVoice(id, "en", slow ? 0.7 : 0.85, voice.current);
+      if (!ok && !voice.current.stop) await speakLine(name, "en", slow ? 0.62 : 0.8, voice.current);
+    })();
   }
 
   function nextCall(avoidId?: string) {
@@ -116,7 +116,7 @@ export function BalloonDrop() {
     w.frozen = true;
     w.splashAt = null;
     const target = next.find((b) => b.target);
-    if (target) callName(spokenLetterName(target.item), intro);
+    if (target) callName(target.item.id, spokenLetterName(target.item), intro);
     bump();
     window.setTimeout(
       () => {
@@ -222,6 +222,7 @@ export function BalloonDrop() {
 
   function startRun() {
     unlockSfx();
+    void loadNeuralManifest();
     hush();
     saved.current = false;
     world.current = emptyWorld({
@@ -401,7 +402,7 @@ export function BalloonDrop() {
           className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           onClick={() => {
             const t = w.balloons.find((b) => b.target);
-            if (t) callName(spokenLetterName(t.item), w.intro);
+            if (t) callName(t.item.id, spokenLetterName(t.item), w.intro);
           }}
         >
           <Volume2 className="size-4" />

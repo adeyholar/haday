@@ -1,0 +1,778 @@
+# HaDay voice corpus
+# id <tab> part <tab> text
+# Feed this to a neural voice (Hebrew + English) or read it in the Voice bank.
+
+alef	he	אָלֶף
+alef	en	Alef
+bet	he	בֵּית
+bet	en	Bet
+gimel	he	גִּימֶל
+gimel	en	Gimel
+dalet	he	דָּלֶת
+dalet	en	Dalet
+he	he	הֵא
+he	en	He
+vav	he	וָו
+vav	en	Vav
+zayin	he	זַיִן
+zayin	en	Zayin
+het	he	חֵית
+het	en	Het
+tet	he	טֵית
+tet	en	Tet
+yod	he	יוֹד
+yod	en	Yod
+kaf	he	כַּף
+kaf	en	Kaf
+lamed	he	לָמֶד
+lamed	en	Lamed
+mem	he	מֵם
+mem	en	Mem
+nun	he	נוּן
+nun	en	Nun
+samekh	he	סָמֶךְ
+samekh	en	Samekh
+ayin	he	עַיִן
+ayin	en	Ayin
+pe	he	פֵּא
+pe	en	Pe
+tsade	he	צָדֵי
+tsade	en	Tsade
+qof	he	קוֹף
+qof	en	Qof
+resh	he	רֵישׁ
+resh	en	Resh
+shin	he	שִׁין
+shin	en	Shin
+sin	he	שִׂין
+sin	en	Sin
+tav	he	תָּו
+tav	en	Tav
+kaf-final	he	כַּף סוֹפִית
+kaf-final	en	Final kaf
+mem-final	he	מֵם סוֹפִית
+mem-final	en	Final mem
+nun-final	he	נוּן סוֹפִית
+nun-final	en	Final nun
+pe-final	he	פֵּא סוֹפִית
+pe-final	en	Final pe
+tsade-final	he	צָדֵי סוֹפִית
+tsade-final	en	Final tsade
+qamets	he	בָ
+qamets	en	Qamets
+tsere	he	בֵ
+tsere	en	Tsere
+holem	he	בֹ
+holem	en	Holem
+pathach	he	בַ
+pathach	en	Pathach
+seghol	he	בֶ
+seghol	en	Seghol
+hireq	he	בִ
+hireq	en	Hireq
+qamets-hatuf	he	בָ
+qamets-hatuf	en	Qamets Hatuf
+qibbuts	he	בֻ
+qibbuts	en	Qibbuts
+shewa	he	בְ
+shewa	en	Shewa
+hateph-pathach	he	בֲ
+hateph-pathach	en	Hateph Pathach
+hateph-seghol	he	בֱ
+hateph-seghol	en	Hateph Seghol
+hateph-qamets	he	בֳ
+hateph-qamets	en	Hateph Qamets
+qamets-he	he	בָה
+qamets-he	en	Qamets He
+tsere-he	he	בֵה
+tsere-he	en	Tsere He
+seghol-he	he	בֶה
+seghol-he	en	Seghol He
+holem-he	he	בֹה
+holem-he	en	Holem He
+holem-waw	he	בוֹ
+holem-waw	en	Holem Vav
+shureq	he	בוּ
+shureq	en	Shureq
+tsere-yod	he	בֵי
+tsere-yod	en	Tsere Yod
+seghol-yod	he	בֶי
+seghol-yod	en	Seghol Yod
+hireq-yod	he	בִי
+hireq-yod	en	Hireq Yod
+abraham	he	אַבְרָהָם
+abraham	en	Abraham
+aaron	he	אַהֲרֹן
+aaron	en	Aaron
+david	he	דָּוִד
+david	en	David
+judah	he	יְהוּדָה
+judah	en	Judah
+yhwh	he	יהוה
+yhwh	en	Yahweh
+joshua	he	יְהוֹשׁוּעַ
+joshua	en	Joshua
+joseph	he	יוֹסֵף
+joseph	en	Joseph
+jacob	he	יַעֲקֹב
+jacob	en	Jacob
+isaac	he	יִצְחָק
+isaac	en	Isaac
+jerusalem	he	יְרוּשָׁלַםִ
+jerusalem	en	Jerusalem
+jeremiah	he	יִרְמְיָהוּ
+jeremiah	en	Jeremiah
+israel	he	יִשְׂרָאֵל
+israel	en	Israel
+canaan	he	כְּנַעַן
+canaan	en	Canaan
+egypt	he	מִצְרַיִם
+egypt	en	Egypt
+moses	he	מֹשֶׁה
+moses	en	Moses
+esau	he	עֵשָׂו
+esau	en	Esau
+pharaoh	he	פַּרְעֹה
+pharaoh	en	Pharaoh
+zion	he	צִיּוֹן
+zion	en	Zion
+saul	he	שָׁאוּל
+saul	en	Saul
+solomon	he	שְׁלֹמֹה
+solomon	en	Solomon
+samuel	he	שְׁמוּאֵל
+samuel	en	Samuel
+ab	he	אָב
+ab	en	Father
+adon	he	אָדוֹן
+adon	en	Lord
+adam	he	אָדָם
+adam	en	Man
+adamah	he	אֲדָמָה
+adamah	en	Ground
+ah	he	אָח
+ah	en	Brother
+achot	he	אָחוֹת
+achot	en	Sister
+ish	he	אִישׁ
+ish	en	Man
+el-god	he	אֵל
+el-god	en	God
+elohim	he	אֱלֹהִים
+elohim	en	God
+em	he	אֵם
+em	en	Mother
+erets	he	אֶרֶץ
+erets	en	Land
+ishah	he	אִשָּׁה
+ishah	en	Woman
+bayit	he	בַּיִת
+bayit	en	House
+ben	he	בֵּן
+ben	en	Son
+bat	he	בַּת
+bat	en	Daughter
+dabar	he	דָּבָר
+dabar	en	Word
+yom	he	יוֹם
+yom	en	Day
+laylah	he	לַיְלָה
+laylah	en	Night
+naar	he	נַעַר
+naar	en	Boy
+naarah	he	נַעֲרָה
+naarah	en	Young girl
+goy	he	גּוֹי
+goy	en	Nation
+derek	he	דֶּרֶךְ
+derek	en	Way
+har	he	הַר
+har	en	Mountain
+kohen	he	כֹּהֵן
+kohen	en	Priest
+leb	he	לֵב
+leb	en	Heart
+mayim	he	מַיִם
+mayim	en	Water
+melek	he	מֶלֶךְ
+melek	en	King
+nabi	he	נָבִיא
+nabi	en	Prophet
+nephesh	he	נֶפֶשׁ
+nephesh	en	Soul
+sus	he	סוּס
+sus	en	Horse
+sefer	he	סֵפֶר
+sefer	en	Book
+ebed	he	עֶבֶד
+ebed	en	Slave
+ir	he	עִיר
+ir	en	City
+tsaba	he	צָבָא
+tsaba	en	Host
+qol	he	קוֹל
+qol	en	Voice
+rosh	he	רֹאשׁ
+rosh	en	Head
+shem	he	שֵׁם
+shem	en	Name
+shanah	he	שָׁנָה
+shanah	en	Year
+torah	he	תּוֹרָה
+torah	en	Law
+esh	he	אֵשׁ
+esh	en	Fire
+hekal	he	הֵיכָל
+hekal	en	Temple
+zahav	he	זָהָב
+zahav	en	Gold
+hereb	he	חֶרֶב
+hereb	en	Sword
+yeled	he	יֶלֶד
+yeled	en	Child
+yam	he	יָם
+yam	en	Sea
+kesef	he	כֶּסֶף
+kesef	en	Silver
+mizbeah	he	מִזְבֵּחַ
+mizbeah	en	Altar
+maqom	he	מָקוֹם
+maqom	en	Place
+mishpat	he	מִשְׁפָּט
+mishpat	en	Judgment
+neum	he	נְאֻם
+neum	en	Utterance
+olam	he	עוֹלָם
+olam	en	Forever
+anan	he	עָנָן
+anan	en	Cloud
+ruah	he	רוּחַ
+ruah	en	Spirit
+sar	he	שַׂר
+sar	en	Ruler
+shamayim	he	שָׁמַיִם
+shamayim	en	Heaven
+shaar	he	שַׁעַר
+shaar	en	Gate
+ha	he	הַ
+ha	en	The
+we	he	וְ
+we	en	And
+achar	he	אַחַר
+achar	en	After
+el	he	אֶל
+el	en	To
+et-with	he	אֵת
+et-with	en	With
+be	he	בְּ
+be	en	In
+ben-prep	he	בֵּין
+ben-prep	en	Between
+betokh	he	בְּתוֹךְ
+betokh	en	In the midst of
+ke	he	כְּ
+ke	en	As
+le	he	לְ
+le	en	To
+lemaan	he	לְמַעַן
+lemaan	en	On account of
+min	he	מִן
+min	en	From
+maal	he	מַעַל
+maal	en	Above
+ever	he	עֵבֶר
+ever	en	Beyond
+ad	he	עַד
+ad	en	Until
+al	he	עַל
+al	en	On
+im	he	עִם
+im	en	With
+panim	he	פָּנִים
+panim	en	Face
+tahat	he	תַּחַת
+tahat	en	Under
+et	he	אֵת
+et	en	Direct object marker
+kol	he	כֹּל
+kol	en	All
+qodesh	he	קֹדֶשׁ
+qodesh	en	Holiness
+raah-evil	he	רָעָה
+raah-evil	en	Evil
+gadol	he	גָּדוֹל
+gadol	en	Great
+zaqen	he	זָקֵן
+zaqen	en	Old
+zar	he	זָר
+zar	en	Foreign
+hay	he	חַי
+hay	en	Living
+hakam	he	חָכָם
+hakam	en	Wise
+tov	he	טוֹב
+tov	en	Good
+yashar	he	יָשָׁר
+yashar	en	Upright
+meat	he	מְעַט
+meat	en	Little
+tsaddiq	he	צַדִּיק
+tsaddiq	en	Righteous
+qadosh	he	קָדוֹשׁ
+qadosh	en	Holy
+qaton	he	קָטֹן
+qaton	en	Small
+qarov	he	קָרוֹב
+qarov	en	Near
+rab	he	רַב
+rab	en	Great
+rachoq	he	רָחוֹק
+rachoq	en	Distant
+ra	he	רַע
+ra	en	Bad
+rasha	he	רָשָׁע
+rasha	en	Wicked
+meod	he	מְאֹד
+meod	en	Very
+anahnu	he	אֲנַחְנוּ
+anahnu	en	We
+ani	he	אֲנִי
+ani	en	I
+anoki	he	אָנֹכִי
+anoki	en	I
+attah	he	אַתָּה
+attah	en	You
+attem	he	אַתֶּם
+attem	en	You
+hu	he	הוּא
+hu	en	He
+hi	he	הִיא
+hi	en	She
+hem	he	הֵם
+hem	en	They
+elleh	he	אֵלֶּה
+elleh	en	These
+zot	he	זֹאת
+zot	en	This
+zeh	he	זֶה
+zeh	en	This
+ha-int	he	הֲ
+ha-int	en	Interrogative particle (yes/no question)
+lama	he	לָמָּה
+lama	en	Why
+mah	he	מָה
+mah	en	What
+maddua	he	מַדּוּעַ
+maddua	en	Why
+mi	he	מִי
+mi	en	Who
+acher	he	אַחֵר
+acher	en	Other
+asher	he	אֲשֶׁר
+asher	en	Who
+ki	he	כִּי
+ki	en	That
+she	he	שֶׁ
+she	en	Who
+aph	he	אַף
+aph	en	Nostril
+baqar	he	בָּקָר
+baqar	en	Cattle
+boqer	he	בֹּקֶר
+boqer	en	Morning
+berakah	he	בְּרָכָה
+berakah	en	Blessing
+hattat	he	חַטָּאת
+hattat	en	Sin
+kavod	he	כָּבוֹד
+kavod	en	Glory
+keli	he	כְּלִי
+keli	en	Vessel
+lehem	he	לֶחֶם
+lehem	en	Bread
+milhamah	he	מִלְחָמָה
+milhamah	en	War
+mishpahah	he	מִשְׁפָּחָה
+mishpahah	en	Family
+am	he	עַם
+am	en	People
+ets	he	עֵץ
+ets	en	Tree
+o	he	אוֹ
+o	en	Or
+ein	he	אֵין
+ein	en	Is not
+gam	he	גַּם
+gam	en	Also
+hen	he	הֵן
+hen	en	Behold
+hinneh	he	הִנֵּה
+hinneh	en	Behold
+yesh	he	יֵשׁ
+yesh	en	There is
+levad	he	לְבַד
+levad	en	Alone
+saviv	he	סָבִיב
+saviv	en	Around
+eben	he	אֶבֶן
+eben	en	Stone
+oyeb	he	אֹיֵב
+oyeb	en	Enemy
+berit	he	בְּרִית
+berit	en	Covenant
+basar	he	בָּשָׂר
+basar	en	Flesh
+gebul	he	גְּבוּל
+gebul	en	Border
+hodesh	he	חֹדֶשׁ
+hodesh	en	Month
+hayil	he	חַיִל
+hayil	en	Strength
+hesed	he	חֶסֶד
+hesed	en	Loyalty
+yad	he	יָד
+yad	en	Hand
+midbar	he	מִדְבָּר
+midbar	en	Wilderness
+mavet	he	מָוֶת
+mavet	en	Death
+matteh	he	מַטֶּה
+matteh	en	Staff
+olah	he	עֹלָה
+olah	en	Whole burnt offering
+et-time	he	עֵת
+et-time	en	Time
+tson	he	צֹאן
+tson	en	Flock
+regel	he	רֶגֶל
+regel	en	Foot
+sadeh	he	שָׂדֶה
+sadeh	en	Field
+ammah	he	אַמָּה
+ammah	en	Cubit
+orek	he	אֹרֶךְ
+orek	en	Length
+hatsi	he	חֲצִי
+hatsi	en	Half
+rohab	he	רֹחַב
+rohab	en	Width
+ehad	he	אֶחָד
+ehad	en	One
+shenayim	he	שְׁנַיִם
+shenayim	en	Two
+shalosh	he	שָׁלֹשׁ
+shalosh	en	Three
+arba	he	אַרְבַּע
+arba	en	Four
+hamesh	he	חָמֵשׁ
+hamesh	en	Five
+shesh	he	שֵׁשׁ
+shesh	en	Six
+sheba	he	שֶׁבַע
+sheba	en	Seven
+shemoneh	he	שְׁמֹנֶה
+shemoneh	en	Eight
+tesha	he	תֵּשַׁע
+tesha	en	Nine
+eser	he	עֶשֶׂר
+eser	en	Ten
+meah	he	מֵאָה
+meah	en	Hundred
+eleph	he	אֶלֶף
+eleph	en	Thousand
+rishon	he	רִאשׁוֹן
+rishon	en	First
+sheni	he	שֵׁנִי
+sheni	en	Second
+shelishi	he	שְׁלִישִׁי
+shelishi	en	Third
+shebii	he	שְׁבִיעִי
+shebii	en	Seventh
+akol	he	אָכַל
+akol	en	To eat
+amar	he	אָמַר
+amar	en	To say
+hayah	he	הָיָה
+hayah	en	To be
+halak	he	הָלַךְ
+halak	en	To go
+yatsa	he	יָצָא
+yatsa	en	To go out
+yashab	he	יָשַׁב
+yashab	en	To sit
+nagash	he	נָגַשׁ
+nagash	en	To draw near
+natan	he	נָתַן
+natan	en	To give
+asah	he	עָשָׂה
+asah	en	To do
+raah	he	רָאָה
+raah	en	To see
+shama	he	שָׁמַע
+shama	en	To hear
+ak	he	אַךְ
+ak	en	Only
+al-neg	he	אַל
+al-neg	en	No
+im-if	he	אִם
+im-if	en	If
+bal	he	בַּל
+bal	en	No
+lo	he	לֹא
+lo	en	No
+attah-now	he	עַתָּה
+attah-now	en	Now
+tamid	he	תָּמִיד
+tamid	en	Continually
+barak	he	בָּרַךְ
+barak	en	To bless
+zakar-v	he	זָכַר
+zakar-v	en	To remember
+hazaq	he	חָזַק
+hazaq	en	To be strong
+yada	he	יָדַע
+yada	en	To know
+kaved	he	כָּבֵד
+kaved	en	To be heavy
+katab	he	כָּתַב
+katab	en	To write
+male	he	מָלֵא
+male	en	To be full
+malak	he	מָלַךְ
+malak	en	To reign
+natsa	he	מָצָא
+natsa	en	To find
+paqad	he	פָּקַד
+paqad	en	To attend
+shakab	he	שָׁכַב
+shakab	en	To lie down
+shalach	he	שָׁלַח
+shalach	en	To send
+shamar	he	שָׁמַר
+shamar	en	To watch
+koh	he	כֹּה
+koh	en	Thus
+ken	he	כֵּן
+ken	en	So
+od	he	עוֹד
+od	en	Again
+bo	he	בּוֹא
+bo	en	To go in
+banah	he	בָּנָה
+banah	en	To build
+yalad	he	יָלַד
+yalad	en	To bear
+yare	he	יָרֵא
+yare	en	To fear
+yarad	he	יָרַד
+yarad	en	To go down
+laqah	he	לָקַח
+laqah	en	To take
+mut	he	מוּת
+mut	en	To die
+naphal	he	נָפַל
+naphal	en	To fall
+natan-nasa	he	נָשָׂא
+natan-nasa	en	To lift
+abar	he	עָבַר
+abar	en	To pass over
+alah	he	עָלָה
+alah	en	To go up
+amad	he	עָמַד
+amad	en	To stand
+qum	he	קוּם
+qum	en	To rise
+qara	he	קָרָא
+qara	en	To call
+sim	he	שִׂים
+sim	en	To set
+shub	he	שׁוּב
+shub	en	To turn back
+poh	he	פֹּה
+poh	en	Here
+raq	he	רַק
+raq	en	Only
+hayah-live	he	חָיָה
+hayah-live	en	To live
+yakol	he	יָכֹל
+yakol	en	To be able
+karat	he	כָּרַת
+karat	en	To cut
+sur	he	סוּר
+sur	en	To turn aside
+abad	he	עָבַד
+abad	en	To work
+anah	he	עָנָה
+anah	en	To answer
+ozen	he	אֹזֶן
+ozen	en	Ear
+ayil	he	אַיִל
+ayil	en	Ram
+zebah	he	זֶבַח
+zebah	en	Sacrifice
+hayyim	he	חַיִּים
+hayyim	en	Life
+tsedaqah	he	צְדָקָה
+tsedaqah	en	Righteousness
+tsaphon	he	צָפוֹן
+tsaphon	en	North
+az	he	אָז
+az	en	Then
+aph-also	he	אַף
+aph-also	en	Also
+gibbor	he	גִּבּוֹר
+gibbor	en	Mighty
+pen	he	פֶּן
+pen	en	Lest
+gaal	he	גָּאַל
+gaal	en	To redeem
+hata	he	חָטָא
+hata	en	To sin
+yasaph	he	יָסַף
+yasaph	en	To add
+yarash	he	יָרַשׁ
+yarash	en	To inherit
+kipper	he	כָּפַר
+kipper	en	To cover
+natah	he	נָטָה
+natah	en	To stretch out
+azab	he	עָזַב
+azab	en	To leave
+qarab	he	קָרַב
+qarab	en	To approach
+rabah	he	רָבָה
+rabah	en	To be many
+shatah	he	שָׁתָה
+shatah	en	To drink
+kaph	he	כַּף
+kaph	en	Hand
+peh	he	פֶּה
+peh	en	Mouth
+rea	he	רֵעַ
+rea	en	Friend
+neged	he	נֶגֶד
+neged	en	Opposite
+sham	he	שָׁם
+sham	en	There
+abad-perish	he	אָבַד
+abad-perish	en	To perish
+ahab	he	אָהַב
+ahab	en	To love
+asaph	he	אָסַף
+asaph	en	To gather
+galah	he	גָּלָה
+galah	en	To uncover
+taher	he	טָהֵר
+taher	en	To be clean
+kalah	he	כָּלָה
+kalah	en	To be complete
+rum	he	רוּם
+rum	en	To be high
+shaphat	he	שָׁפַט
+shaphat	en	To judge
+ohel	he	אֹהֶל
+ohel	en	Tent
+emet	he	אֱמֶת
+emet	en	Truth
+dam	he	דָּם
+dam	en	Blood
+kisse	he	כִּסֵּא
+kisse	en	Seat
+mispar	he	מִסְפָּר
+mispar	en	Number
+shemesh	he	שֶׁמֶשׁ
+shemesh	en	Sun
+bahar	he	בָּחַר
+bahar	en	To choose
+bin	he	בִּין
+bin	en	To understand
+darash	he	דָּרַשׁ
+darash	en	To seek
+harag	he	הָרַג
+harag	en	To kill
+haphets	he	חָפֵץ
+haphets	en	To delight in
+qadash	he	קָדַשׁ
+qadash	en	To be holy
+raah-pasture	he	רָעָה
+raah-pasture	en	To pasture
+shaal	he	שָׁאַל
+shaal	en	To ask
+baal	he	בַּעַל
+baal	en	Owner
+shebet	he	שֵׁבֶט
+shebet	en	Rod
+shalom	he	שָׁלוֹם
+shalom	en	Peace
+baad	he	בַּעַד
+baad	en	Behind
+yaan	he	יַעַן
+yaan	en	On account of
+na	he	נָא
+na	en	Please
+batah	he	בָּטַח
+batah	en	To trust
+bakah	he	בָּכָה
+bakah	en	To weep
+labash	he	לָבַשׁ
+labash	en	To put on
+saraf	he	שָׂרַף
+saraf	en	To burn
+shillem	he	שָׁלֵם
+shillem	en	To be complete
+dor	he	דּוֹר
+dor	en	Generation
+zera	he	זֶרַע
+zera	en	Seed
+huts	he	חוּץ
+huts	en	Outside
+melakah	he	מְלָאכָה
+melakah	en	Work
+avon	he	עָוֹן
+avon	en	Iniquity
+par	he	פַּר
+par	en	Bull
+petah	he	פֶּתַח
+petah	en	Opening
+rob	he	רֹב
+rob	en	Multitude
+safah	he	שָׂפָה
+safah	en	Lip
+announce-1	he	
+announce-1	en	Chapter 1. Alphabet
+announce-2	he	
+announce-2	en	Chapter 2. Names
+announce-3	he	
+announce-3	en	Chapter 3. Nouns
+announce-4	he	
+announce-4	en	Chapter 4. More nouns
+announce-5	he	
+announce-5	en	Chapter 5. Article & vav
+announce-6	he	
+announce-6	en	Chapter 6. Prepositions
+announce-7	he	
+announce-7	en	Chapter 7. Adjectives
+announce-8	he	
+announce-8	en	Chapter 8. Pronouns
+announce-9	he	
+announce-9	en	Chapter 9. More nouns
+announce-10	he	
+announce-10	en	Chapter 10. Construct nouns
+announce-11	he	
+announce-11	en	Chapter 11. Numbers
+announce-12	he	
+announce-12	en	Chapter 12. Qal verbs
+announce-13	he	
+announce-13	en	Chapter 13. More Qal
+announce-14	he	
+announce-14	en	Chapter 14. Come & go
+announce-15	he	
+announce-15	en	Chapter 15. Live & serve
+announce-16	he	
+announce-16	en	Chapter 16. Redeem
+announce-17	he	
+announce-17	en	Chapter 17. Love & judge
+announce-18	he	
+announce-18	en	Chapter 18. Choose & seek
+announce-19	he	
+announce-19	en	Chapter 19. Trust & work

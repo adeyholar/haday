@@ -31,6 +31,7 @@ import {
   waitForVoices,
   type ListenLoop,
 } from "@/lib/listen";
+import { loadNeuralManifest } from "@/lib/neural-voice";
 
 export const Route = createFileRoute("/listen/")({ component: ListenPage });
 
@@ -64,6 +65,7 @@ function ListenPage() {
 
   useEffect(() => {
     void waitForVoices().then(() => setHeVoice(hasHebrewVoice()));
+    void loadNeuralManifest();
   }, []);
 
   useEffect(() => {
