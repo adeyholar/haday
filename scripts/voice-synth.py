@@ -63,7 +63,10 @@ async def run(args: argparse.Namespace) -> int:
     await asyncio.gather(*tasks)
     (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=0))
     print(f"neural {len(manifest)} ids, wrote {made} new files → {OUT}")
-    return 0
+    from subprocess import run
+
+    n = run([sys.executable, str(ROOT / "scripts" / "voice-normalize.py"), "--dir", str(OUT)])
+    return n.returncode
 
 
 def main() -> int:

@@ -482,6 +482,7 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
     const start = whole ? 0 : Math.max(0, clip.start);
     const end = whole ? (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 2.4) : Math.max(start + 0.14, clip.end);
     el.playbackRate = Math.min(1.2, Math.max(0.7, rate));
+    el.volume = 1;
     el.currentTime = start;
     await el.play();
     return await new Promise<boolean>((resolve) => {

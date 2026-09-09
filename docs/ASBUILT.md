@@ -34,7 +34,9 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 ## Listen (as built)
 
-**Vocabulary.** Playback order: owner Voice-bank take → neural Hila/Jenny clip for the closed corpus → isolated Eliran lexeme when the citation form is in Genesis → TTS. Lingua Libre is not used. Prefixes are not clipped. Tanakh sentence-cuts are not used here.
+**Vocabulary.** Playback order: owner Voice-bank take → neural clip (loudness-matched; Hebrew gained so it is not quieter than English) → isolated Eliran lexeme → TTS.
+
+**Swap engine.** Download `/audio/neural/corpus.txt`. Synthesize `{id}.he.mp3` / `{id}.en.mp3`. Put them in `public/audio/neural/inbox/`. `python3 scripts/voice-import.py` normalizes and rebuilds the manifest.
 
 **Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 

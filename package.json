@@ -19,6 +19,8 @@
     "check:auth": "node scripts/check-auth-invariant.mjs",
     "voice:corpus": "node scripts/export-voice-corpus.mjs",
     "voice:synth": "node scripts/export-voice-corpus.mjs && python3 scripts/voice-synth.py",
+    "voice:norm": "python3 scripts/voice-normalize.py",
+    "voice:import": "python3 scripts/voice-import.py",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

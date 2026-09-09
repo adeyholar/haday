@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-09
 
-- **Voice module.** Closed list of letters, vowels, names, and BBH lemmas, spoken by a natural Hebrew neural voice (Hila) and a natural English voice (Jenny). Your Voice bank takes still win. Browser TTS is last. Download the text list from Voice bank to feed another synthesizer later.
+- **Hebrew volume matched.** Neural clips are trimmed and loudness-normalized; Hebrew sits a bit louder than English so it does not disappear. Same pipeline accepts MP3s from another engine (`voice-import`).
 
 - **Alive Pet + Voice bank.** Course owner records specific class lemmas (Hebrew name, optional English gloss). Alive Pet and Listen use those takes first. Weak lemmas you missed lead the pet’s queue.
 
