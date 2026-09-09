@@ -282,6 +282,87 @@
     0 0 0 6px color-mix(in oklab, var(--color-balloon) 55%, transparent);
 }
 
+.alive-pet {
+  position: relative;
+  width: 10.5rem;
+  height: 11.5rem;
+}
+
+.alive-pet-body {
+  position: absolute;
+  inset-inline: 1.6rem;
+  bottom: 0.2rem;
+  height: 4.6rem;
+  border-radius: 50% 50% 46% 46%;
+  background: var(--color-parchment);
+  box-shadow: var(--shadow-border);
+}
+
+.alive-pet-head {
+  position: absolute;
+  inset-inline: 2.4rem;
+  top: 1.8rem;
+  height: 5.2rem;
+  border-radius: 50%;
+  background: var(--color-card);
+  box-shadow: var(--shadow-border);
+}
+
+.alive-pet-ear {
+  position: absolute;
+  top: 0.7rem;
+  width: 1.6rem;
+  height: 2.4rem;
+  border-radius: 50% 50% 40% 40%;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-border);
+}
+
+.alive-pet-ear-l { left: 2.1rem; transform: rotate(-18deg); }
+.alive-pet-ear-r { right: 2.1rem; transform: rotate(18deg); }
+
+.alive-pet-eye {
+  position: absolute;
+  top: 2rem;
+  width: 0.55rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.alive-pet-eye-l { left: 1.45rem; }
+.alive-pet-eye-r { right: 1.45rem; }
+
+.alive-pet-mouth {
+  position: absolute;
+  left: 50%;
+  bottom: 1.15rem;
+  width: 1.15rem;
+  height: 0.28rem;
+  border-radius: 0 0 1rem 1rem;
+  background: var(--color-ink);
+  transform: translateX(-50%);
+}
+
+.alive-pet.is-talking .alive-pet-mouth {
+  animation: pet-talk 280ms var(--ease-out) infinite;
+}
+
+.alive-pet.is-talking .alive-pet-ear {
+  animation: pet-ear 900ms var(--ease-smooth-out) infinite;
+}
+
+@keyframes pet-talk {
+  from { height: 0.22rem; }
+  to { height: 0.7rem; }
+}
+
+@keyframes pet-ear {
+  from { transform: rotate(-12deg); }
+  50% { transform: rotate(8deg); }
+  to { transform: rotate(-12deg); }
+}
+
 @media (min-width: 640px) {
   .letter-balloon {
     width: 4.2rem;

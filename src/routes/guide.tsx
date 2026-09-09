@@ -41,7 +41,8 @@ function GuidePage() {
             Zakhor (Daily keep) is the short daily mix of words you have already met — due, weak, and older mastered
             lemmas — so new chapters do not bury the old ones. The Study menu groups Drill, Write, Quiz, Match, Lex,
             Alef-bet, Zakhor, and Guide. Listen has its own menu: class vocabulary, then Genesis 1–5 follow-along with the
-            recorded Hebrew chapter audio (not a computer voice) and a grade at 90%. Ask HaDay Hebraic AI to clarify the
+            recorded Hebrew chapter audio (not a computer voice) and a grade at 90%. Alive Pet speaks class words in the
+            owner’s recorded voice when a take exists, with your weak lemmas first. Ask HaDay Hebraic AI to clarify the
             lesson. Suggest a feature puts class ideas in the inventory for review — what makes sense gets planned and
             built.
           </li>
@@ -96,7 +97,16 @@ function GuidePage() {
           lively woman voice when the phone has one. Default pace is Warm. Tap Play once; after that you can sit and
           listen. Jump to a chapter if you want a shorter stretch. Loop this chapter, pick a group of chapters (Mix), or
           loop the whole list. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
-          off.
+          off. Class-owner recordings in the Voice bank play first when they exist.
+        </p>
+      </Panel>
+
+      <Panel className="mb-3">
+        <h2 className="font-display text-2xl font-bold text-ink">Alive Pet</h2>
+        <p className="mt-2 text-sm text-muted">
+          Listen → Alive Pet. A companion recites class lemmas: Hebrew, then English. The course owner records specific
+          words in the Voice bank; those takes are the pet’s data. Your weak lemmas come first. Until a take exists, it
+          uses the Open Hebrew Bible clip or a computer voice.
         </p>
       </Panel>
 

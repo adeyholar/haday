@@ -21,7 +21,8 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 |---|---|---|
 | **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. Learn / Rules name letters with the Hebrew glyph (ה not “He”). |
 | **Game** | BBH path Ch. 1–19, Custom mix (Vocabulary or Grammar), Aleph-bet mastery, **Ocean letters** (letters or vowels; listen-only; two-player; weak sky; first-call highlight), Syllables, Nouns, Article & vav, Grammar hub, Ultimate | Header Game stays grouped. Ocean letters: 3 lives, +1 per wave, look-alike decoys, iPad tap-to-start for voice. **90%** to clear a stage or unit. |
-| **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. |
+| **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. |
+| **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
@@ -49,6 +50,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | New email accounts | Domain must accept mail; no throwaway inbox; classmate opens a 24-hour confirmation link before sign-in |
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
 | Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). **Remove** deletes an unwanted account (not the owner). |
+| Voice bank | Owner records Hebrew / English takes of class lemmas. Alive Pet and Listen use them first. |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
 | Privacy | Public `/legal` — what we store, that we do not sell it, local/international disclaimer, 13+ |
@@ -68,7 +70,7 @@ Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FR
 | `public/tanakh/books/` | Westminster Leningrad nikkud + WEB English |
 | `public/tanakh/align/` | Kaldi MFA word / phone times, 929/929 |
 | `scripts/mfa-align-tanakh.py` | Murillo-style MFA runner (resume skips finished chapters) |
-| `migrations/*.sql` | Auth, study, game, leaderboard, visits, handwriting, ideas, existing-user emailVerified backfill |
+| `migrations/*.sql` | Auth, study, game, leaderboard, visits, handwriting, ideas, existing-user emailVerified backfill, voice bank |
 
 Postgres on Azure holds users, sessions, progress, ideas, visits. Local preview uses PGLite.
 

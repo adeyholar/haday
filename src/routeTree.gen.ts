@@ -29,9 +29,11 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as WriteRouteImport } from './routes/write'
+import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
+import { Route as ListenPetRouteImport } from './routes/listen/pet'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as GameChapterIndexRouteImport } from './routes/game/$chapter/index'
 import { Route as GameChapterStageRouteImport } from './routes/game/$chapter/$stage'
@@ -153,6 +155,11 @@ const WriteRoute = WriteRouteImport.update({
   path: '/write',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVoiceRoute = AdminVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
@@ -166,6 +173,11 @@ const GameIndexRoute = GameIndexRouteImport.update({
 const ListenIndexRoute = ListenIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => ListenRoute,
+} as any)
+const ListenPetRoute = ListenPetRouteImport.update({
+  id: '/pet',
+  path: '/pet',
   getParentRoute: () => ListenRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -271,7 +283,7 @@ const ListenReadBookChRoute = ListenReadBookChRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
@@ -290,7 +302,9 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/listen/pet': typeof ListenPetRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -316,7 +330,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
@@ -334,7 +348,9 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/listen/pet': typeof ListenPetRoute
   '/game': typeof GameIndexRoute
   '/listen': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -361,7 +377,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
@@ -380,7 +396,9 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/listen/pet': typeof ListenPetRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -427,7 +445,9 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/voice'
     | '/api/health'
+    | '/listen/pet'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -471,7 +491,9 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/voice'
     | '/api/health'
+    | '/listen/pet'
     | '/game'
     | '/listen'
     | '/api/auth/$'
@@ -516,7 +538,9 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/voice'
     | '/api/health'
+    | '/listen/pet'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -543,7 +567,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AlphabetRoute: typeof AlphabetRoute
   AskRoute: typeof AskRoute
   BrowseRoute: typeof BrowseRoute
@@ -725,6 +749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WriteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/voice': {
+      id: '/admin/voice'
+      path: '/voice'
+      fullPath: '/admin/voice'
+      preLoaderRoute: typeof AdminVoiceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/health': {
       id: '/api/health'
       path: '/api/health'
@@ -744,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/listen/'
       preLoaderRoute: typeof ListenIndexRouteImport
+      parentRoute: typeof ListenRoute
+    }
+    '/listen/pet': {
+      id: '/listen/pet'
+      path: '/pet'
+      fullPath: '/listen/pet'
+      preLoaderRoute: typeof ListenPetRouteImport
       parentRoute: typeof ListenRoute
     }
     '/api/auth/$': {
@@ -889,7 +927,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminVoiceRoute: typeof AdminVoiceRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminVoiceRoute: AdminVoiceRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface ListenRouteChildren {
+  ListenPetRoute: typeof ListenPetRoute
   ListenIndexRoute: typeof ListenIndexRoute
   ListenReadIndexRoute: typeof ListenReadIndexRoute
   ListenReadBookChRoute: typeof ListenReadBookChRoute
@@ -897,6 +946,7 @@ interface ListenRouteChildren {
 }
 
 const ListenRouteChildren: ListenRouteChildren = {
+  ListenPetRoute: ListenPetRoute,
   ListenIndexRoute: ListenIndexRoute,
   ListenReadIndexRoute: ListenReadIndexRoute,
   ListenReadBookChRoute: ListenReadBookChRoute,
@@ -908,7 +958,7 @@ const ListenRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AlphabetRoute: AlphabetRoute,
   AskRoute: AskRoute,
   BrowseRoute: BrowseRoute,

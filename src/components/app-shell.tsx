@@ -14,7 +14,9 @@ import {
   Link2,
   ListChecks,
   Medal,
+  Mic,
   MoreHorizontal,
+  PawPrint,
   PenLine,
   Repeat,
   ScrollText,
@@ -65,6 +67,7 @@ const GAME: NavItem[] = [
 
 const LISTEN: NavItem[] = [
   { to: "/listen", label: "Vocabulary", hint: "Hebrew, then English", icon: Headphones },
+  { to: "/listen/pet", label: "Alive Pet", hint: "Class voice, your weak words", icon: PawPrint },
   { to: "/listen/read", label: "Tanakh", hint: "All 39 books", icon: BookOpen },
   { to: "/listen/read", hash: "torah", label: "Torah", hint: "Genesis–Deuteronomy", icon: BookOpen },
   { to: "/listen/read", hash: "neviim", label: "Nevi'im", hint: "Joshua–Malachi", icon: BookOpen },
@@ -78,7 +81,10 @@ function moreItems(admin: boolean): NavItem[] {
     { to: "/leaderboard", label: "Leaderboard", hint: "Class standings", icon: Medal },
     { to: "/rewards", label: "Rewards", hint: "Ranks and badges", icon: Trophy },
   ];
-  if (admin) items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
+  if (admin) {
+    items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
+    items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
+  }
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
   return items;
@@ -244,7 +250,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/ask", "/ideas", "/legal"].includes(pathname)}
+              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/ask", "/ideas", "/legal"].includes(pathname)}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />

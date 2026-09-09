@@ -1,6 +1,7 @@
 import { alphabetVocab, bbhVocab, GAME_CHAPTER_TITLES, type VocabItem } from "@/lib/vocab";
 import type { ReadingVerse } from "@/lib/reading";
 import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
+import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -630,7 +631,54 @@ export function pauseMs(ms: number, signal: { stop: boolean }): Promise<void> {
   });
 }
 
+const voiceClipCache = new Map<string, { mime: string; b64: string } | null>();
+let voiceHeIds: Set<string> | null = null;
+
+export function invalidateVoiceCache() {
+  voiceClipCache.clear();
+  voiceHeIds = null;
+}
+
+export async function recordedHeIds(): Promise<Set<string>> {
+  if (voiceHeIds) return voiceHeIds;
+  try {
+    const rows = await listVoiceIndex();
+    voiceHeIds = new Set(rows.filter((r) => r.part === "he").map((r) => r.vocabId));
+  } catch {
+    voiceHeIds = new Set();
+  }
+  return voiceHeIds;
+}
+
+export async function playAdminVoice(
+  vocabId: string,
+  part: VoicePart,
+  rate: number,
+  signal: { stop: boolean },
+): Promise<boolean> {
+  const key = `${vocabId}:${part}`;
+  let payload = voiceClipCache.get(key);
+  if (payload === undefined) {
+    try {
+      const row = await getVoiceClip({ data: { vocabId, part } });
+      payload = row ? { mime: row.mime, b64: row.b64 } : null;
+    } catch {
+      payload = null;
+    }
+    voiceClipCache.set(key, payload);
+  }
+  if (!payload || signal.stop) return false;
+  const src = `data:${payload.mime};base64,${payload.b64}`;
+  return playVocabClip(
+    { src, start: 0, end: 0, he: "", kind: "lemma", source: "eliran" },
+    rate,
+    signal,
+  );
+}
+
 async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
+  const own = await playAdminVoice(item.id, "he", rate, signal);
+  if (own || signal.stop) return;
   const clip = vocabClip(item.id);
   if (clip?.source === "eliran" && clip.kind === "lemma") {
     const ok = await playVocabClip(clip, rate, signal);
@@ -662,7 +710,10 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
   if (signal.stop) return;
 
   const en = spokenEnglish(item.gloss);
-  if (en) await speakLine(en, "en", rate, signal);
+  if (en) {
+    const ownEn = await playAdminVoice(item.id, "en", rate, signal);
+    if (!ownEn && !signal.stop) await speakLine(en, "en", rate, signal);
+  }
   if (signal.stop) return;
   await pauseMs(restFor(rate, apple ? 280 : 720), signal);
 }

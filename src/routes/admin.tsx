@@ -118,7 +118,12 @@ function AdminPage() {
         <p className="mt-2 max-w-prose text-sm text-muted">
           {mailer?.configured
             ? "Email reset sends the hour-long link to that classmate. Copy stays as a backup if nothing arrives."
-            : "This host is not sending mail yet. Email reset still creates a link you can copy until a mailer key is on Azure or Vercel."}
+            : "This host is not sending mail yet. Email reset still creates a link you can copy until a mailer key is on Azure or Vercel."}{" "}
+          <Link to="/admin/voice" className="font-semibold text-primary">
+            Voice bank
+          </Link>
+          {" — "}
+          record class lemmas for Alive Pet and Listen.
         </p>
       </Panel>
 

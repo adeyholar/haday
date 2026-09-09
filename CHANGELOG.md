@@ -10,6 +10,10 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+## 2026-09-09
+
+- **Alive Pet + Voice bank.** Course owner records specific class lemmas (Hebrew name, optional English gloss). Alive Pet and Listen use those takes first. Weak lemmas you missed lead the pet’s queue.
+
 ## 2026-09-08
 
 - **Spell · strict grades as you type again.** Green/red live grade while you type. The verse still stays hidden until you submit.
