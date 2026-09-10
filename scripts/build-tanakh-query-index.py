@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Scan Masoretic Tanakh dumps into a compact admin query index.
 
-Tags follow class rules, not a commercial lexicon:
-  hatuf / gadol  — qamets hatuf (closed unaccented) vs qamets gadol
-  ms / mp / fs / fp / dual — ending shape after common prefixes
+Tags follow class rules (endings, shewa, qamets, surface verb person), not a commercial lexicon.
 """
 from __future__ import annotations
 
@@ -19,29 +17,39 @@ OUT = ROOT / "public" / "tanakh" / "query-index.json"
 QAMETS = "\u05B8"
 QAMETS_QATAN = "\u05C7"
 SHEWA = "\u05B0"
+HATEPH_SEGOL = "\u05B1"
+HATEPH_PATAH = "\u05B2"
+HATEPH_QAMETS = "\u05B3"
 METEG = "\u05BD"
 MAQQEF = "\u05BE"
 HOLEM = "\u05B9"
 HOLEM_HASER = "\u05BA"
-SHUREQ = "\u05BC"  # dagesh; shureq is vav + dagesh when vav has no other vowel
 HIREQ = "\u05B4"
+TSERE = "\u05B5"
+SEGOL = "\u05B6"
+PATHACH = "\u05B7"
+QIBBUTS = "\u05BB"
+DAGESH = "\u05BC"
 ACCENT = {chr(i) for i in range(0x0591, 0x05B0)}
 CONS = {chr(i) for i in range(0x05D0, 0x05EB)}
 FULL = {
     SHEWA,
-    "\u05B1",
-    "\u05B2",
-    "\u05B3",
+    HATEPH_SEGOL,
+    HATEPH_PATAH,
+    HATEPH_QAMETS,
     HIREQ,
-    "\u05B5",
-    "\u05B6",
-    "\u05B7",
+    TSERE,
+    SEGOL,
+    PATHACH,
     QAMETS,
     HOLEM,
     HOLEM_HASER,
-    "\u05BB",
+    QIBBUTS,
     QAMETS_QATAN,
 }
+SHORT = {PATHACH, SEGOL, HIREQ, QIBBUTS, QAMETS_QATAN}
+LONG = {TSERE, HOLEM, HOLEM_HASER}
+HATEPH = {HATEPH_SEGOL, HATEPH_PATAH, HATEPH_QAMETS}
 
 PREFIX_RE = re.compile(
     r"^"
@@ -50,12 +58,32 @@ PREFIX_RE = re.compile(
     r"(הַ|הָ|הֶ)?"
 )
 
+KEEP_ALWAYS = {
+    "hatuf",
+    "dual",
+    "fp",
+    "mp",
+    "fs",
+    "shewaPair",
+    "shewaVocal",
+    "shewaSilent",
+    "wayy",
+    "v3ms",
+    "v3fs",
+    "v2ms",
+    "v2fs",
+    "v3mp",
+    "v2mp",
+    "v2fp",
+    "v1cs",
+    "v1cp",
+    "hateph",
+}
+
 
 def strip_acc(s: str) -> str:
     return "".join(
-        ch
-        for ch in s
-        if ch not in ACCENT and ch not in "\u05c0\u05c3\u05c6" and ch != METEG
+        ch for ch in s if ch not in ACCENT and ch not in "\u05c0\u05c3\u05c6" and ch != METEG
     )
 
 
@@ -83,14 +111,15 @@ def kind(cl: str) -> str:
     if QAMETS_QATAN in cl:
         return "qatan"
     vowels = [ch for ch in cl if ch in FULL]
+    if any(ch in HATEPH for ch in cl):
+        return "hateph"
     if QAMETS in cl:
         return "qamets"
     if vowels == [SHEWA]:
         return "shewa"
     if any(v != SHEWA for v in vowels):
         return "full"
-    # mater: vav with holem/dagesh (shureq), yod with hireq already in FULL
-    if cl[0] == "ו" and ("\u05bc" in cl or HOLEM in cl or HOLEM_HASER in cl):
+    if cl[0] == "ו" and (DAGESH in cl or HOLEM in cl or HOLEM_HASER in cl):
         return "full"
     if cl[0] == "י" and HIREQ in cl:
         return "full"
@@ -101,31 +130,52 @@ def is_onset(cl: str) -> bool:
     return kind(cl) == "none"
 
 
+def fold_clusters(piece: str) -> list[str]:
+    cls = clusters(piece)
+    folded: list[str] = []
+    buf = ""
+    for cl in cls:
+        if is_onset(cl):
+            buf += cl
+            continue
+        folded.append(buf + cl)
+        buf = ""
+    if buf:
+        if folded:
+            folded[-1] += buf
+        else:
+            folded.append(buf)
+    return folded
+
+
+def prev_length(cl: str) -> str:
+    """short | long | shewa | other — for the shewa rule."""
+    if QAMETS_QATAN in cl:
+        return "short"
+    if any(ch in SHORT for ch in cl) and QAMETS not in cl:
+        return "short"
+    if any(ch in LONG for ch in cl):
+        return "long"
+    if QAMETS in cl:
+        return "long"
+    if kind(cl) == "shewa":
+        return "shewa"
+    if kind(cl) == "hateph":
+        return "short"
+    return "other"
+
+
 def qamets_tags(word: str) -> set[str]:
     tags: set[str] = set()
     if QAMETS_QATAN in word:
         tags.add("hatuf")
     proclitic = MAQQEF in word
     pieces = word.split(MAQQEF) if MAQQEF in word else [word]
-    for piece in pieces:
-        cls = clusters(piece)
-        if not cls:
+    for p_i, piece in enumerate(pieces):
+        folded = fold_clusters(piece)
+        if not folded:
             continue
-        # fold onset-only consonants onto the next cluster
-        folded: list[str] = []
-        buf = ""
-        for cl in cls:
-            if is_onset(cl):
-                buf += cl
-                continue
-            folded.append(buf + cl)
-            buf = ""
-        if buf:
-            if folded:
-                folded[-1] += buf
-            else:
-                folded.append(buf)
-        vowel_i = [i for i, cl in enumerate(folded) if kind(cl) in {"qamets", "qatan", "full", "shewa"}]
+        vowel_i = [i for i, cl in enumerate(folded) if kind(cl) in {"qamets", "qatan", "full", "shewa", "hateph"}]
         last_v = vowel_i[-1] if vowel_i else -1
         for i, cl in enumerate(folded):
             k = kind(cl)
@@ -135,8 +185,7 @@ def qamets_tags(word: str) -> set[str]:
                 tags.add("hatuf")
                 continue
             body = letters("".join(folded))
-            # Prefix-stripped כל with qamets is the textbook hatuf (kol, not kāl).
-            if body.endswith("כל") and body[-2:] == "כל" and len(body) <= 4 and i == 0:
+            if body.endswith("כל") and len(body) <= 4 and i == 0:
                 tags.add("hatuf")
                 continue
             nxt = folded[i + 1] if i + 1 < len(folded) else ""
@@ -151,12 +200,47 @@ def qamets_tags(word: str) -> set[str]:
             meteg = METEG in cl
             last = i == last_v
             accented = meteg or last
-            if proclitic and i == 0 and piece is pieces[0]:
-                accented = meteg  # maqqef chain is unaccented unless meteg
+            if proclitic and i == 0 and p_i == 0:
+                accented = meteg
             if closed and not accented:
                 tags.add("hatuf")
             else:
                 tags.add("gadol")
+    return tags
+
+
+def shewa_tags(word: str) -> set[str]:
+    tags: set[str] = set()
+    if any(ch in HATEPH for ch in word):
+        tags.add("hateph")
+    folded = fold_clusters(word.split(MAQQEF)[0])
+    shewa_i = [i for i, cl in enumerate(folded) if kind(cl) == "shewa"]
+    if not shewa_i:
+        return tags
+    tags.add("shewa")
+    if len(shewa_i) == 1:
+        tags.add("shewaOne")
+    if any(shewa_i[j] + 1 == shewa_i[j + 1] for j in range(len(shewa_i) - 1)):
+        tags.add("shewaPair")
+    for i in shewa_i:
+        if i == 0:
+            tags.add("shewaVocal")
+            continue
+        if i + 1 < len(folded) and kind(folded[i - 1]) == "shewa":
+            tags.add("shewaVocal")  # second of two
+            continue
+        if i + 1 < len(folded) and kind(folded[i + 1]) == "shewa":
+            tags.add("shewaSilent")  # first of two
+            continue
+        plen = prev_length(folded[i - 1])
+        if QAMETS in folded[i - 1] or QAMETS_QATAN in folded[i - 1]:
+            tags.add("shewaSilent")
+        elif plen == "short":
+            tags.add("shewaSilent")
+        elif plen == "long":
+            tags.add("shewaVocal")
+        else:
+            tags.add("shewaSilent")
     return tags
 
 
@@ -170,25 +254,114 @@ def ending_tags(word: str) -> set[str]:
     s = stem(word)
     cons = letters(s)
     tags: set[str] = set()
-    if re.search(r"ַיִם$|ָיִם$|ֵיִם$", s) or cons.endswith("ים") and "ַיִ" in s:
-        # dual: ay diphthong + mem. Avoid plain hireq-yod-mem.
-        if re.search(r"[ַָ]יִם$", s) or re.search(r"ַיִם$", s):
-            tags.add("dual")
-            return tags
+    if re.search(r"[ַָ]יִם$", s):
+        tags.add("dual")
+        tags.add("pl")
+        return tags
     if re.search(r"ִים$", s) or (cons.endswith("ים") and "ִי" in s):
         tags.add("mp")
+        tags.add("pl")
         return tags
     if re.search(r"וֹת$|ֹת$", s) or cons.endswith("ות"):
         tags.add("fp")
+        tags.add("pl")
         return tags
     if re.search(r"ָה$", s) or (cons.endswith("ה") and QAMETS in s[-3:]):
         tags.add("fs")
         return tags
-    if re.search(r"ַת$|ֶת$|ִית$", s) or cons.endswith("ת"):
+    if re.search(r"ַת$|ֶת$|ִית$", s):
         tags.add("fs")
         return tags
     if cons:
         tags.add("ms")
+    return tags
+
+
+def verb_tags(word: str) -> set[str]:
+    """Surface person tags. Narrative wayyiqtol is the cleanest; qatal/yiqtol are shape guesses."""
+    tags: set[str] = set()
+    w = strip_acc(word).replace(MAQQEF, "")
+    cons = letters(w)
+    if not cons:
+        return tags
+    if re.match(r"^וַ[ייתנ]", w) or cons.startswith("וי") or cons.startswith("ות") or cons.startswith("ונ"):
+        if re.match(r"^וַי", w) or cons.startswith("וי"):
+            tags.add("wayy")
+            if cons.endswith("ו") and len(cons) > 4:
+                tags.add("v3mp")
+                tags.add("pl")
+            else:
+                tags.add("v3ms")
+        elif re.match(r"^וַת", w) or cons.startswith("ות"):
+            tags.add("wayy")
+            if cons.endswith("ו") and len(cons) > 4:
+                tags.add("v2mp")
+                tags.add("pl")
+            elif cons.endswith("י") and len(cons) > 4:
+                tags.add("v2fs")
+            else:
+                tags.add("v3fs")
+        elif cons.startswith("ונ"):
+            tags.add("wayy")
+            tags.add("v1cp")
+            tags.add("pl")
+        return tags
+
+    # yiqtol prefixes (no vav-consecutive)
+    if re.match(r"^י[\u05b0-\u05bb]", w) or (cons.startswith("י") and re.match(r"^יִ|^יַ|^יֵ|^יָ|^יְ", w)):
+        if cons.endswith("ו") and len(cons) > 3:
+            tags.add("v3mp")
+            tags.add("pl")
+        else:
+            tags.add("v3ms")
+        return tags
+    if re.match(r"^ת[\u05b0-\u05bb]", w):
+        if cons.endswith("ו") and len(cons) > 3:
+            tags.add("v2mp")
+            tags.add("pl")
+        elif cons.endswith("י") and len(cons) > 3:
+            tags.add("v2fs")
+        else:
+            tags.add("v2ms")  # same shape as 3fs yiqtol; also tag 3fs
+            tags.add("v3fs")
+        return tags
+    if re.match(r"^א[\u05b0-\u05bb]", w) and len(cons) >= 3:
+        tags.add("v1cs")
+        return tags
+    if re.match(r"^נ[\u05b0-\u05bb]", w) and len(cons) >= 3:
+        tags.add("v1cp")
+        tags.add("pl")
+        return tags
+
+    # qatal suffixes
+    if re.search(r"תִּי$|תִי$|תי$", w) or cons.endswith("תי"):
+        tags.add("v1cs")
+    elif re.search(r"תֶּם$|תם$", w) or cons.endswith("תם"):
+        tags.add("v2mp")
+        tags.add("pl")
+    elif re.search(r"תֶּן$|תן$", w) or cons.endswith("תן"):
+        tags.add("v2fp")
+        tags.add("pl")
+    elif re.search(r"נוּ$", w) or cons.endswith("נו"):
+        tags.add("v1cp")
+        tags.add("pl")
+    elif re.search(r"ת[\u05bc]?ְ$", w):
+        tags.add("v2fs")
+    elif re.search(r"ת[\u05bc]?ָ$", w):
+        tags.add("v2ms")
+    elif re.search(r"וּ$", w) and cons.endswith("ו") and len(cons) >= 4:
+        tags.add("v3mp")
+        tags.add("pl")
+    return tags
+
+
+def prefix_tags(word: str) -> set[str]:
+    w = strip_acc(word)
+    tags: set[str] = set()
+    if re.match(r"^הַ|^הָ|^הֶ", w):
+        tags.add("article")
+    if re.match(r"^וְ|^וּ|^וַ|^וָ|^וֵ|^וִ|^וֹ", w):
+        tags.add("vav")
     return tags
 
 
@@ -213,33 +386,42 @@ def main() -> None:
                 ref = f"{bid}.{ch}.{vs['v']}"
                 for raw in vs.get("words") or []:
                     tokens += 1
-                    tags = qamets_tags(raw) | ending_tags(raw)
+                    tags = (
+                        qamets_tags(raw)
+                        | ending_tags(raw)
+                        | shewa_tags(raw)
+                        | verb_tags(raw)
+                        | prefix_tags(raw)
+                    )
                     add_form(bucket, raw, ref, tags)
     forms = []
     for w, row in bucket.items():
         tags = set(row["tags"])
         n = row["n"]
-        keep = bool(tags & {"hatuf", "dual", "fp", "mp", "fs"})
+        keep = bool(tags & KEEP_ALWAYS)
         if "gadol" in tags and n >= 3:
             keep = True
         if "ms" in tags and n >= 5:
+            keep = True
+        if "shewa" in tags and n >= 6:
+            keep = True
+        if "pl" in tags and n >= 3:
             keep = True
         if not keep:
             continue
         forms.append({"w": w, "n": n, "t": sorted(tags), "r": row["refs"]})
     forms.sort(key=lambda x: (-x["n"], x["w"]))
-    payload = {"v": 1, "tokens": tokens, "forms": forms}
+    payload = {"v": 2, "tokens": tokens, "forms": forms}
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     counts = defaultdict(int)
     for f in forms:
         for t in f["t"]:
             counts[t] += 1
     print(f"tokens {tokens} unique {len(forms)} → {OUT} ({OUT.stat().st_size // 1024} KB)")
-    print("tags", dict(counts))
-    # sanity
-    for sample in ("חָכְמָה", "כָּל", "דָּבָר", "יָד", "קָרְבָּן"):
+    print("tags", dict(sorted(counts.items(), key=lambda kv: -kv[1])))
+    for sample in ("חָכְמָה", "כָּל", "יִשְׁמְעוּ", "וַיֹּאמֶר", "שָׁמַעְתָּ"):
         hits = [f for f in forms if letters(f["w"]) == letters(sample)]
-        print(sample, [(h["w"], h["t"][:6], h["n"]) for h in hits[:3]])
+        print(sample, [(h["w"], h["t"], h["n"]) for h in hits[:2]])
 
 
 if __name__ == "__main__":

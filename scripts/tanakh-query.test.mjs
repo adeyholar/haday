@@ -22,6 +22,20 @@ test("parse feminine nouns", () => {
   assert.equal(p.kind, "fs");
 });
 
+test("parse vocal shewa and two shewas", () => {
+  assert.equal(parseTanakhQuery("give me 10 vocal shewa").kind, "shewaVocal");
+  assert.equal(parseTanakhQuery("two shewas together").kind, "shewaPair");
+  assert.equal(parseTanakhQuery("silent shifa").kind, "shewaSilent");
+});
+
+test("parse verb person names", () => {
+  assert.equal(parseTanakhQuery("10 3ms").kind, "v3ms");
+  assert.equal(parseTanakhQuery("3fs verbs").kind, "v3fs");
+  assert.equal(parseTanakhQuery("2ms").kind, "v2ms");
+  assert.equal(parseTanakhQuery("give me 10 PL").kind, "pl");
+  assert.equal(parseTanakhQuery("feminine verbs").kind, "femVerb");
+});
+
 test("run filters hatuf and respects limit", () => {
   const forms = [
     { w: "כָּל", n: 100, t: ["hatuf", "ms"], r: ["Gen.1.21"] },

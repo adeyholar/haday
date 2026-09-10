@@ -1,21 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { getAdminStatus } from "@/lib/admin";
 import { searchTanakhIndex, type TanakhQueryResult } from "@/lib/tanakh-query-server";
-import { QUERY_PRESETS, parseRef, type QueryKind } from "@/lib/tanakh-query";
-import { isBookId } from "@/lib/tanakh-canon";
+import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
+import { QUERY_PRESETS, kindLabel, parseRef, prettyRef, type QueryForm, type QueryKind } from "@/lib/tanakh-query";
 
 export const Route = createFileRoute("/admin/query")({ component: TanakhFinderPage });
 
+const GROUPS = ["Vowels", "Shewa", "Nouns", "Verbs", "Prefixes"];
+
 function TanakhFinderPage() {
   const [admin, setAdmin] = useState<boolean | null>(null);
-  const [q, setQ] = useState("give me 10 qamets qatan");
+  const [q, setQ] = useState("give me 10 vocal shewa");
   const [kind, setKind] = useState<QueryKind | "">("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TanakhQueryResult | null>(null);
+  const [card, setCard] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [verse, setVerse] = useState<{ he: string; en: string } | null>(null);
 
   useEffect(() => {
     void getAdminStatus()
@@ -31,6 +36,9 @@ function TanakhFinderPage() {
     try {
       const data = await searchTanakhIndex({ data: { q: ask, kind: k } });
       setResult(data);
+      setCard(0);
+      setOpen(false);
+      setVerse(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Query failed.");
     } finally {
@@ -43,6 +51,47 @@ function TanakhFinderPage() {
     const lines = result.items.map((row) => `${row.w}\t${row.n}\t${row.r.join(", ")}`);
     void navigator.clipboard.writeText(lines.join("\n"));
   }
+
+  const item: QueryForm | null = result?.items[card] ?? null;
+
+  useEffect(() => {
+    if (!open || !item?.r[0]) {
+      setVerse(null);
+      return;
+    }
+    const loc = parseRef(item.r[0]);
+    if (!isBookId(loc.book)) return;
+    let cancelled = false;
+    void fetchTanakhBook(loc.book).then((dump) => {
+      if (cancelled) return;
+      const row = dump.chapters[loc.ch]?.find((v) => v.v === Number(loc.v));
+      setVerse(row ? { he: row.he, en: row.en } : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, item]);
+
+  function tapCard() {
+    if (!result?.items.length) return;
+    if (!open) {
+      setOpen(true);
+      return;
+    }
+    const next = card + 1;
+    if (next >= result.items.length) {
+      setCard(0);
+      setOpen(false);
+      return;
+    }
+    setCard(next);
+    setOpen(false);
+    setVerse(null);
+  }
+
+  const grouped = useMemo(() => {
+    return GROUPS.map((g) => ({ g, items: QUERY_PRESETS.filter((p) => p.group === g) }));
+  }, []);
 
   if (admin === false) {
     return (
@@ -67,10 +116,9 @@ function TanakhFinderPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Tanakh finder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Pull a working list from the Masoretic text: qamets hatuf vs gadol, endingless masculine, feminine endings,
-          duals, or the class noun lemmas as they actually appear. Ask in English — “give me 10 qamets qatan from
-          Torah” — or tap a preset. Gender from endings is the form the student sees; class feminine/masculine uses the
-          BBH noun list.{" "}
+          Any class grammar name: shewa (vocal, silent, two together), qamets hatuf or gadol, 3ms / 3fs / 2ms / PL,
+          feminine verbs, article, vav. Ask “give me 10 silent shewa from Torah.” Results come as a deck — tap the card
+          to read the verse, tap again to move on.{" "}
           <Link to="/admin" className="font-semibold text-primary">
             Roster
           </Link>
@@ -88,40 +136,45 @@ function TanakhFinderPage() {
               className="mt-1 h-12 w-full rounded-[var(--radius-md)] border border-border bg-parchment px-3 text-ink"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="give me 10 qamets qatan"
+              placeholder="give me 10 3ms · two shewas · PL"
             />
           </label>
           <Button type="submit" disabled={busy} className="h-11">
-            {busy ? "Searching…" : "Find in the Tanakh"}
+            {busy ? "Searching…" : "Deal the deck"}
           </Button>
         </form>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {QUERY_PRESETS.map((p) => (
-            <button
-              key={p.kind}
-              type="button"
-              onClick={() => {
-                setKind(p.kind);
-                setQ(p.ask);
-                void run({ q: p.ask, kind: p.kind });
-              }}
-              className="rounded-[var(--radius-md)] bg-surface px-3 py-2 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+        {grouped.map((block) => (
+          <div key={block.g} className="mt-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">{block.g}</p>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {block.items.map((p) => (
+                <button
+                  key={p.kind}
+                  type="button"
+                  onClick={() => {
+                    setKind(p.kind);
+                    setQ(p.ask);
+                    void run({ q: p.ask, kind: p.kind });
+                  }}
+                  className="rounded-[var(--radius-md)] bg-surface px-3 py-2 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
         {error ? <p className="mt-2 text-sm text-danger">{error}</p> : null}
       </Panel>
 
-      {result ? (
+      {result && item ? (
         <Panel>
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="font-display text-2xl font-bold text-ink">{result.label}</h2>
               <p className="text-sm text-muted">
-                {result.items.length} shown · {result.total} distinct forms · {result.tokens.toLocaleString()} tokens in
-                the index
+                Card {card + 1} of {result.items.length}
+                {result.total > result.items.length ? ` · ${result.total} forms in the corpus` : ""}
                 {result.parsed.scope !== "all" ? ` · ${result.parsed.scope}` : ""}
               </p>
             </div>
@@ -129,38 +182,61 @@ function TanakhFinderPage() {
               Copy list
             </Button>
           </div>
-          <ul className="mt-4 space-y-2">
-            {result.items.map((row) => (
-              <li
-                key={row.w}
-                className="rounded-[var(--radius-md)] bg-surface px-3 py-2 shadow-[var(--shadow-border)]"
-              >
-                <p className="he-word text-2xl text-ink" dir="rtl" lang="he">
-                  {row.w}
+
+          <button
+            type="button"
+            onClick={tapCard}
+            className="mt-4 w-full rounded-[var(--radius-lg)] bg-parchment px-4 py-8 text-center shadow-[var(--shadow-border)]"
+          >
+            <p className="he-word text-5xl leading-tight text-ink sm:text-6xl" dir="rtl" lang="he">
+              {item.w}
+            </p>
+            {!open ? (
+              <p className="mt-4 text-sm font-semibold text-muted">Tap to read · tap again to move</p>
+            ) : (
+              <div className="mt-4 space-y-2 text-start">
+                <p className="text-xs text-muted">
+                  {item.n}× · {item.t.join(" · ")}
                 </p>
-                <p className="mt-1 text-xs text-muted">
-                  {row.n}× · {row.t.join(" · ")}
-                </p>
-                <p className="mt-1 flex flex-wrap gap-2 text-sm">
-                  {row.r.map((ref) => {
-                    const loc = parseRef(ref);
-                    if (!isBookId(loc.book)) return <span key={ref}>{ref}</span>;
-                    return (
-                      <Link
-                        key={ref}
-                        to="/listen/read/$book/$ch"
-                        params={{ book: loc.book, ch: loc.ch }}
-                        search={{ v1: Number(loc.v) }}
-                        className="font-semibold text-primary"
-                      >
-                        {ref.replace(/\./g, " ")}
-                      </Link>
-                    );
-                  })}
-                </p>
-              </li>
-            ))}
-          </ul>
+                {item.r[0] ? (
+                  <p className="text-sm font-semibold text-primary">{prettyRef(item.r[0])}</p>
+                ) : null}
+                {verse ? (
+                  <>
+                    <p className="he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">
+                      {verse.he}
+                    </p>
+                    <p className="text-sm text-muted">{verse.en}</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted">Loading the verse…</p>
+                )}
+              </div>
+            )}
+          </button>
+
+          <div className="mt-3 flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setCard((c) => Math.max(0, c - 1));
+                setOpen(false);
+                setVerse(null);
+              }}
+              disabled={card === 0}
+            >
+              Back
+            </Button>
+            <Button type="button" className="flex-1" onClick={tapCard}>
+              {open ? (card + 1 >= result.items.length ? "Start over" : "Next card") : "Read"}
+            </Button>
+          </div>
+        </Panel>
+      ) : result ? (
+        <Panel>
+          <p className="text-sm text-muted">No forms for {kindLabel(result.parsed.kind)} in that slice.</p>
         </Panel>
       ) : null}
     </>
