@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-10
 
+- **Qamets hatuf cards show the chain.** כָּל is never dealt alone. The card is כָּל־נֶפֶשׁ (or the next word), so you can see the closed, unaccented syllable — kol, not kāl.
+
 - **Tanakh cards index on Azure.** The deck reads the built copy (`.output/public`) and the image now ships `query-index.json`, so dealing a grammar no longer dies with a missing-file error.
 
 - **Tanakh cards (own pages).** Study → Tanakh cards. Pick 10 / 20 / 50 and a grammar name. A separate flashcard page deals the deck. Flip to read the verse, then **Open this verse in Tanakh**. Old `/admin/query` sends you there.

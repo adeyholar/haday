@@ -379,7 +379,14 @@ export function runTanakhQuery(forms: QueryForm[], parsed: ParsedTanakhQuery): {
     if (books && refs.length === 0) continue;
     hit.push(books ? { ...form, r: refs } : form);
   }
-  hit.sort((a, b) => b.n - a.n || a.w.localeCompare(b.w, "he"));
+  hit.sort((a, b) => {
+    if (parsed.kind === "hatuf") {
+      const ac = a.w.includes("־") ? 1 : 0;
+      const bc = b.w.includes("־") ? 1 : 0;
+      if (ac !== bc) return bc - ac;
+    }
+    return b.n - a.n || a.w.localeCompare(b.w, "he");
+  });
   return { items: hit.slice(0, parsed.limit), total: hit.length };
 }
 
@@ -390,4 +397,12 @@ export function parseRef(ref: string): { book: string; ch: string; v: string } {
 
 export function prettyRef(ref: string): string {
   return ref.replace(/\./g, " ");
+}
+
+export function hatufWhy(word: string): string | null {
+  if (word.includes("־")) {
+    return "Qamets hatuf (short o): this syllable is closed and unaccented. The maqqef binds it to the next word, so the stress sits there — that is how you know kol, not kāl.";
+  }
+  if (!word) return null;
+  return "Qamets hatuf (short o): the syllable is closed (often by a silent shewa) and not the accented one.";
 }

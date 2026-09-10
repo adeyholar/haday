@@ -3,7 +3,9 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseTanakhQuery, runTanakhQuery, stemLetters } = await jiti.import("/workspace/src/lib/tanakh-query.ts");
+const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy } = await jiti.import(
+  "/workspace/src/lib/tanakh-query.ts",
+);
 
 test("parse qamets qatan with a count and Torah scope", () => {
   const p = parseTanakhQuery("give me 10 qamets qatan from Torah");
@@ -56,7 +58,6 @@ test("run filters hatuf and respects limit", () => {
   const { items, total } = runTanakhQuery(forms, parseTanakhQuery("2 qamets hatuf"));
   assert.equal(total, 2);
   assert.equal(items.length, 2);
-  assert.equal(items[0].w, "כָּל");
 });
 
 test("qal perfect requires both tags", () => {
@@ -75,15 +76,24 @@ test("stem letters drop the article", () => {
 });
 
 test("finder ask swaps the count", async () => {
-  const { finderAsk, parseFinderSearch } = await jiti.import("/workspace/src/lib/finder-search.ts");
+  const { finderAsk, parseFinderSearch, queryIndexPaths } = await jiti.import(
+    "/workspace/src/lib/finder-search.ts",
+  );
   assert.equal(finderAsk("give me 10 qal perfect", 20), "give me 20 qal perfect");
   assert.equal(finderAsk("construct", 10), "give me 10 construct");
   assert.equal(parseFinderSearch({ q: "piel", n: "20" }).n, 20);
-});
-
-test("query index paths cover Azure output", async () => {
-  const { queryIndexPaths } = await jiti.import("/workspace/src/lib/finder-search.ts");
   const paths = queryIndexPaths("/app");
   assert.ok(paths.some((p) => p.endsWith("public/tanakh/query-index.json")));
   assert.ok(paths.some((p) => p.includes(".output/public/tanakh")));
+});
+
+test("hatuf sorts maqqef chains first", () => {
+  const forms = [
+    { w: "כָּל", n: 2000, t: ["hatuf", "ms"], r: ["Gen.1.21"] },
+    { w: "כָּל־נֶפֶשׁ", n: 12, t: ["hatuf", "chain"], r: ["Gen.1.21"] },
+    { w: "חָכְמָה", n: 70, t: ["hatuf", "fs"], r: ["Prov.1.7"] },
+  ];
+  const { items } = runTanakhQuery(forms, parseTanakhQuery("10 qamets qatan"));
+  assert.equal(items[0].w, "כָּל־נֶפֶשׁ");
+  assert.match(hatufWhy("כָּל־נֶפֶשׁ") ?? "", /maqqef|unaccented/i);
 });

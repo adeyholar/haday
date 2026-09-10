@@ -558,6 +558,24 @@ def overlay_oshb(bucket: dict) -> int:
     return tagged
 
 
+def is_kol_family(word: str) -> bool:
+    body = letters(stem(word))
+    return body.endswith("כל") and 2 <= len(body) <= 5
+
+
+def chain_phrase(raw: str, nxt: str, tags: set[str]) -> str | None:
+    """Kol and other proclitic hatuf need the next word — otherwise kol vs kāl is a guess."""
+    if "hatuf" not in tags or not nxt:
+        return None
+    if not (is_kol_family(raw) or MAQQEF in raw):
+        return None
+    left = strip_acc(raw).replace(MAQQEF, "")
+    right = strip_acc(nxt).split(MAQQEF)[0]
+    if not left or not right:
+        return None
+    return f"{left}{MAQQEF}{right}"
+
+
 def add_form(bucket: dict, word: str, ref: str, tags: set[str]) -> None:
     w = strip_acc(word)
     row = bucket[w]
@@ -577,11 +595,21 @@ def main() -> None:
         for ch, verses in book["chapters"].items():
             for vs in verses:
                 ref = f"{bid}.{ch}.{vs['v']}"
-                for raw in vs.get("words") or []:
+                words = vs.get("words") or []
+                for i, raw in enumerate(words):
                     tokens += 1
                     tags = qamets_tags(raw) | ending_tags(raw) | shewa_tags(raw) | prefix_tags(raw)
                     add_form(bucket, raw, ref, tags)
+                    nxt = words[i + 1] if i + 1 < len(words) else ""
+                    phrase = chain_phrase(raw, nxt, tags)
+                    if phrase:
+                        add_form(bucket, phrase, ref, tags | {"chain"})
     print("OSHB overlay", overlay_oshb(bucket), "words")
+    for w, row in list(bucket.items()):
+        if MAQQEF in w:
+            continue
+        if "hatuf" in row["tags"] and is_kol_family(w):
+            row["tags"].discard("hatuf")
     forms = []
     for w, row in bucket.items():
         tags = set(row["tags"])
@@ -599,7 +627,7 @@ def main() -> None:
             continue
         forms.append({"w": w, "n": n, "t": sorted(tags), "r": row["refs"]})
     forms.sort(key=lambda x: (-x["n"], x["w"]))
-    payload = {"v": 3, "tokens": tokens, "source": "WLC+OSHB", "forms": forms}
+    payload = {"v": 4, "tokens": tokens, "source": "WLC+OSHB", "forms": forms}
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     counts = defaultdict(int)
     for f in forms:
@@ -607,7 +635,7 @@ def main() -> None:
             counts[t] += 1
     print(f"tokens {tokens} unique {len(forms)} → {OUT} ({OUT.stat().st_size // 1024} KB)")
     print("tags", dict(sorted(counts.items(), key=lambda kv: -kv[1])))
-    for sample in ("חָכְמָה", "כָּל", "יִשְׁמְעוּ", "וַיֹּאמֶר", "שָׁמַעְתָּ"):
+    for sample in ("חָכְמָה", "כָּל", "כָּל־נֶפֶשׁ", "וַיֹּאמֶר"):
         hits = [f for f in forms if letters(f["w"]) == letters(sample)]
         print(sample, [(h["w"], h["t"], h["n"]) for h in hits[:2]])
 

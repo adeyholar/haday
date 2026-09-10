@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StudyMenu } from "@/components/study-menu";
 import { dealFinderDeck } from "@/lib/finder-deal";
 import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
-import { parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
+import { hatufWhy, parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
 import { parseFinderSearch } from "@/lib/finder-search";
 import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
@@ -166,9 +166,14 @@ function FinderDeckPage() {
             {item.w}
           </p>
           {!flipped ? (
-            <p className="mt-6 text-sm font-semibold text-muted">Tap to flip · see the verse</p>
+            <p className="mt-6 text-sm font-semibold text-muted">
+              {item.w.includes("־") ? "Tap to flip · why this is unaccented" : "Tap to flip · see the verse"}
+            </p>
           ) : (
             <div className="mt-6 space-y-3 text-start">
+              {hatufWhy(item.w) && (result.parsed.kind === "hatuf" || item.t.includes("hatuf")) ? (
+                <p className="text-sm text-ink">{hatufWhy(item.w)}</p>
+              ) : null}
               <p className="text-xs text-muted">{item.n}× in the Tanakh</p>
               {loc ? <p className="text-sm font-semibold text-ink">{prettyRef(item.r[0] ?? "")}</p> : null}
               {verse ? (
