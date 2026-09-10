@@ -9,7 +9,7 @@ import { QUERY_PRESETS, kindLabel, parseRef, prettyRef, type QueryForm, type Que
 
 export const Route = createFileRoute("/admin/query")({ component: TanakhFinderPage });
 
-const GROUPS = ["Vowels", "Shewa", "Nouns", "Verbs", "Prefixes"];
+const GROUPS = ["Nouns", "Binyan", "Person", "Vowels", "Shewa", "Prefixes"];
 
 function TanakhFinderPage() {
   const [admin, setAdmin] = useState<boolean | null>(null);
@@ -116,9 +116,10 @@ function TanakhFinderPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Tanakh finder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Any class grammar name: shewa (vocal, silent, two together), qamets hatuf or gadol, 3ms / 3fs / 2ms / PL,
-          feminine verbs, article, vav. Ask “give me 10 silent shewa from Torah.” Results come as a deck — tap the card
-          to read the verse, tap again to move on.{" "}
+          Any class grammar name as a teaching deck: construct vs absolute, pronouns, qal perfect /
+          imperfect, wayyiqtol, piel / pual / niphal / hiphil / hophal / hithpael, shewa, qamets.
+          Ask “give me 10 qal perfect” or tap a chip. Tap the card to read the verse, tap again to
+          move. Morphology from the Open Scriptures Hebrew Bible (CC BY 4.0).{" "}
           <Link to="/admin" className="font-semibold text-primary">
             Roster
           </Link>
@@ -136,7 +137,7 @@ function TanakhFinderPage() {
               className="mt-1 h-12 w-full rounded-[var(--radius-md)] border border-border bg-parchment px-3 text-ink"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="give me 10 3ms · two shewas · PL"
+              placeholder="give me 10 qal perfect · construct · piel"
             />
           </label>
           <Button type="submit" disabled={busy} className="h-11">
@@ -149,7 +150,7 @@ function TanakhFinderPage() {
             <div className="mt-1 flex flex-wrap gap-2">
               {block.items.map((p) => (
                 <button
-                  key={p.kind}
+                  key={p.ask}
                   type="button"
                   onClick={() => {
                     setKind(p.kind);
@@ -180,6 +181,24 @@ function TanakhFinderPage() {
             </div>
             <Button type="button" variant="outline" onClick={copyList}>
               Copy list
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (!result) return;
+                const mix = [...result.items];
+                for (let i = mix.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [mix[i], mix[j]] = [mix[j]!, mix[i]!];
+                }
+                setResult({ ...result, items: mix });
+                setCard(0);
+                setOpen(false);
+                setVerse(null);
+              }}
+            >
+              Shuffle
             </Button>
           </div>
 
@@ -236,7 +255,7 @@ function TanakhFinderPage() {
         </Panel>
       ) : result ? (
         <Panel>
-          <p className="text-sm text-muted">No forms for {kindLabel(result.parsed.kind)} in that slice.</p>
+          <p className="text-sm text-muted">No forms for {kindLabel(result.parsed.kind, result.parsed.need)} in that slice.</p>
         </Panel>
       ) : null}
     </>

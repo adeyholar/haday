@@ -78,6 +78,21 @@ KEEP_ALWAYS = {
     "v1cs",
     "v1cp",
     "hateph",
+    "cst",
+    "qal",
+    "piel",
+    "pual",
+    "niphal",
+    "hiphil",
+    "hophal",
+    "hithpael",
+    "qatal",
+    "yiqtol",
+    "weqatal",
+    "infcst",
+    "pron",
+    "ptcp",
+    "impv",
 }
 
 
@@ -365,6 +380,184 @@ def prefix_tags(word: str) -> set[str]:
     return tags
 
 
+STEM_CODE = {
+    "q": "qal",
+    "N": "niphal",
+    "p": "piel",
+    "P": "pual",
+    "h": "hiphil",
+    "H": "hophal",
+    "t": "hithpael",
+    "Q": "qalpass",
+}
+ASPECT_CODE = {
+    "p": "qatal",
+    "q": "weqatal",
+    "i": "yiqtol",
+    "w": "wayy",
+    "h": "coh",
+    "j": "juss",
+    "v": "impv",
+    "r": "ptcp",
+    "s": "ptcp",
+    "a": "infabs",
+    "c": "infcst",
+}
+
+OSHB_DIR = Path("/tmp/oshb")
+OSHB_BASE = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{book}.xml"
+OSHB_BOOKS = [
+    "Gen",
+    "Exod",
+    "Lev",
+    "Num",
+    "Deut",
+    "Josh",
+    "Judg",
+    "1Sam",
+    "2Sam",
+    "1Kgs",
+    "2Kgs",
+    "Isa",
+    "Jer",
+    "Ezek",
+    "Hos",
+    "Joel",
+    "Amos",
+    "Obad",
+    "Jonah",
+    "Mic",
+    "Nah",
+    "Hab",
+    "Zeph",
+    "Hag",
+    "Zech",
+    "Mal",
+    "Ps",
+    "Prov",
+    "Job",
+    "Song",
+    "Ruth",
+    "Lam",
+    "Eccl",
+    "Esth",
+    "Dan",
+    "Ezra",
+    "Neh",
+    "1Chr",
+    "2Chr",
+]
+
+
+def morph_tags(code: str) -> set[str]:
+    tags: set[str] = set()
+    if not code:
+        return tags
+    parts = code.split("/")
+    for i, raw in enumerate(parts):
+        p = raw[1:] if i == 0 and raw[:1] in "HA" else raw
+        if not p:
+            continue
+        pos = p[0]
+        if pos == "V" and len(p) >= 3:
+            tags.add("verb")
+            stem = STEM_CODE.get(p[1])
+            aspect = ASPECT_CODE.get(p[2])
+            if stem:
+                tags.add(stem)
+            if aspect:
+                tags.add(aspect)
+            if len(p) >= 6 and p[3] in "123":
+                tags.add(f"v{p[3]}{p[4]}{p[5]}")
+                if p[4] == "f":
+                    tags.add("femVerb")
+        elif pos == "N" and len(p) >= 5:
+            tags.add("noun")
+            if p[-1] == "c":
+                tags.add("cst")
+            elif p[-1] == "a":
+                tags.add("abs")
+            if len(p) >= 4 and p[3] == "d":
+                tags.add("dual")
+                tags.add("pl")
+        elif pos == "A" and len(p) >= 5:
+            tags.add("adj")
+            if p[-1] == "c":
+                tags.add("cst")
+            elif p[-1] == "a":
+                tags.add("abs")
+        elif pos == "P":
+            tags.add("pron")
+    return tags
+
+
+def fetch_oshb_book(book: str) -> Path:
+    OSHB_DIR.mkdir(parents=True, exist_ok=True)
+    dest = OSHB_DIR / f"{book}.xml"
+    if dest.exists() and dest.stat().st_size > 1000:
+        return dest
+    import urllib.request
+
+    url = OSHB_BASE.format(book=book)
+    print(f"  fetch OSHB {book}")
+    urllib.request.urlretrieve(url, dest)
+    return dest
+
+
+def overlay_oshb(bucket: dict) -> int:
+    """Join Open Scriptures Hebrew morphology onto the WLC forms (CC BY 4.0).
+
+    Aramaic rows are skipped. Tags that fire on under 20% of a spelling (rare
+    homographs) stay off so כָּל is not treated as a verb.
+    """
+    import xml.etree.ElementTree as ET
+    from collections import Counter
+
+    ns = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
+    freq: dict[str, Counter] = defaultdict(Counter)
+    seen: dict[str, int] = defaultdict(int)
+    tagged = 0
+    for book in OSHB_BOOKS:
+        try:
+            path = fetch_oshb_book(book)
+        except Exception as exc:  # noqa: BLE001
+            print("OSHB skip", book, exc)
+            continue
+        root = ET.parse(path).getroot()
+        for verse in root.iter(f"{ns}verse"):
+            osis = verse.get("osisID")
+            if not osis:
+                continue
+            ref = osis
+            for w in verse.findall(f"{ns}w"):
+                if w.get("type") == "x-ketiv":
+                    continue
+                morph = w.get("morph") or ""
+                if morph.startswith("A"):
+                    continue
+                raw = (w.text or "").replace("/", "")
+                if not raw:
+                    continue
+                tags = morph_tags(morph)
+                if not tags:
+                    continue
+                wkey = strip_acc(raw)
+                freq[wkey].update(tags)
+                seen[wkey] += 1
+                row = bucket[wkey]
+                if ref not in row["refs"] and len(row["refs"]) < 3:
+                    row["refs"].append(ref)
+                if row["n"] == 0:
+                    row["n"] = 1
+                tagged += 1
+    for wkey, counts in freq.items():
+        n = seen[wkey] or 1
+        floor = max(1, int(0.2 * n))
+        keep = {tag for tag, c in counts.items() if c >= floor}
+        bucket[wkey]["tags"] |= keep
+    return tagged
+
+
 def add_form(bucket: dict, word: str, ref: str, tags: set[str]) -> None:
     w = strip_acc(word)
     row = bucket[w]
@@ -386,14 +579,9 @@ def main() -> None:
                 ref = f"{bid}.{ch}.{vs['v']}"
                 for raw in vs.get("words") or []:
                     tokens += 1
-                    tags = (
-                        qamets_tags(raw)
-                        | ending_tags(raw)
-                        | shewa_tags(raw)
-                        | verb_tags(raw)
-                        | prefix_tags(raw)
-                    )
+                    tags = qamets_tags(raw) | ending_tags(raw) | shewa_tags(raw) | prefix_tags(raw)
                     add_form(bucket, raw, ref, tags)
+    print("OSHB overlay", overlay_oshb(bucket), "words")
     forms = []
     for w, row in bucket.items():
         tags = set(row["tags"])
@@ -411,7 +599,7 @@ def main() -> None:
             continue
         forms.append({"w": w, "n": n, "t": sorted(tags), "r": row["refs"]})
     forms.sort(key=lambda x: (-x["n"], x["w"]))
-    payload = {"v": 2, "tokens": tokens, "forms": forms}
+    payload = {"v": 3, "tokens": tokens, "source": "WLC+OSHB", "forms": forms}
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     counts = defaultdict(int)
     for f in forms:

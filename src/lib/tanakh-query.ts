@@ -29,7 +29,25 @@ export type QueryKind =
   | "v2fp"
   | "v1cs"
   | "v1cp"
-  | "femVerb";
+  | "femVerb"
+  | "cst"
+  | "abs"
+  | "noun"
+  | "pron"
+  | "qal"
+  | "piel"
+  | "pual"
+  | "niphal"
+  | "hiphil"
+  | "hophal"
+  | "hithpael"
+  | "qatal"
+  | "yiqtol"
+  | "weqatal"
+  | "infcst"
+  | "infabs"
+  | "ptcp"
+  | "impv";
 
 export type QueryForm = {
   w: string;
@@ -40,19 +58,16 @@ export type QueryForm = {
 
 export type ParsedTanakhQuery = {
   kind: QueryKind;
+  need: QueryKind[];
   limit: number;
   scope: "all" | SectionId | BookId;
   raw: string;
 };
 
 export const QUERY_PRESETS: Array<{ kind: QueryKind; label: string; ask: string; group: string }> = [
-  { group: "Vowels", kind: "hatuf", label: "Qamets hatuf", ask: "10 qamets qatan" },
-  { group: "Vowels", kind: "gadol", label: "Qamets gadol", ask: "10 qamets gadol" },
-  { group: "Shewa", kind: "shewaVocal", label: "Vocal shewa", ask: "10 vocal shewa" },
-  { group: "Shewa", kind: "shewaSilent", label: "Silent shewa", ask: "10 silent shewa" },
-  { group: "Shewa", kind: "shewaPair", label: "Two shewas", ask: "10 two shewas together" },
-  { group: "Shewa", kind: "shewaOne", label: "One shewa", ask: "10 single shewa" },
-  { group: "Shewa", kind: "hateph", label: "Hateph", ask: "10 hateph vowels" },
+  { group: "Nouns", kind: "cst", label: "Construct", ask: "10 construct" },
+  { group: "Nouns", kind: "abs", label: "Absolute", ask: "10 absolute nouns" },
+  { group: "Nouns", kind: "pron", label: "Pronouns", ask: "10 pronouns" },
   { group: "Nouns", kind: "ms", label: "Endingless masc.", ask: "endingless masculine nouns" },
   { group: "Nouns", kind: "fs", label: "Feminine sg", ask: "feminine nouns" },
   { group: "Nouns", kind: "fp", label: "Feminine pl", ask: "feminine plural" },
@@ -61,14 +76,31 @@ export const QUERY_PRESETS: Array<{ kind: QueryKind; label: string; ask: string;
   { group: "Nouns", kind: "pl", label: "Plural (PL)", ask: "10 PL" },
   { group: "Nouns", kind: "classFem", label: "Class feminine", ask: "BBH feminine nouns" },
   { group: "Nouns", kind: "classMasc", label: "Class masculine", ask: "BBH masculine nouns" },
-  { group: "Verbs", kind: "v3ms", label: "3ms", ask: "10 3ms" },
-  { group: "Verbs", kind: "v3fs", label: "3fs", ask: "10 3fs" },
-  { group: "Verbs", kind: "v2ms", label: "2ms", ask: "10 2ms" },
-  { group: "Verbs", kind: "v2fs", label: "2fs", ask: "10 2fs" },
-  { group: "Verbs", kind: "v3mp", label: "3mp", ask: "10 3mp" },
-  { group: "Verbs", kind: "v2mp", label: "2mp", ask: "10 2mp" },
-  { group: "Verbs", kind: "femVerb", label: "Feminine verb", ask: "10 feminine verbs" },
-  { group: "Verbs", kind: "wayy", label: "Wayyiqtol", ask: "10 wayyiqtol" },
+  { group: "Binyan", kind: "qal", label: "Qal perfect", ask: "10 qal perfect" },
+  { group: "Binyan", kind: "qal", label: "Qal imperfect", ask: "10 qal imperfect" },
+  { group: "Binyan", kind: "wayy", label: "Wayyiqtol", ask: "10 wayyiqtol" },
+  { group: "Binyan", kind: "piel", label: "Piel", ask: "10 piel" },
+  { group: "Binyan", kind: "pual", label: "Pual", ask: "10 pual" },
+  { group: "Binyan", kind: "niphal", label: "Niphal", ask: "10 niphal" },
+  { group: "Binyan", kind: "hiphil", label: "Hiphil", ask: "10 hiphil" },
+  { group: "Binyan", kind: "hophal", label: "Hophal", ask: "10 hophal" },
+  { group: "Binyan", kind: "hithpael", label: "Hithpael", ask: "10 hithpael" },
+  { group: "Binyan", kind: "qatal", label: "All perfect (qatal)", ask: "10 qatal" },
+  { group: "Binyan", kind: "yiqtol", label: "All imperfect", ask: "10 yiqtol" },
+  { group: "Binyan", kind: "infcst", label: "Infinitive construct", ask: "10 infinitive construct" },
+  { group: "Binyan", kind: "ptcp", label: "Participle", ask: "10 participle" },
+  { group: "Person", kind: "v3ms", label: "3ms", ask: "10 3ms" },
+  { group: "Person", kind: "v3fs", label: "3fs", ask: "10 3fs" },
+  { group: "Person", kind: "v2ms", label: "2ms", ask: "10 2ms" },
+  { group: "Person", kind: "v2fs", label: "2fs", ask: "10 2fs" },
+  { group: "Person", kind: "v3mp", label: "3mp", ask: "10 3mp" },
+  { group: "Person", kind: "femVerb", label: "Feminine verb", ask: "10 feminine verbs" },
+  { group: "Vowels", kind: "hatuf", label: "Qamets hatuf", ask: "10 qamets qatan" },
+  { group: "Vowels", kind: "gadol", label: "Qamets gadol", ask: "10 qamets gadol" },
+  { group: "Shewa", kind: "shewaVocal", label: "Vocal shewa", ask: "10 vocal shewa" },
+  { group: "Shewa", kind: "shewaSilent", label: "Silent shewa", ask: "10 silent shewa" },
+  { group: "Shewa", kind: "shewaPair", label: "Two shewas", ask: "10 two shewas together" },
+  { group: "Shewa", kind: "hateph", label: "Hateph", ask: "10 hateph vowels" },
   { group: "Prefixes", kind: "article", label: "Article הַ", ask: "10 definite article" },
   { group: "Prefixes", kind: "vav", label: "Conjunction וְ", ask: "10 conjunction vav" },
 ];
@@ -186,45 +218,76 @@ export function parseTanakhQuery(raw: string): ParsedTanakhQuery {
     }
   }
 
-  const kind = detectKind(t);
-  return { kind, limit, scope, raw: raw.trim() };
+  const detected = detectQuery(t);
+  return { kind: detected.kind, need: detected.need, limit, scope, raw: raw.trim() };
 }
 
-function detectKind(t: string): QueryKind {
-  if (/two shewa|two shva|two shwa|two sheva|double shewa|shewa.?pair|shewas together|two shifa/.test(t)) return "shewaPair";
-  if (/vocal shewa|vocal shva|vocal shifa|mobile shewa/.test(t)) return "shewaVocal";
-  if (/silent shewa|silent shva|silent shifa|quiescent shewa/.test(t)) return "shewaSilent";
-  if (/single shewa|one shewa|shewa one/.test(t)) return "shewaOne";
-  if (/hateph|hataf|reduced vowel/.test(t)) return "hateph";
-  if (/\bshewa\b|\bshva\b|\bshwa\b|\bsheva\b|\bshifa\b|\bshva\b/.test(t)) return "shewa";
-  if (/hatuf|qatan|katan|kamat katan|qamets qatan|short o|kamats katan/.test(t)) return "hatuf";
-  if (/gadol|qamets gadol|kamat gadol|long a|kamats gadol/.test(t)) return "gadol";
-  if (/wayyiqtol|vav consecutive|vayyiqtol/.test(t)) return "wayy";
-  if (/feminine verb|fem verb/.test(t)) return "femVerb";
-  if (/\b3\s*m\s*s\b|\b3ms\b|third masculine singular|three m\.?s\b/.test(t)) return "v3ms";
-  if (/\b3\s*f\s*s\b|\b3fs\b|third feminine singular|three f\.?s\b/.test(t)) return "v3fs";
-  if (/\b2\s*m\s*s\b|\b2ms\b|second masculine singular|two m\.?s\b/.test(t)) return "v2ms";
-  if (/\b2\s*f\s*s\b|\b2fs\b|second feminine singular|two f\.?s\b/.test(t)) return "v2fs";
-  if (/\b3\s*m\s*p\b|\b3mp\b|\b3\s*p\s*s\b|\b3cp\b|third (masculine )?plural|three p/.test(t)) return "v3mp";
-  if (/\b2\s*m\s*p\b|\b2mp\b|\b2\s*p\s*s\b|second masculine plural|two p/.test(t) && !/f\.?p|fp/.test(t)) return "v2mp";
-  if (/\b2\s*f\s*p\b|\b2fp\b|second feminine plural|two f\.?p/.test(t)) return "v2fp";
-  if (/\b1\s*c\s*s\b|\b1cs\b|first (common )?singular/.test(t)) return "v1cs";
-  if (/\b1\s*c\s*p\b|\b1cp\b|first (common )?plural/.test(t)) return "v1cp";
-  if (/\bpl\b|plurals?\b/.test(t) && !/masculine plural|feminine plural/.test(t)) return "pl";
-  if (/definite article|article הַ|article ha/.test(t)) return "article";
-  if (/conjunction vav|vav conjunct|וְ/.test(t) && !/wayy/.test(t)) return "vav";
-  if (/dual|ַיִם|pair of/.test(t)) return "dual";
-  if (/feminine plural|fem plural|ות\b/.test(t)) return "fp";
-  if (/masculine plural|masc plural/.test(t)) return "mp";
-  if (/class feminine|bbh feminine|vocabulary feminine/.test(t)) return "classFem";
-  if (/class masculine|bbh masculine|vocabulary masculine/.test(t)) return "classMasc";
-  if (/endingless|no ending|bare masculine|masculine singular|masc sg|endless masculine/.test(t)) return "ms";
-  if (/feminine|fem sg|qamets he|ָה/.test(t)) return "fs";
-  if (/masculine noun/.test(t)) return "ms";
-  return "hatuf";
+function detectAspect(t: string): QueryKind | null {
+  if (/wayyiqtol|vayyiqtol|vav consecutive/.test(t)) return "wayy";
+  if (/weqatal|waw perfect|sequential perfect/.test(t)) return "weqatal";
+  if (/infinitive construct/.test(t)) return "infcst";
+  if (/infinitive absolute/.test(t)) return "infabs";
+  if (/\bparticiple\b/.test(t)) return "ptcp";
+  if (/\bimperative\b/.test(t)) return "impv";
+  if (/\bimperfect\b|\byiqtol\b/.test(t)) return "yiqtol";
+  if (/\bperfect\b|\bqatal\b|\bkata\b/.test(t)) return "qatal";
+  return null;
 }
 
-export function kindLabel(kind: QueryKind): string {
+function detectStem(t: string): QueryKind | null {
+  if (/\bpiel\b|pi'el/.test(t)) return "piel";
+  if (/\bpual\b|pu'al|\bpua\b/.test(t)) return "pual";
+  if (/\bniphal\b|\bnifal\b/.test(t)) return "niphal";
+  if (/\bhiphil\b|\bhifil\b/.test(t)) return "hiphil";
+  if (/\bhophal\b|\bhofal\b/.test(t)) return "hophal";
+  if (/\bhithpael\b|\bhitpael\b|hithpa'el/.test(t)) return "hithpael";
+  if (/\bqal\b|\bcal\b/.test(t)) return "qal";
+  return null;
+}
+
+function detectQuery(t: string): { kind: QueryKind; need: QueryKind[] } {
+  const stem = detectStem(t);
+  const aspect = detectAspect(t);
+  if (stem && aspect && aspect !== stem) return { kind: stem, need: [aspect] };
+  if (stem) return { kind: stem, need: [] };
+  if (aspect) return { kind: aspect, need: [] };
+
+  if (/two shewa|two shva|two shwa|two sheva|double shewa|shewa.?pair|shewas together|two shifa/.test(t)) return { kind: "shewaPair", need: [] };
+  if (/vocal shewa|vocal shva|vocal shifa|mobile shewa/.test(t)) return { kind: "shewaVocal", need: [] };
+  if (/silent shewa|silent shva|silent shifa|quiescent shewa/.test(t)) return { kind: "shewaSilent", need: [] };
+  if (/single shewa|one shewa|shewa one/.test(t)) return { kind: "shewaOne", need: [] };
+  if (/hateph|hataf|reduced vowel/.test(t)) return { kind: "hateph", need: [] };
+  if (/\bshewa\b|\bshva\b|\bshwa\b|\bsheva\b|\bshifa\b/.test(t)) return { kind: "shewa", need: [] };
+  if (/hatuf|qatan|katan|kamat katan|qamets qatan|short o|kamats katan/.test(t)) return { kind: "hatuf", need: [] };
+  if (/gadol|qamets gadol|kamat gadol|long a|kamats gadol/.test(t)) return { kind: "gadol", need: [] };
+  if (/construct case|in construct|\bconstruct\b|\bsmikhut\b|\bsmichut\b/.test(t)) return { kind: "cst", need: [] };
+  if (/\babsolute\b/.test(t)) return { kind: "abs", need: [] };
+  if (/\bpronoun/.test(t)) return { kind: "pron", need: [] };
+  if (/feminine verb|fem verb/.test(t)) return { kind: "femVerb", need: [] };
+  if (/\b3\s*m\s*s\b|\b3ms\b|third masculine singular|three m\.?s\b/.test(t)) return { kind: "v3ms", need: [] };
+  if (/\b3\s*f\s*s\b|\b3fs\b|third feminine singular|three f\.?s\b/.test(t)) return { kind: "v3fs", need: [] };
+  if (/\b2\s*m\s*s\b|\b2ms\b|second masculine singular|two m\.?s\b/.test(t)) return { kind: "v2ms", need: [] };
+  if (/\b2\s*f\s*s\b|\b2fs\b|second feminine singular|two f\.?s\b/.test(t)) return { kind: "v2fs", need: [] };
+  if (/\b3\s*m\s*p\b|\b3mp\b|\b3\s*p\s*s\b|\b3cp\b|third (masculine )?plural|three p/.test(t)) return { kind: "v3mp", need: [] };
+  if (/\b2\s*m\s*p\b|\b2mp\b|\b2\s*p\s*s\b|second masculine plural|two p/.test(t) && !/f\.?p|fp/.test(t)) return { kind: "v2mp", need: [] };
+  if (/\b2\s*f\s*p\b|\b2fp\b|second feminine plural|two f\.?p/.test(t)) return { kind: "v2fp", need: [] };
+  if (/\b1\s*c\s*s\b|\b1cs\b|first (common )?singular/.test(t)) return { kind: "v1cs", need: [] };
+  if (/\b1\s*c\s*p\b|\b1cp\b|first (common )?plural/.test(t)) return { kind: "v1cp", need: [] };
+  if (/\bpl\b|plurals?\b/.test(t) && !/masculine plural|feminine plural/.test(t)) return { kind: "pl", need: [] };
+  if (/definite article|article הַ|article ha/.test(t)) return { kind: "article", need: [] };
+  if (/conjunction vav|vav conjunct/.test(t)) return { kind: "vav", need: [] };
+  if (/dual|ַיִם|pair of/.test(t)) return { kind: "dual", need: [] };
+  if (/feminine plural|fem plural/.test(t)) return { kind: "fp", need: [] };
+  if (/masculine plural|masc plural/.test(t)) return { kind: "mp", need: [] };
+  if (/class feminine|bbh feminine|vocabulary feminine/.test(t)) return { kind: "classFem", need: [] };
+  if (/class masculine|bbh masculine|vocabulary masculine/.test(t)) return { kind: "classMasc", need: [] };
+  if (/endingless|no ending|bare masculine|masculine singular|masc sg|endless masculine/.test(t)) return { kind: "ms", need: [] };
+  if (/feminine|fem sg|ָה/.test(t)) return { kind: "fs", need: [] };
+  if (/masculine noun/.test(t)) return { kind: "ms", need: [] };
+  return { kind: "hatuf", need: [] };
+}
+
+export function kindLabel(kind: QueryKind, need: QueryKind[] = []): string {
   const labels: Record<QueryKind, string> = {
     hatuf: "Qamets hatuf (short o)",
     gadol: "Qamets gadol (long ā)",
@@ -254,9 +317,28 @@ export function kindLabel(kind: QueryKind): string {
     v2fp: "2fp verb",
     v1cs: "1cs verb",
     v1cp: "1cp verb",
-    femVerb: "Feminine verb (3fs / 2fs / 2fp)",
+    femVerb: "Feminine verb",
+    cst: "Construct",
+    abs: "Absolute",
+    noun: "Noun",
+    pron: "Pronoun",
+    qal: "Qal",
+    piel: "Piel",
+    pual: "Pual",
+    niphal: "Niphal",
+    hiphil: "Hiphil",
+    hophal: "Hophal",
+    hithpael: "Hithpael",
+    qatal: "Perfect (qatal)",
+    yiqtol: "Imperfect (yiqtol)",
+    weqatal: "Weqatal",
+    infcst: "Infinitive construct",
+    infabs: "Infinitive absolute",
+    ptcp: "Participle",
+    impv: "Imperative",
   };
-  return labels[kind];
+  const extra = need.map((k) => labels[k]).filter(Boolean);
+  return extra.length ? `${labels[kind]} · ${extra.join(" · ")}` : labels[kind];
 }
 
 function booksForScope(scope: ParsedTanakhQuery["scope"]): Set<string> | null {
@@ -275,7 +357,7 @@ function refsInScope(refs: string[], books: Set<string> | null): string[] {
 
 function matchesKind(form: QueryForm, kind: QueryKind): boolean {
   const t = new Set(form.t);
-  if (kind === "femVerb") return t.has("v3fs") || t.has("v2fs") || t.has("v2fp");
+  if (kind === "femVerb") return t.has("femVerb") || t.has("v3fs") || t.has("v2fs") || t.has("v2fp");
   if (kind === "classFem") {
     const stem = stemLetters(form.w);
     return CLASS_FEM.some((lem) => stem === lem || stem.endsWith(lem));
@@ -292,6 +374,7 @@ export function runTanakhQuery(forms: QueryForm[], parsed: ParsedTanakhQuery): {
   const hit: QueryForm[] = [];
   for (const form of forms) {
     if (!matchesKind(form, parsed.kind)) continue;
+    if (parsed.need.some((tag) => !form.t.includes(tag))) continue;
     const refs = refsInScope(form.r, books);
     if (books && refs.length === 0) continue;
     hit.push(books ? { ...form, r: refs } : form);

@@ -36,6 +36,17 @@ test("parse verb person names", () => {
   assert.equal(parseTanakhQuery("feminine verbs").kind, "femVerb");
 });
 
+test("parse qal perfect and construct", () => {
+  const qal = parseTanakhQuery("give me 10 qal perfect");
+  assert.equal(qal.kind, "qal");
+  assert.deepEqual(qal.need, ["qatal"]);
+  assert.equal(parseTanakhQuery("10 cal imperfect").kind, "qal");
+  assert.deepEqual(parseTanakhQuery("10 cal imperfect").need, ["yiqtol"]);
+  assert.equal(parseTanakhQuery("construct case").kind, "cst");
+  assert.equal(parseTanakhQuery("10 piel").kind, "piel");
+  assert.equal(parseTanakhQuery("10 pual").kind, "pual");
+});
+
 test("run filters hatuf and respects limit", () => {
   const forms = [
     { w: "כָּל", n: 100, t: ["hatuf", "ms"], r: ["Gen.1.21"] },
@@ -46,6 +57,17 @@ test("run filters hatuf and respects limit", () => {
   assert.equal(total, 2);
   assert.equal(items.length, 2);
   assert.equal(items[0].w, "כָּל");
+});
+
+test("qal perfect requires both tags", () => {
+  const forms = [
+    { w: "בָּרָא", n: 10, t: ["qal", "qatal", "v3ms"], r: ["Gen.1.1"] },
+    { w: "יִבְרָא", n: 5, t: ["qal", "yiqtol", "v3ms"], r: ["Gen.1.1"] },
+    { w: "דִּבֶּר", n: 8, t: ["piel", "qatal", "v3ms"], r: ["Exod.6.2"] },
+  ];
+  const { items, total } = runTanakhQuery(forms, parseTanakhQuery("10 qal perfect"));
+  assert.equal(total, 1);
+  assert.equal(items[0].w, "בָּרָא");
 });
 
 test("stem letters drop the article", () => {

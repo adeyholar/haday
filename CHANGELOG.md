@@ -12,7 +12,7 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-10
 
-- **Tanakh finder (owner).** Ask any class grammar name — qamets hatuf/gadol, vocal or silent shewa, two shewas, 3ms/3fs/2ms/PL, feminine verbs, article, vav. Results deal as a card deck: tap to read the verse, tap again to move.
+- **Tanakh finder as a teaching deck.** Construct vs absolute, pronouns, qal perfect/imperfect, wayyiqtol, piel, pual, niphal, hiphil, hophal, hithpael — plus shewa and qamets. Ask “give me 10 qal perfect,” tap the card to read, tap again to move. Morphology: Open Scriptures Hebrew Bible (CC BY 4.0).
 
 - **אֵת vs אֶת.** Preposition “with” stays אֵת (tsere). The direct-object marker is now אֶת (segol), so Recognize no longer shows two identical cards.
 

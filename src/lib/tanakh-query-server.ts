@@ -43,5 +43,5 @@ export const searchTanakhIndex = createServerFn({ method: "POST" })
     if (data.scope) parsed.scope = data.scope as ParsedTanakhQuery["scope"];
     const index = await loadIndex();
     const { items, total } = runTanakhQuery(index.forms, parsed);
-    return { parsed, label: kindLabel(parsed.kind), total, tokens: index.tokens, items };
+    return { parsed, label: kindLabel(parsed.kind, parsed.need), total, tokens: index.tokens, items };
   });
