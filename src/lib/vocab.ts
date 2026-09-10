@@ -122,7 +122,7 @@ export const VOCAB: VocabItem[] = [
   { id: "im", hebrew: "עִם", translit: "ʿim", gloss: "with, together with", alts: ["with", "together with"], pos: "prep", chapter: 6, freq: 1048 },
   { id: "panim", hebrew: "פָּנִים", translit: "pānîm", gloss: "face, front", alts: ["face", "front", "presence", "before", "in front of"], hebrewAlts: ["לִפְנֵי"], pos: "noun", chapter: 6, freq: 2126 },
   { id: "tahat", hebrew: "תַּחַת", translit: "taḥat", gloss: "under, below, instead of", alts: ["under", "below", "instead of", "beneath"], pos: "prep", chapter: 6, freq: 510 },
-  { id: "et", hebrew: "אֵת", translit: "ʾēt", gloss: "direct object marker", alts: ["object marker", "direct object", "not translated"], hebrewAlts: ["אֶת"], pos: "particle", chapter: 6, freq: 10978 },
+  { id: "et", hebrew: "אֶת", translit: "ʾet", gloss: "direct object marker", alts: ["object marker", "direct object", "not translated"], hebrewAlts: ["אֵת"], pos: "particle", chapter: 6, freq: 10978 },
   { id: "kol", hebrew: "כֹּל", translit: "kōl", gloss: "all, each, every", alts: ["all", "each", "every", "whole"], hebrewAlts: ["כָּל"], pos: "noun", chapter: 6, freq: 5415 },
 
   // Ch 7 — BBH 3rd ed. 7.9 adjectives

@@ -292,7 +292,7 @@ panim	he	פָּנִים
 panim	en	Face
 tahat	he	תַּחַת
 tahat	en	Under
-et	he	אֵת
+et	he	אֶת
 et	en	Direct object marker
 kol	he	כֹּל
 kol	en	All
