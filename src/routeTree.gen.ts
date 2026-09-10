@@ -29,6 +29,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as WriteRouteImport } from './routes/write'
+import { Route as AdminQueryRouteImport } from './routes/admin.query'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as GameIndexRouteImport } from './routes/game/index'
@@ -154,6 +155,11 @@ const WriteRoute = WriteRouteImport.update({
   id: '/write',
   path: '/write',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminQueryRoute = AdminQueryRouteImport.update({
+  id: '/query',
+  path: '/query',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminVoiceRoute = AdminVoiceRouteImport.update({
   id: '/voice',
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/listen/pet': typeof ListenPetRoute
@@ -348,6 +355,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/listen/pet': typeof ListenPetRoute
@@ -396,6 +404,7 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/write': typeof WriteRoute
+  '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/listen/pet': typeof ListenPetRoute
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/listen/pet'
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/listen/pet'
@@ -538,6 +549,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/write'
+    | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/listen/pet'
@@ -749,6 +761,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WriteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/query': {
+      id: '/admin/query'
+      path: '/query'
+      fullPath: '/admin/query'
+      preLoaderRoute: typeof AdminQueryRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/voice': {
       id: '/admin/voice'
       path: '/voice'
@@ -928,10 +947,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminQueryRoute: typeof AdminQueryRoute
   AdminVoiceRoute: typeof AdminVoiceRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminQueryRoute: AdminQueryRoute,
   AdminVoiceRoute: AdminVoiceRoute,
 }
 
