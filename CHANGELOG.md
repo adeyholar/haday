@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-10
 
+- **Tanakh cards (own pages).** Study → Tanakh cards. Pick 10 / 20 / 50 and a grammar name. A separate flashcard page deals the deck. Flip to read the verse, then **Open this verse in Tanakh**. Old `/admin/query` sends you there.
+
 - **Tanakh finder as a teaching deck.** Construct vs absolute, pronouns, qal perfect/imperfect, wayyiqtol, piel, pual, niphal, hiphil, hophal, hithpael — plus shewa and qamets. Ask “give me 10 qal perfect,” tap the card to read, tap again to move. Morphology: Open Scriptures Hebrew Bible (CC BY 4.0).
 
 - **אֵת vs אֶת.** Preposition “with” stays אֵת (tsere). The direct-object marker is now אֶת (segol), so Recognize no longer shows two identical cards.

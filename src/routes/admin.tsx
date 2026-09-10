@@ -124,11 +124,11 @@ function AdminPage() {
           </Link>
           {" — "}
           record class lemmas for Alive Pet and Listen.{" "}
-          <Link to="/admin/query" className="font-semibold text-primary">
-            Tanakh finder
+          <Link to="/finder" className="font-semibold text-primary">
+            Tanakh cards
           </Link>
           {" — "}
-          pull qamets hatuf, endings, and class nouns from the whole text.
+          deal a grammar flashcard deck from the whole text.
         </p>
       </Panel>
 

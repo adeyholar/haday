@@ -53,7 +53,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
 | Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). **Remove** deletes an unwanted account (not the owner). |
 | Voice bank | Owner records Hebrew / English takes of the corpus (letters, vowels, names, lemmas). Alive Pet, Listen, and Ocean letters use them first. Neural Hila/Jenny fills every line that has no owner take. Corpus text: `/audio/neural/corpus.txt`. |
-| Tanakh finder | Owner `/admin/query`. Teaching deck over WLC + OSHB morphology: construct/absolute, qal/piel/pual/niphal/hiphil/hophal/hithpael, qatal/yiqtol/wayyiqtol, shewa, qamets. Tap card to read, tap to advance. |
+| Tanakh cards | `/finder` hub + `/finder/deck` flashcards. Signed-in learners deal N forms of a grammar (construct, qal perfect, shewa…). Flip, then open the verse in Listen/Read. |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
 | Privacy | Public `/legal` — what we store, that we do not sell it, local/international disclaimer, 13+ |

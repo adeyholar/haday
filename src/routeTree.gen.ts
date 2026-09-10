@@ -32,6 +32,8 @@ import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as FinderIndexRouteImport } from './routes/finder/index'
+import { Route as FinderDeckRouteImport } from './routes/finder/deck'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -169,6 +171,16 @@ const AdminVoiceRoute = AdminVoiceRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinderIndexRoute = FinderIndexRouteImport.update({
+  id: '/finder/',
+  path: '/finder/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinderDeckRoute = FinderDeckRouteImport.update({
+  id: '/finder/deck',
+  path: '/finder/deck',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameIndexRoute = GameIndexRouteImport.update({
@@ -311,7 +323,9 @@ export interface FileRoutesByFullPath {
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/finder/deck': typeof FinderDeckRoute
   '/listen/pet': typeof ListenPetRoute
+  '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -358,7 +372,9 @@ export interface FileRoutesByTo {
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/finder/deck': typeof FinderDeckRoute
   '/listen/pet': typeof ListenPetRoute
+  '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
   '/listen': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -407,7 +423,9 @@ export interface FileRoutesById {
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/finder/deck': typeof FinderDeckRoute
   '/listen/pet': typeof ListenPetRoute
+  '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -457,7 +475,9 @@ export interface FileRouteTypes {
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
+    | '/finder/deck'
     | '/listen/pet'
+    | '/finder/'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -504,7 +524,9 @@ export interface FileRouteTypes {
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
+    | '/finder/deck'
     | '/listen/pet'
+    | '/finder'
     | '/game'
     | '/listen'
     | '/api/auth/$'
@@ -552,7 +574,9 @@ export interface FileRouteTypes {
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
+    | '/finder/deck'
     | '/listen/pet'
+    | '/finder/'
     | '/game/'
     | '/listen/'
     | '/api/auth/$'
@@ -599,6 +623,8 @@ export interface RootRouteChildren {
   RulesRoute: typeof RulesRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  FinderDeckRoute: typeof FinderDeckRoute
+  FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   GameChapterStageRoute: typeof GameChapterStageRoute
@@ -780,6 +806,20 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finder/': {
+      id: '/finder/'
+      path: '/finder'
+      fullPath: '/finder/'
+      preLoaderRoute: typeof FinderIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finder/deck': {
+      id: '/finder/deck'
+      path: '/finder/deck'
+      fullPath: '/finder/deck'
+      preLoaderRoute: typeof FinderDeckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/': {
@@ -999,6 +1039,8 @@ const rootRouteChildren: RootRouteChildren = {
   RulesRoute: RulesRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,
+  FinderDeckRoute: FinderDeckRoute,
+  FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GameChapterStageRoute: GameChapterStageRoute,

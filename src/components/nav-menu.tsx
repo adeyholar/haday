@@ -26,6 +26,8 @@ export type NavHref =
   | "/admin"
   | "/admin/voice"
   | "/admin/query"
+  | "/finder"
+  | "/finder/deck"
   | "/legal"
   | "/game"
   | "/game/custom"

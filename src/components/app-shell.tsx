@@ -50,6 +50,7 @@ const STUDY: NavItem[] = [
   { to: "/browse", label: "Lexicon", hint: "Week’s lemmas", icon: BookOpen },
   { to: "/alphabet", label: "Alef-bet lesson", hint: "See, follow, my hand", icon: Languages },
   { to: "/keep", label: "Zakhor", hint: "Daily keep", icon: Repeat },
+  { to: "/finder", label: "Tanakh cards", hint: "Grammar flashcards from the text", icon: ScrollText },
   { to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp },
 ];
 
@@ -84,7 +85,6 @@ function moreItems(admin: boolean): NavItem[] {
   if (admin) {
     items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
     items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
-    items.push({ to: "/admin/query", label: "Tanakh finder", hint: "Hatuf, gender, endings", icon: ScrollText });
   }
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
@@ -251,7 +251,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/admin/query", "/ask", "/ideas", "/legal"].includes(pathname)}
+              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal"].includes(pathname) || pathname.startsWith("/finder")}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />

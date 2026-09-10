@@ -2,7 +2,6 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { assertAdmin } from "@/lib/admin";
 import {
   kindLabel,
   parseTanakhQuery,
@@ -35,8 +34,7 @@ export type TanakhQueryResult = {
 export const searchTanakhIndex = createServerFn({ method: "POST" })
   .validator((input: { q: string; kind?: QueryKind; limit?: number; scope?: string }) => input)
   .middleware([authMiddleware])
-  .handler(async ({ data, context }): Promise<TanakhQueryResult> => {
-    await assertAdmin(context.userId);
+  .handler(async ({ data }): Promise<TanakhQueryResult> => {
     const parsed = parseTanakhQuery(data.q || data.kind || "qamets qatan");
     if (data.kind) parsed.kind = data.kind;
     if (data.limit) parsed.limit = Math.min(200, Math.max(1, data.limit));

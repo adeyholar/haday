@@ -81,6 +81,10 @@
   line-height: 1.2;
 }
 
+.finder-flash {
+  min-height: 22rem;
+}
+
 .he-verse {
   display: flex;
   flex-wrap: wrap;

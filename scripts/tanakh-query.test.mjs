@@ -73,3 +73,10 @@ test("qal perfect requires both tags", () => {
 test("stem letters drop the article", () => {
   assert.equal(stemLetters("הָאָרֶץ"), "ארץ");
 });
+
+test("finder ask swaps the count", async () => {
+  const { finderAsk, parseFinderSearch } = await jiti.import("/workspace/src/lib/finder-search.ts");
+  assert.equal(finderAsk("give me 10 qal perfect", 20), "give me 20 qal perfect");
+  assert.equal(finderAsk("construct", 10), "give me 10 construct");
+  assert.equal(parseFinderSearch({ q: "piel", n: "20" }).n, 20);
+});
