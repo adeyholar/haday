@@ -80,3 +80,10 @@ test("finder ask swaps the count", async () => {
   assert.equal(finderAsk("construct", 10), "give me 10 construct");
   assert.equal(parseFinderSearch({ q: "piel", n: "20" }).n, 20);
 });
+
+test("query index paths cover Azure output", async () => {
+  const { queryIndexPaths } = await jiti.import("/workspace/src/lib/finder-search.ts");
+  const paths = queryIndexPaths("/app");
+  assert.ok(paths.some((p) => p.endsWith("public/tanakh/query-index.json")));
+  assert.ok(paths.some((p) => p.includes(".output/public/tanakh")));
+});

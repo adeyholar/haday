@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { queryIndexPaths } from "@/lib/finder-search";
 import {
   kindLabel,
   parseTanakhQuery,
@@ -15,10 +15,23 @@ type IndexFile = { v: number; tokens: number; forms: QueryForm[] };
 
 let cache: IndexFile | null = null;
 
+async function readIndexJson(): Promise<string> {
+  const tried: string[] = [];
+  for (const path of queryIndexPaths(process.cwd())) {
+    tried.push(path);
+    try {
+      return await readFile(path, "utf8");
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== "ENOENT") throw err;
+    }
+  }
+  throw new Error(`Tanakh index is not on this host (looked in ${tried.join(" · ")}).`);
+}
+
 async function loadIndex(): Promise<IndexFile> {
   if (cache) return cache;
-  const path = join(process.cwd(), "public/tanakh/query-index.json");
-  const raw = await readFile(path, "utf8");
+  const raw = await readIndexJson();
   cache = JSON.parse(raw) as IndexFile;
   return cache;
 }

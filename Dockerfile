@@ -19,6 +19,8 @@ ENV PORT=8080
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/.output ./.output
+COPY --from=build /app/public/tanakh/query-index.json ./.output/public/tanakh/query-index.json
+COPY --from=build /app/public/tanakh/query-index.json ./public/tanakh/query-index.json
 COPY migrations ./migrations
 COPY scripts ./scripts
 EXPOSE 8080

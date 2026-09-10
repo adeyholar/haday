@@ -13,3 +13,8 @@ export function finderAsk(labelAsk: string, n: number): string {
   if (/\d+/.test(labelAsk)) return labelAsk.replace(/\d+/, String(n));
   return `give me ${n} ${labelAsk.trim()}`;
 }
+
+export function queryIndexPaths(cwd = "."): string[] {
+  const root = cwd.replace(/\/$/, "");
+  return [`${root}/public/tanakh/query-index.json`, `${root}/.output/public/tanakh/query-index.json`];
+}

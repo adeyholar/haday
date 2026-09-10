@@ -3,15 +3,24 @@ import { Link, Navigate, createFileRoute } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { StudyMenu } from "@/components/study-menu";
-import { searchTanakhIndex, type TanakhQueryResult } from "@/lib/tanakh-query-server";
+import { dealFinderDeck } from "@/lib/finder-deal";
 import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
 import { parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
 import { parseFinderSearch } from "@/lib/finder-search";
+import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
 export const Route = createFileRoute("/finder/deck")({
   validateSearch: parseFinderSearch,
   component: FinderDeckPage,
 });
+
+function friendlyError(err: unknown): string {
+  const raw = err instanceof Error ? err.message : "";
+  if (/ENOENT|not on this host|query-index/i.test(raw)) {
+    return "The Tanakh card index is not on this host yet. After the next deploy, deal again.";
+  }
+  return raw || "Could not deal this deck.";
+}
 
 function FinderDeckPage() {
   const { q, n } = Route.useSearch();
@@ -30,12 +39,12 @@ function FinderDeckPage() {
     setResult(null);
     setCard(0);
     setFlipped(false);
-    void searchTanakhIndex({ data: { q, limit: n } })
+    void dealFinderDeck(q, n)
       .then((data) => {
         if (!cancelled) setResult(data);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not deal this deck.");
+        if (!cancelled) setError(friendlyError(err));
       })
       .finally(() => {
         if (!cancelled) setBusy(false);
