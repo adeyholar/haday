@@ -265,10 +265,17 @@ def stem(word: str) -> str:
     return w[m.end() :] if m else w
 
 
+NOT_FS = {"את", "יהוה", "עתה", "תחת"}
+
+
 def ending_tags(word: str) -> set[str]:
     s = stem(word)
     cons = letters(s)
     tags: set[str] = set()
+    if cons in NOT_FS:
+        if cons:
+            tags.add("ms")
+        return tags
     if re.search(r"[ַָ]יִם$", s):
         tags.add("dual")
         tags.add("pl")

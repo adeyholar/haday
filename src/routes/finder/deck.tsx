@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StudyMenu } from "@/components/study-menu";
 import { dealFinderDeck } from "@/lib/finder-deal";
 import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
-import { hatufWhy, parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
+import { hatufWhy, markFormInVerse, parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
 import { parseFinderSearch } from "@/lib/finder-search";
 import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
@@ -174,12 +174,19 @@ function FinderDeckPage() {
               {hatufWhy(item.w) && (result.parsed.kind === "hatuf" || item.t.includes("hatuf")) ? (
                 <p className="text-sm text-ink">{hatufWhy(item.w)}</p>
               ) : null}
+              {result.parsed.kind === "fs" ? (
+                <p className="text-sm text-ink">Feminine singular noun. The ָ ה or ת ending is on the highlighted word.</p>
+              ) : null}
               <p className="text-xs text-muted">{item.n}× in the Tanakh</p>
               {loc ? <p className="text-sm font-semibold text-ink">{prettyRef(item.r[0] ?? "")}</p> : null}
               {verse ? (
                 <>
-                  <p className="he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">
-                    {verse.he}
+                  <p className="he-verse he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">
+                    {markFormInVerse(verse.he, item.w).map((tok, i) => (
+                      <span key={`${tok.word}-${i}`} className={tok.hit ? "he-spoken" : undefined}>
+                        {tok.word}
+                      </span>
+                    ))}
                   </p>
                   <p className="text-sm text-muted">{verse.en}</p>
                 </>

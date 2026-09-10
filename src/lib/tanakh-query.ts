@@ -355,6 +355,10 @@ function refsInScope(refs: string[], books: Set<string> | null): string[] {
   return refs.filter((r) => books.has(r.split(".")[0] ?? ""));
 }
 
+function isNominal(t: Set<string>): boolean {
+  return (t.has("noun") || t.has("adj")) && !t.has("verb") && !t.has("pron");
+}
+
 function matchesKind(form: QueryForm, kind: QueryKind): boolean {
   const t = new Set(form.t);
   if (kind === "femVerb") return t.has("femVerb") || t.has("v3fs") || t.has("v2fs") || t.has("v2fp");
@@ -365,6 +369,9 @@ function matchesKind(form: QueryForm, kind: QueryKind): boolean {
   if (kind === "classMasc") {
     const stem = stemLetters(form.w);
     return CLASS_MASC.some((lem) => stem === lem || stem.endsWith(lem));
+  }
+  if (kind === "fs" || kind === "fp" || kind === "ms" || kind === "mp") {
+    return t.has(kind) && isNominal(t);
   }
   return t.has(kind);
 }
@@ -405,4 +412,26 @@ export function hatufWhy(word: string): string | null {
   }
   if (!word) return null;
   return "Qamets hatuf (short o): the syllable is closed (often by a silent shewa) and not the accented one.";
+}
+
+export function formKeys(form: string): string[] {
+  return form
+    .split("־")
+    .map((part) => lettersOf(part))
+    .filter(Boolean);
+}
+
+export function tokenHitsForm(token: string, form: string): boolean {
+  const keys = formKeys(form);
+  const tok = lettersOf(token);
+  if (!tok) return false;
+  if (keys.includes(tok)) return true;
+  return keys.includes(lettersOf(token.replace(/^[\u05D5\u05D1\u05DB\u05DC\u05DE\u05D4]/, "")));
+}
+
+export function markFormInVerse(he: string, form: string): { word: string; hit: boolean }[] {
+  return he
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => ({ word, hit: tokenHitsForm(word, form) }));
 }

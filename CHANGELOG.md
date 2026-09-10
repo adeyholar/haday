@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-10
 
+- **Tanakh cards highlight + real gender.** The verse marks the form. Feminine/masculine decks are nouns (and adjectives), so אֶת, יהוה, and 3ms verbs are out.
+
 - **Qamets hatuf cards show the chain.** כָּל is never dealt alone. The card is כָּל־נֶפֶשׁ (or the next word), so you can see the closed, unaccented syllable — kol, not kāl.
 
 - **Tanakh cards index on Azure.** The deck reads the built copy (`.output/public`) and the image now ships `query-index.json`, so dealing a grammar no longer dies with a missing-file error.

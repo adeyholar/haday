@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy } = await jiti.import(
+const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy, markFormInVerse } = await jiti.import(
   "/workspace/src/lib/tanakh-query.ts",
 );
 
@@ -96,4 +96,20 @@ test("hatuf sorts maqqef chains first", () => {
   const { items } = runTanakhQuery(forms, parseTanakhQuery("10 qamets qatan"));
   assert.equal(items[0].w, "כָּל־נֶפֶשׁ");
   assert.match(hatufWhy("כָּל־נֶפֶשׁ") ?? "", /maqqef|unaccented/i);
+});
+
+test("feminine singular is nouns, not את", () => {
+  const forms = [
+    { w: "אֶת", n: 6671, t: ["fs"], r: ["1Chr.1.10"] },
+    { w: "יְהוָה", n: 5645, t: ["fs", "gadol"], r: ["Gen.2.4"] },
+    { w: "עָשָׂה", n: 357, t: ["fs", "gadol", "qal", "qatal", "v3ms", "verb"], r: ["Gen.1.7"] },
+    { w: "שָׁנָה", n: 420, t: ["abs", "fs", "gadol", "noun"], r: ["Gen.5.3"] },
+    { w: "אִשָּׁה", n: 147, t: ["abs", "fs", "gadol", "noun"], r: ["Gen.2.23"] },
+  ];
+  const { items, total } = runTanakhQuery(forms, parseTanakhQuery("10 feminine singular"));
+  assert.equal(total, 2);
+  assert.equal(items[0].w, "שָׁנָה");
+  const marks = markFormInVerse("וְכוּשׁ יָלַד אֶת נִמְרוֹד שָׁנָה בָּאָרֶץ", "שָׁנָה");
+  assert.ok(marks.some((m) => m.hit && m.word.includes("שָׁנָה")));
+  assert.ok(marks.some((m) => !m.hit && m.word.includes("אֶת")));
 });
