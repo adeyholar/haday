@@ -123,7 +123,12 @@ function AdminPage() {
             Voice bank
           </Link>
           {" — "}
-          record class lemmas for Alive Pet and Listen.
+          record class lemmas for Alive Pet and Listen.{" "}
+          <Link to="/admin/query" className="font-semibold text-primary">
+            Tanakh finder
+          </Link>
+          {" — "}
+          pull qamets hatuf, endings, and class nouns from the whole text.
         </p>
       </Panel>
 

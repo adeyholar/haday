@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-10
 
+- **Tanakh finder (owner).** Admin can ask “give me 10 qamets qatan” or tap endingless masculine / feminine / dual and get real Masoretic hits with verse links. Gender from endings is the form; class feminine/masculine uses the BBH noun list.
+
 - **אֵת vs אֶת.** Preposition “with” stays אֵת (tsere). The direct-object marker is now אֶת (segol), so Recognize no longer shows two identical cards.
 
 ## 2026-09-09
