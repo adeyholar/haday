@@ -87,4 +87,4 @@ When a feature ships to `main`:
 2. **This file** — change only the section that is no longer true (table row, count, URL).
 3. Do not leave the as-built ahead of production. Azure deploys from `main`.
 
-In-app **Suggest a feature** is the student list. This file is the engineering picture of what actually runs.
+In-app **Suggest a feature** is the student list. This file is the engineering picture of what actually runs. The next four builds (tap-word, echo verse, Ask on this verse, pronunciation later) live in [ROADMAP.md](ROADMAP.md).
