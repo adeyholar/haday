@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, SkipBack, SkipForward } from "lucide-react";
+import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
@@ -59,6 +59,26 @@ import {
 } from "@/lib/tanakh-canon";
 
 type Mode = "follow" | "grade";
+
+const VOL_KEY = "haday-read-vol";
+
+function loadReadVolume(): number {
+  try {
+    const n = Number(localStorage.getItem(VOL_KEY));
+    if (Number.isFinite(n)) return Math.min(1, Math.max(0, n));
+  } catch {
+    /* private mode */
+  }
+  return 1;
+}
+
+function saveReadVolume(n: number) {
+  try {
+    localStorage.setItem(VOL_KEY, String(n));
+  } catch {
+    /* private mode */
+  }
+}
 
 export function TanakhReading({
   book,
@@ -737,6 +757,20 @@ function FollowCard({
   onLoop: (on: boolean) => void;
 }) {
   const lo = windowStart;
+  const [vol, setVol] = useState(loadReadVolume);
+  const lastVol = useRef(vol || 1);
+  useEffect(() => {
+    if (vol > 0) lastVol.current = vol;
+    saveReadVolume(vol);
+    const el = audioRef.current;
+    if (!el) return;
+    const apply = () => {
+      el.volume = vol;
+    };
+    apply();
+    el.addEventListener("loadedmetadata", apply);
+    return () => el.removeEventListener("loadedmetadata", apply);
+  }, [vol, audioRef]);
   const hi = windowEnd > windowStart ? windowEnd : duration;
   const span = Math.max(0, hi - lo);
   const rel = Math.max(0, Math.min(span, now - lo));
@@ -789,13 +823,27 @@ function FollowCard({
             onSeek(t);
           }}
         />
-        <audio
-          ref={audioRef}
-          className="mt-1 w-full"
-          controls
-          preload={preload}
-          controlsList="nodownload noplaybackrate"
-        />
+        <audio ref={audioRef} className="sr-only" preload={preload} playsInline />
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            type="button"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink"
+            aria-label={vol === 0 ? "Unmute" : "Mute"}
+            onClick={() => setVol((v) => (v === 0 ? lastVol.current || 1 : 0))}
+          >
+            {vol === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+          </button>
+          <input
+            className="audio-seek flex-1"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={vol}
+            aria-label="Volume"
+            onChange={(e) => setVol(Number(e.target.value))}
+          />
+        </div>
         <div className="mt-3 grid grid-cols-5 gap-2">
           <Button type="button" variant="outline" size="lg" className="min-h-14" onClick={() => onNudge(-5)}>
             <Rewind className="size-5" />

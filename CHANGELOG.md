@@ -10,6 +10,10 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+## 2026-09-11
+
+- **One seek bar on follow-along.** The browser’s extra player is gone. Volume stays on the HaDay bar (speaker + slider). Seek, play, skip, loop, and speed are unchanged.
+
 ## 2026-09-10
 
 - **Tanakh cards highlight + real gender.** The verse marks the form. Feminine/masculine decks are nouns (and adjectives), so אֶת, יהוה, and 3ms verbs are out.
