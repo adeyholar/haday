@@ -23,7 +23,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 | **Game** | BBH path Ch. 1–19, Custom mix (Vocabulary or Grammar), Aleph-bet mastery, **Ocean letters** (letters or vowels; listen-only; two-player; weak sky; first-call highlight), Syllables, Nouns, Article & vav, Grammar hub, Ultimate | Header Game stays grouped. Ocean letters: 3 lives, +1 per wave, look-alike decoys, iPad tap-to-start for voice. **90%** to clear a stage or unit. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |
-| **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight | Recorded Shmuelof audio. Book, chapter, or verse range (e.g. Genesis 2:7–10). |
+| **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
 | **Account** | Google, X, or email + password | Progress stays with the account. Old Vercel logins do **not** carry over. |

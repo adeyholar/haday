@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { queryIndexPaths } from "@/lib/finder-search";
+import { matchFormForWord } from "@/lib/word-card";
 import {
   kindLabel,
   parseTanakhQuery,
@@ -55,4 +56,26 @@ export const searchTanakhIndex = createServerFn({ method: "POST" })
     const index = await loadIndex();
     const { items, total } = runTanakhQuery(index.forms, parsed);
     return { parsed, label: kindLabel(parsed.kind, parsed.need), total, tokens: index.tokens, items };
+  });
+
+export type WordLookup = {
+  w: string;
+  t: string[];
+  n: number;
+};
+
+export const lookupTanakhWord = createServerFn({ method: "POST" })
+  .validator((input: { w: string; ref?: string }) => input)
+  .middleware([authMiddleware])
+  .handler(async ({ data }): Promise<WordLookup | null> => {
+    const w = (data.w || "").trim();
+    if (!w) return null;
+    try {
+      const index = await loadIndex();
+      const hit = matchFormForWord(index.forms, w, data.ref);
+      if (!hit) return { w, t: [], n: 0 };
+      return { w: hit.w, t: hit.t, n: hit.n };
+    } catch {
+      return { w, t: [], n: 0 };
+    }
   });

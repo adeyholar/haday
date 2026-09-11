@@ -312,6 +312,15 @@ export function verseStartFrom(meta: ChapterAudio | undefined, verse: number): n
   return starts[Math.max(0, Math.min(starts.length, verse) - 1)] ?? 0;
 }
 
+/** End of this 1-based verse in the chapter MP3 (next verse start, or duration). */
+export function verseEndFrom(meta: ChapterAudio | undefined, verse: number, duration = 0): number {
+  const starts = meta?.verses;
+  if (!starts?.length) return duration;
+  const next = starts[Math.max(0, verse)];
+  if (typeof next === "number" && next > 0) return next;
+  return duration || (starts.at(-1) ?? 0);
+}
+
 export function verseStartTime(chapter: number, verse: number): number {
   return verseStartFrom(chapterAudio(chapter), verse);
 }

@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, Sk
 import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
+import { EchoVerse } from "@/components/echo-verse";
+import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { Panel } from "@/components/panel";
 import { playGrade } from "@/lib/sfx";
 import {
@@ -23,6 +25,7 @@ import {
   sliceVerses,
   verseAtStarts,
   verseStartFrom,
+  verseEndFrom,
   versesFromDump,
   withEstimatedTiming,
   wordAtStarts,
@@ -617,12 +620,16 @@ export function TanakhReading({
           duration={tdur}
           windowStart={win.start}
           windowEnd={win.end > win.start ? win.end : tdur}
+          verseStart={verseStartFrom(audioMeta, verse.verse)}
+          verseEnd={verseEndFrom(audioMeta, verse.verse, tdur)}
+          audioSrc={audioMeta.src}
           loop={loop}
           preload={local ? "auto" : "metadata"}
           onToggle={() => {
             if (playing) halt();
             else void playFrom(i, true);
           }}
+          onHalt={halt}
           onStep={step}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
@@ -724,9 +731,13 @@ function FollowCard({
   duration,
   windowStart,
   windowEnd,
+  verseStart,
+  verseEnd,
+  audioSrc,
   loop,
   preload,
   onToggle,
+  onHalt,
   onStep,
   onNudge,
   onSeek,
@@ -746,9 +757,13 @@ function FollowCard({
   duration: number;
   windowStart: number;
   windowEnd: number;
+  verseStart: number;
+  verseEnd: number;
+  audioSrc: string;
   loop: boolean;
   preload: "auto" | "metadata";
   onToggle: () => void;
+  onHalt: () => void;
   onStep: (d: number) => void;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
@@ -759,6 +774,10 @@ function FollowCard({
   const lo = windowStart;
   const [vol, setVol] = useState(loadReadVolume);
   const lastVol = useRef(vol || 1);
+  const [pick, setPick] = useState<WordPick | null>(null);
+  useEffect(() => {
+    setPick(null);
+  }, [verse.ref]);
   useEffect(() => {
     if (vol > 0) lastVol.current = vol;
     saveReadVolume(vol);
@@ -774,13 +793,35 @@ function FollowCard({
   const hi = windowEnd > windowStart ? windowEnd : duration;
   const span = Math.max(0, hi - lo);
   const rel = Math.max(0, Math.min(span, now - lo));
+  const bookId = verse.book === "Gen" ? "Gen" : verse.book;
   return (
     <>
       <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">{verse.ref}</p>
         <p className="he-verse mt-4 text-xl sm:text-2xl md:text-3xl" lang="he" dir="rtl">
           {verse.words.map((w, wi) => (
-            <span key={`${verse.ref}-${wi}`} className={wi === wordI ? "he-spoken max-w-full" : "max-w-full text-ink"}>
+            <button
+              type="button"
+              key={`${verse.ref}-${wi}`}
+              className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
+                wi === wordI ? "he-spoken" : "text-ink"
+              } ${pick?.index === wi ? "he-tapped" : ""}`}
+              onClick={() => {
+                if (pick?.index === wi) {
+                  setPick(null);
+                  return;
+                }
+                setPick({
+                  word: w,
+                  index: wi,
+                  book: bookId,
+                  chapter: verse.chapter,
+                  verse: verse.verse,
+                  he: verse.he,
+                  en: verse.en,
+                });
+              }}
+            >
               {hebrewClusters(w).map((part, pi) => (
                 <span
                   key={`${verse.ref}-${wi}-${pi}`}
@@ -793,14 +834,17 @@ function FollowCard({
                   {part.glyph}
                 </span>
               ))}
-            </span>
+            </button>
           ))}
         </p>
+        <p className="mt-2 text-xs text-muted">Tap a word for its card. Highlight still follows the reader.</p>
         <p className="mt-4 max-w-full text-base leading-relaxed break-words text-ink">{verse.en}</p>
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
         </p>
+        <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} />
       </div>
+      {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
 
       <div className="mt-4 rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)]">
         <div className="flex items-center justify-between text-sm font-semibold tabular-nums text-muted">

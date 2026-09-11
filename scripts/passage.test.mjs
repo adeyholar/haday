@@ -15,7 +15,7 @@ const {
   versesInChapter,
   isFullChapter,
 } = await jiti.import("/workspace/src/lib/passage.ts");
-const { sliceVerses, audioWindow, verseStartFrom, chapterAudio, readingVerses } = await jiti.import(
+const { sliceVerses, audioWindow, verseStartFrom, verseEndFrom, chapterAudio, readingVerses } = await jiti.import(
   "/workspace/src/lib/reading.ts",
 );
 
@@ -94,6 +94,7 @@ test("slice and audio window keep Genesis 2:7–10 on the recording", () => {
   assert.equal(win.start, verseStartFrom(meta, 7));
   assert.ok(win.end > win.start);
   assert.equal(win.end, verseStartFrom(meta, 11));
+  assert.equal(verseEndFrom(meta, 10, meta.duration), verseStartFrom(meta, 11));
   assert.ok(win.start > 30, "verse 7 is well into the chapter");
   const rows = sliceVerses(readingVerses(2), 7, 10);
   assert.equal(rows.length, 4);

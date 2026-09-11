@@ -8,7 +8,7 @@ Tick the status when a slice ships (`queued` → `building` → `shipped`).
 
 ---
 
-## 1. Tap a word · lexicon card — `queued`
+## 1. Tap a word · lexicon card — `shipped`
 
 **Classmates get.** In follow-along, tap any Hebrew word. A card opens: the form, class gloss if it is a BBH lemma, OSHB tags (noun/verb, binyan, person/gender/number, construct), and a button to deal that grammar in Tanakh cards or jump to Listen on that verse.
 
@@ -20,7 +20,7 @@ Tick the status when a slice ships (`queued` → `building` → `shipped`).
 
 ---
 
-## 2. Echo the verse · ears first — `queued`
+## 2. Echo the verse · ears first — `shipped`
 
 **Classmates get.** After a verse (or a chosen range), **Echo**: the recording plays, then the mic opens. Student reads. Both takes play back, Hebrew still on screen, spoken word still marked. Optional: save the take on the account for the owner to hear later.
 
@@ -32,7 +32,7 @@ Tick the status when a slice ships (`queued` → `building` → `shipped`).
 
 ---
 
-## 3. Ask HaDay on this verse — `queued`
+## 3. Ask HaDay on this verse — `shipped`
 
 **Classmates get.** From the word card or the verse, **Ask about this**. The tutor already knows book, chapter, verse, the Hebrew line, the tapped form, and class vocab in that verse. Answers stay on the lesson and the open text.
 

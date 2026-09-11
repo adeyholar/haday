@@ -9,6 +9,28 @@ import { GAME_CHAPTER_TITLES } from "@/lib/vocab";
 
 export type AskTurn = { role: "user" | "assistant"; text: string };
 export type AskResult = { ok: true; text: string } | { ok: false; error: string };
+export type AskVerseContext = {
+  ref: string;
+  he: string;
+  en: string;
+  word?: string;
+  tags?: string[];
+  vocab?: string;
+};
+
+function verseBrief(ctx?: AskVerseContext): string {
+  if (!ctx?.ref || !ctx.he) return "";
+  const tags = (ctx.tags ?? []).join(", ");
+  return `
+The classmate has this verse open (do not swap the Hebrew):
+${ctx.ref}
+Hebrew: ${ctx.he}
+English: ${ctx.en}
+${ctx.word ? `Tapped word: ${ctx.word}` : ""}
+${tags ? `Index tags for that form: ${tags}` : ""}
+${ctx.vocab ? `Class vocab: ${ctx.vocab}` : ""}
+Answer about this open verse and form. If you are not sure of a root or a rare parsing, say so. Do not invent a different word.`;
+}
 
 function lessonBrief(): string {
   const vocab = Object.entries(CHAPTER_META)
@@ -32,7 +54,7 @@ Reading assignment: Genesis 1–5, Westminster Leningrad Codex (public domain) w
 }
 
 export const askHaday = createServerFn({ method: "POST" })
-  .validator((input: { question: string; history?: AskTurn[] }) => input)
+  .validator((input: { question: string; history?: AskTurn[]; context?: AskVerseContext }) => input)
   .middleware([authMiddleware])
   .handler(async ({ data }): Promise<AskResult> => {
     const apiKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
@@ -57,8 +79,8 @@ export const askHaday = createServerFn({ method: "POST" })
           {
             role: "system",
             content: `You are HaDay Hebraic AI, a tutor for a first-year Biblical Hebrew class using Basics of Biblical Hebrew (Pratico / Van Pelt). Be clear, brief, and kind. Answer from the lesson: letters, syllables, nouns, the article הַ, the conjunction וְ, prepositions, adjectives, pronouns, existence particles, construct chains, numbers, and the BBH vocabulary. Hebrew you cite must match the actual word (do not mix fire אֵשׁ with אשית “I will put”). Dual needs the ay diphthong. Game and Quiz use citation lemmas (יָם, not בַּיָּם). The ordinary article is הַ plus dagesh; gutturals and resh refuse dagesh (compensatory הָ on א ע ר, virtual הַ on ה ח, seghol הֶ before unaccented הָ חָ עָ). Vav is always prefixed: default וְ, bump וּ before ב מ פ, hateph match, יְ → וִי, אֱלֹהִים → וֵאלֹהִים. Inseparable prepositions are בְּ כְּ לְ; מִן may assimilate. Adjectives agree and follow attributively, or predicate without matching article. Independent pronouns add emphasis. Construct is X of Y. Numbers 3–10 often flip gender. Week 3 reads chapters 4 and 5 together; games stay chapter by chapter. Genesis 1–5 is the first reading, public-domain Masoretic text. If you are not sure, say so. Do not reprint copyrighted textbook pages.
-
-${lessonBrief()}`,
+${lessonBrief()}
+${verseBrief(data.context)}`,
           },
           ...history.map((t) => ({ role: t.role, content: t.text })),
           { role: "user", content: question },

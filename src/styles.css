@@ -99,7 +99,8 @@
   unicode-bidi: isolate;
   overflow-wrap: anywhere;
 }
-.he-verse > span {
+.he-verse > span,
+.he-verse > button {
   font-family: var(--font-hebrew);
   font-weight: 700;
   max-width: 100%;
@@ -107,6 +108,9 @@
   overflow-wrap: anywhere;
   word-break: break-word;
   box-decoration-break: clone;
+}
+.he-tapped {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 .he-spoken {
   background: color-mix(in oklab, var(--color-primary) 16%, transparent);
