@@ -1,18 +1,47 @@
-/** Trial plates for concrete Ch. 3–4 nouns. Original classroom art — not web photos. */
+/** Classroom plates for picturable BBH nouns. Original art — web photos failed license/sense checks. */
 export const VOCAB_ART_IDS = [
-  "bayit",
-  "erets",
+  // Ch. 3
+  "ab",
   "adamah",
+  "ah",
+  "achot",
+  "ish",
+  "em",
+  "erets",
+  "ishah",
+  "bayit",
+  "ben",
+  "bat",
   "yom",
   "laylah",
+  "naar",
+  "naarah",
+  // Ch. 4
   "derek",
   "har",
+  "kohen",
+  "leb",
   "mayim",
   "melek",
   "sus",
   "sefer",
-  "ir",
   "ayin",
+  "ir",
+  "tsaba",
+  "torah",
+  // Ch. 5
+  "esh",
+  "hekal",
+  "zahav",
+  "hereb",
+  "yeled",
+  "yam",
+  "kesef",
+  "mizbeah",
+  "anan",
+  "ruah",
+  "shamayim",
+  "shaar",
 ] as const;
 
 export type VocabArtId = (typeof VOCAB_ART_IDS)[number];
