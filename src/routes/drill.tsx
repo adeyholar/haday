@@ -10,6 +10,7 @@ import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { DontKnowButton } from "@/components/dont-know-button";
+import { VocabArt } from "@/components/vocab-art";
 import type { Rating } from "@/lib/srs";
 
 export const Route = createFileRoute("/drill")({ component: DrillPage });
@@ -181,16 +182,24 @@ function DrillPage() {
           {POS_LABEL[current.pos]} · Ch. {current.chapter}
         </p>
         {!ui.flipped ? (
-          frontHe ? (
-            <p className="he-word mt-4 text-5xl sm:text-6xl">{current.hebrew}</p>
-          ) : (
-            <p className="mt-4 font-display text-3xl font-semibold">{current.gloss}</p>
-          )
+          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+            <div className="min-w-0">
+              {frontHe ? (
+                <p className="he-word text-5xl sm:text-6xl">{current.hebrew}</p>
+              ) : (
+                <p className="font-display text-3xl font-semibold">{current.gloss}</p>
+              )}
+            </div>
+            <VocabArt id={current.id} />
+          </div>
         ) : (
-          <div className="mt-4">
-            <p className="he-word text-5xl sm:text-6xl">{current.hebrew}</p>
-            <p className="mt-3 font-display text-2xl font-semibold">{current.gloss}</p>
-            <p className="mt-1 text-sm text-muted">{current.translit}</p>
+          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+            <div className="min-w-0">
+              <p className="he-word text-5xl sm:text-6xl">{current.hebrew}</p>
+              <p className="mt-3 font-display text-2xl font-semibold">{current.gloss}</p>
+              <p className="mt-1 text-sm text-muted">{current.translit}</p>
+            </div>
+            <VocabArt id={current.id} />
           </div>
         )}
         {!ui.flipped && <p className="mt-8 text-sm text-subtle">Tap to reveal · Space</p>}

@@ -1,5 +1,6 @@
-/** Classroom plates for picturable BBH nouns. Original art — web photos failed license/sense checks. */
+/** Classroom plates for picturable BBH lemmas. Original art — not web photos. */
 export const VOCAB_ART_IDS = [
+  "zion-light",
   // Ch. 3
   "ab",
   "adamah",
@@ -46,9 +47,17 @@ export const VOCAB_ART_IDS = [
 
 export type VocabArtId = (typeof VOCAB_ART_IDS)[number];
 
+/** YHWH / Elohim / El: light on Zion — never a figure. */
+const ART_ALIAS: Record<string, string> = {
+  yhwh: "zion-light",
+  elohim: "zion-light",
+  "el-god": "zion-light",
+};
+
 const ART = new Set<string>(VOCAB_ART_IDS);
 
 export function vocabArtSrc(id: string): string | undefined {
-  if (!ART.has(id)) return undefined;
-  return `/vocab-art/${id}.jpg`;
+  const file = ART_ALIAS[id] ?? (ART.has(id) ? id : undefined);
+  if (!file) return undefined;
+  return `/vocab-art/${file}.jpg`;
 }

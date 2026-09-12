@@ -8,6 +8,7 @@ import { POS_LABEL, bbhVocab, itemsForWeek, type Pos } from "@/lib/vocab";
 import { hydrateCard, isHighWeak, isMastered, isWeak } from "@/lib/srs";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
+import { VocabArt } from "@/components/vocab-art";
 
 export const Route = createFileRoute("/browse")({
   component: BrowsePage,
@@ -117,8 +118,11 @@ function BrowsePage() {
                 </span>
               </button>
               {expanded && (
-                <div className="px-4 pb-4">
-                  <VerseCard item={item} />
+                <div className="flex items-start gap-3 px-4 pb-4">
+                  <VocabArt id={item.id} className="size-20 sm:size-24" />
+                  <div className="min-w-0 flex-1">
+                    <VerseCard item={item} />
+                  </div>
                 </div>
               )}
             </li>

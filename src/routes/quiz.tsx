@@ -14,6 +14,7 @@ import { StudyMenu } from "@/components/study-menu";
 import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { playGrade } from "@/lib/sfx";
+import { VocabArt } from "@/components/vocab-art";
 
 export const Route = createFileRoute("/quiz")({ component: QuizPage });
 
@@ -169,8 +170,13 @@ function QuizPage() {
       </Panel>
 
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
-        <p className="he-word text-5xl">{item.hebrew}</p>
-        <p className="mt-2 text-sm text-muted">{item.translit}</p>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+          <div className="min-w-0">
+            <p className="he-word text-5xl">{item.hebrew}</p>
+            <p className="mt-2 text-sm text-muted">{item.translit}</p>
+          </div>
+          <VocabArt id={item.id} />
+        </div>
       </div>
 
       {mode === "choice" ? (
