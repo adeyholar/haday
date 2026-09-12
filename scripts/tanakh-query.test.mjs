@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy, markFormInVerse } = await jiti.import(
+const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy, markFormInVerse, kindLabel } = await jiti.import(
   "/workspace/src/lib/tanakh-query.ts",
 );
 
@@ -12,6 +12,17 @@ test("parse qamets qatan with a count and Torah scope", () => {
   assert.equal(p.kind, "hatuf");
   assert.equal(p.limit, 10);
   assert.equal(p.scope, "torah");
+});
+
+test("class names: qamets is long ā, qamets hatuf is short o", () => {
+  assert.equal(parseTanakhQuery("give me 10 qamets").kind, "gadol");
+  assert.equal(parseTanakhQuery("10 qamets hatuf").kind, "hatuf");
+  assert.equal(parseTanakhQuery("10 qamat").kind, "gadol");
+  assert.equal(kindLabel("gadol"), "Qamets (long ā)");
+  assert.equal(kindLabel("hatuf"), "Qamets hatuf (short o)");
+  assert.ok(!kindLabel("gadol").toLowerCase().includes("gadol"));
+  assert.ok(!kindLabel("hatuf").toLowerCase().includes("katan"));
+  assert.ok(!kindLabel("hatuf").toLowerCase().includes("qatan"));
 });
 
 test("parse endingless masculine", () => {

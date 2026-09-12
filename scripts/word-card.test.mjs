@@ -18,7 +18,7 @@ test("qal perfect tags open qal perfect cards, not a shoresh guess", () => {
 
 test("hatuf beats other tags for the deck link", () => {
   const ask = grammarAskFromTags(["hatuf", "cst", "ms", "noun", "chain"]);
-  assert.equal(ask?.q, "give me 10 qamets qatan");
+  assert.equal(ask?.q, "give me 10 qamets hatuf");
 });
 
 test("matchFormForWord prefers the ref, not a random homograph", () => {

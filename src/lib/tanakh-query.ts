@@ -95,8 +95,8 @@ export const QUERY_PRESETS: Array<{ kind: QueryKind; label: string; ask: string;
   { group: "Person", kind: "v2fs", label: "2fs", ask: "10 2fs" },
   { group: "Person", kind: "v3mp", label: "3mp", ask: "10 3mp" },
   { group: "Person", kind: "femVerb", label: "Feminine verb", ask: "10 feminine verbs" },
-  { group: "Vowels", kind: "hatuf", label: "Qamets hatuf", ask: "10 qamets qatan" },
-  { group: "Vowels", kind: "gadol", label: "Qamets gadol", ask: "10 qamets gadol" },
+  { group: "Vowels", kind: "hatuf", label: "Qamets hatuf", ask: "10 qamets hatuf" },
+  { group: "Vowels", kind: "gadol", label: "Qamets", ask: "10 qamets" },
   { group: "Shewa", kind: "shewaVocal", label: "Vocal shewa", ask: "10 vocal shewa" },
   { group: "Shewa", kind: "shewaSilent", label: "Silent shewa", ask: "10 silent shewa" },
   { group: "Shewa", kind: "shewaPair", label: "Two shewas", ask: "10 two shewas together" },
@@ -258,8 +258,11 @@ function detectQuery(t: string): { kind: QueryKind; need: QueryKind[] } {
   if (/single shewa|one shewa|shewa one/.test(t)) return { kind: "shewaOne", need: [] };
   if (/hateph|hataf|reduced vowel/.test(t)) return { kind: "hateph", need: [] };
   if (/\bshewa\b|\bshva\b|\bshwa\b|\bsheva\b|\bshifa\b/.test(t)) return { kind: "shewa", need: [] };
-  if (/hatuf|qatan|katan|kamat katan|qamets qatan|short o|kamats katan/.test(t)) return { kind: "hatuf", need: [] };
-  if (/gadol|qamets gadol|kamat gadol|long a|kamats gadol/.test(t)) return { kind: "gadol", need: [] };
+  if (/hatuf|qatan|katan|kamat katan|qamets qatan|qamat katan|qamets hatuf|qamat hatuf|short o|kamats katan/.test(t))
+    return { kind: "hatuf", need: [] };
+  if (/\bgadol\b|qamets gadol|qamat gadol|kamats gadol|kamat gadol/.test(t)) return { kind: "gadol", need: [] };
+  if (/\bqamets\b|\bqamat\b|\bkamats\b/.test(t)) return { kind: "gadol", need: [] };
+  if (/long ā|long a/.test(t)) return { kind: "gadol", need: [] };
   if (/construct case|in construct|\bconstruct\b|\bsmikhut\b|\bsmichut\b/.test(t)) return { kind: "cst", need: [] };
   if (/\babsolute\b/.test(t)) return { kind: "abs", need: [] };
   if (/\bpronoun/.test(t)) return { kind: "pron", need: [] };
@@ -290,7 +293,7 @@ function detectQuery(t: string): { kind: QueryKind; need: QueryKind[] } {
 export function kindLabel(kind: QueryKind, need: QueryKind[] = []): string {
   const labels: Record<QueryKind, string> = {
     hatuf: "Qamets hatuf (short o)",
-    gadol: "Qamets gadol (long ā)",
+    gadol: "Qamets (long ā)",
     ms: "Endingless (looks masculine singular)",
     mp: "Masculine plural ִים",
     fs: "Feminine singular (ָה / ת)",

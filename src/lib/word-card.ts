@@ -62,7 +62,7 @@ export function describeTags(tags: string[]): string[] {
 
 export function grammarAskFromTags(tags: string[]): { q: string; label: string } | null {
   const t = new Set(tags);
-  if (t.has("hatuf")) return { q: "give me 10 qamets qatan", label: "Qamets hatuf cards" };
+  if (t.has("hatuf")) return { q: "give me 10 qamets hatuf", label: "Qamets hatuf cards" };
   if (t.has("qal") && t.has("qatal")) return { q: "give me 10 qal perfect", label: "Qal perfect cards" };
   if (t.has("qal") && t.has("yiqtol")) return { q: "give me 10 qal imperfect", label: "Qal imperfect cards" };
   if (t.has("wayy")) return { q: "give me 10 wayyiqtol", label: "Wayyiqtol cards" };

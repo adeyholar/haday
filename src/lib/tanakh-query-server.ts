@@ -49,7 +49,7 @@ export const searchTanakhIndex = createServerFn({ method: "POST" })
   .validator((input: { q: string; kind?: QueryKind; limit?: number; scope?: string }) => input)
   .middleware([authMiddleware])
   .handler(async ({ data }): Promise<TanakhQueryResult> => {
-    const parsed = parseTanakhQuery(data.q || data.kind || "qamets qatan");
+    const parsed = parseTanakhQuery(data.q || data.kind || "qamets hatuf");
     if (data.kind) parsed.kind = data.kind;
     if (data.limit) parsed.limit = Math.min(200, Math.max(1, data.limit));
     if (data.scope) parsed.scope = data.scope as ParsedTanakhQuery["scope"];
