@@ -164,6 +164,15 @@
   box-decoration-break: clone;
 }
 
+mark.en-hit {
+  background: color-mix(in oklab, var(--color-primary) 22%, transparent);
+  color: var(--color-ink);
+  font-weight: 700;
+  padding: 0 0.08em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+}
+
 .account-chip > div {
   min-width: 0;
 }

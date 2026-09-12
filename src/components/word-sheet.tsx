@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
-import { classLemmaForWord, describeTags, grammarAskFromTags, vocabLine } from "@/lib/word-card";
+import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, vocabLine } from "@/lib/word-card";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
+import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
+import { EnglishVerse } from "@/components/english-verse";
 import type { BookId } from "@/lib/tanakh-canon";
 
 export type WordPick = {
@@ -100,6 +102,18 @@ export function WordSheet({
           Close
         </button>
       </div>
+      {pick.he ? (
+        <div className="mt-3 space-y-2">
+          <p className="he-verse he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">
+            {markFormInVerse(pick.he, pick.word).map((tok, i) => (
+              <span key={`${tok.word}-${i}`} className={tok.hit ? "he-spoken" : undefined}>
+                {tok.word}
+              </span>
+            ))}
+          </p>
+          <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
+        </div>
+      ) : null}
       {lemma ? (
         <p className="mt-3 text-sm text-ink">
           Class vocab · Ch. {lemma.chapter}: <span className="he-word text-xl" dir="rtl" lang="he">{lemma.hebrew}</span>

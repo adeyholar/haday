@@ -106,3 +106,48 @@ export function vocabLine(item: VocabItem | undefined): string | undefined {
   const gloss = shortGloss(item.gloss);
   return `${item.hebrew} · ${gloss} (Ch. ${item.chapter})`;
 }
+
+const SKIP_EN = new Set(["the", "a", "an", "and", "of", "to", "in", "on", "or"]);
+
+/** Gloss phrases we can look up in a WEB verse. Longest first. */
+export function englishKeysForWord(word: string): string[] {
+  const item = lemmaForSurface(word);
+  if (!item) return [];
+  const raw = [item.gloss, ...item.alts]
+    .flatMap((s) => s.split(/[;,/]/))
+    .map((s) => s.replace(/\s+/g, " ").trim())
+    .filter((s) => s.length >= 3 && !SKIP_EN.has(s.toLowerCase()));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const k of raw.sort((a, b) => b.length - a.length)) {
+    const id = k.toLowerCase();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(k);
+  }
+  return out;
+}
+
+export type EnSeg = { text: string; hit: boolean };
+
+export function markGlossInEnglish(en: string, keys: string[]): EnSeg[] {
+  if (!en) return [];
+  const phrases = keys
+    .map((k) => k.trim())
+    .filter((k) => k.length >= 3)
+    .sort((a, b) => b.length - a.length);
+  if (!phrases.length) return [{ text: en, hit: false }];
+  const body = phrases.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+")).join("|");
+  const re = new RegExp(`\\b(?:${body})\\b`, "gi");
+  const segs: EnSeg[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(en))) {
+    if (m.index > last) segs.push({ text: en.slice(last, m.index), hit: false });
+    segs.push({ text: m[0] ?? "", hit: true });
+    last = m.index + (m[0]?.length ?? 0);
+    if (m.index === re.lastIndex) re.lastIndex += 1;
+  }
+  if (last < en.length) segs.push({ text: en.slice(last), hit: false });
+  return segs.length ? segs : [{ text: en, hit: false }];
+}

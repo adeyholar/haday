@@ -3,9 +3,8 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { describeTags, grammarAskFromTags, matchFormForWord, classLemmaForWord } = await jiti.import(
-  "/workspace/src/lib/word-card.ts",
-);
+const { describeTags, grammarAskFromTags, matchFormForWord, classLemmaForWord, englishKeysForWord, markGlossInEnglish } =
+  await jiti.import("/workspace/src/lib/word-card.ts");
 
 test("qal perfect tags open qal perfect cards, not a shoresh guess", () => {
   const tags = ["verb", "qal", "qatal", "v3ms"];
@@ -34,4 +33,18 @@ test("matchFormForWord prefers the ref, not a random homograph", () => {
 test("class lemma for a prefixed form stays the citation word", () => {
   const v = classLemmaForWord("הָאָרֶץ");
   assert.equal(v?.id, "erets");
+});
+
+test("English verse marks the gloss of the focused Hebrew word", () => {
+  const keys = englishKeysForWord("הָאָרֶץ");
+  assert.ok(keys.some((k) => /earth|land/i.test(k)));
+  const segs = markGlossInEnglish("In the beginning God created the heavens and the earth.", keys);
+  assert.ok(segs.some((s) => s.hit && /earth/i.test(s.text)));
+  assert.ok(segs.some((s) => !s.hit && /heavens/i.test(s.text)));
+});
+
+test("YHWH marks LORD in the English line", () => {
+  const keys = englishKeysForWord("יהוה");
+  const segs = markGlossInEnglish("and YHWH God took the man, and put him into the garden of Eden.", keys);
+  assert.ok(segs.some((s) => s.hit && /yhwh|lord/i.test(s.text)));
 });

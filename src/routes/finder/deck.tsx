@@ -7,6 +7,8 @@ import { dealFinderDeck } from "@/lib/finder-deal";
 import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
 import { hatufWhy, markFormInVerse, parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
 import { parseFinderSearch } from "@/lib/finder-search";
+import { englishKeysForWord } from "@/lib/word-card";
+import { EnglishVerse } from "@/components/english-verse";
 import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
 export const Route = createFileRoute("/finder/deck")({
@@ -188,7 +190,11 @@ function FinderDeckPage() {
                       </span>
                     ))}
                   </p>
-                  <p className="text-sm text-muted">{verse.en}</p>
+                  <EnglishVerse
+                    en={verse.en}
+                    keys={englishKeysForWord(item.w)}
+                    className="text-sm leading-relaxed text-ink"
+                  />
                 </>
               ) : (
                 <p className="text-sm text-muted">Loading the verse…</p>

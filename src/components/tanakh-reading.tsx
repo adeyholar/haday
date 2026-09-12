@@ -5,6 +5,7 @@ import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
 import { EchoVerse } from "@/components/echo-verse";
+import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { Panel } from "@/components/panel";
 import { playGrade } from "@/lib/sfx";
@@ -50,6 +51,7 @@ import {
   versesInChapter,
   type ReadSearch,
 } from "@/lib/passage";
+import { englishKeysForWord } from "@/lib/word-card";
 import {
   bookMeta,
   chapterAudioSrc,
@@ -794,6 +796,8 @@ function FollowCard({
   const span = Math.max(0, hi - lo);
   const rel = Math.max(0, Math.min(span, now - lo));
   const bookId = verse.book === "Gen" ? "Gen" : verse.book;
+  const focusWord = pick?.word ?? verse.words[wordI] ?? "";
+  const enKeys = englishKeysForWord(focusWord);
   return (
     <>
       <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
@@ -838,7 +842,7 @@ function FollowCard({
           ))}
         </p>
         <p className="mt-2 text-xs text-muted">Tap a word for its card. Highlight still follows the reader.</p>
-        <p className="mt-4 max-w-full text-base leading-relaxed break-words text-ink">{verse.en}</p>
+        <EnglishVerse en={verse.en} keys={enKeys} />
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
         </p>

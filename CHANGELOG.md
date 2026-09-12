@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-11
 
+- **English follows the Hebrew in focus.** When a word is spoken, tapped, or flipped on a Tanakh card, the matching English gloss in the verse is marked too (class vocab only — we do not guess).
+
 - **Qamets names match class.** The long ָ is tagged **Qamets**, not “qamets gadol.” The short-o ָ is **Qamets hatuf**, not “qamets katan.”
 
 - **Tap a word in follow-along.** A card shows the form, class gloss when it is a BBH lemma, and grammar tags (binyan, person, construct…). Deal matching Tanakh cards, or ask HaDay about *this* verse and word.
