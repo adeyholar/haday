@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { HebrewType } from "@/components/hebrew-type";
+import { VocabArt } from "@/components/vocab-art";
 import { Panel } from "@/components/panel";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
@@ -342,19 +343,27 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
 
       <div className="rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
         {stage === "recognize" || stage === "gloss" ? (
-          <>
-            <p className="he-word text-5xl">{item.hebrew}</p>
-            <p className="mt-2 text-sm text-muted">{item.translit}</p>
-            {item.id.startsWith("tv:") && (
-              <p className="mt-1 text-xs text-muted">Tanakh form · lemma <span className="he-word text-base text-ink">{item.hebrewAlts?.[0]}</span></p>
-            )}
-          </>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+            <div className="min-w-0">
+              <p className="he-word text-5xl">{item.hebrew}</p>
+              <p className="mt-2 text-sm text-muted">{item.translit}</p>
+              {item.id.startsWith("tv:") && (
+                <p className="mt-1 text-xs text-muted">
+                  Tanakh form · lemma <span className="he-word text-base text-ink">{item.hebrewAlts?.[0]}</span>
+                </p>
+              )}
+            </div>
+            <VocabArt id={item.id} />
+          </div>
         ) : (
-          <>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">English</p>
-            <p className="mt-1 font-display text-3xl font-semibold text-ink">{item.gloss}</p>
-            {revealed && <p className="he-word mt-3 text-4xl">{item.hebrew}</p>}
-          </>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">English</p>
+              <p className="mt-1 font-display text-3xl font-semibold text-ink">{item.gloss}</p>
+              {revealed && <p className="he-word mt-3 text-4xl">{item.hebrew}</p>}
+            </div>
+            <VocabArt id={item.id} />
+          </div>
         )}
       </div>
 

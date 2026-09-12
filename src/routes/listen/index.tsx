@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
+import { VocabArt } from "@/components/vocab-art";
 import { Panel } from "@/components/panel";
 import { GAME_CHAPTER_TITLES } from "@/lib/vocab";
 import { vocabClip, vocabClipLabel } from "@/lib/vocab-clips";
@@ -232,9 +233,14 @@ function ListenPage() {
           Chapter {item?.chapter ?? "—"}
           {item ? ` · ${GAME_CHAPTER_TITLES[item.chapter] ?? ""}` : ""}
         </p>
-        <p className="he-word mt-4 text-5xl sm:text-6xl">{item?.hebrew}</p>
-        <p className="mt-3 font-display text-2xl font-semibold text-ink">{item?.gloss}</p>
-        <p className="mt-1 text-sm text-muted">{item?.translit}</p>
+        <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
+          <div className="min-w-0">
+            <p className="he-word text-5xl sm:text-6xl">{item?.hebrew}</p>
+            <p className="mt-3 font-display text-2xl font-semibold text-ink">{item?.gloss}</p>
+            <p className="mt-1 text-sm text-muted">{item?.translit}</p>
+          </div>
+          {item ? <VocabArt id={item.id} /> : null}
+        </div>
         {showClip && lemmaClip ? (
           <p className="mt-3 text-sm text-primary">{vocabClipLabel(lemmaClip)}</p>
         ) : null}

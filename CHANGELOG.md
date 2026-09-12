@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-11
 
+- **Trial noun pictures (Ch. 3–4).** Thirteen concrete words (house, land, soil, day, night, road, mountain, water, king, horse, scroll, city, eye) show an original plate beside the word on Listen and in Game. No people, no God, no particles. רֹאשׁ is not in this batch.
+
 - **English follows the Hebrew in focus.** When a word is spoken, tapped, or flipped on a Tanakh card, the matching English gloss in the verse is marked too (class vocab only — we do not guess).
 
 - **Qamets names match class.** The long ָ is tagged **Qamets**, not “qamets gadol.” The short-o ָ is **Qamets hatuf**, not “qamets katan.”
