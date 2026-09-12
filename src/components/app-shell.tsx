@@ -87,6 +87,7 @@ function moreItems(admin: boolean): NavItem[] {
     items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
+  items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });
   items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
   return items;
 }
@@ -94,7 +95,8 @@ function moreItems(admin: boolean): NavItem[] {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isPending } = useCurrentUserState();
-  const isPublic = pathname === "/login" || pathname === "/reset-password" || pathname === "/legal";
+  const isPublic =
+    pathname === "/login" || pathname === "/reset-password" || pathname === "/legal" || pathname === "/credits";
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -251,7 +253,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal"].includes(pathname) || pathname.startsWith("/finder")}
+              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/finder")}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />

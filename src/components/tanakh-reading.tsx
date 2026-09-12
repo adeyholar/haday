@@ -715,7 +715,12 @@ export function TanakhReading({
         )}
       </div>
 
-      <p className="mt-6 text-xs text-muted">{AUDIO_CREDIT}</p>
+      <p className="mt-6 text-xs text-muted">
+        {AUDIO_CREDIT}{" "}
+        <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Full credits
+        </Link>
+      </p>
     </>
   );
 }

@@ -10,7 +10,11 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
-## 2026-09-11
+## 2026-09-12
+
+- **Credits page.** Audio, Hebrew text, English, and open licenses are named on one page (More → Credits). Tanakh listen and sign-in link to it.
+
+
 
 - **God as light on Zion.** יהוה / אֱלֹהִים / אֵל share one plate: dawn light on the mount — no figure. Pictures also show in Study (Drill, Quiz, Lexicon, Daily keep), not only Listen and Game.
 

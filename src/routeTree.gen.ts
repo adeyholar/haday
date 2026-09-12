@@ -15,6 +15,7 @@ import { Route as AlphabetRouteImport } from './routes/alphabet'
 import { Route as AskRouteImport } from './routes/ask'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as ChallengeRouteImport } from './routes/challenge'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DrillRouteImport } from './routes/drill'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as IdeasRouteImport } from './routes/ideas'
@@ -86,6 +87,11 @@ const BrowseRoute = BrowseRouteImport.update({
 const ChallengeRoute = ChallengeRouteImport.update({
   id: '/challenge',
   path: '/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DrillRoute = DrillRouteImport.update({
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
   '/challenge': typeof ChallengeRoute
+  '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
   '/ideas': typeof IdeasRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
   '/challenge': typeof ChallengeRoute
+  '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
   '/ideas': typeof IdeasRoute
@@ -406,6 +414,7 @@ export interface FileRoutesById {
   '/ask': typeof AskRoute
   '/browse': typeof BrowseRoute
   '/challenge': typeof ChallengeRoute
+  '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
   '/ideas': typeof IdeasRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/browse'
     | '/challenge'
+    | '/credits'
     | '/drill'
     | '/guide'
     | '/ideas'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/browse'
     | '/challenge'
+    | '/credits'
     | '/drill'
     | '/guide'
     | '/ideas'
@@ -557,6 +568,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/browse'
     | '/challenge'
+    | '/credits'
     | '/drill'
     | '/guide'
     | '/ideas'
@@ -608,6 +620,7 @@ export interface RootRouteChildren {
   AskRoute: typeof AskRoute
   BrowseRoute: typeof BrowseRoute
   ChallengeRoute: typeof ChallengeRoute
+  CreditsRoute: typeof CreditsRoute
   DrillRoute: typeof DrillRoute
   GuideRoute: typeof GuideRoute
   IdeasRoute: typeof IdeasRoute
@@ -687,6 +700,13 @@ declare module '@tanstack/react-router' {
       path: '/challenge'
       fullPath: '/challenge'
       preLoaderRoute: typeof ChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/drill': {
@@ -1024,6 +1044,7 @@ const rootRouteChildren: RootRouteChildren = {
   AskRoute: AskRoute,
   BrowseRoute: BrowseRoute,
   ChallengeRoute: ChallengeRoute,
+  CreditsRoute: CreditsRoute,
   DrillRoute: DrillRoute,
   GuideRoute: GuideRoute,
   IdeasRoute: IdeasRoute,

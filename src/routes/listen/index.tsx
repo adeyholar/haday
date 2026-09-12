@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
@@ -390,7 +390,11 @@ function ListenPage() {
         </div>
         <p className="mt-3 text-xs text-muted">
           Turn the ringer and media volume up. You should hear a short chime, then the words. Keep the screen on.
-          iPhone: Safari is the most reliable. Android: Chrome. Unmute media, not just the ringer.
+          iPhone: Safari is the most reliable. Android: Chrome. Unmute media, not just the ringer. Isolated lemmas:{" "}
+          <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Open Hebrew Bible and other credits
+          </Link>
+          .
         </p>
       </Panel>
     </>

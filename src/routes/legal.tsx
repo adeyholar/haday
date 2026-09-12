@@ -123,6 +123,10 @@ function LegalPage() {
             Back to sign in
           </Link>
         )}
+        {" · "}
+        <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Credits
+        </Link>
       </p>
     </main>
   );

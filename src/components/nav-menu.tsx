@@ -29,6 +29,7 @@ export type NavHref =
   | "/finder"
   | "/finder/deck"
   | "/legal"
+  | "/credits"
   | "/game"
   | "/game/custom"
   | "/game/alefbet"

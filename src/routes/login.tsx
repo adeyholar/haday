@@ -367,6 +367,10 @@ function Login() {
         <Link to="/legal" className="underline-offset-4 hover:underline">
           Privacy and disclaimer
         </Link>
+        {" · "}
+        <Link to="/credits" className="underline-offset-4 hover:underline">
+          Credits
+        </Link>
         {" · "}We do not sell your information.
       </p>
     </main>

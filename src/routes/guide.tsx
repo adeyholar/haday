@@ -98,7 +98,11 @@ function GuidePage() {
           listen. Jump to a chapter if you want a shorter stretch. Loop this chapter, pick a group of chapters (Mix), or
           loop the whole list. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
           off. A natural Hebrew neural voice speaks each lemma, with Hebrew loudness matched to English. Class-owner
-          recordings in the Voice bank still play first when they exist.
+          recordings in the Voice bank still play first when they exist. Readers and texts are named on{" "}
+          <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Credits
+          </Link>
+          .
         </p>
       </Panel>
 
