@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
-import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, vocabLine } from "@/lib/word-card";
+import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, hasGlossInEnglish, vocabLine } from "@/lib/word-card";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
@@ -112,6 +112,9 @@ export function WordSheet({
             ))}
           </p>
           <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
+          {!hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
+            <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
+          ) : null}
         </div>
       ) : null}
       {lemma ? (
@@ -146,6 +149,13 @@ export function WordSheet({
             {deck.label}
           </Link>
         ) : null}
+        <Link
+          to="/finder/word"
+          search={{ q: pick.word, scope: "all", page: 1 }}
+          className="flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-surface px-4 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
+        >
+          Every verse with this word
+        </Link>
         <Button type="button" variant="outline" size="lg" onClick={() => setAskOpen((o) => !o)}>
           Ask about this word
         </Button>

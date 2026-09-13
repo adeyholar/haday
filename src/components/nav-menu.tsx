@@ -28,6 +28,7 @@ export type NavHref =
   | "/admin/query"
   | "/finder"
   | "/finder/deck"
+  | "/finder/word"
   | "/legal"
   | "/credits"
   | "/game"

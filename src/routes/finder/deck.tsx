@@ -7,7 +7,9 @@ import { dealFinderDeck } from "@/lib/finder-deal";
 import { fetchTanakhBook, isBookId } from "@/lib/tanakh-canon";
 import { hatufWhy, markFormInVerse, parseRef, prettyRef, type QueryForm } from "@/lib/tanakh-query";
 import { parseFinderSearch } from "@/lib/finder-search";
-import { englishKeysForWord } from "@/lib/word-card";
+import { englishKeysForWord, hasGlossInEnglish, classLemmaForWord } from "@/lib/word-card";
+import { shortGloss } from "@/lib/tanakh-learn-note";
+import { markQueryInVerse } from "@/lib/tanakh-word";
 import { EnglishVerse } from "@/components/english-verse";
 import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
@@ -140,6 +142,8 @@ function FinderDeckPage() {
   }
 
   const last = card + 1 >= result.items.length;
+  const enKeys = englishKeysForWord(item.w);
+  const lemma = classLemmaForWord(item.w);
 
   return (
     <>
@@ -184,17 +188,23 @@ function FinderDeckPage() {
               {verse ? (
                 <>
                   <p className="he-verse he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">
-                    {markFormInVerse(verse.he, item.w).map((tok, i) => (
+                    {(result.parsed.hebrew
+                      ? markQueryInVerse(verse.he, result.parsed.hebrew)
+                      : markFormInVerse(verse.he, item.w)
+                    ).map((tok, i) => (
                       <span key={`${tok.word}-${i}`} className={tok.hit ? "he-spoken" : undefined}>
-                        {tok.word}
+                        {tok.word}{" "}
                       </span>
                     ))}
                   </p>
                   <EnglishVerse
                     en={verse.en}
-                    keys={englishKeysForWord(item.w)}
+                    keys={enKeys}
                     className="text-sm leading-relaxed text-ink"
                   />
+                  {!hasGlossInEnglish(verse.en, enKeys) && lemma ? (
+                    <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
+                  ) : null}
                 </>
               ) : (
                 <p className="text-sm text-muted">Loading the verse…</p>

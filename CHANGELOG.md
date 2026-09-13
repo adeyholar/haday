@@ -10,7 +10,13 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
-## 2026-09-12
+## 2026-09-13
+
+- **Find a Hebrew word.** Study → Tanakh cards: type a word (בַּיִת, אָמַר, אֶרֶץ). Every matching verse is listed, Torah / Nevi'im / Ketuvim filter, page through the whole Tanakh. Hebrew is marked; English is marked when the word is in the class list.
+
+- **English now follows the Hebrew on the card.** WEB inflections (said, created, sons) are marked, not only the citation gloss. Wayyiqtol of a class verb still maps to that gloss. If WEB wording is different, the class gloss is printed under the verse.
+
+
 
 - **Credits page.** Audio, Hebrew text, English, and open licenses are named on one page (More → Credits). Tanakh listen and sign-in link to it.
 

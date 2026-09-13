@@ -74,6 +74,10 @@ test("a 2-letter lemma is never glued onto a longer unrelated word", () => {
     const g = lettersOnly(guessed.hebrew);
     if (g.length > 2) continue;
     if (guessed.id === stored) continue;
+    const altHit = [guessed.hebrew, ...(guessed.hebrewAlts ?? [])].some(
+      (h) => lettersOnly(h) === surf,
+    );
+    if (altHit) continue;
     if (surf.startsWith(g) && surf.length - g.length >= 2) {
       bad.push(`${item.hebrew} stored=${stored} guessed=${guessed.id} (${guessed.gloss})`);
     }

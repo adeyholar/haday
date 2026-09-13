@@ -50,7 +50,7 @@ const STUDY: NavItem[] = [
   { to: "/browse", label: "Lexicon", hint: "Week’s lemmas", icon: BookOpen },
   { to: "/alphabet", label: "Alef-bet lesson", hint: "See, follow, my hand", icon: Languages },
   { to: "/keep", label: "Zakhor", hint: "Daily keep", icon: Repeat },
-  { to: "/finder", label: "Tanakh cards", hint: "Grammar flashcards from the text", icon: ScrollText },
+  { to: "/finder", label: "Tanakh cards", hint: "Grammar decks and word search", icon: ScrollText },
   { to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp },
 ];
 

@@ -121,13 +121,44 @@ function closedClass(v: VocabItem): boolean {
   return v.pos === "particle" || v.pos === "pron";
 }
 
+/** Match a BBH verb to a prefixed/suffixed form. Closed class only — not a guessed shoresh. */
+const VERB_PFX = ["והת", "וית", "הת", "וי", "ות", "וא", "ונ", "וה", "ו", "י", "ת", "א", "נ", ""] as const;
+const VERB_SFX = ["תם", "תי", "נו", "נה", "ות", "ים", "יו", "יה", "הו", "ני", "ה", "ו", "י", "ת", ""] as const;
+
+function verbFitsClass(surface: string, lemma: VocabItem): boolean {
+  const s = foldFinals(lettersOnly(surface));
+  const roots = [lemma.hebrew, ...(lemma.hebrewAlts ?? [])]
+    .map((h) => foldFinals(lettersOnly(h)))
+    .filter((root) => root.length >= 2);
+  for (const r of roots) {
+    if (s === r) return true;
+    const mater = foldFinals(r.replaceAll("ו", ""));
+    for (const p of VERB_PFX) {
+      if (p && !s.startsWith(p)) continue;
+      const rest = s.slice(p.length);
+      for (const x of VERB_SFX) {
+        if (x && !rest.endsWith(x)) continue;
+        const core = x ? rest.slice(0, rest.length - x.length) : rest;
+        if (core === r) return true;
+        if (mater.length >= 2 && core === mater) return true;
+        if (r.endsWith("ה")) {
+          const bare = r.slice(0, -1);
+          if (p && core === bare) return true;
+          if (x === "ה" && core === `${bare}ת`) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 /** True when this surface may be shown as that lemma in a drill. */
 export function formFitsLemma(surface: string, lemma: VocabItem): boolean {
   const s = foldFinals(lettersOnly(surface));
   const r = foldFinals(lettersOnly(lemma.hebrew));
   if (s.length < 2 || r.length < 2) return false;
   if (s === r) return true;
-  if (lemma.pos === "verb") return false;
+  if (lemma.pos === "verb") return verbFitsClass(surface, lemma);
   if (closedClass(lemma)) return s.startsWith("ו") && s.slice(1) === r;
   if (r.length < 3) {
     const c = s[0]!;
@@ -151,6 +182,10 @@ export function lemmaForSurface(surface: string): VocabItem | undefined {
       .map((h) => foldFinals(lettersOnly(h)))
       .filter((root) => root.length >= 2);
     if (keys.some((root) => bodies.includes(root))) {
+      const fullHit = keys.includes(surf);
+      if (closedClass(v) && !fullHit && !(surf.startsWith("ו") && keys.includes(surf.slice(1)))) {
+        continue;
+      }
       if (!exact || v.freq > exact.freq) exact = v;
       continue;
     }

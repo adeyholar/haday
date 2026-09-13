@@ -62,6 +62,7 @@ export type ParsedTanakhQuery = {
   limit: number;
   scope: "all" | SectionId | BookId;
   raw: string;
+  hebrew?: string;
 };
 
 export const QUERY_PRESETS: Array<{ kind: QueryKind; label: string; ask: string; group: string }> = [
@@ -216,6 +217,11 @@ export function parseTanakhQuery(raw: string): ParsedTanakhQuery {
         break;
       }
     }
+  }
+
+  const he = lettersOf(raw);
+  if (he.length >= 2) {
+    return { kind: "hatuf", need: [], limit, scope, raw: raw.trim(), hebrew: he };
   }
 
   const detected = detectQuery(t);

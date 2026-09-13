@@ -96,6 +96,29 @@ export async function fetchTanakhBook(id: BookId): Promise<TanakhDump> {
   return data;
 }
 
+export async function versesForRefs(
+  refs: string[],
+): Promise<Array<{ ref: string; he: string; en: string }>> {
+  const out: Array<{ ref: string; he: string; en: string }> = [];
+  const needed = new Set<BookId>();
+  const parsed = refs.map((ref) => {
+    const [book, ch, v] = ref.split(".");
+    return { ref, book: book ?? "", ch: ch ?? "1", v: Number(v ?? 1) };
+  });
+  for (const row of parsed) {
+    if (isBookId(row.book)) needed.add(row.book);
+  }
+  await Promise.all([...needed].map((id) => fetchTanakhBook(id).catch(() => null)));
+  for (const row of parsed) {
+    if (!isBookId(row.book)) continue;
+    const dump = dumpCache.get(row.book);
+    const verse = dump?.chapters[row.ch]?.find((item) => item.v === row.v);
+    if (!verse) continue;
+    out.push({ ref: row.ref, he: verse.he, en: verse.en });
+  }
+  return out;
+}
+
 /** Mechon Mamre / Talking Bibles chapter codes (Abraham Shmuelof). */
 const MECHON: Record<BookId, string> = {
   Gen: "01",

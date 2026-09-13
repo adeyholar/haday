@@ -35,6 +35,7 @@ import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as FinderIndexRouteImport } from './routes/finder/index'
 import { Route as FinderDeckRouteImport } from './routes/finder/deck'
+import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -189,6 +190,11 @@ const FinderDeckRoute = FinderDeckRouteImport.update({
   path: '/finder/deck',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinderWordRoute = FinderWordRouteImport.update({
+  id: '/finder/word',
+  path: '/finder/word',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/game/',
   path: '/game/',
@@ -331,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
+  '/finder/word': typeof FinderWordRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByTo {
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
+  '/finder/word': typeof FinderWordRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
@@ -433,6 +441,7 @@ export interface FileRoutesById {
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
+  '/finder/word': typeof FinderWordRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
+    | '/finder/word'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
@@ -536,6 +546,7 @@ export interface FileRouteTypes {
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
+    | '/finder/word'
     | '/listen/pet'
     | '/finder'
     | '/game'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
+    | '/finder/word'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
@@ -637,6 +649,7 @@ export interface RootRouteChildren {
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
   FinderDeckRoute: typeof FinderDeckRoute
+  FinderWordRoute: typeof FinderWordRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/finder/deck'
       fullPath: '/finder/deck'
       preLoaderRoute: typeof FinderDeckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finder/word': {
+      id: '/finder/word'
+      path: '/finder/word'
+      fullPath: '/finder/word'
+      preLoaderRoute: typeof FinderWordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/': {
@@ -1061,6 +1081,7 @@ const rootRouteChildren: RootRouteChildren = {
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,
   FinderDeckRoute: FinderDeckRoute,
+  FinderWordRoute: FinderWordRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

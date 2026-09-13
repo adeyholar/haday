@@ -48,3 +48,20 @@ test("YHWH marks LORD in the English line", () => {
   const segs = markGlossInEnglish("and YHWH God took the man, and put him into the garden of Eden.", keys);
   assert.ok(segs.some((s) => s.hit && /yhwh|lord/i.test(s.text)));
 });
+
+test("verb citation marks WEB inflected English (said, created)", () => {
+  const said = markGlossInEnglish("God said, “Let there be light,” and there was light.", englishKeysForWord("אָמַר"));
+  assert.ok(said.some((s) => s.hit && /said/i.test(s.text)));
+  const created = markGlossInEnglish(
+    "In the beginning, God created the heavens and the earth.",
+    englishKeysForWord("בָּרָא"),
+  );
+  assert.ok(created.some((s) => s.hit && /created/i.test(s.text)));
+});
+
+test("wayyiqtol of a class verb still maps to the citation gloss", () => {
+  const keys = englishKeysForWord("וַיֹּאמֶר");
+  assert.ok(keys.some((k) => /said|say/i.test(k)));
+  const segs = markGlossInEnglish("God said, “Let there be light,” and there was light.", keys);
+  assert.ok(segs.some((s) => s.hit && /said/i.test(s.text)));
+});
