@@ -1,6 +1,6 @@
 # HaDay voice corpus
 # id <tab> part <tab> text
-# Feed this to a neural voice (Hebrew + English) or read it in the Voice bank.
+# Hebrew part is Hebrew-only. English part is English-only. Never mix in one prompt.
 
 alef	he	אָלֶף
 alef	en	Alef
@@ -58,47 +58,47 @@ pe-final	he	פֵּא סוֹפִית
 pe-final	en	Final pe
 tsade-final	he	צָדֵי סוֹפִית
 tsade-final	en	Final tsade
-qamets	he	בָ
+qamets	he	קָמֶץ
 qamets	en	Qamets
-tsere	he	בֵ
+tsere	he	צֵירֵי
 tsere	en	Tsere
-holem	he	בֹ
+holem	he	חוֹלֶם
 holem	en	Holem
-pathach	he	בַ
+pathach	he	פַּתָּח
 pathach	en	Pathach
-seghol	he	בֶ
+seghol	he	סֶגּוֹל
 seghol	en	Seghol
-hireq	he	בִ
+hireq	he	חִירֶק
 hireq	en	Hireq
-qamets-hatuf	he	בָ
+qamets-hatuf	he	קָמֶץ חָטוּף
 qamets-hatuf	en	Qamets Hatuf
-qibbuts	he	בֻ
+qibbuts	he	קִבּוּץ
 qibbuts	en	Qibbuts
-shewa	he	בְ
+shewa	he	שְׁוָא
 shewa	en	Shewa
-hateph-pathach	he	בֲ
+hateph-pathach	he	חֲטֶף פַּתָּח
 hateph-pathach	en	Hateph Pathach
-hateph-seghol	he	בֱ
+hateph-seghol	he	חֲטֶף סֶגּוֹל
 hateph-seghol	en	Hateph Seghol
-hateph-qamets	he	בֳ
+hateph-qamets	he	חֲטֶף קָמֶץ
 hateph-qamets	en	Hateph Qamets
-qamets-he	he	בָה
+qamets-he	he	קָמֶץ הֵא
 qamets-he	en	Qamets He
-tsere-he	he	בֵה
+tsere-he	he	צֵירֵי הֵא
 tsere-he	en	Tsere He
-seghol-he	he	בֶה
+seghol-he	he	סֶגּוֹל הֵא
 seghol-he	en	Seghol He
-holem-he	he	בֹה
+holem-he	he	חוֹלֶם הֵא
 holem-he	en	Holem He
-holem-waw	he	בוֹ
+holem-waw	he	חוֹלֶם וָו
 holem-waw	en	Holem Vav
-shureq	he	בוּ
+shureq	he	שׁוּרֶק
 shureq	en	Shureq
-tsere-yod	he	בֵי
+tsere-yod	he	צֵירֵי יוֹד
 tsere-yod	en	Tsere Yod
-seghol-yod	he	בֶי
+seghol-yod	he	סֶגּוֹל יוֹד
 seghol-yod	en	Seghol Yod
-hireq-yod	he	בִי
+hireq-yod	he	חִירֶק יוֹד
 hireq-yod	en	Hireq Yod
 abraham	he	אַבְרָהָם
 abraham	en	Abraham
@@ -738,41 +738,41 @@ rob	he	רֹב
 rob	en	Multitude
 safah	he	שָׂפָה
 safah	en	Lip
-announce-1	he	
-announce-1	en	Chapter 1. Alphabet
-announce-2	he	
-announce-2	en	Chapter 2. Names
-announce-3	he	
-announce-3	en	Chapter 3. Nouns
-announce-4	he	
-announce-4	en	Chapter 4. More nouns
-announce-5	he	
-announce-5	en	Chapter 5. Article & vav
-announce-6	he	
-announce-6	en	Chapter 6. Prepositions
-announce-7	he	
-announce-7	en	Chapter 7. Adjectives
-announce-8	he	
-announce-8	en	Chapter 8. Pronouns
-announce-9	he	
-announce-9	en	Chapter 9. More nouns
-announce-10	he	
-announce-10	en	Chapter 10. Construct nouns
-announce-11	he	
-announce-11	en	Chapter 11. Numbers
-announce-12	he	
-announce-12	en	Chapter 12. Qal verbs
-announce-13	he	
-announce-13	en	Chapter 13. More Qal
-announce-14	he	
-announce-14	en	Chapter 14. Come & go
-announce-15	he	
-announce-15	en	Chapter 15. Live & serve
-announce-16	he	
-announce-16	en	Chapter 16. Redeem
-announce-17	he	
-announce-17	en	Chapter 17. Love & judge
-announce-18	he	
-announce-18	en	Chapter 18. Choose & seek
-announce-19	he	
-announce-19	en	Chapter 19. Trust & work
+announce-1	he	פֶּרֶק אֶחָד
+announce-1	en	Chapter one. Alphabet
+announce-2	he	פֶּרֶק שְׁנַיִם
+announce-2	en	Chapter two. Names
+announce-3	he	פֶּרֶק שָׁלוֹשׁ
+announce-3	en	Chapter three. Nouns
+announce-4	he	פֶּרֶק אַרְבַּע
+announce-4	en	Chapter four. More nouns
+announce-5	he	פֶּרֶק חָמֵשׁ
+announce-5	en	Chapter five. Article & vav
+announce-6	he	פֶּרֶק שֵׁשׁ
+announce-6	en	Chapter six. Prepositions
+announce-7	he	פֶּרֶק שֶׁבַע
+announce-7	en	Chapter seven. Adjectives
+announce-8	he	פֶּרֶק שְׁמוֹנֶה
+announce-8	en	Chapter eight. Pronouns
+announce-9	he	פֶּרֶק תֵּשַׁע
+announce-9	en	Chapter nine. More nouns
+announce-10	he	פֶּרֶק עֶשֶׂר
+announce-10	en	Chapter ten. Construct nouns
+announce-11	he	פֶּרֶק אַחַד עָשָׂר
+announce-11	en	Chapter eleven. Numbers
+announce-12	he	פֶּרֶק שְׁנֵים עָשָׂר
+announce-12	en	Chapter twelve. Qal verbs
+announce-13	he	פֶּרֶק שְׁלוֹשָׁה עָשָׂר
+announce-13	en	Chapter thirteen. More Qal
+announce-14	he	פֶּרֶק אַרְבָּעָה עָשָׂר
+announce-14	en	Chapter fourteen. Come & go
+announce-15	he	פֶּרֶק חֲמִשָּׁה עָשָׂר
+announce-15	en	Chapter fifteen. Live & serve
+announce-16	he	פֶּרֶק שִׁשָּׁה עָשָׂר
+announce-16	en	Chapter sixteen. Redeem
+announce-17	he	פֶּרֶק שִׁבְעָה עָשָׂר
+announce-17	en	Chapter seventeen. Love & judge
+announce-18	he	פֶּרֶק שְׁמוֹנָה עָשָׂר
+announce-18	en	Chapter eighteen. Choose & seek
+announce-19	he	פֶּרֶק תִּשְׁעָה עָשָׂר
+announce-19	en	Chapter nineteen. Trust & work

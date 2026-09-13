@@ -3,7 +3,7 @@ import type { ReadingVerse } from "@/lib/reading";
 import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
 import { loadNeuralManifest, neuralSrc } from "@/lib/neural-voice";
-import { clipLookupIds } from "@/lib/voice-corpus";
+import { clipLookupIds, hebrewForTts, chapterWordEn } from "@/lib/voice-corpus";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -16,7 +16,7 @@ export function listenPlaylist(): ListenItem[] {
   const items = [...alphabetVocab(), ...bbhVocab()];
   let prev = -1;
   return items.map((item) => {
-    const announce = item.chapter !== prev ? `Chapter ${item.chapter}. ${GAME_CHAPTER_TITLES[item.chapter] ?? ""}` : undefined;
+    const announce = item.chapter !== prev ? `Chapter ${chapterWordEn(item.chapter)}. ${GAME_CHAPTER_TITLES[item.chapter] ?? ""}` : undefined;
     prev = item.chapter;
     return { ...item, announce };
   });
@@ -184,10 +184,7 @@ export function isAppleMobile(): boolean {
 }
 
 function ttsHebrew(s: string): string {
-  return s
-    .normalize("NFC")
-    .replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C7]/g, "")
-    .trim();
+  return hebrewForTts(s);
 }
 
 export function glossSpoken(gloss: string): string {
@@ -528,7 +525,7 @@ export async function speakLine(
   signal: { stop: boolean } = { stop: false },
 ): Promise<boolean> {
   const s = synth();
-  const spoken = text.trim();
+  const spoken = lang === "he" ? ttsHebrew(text) : text.trim();
   if (!s || !spoken || signal.stop) return false;
   try {
     if (s.paused) s.resume();
@@ -748,14 +745,11 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
 export async function speakReadingVerse(verse: ReadingVerse, rate: number, signal: { stop: boolean }): Promise<void> {
   if (signal.stop) return;
   const apple = isAppleMobile();
-  await speakLine(`Genesis ${verse.chapter}, verse ${verse.verse}.`, "en", Math.min(rate, 1), signal);
+  await speakLine(`Genesis ${chapterWordEn(verse.chapter)}, verse ${chapterWordEn(verse.verse)}.`, "en", Math.min(rate, 1), signal);
   if (signal.stop) return;
   const he = ttsHebrew(verse.he);
   if (hasHebrewVoice()) {
-    const ok = await speakLine(he, "he", rate, signal);
-    if (!ok && !signal.stop) await speakLine(he, "en", rate, signal);
-  } else {
-    await speakLine(he, "en", rate, signal);
+    await speakLine(he, "he", rate, signal);
   }
   if (signal.stop) return;
   await pauseMs(restFor(rate, apple ? 220 : 380), signal);

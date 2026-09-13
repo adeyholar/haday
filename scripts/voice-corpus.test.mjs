@@ -12,7 +12,13 @@ test("corpus covers letters, vowels, names, vocab", () => {
   assert.ok(kinds.has("vowel"));
   assert.ok(kinds.has("vocab"));
   assert.ok(items.some((i) => i.id === "alef" && i.speakHe.includes("אָלֶף")));
-  assert.ok(items.some((i) => i.id === "qamets"));
+  assert.ok(items.some((i) => i.id === "qamets" && i.speakHe.includes("קָמֶץ")));
+  assert.ok(items.some((i) => i.id === "qamets-hatuf" && i.speakHe.includes("חָטוּף")));
+  assert.ok(items.every((i) => !/[A-Za-z0-9]/.test(i.speakHe)));
+  const ann = items.find((i) => i.id === "announce-3");
+  assert.ok(ann?.speakEn.includes("three"));
+  assert.ok(ann?.speakHe.includes("פֶּרֶק") || ann?.speakHe.includes("פרק"));
+  assert.ok(!/\d/.test(ann?.speakEn ?? ""));
   assert.ok(items.some((i) => i.id === "abraham"));
   assert.equal(resolveCorpusId("ch1-alef"), "alef");
   const et = items.find((i) => i.id === "et");

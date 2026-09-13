@@ -12,6 +12,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ## 2026-09-13
 
+- **Hebrew TTS is Hebrew-only.** Neural Hila never sees English, digits, or a vowel glyph. Vowels are spoken as names (קָמֶץ, קָמֶץ חָטוּף). Chapter cues are “Chapter three”, and פֶּרֶק שָׁלוֹשׁ on the Hebrew side. Ocean letters call the Hebrew name first. Alive Pet says שָׁלוֹם, then the English name — two clips, not one mixed line.
+
 - **Find a Hebrew word.** Study → Tanakh cards: type a word (בַּיִת, אָמַר, אֶרֶץ). Every matching verse is listed, Torah / Nevi'im / Ketuvim filter, page through the whole Tanakh. Hebrew is marked; English is marked when the word is in the class list.
 
 - **English now follows the Hebrew on the card.** WEB inflections (said, created, sons) are marked, not only the citation gloss. Wayyiqtol of a class verb still maps to that gloss. If WEB wording is different, the class gloss is printed under the verse.

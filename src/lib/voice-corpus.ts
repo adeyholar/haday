@@ -45,15 +45,98 @@ const LETTER_HE_NAME: Record<string, string> = {
   "tsade-final": "צָדֵי סוֹפִית",
 };
 
-function stripCantillation(s: string): string {
-  return s.normalize("NFC").replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C7]/g, "").trim();
+/** Vowel names in Hebrew — never a pointed bet glyph. */
+const VOWEL_HE_NAME: Record<string, string> = {
+  qamets: "קָמֶץ",
+  tsere: "צֵירֵי",
+  holem: "חוֹלֶם",
+  pathach: "פַּתָּח",
+  seghol: "סֶגּוֹל",
+  hireq: "חִירֶק",
+  "qamets-hatuf": "קָמֶץ חָטוּף",
+  qibbuts: "קִבּוּץ",
+  shewa: "שְׁוָא",
+  "hateph-pathach": "חֲטֶף פַּתָּח",
+  "hateph-seghol": "חֲטֶף סֶגּוֹל",
+  "hateph-qamets": "חֲטֶף קָמֶץ",
+  "qamets-he": "קָמֶץ הֵא",
+  "tsere-he": "צֵירֵי הֵא",
+  "seghol-he": "סֶגּוֹל הֵא",
+  "holem-he": "חוֹלֶם הֵא",
+  "holem-waw": "חוֹלֶם וָו",
+  shureq: "שׁוּרֶק",
+  "tsere-yod": "צֵירֵי יוֹד",
+  "seghol-yod": "סֶגּוֹל יוֹד",
+  "hireq-yod": "חִירֶק יוֹד",
+};
+
+const HE_CHAPTER: Record<number, string> = {
+  1: "אֶחָד",
+  2: "שְׁנַיִם",
+  3: "שָׁלוֹשׁ",
+  4: "אַרְבַּע",
+  5: "חָמֵשׁ",
+  6: "שֵׁשׁ",
+  7: "שֶׁבַע",
+  8: "שְׁמוֹנֶה",
+  9: "תֵּשַׁע",
+  10: "עֶשֶׂר",
+  11: "אַחַד עָשָׂר",
+  12: "שְׁנֵים עָשָׂר",
+  13: "שְׁלוֹשָׁה עָשָׂר",
+  14: "אַרְבָּעָה עָשָׂר",
+  15: "חֲמִשָּׁה עָשָׂר",
+  16: "שִׁשָּׁה עָשָׂר",
+  17: "שִׁבְעָה עָשָׂר",
+  18: "שְׁמוֹנָה עָשָׂר",
+  19: "תִּשְׁעָה עָשָׂר",
+};
+
+const EN_CHAPTER = [
+  "",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+];
+
+export function chapterWordEn(n: number): string {
+  return EN_CHAPTER[n] ?? String(n);
+}
+
+/** Hebrew TTS: pointed Hebrew only. No Latin, no digits, no cantillation. */
+export function hebrewForTts(s: string): string {
+  return s
+    .normalize("NFC")
+    .replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C7]/g, "")
+    .replace(/[A-Za-z0-9]/g, " ")
+    .replace(/[^\u0590-\u05FF\s־]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function englishLine(s: string): string {
   const first = s.replace(/;/g, ",").split(",")[0]?.trim() ?? s;
   if (!first) return s.trim();
-  if (first === first.toUpperCase()) return first;
-  return first.charAt(0).toUpperCase() + first.slice(1);
+  const noDigit = first.replace(/\d+/g, (n) => EN_CHAPTER[Number(n)] ?? n).trim();
+  const line = noDigit || first;
+  if (line === line.toUpperCase()) return line;
+  return line.charAt(0).toUpperCase() + line.slice(1);
 }
 
 /** Closed list the synthesizer reads. Letters, vowels, names, BBH lemmas. */
@@ -64,7 +147,10 @@ export function voiceCorpus(): VoiceCorpusItem[] {
   function add(item: VoiceCorpusItem) {
     if (seen.has(item.id)) return;
     seen.add(item.id);
-    out.push(item);
+    out.push({
+      ...item,
+      speakHe: hebrewForTts(item.speakHe),
+    });
   }
 
   for (const l of [...CONSONANTS, ...FINAL_FORMS]) {
@@ -85,20 +171,20 @@ export function voiceCorpus(): VoiceCorpusItem[] {
       kind: "vowel",
       group: "Vowels",
       glyph: v.mark,
-      speakHe: v.mark,
+      speakHe: VOWEL_HE_NAME[v.id] ?? v.name,
       speakEn: v.name,
       aliases: [],
     });
   }
 
   for (const item of bbhVocab()) {
-    const ch = GAME_CHAPTER_TITLES[item.chapter] ?? `Chapter ${item.chapter}`;
+    const ch = GAME_CHAPTER_TITLES[item.chapter] ?? `Chapter ${EN_CHAPTER[item.chapter] ?? item.chapter}`;
     add({
       id: item.id,
       kind: "vocab",
       group: `Ch. ${item.chapter} · ${ch}`,
       glyph: item.hebrew,
-      speakHe: stripCantillation(item.hebrew),
+      speakHe: item.hebrew,
       speakEn: englishLine(item.gloss),
       aliases: [],
     });
@@ -106,13 +192,14 @@ export function voiceCorpus(): VoiceCorpusItem[] {
 
   for (let ch = 1; ch <= 19; ch++) {
     const title = GAME_CHAPTER_TITLES[ch] ?? "";
+    const enNum = EN_CHAPTER[ch] ?? String(ch);
     add({
       id: `announce-${ch}`,
       kind: "vocab",
       group: "Chapter cues",
       glyph: String(ch),
-      speakHe: "",
-      speakEn: `Chapter ${ch}. ${title}`.trim(),
+      speakHe: hebrewForTts(`פֶּרֶק ${HE_CHAPTER[ch] ?? ""}`),
+      speakEn: `Chapter ${enNum}. ${title}`.trim(),
       aliases: [],
     });
   }
@@ -134,7 +221,7 @@ export function corpusScript(items = voiceCorpus()): string {
   const lines = [
     "# HaDay voice corpus",
     "# id <tab> part <tab> text",
-    "# Feed this to a neural voice (Hebrew + English) or read it in the Voice bank.",
+    "# Hebrew part is Hebrew-only. English part is English-only. Never mix in one prompt.",
     "",
   ];
   for (const item of items) {

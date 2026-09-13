@@ -57,7 +57,8 @@ function AlivePetPage() {
     let at = start;
     if (at === 0) {
       setTalking(true);
-      await speakLine(`Shalom, ${name}.`, "en", 0.85, stopRef.current);
+      await speakLine("שָׁלוֹם", "he", 0.85, stopRef.current);
+      if (!stopRef.current.stop && name) await speakLine(name, "en", 0.85, stopRef.current);
       setTalking(false);
     }
     while (!stopRef.current.stop && my === gen.current) {

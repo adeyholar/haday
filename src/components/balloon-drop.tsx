@@ -96,8 +96,11 @@ export function BalloonDrop() {
     hush();
     setHeard(name);
     void (async () => {
-      const ok = await playNeuralVoice(id, "en", slow ? 0.7 : 0.85, voice.current);
-      if (!ok && !voice.current.stop) await speakLine(name, "en", slow ? 0.62 : 0.8, voice.current);
+      const he = await playNeuralVoice(id, "he", slow ? 0.7 : 0.85, voice.current);
+      if (!he && !voice.current.stop) {
+        const en = await playNeuralVoice(id, "en", slow ? 0.7 : 0.85, voice.current);
+        if (!en && !voice.current.stop) await speakLine(name, "en", slow ? 0.62 : 0.8, voice.current);
+      }
     })();
   }
 
