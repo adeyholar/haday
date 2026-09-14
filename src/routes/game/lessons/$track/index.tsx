@@ -66,8 +66,11 @@ function GrammarTrackMapPage() {
           ))}
         </div>
         <p className="mt-3 text-sm text-muted">
-          Four units: learn with real verses, pair the forms, then a 12-question quiz. 90% held unlocks the next
-          unit. Original notes and Masoretic examples — not a textbook reprint.
+          Exam path: 12 questions, closed book. 90% held unlocks the next exam. Prepare in{" "}
+          <Link to="/lessons/$track" params={{ track: track.id }} className="font-semibold text-primary">
+            Study
+          </Link>{" "}
+          first — notes, Tanakh verses, and pairing practice.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/game/lessons" className="font-semibold text-primary">
@@ -128,7 +131,11 @@ function GrammarTrackMapPage() {
                 <p className="mt-1 text-sm tracking-widest text-primary">
                   {"★".repeat(Math.min(3, rec.stars))} · best {rec.best}%
                 </p>
-              ) : null}
+              ) : (
+                <p className={cn("mt-1 text-sm", current ? "text-primary-foreground/80" : "text-muted")}>
+                  Exam · prepare in Study first
+                </p>
+              )}
             </>
           );
           const cls = cn(
@@ -145,7 +152,16 @@ function GrammarTrackMapPage() {
                   {inner}
                 </Link>
               ) : (
-                <div className={cls}>{inner}</div>
+                <div className={cls}>
+                  {inner}
+                  <Link
+                    to="/lessons/$track/$unit"
+                    params={{ track: track.id, unit: String(u.id) }}
+                    className="mt-2 inline-block text-sm font-semibold text-primary"
+                  >
+                    Prepare this unit
+                  </Link>
+                </div>
               )}
             </li>
           );

@@ -37,6 +37,7 @@ import { Route as FinderIndexRouteImport } from './routes/finder/index'
 import { Route as FinderDeckRouteImport } from './routes/finder/deck'
 import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
+import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -54,6 +55,8 @@ import { Route as GameNounsIndexRouteImport } from './routes/game/nouns/index'
 import { Route as GameNounsUnitRouteImport } from './routes/game/nouns/$unit'
 import { Route as GameSyllablesIndexRouteImport } from './routes/game/syllables/index'
 import { Route as GameSyllablesUnitRouteImport } from './routes/game/syllables/$unit'
+import { Route as LessonsTrackIndexRouteImport } from './routes/lessons/$track/index'
+import { Route as LessonsTrackUnitRouteImport } from './routes/lessons/$track/$unit'
 import { Route as ListenReadIndexRouteImport } from './routes/listen/read/index'
 import { Route as GameLessonsTrackIndexRouteImport } from './routes/game/lessons/$track/index'
 import { Route as GameLessonsTrackUnitRouteImport } from './routes/game/lessons/$track/$unit'
@@ -200,6 +203,11 @@ const GameIndexRoute = GameIndexRouteImport.update({
   path: '/game/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LessonsIndexRoute = LessonsIndexRouteImport.update({
+  id: '/lessons/',
+  path: '/lessons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListenIndexRoute = ListenIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -285,6 +293,16 @@ const GameSyllablesUnitRoute = GameSyllablesUnitRouteImport.update({
   path: '/game/syllables/$unit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LessonsTrackIndexRoute = LessonsTrackIndexRouteImport.update({
+  id: '/lessons/$track/',
+  path: '/lessons/$track/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsTrackUnitRoute = LessonsTrackUnitRouteImport.update({
+  id: '/lessons/$track/$unit',
+  path: '/lessons/$track/$unit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListenReadIndexRoute = ListenReadIndexRouteImport.update({
   id: '/read/',
   path: '/read/',
@@ -341,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
+  '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
@@ -349,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
@@ -357,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
+  '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -392,6 +413,7 @@ export interface FileRoutesByTo {
   '/listen/pet': typeof ListenPetRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
+  '/lessons': typeof LessonsIndexRoute
   '/listen': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
@@ -400,6 +422,7 @@ export interface FileRoutesByTo {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
   '/game/article': typeof GameArticleIndexRoute
@@ -408,6 +431,7 @@ export interface FileRoutesByTo {
   '/game/lessons': typeof GameLessonsIndexRoute
   '/game/nouns': typeof GameNounsIndexRoute
   '/game/syllables': typeof GameSyllablesIndexRoute
+  '/lessons/$track': typeof LessonsTrackIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -445,6 +469,7 @@ export interface FileRoutesById {
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
+  '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
@@ -453,6 +478,7 @@ export interface FileRoutesById {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
@@ -461,6 +487,7 @@ export interface FileRoutesById {
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
+  '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -499,6 +526,7 @@ export interface FileRouteTypes {
     | '/listen/pet'
     | '/finder/'
     | '/game/'
+    | '/lessons/'
     | '/listen/'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
@@ -507,6 +535,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/lessons/$track/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
@@ -515,6 +544,7 @@ export interface FileRouteTypes {
     | '/game/lessons/'
     | '/game/nouns/'
     | '/game/syllables/'
+    | '/lessons/$track/'
     | '/listen/read/'
     | '/game/lessons/$track/$unit'
     | '/listen/read/$book/$ch'
@@ -550,6 +580,7 @@ export interface FileRouteTypes {
     | '/listen/pet'
     | '/finder'
     | '/game'
+    | '/lessons'
     | '/listen'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
@@ -558,6 +589,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/lessons/$track/$unit'
     | '/game/$chapter'
     | '/game/alefbet'
     | '/game/article'
@@ -566,6 +598,7 @@ export interface FileRouteTypes {
     | '/game/lessons'
     | '/game/nouns'
     | '/game/syllables'
+    | '/lessons/$track'
     | '/listen/read'
     | '/game/lessons/$track/$unit'
     | '/listen/read/$book/$ch'
@@ -602,6 +635,7 @@ export interface FileRouteTypes {
     | '/listen/pet'
     | '/finder/'
     | '/game/'
+    | '/lessons/'
     | '/listen/'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
@@ -610,6 +644,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/lessons/$track/$unit'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
@@ -618,6 +653,7 @@ export interface FileRouteTypes {
     | '/game/lessons/'
     | '/game/nouns/'
     | '/game/syllables/'
+    | '/lessons/$track/'
     | '/listen/read/'
     | '/game/lessons/$track/$unit'
     | '/listen/read/$book/$ch'
@@ -652,6 +688,7 @@ export interface RootRouteChildren {
   FinderWordRoute: typeof FinderWordRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
+  LessonsIndexRoute: typeof LessonsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   GameChapterStageRoute: typeof GameChapterStageRoute
   GameAlefbetLevelRoute: typeof GameAlefbetLevelRoute
@@ -659,6 +696,7 @@ export interface RootRouteChildren {
   GameCustomPlayRoute: typeof GameCustomPlayRoute
   GameNounsUnitRoute: typeof GameNounsUnitRoute
   GameSyllablesUnitRoute: typeof GameSyllablesUnitRoute
+  LessonsTrackUnitRoute: typeof LessonsTrackUnitRoute
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
   GameArticleIndexRoute: typeof GameArticleIndexRoute
@@ -667,6 +705,7 @@ export interface RootRouteChildren {
   GameLessonsIndexRoute: typeof GameLessonsIndexRoute
   GameNounsIndexRoute: typeof GameNounsIndexRoute
   GameSyllablesIndexRoute: typeof GameSyllablesIndexRoute
+  LessonsTrackIndexRoute: typeof LessonsTrackIndexRoute
   GameLessonsTrackUnitRoute: typeof GameLessonsTrackUnitRoute
   GameLessonsTrackIndexRoute: typeof GameLessonsTrackIndexRoute
 }
@@ -869,6 +908,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lessons/': {
+      id: '/lessons/'
+      path: '/lessons'
+      fullPath: '/lessons/'
+      preLoaderRoute: typeof LessonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listen/': {
       id: '/listen/'
       path: '/'
@@ -988,6 +1034,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameSyllablesUnitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lessons/$track/': {
+      id: '/lessons/$track/'
+      path: '/lessons/$track'
+      fullPath: '/lessons/$track/'
+      preLoaderRoute: typeof LessonsTrackIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons/$track/$unit': {
+      id: '/lessons/$track/$unit'
+      path: '/lessons/$track/$unit'
+      fullPath: '/lessons/$track/$unit'
+      preLoaderRoute: typeof LessonsTrackUnitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listen/read/': {
       id: '/listen/read/'
       path: '/read'
@@ -1084,6 +1144,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinderWordRoute: FinderWordRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
+  LessonsIndexRoute: LessonsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GameChapterStageRoute: GameChapterStageRoute,
   GameAlefbetLevelRoute: GameAlefbetLevelRoute,
@@ -1091,6 +1152,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameCustomPlayRoute: GameCustomPlayRoute,
   GameNounsUnitRoute: GameNounsUnitRoute,
   GameSyllablesUnitRoute: GameSyllablesUnitRoute,
+  LessonsTrackUnitRoute: LessonsTrackUnitRoute,
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
   GameArticleIndexRoute: GameArticleIndexRoute,
@@ -1099,6 +1161,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameLessonsIndexRoute: GameLessonsIndexRoute,
   GameNounsIndexRoute: GameNounsIndexRoute,
   GameSyllablesIndexRoute: GameSyllablesIndexRoute,
+  LessonsTrackIndexRoute: LessonsTrackIndexRoute,
   GameLessonsTrackUnitRoute: GameLessonsTrackUnitRoute,
   GameLessonsTrackIndexRoute: GameLessonsTrackIndexRoute,
 }

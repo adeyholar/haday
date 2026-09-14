@@ -251,6 +251,11 @@ function Home() {
           </div>
         </div>
         <div className="mt-5 flex flex-col gap-2">
+          <Link to="/lessons" className="flex-1">
+            <Button className="w-full" variant="outline" size="lg">
+              Grammar lessons · prepare
+            </Button>
+          </Link>
           <Link to="/keep" className="flex-1">
             <Button className="w-full" size="lg">
               Zakhor · Daily keep

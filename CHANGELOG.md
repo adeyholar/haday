@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Study prepares; Game exams.** Grammar lessons (notes, verses, pairing) live under Study and are all open. Game grammar is a closed-book 12-question exam. 90% still opens the next unit.
+
 - **Verbs & binyan.** Game → Grammar: 17 units from “is this a verb?” through Qal, wayyiqtol, Piel / Hiphil / Niphal, person, Pual / Hophal / Hithpael, weak roots, and a live parse. Signatures first. Class lemmas only. 90% opens the next unit.
 
 - **Drill etches the word, not the card.** A sitting is Meet → Which one (twins) → type the gloss → tap the lemma in a verse → one old Keep card. Cues rotate (Hebrew, English, consonants, picture, audio). A tap faster than 0.4s on Recognize or Contrast is a guess. After a miss, Keep waits 10 minutes, then 1 day, 3 days, 7 days — not a forever cram.

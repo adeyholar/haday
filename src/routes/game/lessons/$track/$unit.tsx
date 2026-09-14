@@ -28,7 +28,7 @@ function GrammarUnitPage() {
       <div className="mb-4">
         <GameMenu />
       </div>
-      <GrammarPlay key={`${track.id}-${n}`} track={track} unitId={n} />
+      <GrammarPlay key={`${track.id}-${n}-exam`} track={track} unitId={n} mode="exam" />
     </>
   );
 }

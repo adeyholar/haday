@@ -12,6 +12,7 @@ const OPTIONS = [
   { value: "/alphabet", match: (p: string) => p.startsWith("/alphabet"), label: "Alef-bet lesson" },
   { value: "/keep", match: (p: string) => p.startsWith("/keep"), label: "Zakhor · Daily keep" },
   { value: "/finder", match: (p: string) => p.startsWith("/finder"), label: "Tanakh cards" },
+  { value: "/lessons", match: (p: string) => p.startsWith("/lessons"), label: "Grammar lessons" },
   { value: "/guide", match: (p: string) => p.startsWith("/guide"), label: "Guide" },
 ] as const;
 
@@ -36,6 +37,7 @@ export function StudyMenu() {
         else if (to === "/alphabet") void navigate({ to: "/alphabet" });
         else if (to === "/keep") void navigate({ to: "/keep" });
         else if (to === "/finder") void navigate({ to: "/finder" });
+        else if (to === "/lessons") void navigate({ to: "/lessons" });
         else if (to === "/guide") void navigate({ to: "/guide" });
       }}
     />

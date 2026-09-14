@@ -9,22 +9,26 @@ import { learnUnitVerses } from "@/lib/tanakh-learn-note";
 import { playGrade } from "@/lib/sfx";
 import { cn } from "@/lib/cn";
 import {
-  GRAMMAR_QUIZ_LEN,
   buildGrammarQuiz,
   grammarMatchPairs,
-  grammarQuizPool,
   grammarUnitMax,
   starsFromGrammarScore,
   type GrammarQuiz,
   type GrammarTrack,
 } from "@/lib/grammar";
 import { useStudy } from "@/lib/store";
-import { GAME_STAGE_PASS } from "@/lib/game";
+import { GAME_STAGE_PASS, isGrammarUnitUnlocked } from "@/lib/game";
 import { derangeAgainst, shuffleList } from "@/lib/quiz-draw";
 
 type PlayQ = GrammarQuiz & { key: string; retry?: boolean };
 
-function MixHe({ text, className }: { text: string; className?: string }) {
+export type GrammarPlayMode = "prepare" | "exam";
+
+function examItems(track: GrammarTrack, unitId: number): PlayQ[] {
+  return buildGrammarQuiz(track, unitId).map((item, n) => ({ ...item, key: `${track.id}-${unitId}-${n}` }));
+}
+
+export function MixHe({ text, className }: { text: string; className?: string }) {
   const re = /[\u0590-\u05FF]+/g;
   const nodes: ReactNode[] = [];
   let last = 0;
@@ -43,17 +47,31 @@ function MixHe({ text, className }: { text: string; className?: string }) {
   return <span className={className}>{nodes}</span>;
 }
 
-export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: number }) {
+export function GrammarPlay({
+  track,
+  unitId,
+  mode = "exam",
+}: {
+  track: GrammarTrack;
+  unitId: number;
+  mode?: GrammarPlayMode;
+}) {
   const unit = track.units.find((u) => u.id === unitId);
   const complete = useStudy((s) => s.completeGrammarUnit);
+  const game = useStudy((s) => s.game);
+  const examOpen = isGrammarUnitUnlocked(game, track.id, unitId);
   const unitMax = grammarUnitMax(track);
-  const [step, setStep] = useState<"learn" | "match" | "quiz">("learn");
-  const [items, setItems] = useState<PlayQ[]>([]);
+  const seededExam = useMemo(
+    () => (mode === "exam" ? examItems(track, unitId) : []),
+    [track, unitId, mode],
+  );
+  const [step, setStep] = useState<"learn" | "match" | "quiz">(mode === "prepare" ? "learn" : "quiz");
+  const [items, setItems] = useState<PlayQ[]>(seededExam);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [held, setHeld] = useState<Set<string>>(() => new Set());
   const [firstTry, setFirstTry] = useState(0);
-  const [firstSeen, setFirstSeen] = useState(0);
+  const [firstSeen, setFirstSeen] = useState(seededExam.length);
   const [done, setDone] = useState(false);
 
   const pairs = useMemo(() => (unit ? grammarMatchPairs(unit) : []), [unit]);
@@ -183,7 +201,7 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold text-ink">{unit.title}</h1>
           <p className="mt-1 text-sm text-muted">
-            Unit {unit.id} of {unitMax} · Learn
+            Unit {unit.id} of {unitMax} · Prepare
           </p>
           <p className="mt-3 rounded-[var(--radius-md)] bg-surface px-3 py-2 font-display text-xl text-primary">
             <MixHe text={unit.short} />
@@ -227,8 +245,11 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
           </ul>
         </Panel>
         <Button className="mt-4 w-full" onClick={startMatch}>
-          Pair the forms
+          Practice pairing
         </Button>
+        <p className="mt-2 text-center text-sm text-muted">
+          Pairing is practice. The Game path is the exam — 12 questions, 90% to open the next unit.
+        </p>
       </>
     );
   }
@@ -239,11 +260,11 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
       <>
         <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            {track.title} · Unit {unit.id} · Pair
+            {track.title} · Unit {unit.id} · Practice
           </p>
           <h1 className="mt-1 font-display text-2xl font-bold text-ink">{track.matchPrompt}</h1>
           <p className="mt-2 text-sm text-muted">
-            Tap a Hebrew form, then its tag. A miss stays on the board — try again.
+            Tap a Hebrew form, then its tag. Practice only — this does not clear the unit.
           </p>
         </Panel>
         <div className="mt-3 grid grid-cols-2 gap-2">
@@ -299,9 +320,27 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
           </ul>
         </div>
         {doneMatch ? (
-          <Button className="mt-4 w-full" onClick={startQuiz}>
-            Quiz this rule · {GRAMMAR_QUIZ_LEN} of {grammarQuizPool(track, unit).length}
-          </Button>
+          <div className="mt-4 flex flex-col gap-2">
+            {examOpen ? (
+              <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(unitId) }} className="block">
+                <Button className="w-full">Take the exam</Button>
+              </Link>
+            ) : (
+              <p className="text-center text-sm text-muted">
+                Exam locked until the previous Game unit is held at {GAME_STAGE_PASS}%.
+              </p>
+            )}
+            <Button variant="outline" onClick={() => setStep("learn")}>
+              Review the notes
+            </Button>
+            <Link
+              to="/lessons/$track"
+              params={{ track: track.id }}
+              className="text-center text-sm font-semibold text-primary"
+            >
+              {track.title} · prepare
+            </Link>
+          </div>
         ) : (
           <p className="mt-3 text-center text-sm text-muted">
             {locked.size} / {pairs.length} paired
@@ -320,7 +359,7 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
           {held.size} / {unique} held
           {unique ? ` · first look ${Math.round((firstTry / unique) * 100)}%` : ""}
           {" · "}
-          {passed ? "Unit cleared." : `Need ${GAME_STAGE_PASS}% held to unlock the next unit.`}
+          {passed ? "Exam cleared." : `Need ${GAME_STAGE_PASS}% held to unlock the next exam.`}
         </p>
         <p className="mt-2 text-sm text-muted">Misses came back later. A later hit still counts as held.</p>
         <div className="mt-4 flex flex-col gap-2">
@@ -330,14 +369,19 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
               params={{ track: track.id, unit: String(unitId + 1) }}
               className="block"
             >
-              <Button className="w-full">Next unit</Button>
+              <Button className="w-full">Next exam</Button>
             </Link>
           ) : null}
-          <Button variant="outline" onClick={startMatch}>
-            Pair and quiz again
+          <Link to="/lessons/$track/$unit" params={{ track: track.id, unit: String(unitId) }} className="block">
+            <Button variant="outline" className="w-full">
+              Prepare this unit
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={startQuiz}>
+            Retry exam
           </Button>
           <Link to="/game/lessons/$track" params={{ track: track.id }} className="text-sm font-semibold text-primary">
-            {track.title} map
+            {track.title} exams
           </Link>
         </div>
       </Panel>
@@ -352,10 +396,11 @@ export function GrammarPlay({ track, unitId }: { track: GrammarTrack; unitId: nu
     <>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          {track.title} · Unit {unit.id} · Quiz · {i + 1} / {items.length}
+          {track.title} · Unit {unit.id} · Exam · {i + 1} / {items.length}
           {q.review ? " · review" : ""}
           {q.retry ? " · again" : ""}
         </p>
+        <p className="mt-1 text-xs font-semibold text-muted">Closed book · prepare first in Study</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-ink">
           <MixHe text={q.q} />
         </h1>

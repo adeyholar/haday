@@ -27,7 +27,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar (topics plus Verbs & binyan), and Ultimate Challenge. The Game picker groups those same topics so the list stays short on a phone.
+            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar exams, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -36,11 +36,12 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             pick a course week or a Game chapter — same BBH 3rd-ed. lemmas as Game — then Drill, Write, Quiz, Match, or Lex.
+            Grammar lessons (Study) prepare the topic with notes and verses; Game grammar is the closed-book exam (90%).
             Closed-book Exam is from memory; misses lead the next Write and Quiz rounds.
             Ultimate Challenge is optional: the whole Ch. 2–19 list in one sitting, graded at the end.
             Zakhor (Daily keep) is the short daily mix of words you have already met — due, weak, and older mastered
             lemmas — so new chapters do not bury the old ones. The Study menu groups Drill, Write, Quiz, Match, Lex,
-            Alef-bet, Zakhor, and Guide. Listen has its own menu: class vocabulary, then Genesis 1–5 follow-along with the
+            Alef-bet, Zakhor, Grammar lessons, and Guide.
             recorded Hebrew chapter audio (not a computer voice) and a grade at 90%. Alive Pet speaks class words in the
             owner’s recorded voice when a take exists, with your weak lemmas first. Ask HaDay Hebraic AI to clarify the
             lesson. Suggest a feature puts class ideas in the inventory for review — what makes sense gets planned and

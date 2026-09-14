@@ -19,8 +19,8 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 
 | Area | What it does | Why it helps |
 |---|---|---|
-| **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Drill sitting: meet, contrast twins, type gloss, find lemma in a verse, one old Keep. Cues rotate. Misses expand 10 min → 1d → 3d → 7d. Lucky taps do not count. |
-| **Game** | BBH path Ch. 1–19, Custom mix (Vocabulary or Grammar), Aleph-bet mastery, **Ocean letters**, Syllables, Nouns, Article & vav, Grammar topics (prep → numbers **and Verbs & binyan**, 17 units), Ultimate | Header Game stays grouped. Verbs walk signatures (Qal → parse) at **90%** per unit. |
+| **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor, **Grammar lessons** | Drill sitting: meet, contrast twins, type gloss, find lemma in a verse, one old Keep. **Grammar lessons** prepare (open notes + pairing). Game grammar is the exam. |
+| **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. Neural Hebrew is Hebrew-only (vowel **names**, no digits). |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
