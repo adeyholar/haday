@@ -5,13 +5,13 @@ import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
 import { GradeBanner } from "@/components/grade-banner";
 import { Panel } from "@/components/panel";
-import { shuffle, type VocabItem } from "@/lib/vocab";
+import { type VocabItem } from "@/lib/vocab";
 import { pickEloDeck } from "@/lib/elo";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { useStudy } from "@/lib/store";
 import { playGrade } from "@/lib/sfx";
 import { DontKnowButton } from "@/components/dont-know-button";
-import { spliceLater } from "@/lib/quiz-draw";
+import { spliceLater, derangeAgainst, shuffleOffFirst, shuffleList } from "@/lib/quiz-draw";
 import { cn } from "@/lib/cn";
 
 export const Route = createFileRoute("/match")({ component: MatchPage });
@@ -57,8 +57,13 @@ function MatchPage() {
       if (items.length >= 6) break;
     }
     setBoard(items);
-    setHeTiles(shuffle(items.map((x) => ({ id: x.id, kind: "he" as const, label: x.hebrew }))));
-    setEnTiles(shuffle(items.map((x) => ({ id: x.id, kind: "en" as const, label: shortGloss(x) }))));
+    const he = shuffleList(items.map((x) => ({ id: x.id, kind: "he" as const, label: x.hebrew })));
+    const en = derangeAgainst(
+      he,
+      items.map((x) => ({ id: x.id, kind: "en" as const, label: shortGloss(x) })),
+    );
+    setHeTiles(he);
+    setEnTiles(en);
     setPicked(null);
     setLocked(new Set());
     setWrong(null);
@@ -89,13 +94,14 @@ function MatchPage() {
     if (picked.id === tile.id) {
       playGrade(true);
       rate(tile.id, "good");
-      setLocked((prev) => new Set(prev).add(tile.id));
+      const nextLocked = new Set(locked).add(tile.id);
+      setLocked(nextLocked);
       setPicked(null);
       setRight((n) => n + 1);
       if (locked.size + 1 >= board.length) {
-        const order = shuffle(board);
+        const order = shuffleList(board);
         setPickOrder(order);
-        setPickChoices(shuffle(board));
+        setPickChoices(shuffleOffFirst(board, (c) => c.id === order[0]?.id));
         setPickI(0);
         setPhase("pick");
       }
@@ -138,7 +144,8 @@ function MatchPage() {
       return;
     }
     setPickI((n) => n + 1);
-    setPickChoices(shuffle(board));
+    const nextCard = order[pickI + 1];
+    setPickChoices(shuffleOffFirst(board, (c) => c.id === nextCard?.id));
     setPickSel(null);
   }
 

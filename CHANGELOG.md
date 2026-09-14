@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Match boards.** Hebrew and English never sit on the same row. The lemma pad never parks the answer in the first cell.
+
 ## 2026-09-13
 
 - **Hebrew TTS is Hebrew-only.** Neural Hila never sees English, digits, or a vowel glyph. Vowels are spoken as names (קָמֶץ, קָמֶץ חָטוּף). Chapter cues are “Chapter three”, and פֶּרֶק שָׁלוֹשׁ on the Hebrew side. Ocean letters call the Hebrew name first. Alive Pet says שָׁלוֹם, then the English name — two clips, not one mixed line.

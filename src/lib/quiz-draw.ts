@@ -3,11 +3,51 @@
 export const ROUND_LEN = 12;
 const RECENT_KEEP = 24;
 
-function shuffle<T>(arr: T[]): T[] {
+export function shuffleList<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  return shuffleList(arr);
+}
+
+/**
+ * Sattolo cycle: every item moves. For n ≥ 2 this is a derangement
+ * (no item stays in its original slot).
+ */
+export function derange<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Permute `right` so no id sits on the same row as `left`. */
+export function derangeAgainst<L extends { id: string }, R extends { id: string }>(left: L[], right: R[]): R[] {
+  if (right.length < 2) return [...right];
+  const byId = new Map(right.map((x) => [x.id, x]));
+  return derange(left.map((x) => x.id)).map((id) => {
+    const hit = byId.get(id);
+    if (!hit) throw new Error(`derangeAgainst: missing ${id}`);
+    return hit;
+  });
+}
+
+/** Shuffle a choice pad so the answer is never parked in the first cell. */
+export function shuffleOffFirst<T>(items: T[], isAnswer: (item: T) => boolean): T[] {
+  const a = shuffleList(items);
+  if (a.length < 2) return a;
+  const i = a.findIndex(isAnswer);
+  if (i === 0) {
+    const j = 1 + Math.floor(Math.random() * (a.length - 1));
+    [a[0], a[j]] = [a[j], a[0]];
   }
   return a;
 }

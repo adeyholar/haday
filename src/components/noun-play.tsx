@@ -20,6 +20,7 @@ import {
 } from "@/lib/nouns";
 import { useStudy } from "@/lib/store";
 import { GAME_STAGE_PASS } from "@/lib/game";
+import { derangeAgainst, shuffleList } from "@/lib/quiz-draw";
 
 type PlayQ = NounQuiz & { key: string; retry?: boolean };
 
@@ -90,20 +91,12 @@ export function NounPlay({ unitId }: { unitId: number }) {
   const unique = firstSeen || items.filter((x) => !x.retry).length;
   const pct = useMemo(() => (unique ? Math.round((held.size / unique) * 100) : 0), [held, unique]);
 
-  function shuffleIn<T>(arr: T[]): T[] {
-    const a = [...arr];
-    for (let n = a.length - 1; n > 0; n--) {
-      const j = Math.floor(Math.random() * (n + 1));
-      [a[n], a[j]] = [a[j], a[n]];
-    }
-    return a;
-  }
-
   function startMatch() {
     if (!unit) return;
     const p = nounMatchPairs(unit);
-    setHeTiles(shuffleIn(p));
-    setLabTiles(shuffleIn(p));
+    const he = shuffleList(p);
+    setHeTiles(he);
+    setLabTiles(derangeAgainst(he, p));
     setTap(null);
     setLocked(new Set());
     setMissId(null);
@@ -145,7 +138,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
     const ok = picked === q.answer;
     let nextItems = items;
     if (!ok && !q.retry) {
-      const later: PlayQ = { ...q, key: `${q.key}-retry`, retry: true, choices: shuffleIn(q.choices) };
+      const later: PlayQ = { ...q, key: `${q.key}-retry`, retry: true, choices: shuffleList(q.choices) };
       const insertAt = Math.min(items.length, i + 2 + Math.floor(Math.random() * 3));
       nextItems = [...items.slice(0, insertAt), later, ...items.slice(insertAt)];
       setItems(nextItems);
