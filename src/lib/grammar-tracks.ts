@@ -4,6 +4,7 @@ import { EXIST_UNITS } from "@/lib/grammar-exist";
 import { NUMBER_UNITS } from "@/lib/grammar-numbers";
 import { PREP_UNITS } from "@/lib/grammar-prep";
 import { PRON_UNITS } from "@/lib/grammar-pron";
+import { VERB_UNITS } from "@/lib/grammar-verbs";
 import {
   GRAMMAR_TRACK_IDS,
   isGrammarTrackId,
@@ -84,6 +85,18 @@ export const GRAMMAR_TRACKS: GrammarTrack[] = [
     kind: "numbers",
     matchPrompt: "Match the number to its count",
     units: NUMBER_UNITS,
+  },
+  {
+    id: "verbs",
+    chapter: 12,
+    title: "Verbs & binyan",
+    short: "Qal to Hithpael",
+    blurb: "Signatures first: Qal, Piel, Hiphil, Niphal — then aspect, person, the rest of the seven, weak roots, and a live parse.",
+    intro:
+      "A verb wears clothes: stem (binyan), aspect, and person. Qal is the plain stem. Piel doubles the middle letter. Hiphil often shows הִ and means “cause to.” Niphal shows נִ and often means “was / appeared.” Wayyiqtol (וַ + dagesh) is the story “and he…”\n\nWork one unit at a time. Name the stem before the person. Class verbs (אָמַר, עָשָׂה, שָׁמַע, נָתַן, הָיָה, כָּבֵד, בָּרַךְ, יָצָא, רָאָה, הָלַךְ) keep coming back in new clothes. 90% held opens the next unit. Game vocab stays the citation form.",
+    kind: "verbs",
+    matchPrompt: "Match the form to its stem and job",
+    units: VERB_UNITS,
   },
 ];
 

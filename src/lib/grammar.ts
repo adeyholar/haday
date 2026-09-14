@@ -2,7 +2,7 @@ import { drawRound, ROUND_LEN } from "@/lib/quiz-draw";
 import { hardenQuizChoices } from "@/lib/close-quiz";
 import type { LearnKind, LearnSample, LearnVerse } from "@/lib/tanakh-learn-note";
 
-export type GrammarTrackId = "prep" | "adj" | "pron" | "exist" | "construct" | "numbers";
+export type GrammarTrackId = "prep" | "adj" | "pron" | "exist" | "construct" | "numbers" | "verbs";
 
 export type GrammarQuiz = {
   q: string;
@@ -50,7 +50,13 @@ export const GRAMMAR_TRACK_IDS: GrammarTrackId[] = [
   "exist",
   "construct",
   "numbers",
+  "verbs",
 ];
+
+/** Prep–numbers have four units; verbs walk 17. */
+export function grammarTrackCap(id: GrammarTrackId): number {
+  return id === "verbs" ? 17 : 4;
+}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];

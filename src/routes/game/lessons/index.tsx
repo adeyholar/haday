@@ -20,9 +20,9 @@ function LessonsHubPage() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar topics</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">One topic at a time</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Prepositions, adjectives, pronouns, existence particles, construct nouns, numbers — each is its own path
-          with original notes and Tanakh verses, not a reprint of the class book. Four units: learn, pair, then a
-          12-question quiz. 90% held opens the next unit on that topic.
+          Prepositions through numbers, then verbs and binyan — each is its own path with original notes and Tanakh
+          verses, not a reprint of the class book. Learn, pair, then a 12-question quiz. 90% held opens the next unit
+          on that topic. Verbs walk from Qal to a live parse.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/game/article" className="font-semibold text-primary">

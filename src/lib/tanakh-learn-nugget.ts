@@ -112,6 +112,28 @@ export function learnNugget(kind: LearnKind, verse: LearnVerse): string {
     return "Cardinals count; ordinals (first, second, seventh) sit like adjectives after the noun. Three–ten often wear the opposite gender ending from the counted noun.";
   }
 
+  if (kind === "verbs") {
+    if (raw.startsWith("וַי") || raw.startsWith("וַת") || raw.startsWith("וָא") || raw.startsWith("וַיְ")) {
+      return "וַ plus patah (and usually dagesh) is wayyiqtol — the story chain “and he/she…”.";
+    }
+    if (raw.startsWith("הִת") || raw.startsWith("מִתְ")) {
+      return "הִתְ (or מִתְ on a participle) plus a doubled middle letter is Hithpael — often walk-about / reflexive.";
+    }
+    if (raw.startsWith("הִ") || raw.startsWith("הוֹ") || raw.startsWith("הֶ")) {
+      return "הִ / הוֹ on a verb is often Hiphil — “cause to…” Strip it; the class lemma is underneath.";
+    }
+    if (raw.startsWith("הֻ") || raw.startsWith("הוּ")) {
+      return "הֻ / וּ on the front of a verb is often Hophal — the passive of Hiphil (“was brought”).";
+    }
+    if (raw.startsWith("נִ") && raw.length > 3) {
+      return "נִ on a perfect is the Niphal tell — often passive or reflexive of the Qal.";
+    }
+    if (/ּ/.test(raw) && !raw.startsWith("וַ")) {
+      return "Dagesh in the middle root letter is the Piel (or Pual) tell. Pual adds an u-vowel.";
+    }
+    return "Name the stem first (Qal / Piel / Hiphil / Niphal), then the aspect (perfect / imperfect / wayyiqtol), then who.";
+  }
+
   const rawS = verse.hit;
   if (/ּ/.test(rawS) && /[בגדכפת]/.test(lettersOnly(rawS))) {
     return "Dagesh forte doubles the letter — split through it. Dagesh lene (begadkephat after a consonant) does not double and you do not split.";

@@ -4,7 +4,7 @@ import { lemmaForSurface } from "@/lib/tanakh-pool";
 import { verseFor } from "@/lib/verses";
 import { VOCAB, type VocabItem } from "@/lib/vocab";
 
-export type LearnKind = "article" | "noun" | "syllable" | "prep" | "adj" | "pron" | "exist" | "construct" | "numbers";
+export type LearnKind = "article" | "noun" | "syllable" | "prep" | "adj" | "pron" | "exist" | "construct" | "numbers" | "verbs";
 
 export type LearnSample = {
   word: string;

@@ -71,7 +71,7 @@ function Home() {
         >
           <Compass className="size-6" />
           <p className="mt-3 font-display text-3xl font-bold">Game mode</p>
-          <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, letters and forms, Grammar topics, or Ultimate. Pick from the Game menu — Grammar opens the six topics.</p>
+          <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, letters and forms, Grammar topics (including Verbs & binyan), or Ultimate. Pick from the Game menu.</p>
         </Link>
         <a
           href="#study-mode"

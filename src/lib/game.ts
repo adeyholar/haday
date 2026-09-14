@@ -1,11 +1,11 @@
 import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
-import { GRAMMAR_TRACK_IDS, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
+import { GRAMMAR_TRACK_IDS, grammarTrackCap, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
 export const NOUN_UNIT_MAX = 6;
 export const ARTICLE_UNIT_MAX = 6;
-export const GRAMMAR_UNIT_MAX = 4;
+export const GRAMMAR_UNIT_MAX = 17;
 /** Percent required to clear a Game stage or grammar unit and open the next one. */
 export const GAME_STAGE_PASS = 90;
 
@@ -178,6 +178,7 @@ export function emptyLessons(): Record<GrammarTrackId, SyllableProgress> {
     exist: emptyLessonTrack(),
     construct: emptyLessonTrack(),
     numbers: emptyLessonTrack(),
+    verbs: emptyLessonTrack(),
   };
 }
 
@@ -718,7 +719,8 @@ export function grammarUnitRecord(game: GameSnapshot, trackId: GrammarTrackId, u
 }
 
 export function isGrammarUnitUnlocked(game: GameSnapshot, trackId: GrammarTrackId, unit: number): boolean {
-  const n = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  const cap = grammarTrackCap(trackId);
+  const n = Math.min(cap, Math.max(1, Math.round(unit) || 1));
   return n <= (lessonProgress(game, trackId).unlockedUnit || 1);
 }
 
@@ -730,7 +732,8 @@ export function applyGrammarResult(
 ): GameSnapshot {
   if (!isGrammarTrackId(trackId)) return cloneGame(hydrateGame(game));
   const next = cloneGame(hydrateGame(game));
-  const n = Math.min(GRAMMAR_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
+  const cap = grammarTrackCap(trackId);
+  const n = Math.min(cap, Math.max(1, Math.round(unit) || 1));
   const lessons = next.lessons ?? emptyLessons();
   const track = lessons[trackId] ?? emptyLessonTrack();
   const prev = track.units[String(n)] ?? emptyAlefLevel();
@@ -741,7 +744,7 @@ export function applyGrammarResult(
     cleared: prev.cleared || passed,
     attempts: (prev.attempts || 0) + 1,
   };
-  if (passed && n >= track.unlockedUnit && n < GRAMMAR_UNIT_MAX) track.unlockedUnit = n + 1;
+  if (passed && n >= track.unlockedUnit && n < cap) track.unlockedUnit = n + 1;
   track.currentUnit = track.unlockedUnit;
   lessons[trackId] = track;
   next.lessons = lessons;

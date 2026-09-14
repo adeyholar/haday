@@ -2,7 +2,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { GameMenu } from "@/components/game-menu";
 import { GrammarPlay } from "@/components/grammar-play";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { GRAMMAR_UNIT_MAX, isGrammarUnitUnlocked } from "@/lib/game";
+import { isGrammarUnitUnlocked } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/game/lessons/$track/$unit")({ component: GrammarUnitPage });
@@ -16,7 +16,7 @@ function GrammarUnitPage() {
     Boolean(track) &&
     Number.isInteger(n) &&
     n >= 1 &&
-    n <= GRAMMAR_UNIT_MAX &&
+    n <= (track?.units.length ?? 0) &&
     track != null &&
     isGrammarUnitUnlocked(game, track.id, n);
 
