@@ -694,7 +694,7 @@ export async function playNeuralVoice(
   return playVocabClip({ src, start: 0, end: 0, he: "", kind: "lemma", source: "eliran" }, rate, signal);
 }
 
-async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
+export async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
   const own = await playAdminVoice(item.id, "he", rate, signal);
   if (own || signal.stop) return;
   const neural = await playNeuralVoice(item.id, "he", rate, signal);

@@ -219,7 +219,7 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Study toolbox</h2>
         <dl className="mt-3 space-y-3 text-sm">
-          <Tool name="Drill" to="/drill" body="Flip cards. Grade yourself. SRS brings weak words back." />
+          <Tool name="Drill" to="/drill" body="A sitting: meet the word, pick it among twins, type the gloss, find it in a verse, then one old Keep card. Cue changes so you cannot memorize the card." />
           <Tool name="Write" to="/write" body="Type or hand-write the Hebrew. Memorize mode hides the lemma first. After a miss you can save that scribble as your handwriting." />
           <Tool name="Quiz" to="/quiz" body="Multiple choice or type the English gloss. Same BBH lemmas as class, sitting near what you can still miss." />
           <Tool name="Match" to="/match" body="Select the pair: Hebrew tile to English tile. Misses come back. Boards use the class lemmas." />

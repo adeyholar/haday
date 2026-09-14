@@ -749,6 +749,28 @@ function distractorScore(item: VocabItem, other: VocabItem): number {
   return s;
 }
 
+/** Nearby lemmas for contrast boards — look-alikes and class families first. */
+export function closeItems(item: VocabItem, pool: VocabItem[], n = 3): VocabItem[] {
+  const nearby = VOCAB.filter(
+    (v) => v.id !== item.id && (Math.abs(v.chapter - item.chapter) <= 3 || v.pos === item.pos),
+  );
+  const byId = new Map<string, VocabItem>();
+  for (const v of [...pool, ...nearby]) {
+    if (v.id === item.id) continue;
+    byId.set(v.id, v);
+  }
+  const ranked = [...byId.values()].sort((a, b) => distractorScore(item, b) - distractorScore(item, a));
+  const out: VocabItem[] = [];
+  const seenHe = new Set([item.hebrew]);
+  for (const x of ranked) {
+    if (seenHe.has(x.hebrew)) continue;
+    seenHe.add(x.hebrew);
+    out.push(x);
+    if (out.length >= n) break;
+  }
+  return out;
+}
+
 /** Four glosses: the lemma plus two close traps and one same-POS neighbor. */
 export function quizChoices(item: VocabItem, pool: VocabItem[], n = 4): string[] {
   const nearby = VOCAB.filter(

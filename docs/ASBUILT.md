@@ -19,7 +19,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 
 | Area | What it does | Why it helps |
 |---|---|---|
-| **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Same BBH lemmas as class. Misses come back. Daily keep so new chapters do not bury old ones. Learn / Rules name letters with the Hebrew glyph (ה not “He”). |
+| **Study** | Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor | Drill sitting: meet, contrast twins, type gloss, find lemma in a verse, one old Keep. Cues rotate. Misses expand 10 min → 1d → 3d → 7d. Lucky taps do not count. |
 | **Game** | BBH path Ch. 1–19, Custom mix (Vocabulary or Grammar), Aleph-bet mastery, **Ocean letters** (letters or vowels; listen-only; two-player; weak sky; first-call highlight), Syllables, Nouns, Article & vav, Grammar hub, Ultimate | Header Game stays grouped. Ocean letters: 3 lives, +1 per wave, look-alike decoys, iPad tap-to-start for voice. **90%** to clear a stage or unit. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. Neural Hebrew is Hebrew-only (vowel **names**, no digits). |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |

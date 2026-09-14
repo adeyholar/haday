@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { HebrewType } from "@/components/hebrew-type";
@@ -28,6 +28,7 @@ import { verseFor } from "@/lib/verses";
 import { scoreboard } from "@/lib/rewards";
 import { useStudy } from "@/lib/store";
 import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
+import { GUESS_MS } from "@/lib/etch";
 
 function spellTargets(item: VocabItem, stage: GameStageId): { target: string; alts: string[] } {
   const alts = [...(item.hebrewAlts ?? [])];
@@ -81,6 +82,9 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const [firstSeen, setFirstSeen] = useState(0);
   const [phase, setPhase] = useState<Phase>("play");
   const [stars, setStars] = useState(1);
+  const [guessKey, setGuessKey] = useState(0);
+  const [guessFast, setGuessFast] = useState(false);
+  const shownAt = useRef(Date.now());
 
   useEffect(() => {
     setQueue(shuffleCopy(pool));
@@ -94,9 +98,16 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     setFirstSeen(0);
     setPhase("play");
     setStars(1);
+    setGuessKey(0);
+    setGuessFast(false);
+    shownAt.current = Date.now();
   }, [chapter, stage, pool, mixKey]);
 
   const item = queue[0];
+  useEffect(() => {
+    shownAt.current = Date.now();
+    setGuessFast(false);
+  }, [item?.id]);
   const spell = item ? spellTargets(item, stage) : { target: "", alts: [] as string[] };
   const typedOk =
     !item
@@ -104,7 +115,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
       : stage === "gloss"
         ? glossMatches(item, typed)
         : liveMatchAny(spell.target, typed, spell.alts, true) === "exact";
-  const choices = useMemo(() => (item ? quizChoices(item, pool) : []), [item, pool]);
+  const choices = useMemo(() => (item ? quizChoices(item, pool) : []), [item, pool, guessKey]);
   const meta = stageMeta(stage);
   const chapterMeta = CHAPTER_META[chapter];
   const doneCount = total - queue.length;
@@ -333,6 +344,9 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           </span>
         </div>
         <p className="mt-1 text-sm text-muted">{meta.prompt}</p>
+        {guessFast && stage === "recognize" && picked === null && (
+          <p className="mt-2 text-sm font-semibold text-danger">Too fast — name it, don’t tap the pattern.</p>
+        )}
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface">
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-[var(--motion-fast)]"
@@ -384,6 +398,13 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
                     disabled={picked !== null || firstMiss}
                     onClick={() => {
                       if (c === item.gloss) {
+                        if (Date.now() - shownAt.current < GUESS_MS) {
+                          setGuessFast(true);
+                          setGuessKey((n) => n + 1);
+                          shownAt.current = Date.now();
+                          playGrade(false);
+                          return;
+                        }
                         setPicked(c);
                         playGrade(true);
                         return;

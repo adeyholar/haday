@@ -17,6 +17,8 @@ export type CardState = {
 const MINUTE = 60_000;
 const DAY = 86_400_000;
 const RECENT_CAP = 8;
+/** After a miss: retry soon, then 1 day, 3 days, 7 days — not cram-reset forever. */
+const MISS_WAIT = [10 * MINUTE, 1 * DAY, 3 * DAY, 7 * DAY];
 
 export function newCard(now = Date.now()): CardState {
   return {
@@ -79,13 +81,15 @@ export function applyRating(card: CardState, rating: Rating, now = Date.now()): 
     };
   }
   if (rating === "again") {
+    const lapses = prev.lapses + 1;
+    const wait = MISS_WAIT[Math.min(lapses - 1, MISS_WAIT.length - 1)] ?? 7 * DAY;
     return {
       ...prev,
       ease: Math.max(1.3, prev.ease - 0.2),
-      interval: 0,
-      due: now + 10 * MINUTE,
+      interval: wait >= DAY ? wait / DAY : 0,
+      due: now + wait,
       reps: 0,
-      lapses: prev.lapses + 1,
+      lapses,
       last: now,
       misses: prev.misses + 1,
       recent: pushRecent(prev.recent, "m"),
