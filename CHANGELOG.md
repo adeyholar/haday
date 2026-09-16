@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Letter names, not shi-n.** Hear plays recorded clips in /audio/letters (shin and sin are separate). From Alef-bet Station, Drill is the letter quiz — six at a time or the whole line — not week vocabulary.
+
 - **The Book’s alef-bet.** After the first word, Psalm 119 walks twenty-two stanzas, א to ת, with Hear. Practice still comes after.
 
 - **Notice the first word.** After Genesis 1:1, walk בְּרֵאשִׁית letter by letter, then Hear א to ת. Practice still comes after.

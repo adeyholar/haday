@@ -15,6 +15,7 @@ const {
   labSearch,
   lessonById,
   lessonsFor,
+  isAlefStationLesson,
   openLadderText,
   stationComplete,
   trainLadderLesson,
@@ -82,7 +83,7 @@ test("continue points at first untrained open lesson", () => {
   const t = continueTarget(p);
   assert.equal(t.lessonId, "alef-bereshit");
   const trained = trainLadderLesson(p, "alef-bereshit");
-  assert.equal(continueTarget(trained).lessonId, "alef-acrostic");
+  assert.equal(continueTarget(trained).lessonId, "alef-ps119");
 });
 
 test("game snapshot keeps ladder through hydrate", () => {
@@ -101,4 +102,18 @@ test("lab search carries the Stations lesson id", () => {
   const lab = lessonById("alef-bereshit").lab;
   assert.deepEqual(labSearch(lab, "alef-bereshit").from, "alef-bereshit");
   assert.equal("from" in labSearch(lab), false);
+});
+
+test("Alef-bet Drill is the letter quiz, not week vocab", () => {
+  assert.equal(isAlefStationLesson("alef-bereshit"), true);
+  assert.equal(isAlefStationLesson("alef-ps119"), true);
+  assert.equal(isAlefStationLesson("alef-hear"), true);
+  assert.equal(isAlefStationLesson("names-who"), false);
+  const legacy = hydrateLadder({
+    unlockedLevel: 1,
+    currentLessonId: "alef-acrostic",
+    openedText: { "alef-acrostic": true },
+  });
+  assert.equal(legacy.currentLessonId, "alef-ps119");
+  assert.equal(legacy.openedText["alef-ps119"], true);
 });

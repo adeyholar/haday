@@ -165,17 +165,19 @@ function AlphabetPage() {
 
       {tab === "hand" && <HandTrain />}
 
-      {tab === "drill" && <FoundationQuiz />}
+      {tab === "drill" && <FoundationQuiz fromLesson={search.from} />}
 
       {tab === "exam" && <ClosedBook onPractice={(next) => setTab(next)} />}
     </>
   );
 }
 
-function FoundationQuiz() {
+function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
   const queue = useStudy((s) => s.alefQueue);
   const rate = useStudy((s) => s.rate);
-  const [kind, setKind] = useState<QuizKind>("vowel-name");
+  const fromAlef = Boolean(fromLesson?.startsWith("alef-"));
+  const [kind, setKind] = useState<QuizKind>(fromAlef ? "letter-name" : "vowel-name");
+  const [pack, setPack] = useState<"batch" | "all">(fromAlef ? "batch" : "all");
   const [seed, setSeed] = useState(0);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -188,7 +190,7 @@ function FoundationQuiz() {
   const [follow, setFollow] = useState<(HebrewLetter | HebrewVowel)[]>([]);
 
   const isScribble = kind === "letter-scribble" || kind === "vowel-scribble";
-  const isLetter = kind.startsWith("letter") || kind === "translit-letter";
+  const isLetter = kind.startsWith("letter") || kind === "translit-letter" || kind === "name-letter";
   const letterDeck = useMemo(() => {
     const q = alefByKeys(queue)
       .filter((x) => x.kind === "letter")
@@ -196,11 +198,15 @@ function FoundationQuiz() {
       .filter((x): x is HebrewLetter => Boolean(x));
     if (q.length && isLetter) return q;
     const source = kind === "letter-scribble" ? WRITE_LETTERS : CONSONANTS;
+    if (fromAlef) {
+      const shuffled = shuffle(source);
+      return pack === "all" ? shuffled : shuffled.slice(0, 6);
+    }
     return pickByBkt(
       source.map((l) => ({ id: alefKey("letter", l.id), letter: l })),
       12,
     ).map((x) => x.letter);
-  }, [seed, kind, queue, isLetter]);
+  }, [seed, kind, queue, isLetter, fromAlef, pack]);
   const vowelDeck = useMemo(() => {
     const q = alefByKeys(queue)
       .filter((x) => x.kind === "vowel")
@@ -285,6 +291,9 @@ function FoundationQuiz() {
       if (kind === "translit-letter") {
         return <p className="font-mono text-5xl font-bold text-ink">{letter.translit}</p>;
       }
+      if (kind === "name-letter") {
+        return <p className="font-display text-4xl font-bold text-ink">{letter.name}</p>;
+      }
       return <p className="he-word text-7xl">{letter.letter}</p>;
     }
     if (vowel) return <p className="he-word text-7xl">{vowel.mark}</p>;
@@ -313,6 +322,32 @@ function FoundationQuiz() {
 
   return (
     <div className="mt-5">
+      {fromAlef ? (
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={pack === "batch" ? "primary" : "outline"}
+            onClick={() => {
+              setPack("batch");
+              setSeed((s) => s + 1);
+            }}
+          >
+            Six letters
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={pack === "all" ? "primary" : "outline"}
+            onClick={() => {
+              setPack("all");
+              setSeed((s) => s + 1);
+            }}
+          >
+            Whole alef-bet
+          </Button>
+        </div>
+      ) : null}
       <QuizPicker kind={kind} onKind={(k) => { setKind(k); setSeed((s) => s + 1); }} />
       {queue.length > 0 && (
         <p className="mt-2 text-sm font-medium text-primary">Serving closed-book misses first.</p>
@@ -396,7 +431,7 @@ function FoundationQuiz() {
                   show && missedId === id && "bg-danger text-parchment",
                 )}
               >
-                {kind === "translit-letter" && "letter" in o ? (
+                {((kind === "translit-letter" || kind === "name-letter") && "letter" in o) ? (
                   <span className="he-word text-2xl">{o.letter}</span>
                 ) : (
                   optionLabel(o)

@@ -14,6 +14,7 @@ const {
 const { LESSONS, lessonById, lessonsFor } = await jiti.import("/workspace/src/lib/ladder.ts");
 const { isBookId } = await jiti.import("/workspace/src/lib/tanakh-canon.ts");
 const { PSALM_119_STANZAS, acrosticLetters } = await jiti.import("/workspace/src/lib/psalm-119-acrostic.ts");
+const { letterNameSrc, LETTER_SAY_EN } = await jiti.import("/workspace/src/lib/letter-clips.ts");
 
 test("Genesis 1:1 first word splits into six letters ending in tav", () => {
   const parts = splitConsonantGlyphs(BERESHIT_WORD);
@@ -46,10 +47,12 @@ test("Psalm 119 acrostic is 22 stanzas on book id Ps, not lesson 1", () => {
   const alef = lessonsFor("alef");
   assert.deepEqual(
     alef.map((l) => l.id),
-    ["alef-bereshit", "alef-acrostic", "alef-hear"],
+    ["alef-bereshit", "alef-ps119", "alef-hear"],
   );
   assert.equal(alef[0].order, 1);
-  const lesson = lessonById("alef-acrostic");
+  const lesson = lessonById("alef-ps119");
+  assert.equal(lesson.order, 2);
+  assert.equal(lessonById("alef-acrostic").id, "alef-ps119");
   assert.equal(lesson.order, 2);
   assert.equal(lesson.lab.book, "Ps");
   assert.equal(lesson.lab.ch, 119);
@@ -64,7 +67,16 @@ test("Psalm 119 acrostic is 22 stanzas on book id Ps, not lesson 1", () => {
   assert.equal(letters.some((l) => l.id === "sin"), false);
   assert.match(PSALM_119_STANZAS.find((s) => s.letterId === "shin").head, /שׂ/);
   assert.equal(
-    LESSONS.filter((l) => l.id === "alef-acrostic").length,
+    LESSONS.filter((l) => l.id === "alef-ps119").length,
     1,
   );
+});
+
+test("letter name clips exist for shin and sin, not English shi-n", () => {
+  assert.equal(letterNameSrc("shin"), "/audio/letters/shin.mp3");
+  assert.equal(letterNameSrc("sin"), "/audio/letters/sin.mp3");
+  assert.equal(letterNameSrc("alef"), "/audio/letters/alef.mp3");
+  assert.equal(LETTER_SAY_EN.shin, "sheen");
+  assert.equal(LETTER_SAY_EN.sin, "seen");
+  assert.notEqual(LETTER_SAY_EN.shin, "shin");
 });
