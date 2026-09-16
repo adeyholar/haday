@@ -5,6 +5,7 @@ import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { GameContinue } from "@/components/game-continue";
+import { StudyContinue } from "@/components/study-continue";
 import { LeaderboardTeaser } from "@/components/leaderboard-teaser";
 import { RewardsBar } from "@/components/rewards-bar";
 import { COURSE_WEEKS, bbhVocab, itemsForWeek, studySetMeta } from "@/lib/vocab";
@@ -73,6 +74,14 @@ function Home() {
           <p className="mt-3 font-display text-3xl font-bold">Game mode</p>
           <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, letters and forms, Grammar topics (including Verbs & binyan), or Ultimate. Pick from the Game menu.</p>
         </Link>
+        <Link
+          to="/study"
+          className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+        >
+          <Library className="size-6 text-primary" />
+          <p className="mt-3 font-display text-3xl font-bold">The climb</p>
+          <p className="mt-1 text-sm text-muted">Five stations. Open the text first. The Realm is the top.</p>
+        </Link>
         <a
           href="#study-mode"
           className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
@@ -83,7 +92,8 @@ function Home() {
         </a>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 flex flex-col gap-2">
+        <StudyContinue />
         <GameContinue />
         <p className="sr-only">{continueLabel(game)}</p>
       </div>

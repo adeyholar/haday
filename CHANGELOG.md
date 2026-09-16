@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **The climb (preview).** Study → The climb: five stations (Alef-bet Station to Realm of the Word). Open the text first; name the rule last. Game, Listen, and week tools stay where they were.
+
 - **Study prepares; Game exams.** Grammar lessons (notes, verses, pairing) live under Study and are all open. Game grammar is a closed-book 12-question exam. 90% still opens the next unit.
 
 - **Verbs & binyan.** Game → Grammar: 17 units from “is this a verb?” through Qal, wayyiqtol, Piel / Hiphil / Niphal, person, Pual / Hophal / Hithpael, weak roots, and a live parse. Signatures first. Class lemmas only. 90% opens the next unit.

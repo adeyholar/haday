@@ -3,6 +3,7 @@ import { GroupSelect } from "@/components/group-select";
 
 const OPTIONS = [
   { value: "/", match: (p: string) => p === "/", label: "Home" },
+  { value: "/study", match: (p: string) => p.startsWith("/study"), label: "The climb" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
   { value: "/quiz", match: (p: string) => p.startsWith("/quiz"), label: "Quiz" },
@@ -28,6 +29,7 @@ export function StudyMenu() {
       options={OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
       onChange={(to) => {
         if (to === "/") void navigate({ to: "/" });
+        else if (to === "/study") void navigate({ to: "/study" });
         else if (to === "/drill") void navigate({ to: "/drill" });
         else if (to === "/write") void navigate({ to: "/write", search: { mode: "write" } });
         else if (to === "/quiz") void navigate({ to: "/quiz" });
