@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { isBookId } from "@/lib/tanakh-canon";
-import { labSearch, type LadderAction } from "@/lib/ladder";
+import { isAlefStationLesson, labSearch, type LadderAction } from "@/lib/ladder";
 import { fromSearch } from "@/lib/passage";
 
 export function LadderActionLink({
@@ -35,6 +35,15 @@ export function LadderActionLink({
   }
 
   if (action.kind === "drill") {
+    if (isAlefStationLesson(lessonId)) {
+      return (
+        <Link to="/alphabet" search={{ tab: "drill", ...fromSearch(lessonId) }} className="block">
+          <Button className="w-full" variant="outline" size="lg">
+            {action.label}
+          </Button>
+        </Link>
+      );
+    }
     return (
       <Link to="/drill" search={fromSearch(lessonId)} className="block">
         <Button className="w-full" variant="outline" size="lg">

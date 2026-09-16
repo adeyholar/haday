@@ -119,7 +119,7 @@ export const LESSONS: LadderLesson[] = [
     wells: ["alphabet", "vowels"],
   },
   {
-    id: "alef-acrostic",
+    id: "alef-ps119",
     stationId: "alef",
     order: 2,
     title: "The Book's alef-bet",
@@ -334,8 +334,8 @@ export function hydrateLadder(raw: unknown): LadderProgress {
     unlockedLevel: unlocked,
     currentStationId: station.id,
     currentLessonId: lesson.id,
-    openedText: truthMap(r.openedText),
-    trained: truthMap(r.trained),
+    openedText: remapLegacyLesson(truthMap(r.openedText)),
+    trained: remapLegacyLesson(truthMap(r.trained)),
     fruitByStation: fruitMap(r.fruitByStation),
   };
 }
@@ -347,6 +347,11 @@ function truthMap(raw: unknown): Record<string, boolean> {
     if (v) out[k] = true;
   }
   return out;
+}
+
+function remapLegacyLesson(map: Record<string, boolean>): Record<string, boolean> {
+  if (map["alef-acrostic"] && !map["alef-ps119"]) map["alef-ps119"] = true;
+  return map;
 }
 
 function fruitMap(raw: unknown): Record<string, 30 | 60 | 100 | null> {
@@ -363,7 +368,12 @@ export function stationById(id: string): LadderStation | undefined {
 }
 
 export function lessonById(id: string): LadderLesson | undefined {
+  if (id === "alef-acrostic") return LESSONS.find((l) => l.id === "alef-ps119");
   return LESSONS.find((l) => l.id === id);
+}
+
+export function isAlefStationLesson(id: string): boolean {
+  return lessonById(id)?.stationId === "alef";
 }
 
 export function lessonsFor(stationId: StationId): LadderLesson[] {

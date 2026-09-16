@@ -80,7 +80,7 @@ function LessonPage() {
             <p className="mt-2 text-sm text-muted">Open Genesis 1:1 first. Then we walk the first word and the letters.</p>
           )
         ) : null}
-        {lesson.id === "alef-acrostic" ? (
+        {lesson.id === "alef-ps119" ? (
           opened ? (
             <PsalmAcrosticWalk lessonId={lesson.id} />
           ) : (

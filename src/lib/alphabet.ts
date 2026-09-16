@@ -99,6 +99,7 @@ export const VOWEL_GROUPS: Array<{ id: VowelKind; title: string; blurb: string }
 
 export type QuizKind =
   | "letter-name"
+  | "name-letter"
   | "letter-translit"
   | "translit-letter"
   | "letter-scribble"
@@ -109,6 +110,7 @@ export type QuizKind =
 
 export const QUIZ_KINDS: Array<{ id: QuizKind; label: string; hint: string }> = [
   { id: "letter-name", label: "Letter names", hint: "See the consonant, pick the name" },
+  { id: "name-letter", label: "Name → letter", hint: "See the name, pick the consonant" },
   { id: "letter-translit", label: "Letter → translit", hint: "See the letter, pick ʾ b g …" },
   { id: "translit-letter", label: "Translit → letter", hint: "See the translit, pick the letter" },
   { id: "letter-scribble", label: "Write letter", hint: "See the name, scribble the consonant" },

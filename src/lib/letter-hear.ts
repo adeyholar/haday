@@ -1,5 +1,7 @@
-import { playNeuralVoice, speakLine, stopSpeech, unlockSpeech } from "@/lib/listen";
-import { loadNeuralManifest } from "@/lib/neural-voice";
+import { playVocabClip, speakLine, stopSpeech, unlockSpeech } from "@/lib/listen";
+import { LETTER_SAY_EN, letterNameSrc } from "@/lib/letter-clips";
+
+export { letterNameSrc } from "@/lib/letter-clips";
 
 export function hushHear(signal: { stop: boolean }): { stop: boolean } {
   signal.stop = true;
@@ -9,11 +11,16 @@ export function hushHear(signal: { stop: boolean }): { stop: boolean } {
 
 export async function hearLetterName(id: string, name: string, signal: { stop: boolean }): Promise<void> {
   unlockSpeech();
-  await loadNeuralManifest();
   if (signal.stop) return;
-  const he = await playNeuralVoice(id, "he", 0.85, signal);
-  if (he || signal.stop) return;
-  const en = await playNeuralVoice(id, "en", 0.85, signal);
-  if (en || signal.stop) return;
-  await speakLine(name, "en", 0.8, signal);
+  const src = letterNameSrc(id);
+  if (src) {
+    const ok = await playVocabClip(
+      { src, start: 0, end: 0, he: name, kind: "lemma", source: "eliran" },
+      0.95,
+      signal,
+    );
+    if (ok || signal.stop) return;
+  }
+  if (signal.stop) return;
+  await speakLine(LETTER_SAY_EN[id] ?? name, "en", 0.8, signal);
 }
