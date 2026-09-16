@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, Sk
 import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
-import { EchoVerse } from "@/components/echo-verse";
+import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { Panel } from "@/components/panel";
@@ -15,10 +15,10 @@ import {
   audioFor,
   audioWindow,
   chapterFromAlign,
-  clusterAtMeta,
   fetchBookAlign,
   formatPlayTime,
   gradeFromVerses,
+  highlightAtMeta,
   loadReadingProgress,
   mediaClockTime,
   progressId,
@@ -29,7 +29,6 @@ import {
   verseEndFrom,
   versesFromDump,
   withEstimatedTiming,
-  wordAtStarts,
   type ChapterAudio,
   type GradeItem,
   type MediaClock,
@@ -130,6 +129,7 @@ export function TanakhReading({
   const loopRef = useRef(loop);
   const passageRef = useRef(passage);
   const audioMetaRef = useRef<ChapterAudio>(audioFor(book, chapter));
+  const echoClockRef = useRef<EchoClock>(null);
   const [audioMeta, setAudioMeta] = useState<ChapterAudio>(() => audioFor(book, chapter));
   const verse = verses[i];
   const pid = isFullChapter(passage) ? progressId(book, chapter) : `${book}.${chapter}.${vw.from}-${vw.to}`;
@@ -163,7 +163,47 @@ export function TanakhReading({
     };
   }
 
+  function paintVerseWords(item: ReadingVerse, t: number) {
+    const { word, cluster } = highlightAtMeta(audioMetaRef.current, item.verse, t, item.words);
+    if (word !== wordRef.current) {
+      wordRef.current = word;
+      setWordI(word);
+    }
+    if (cluster !== clusterRef.current) {
+      clusterRef.current = cluster;
+      setClusterI(cluster);
+    }
+  }
+
+  function onEchoClock(clock: EchoClock) {
+    echoClockRef.current = clock;
+    if (clock === "off") {
+      if (wordRef.current !== -1) {
+        wordRef.current = -1;
+        setWordI(-1);
+      }
+      if (clusterRef.current !== -1) {
+        clusterRef.current = -1;
+        setClusterI(-1);
+      }
+      return;
+    }
+    if (clock == null) {
+      onTime();
+      return;
+    }
+    const item = versesRef.current[iRef.current];
+    if (item) paintVerseWords(item, clock);
+  }
+
   function onTime() {
+    const echo = echoClockRef.current;
+    if (echo === "off") return;
+    if (typeof echo === "number") {
+      const item = versesRef.current[iRef.current];
+      if (item) paintVerseWords(item, echo);
+      return;
+    }
     const el = elAudio();
     const list = versesRef.current;
     const curMeta = audioMetaRef.current;
@@ -191,20 +231,7 @@ export function TanakhReading({
       iRef.current = next;
       setI(next);
     }
-    if (item) {
-      const starts = curMeta.words?.[item.verse - 1] ?? [];
-      const w = Math.min(Math.max(0, item.words.length - 1), Math.max(0, wordAtStarts(starts, t)));
-      if (w !== wordRef.current) {
-        wordRef.current = w;
-        setWordI(w);
-      }
-      const surface = item.words[w] ?? "";
-      const c = clusterAtMeta(curMeta, item.verse, w, t, surface);
-      if (c !== clusterRef.current) {
-        clusterRef.current = c;
-        setClusterI(c);
-      }
-    }
+    if (item) paintVerseWords(item, t);
   }
 
   function goLoc(loc: { book: BookId; chapter: number }, auto: boolean) {
@@ -633,6 +660,7 @@ export function TanakhReading({
             else void playFrom(i, true);
           }}
           onHalt={halt}
+          onEchoClock={onEchoClock}
           onStep={step}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
@@ -746,6 +774,7 @@ function FollowCard({
   preload,
   onToggle,
   onHalt,
+  onEchoClock,
   onStep,
   onNudge,
   onSeek,
@@ -772,6 +801,7 @@ function FollowCard({
   preload: "auto" | "metadata";
   onToggle: () => void;
   onHalt: () => void;
+  onEchoClock: (clock: EchoClock) => void;
   onStep: (d: number) => void;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
@@ -852,7 +882,7 @@ function FollowCard({
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
         </p>
-        <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} />
+        <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
       </div>
       {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
 

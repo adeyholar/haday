@@ -1,22 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { echoGuideTime } from "@/lib/reading";
 import { pickRecorderMime } from "@/lib/pet";
 
 const MAX_MS = 20_000;
 
 type Phase = "idle" | "model" | "ready" | "rec" | "review";
 
+/** Chapter-audio seconds, "off" = no Hebrew highlight, null = Follow along owns the lights. */
+export type EchoClock = number | "off" | null;
+
 export function EchoVerse({
   src,
   start,
   end,
   onHalt,
+  onClock,
 }: {
   src: string;
   start: number;
   end: number;
   onHalt: () => void;
+  onClock?: (clock: EchoClock) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -29,11 +35,32 @@ export function EchoVerse({
   const chunks = useRef<Blob[]>([]);
   const stream = useRef<MediaStream | null>(null);
   const tick = useRef(0);
+  const raf = useRef(0);
   const mime = useRef("");
+  const clockCb = useRef(onClock);
+  clockCb.current = onClock;
   const span = Math.max(0.8, (end || start + 4) - start);
 
+  function emit(clock: EchoClock) {
+    clockCb.current?.(clock);
+  }
+
+  function stopRaf() {
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = 0;
+  }
+
+  function startRaf(getT: () => number) {
+    stopRaf();
+    const loop = () => {
+      emit(getT());
+      raf.current = requestAnimationFrame(loop);
+    };
+    raf.current = requestAnimationFrame(loop);
+  }
+
   useEffect(() => {
-    return () => hush();
+    return () => hush(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -43,12 +70,13 @@ export function EchoVerse({
     setError(null);
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     setBlobUrl(null);
-    hush();
+    hush(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, start, end]);
 
-  function hush() {
+  function hush(release: boolean) {
     window.clearInterval(tick.current);
+    stopRaf();
     try {
       rec.current?.stop();
     } catch {
@@ -62,9 +90,11 @@ export function EchoVerse({
       model.pause();
     }
     mineRef.current?.pause();
+    if (release) emit(null);
   }
 
   function playModel(): Promise<void> {
+    emit(start);
     onHalt();
     const el = modelRef.current;
     if (!el || !src) return Promise.resolve();
@@ -72,22 +102,25 @@ export function EchoVerse({
     el.currentTime = Math.max(0, start);
     const stopAt = start + span;
     return new Promise((resolve) => {
-      const onTime = () => {
-        if (el.currentTime >= stopAt - 0.05 || el.ended) {
-          el.pause();
-          el.removeEventListener("timeupdate", onTime);
-          el.removeEventListener("ended", onEnded);
-          resolve();
-        }
-      };
-      const onEnded = () => {
-        el.removeEventListener("timeupdate", onTime);
+      const finish = () => {
+        el.pause();
+        el.removeEventListener("timeupdate", onStamp);
         el.removeEventListener("ended", onEnded);
+        stopRaf();
+        emit(Math.min(el.currentTime, stopAt));
         resolve();
       };
-      el.addEventListener("timeupdate", onTime);
+      const onStamp = () => {
+        if (el.currentTime >= stopAt - 0.05 || el.ended) finish();
+      };
+      const onEnded = () => finish();
+      el.addEventListener("timeupdate", onStamp);
       el.addEventListener("ended", onEnded);
-      void el.play().catch(() => resolve());
+      startRaf(() => el.currentTime);
+      void el.play().catch(() => {
+        stopRaf();
+        resolve();
+      });
       setPhase("model");
     });
   }
@@ -95,6 +128,7 @@ export function EchoVerse({
   async function startEcho() {
     setError(null);
     setOpen(true);
+    await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
     await playModel();
     setPhase("ready");
   }
@@ -122,11 +156,14 @@ export function EchoVerse({
         setPhase("review");
         stream.current?.getTracks().forEach((t) => t.stop());
         stream.current = null;
+        stopRaf();
       };
       recorder.start();
       setMs(0);
       setPhase("rec");
       const began = Date.now();
+      emit(start);
+      startRaf(() => echoGuideTime(start, end, Date.now() - began));
       tick.current = window.setInterval(() => {
         const elapsed = Date.now() - began;
         setMs(elapsed);
@@ -139,6 +176,7 @@ export function EchoVerse({
 
   function stopRec() {
     window.clearInterval(tick.current);
+    stopRaf();
     try {
       rec.current?.stop();
     } catch {
@@ -148,6 +186,7 @@ export function EchoVerse({
 
   async function playBoth() {
     await playModel();
+    emit("off");
     const mine = mineRef.current;
     if (mine && blobUrl) {
       mine.src = blobUrl;
@@ -172,7 +211,7 @@ export function EchoVerse({
           type="button"
           className="min-h-11 px-2 text-sm font-semibold text-primary"
           onClick={() => {
-            hush();
+            hush(true);
             setOpen(false);
             setPhase("idle");
           }}
@@ -213,6 +252,10 @@ export function EchoVerse({
             variant="outline"
             size="lg"
             onClick={() => {
+              stopRaf();
+              mineRef.current?.pause();
+              modelRef.current?.pause();
+              emit("off");
               const mine = mineRef.current;
               if (mine) {
                 mine.src = blobUrl;

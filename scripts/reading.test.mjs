@@ -12,6 +12,8 @@ const {
   parseReadingKey,
   chapterAudio,
   verseAtTime,
+  highlightAtMeta,
+  echoGuideTime,
   wordAtTime,
   mediaClockTime,
   formatPlayTime,
@@ -65,6 +67,30 @@ test("recorded chapter audio has a start time for every verse", () => {
       assert.equal(wordAtTime(ch, 1, meta.words[0].at(-1)), v1.words.length - 1);
     }
   }
+});
+
+test("highlight at a word start matches wordAtStarts and stays in verse", () => {
+  const ch = 1;
+  const meta = chapterAudio(ch);
+  const v1 = readingVerses(ch)[0];
+  const t0 = meta.words[0][0];
+  const first = highlightAtMeta(meta, 1, t0, v1.words);
+  assert.equal(first.word, 0);
+  if (v1.words.length > 1) {
+    const tLast = meta.words[0].at(-1);
+    const last = highlightAtMeta(meta, 1, tLast, v1.words);
+    assert.equal(last.word, v1.words.length - 1);
+  }
+  const empty = highlightAtMeta(meta, 1, t0, []);
+  assert.equal(empty.word, -1);
+});
+
+test("echo karaoke maps elapsed time onto the verse window", () => {
+  assert.equal(echoGuideTime(10, 14, 0), 10);
+  assert.ok(echoGuideTime(10, 14, 2000) > 11.9);
+  assert.ok(echoGuideTime(10, 14, 2000) < 12.1);
+  assert.ok(echoGuideTime(10, 14, 20_000) < 14);
+  assert.ok(echoGuideTime(10, 14, 20_000) >= 13.9);
 });
 
 test("slow and fast clocks stay on the recording timeline", () => {
