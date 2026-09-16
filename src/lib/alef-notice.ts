@@ -16,12 +16,12 @@ const dump = genesis as { chapters: Record<string, Array<{ words: string[] }>> }
 export const BERESHIT_WORD = dump.chapters["1"]?.[0]?.words[0] ?? "בְּרֵאשִׁית";
 
 const NOTES: Record<string, string> = {
-  bet: "Start on the right. This is ב with a shewa under it.",
-  resh: "ר comes next. A long mark sits under it.",
-  alef: "א is quiet here. See the shape; do not name a rule yet.",
-  shin: "שׁ — the dot is on the right of ש.",
-  yod: "י is the small letter in the middle of the word.",
-  tav: "ת closes the word on the left.",
+  bet: "Letter 1 of 6 — start on the right. בּ has a dot inside (dagesh) and a shewa under it. This is where the word begins.",
+  resh: "Letter 2. ר with two dots under it (tsere). The long sound in the middle of the word rides on this letter.",
+  alef: "Letter 3. א is quiet here. It has a shape but no sound of its own in this word. See it; do not name a rule yet.",
+  shin: "Letter 4. שׁ — the dot sits on the right of ש. A single dot (hireq) sits under it.",
+  yod: "Letter 5. י is the smallest letter. It sits inside the word, not at either end.",
+  tav: "Letter 6 — the left side. ת closes the word. You have now walked the first word of the Book, right to left.",
 };
 
 export function splitConsonantGlyphs(word: string): { glyph: string; cons: string }[] {

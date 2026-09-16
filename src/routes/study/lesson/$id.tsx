@@ -3,6 +3,7 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { StudyMenu } from "@/components/study-menu";
 import { LadderActionLink } from "@/components/ladder-action";
 import { AlefNoticeWalk } from "@/components/alef-notice-walk";
+import { PsalmAcrosticWalk } from "@/components/psalm-acrostic-walk";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +78,13 @@ function LessonPage() {
             <AlefNoticeWalk />
           ) : (
             <p className="mt-2 text-sm text-muted">Open Genesis 1:1 first. Then we walk the first word and the letters.</p>
+          )
+        ) : null}
+        {lesson.id === "alef-acrostic" ? (
+          opened ? (
+            <PsalmAcrosticWalk lessonId={lesson.id} />
+          ) : (
+            <p className="mt-2 text-sm text-muted">Open Psalm 119 first. Then we walk one letter, one stanza at a time.</p>
           )
         ) : null}
       </Panel>
