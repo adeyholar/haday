@@ -1,6 +1,5 @@
 import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
-import { StudyReturnBanner } from "@/components/study-return-banner";
 import { fromSearch } from "@/lib/passage";
 
 const OPTIONS = [
@@ -22,18 +21,15 @@ export function ListenMenu() {
       : "/listen";
 
   return (
-    <div>
-      <StudyReturnBanner />
-      <GroupSelect
-        title="Listen"
-        value={current}
-        options={OPTIONS}
-        onChange={(to) => {
-          if (to === "/listen") void navigate({ to: "/listen", search: carry });
-          else if (to === "/listen/pet") void navigate({ to: "/listen/pet", search: carry });
-          else void navigate({ to: "/listen/read", search: carry });
-        }}
-      />
-    </div>
+    <GroupSelect
+      title="Listen"
+      value={current}
+      options={OPTIONS}
+      onChange={(to) => {
+        if (to === "/listen") void navigate({ to: "/listen", search: carry });
+        else if (to === "/listen/pet") void navigate({ to: "/listen/pet", search: carry });
+        else void navigate({ to: "/listen/read", search: carry });
+      }}
+    />
   );
 }

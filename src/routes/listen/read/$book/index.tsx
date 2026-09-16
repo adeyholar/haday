@@ -3,6 +3,7 @@ import { Link, Navigate, createFileRoute, useNavigate } from "@tanstack/react-ro
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
+import { StudyReturnBanner } from "@/components/study-return-banner";
 import { Panel } from "@/components/panel";
 import { PassagePicker } from "@/components/passage-picker";
 import { loadReadingProgress, progressId } from "@/lib/reading";
@@ -44,6 +45,7 @@ function BookChapters({ book, from }: { book: BookId; from?: string }) {
 
   return (
     <>
+      <StudyReturnBanner />
       <Panel className="mb-4">
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">

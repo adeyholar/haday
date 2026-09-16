@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Back to lesson.** From Stations into Lab, a full-width bar at the top returns to that lesson. Easy to see, easy to tap.
+
 - **Echo lights the verse.** Hear verse (and the model half of Hear both) highlights Hebrew like Follow along. Hear me does not fake it. Record can walk the words in silence.
 
 - **Back to Stations.** Opening the text from a lesson keeps a return to that lesson. Lab hops keep the door.
