@@ -42,6 +42,7 @@ import { NavTip } from "@/components/nav-tip";
 import { NavMenu, type NavItem } from "@/components/nav-menu";
 
 const STUDY: NavItem[] = [
+  { to: "/study", label: "The climb", hint: "Five stations to the Realm", icon: Library },
   { to: "/drill", label: "Drill", hint: "Flip cards", icon: Layers },
   { to: "/write", label: "Write", hint: "Type or hand-write", icon: PenLine },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
@@ -228,7 +229,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="Study"
               icon={Library}
               items={STUDY}
-              active={STUDY.some((x) => (x.to === "/" ? false : pathname === x.to || pathname.startsWith(`${x.to}/`))) || pathname === "/"}
+              active={
+                STUDY.some((x) => (x.to === "/" ? false : pathname === x.to || pathname.startsWith(`${x.to}/`))) ||
+                pathname === "/" ||
+                pathname.startsWith("/study")
+              }
             />
             <NavMenu
               label="Listen"

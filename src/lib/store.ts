@@ -37,6 +37,7 @@ import { observeBkt } from "./bkt";
 import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
+import { openLadderText, trainLadderLesson, visitLadder } from "./ladder";
 
 type ProgressMap = Record<string, CardState>;
 export type FocusMode = "due" | "weak";
@@ -95,6 +96,9 @@ type StudyState = StudySnapshot & {
     unit: number,
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
+  visitLadder: (stationId: Parameters<typeof visitLadder>[1], lessonId: string) => void;
+  openLadderText: (lessonId: string) => void;
+  trainLadderLesson: (lessonId: string) => void;
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
   finishUltimate: (pct: number) => void;
@@ -226,6 +230,18 @@ export const useStudy = create<StudyState>()(
           ...streakInfo,
           sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
         });
+      },
+      visitLadder: (stationId, lessonId) => {
+        const game = get().game;
+        set({ game: { ...game, ladder: visitLadder(game.ladder, stationId, lessonId) } });
+      },
+      openLadderText: (lessonId) => {
+        const game = get().game;
+        set({ game: { ...game, ladder: openLadderText(game.ladder, lessonId) } });
+      },
+      trainLadderLesson: (lessonId) => {
+        const game = get().game;
+        set({ game: { ...game, ladder: trainLadderLesson(game.ladder, lessonId) } });
       },
       startUltimate: (ids) => {
         set({ game: startUltimateRun(get().game, ids) });

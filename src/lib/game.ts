@@ -1,5 +1,6 @@
 import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
 import { GRAMMAR_TRACK_IDS, grammarTrackCap, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
+import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -59,6 +60,7 @@ export type GameSnapshot = {
   article: SyllableProgress;
   lessons: Record<GrammarTrackId, SyllableProgress>;
   balloons: BalloonProgress;
+  ladder: LadderProgress;
 };
 
 export type BalloonProgress = {
@@ -143,6 +145,7 @@ export function defaultGame(): GameSnapshot {
     article: emptyArticle(),
     lessons: emptyLessons(),
     balloons: emptyBalloons(),
+    ladder: defaultLadder(),
   };
 }
 
@@ -221,6 +224,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     article: hydrateArticle(r.article),
     lessons: hydrateLessons(r.lessons),
     balloons: hydrateBalloons(r.balloons),
+    ladder: hydrateLadder(r.ladder),
   };
 }
 
