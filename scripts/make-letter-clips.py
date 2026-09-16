@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Hebrew letter-name clips for Hear. he-IL-AvriNeural. shin/sin are שִׁין / שִׂין, not English shi-n."""
+"""Hebrew letter-name clips for Hear.
+
+shin / sin / tav use English GuyNeural (sheen / seen / tahv). Avri mis-says
+שִׁין / שִׂין / תָּו as shi-n / si-n / te-af.
+"""
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 from pathlib import Path
@@ -38,6 +43,20 @@ NAMES: list[tuple[str, str]] = [
 ]
 
 VOICE = "he-IL-AvriNeural"
+SAY_OVERRIDE: dict[str, tuple[str, str]] = {
+    "shin": ("en-US-GuyNeural", "sheen"),
+    "sin": ("en-US-GuyNeural", "seen"),
+    "tav": ("en-US-GuyNeural", "tahv"),
+}
+FFMPEG_AF = (
+    "silenceremove=start_periods=1:start_threshold=-40dB:start_silence=0.08:"
+    "stop_periods=1:stop_threshold=-40dB:stop_silence=0.18,loudnorm=I=-16:LRA=11:TP=-1.5"
+)
+# English overrides are already short words — do not eat the tail.
+FFMPEG_AF_EN = (
+    "silenceremove=start_periods=1:start_threshold=-40dB:start_silence=0.08,"
+    "loudnorm=I=-16:LRA=11:TP=-1.5"
+)
 
 
 def run(cmd: list[str]) -> None:
@@ -47,7 +66,10 @@ def run(cmd: list[str]) -> None:
 def one(letter_id: str, he: str) -> str:
     raw = OUT / f"{letter_id}.raw.mp3"
     dest = OUT / f"{letter_id}.mp3"
-    run(["edge-tts", "--voice", VOICE, "--rate=-8%", "--text", he, "--write-media", str(raw)])
+    voice, text = SAY_OVERRIDE.get(letter_id, (VOICE, he))
+    rate = "-10%" if letter_id in SAY_OVERRIDE else "-8%"
+    af = FFMPEG_AF_EN if letter_id in SAY_OVERRIDE else FFMPEG_AF
+    run(["edge-tts", "--voice", voice, f"--rate={rate}", "--text", text, "--write-media", str(raw)])
     run(
         [
             "ffmpeg",
@@ -55,7 +77,7 @@ def one(letter_id: str, he: str) -> str:
             "-i",
             str(raw),
             "-af",
-            "silenceremove=start_periods=1:start_threshold=-40dB:start_silence=0.08:stop_periods=1:stop_threshold=-40dB:stop_silence=0.18,loudnorm=I=-16:LRA=11:TP=-1.5",
+            af,
             "-codec:a",
             "libmp3lame",
             "-q:a",
@@ -68,12 +90,21 @@ def one(letter_id: str, he: str) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--only", default="", help="comma ids, e.g. shin,sin,tav")
+    args = parser.parse_args()
+    wanted = {x.strip() for x in args.only.split(",") if x.strip()}
+    manifest_path = OUT / "manifest.json"
     manifest: dict[str, str] = {}
+    if wanted and manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
     for letter_id, he in NAMES:
-        print("clip", letter_id, he, flush=True)
+        if wanted and letter_id not in wanted:
+            continue
+        print("clip", letter_id, SAY_OVERRIDE.get(letter_id, (VOICE, he)), flush=True)
         manifest[letter_id] = one(letter_id, he)
-    (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
-    print("wrote", len(manifest), "clips")
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    print("wrote", len(wanted or NAMES), "clips")
 
 
 if __name__ == "__main__":

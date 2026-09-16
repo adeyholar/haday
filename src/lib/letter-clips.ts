@@ -29,6 +29,7 @@ const LETTER_CLIPS = new Set([
 export const LETTER_SAY_EN: Record<string, string> = {
   shin: "sheen",
   sin: "seen",
+  tav: "tahv",
   he: "heh",
   het: "khet",
 };

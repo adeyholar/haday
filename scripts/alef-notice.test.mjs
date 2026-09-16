@@ -78,5 +78,6 @@ test("letter name clips exist for shin and sin, not English shi-n", () => {
   assert.equal(letterNameSrc("alef"), "/audio/letters/alef.mp3");
   assert.equal(LETTER_SAY_EN.shin, "sheen");
   assert.equal(LETTER_SAY_EN.sin, "seen");
+  assert.equal(LETTER_SAY_EN.tav, "tahv");
   assert.notEqual(LETTER_SAY_EN.shin, "shin");
 });
