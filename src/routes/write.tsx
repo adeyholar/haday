@@ -226,9 +226,11 @@ function WritePage() {
       }
       const compared = matchHandwriting(item.hebrew, res.hebrew);
       let match = compared.match;
+      if (match === "wrong" || match === "empty") {
+        applyCheck(match === "empty" ? "wrong" : match, res.hebrew);
+        return;
+      }
       if (match !== "exact" && res.verdict === "exact" && compared.distance <= 2) match = "exact";
-      else if (match === "wrong" && res.verdict === "close") match = "close";
-      else if (match === "empty" && res.verdict === "exact") match = "close";
       applyCheck(match, res.hebrew);
     } catch {
       setInputMethod("type");

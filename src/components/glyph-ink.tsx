@@ -45,21 +45,25 @@ export function GlyphInk({ expected, mode, ghost, trace = false, allowSample = t
         : "No model. Body between the two lines. Lamed above the top; finals below the bottom; qof a little below."
       : writingHint(expected));
 
-  const locked = result
-    ? result.match === "exact" || result.match === "close" || (tries >= 2 && result.counted !== false && result.match !== "empty")
-    : false;
-  const ok = result ? result.match === "exact" || result.match === "close" : false;
+  const passed = result ? result.match === "exact" || result.match === "close" : false;
+  const spent = tries >= 2;
+  const locked = passed || spent;
+  const ok = passed;
 
-  function clear() {
+  function wipePad() {
     pad.current?.clear();
     setEmpty(true);
     setResult(null);
-    setTries(0);
     setHandNote(null);
   }
 
+  function clear() {
+    if (locked) return;
+    wipePad();
+  }
+
   async function check() {
-    if (empty || busy || result) return;
+    if (empty || busy || result || spent) return;
     pad.current?.commit();
     const image = pad.current?.toImage();
     const strokes = pad.current?.getStrokes() ?? [];
@@ -137,7 +141,7 @@ export function GlyphInk({ expected, mode, ghost, trace = false, allowSample = t
         <Button type="button" variant="outline" className="flex-1" onClick={() => pad.current?.undo()} disabled={locked || busy}>
           Undo
         </Button>
-        <Button type="button" variant="outline" className="flex-1" onClick={clear} disabled={busy}>
+        <Button type="button" variant="outline" className="flex-1" onClick={clear} disabled={busy || locked}>
           Clear
         </Button>
       </div>
@@ -184,7 +188,7 @@ export function GlyphInk({ expected, mode, ghost, trace = false, allowSample = t
         </Button>
       )}
       {result && !locked && (
-        <Button className="mt-3 w-full" variant="outline" onClick={clear}>
+        <Button className="mt-3 w-full" variant="outline" onClick={wipePad}>
           Try again
         </Button>
       )}

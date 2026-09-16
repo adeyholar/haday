@@ -594,6 +594,27 @@ test("joined chet still counts as chet", () => {
   assert.equal(r.read, "ח");
 });
 
+function sineWave() {
+  const left = 140;
+  const right = 400;
+  const mid = (TOP + BASE) / 2;
+  const amp = (BASE - TOP) * 0.42;
+  const s = [];
+  for (let i = 0; i <= 48; i++) {
+    const t = i / 48;
+    s.push({ x: left + (right - left) * t, y: mid - Math.sin(t * Math.PI * 2) * amp });
+  }
+  return [s];
+}
+
+test("a sine-wave scribble is not chet or he", () => {
+  const ink = sineWave();
+  const chet = grade(ink, "ח");
+  assert.equal(chet.match, "wrong", JSON.stringify(chet));
+  const he = grade(ink, "ה");
+  assert.equal(he.match, "wrong", JSON.stringify(he));
+});
+
 test("chart he is not chet", () => {
   const r = grade(modelInk("ה", 0), "ח");
   assert.equal(r.match, "wrong");

@@ -34,8 +34,11 @@ export async function checkGlyphInk(
       takeWriteCheck();
       const compared = mode === "vowel" ? matchVowel(expected, res.hebrew) : matchLetter(expected, res.hebrew);
       let match = compared.match;
-      if (match !== "exact" && res.verdict === "exact" && compared.readN) match = "exact";
-      else if (match === "wrong" && res.verdict === "close") match = "close";
+      // A different letter stays a miss. Verdict cannot promote ה into ח.
+      if (match === "wrong" || match === "empty") {
+        return { match: match === "empty" ? "wrong" : match, read: res.hebrew || compared.readN || "", counted: true };
+      }
+      if (match !== "exact" && res.verdict === "exact") match = "exact";
       return { match, read: res.hebrew || compared.readN || "", counted: true };
     }
   } catch {

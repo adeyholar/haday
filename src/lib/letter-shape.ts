@@ -34,6 +34,7 @@ type Feat = {
   hasMidArm: boolean;
   hasLeftFoot: boolean;
   leftJoinsRoof: boolean;
+  twoStems: boolean;
   hasCross: boolean;
   footX: number;
   topTips: number;
@@ -214,6 +215,31 @@ function analyze(strokes: InkStroke[], height = 0): Feat | null {
   // Chet’s left stem meets the roof. He leaves a hole under the roof on the left —
   // even a short handwritten gap (the usual student form) must not read as chet.
   const leftJoinsRoof = gapFill >= 3 && leftGap < 0.1;
+  let leftStemMin = 1;
+  let leftStemMax = 0;
+  let leftStemN = 0;
+  let rightStemMin = 1;
+  let rightStemMax = 0;
+  let rightStemN = 0;
+  for (const p of pts) {
+    const xn = (p.x - minX) / w;
+    const yn = (p.y - minY) / h;
+    if (xn < 0.34) {
+      leftStemN += 1;
+      leftStemMin = Math.min(leftStemMin, yn);
+      leftStemMax = Math.max(leftStemMax, yn);
+    }
+    if (xn > 0.66) {
+      rightStemN += 1;
+      rightStemMin = Math.min(rightStemMin, yn);
+      rightStemMax = Math.max(rightStemMax, yn);
+    }
+  }
+  const twoStems =
+    leftStemN >= 6 &&
+    rightStemN >= 6 &&
+    leftStemMax - leftStemMin > 0.5 &&
+    rightStemMax - rightStemMin > 0.5;
   const hasLeftFoot = Number.isFinite(blMin) && blMax - blMin > w * 0.16;
   let hasCross = false;
   if (clean.length === 2 && strokeStraight(clean[0]) && strokeStraight(clean[1])) {
@@ -283,6 +309,7 @@ function analyze(strokes: InkStroke[], height = 0): Feat | null {
     hasMidArm,
     hasLeftFoot,
     leftJoinsRoof,
+    twoStems,
     hasCross,
     footX,
     topTips,
@@ -414,6 +441,7 @@ function gateLetter(want: string, f: Feat, lined: boolean): { ok: boolean; as: s
   }
   if (want === "ת" && !f.hasLeftFoot) return { ok: false, as: f.leftJoinsRoof ? "ח" : "ה" };
   if ((want === "ה" || want === "ח") && f.hasLeftFoot) return { ok: false, as: "ת" };
+  if (want === "ח" && !f.twoStems) return { ok: false, as: "" };
   if (want === "ח" && !f.leftJoinsRoof) return { ok: false, as: "ה" };
   if (want === "ה" && f.leftJoinsRoof) return { ok: false, as: "ח" };
 
