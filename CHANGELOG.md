@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Stations, not “the climb.”** The path is named for students: start with the letters, end reading and hearing the Word. Same five stops.
+
 - **The climb (preview).** Study → The climb: five stations (Alef-bet Station to Realm of the Word). Open the text first; name the rule last. Game, Listen, and week tools stay where they were.
 
 - **Study prepares; Game exams.** Grammar lessons (notes, verses, pairing) live under Study and are all open. Game grammar is a closed-book 12-question exam. 90% still opens the next unit.

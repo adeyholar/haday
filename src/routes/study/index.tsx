@@ -17,11 +17,12 @@ function LadderMapPage() {
     <>
       <Panel className="mb-4">
         <StudyMenu />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">The climb</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Five stations to the Realm</h1>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Learn in order</p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Stations</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Begin at Alef-bet Station. Each rung opens the next. The top is the Realm of the Word — reading and hearing
-          with understanding. Open real text first. Name the rule last.
+          This is the path through Hebrew. You start at Alef-bet Station (the letters). Each station trains you, then
+          the next one opens. The last stop is the Realm of the Word: Scripture you can read and hear with
+          understanding. Always open a real verse first. The grammar name comes last.
         </p>
         <div className="mt-4">
           <StudyContinue />
@@ -40,7 +41,7 @@ function LadderMapPage() {
                 <span className="font-display text-2xl font-bold">{station.name}</span>
                 {open ? (
                   <span className="text-xs font-semibold text-muted">
-                    {station.order === 5 ? "Realm" : `Rung ${station.order}`}
+                    {station.order === 5 ? "Last stop" : `Station ${station.order} of 5`}
                   </span>
                 ) : (
                   <Lock className="size-4 shrink-0 text-muted" />
@@ -55,7 +56,7 @@ function LadderMapPage() {
                   {done ? "Trained" : `${held} / ${n} lessons`}
                 </p>
               ) : (
-                <p className="mt-1 text-sm text-muted">The road opens when the rung below is trained.</p>
+                <p className="mt-1 text-sm text-muted">Finish the station below to open this one.</p>
               )}
             </>
           );

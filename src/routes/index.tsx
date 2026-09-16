@@ -79,8 +79,8 @@ function Home() {
           className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
         >
           <Library className="size-6 text-primary" />
-          <p className="mt-3 font-display text-3xl font-bold">The climb</p>
-          <p className="mt-1 text-sm text-muted">Five stations. Open the text first. The Realm is the top.</p>
+          <p className="mt-3 font-display text-3xl font-bold">Stations</p>
+          <p className="mt-1 text-sm text-muted">Start with the letters. End reading and hearing the Word.</p>
         </Link>
         <a
           href="#study-mode"

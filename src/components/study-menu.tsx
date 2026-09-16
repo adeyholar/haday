@@ -3,7 +3,7 @@ import { GroupSelect } from "@/components/group-select";
 
 const OPTIONS = [
   { value: "/", match: (p: string) => p === "/", label: "Home" },
-  { value: "/study", match: (p: string) => p.startsWith("/study"), label: "The climb" },
+  { value: "/study", match: (p: string) => p.startsWith("/study"), label: "Stations" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
   { value: "/quiz", match: (p: string) => p.startsWith("/quiz"), label: "Quiz" },

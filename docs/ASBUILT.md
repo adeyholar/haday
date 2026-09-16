@@ -19,7 +19,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 
 | Area | What it does | Why it helps |
 |---|---|---|
-| **Study** | **The climb** (five stations), Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor, Grammar lessons | Ladder: Alef-bet Station → House of Names → Verb Tent → Many Voices Camp → Realm of the Word. Text first, rule last. Toolbox unchanged. |
+| **Study** | **Stations** (five stops from alef-bet to the Word), Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor, Grammar lessons | Path: Alef-bet Station → House of Names → Verb Tent → Many Voices Camp → Realm of the Word. Text first, rule last. Toolbox unchanged. |
 | **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. Neural Hebrew is Hebrew-only (vowel **names**, no digits). |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |

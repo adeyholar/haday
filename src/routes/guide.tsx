@@ -37,11 +37,11 @@ function GuidePage() {
             <span className="text-ink"> — </span>
             pick a course week or a Game chapter — same BBH 3rd-ed. lemmas as Game — then Drill, Write, Quiz, Match, or Lex.
             Grammar lessons (Study) prepare the topic with notes and verses; Game grammar is the closed-book exam (90%).
-            The climb (Study → The climb) is five stations from Alef-bet Station to the Realm of the Word — text first, rule last.
+            Stations (Study → Stations) is the path: Alef-bet Station to the Realm of the Word — text first, rule last.
             Closed-book Exam is from memory; misses lead the next Write and Quiz rounds.
             Ultimate Challenge is optional: the whole Ch. 2–19 list in one sitting, graded at the end.
             Zakhor (Daily keep) is the short daily mix of words you have already met — due, weak, and older mastered
-            lemmas — so new chapters do not bury the old ones. The Study menu groups The climb, Drill, Write, Quiz, Match, Lex,
+            lemmas — so new chapters do not bury the old ones. The Study menu groups Stations, Drill, Write, Quiz, Match, Lex,
             Alef-bet, Zakhor, Grammar lessons, and Guide.
             recorded Hebrew chapter audio (not a computer voice) and a grade at 90%. Alive Pet speaks class words in the
             owner’s recorded voice when a take exists, with your weak lemmas first. Ask HaDay Hebraic AI to clarify the

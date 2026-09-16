@@ -30,7 +30,7 @@ function StationPage() {
       <Panel className="mb-4">
         <StudyMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Rung {station.order} of 5
+          Station {station.order} of 5
         </p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">{station.name}</h1>
         <p className="mt-1 font-display text-2xl text-primary" dir="rtl" lang="he">
@@ -43,7 +43,7 @@ function StationPage() {
         </div>
         <p className="mt-3 text-sm">
           <Link to="/study" className="font-semibold text-primary">
-            The climb
+            All stations
           </Link>
         </p>
       </Panel>

@@ -429,7 +429,7 @@ export function continueLabel(progress: LadderProgress): string {
   const t = continueTarget(progress);
   const station = stationById(t.stationId);
   const lesson = lessonById(t.lessonId);
-  if (!station || !lesson) return "Continue the climb";
+  if (!station || !lesson) return "Continue where you left off";
   return `Continue · ${station.name} · ${lesson.title}`;
 }
 

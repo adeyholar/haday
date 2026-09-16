@@ -42,7 +42,7 @@ import { NavTip } from "@/components/nav-tip";
 import { NavMenu, type NavItem } from "@/components/nav-menu";
 
 const STUDY: NavItem[] = [
-  { to: "/study", label: "The climb", hint: "Five stations to the Realm", icon: Library },
+  { to: "/study", label: "Stations", hint: "From the alef-bet to the Word", icon: Library },
   { to: "/drill", label: "Drill", hint: "Flip cards", icon: Layers },
   { to: "/write", label: "Write", hint: "Type or hand-write", icon: PenLine },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },

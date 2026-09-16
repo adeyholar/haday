@@ -122,7 +122,7 @@ function LessonPage() {
           </Link>
         )}
         <Link to="/study" className="text-center text-sm font-semibold text-primary">
-          The climb
+          All stations
         </Link>
       </div>
     </>
