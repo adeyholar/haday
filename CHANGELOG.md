@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Try again (voice).** A miss plays a deep male “Try again,” not the crowd aww. Clap on a hit stays.
+
 - **Try again.** A miss shows “Try again,” not “Not correct.”
 
 - **Stations, not “the climb.”** The path is named for students: start with the letters, end reading and hearing the Word. Same five stops.

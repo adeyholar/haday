@@ -5,8 +5,8 @@ let master: GainNode | null = null;
 let muted = false;
 let applause: AudioBuffer | null = null;
 let applauseLoad: Promise<AudioBuffer | null> | null = null;
-let aww: AudioBuffer | null = null;
-let awwLoad: Promise<AudioBuffer | null> | null = null;
+let tryAgain: AudioBuffer | null = null;
+let tryAgainLoad: Promise<AudioBuffer | null> | null = null;
 const listeners = new Set<(value: boolean) => void>();
 
 function readMuted() {
@@ -43,7 +43,7 @@ export function unlockSfx() {
   const ac = ensureGraph();
   if (!ac) return;
   void loadApplause(ac);
-  void loadAww(ac);
+  void loadTryAgain(ac);
 }
 
 export function isMuted() {
@@ -96,16 +96,15 @@ function loadApplause(ac: AudioContext): Promise<AudioBuffer | null> {
   return applauseLoad;
 }
 
-// Freesound 752706 — small crowd “aww”, CC0 (Nox_Sound).
-function loadAww(ac: AudioContext): Promise<AudioBuffer | null> {
-  if (aww) return Promise.resolve(aww);
-  if (awwLoad) return awwLoad;
-  awwLoad = decodeSfx(ac, "/sfx/crowd-aww.mp3").then((buf) => {
-    if (!buf) awwLoad = null;
-    else aww = buf;
+function loadTryAgain(ac: AudioContext): Promise<AudioBuffer | null> {
+  if (tryAgain) return Promise.resolve(tryAgain);
+  if (tryAgainLoad) return tryAgainLoad;
+  tryAgainLoad = decodeSfx(ac, "/sfx/try-again.mp3").then((buf) => {
+    if (!buf) tryAgainLoad = null;
+    else tryAgain = buf;
     return buf;
   });
-  return awwLoad;
+  return tryAgainLoad;
 }
 
 function startBuffer(ac: AudioContext, dest: GainNode, buf: AudioBuffer, peak = 0.95) {
@@ -138,12 +137,12 @@ function playCrowdClap(ac: AudioContext, dest: GainNode) {
   });
 }
 
-function playCrowdAww(ac: AudioContext, dest: GainNode) {
-  if (aww) {
-    startBuffer(ac, dest, aww, 1);
+function playTryAgain(ac: AudioContext, dest: GainNode) {
+  if (tryAgain) {
+    startBuffer(ac, dest, tryAgain, 1);
     return;
   }
-  void loadAww(ac).then((buf) => {
+  void loadTryAgain(ac).then((buf) => {
     if (buf && !muted) startBuffer(ac, dest, buf, 1);
   });
 }
@@ -152,7 +151,7 @@ export function playGrade(ok: boolean) {
   const ac = ensureGraph();
   if (!ac || !master || muted) return;
   if (ok) playCrowdClap(ac, master);
-  else playCrowdAww(ac, master);
+  else playTryAgain(ac, master);
 }
 
 export function playPop() {
