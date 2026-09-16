@@ -1,5 +1,7 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
+import { StudyReturnBanner } from "@/components/study-return-banner";
+import { fromSearch } from "@/lib/passage";
 
 const OPTIONS = [
   { value: "/listen", label: "Vocabulary" },
@@ -10,6 +12,9 @@ const OPTIONS = [
 export function ListenMenu() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const loose = useSearch({ strict: false }) as { from?: unknown };
+  const from = typeof loose.from === "string" ? loose.from : undefined;
+  const carry = fromSearch(from);
   const current = pathname.startsWith("/listen/read")
     ? "/listen/read"
     : pathname.startsWith("/listen/pet")
@@ -17,15 +22,18 @@ export function ListenMenu() {
       : "/listen";
 
   return (
-    <GroupSelect
-      title="Listen"
-      value={current}
-      options={OPTIONS}
-      onChange={(to) => {
-        if (to === "/listen") void navigate({ to: "/listen" });
-        else if (to === "/listen/pet") void navigate({ to: "/listen/pet" });
-        else void navigate({ to: "/listen/read" });
-      }}
-    />
+    <div>
+      <StudyReturnBanner />
+      <GroupSelect
+        title="Listen"
+        value={current}
+        options={OPTIONS}
+        onChange={(to) => {
+          if (to === "/listen") void navigate({ to: "/listen", search: carry });
+          else if (to === "/listen/pet") void navigate({ to: "/listen/pet", search: carry });
+          else void navigate({ to: "/listen/read", search: carry });
+        }}
+      />
+    </div>
   );
 }

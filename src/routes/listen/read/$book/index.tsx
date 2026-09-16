@@ -7,20 +7,25 @@ import { Panel } from "@/components/panel";
 import { PassagePicker } from "@/components/passage-picker";
 import { loadReadingProgress, progressId } from "@/lib/reading";
 import { TANAKH_BOOKS, bookMeta, isBookId, isLegacyGenesisParam, type BookId } from "@/lib/tanakh-canon";
+import { fromSearch, parseFromSearch } from "@/lib/passage";
 
-export const Route = createFileRoute("/listen/read/$book/")({ component: BookHub });
+export const Route = createFileRoute("/listen/read/$book/")({
+  validateSearch: parseFromSearch,
+  component: BookHub,
+});
 
 function BookHub() {
   const { book: raw } = Route.useParams();
-  if (raw === "all") return <Navigate to="/listen/read/$book" params={{ book: "Gen" }} />;
+  const search = Route.useSearch();
+  if (raw === "all") return <Navigate to="/listen/read/$book" params={{ book: "Gen" }} search={search} />;
   if (isLegacyGenesisParam(raw)) {
-    return <Navigate to="/listen/read/$book/$ch" params={{ book: "Gen", ch: raw }} />;
+    return <Navigate to="/listen/read/$book/$ch" params={{ book: "Gen", ch: raw }} search={search} />;
   }
-  if (!isBookId(raw)) return <Navigate to="/listen/read" />;
-  return <BookChapters book={raw} />;
+  if (!isBookId(raw)) return <Navigate to="/listen/read" search={search} />;
+  return <BookChapters book={raw} from={search.from} />;
 }
 
-function BookChapters({ book }: { book: BookId }) {
+function BookChapters({ book, from }: { book: BookId; from?: string }) {
   const meta = bookMeta(book)!;
   const progress = useMemo(() => loadReadingProgress(), []);
   const navigate = useNavigate();
@@ -28,12 +33,13 @@ function BookChapters({ book }: { book: BookId }) {
   const idx = TANAKH_BOOKS.findIndex((b) => b.id === book);
   const prevBook = idx > 0 ? TANAKH_BOOKS[idx - 1] : undefined;
   const nextBook = idx >= 0 ? TANAKH_BOOKS[idx + 1] : undefined;
+  const carry = fromSearch(from);
 
   function openJump(e: FormEvent) {
     e.preventDefault();
     const n = Number(jump);
     if (!Number.isInteger(n) || n < 1 || n > meta.chapters) return;
-    void navigate({ to: "/listen/read/$book/$ch", params: { book, ch: String(n) } });
+    void navigate({ to: "/listen/read/$book/$ch", params: { book, ch: String(n) }, search: carry });
   }
 
   return (
@@ -41,7 +47,7 @@ function BookChapters({ book }: { book: BookId }) {
       <Panel className="mb-4">
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          <Link to="/listen/read" className="hover:underline">
+          <Link to="/listen/read" search={carry} className="hover:underline">
             Tanakh
           </Link>
           {" · "}
@@ -76,7 +82,7 @@ function BookChapters({ book }: { book: BookId }) {
         <Link
           to="/listen/read/$book/$ch"
           params={{ book, ch: "1" }}
-          search={{ scope: "book" }}
+          search={{ scope: "book", ...carry }}
           className="mt-4 flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-ink px-4 text-sm font-semibold text-parchment"
         >
           Play all {meta.chapters} chapters
@@ -91,6 +97,7 @@ function BookChapters({ book }: { book: BookId }) {
               key={ch}
               to="/listen/read/$book/$ch"
               params={{ book, ch: String(ch) }}
+              search={carry}
               className={`flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-md)] px-2 text-sm font-semibold ${
                 rec?.cleared
                   ? "bg-good text-parchment"
@@ -110,6 +117,7 @@ function BookChapters({ book }: { book: BookId }) {
           <Link
             to="/listen/read/$book"
             params={{ book: prevBook.id }}
+            search={carry}
             className="flex min-h-12 items-center justify-start gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           >
             <ChevronLeft className="size-4 shrink-0" />
@@ -122,6 +130,7 @@ function BookChapters({ book }: { book: BookId }) {
           <Link
             to="/listen/read/$book"
             params={{ book: nextBook.id }}
+            search={carry}
             className="flex min-h-12 items-center justify-end gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           >
             <span className="truncate">{nextBook.en}</span>

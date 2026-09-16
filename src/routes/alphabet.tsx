@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
+import { StudyReturnBanner } from "@/components/study-return-banner";
+import { parseFromSearch } from "@/lib/passage";
 import {
   CONSONANTS,
   QUIZ_KINDS,
@@ -26,10 +28,10 @@ import { useStudy } from "@/lib/store";
 import { DontKnowButton } from "@/components/dont-know-button";
 
 export const Route = createFileRoute("/alphabet")({
-  validateSearch: (s: Record<string, unknown>): { tab?: AlefTab; letter?: string } => {
+  validateSearch: (s: Record<string, unknown>): { tab?: AlefTab; letter?: string; from?: string } => {
     const letter = typeof s.letter === "string" && s.letter ? s.letter : undefined;
     const tab = isAlefTab(s.tab) ? s.tab : letter ? "write" : undefined;
-    return { ...(tab ? { tab } : {}), ...(letter ? { letter } : {}) };
+    return { ...(tab ? { tab } : {}), ...(letter ? { letter } : {}), ...parseFromSearch(s) };
   },
   component: AlphabetPage,
 });
@@ -70,6 +72,7 @@ function AlphabetPage() {
       search: {
         ...(next !== "letters" ? { tab: next } : {}),
         ...(next === "write" || next === "hand" ? { letter: search.letter } : {}),
+        ...(search.from ? { from: search.from } : {}),
       },
     });
   }
@@ -77,6 +80,7 @@ function AlphabetPage() {
   return (
     <>
       <Panel>
+        <StudyReturnBanner />
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Alef-bet</h1>
         <p className="mt-1 text-sm text-muted">
           Learn the letters here, then test them in Write. Follow the moving stroke; passing copies are kept as your

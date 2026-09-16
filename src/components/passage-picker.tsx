@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
@@ -33,6 +33,8 @@ export function PassagePicker({
   defaultChapter?: number;
 }) {
   const navigate = useNavigate();
+  const loose = useSearch({ strict: false }) as { from?: unknown };
+  const from = typeof loose.from === "string" ? loose.from : undefined;
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<PassageKind>("verses");
   const [book, setBook] = useState<BookId>(defaultBook);
@@ -63,7 +65,7 @@ export function PassagePicker({
     void navigate({
       to: "/listen/read/$book/$ch",
       params: { book: p.book, ch: String(p.kind === "chapters" ? p.fromCh : p.chapter) },
-      search: passageSearch({ ...p, loop }),
+      search: passageSearch({ ...p, loop, from }),
     });
   }
 

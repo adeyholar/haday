@@ -5,6 +5,8 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const {
   parseReadSearch,
+  parseFromSearch,
+  fromSearch,
   resolvePassage,
   passageSearch,
   passageLabel,
@@ -42,6 +44,17 @@ test("swaps and clamps inverted or oversized verse numbers", () => {
   const search = parseReadSearch({ v1: "7", v2: "10", loop: "1" });
   assert.deepEqual(search, { v1: 7, v2: 10, loop: true });
   assert.deepEqual(passageSearch(swapped), { v1: 7, v2: 10 });
+});
+
+test("from lesson id rides on Lab search and chapter hops", () => {
+  const search = parseReadSearch({ v1: "1", v2: "1", from: "alef-bereshit" });
+  assert.equal(search.from, "alef-bereshit");
+  const p = resolvePassage("Gen", 1, search);
+  assert.equal(p.from, "alef-bereshit");
+  assert.deepEqual(passageSearch(p), { v1: 1, v2: 1, from: "alef-bereshit" });
+  assert.deepEqual(parseFromSearch({ from: " names-who " }), { from: "names-who" });
+  assert.deepEqual(fromSearch(), {});
+  assert.deepEqual(parseReadSearch({ from: "" }), {});
 });
 
 test("chapter range Genesis 1–5 advances then loops", () => {

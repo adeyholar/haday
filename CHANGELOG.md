@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Back to Stations.** Opening the text from a lesson keeps a return to that lesson. Lab hops keep the door.
+
 - **Write the letter.** A miss does not reset. A different letter (ה for ח) stays a miss. A wave is not ח.
 
 - **Try again (voice).** A miss plays a deep male “Try again,” not the crowd aww. Clap on a hit stays.
