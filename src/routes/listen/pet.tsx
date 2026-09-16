@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Pause, Play } from "lucide-react";
 import { AlivePet } from "@/components/alive-pet";
 import { ListenMenu } from "@/components/listen-menu";
+import { StudyReturnBanner } from "@/components/study-return-banner";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -88,6 +89,7 @@ function AlivePetPage() {
 
   return (
     <>
+      <StudyReturnBanner />
       <Panel className="mb-4">
         <ListenMenu />
         <h1 className="mt-5 font-display text-3xl font-bold text-ink">Alive Pet</h1>

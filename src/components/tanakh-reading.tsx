@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, Sk
 import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { ListenMenu } from "@/components/listen-menu";
+import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
@@ -571,6 +572,7 @@ export function TanakhReading({
 
   return (
     <>
+      <StudyReturnBanner />
       <Panel className="mb-4">
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">

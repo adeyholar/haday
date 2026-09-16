@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useState } from "react";
 import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
 import { ListenMenu } from "@/components/listen-menu";
+import { StudyReturnBanner } from "@/components/study-return-banner";
 import { Panel } from "@/components/panel";
 import { PassagePicker } from "@/components/passage-picker";
 import { bookClearedCount, loadReadingProgress } from "@/lib/reading";
@@ -46,6 +47,7 @@ function TanakhLibrary() {
 
   return (
     <>
+      <StudyReturnBanner />
       <Panel className="mb-4">
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Tanakh</p>
