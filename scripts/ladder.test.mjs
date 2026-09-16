@@ -16,9 +16,12 @@ const {
   lessonById,
   lessonsFor,
   isAlefStationLesson,
+  noticeLadderWalk,
   openLadderText,
+  passLadderDrill,
   stationComplete,
   trainLadderLesson,
+  trainMissing,
   visitLadder,
 } = await jiti.import("/workspace/src/lib/ladder.ts");
 const { defaultGame, hydrateGame } = await jiti.import("/workspace/src/lib/game.ts");
@@ -51,6 +54,13 @@ test("every lesson opens Lab text first", () => {
   }
 });
 
+function finishAlefLesson(p, id) {
+  p = openLadderText(p, id);
+  p = noticeLadderWalk(p, id);
+  p = passLadderDrill(p, id, 90);
+  return trainLadderLesson(p, id);
+}
+
 test("cannot skip rungs; cannot train without text", () => {
   let p = defaultLadder();
   assert.equal(p.unlockedLevel, 1);
@@ -63,14 +73,28 @@ test("cannot skip rungs; cannot train without text", () => {
   assert.equal(canTrain(p, "alef-bereshit"), false);
   p = openLadderText(p, "alef-bereshit");
   assert.equal(p.openedText["alef-bereshit"], true);
-  assert.equal(canTrain(p, "alef-bereshit"), true);
+  assert.equal(canTrain(p, "alef-bereshit"), false);
+  assert.deepEqual(trainMissing(p, "alef-bereshit"), [
+    "Finish the Notice walk",
+    "Pass the letter drill (90%)",
+  ]);
+});
+
+test("open-text-only does not unlock the next station", () => {
+  let p = defaultLadder();
+  for (const lesson of lessonsFor("alef")) {
+    p = openLadderText(p, lesson.id);
+    p = trainLadderLesson(p, lesson.id);
+  }
+  assert.equal(stationComplete(p, "alef"), false);
+  assert.equal(p.unlockedLevel, 1);
+  assert.equal(isStationUnlocked(p, "names"), false);
 });
 
 test("training a full station unlocks the next rung", () => {
   let p = defaultLadder();
   for (const lesson of lessonsFor("alef")) {
-    p = openLadderText(p, lesson.id);
-    p = trainLadderLesson(p, lesson.id);
+    p = finishAlefLesson(p, lesson.id);
   }
   assert.equal(stationComplete(p, "alef"), true);
   assert.equal(p.unlockedLevel, 2);
@@ -82,8 +106,18 @@ test("continue points at first untrained open lesson", () => {
   const p = openLadderText(defaultLadder(), "alef-bereshit");
   const t = continueTarget(p);
   assert.equal(t.lessonId, "alef-bereshit");
-  const trained = trainLadderLesson(p, "alef-bereshit");
+  const trained = finishAlefLesson(defaultLadder(), "alef-bereshit");
   assert.equal(continueTarget(trained).lessonId, "alef-ps119");
+});
+
+test("89% letter drill does not pass the gate", () => {
+  let p = openLadderText(defaultLadder(), "alef-bereshit");
+  p = noticeLadderWalk(p, "alef-bereshit");
+  p = passLadderDrill(p, "alef-bereshit", 89);
+  assert.equal(p.drillPass["alef-bereshit"], undefined);
+  assert.equal(canTrain(p, "alef-bereshit"), false);
+  p = passLadderDrill(p, "alef-bereshit", 90);
+  assert.equal(canTrain(p, "alef-bereshit"), true);
 });
 
 test("game snapshot keeps ladder through hydrate", () => {

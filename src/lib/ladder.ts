@@ -46,6 +46,8 @@ export type LadderProgress = {
   currentStationId: StationId;
   currentLessonId: string;
   openedText: Record<string, boolean>;
+  noticed: Record<string, boolean>;
+  drillPass: Record<string, boolean>;
   trained: Record<string, boolean>;
   fruitByStation: Record<string, 30 | 60 | 100 | null>;
 };
@@ -153,6 +155,7 @@ export const LESSONS: LadderLesson[] = [
     actions: [
       { kind: "lab", label: "Open the text", lab: { book: "Gen", ch: 1, v1: 1, v2: 1 } },
       { kind: "echo", label: "Echo the verse", lab: { book: "Gen", ch: 1, v1: 1, v2: 1 } },
+      { kind: "drill", label: "Drill" },
       { kind: "listen", label: "Listen on the go" },
     ],
     wells: ["alphabet"],
@@ -318,6 +321,8 @@ export function defaultLadder(): LadderProgress {
     currentStationId: "alef",
     currentLessonId: "alef-bereshit",
     openedText: {},
+    noticed: {},
+    drillPass: {},
     trained: {},
     fruitByStation: {},
   };
@@ -335,6 +340,8 @@ export function hydrateLadder(raw: unknown): LadderProgress {
     currentStationId: station.id,
     currentLessonId: lesson.id,
     openedText: remapLegacyLesson(truthMap(r.openedText)),
+    noticed: remapLegacyLesson(truthMap(r.noticed)),
+    drillPass: remapLegacyLesson(truthMap(r.drillPass)),
     trained: remapLegacyLesson(truthMap(r.trained)),
     fruitByStation: fruitMap(r.fruitByStation),
   };
@@ -399,8 +406,33 @@ export function stationComplete(progress: LadderProgress, stationId: StationId):
   return list.length > 0 && list.every((l) => progress.trained[l.id]);
 }
 
+export const LADDER_DRILL_PASS = 90;
+
+export function lessonNeedsWalk(lessonId: string): boolean {
+  const id = lessonById(lessonId)?.id ?? lessonId;
+  return id === "alef-bereshit" || id === "alef-ps119";
+}
+
+export function lessonNeedsLetterDrill(lessonId: string): boolean {
+  return isAlefStationLesson(lessonId);
+}
+
+export function trainMissing(progress: LadderProgress, lessonId: string): string[] {
+  const lesson = lessonById(lessonId);
+  if (!lesson) return ["This lesson is not on the path."];
+  const missing: string[] = [];
+  if (!progress.openedText[lesson.id]) missing.push("Open the text");
+  if (!progress.noticed[lesson.id]) {
+    missing.push(lessonNeedsWalk(lesson.id) ? "Finish the Notice walk" : "Notice the verse");
+  }
+  if (lessonNeedsLetterDrill(lesson.id) && !progress.drillPass[lesson.id]) {
+    missing.push(`Pass the letter drill (${LADDER_DRILL_PASS}%)`);
+  }
+  return missing;
+}
+
 export function canTrain(progress: LadderProgress, lessonId: string): boolean {
-  return Boolean(progress.openedText[lessonId]);
+  return trainMissing(progress, lessonId).length === 0;
 }
 
 export function visitLadder(progress: LadderProgress, stationId: StationId, lessonId: string): LadderProgress {
@@ -422,16 +454,43 @@ export function openLadderText(progress: LadderProgress, lessonId: string): Ladd
   };
 }
 
+export function noticeLadderWalk(progress: LadderProgress, lessonId: string): LadderProgress {
+  const lesson = lessonById(lessonId);
+  if (!lesson) return progress;
+  if (!isStationUnlocked(progress, lesson.stationId)) return progress;
+  if (!progress.openedText[lesson.id]) return progress;
+  return {
+    ...progress,
+    currentStationId: lesson.stationId,
+    currentLessonId: lesson.id,
+    noticed: { ...progress.noticed, [lesson.id]: true },
+  };
+}
+
+export function passLadderDrill(progress: LadderProgress, lessonId: string, pct: number): LadderProgress {
+  const lesson = lessonById(lessonId);
+  if (!lesson) return progress;
+  if (!isStationUnlocked(progress, lesson.stationId)) return progress;
+  if (!lessonNeedsLetterDrill(lesson.id)) return progress;
+  if (pct < LADDER_DRILL_PASS) return progress;
+  return {
+    ...progress,
+    currentStationId: lesson.stationId,
+    currentLessonId: lesson.id,
+    drillPass: { ...progress.drillPass, [lesson.id]: true },
+  };
+}
+
 export function trainLadderLesson(progress: LadderProgress, lessonId: string): LadderProgress {
   const lesson = lessonById(lessonId);
   if (!lesson) return progress;
   if (!isStationUnlocked(progress, lesson.stationId)) return progress;
-  if (!progress.openedText[lessonId]) return progress;
+  if (!canTrain(progress, lesson.id)) return progress;
   const next: LadderProgress = {
     ...progress,
     currentStationId: lesson.stationId,
-    currentLessonId: lessonId,
-    trained: { ...progress.trained, [lessonId]: true },
+    currentLessonId: lesson.id,
+    trained: { ...progress.trained, [lesson.id]: true },
   };
   const station = stationById(lesson.stationId);
   if (station && stationComplete(next, lesson.stationId) && station.order >= next.unlockedLevel && station.order < 5) {

@@ -37,7 +37,7 @@ import { observeBkt } from "./bkt";
 import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
-import { openLadderText, trainLadderLesson, visitLadder } from "./ladder";
+import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
 
 type ProgressMap = Record<string, CardState>;
 export type FocusMode = "due" | "weak";
@@ -98,6 +98,8 @@ type StudyState = StudySnapshot & {
   ) => void;
   visitLadder: (stationId: Parameters<typeof visitLadder>[1], lessonId: string) => void;
   openLadderText: (lessonId: string) => void;
+  noticeLadderWalk: (lessonId: string) => void;
+  passLadderDrill: (lessonId: string, pct: number) => void;
   trainLadderLesson: (lessonId: string) => void;
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
@@ -238,6 +240,14 @@ export const useStudy = create<StudyState>()(
       openLadderText: (lessonId) => {
         const game = get().game;
         set({ game: { ...game, ladder: openLadderText(game.ladder, lessonId) } });
+      },
+      noticeLadderWalk: (lessonId) => {
+        const game = get().game;
+        set({ game: { ...game, ladder: noticeLadderWalk(game.ladder, lessonId) } });
+      },
+      passLadderDrill: (lessonId, pct) => {
+        const game = get().game;
+        set({ game: { ...game, ladder: passLadderDrill(game.ladder, lessonId, pct) } });
       },
       trainLadderLesson: (lessonId) => {
         const game = get().game;

@@ -6,13 +6,16 @@ import { cn } from "@/lib/cn";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { PSALM_119_STANZAS } from "@/lib/psalm-119-acrostic";
 import { loadNeuralManifest } from "@/lib/neural-voice";
+import { useStudy } from "@/lib/store";
 
 export function PsalmAcrosticWalk({ lessonId }: { lessonId: string }) {
   const stanzas = PSALM_119_STANZAS;
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState<"one" | "all" | null>(null);
+  const [seen, setSeen] = useState(() => new Set<number>());
   const voice = useRef({ stop: false });
   const stanza = stanzas[i];
+  const notice = useStudy((s) => s.noticeLadderWalk);
 
   useEffect(() => {
     void loadNeuralManifest();
@@ -20,6 +23,15 @@ export function PsalmAcrosticWalk({ lessonId }: { lessonId: string }) {
       voice.current = hushHear(voice.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (seen.size >= stanzas.length) notice(lessonId);
+  }, [seen, stanzas.length, lessonId, notice]);
+
+  function mark(n: number) {
+    setI(n);
+    setSeen((s) => new Set(s).add(n));
+  }
 
   function startVoice() {
     voice.current = hushHear(voice.current);
@@ -29,7 +41,7 @@ export function PsalmAcrosticWalk({ lessonId }: { lessonId: string }) {
     const row = stanzas[n];
     if (!row) return;
     startVoice();
-    setI(n);
+    mark(n);
     setPlaying("one");
     void hearLetterName(row.letterId, row.name, voice.current).finally(() => {
       if (!voice.current.stop) setPlaying(null);
@@ -44,6 +56,7 @@ export function PsalmAcrosticWalk({ lessonId }: { lessonId: string }) {
       if (signal.stop) break;
       const row = stanzas[n]!;
       setI(n);
+      setSeen((s) => new Set(s).add(n));
       await hearLetterName(row.letterId, row.name, signal);
     }
     if (!signal.stop) setPlaying(null);
