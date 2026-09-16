@@ -1,0 +1,209 @@
+import { useEffect, useRef, useState } from "react";
+import { Volume2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+import {
+  alefBetWalk,
+  bereshitSteps,
+} from "@/lib/alef-notice";
+import { playNeuralVoice, speakLine, stopSpeech, unlockSpeech } from "@/lib/listen";
+import { loadNeuralManifest } from "@/lib/neural-voice";
+
+export function AlefNoticeWalk() {
+  const steps = bereshitSteps();
+  const letters = alefBetWalk();
+  const [wordI, setWordI] = useState(0);
+  const [walkI, setWalkI] = useState(0);
+  const [playing, setPlaying] = useState<"word" | "walk" | "all" | null>(null);
+  const voice = useRef({ stop: false });
+  const word = steps[wordI];
+  const walk = letters[walkI];
+
+  useEffect(() => {
+    void loadNeuralManifest();
+    return () => {
+      voice.current.stop = true;
+      stopSpeech();
+    };
+  }, []);
+
+  function startVoice() {
+    voice.current.stop = true;
+    stopSpeech();
+    voice.current = { stop: false };
+  }
+
+  async function hearLetter(id: string, name: string) {
+    unlockSpeech();
+    await loadNeuralManifest();
+    const signal = voice.current;
+    if (signal.stop) return;
+    const he = await playNeuralVoice(id, "he", 0.85, signal);
+    if (he || signal.stop) return;
+    const en = await playNeuralVoice(id, "en", 0.85, signal);
+    if (en || signal.stop) return;
+    await speakLine(name, "en", 0.8, signal);
+  }
+
+  function hearWordLetter(i = wordI) {
+    const step = steps[i];
+    if (!step) return;
+    startVoice();
+    setWordI(i);
+    setPlaying("word");
+    void hearLetter(step.letterId, step.name).finally(() => {
+      if (!voice.current.stop) setPlaying(null);
+    });
+  }
+
+  function hearWalkLetter(i = walkI) {
+    const letter = letters[i];
+    if (!letter) return;
+    startVoice();
+    setWalkI(i);
+    setPlaying("walk");
+    void hearLetter(letter.id, letter.name).finally(() => {
+      if (!voice.current.stop) setPlaying(null);
+    });
+  }
+
+  async function hearWalkAll() {
+    startVoice();
+    setPlaying("all");
+    const signal = voice.current;
+    for (let i = 0; i < letters.length; i++) {
+      if (signal.stop) break;
+      const letter = letters[i]!;
+      setWalkI(i);
+      await hearLetter(letter.id, letter.name);
+    }
+    if (!signal.stop) setPlaying(null);
+  }
+
+  return (
+    <div className="mt-4 space-y-6">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">The first word</p>
+        <p className="mt-2 text-sm text-muted">Genesis 1:1. Right to left. Tap a letter, then Hear.</p>
+        <p className="he-word mt-3 text-center text-4xl sm:text-5xl" lang="he" dir="rtl">
+          {steps.map((s, i) => (
+            <button
+              type="button"
+              key={`${s.cons}-${i}`}
+              className={cn(
+                "rounded-sm bg-transparent px-0.5 py-1 shadow-none",
+                i === wordI ? "he-spoken" : "text-ink",
+              )}
+              onClick={() => {
+                setWordI(i);
+                hearWordLetter(i);
+              }}
+            >
+              {s.glyph}
+            </button>
+          ))}
+        </p>
+        {word ? (
+          <p className="mt-3 text-ink">
+            <span className="he-word text-2xl" lang="he" dir="rtl">
+              {word.glyph}
+            </span>
+            <span className="ms-2 font-semibold">{word.name}</span>
+            <span className="mt-1 block text-sm text-muted">{word.note}</span>
+          </p>
+        ) : null}
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={wordI === 0}
+            onClick={() => {
+              const n = Math.max(0, wordI - 1);
+              setWordI(n);
+              hearWordLetter(n);
+            }}
+          >
+            Previous
+          </Button>
+          <Button type="button" onClick={() => hearWordLetter()} disabled={playing === "word"}>
+            <Volume2 className="size-4" />
+            Hear
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={wordI >= steps.length - 1}
+            onClick={() => {
+              const n = Math.min(steps.length - 1, wordI + 1);
+              setWordI(n);
+              hearWordLetter(n);
+            }}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Walk א to ת</p>
+        <p className="mt-2 text-sm text-muted">Every letter, in order. Hear each name. No score.</p>
+        {walk ? (
+          <div className="mt-3 rounded-[var(--radius-md)] bg-surface px-4 py-5 text-center">
+            <p className="he-word text-6xl" lang="he" dir="rtl">
+              {walk.letter}
+            </p>
+            <p className="mt-2 font-display text-2xl font-bold text-ink">{walk.name}</p>
+            <p className="text-sm text-muted">{walk.sound}</p>
+          </div>
+        ) : null}
+        <ul dir="rtl" className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-8">
+          {letters.map((letter, i) => (
+            <li key={letter.id}>
+              <button
+                type="button"
+                onClick={() => hearWalkLetter(i)}
+                className={cn(
+                  "flex size-11 w-full items-center justify-center rounded-[var(--radius-md)] he-word text-xl",
+                  i === walkI ? "bg-ink text-parchment" : "bg-card shadow-[var(--shadow-border)]",
+                )}
+              >
+                {letter.letter}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={walkI === 0}
+            onClick={() => {
+              const n = Math.max(0, walkI - 1);
+              hearWalkLetter(n);
+            }}
+          >
+            Previous
+          </Button>
+          <Button type="button" onClick={() => hearWalkLetter()} disabled={playing === "walk"}>
+            <Volume2 className="size-4" />
+            Hear
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={walkI >= letters.length - 1}
+            onClick={() => {
+              const n = Math.min(letters.length - 1, walkI + 1);
+              hearWalkLetter(n);
+            }}
+          >
+            Next
+          </Button>
+          <Button type="button" variant="outline" onClick={() => void hearWalkAll()} disabled={playing === "all"}>
+            Hear א to ת
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
