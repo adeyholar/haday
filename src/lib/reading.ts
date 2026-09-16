@@ -380,6 +380,26 @@ export function clusterAtPlay(chapter: number, verse: number, word: number, time
   return clusterAtMeta(chapterAudio(chapter), verse, word, time, surface);
 }
 
+/** Word + cluster for a chapter-audio clock. Echo model playback reuses this. */
+export function highlightAtMeta(
+  meta: ChapterAudio | undefined,
+  verse: number,
+  time: number,
+  words: string[],
+): { word: number; cluster: number } {
+  if (!words.length) return { word: -1, cluster: -1 };
+  const starts = meta?.words?.[Math.max(0, verse - 1)] ?? [];
+  const word = Math.min(words.length - 1, Math.max(0, wordAtStarts(starts, time)));
+  const surface = words[word] ?? "";
+  return { word, cluster: clusterAtMeta(meta, verse, word, time, surface) };
+}
+
+/** Silent karaoke: map recording elapsed onto the verse window. */
+export function echoGuideTime(start: number, end: number, elapsedMs: number): number {
+  const span = Math.max(0.8, (end || start + 4) - start);
+  return Math.min(start + span - 0.01, Math.max(start, start + elapsedMs / 1000));
+}
+
 export type GradeItem = {
   id: string;
   verse: ReadingVerse;
