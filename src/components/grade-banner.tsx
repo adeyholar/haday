@@ -9,7 +9,7 @@ type Props = {
 };
 
 export function GradeBanner({ ok, label, size = "result", className }: Props) {
-  const text = label ?? (ok ? "Correct" : "Not correct");
+  const text = label ?? (ok ? "Correct" : "Try again");
   const Icon = ok ? Check : X;
   const live = size === "live";
 

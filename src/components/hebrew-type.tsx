@@ -120,7 +120,7 @@ type Props = {
   disabled?: boolean;
   strict?: boolean;
   hideHint?: boolean;
-  /** When false, no live Correct / Not correct / rings until the parent grades a submit. */
+  /** When false, no live Correct / Try again / rings until the parent grades a submit. */
   liveGrade?: boolean;
 };
 
@@ -136,7 +136,7 @@ export function HebrewType({
 }: Props) {
   const live = liveMatchAny(target, value, alts, strict);
   const extra = live === "off" ? pointingHint(target, value) : null;
-  const offLabel = extra === "Use the final form" ? extra : "Not correct";
+  const offLabel = extra === "Use the final form" ? extra : "Try again";
   const hint = strict
     ? live === "empty"
       ? "Consonant first, then its vowel. Full match."

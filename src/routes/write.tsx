@@ -542,7 +542,7 @@ function ResultPanel({
     result.match === "exact" ? "Correct"
     : result.match === "close" ? "Close — count it"
     : result.match === "empty" ? "Draw again"
-    : "Not correct";
+    : "Try again";
   const coach = hideAnswer ? null : dageshCoach(item.hebrew);
 
   return (

@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Try again.** A miss shows “Try again,” not “Not correct.”
+
 - **Stations, not “the climb.”** The path is named for students: start with the letters, end reading and hearing the Word. Same five stops.
 
 - **The climb (preview).** Study → The climb: five stations (Alef-bet Station to Realm of the Word). Open the text first; name the rule last. Game, Listen, and week tools stay where they were.
