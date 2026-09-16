@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **The Book’s alef-bet.** After the first word, Psalm 119 walks twenty-two stanzas, א to ת, with Hear. Practice still comes after.
+
 - **Notice the first word.** After Genesis 1:1, walk בְּרֵאשִׁית letter by letter, then Hear א to ת. Practice still comes after.
 
 - **Back to lesson.** From Stations into Lab, a full-width bar at the top returns to that lesson. Easy to see, easy to tap.

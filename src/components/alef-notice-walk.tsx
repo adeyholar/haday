@@ -2,11 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import {
-  alefBetWalk,
-  bereshitSteps,
-} from "@/lib/alef-notice";
-import { playNeuralVoice, speakLine, stopSpeech, unlockSpeech } from "@/lib/listen";
+import { alefBetWalk, bereshitSteps } from "@/lib/alef-notice";
+import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { loadNeuralManifest } from "@/lib/neural-voice";
 
 export function AlefNoticeWalk() {
@@ -22,27 +19,16 @@ export function AlefNoticeWalk() {
   useEffect(() => {
     void loadNeuralManifest();
     return () => {
-      voice.current.stop = true;
-      stopSpeech();
+      voice.current = hushHear(voice.current);
     };
   }, []);
 
   function startVoice() {
-    voice.current.stop = true;
-    stopSpeech();
-    voice.current = { stop: false };
+    voice.current = hushHear(voice.current);
   }
 
   async function hearLetter(id: string, name: string) {
-    unlockSpeech();
-    await loadNeuralManifest();
-    const signal = voice.current;
-    if (signal.stop) return;
-    const he = await playNeuralVoice(id, "he", 0.85, signal);
-    if (he || signal.stop) return;
-    const en = await playNeuralVoice(id, "en", 0.85, signal);
-    if (en || signal.stop) return;
-    await speakLine(name, "en", 0.8, signal);
+    await hearLetterName(id, name, voice.current);
   }
 
   function hearWordLetter(i = wordI) {
@@ -84,7 +70,9 @@ export function AlefNoticeWalk() {
     <div className="mt-4 space-y-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">The first word</p>
-        <p className="mt-2 text-sm text-muted">Genesis 1:1. Right to left. Tap a letter, then Hear.</p>
+        <p className="mt-2 text-sm text-muted">
+          Genesis 1:1. Six letters. Right to left. Tap a letter, then Hear. Together this word opens the Book.
+        </p>
         <p className="he-word mt-3 text-center text-4xl sm:text-5xl" lang="he" dir="rtl">
           {steps.map((s, i) => (
             <button
@@ -108,7 +96,9 @@ export function AlefNoticeWalk() {
             <span className="he-word text-2xl" lang="he" dir="rtl">
               {word.glyph}
             </span>
-            <span className="ms-2 font-semibold">{word.name}</span>
+            <span className="ms-2 font-semibold">
+              {word.name} · {wordI + 1} of {steps.length}
+            </span>
             <span className="mt-1 block text-sm text-muted">{word.note}</span>
           </p>
         ) : null}

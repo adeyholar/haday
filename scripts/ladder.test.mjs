@@ -82,7 +82,7 @@ test("continue points at first untrained open lesson", () => {
   const t = continueTarget(p);
   assert.equal(t.lessonId, "alef-bereshit");
   const trained = trainLadderLesson(p, "alef-bereshit");
-  assert.equal(continueTarget(trained).lessonId, "alef-hear");
+  assert.equal(continueTarget(trained).lessonId, "alef-acrostic");
 });
 
 test("game snapshot keeps ladder through hydrate", () => {
