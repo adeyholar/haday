@@ -18,6 +18,7 @@ export type ReadSearch = {
   c2?: number;
   scope?: "book" | "all";
   loop?: boolean;
+  from?: string;
 };
 
 export type Passage = {
@@ -29,6 +30,7 @@ export type Passage = {
   fromV: number;
   toV: number;
   loop: boolean;
+  from?: string;
 };
 
 export type PlayLoc = { book: BookId; chapter: number };
@@ -44,8 +46,18 @@ function asInt(raw: unknown): number | undefined {
   return undefined;
 }
 
+export function parseFromSearch(s: Record<string, unknown>): { from?: string } {
+  if (typeof s.from !== "string") return {};
+  const from = s.from.trim();
+  return from ? { from } : {};
+}
+
+export function fromSearch(from?: string): { from?: string } {
+  return from ? { from } : {};
+}
+
 export function parseReadSearch(s: Record<string, unknown>): ReadSearch {
-  const out: ReadSearch = {};
+  const out: ReadSearch = { ...parseFromSearch(s) };
   const v1 = asInt(s.v1);
   const v2 = asInt(s.v2);
   const c1 = asInt(s.c1);
@@ -83,7 +95,7 @@ export function clampChapter(book: string, chapter: number): number {
 }
 
 export function passageSearch(p: Passage): ReadSearch {
-  const out: ReadSearch = {};
+  const out: ReadSearch = { ...fromSearch(p.from) };
   if (p.loop) out.loop = true;
   if (p.kind === "verses") {
     out.v1 = p.fromV;
@@ -107,12 +119,14 @@ export function resolvePassage(book: BookId, chapter: number, search: ReadSearch
   const chMax = lastChapter(book);
   const ch = clamp(chapter, 1, chMax);
   const loop = Boolean(search.loop);
+  const from = search.from;
 
+  let p: Passage;
   if (search.v1 != null || search.v2 != null) {
     let a = clampVerse(book, ch, search.v1 ?? 1);
     let b = clampVerse(book, ch, search.v2 ?? versesInChapter(book, ch));
     if (a > b) [a, b] = [b, a];
-    return {
+    p = {
       kind: "verses",
       book,
       chapter: ch,
@@ -122,10 +136,8 @@ export function resolvePassage(book: BookId, chapter: number, search: ReadSearch
       toV: b,
       loop,
     };
-  }
-
-  if (search.scope === "all") {
-    return {
+  } else if (search.scope === "all") {
+    p = {
       kind: "all",
       book,
       chapter: ch,
@@ -135,10 +147,8 @@ export function resolvePassage(book: BookId, chapter: number, search: ReadSearch
       toV: versesInChapter(book, ch),
       loop,
     };
-  }
-
-  if (search.scope === "book") {
-    return {
+  } else if (search.scope === "book") {
+    p = {
       kind: "book",
       book,
       chapter: ch,
@@ -148,14 +158,12 @@ export function resolvePassage(book: BookId, chapter: number, search: ReadSearch
       toV: versesInChapter(book, ch),
       loop,
     };
-  }
-
-  if (search.c1 != null || search.c2 != null) {
+  } else if (search.c1 != null || search.c2 != null) {
     let a = clampChapter(book, search.c1 ?? ch);
     let b = clampChapter(book, search.c2 ?? a);
     if (a > b) [a, b] = [b, a];
     const playing = clamp(ch, a, b);
-    return {
+    p = {
       kind: "chapters",
       book,
       chapter: playing,
@@ -165,18 +173,19 @@ export function resolvePassage(book: BookId, chapter: number, search: ReadSearch
       toV: versesInChapter(book, playing),
       loop,
     };
+  } else {
+    p = {
+      kind: "chapters",
+      book,
+      chapter: ch,
+      fromCh: ch,
+      toCh: ch,
+      fromV: 1,
+      toV: versesInChapter(book, ch),
+      loop,
+    };
   }
-
-  return {
-    kind: "chapters",
-    book,
-    chapter: ch,
-    fromCh: ch,
-    toCh: ch,
-    fromV: 1,
-    toV: versesInChapter(book, ch),
-    loop,
-  };
+  return from ? { ...p, from } : p;
 }
 
 export function isSingleChapter(p: Passage): boolean {

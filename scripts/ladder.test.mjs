@@ -12,6 +12,7 @@ const {
   defaultLadder,
   hydrateLadder,
   isStationUnlocked,
+  labSearch,
   lessonById,
   lessonsFor,
   openLadderText,
@@ -94,4 +95,10 @@ test("game snapshot keeps ladder through hydrate", () => {
   assert.equal(old.ladder.unlockedLevel, 1);
   assert.ok(lessonById("alef-bereshit"));
   assert.deepEqual(hydrateLadder(null).currentLessonId, defaultLadder().currentLessonId);
+});
+
+test("lab search carries the Stations lesson id", () => {
+  const lab = lessonById("alef-bereshit").lab;
+  assert.deepEqual(labSearch(lab, "alef-bereshit").from, "alef-bereshit");
+  assert.equal("from" in labSearch(lab), false);
 });

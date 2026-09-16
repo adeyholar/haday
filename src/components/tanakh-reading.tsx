@@ -42,6 +42,7 @@ import {
   nextPlayLoc,
   passageLabel,
   passageSearch,
+  fromSearch,
   playingLabel,
   prevPlayLoc,
   resolvePassage,
@@ -546,11 +547,11 @@ export function TanakhReading({
       <Panel className="mb-4">
         <ListenMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          <Link to="/listen/read" className="hover:underline">
+          <Link to="/listen/read" search={fromSearch(passage.from)} className="hover:underline">
             Tanakh
           </Link>
           {" · "}
-          <Link to="/listen/read/$book" params={{ book }} className="hover:underline">
+          <Link to="/listen/read/$book" params={{ book }} search={fromSearch(passage.from)} className="hover:underline">
             {meta?.en ?? book}
           </Link>
           {` ${chapter}`}
@@ -687,7 +688,7 @@ export function TanakhReading({
           <Link
             to="/listen/read/$book/$ch"
             params={{ book: prevLoc.book, ch: String(prevLoc.chapter) }}
-            search={multi ? passageSearch({ ...live, book: prevLoc.book, chapter: prevLoc.chapter }) : {}}
+            search={multi ? passageSearch({ ...live, book: prevLoc.book, chapter: prevLoc.chapter }) : fromSearch(passage.from)}
             className="flex min-h-12 items-center justify-start gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           >
             <ChevronLeft className="size-4 shrink-0" />
@@ -702,7 +703,7 @@ export function TanakhReading({
           <Link
             to="/listen/read/$book/$ch"
             params={{ book: nxtLoc.book, ch: String(nxtLoc.chapter) }}
-            search={multi ? passageSearch({ ...live, book: nxtLoc.book, chapter: nxtLoc.chapter }) : {}}
+            search={multi ? passageSearch({ ...live, book: nxtLoc.book, chapter: nxtLoc.chapter }) : fromSearch(passage.from)}
             className="flex min-h-12 items-center justify-end gap-1 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           >
             <span className="truncate">

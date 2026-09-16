@@ -13,10 +13,16 @@ import {
   booksIn,
   loadLastRead,
 } from "@/lib/tanakh-canon";
+import { fromSearch, parseFromSearch } from "@/lib/passage";
 
-export const Route = createFileRoute("/listen/read/")({ component: TanakhLibrary });
+export const Route = createFileRoute("/listen/read/")({
+  validateSearch: parseFromSearch,
+  component: TanakhLibrary,
+});
 
 function TanakhLibrary() {
+  const { from } = Route.useSearch();
+  const carry = fromSearch(from);
   const progress = useMemo(() => loadReadingProgress(), []);
   const last = useMemo(() => loadLastRead(), []);
   const lastBook = last ? bookMeta(last.book) : undefined;
@@ -53,6 +59,7 @@ function TanakhLibrary() {
             <Link
               to="/listen/read/$book/$ch"
               params={{ book: last.book, ch: String(last.chapter) }}
+              search={carry}
               className="flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-ink px-3 text-center text-sm font-semibold text-parchment"
             >
               Continue {lastBook.en} {last.chapter}
@@ -61,6 +68,7 @@ function TanakhLibrary() {
             <Link
               to="/listen/read/$book/$ch"
               params={{ book: "Gen", ch: "1" }}
+              search={carry}
               className="flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-ink px-3 text-center text-sm font-semibold text-parchment"
             >
               Start Genesis 1
@@ -69,7 +77,7 @@ function TanakhLibrary() {
           <Link
             to="/listen/read/$book/$ch"
             params={{ book: "Gen", ch: "1" }}
-            search={{ scope: "all" }}
+            search={{ scope: "all", ...carry }}
             className="flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-card px-3 text-center text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
           >
             Play all 39 books
@@ -92,7 +100,7 @@ function TanakhLibrary() {
           <h2 className="mb-2 font-display text-2xl font-bold text-ink">
             {filtered.length ? "Matches" : "No matching book"}
           </h2>
-          <BookGrid books={filtered} progress={progress} />
+          <BookGrid books={filtered} progress={progress} from={from} />
         </section>
       ) : (
         SECTIONS.map((sec) => (
@@ -103,7 +111,7 @@ function TanakhLibrary() {
                 {sec.he}
               </p>
             </div>
-            <BookGrid books={booksIn(sec.id)} progress={progress} />
+            <BookGrid books={booksIn(sec.id)} progress={progress} from={from} />
           </section>
         ))
       )}
@@ -116,10 +124,13 @@ function TanakhLibrary() {
 function BookGrid({
   books,
   progress,
+  from,
 }: {
   books: ReturnType<typeof booksIn>;
   progress: ReturnType<typeof loadReadingProgress>;
+  from?: string;
 }) {
+  const carry = fromSearch(from);
   if (!books.length) return null;
   return (
     <ul className="grid gap-2 sm:grid-cols-2">
@@ -130,6 +141,7 @@ function BookGrid({
             <Link
               to="/listen/read/$book"
               params={{ book: b.id }}
+              search={carry}
               className="block min-h-24 rounded-[var(--radius-lg)] bg-card p-4 shadow-[var(--shadow-border)]"
             >
               <p className="he-word text-xl text-ink" lang="he" dir="rtl">

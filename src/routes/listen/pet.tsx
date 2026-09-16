@@ -16,10 +16,14 @@ import {
 } from "@/lib/listen";
 import { firstNameOf, petQueue } from "@/lib/pet";
 import { loadNeuralManifest } from "@/lib/neural-voice";
+import { parseFromSearch } from "@/lib/passage";
 import { useStudy } from "@/lib/store";
 import type { VocabItem } from "@/lib/vocab";
 
-export const Route = createFileRoute("/listen/pet")({ component: AlivePetPage });
+export const Route = createFileRoute("/listen/pet")({
+  validateSearch: parseFromSearch,
+  component: AlivePetPage,
+});
 
 function AlivePetPage() {
   const { user } = useCurrentUserState();

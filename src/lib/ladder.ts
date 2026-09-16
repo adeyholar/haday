@@ -435,9 +435,10 @@ export function continueLabel(progress: LadderProgress): string {
 
 export const BRAND_BLOCK = /BBH|Pratico|Van Pelt|K\s*&\s*J|Ross|Futato|Gesenius|Davidson|Basics of Biblical Hebrew/i;
 
-export function labSearch(lab: LabRef): { v1?: number; v2?: number } {
-  const out: { v1?: number; v2?: number } = {};
+export function labSearch(lab: LabRef, from?: string): { v1?: number; v2?: number; from?: string } {
+  const out: { v1?: number; v2?: number; from?: string } = {};
   if (lab.v1 != null) out.v1 = lab.v1;
   if (lab.v2 != null) out.v2 = lab.v2;
+  if (from) out.from = from;
   return out;
 }

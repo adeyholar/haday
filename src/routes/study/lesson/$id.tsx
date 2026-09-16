@@ -59,7 +59,7 @@ function LessonPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">1 · Open the text</p>
         <p className="mt-2 max-w-prose text-ink">{lesson.notice}</p>
         <div className="mt-3">
-          <LadderActionLink action={labAction} onLab={() => openText(lesson.id)} />
+          <LadderActionLink action={labAction} lessonId={lesson.id} onLab={() => openText(lesson.id)} />
         </div>
         {!opened ? (
           <p className="mt-2 text-sm text-muted">The Lab is the door. Practice waits until you have opened the verse.</p>
@@ -81,6 +81,7 @@ function LessonPage() {
               <LadderActionLink
                 key={`${action.kind}-${action.label}`}
                 action={action}
+                lessonId={lesson.id}
                 onLab={action.kind === "echo" ? () => openText(lesson.id) : undefined}
               />
             ))

@@ -33,8 +33,12 @@ import {
   type ListenLoop,
 } from "@/lib/listen";
 import { loadNeuralManifest } from "@/lib/neural-voice";
+import { parseFromSearch } from "@/lib/passage";
 
-export const Route = createFileRoute("/listen/")({ component: ListenPage });
+export const Route = createFileRoute("/listen/")({
+  validateSearch: parseFromSearch,
+  component: ListenPage,
+});
 
 function ListenPage() {
   const list = useMemo(() => listenPlaylist(), []);
