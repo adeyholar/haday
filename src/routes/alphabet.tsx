@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { parseFromSearch } from "@/lib/passage";
+import { LADDER_DRILL_PASS } from "@/lib/ladder";
 import {
   CONSONANTS,
   QUIZ_KINDS,
@@ -176,6 +177,7 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
   const queue = useStudy((s) => s.alefQueue);
   const rate = useStudy((s) => s.rate);
   const fromAlef = Boolean(fromLesson?.startsWith("alef-"));
+  const passDrill = useStudy((s) => s.passLadderDrill);
   const [kind, setKind] = useState<QuizKind>(fromAlef ? "letter-name" : "vowel-name");
   const [pack, setPack] = useState<"batch" | "all">(fromAlef ? "batch" : "all");
   const [seed, setSeed] = useState(0);
@@ -235,6 +237,13 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
   const vowel = (i < vowelDeck.length ? vowelDeck[i] : follow[i - vowelDeck.length]) as HebrewVowel | undefined;
   const total = (isLetter ? letterDeck.length : vowelDeck.length) + follow.length;
   const done = i >= total;
+  const drillPct = total ? Math.round((right / total) * 100) : 0;
+  const drillOk = Boolean(fromAlef && isLetter && !isScribble && total >= 6 && drillPct >= LADDER_DRILL_PASS);
+
+  useEffect(() => {
+    if (!done || !fromLesson || !drillOk) return;
+    passDrill(fromLesson, drillPct);
+  }, [done, fromLesson, drillOk, drillPct, passDrill]);
 
   const prompt = isLetter ? letter : vowel;
   const options = useMemo(() => {
@@ -311,7 +320,15 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
         <div className="mt-4 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <p className="font-display text-3xl font-bold text-ink">
             {right} / {total}
+            {fromAlef && isLetter && !isScribble ? ` · ${drillPct}%` : ""}
           </p>
+          {fromAlef && isLetter && !isScribble ? (
+            <p className="mt-2 text-sm text-muted">
+              {drillOk
+                ? `Passed the letter drill (${LADDER_DRILL_PASS}%+). You can mark the lesson trained.`
+                : `Need ${LADDER_DRILL_PASS}% on six letters or the whole line. Try again.`}
+            </p>
+          ) : null}
           <Button className="mt-4" onClick={() => setSeed((s) => s + 1)}>
             New round
           </Button>

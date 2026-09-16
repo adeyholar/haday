@@ -5,13 +5,17 @@ import { cn } from "@/lib/cn";
 import { alefBetWalk, bereshitSteps } from "@/lib/alef-notice";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { loadNeuralManifest } from "@/lib/neural-voice";
+import { useStudy } from "@/lib/store";
 
-export function AlefNoticeWalk() {
+export function AlefNoticeWalk({ lessonId }: { lessonId: string }) {
   const steps = bereshitSteps();
   const letters = alefBetWalk();
   const [wordI, setWordI] = useState(0);
   const [walkI, setWalkI] = useState(0);
   const [playing, setPlaying] = useState<"word" | "walk" | "all" | null>(null);
+  const notice = useStudy((s) => s.noticeLadderWalk);
+  const [wordSeen, setWordSeen] = useState(() => new Set<number>());
+  const [walkSeen, setWalkSeen] = useState(() => new Set<number>());
   const voice = useRef({ stop: false });
   const word = steps[wordI];
   const walk = letters[walkI];
@@ -22,6 +26,20 @@ export function AlefNoticeWalk() {
       voice.current = hushHear(voice.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (wordSeen.size >= steps.length && walkSeen.size >= letters.length) notice(lessonId);
+  }, [wordSeen, walkSeen, steps.length, letters.length, lessonId, notice]);
+
+  function markWord(i: number) {
+    setWordI(i);
+    setWordSeen((s) => new Set(s).add(i));
+  }
+
+  function markWalk(i: number) {
+    setWalkI(i);
+    setWalkSeen((s) => new Set(s).add(i));
+  }
 
   function startVoice() {
     voice.current = hushHear(voice.current);
@@ -35,7 +53,7 @@ export function AlefNoticeWalk() {
     const step = steps[i];
     if (!step) return;
     startVoice();
-    setWordI(i);
+    markWord(i);
     setPlaying("word");
     void hearLetter(step.letterId, step.name).finally(() => {
       if (!voice.current.stop) setPlaying(null);
@@ -46,7 +64,7 @@ export function AlefNoticeWalk() {
     const letter = letters[i];
     if (!letter) return;
     startVoice();
-    setWalkI(i);
+    markWalk(i);
     setPlaying("walk");
     void hearLetter(letter.id, letter.name).finally(() => {
       if (!voice.current.stop) setPlaying(null);
@@ -61,6 +79,7 @@ export function AlefNoticeWalk() {
       if (signal.stop) break;
       const letter = letters[i]!;
       setWalkI(i);
+      setWalkSeen((s) => new Set(s).add(i));
       await hearLetter(letter.id, letter.name);
     }
     if (!signal.stop) setPlaying(null);
@@ -83,7 +102,6 @@ export function AlefNoticeWalk() {
                 i === wordI ? "he-spoken" : "text-ink",
               )}
               onClick={() => {
-                setWordI(i);
                 hearWordLetter(i);
               }}
             >
@@ -109,7 +127,6 @@ export function AlefNoticeWalk() {
             disabled={wordI === 0}
             onClick={() => {
               const n = Math.max(0, wordI - 1);
-              setWordI(n);
               hearWordLetter(n);
             }}
           >
@@ -125,7 +142,6 @@ export function AlefNoticeWalk() {
             disabled={wordI >= steps.length - 1}
             onClick={() => {
               const n = Math.min(steps.length - 1, wordI + 1);
-              setWordI(n);
               hearWordLetter(n);
             }}
           >

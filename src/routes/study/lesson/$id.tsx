@@ -10,8 +10,10 @@ import {
   canTrain,
   isStationUnlocked,
   lessonById,
+  lessonNeedsWalk,
   lessonsFor,
   stationById,
+  trainMissing,
 } from "@/lib/ladder";
 import { useStudy } from "@/lib/store";
 
@@ -23,6 +25,7 @@ function LessonPage() {
   const visit = useStudy((s) => s.visitLadder);
   const openText = useStudy((s) => s.openLadderText);
   const train = useStudy((s) => s.trainLadderLesson);
+  const notice = useStudy((s) => s.noticeLadderWalk);
   const lesson = lessonById(id);
   const station = lesson ? stationById(lesson.stationId) : undefined;
 
@@ -39,6 +42,7 @@ function LessonPage() {
 
   const opened = Boolean(ladder.openedText[lesson.id]);
   const trained = Boolean(ladder.trained[lesson.id]);
+  const missing = trained ? [] : trainMissing(ladder, lesson.id);
   const siblings = lessonsFor(lesson.stationId);
   const nextLesson = siblings.find((l) => l.order === lesson.order + 1);
   const labAction = lesson.actions.find((a) => a.kind === "lab") ?? lesson.actions[0];
@@ -75,7 +79,7 @@ function LessonPage() {
         <p className="mt-2 max-w-prose text-ink">{lesson.distinction}</p>
         {lesson.id === "alef-bereshit" ? (
           opened ? (
-            <AlefNoticeWalk />
+            <AlefNoticeWalk lessonId={lesson.id} />
           ) : (
             <p className="mt-2 text-sm text-muted">Open Genesis 1:1 first. Then we walk the first word and the letters.</p>
           )
@@ -86,6 +90,21 @@ function LessonPage() {
           ) : (
             <p className="mt-2 text-sm text-muted">Open Psalm 119 first. Then we walk one letter, one stanza at a time.</p>
           )
+        ) : null}
+        {opened && !lessonNeedsWalk(lesson.id) ? (
+          ladder.noticed[lesson.id] ? (
+            <p className="mt-3 text-sm text-muted">You noticed this verse.</p>
+          ) : (
+            <Button className="mt-3" variant="outline" onClick={() => notice(lesson.id)}>
+              I have noticed
+            </Button>
+          )
+        ) : null}
+        {opened && lessonNeedsWalk(lesson.id) && !ladder.noticed[lesson.id] ? (
+          <p className="mt-3 text-sm text-muted">Walk every letter. Hear is not a score.</p>
+        ) : null}
+        {opened && lessonNeedsWalk(lesson.id) && ladder.noticed[lesson.id] ? (
+          <p className="mt-3 text-sm text-muted">Notice walk finished.</p>
         ) : null}
       </Panel>
 
@@ -121,9 +140,16 @@ function LessonPage() {
         {trained ? (
           <p className="text-center text-sm font-semibold text-muted">This lesson is trained.</p>
         ) : (
-          <Button className="w-full" disabled={!canTrain(ladder, lesson.id)} onClick={() => train(lesson.id)}>
-            Mark trained
-          </Button>
+          <>
+            {missing.length > 0 ? (
+              <p className="text-sm text-muted">
+                Still need: {missing.join(" · ")}
+              </p>
+            ) : null}
+            <Button className="w-full" disabled={!canTrain(ladder, lesson.id)} onClick={() => train(lesson.id)}>
+              Mark trained
+            </Button>
+          </>
         )}
         {nextLesson ? (
           <Link to="/study/lesson/$id" params={{ id: nextLesson.id }} className="block">
