@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Shin, sin, tav.** Hear those three as sheen / seen / tahv — not shi-n / si-n / te-af.
+
 - **Stations gates.** Mark trained only after the text, the Notice walk, and a 90% letter drill. Opening the verse alone does not unlock the next station.
 
 - **Letter names, not shi-n.** Hear plays recorded clips in /audio/letters (shin and sin are separate). From Alef-bet Station, Drill is the letter quiz — six at a time or the whole line — not week vocabulary.
