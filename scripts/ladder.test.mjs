@@ -23,6 +23,8 @@ const {
   trainLadderLesson,
   trainMissing,
   visitLadder,
+  lessonGates,
+  lessonGateLine,
 } = await jiti.import("/workspace/src/lib/ladder.ts");
 const { defaultGame, hydrateGame } = await jiti.import("/workspace/src/lib/game.ts");
 
@@ -118,6 +120,34 @@ test("89% letter drill does not pass the gate", () => {
   assert.equal(canTrain(p, "alef-bereshit"), false);
   p = passLadderDrill(p, "alef-bereshit", 90);
   assert.equal(canTrain(p, "alef-bereshit"), true);
+});
+
+test("lesson checklist lists every gate without changing rules", () => {
+  let p = defaultLadder();
+  assert.equal(lessonGateLine(p, "alef-bereshit"), "0/3 · Need: Text · Notice · Drill");
+  const fresh = lessonGates(p, "alef-bereshit");
+  assert.deepEqual(
+    fresh.map((g) => g.done),
+    [false, false, false],
+  );
+  assert.deepEqual(
+    fresh.map((g) => g.label),
+    trainMissing(p, "alef-bereshit"),
+  );
+  p = openLadderText(p, "alef-bereshit");
+  assert.equal(lessonGateLine(p, "alef-bereshit"), "1/3 · Need: Notice · Drill");
+  p = noticeLadderWalk(p, "alef-bereshit");
+  assert.equal(lessonGateLine(p, "alef-bereshit"), "2/3 · Need: Drill");
+  p = passLadderDrill(p, "alef-bereshit", 90);
+  assert.equal(lessonGateLine(p, "alef-bereshit"), "3/3 ready");
+  p = trainLadderLesson(p, "alef-bereshit");
+  assert.equal(lessonGateLine(p, "alef-bereshit"), "trained");
+  const names = lessonById("names-who");
+  assert.ok(names);
+  assert.equal(
+    lessonGates(defaultLadder(), "names-who").some((g) => g.id === "drill"),
+    false,
+  );
 });
 
 test("game snapshot keeps ladder through hydrate", () => {

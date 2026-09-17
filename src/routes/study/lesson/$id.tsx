@@ -4,16 +4,17 @@ import { StudyMenu } from "@/components/study-menu";
 import { LadderActionLink } from "@/components/ladder-action";
 import { AlefNoticeWalk } from "@/components/alef-notice-walk";
 import { PsalmAcrosticWalk } from "@/components/psalm-acrostic-walk";
+import { LessonStepBadge, LessonUnlockChecklist } from "@/components/lesson-unlock-checklist";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import {
   canTrain,
   isStationUnlocked,
   lessonById,
+  lessonGates,
   lessonNeedsWalk,
   lessonsFor,
   stationById,
-  trainMissing,
 } from "@/lib/ladder";
 import { useStudy } from "@/lib/store";
 
@@ -42,7 +43,9 @@ function LessonPage() {
 
   const opened = Boolean(ladder.openedText[lesson.id]);
   const trained = Boolean(ladder.trained[lesson.id]);
-  const missing = trained ? [] : trainMissing(ladder, lesson.id);
+  const noticed = Boolean(ladder.noticed[lesson.id]);
+  const drilled = Boolean(ladder.drillPass[lesson.id]);
+  const gates = lessonGates(ladder, lesson.id);
   const siblings = lessonsFor(lesson.stationId);
   const nextLesson = siblings.find((l) => l.order === lesson.order + 1);
   const labAction = lesson.actions.find((a) => a.kind === "lab") ?? lesson.actions[0];
@@ -61,8 +64,15 @@ function LessonPage() {
         <p className="mt-2 text-sm text-muted">{lesson.labLabel}</p>
       </Panel>
 
+      <div className="mt-3">
+        <LessonUnlockChecklist progress={ladder} lesson={lesson} onOpenText={() => openText(lesson.id)} />
+      </div>
+
       <Panel className="mt-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">1 · Open the text</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">1 · Open the text</p>
+          <LessonStepBadge done={opened} />
+        </div>
         <p className="mt-2 max-w-prose text-ink">{lesson.notice}</p>
         <div className="mt-3">
           <LadderActionLink action={labAction} lessonId={lesson.id} onLab={() => openText(lesson.id)} />
@@ -75,41 +85,49 @@ function LessonPage() {
       </Panel>
 
       <Panel className="mt-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">2 · Notice</p>
-        <p className="mt-2 max-w-prose text-ink">{lesson.distinction}</p>
-        {lesson.id === "alef-bereshit" ? (
-          opened ? (
-            <AlefNoticeWalk lessonId={lesson.id} />
-          ) : (
-            <p className="mt-2 text-sm text-muted">Open Genesis 1:1 first. Then we walk the first word and the letters.</p>
-          )
-        ) : null}
-        {lesson.id === "alef-ps119" ? (
-          opened ? (
-            <PsalmAcrosticWalk lessonId={lesson.id} />
-          ) : (
-            <p className="mt-2 text-sm text-muted">Open Psalm 119 first. Then we walk one letter, one stanza at a time.</p>
-          )
-        ) : null}
-        {opened && !lessonNeedsWalk(lesson.id) ? (
-          ladder.noticed[lesson.id] ? (
-            <p className="mt-3 text-sm text-muted">You noticed this verse.</p>
-          ) : (
-            <Button className="mt-3" variant="outline" onClick={() => notice(lesson.id)}>
-              I have noticed
-            </Button>
-          )
-        ) : null}
-        {opened && lessonNeedsWalk(lesson.id) && !ladder.noticed[lesson.id] ? (
-          <p className="mt-3 text-sm text-muted">Walk every letter. Hear is not a score.</p>
-        ) : null}
-        {opened && lessonNeedsWalk(lesson.id) && ladder.noticed[lesson.id] ? (
-          <p className="mt-3 text-sm text-muted">Notice walk finished.</p>
-        ) : null}
+        <div id="lesson-notice" className="scroll-mt-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">2 · Notice</p>
+            <LessonStepBadge done={noticed} />
+          </div>
+          <p className="mt-2 max-w-prose text-ink">{lesson.distinction}</p>
+          {lesson.id === "alef-bereshit" ? (
+            opened ? (
+              <AlefNoticeWalk lessonId={lesson.id} />
+            ) : (
+              <p className="mt-2 text-sm text-muted">Open Genesis 1:1 first. Then we walk the first word and the letters.</p>
+            )
+          ) : null}
+          {lesson.id === "alef-ps119" ? (
+            opened ? (
+              <PsalmAcrosticWalk lessonId={lesson.id} />
+            ) : (
+              <p className="mt-2 text-sm text-muted">Open Psalm 119 first. Then we walk one letter, one stanza at a time.</p>
+            )
+          ) : null}
+          {opened && !lessonNeedsWalk(lesson.id) ? (
+            ladder.noticed[lesson.id] ? (
+              <p className="mt-3 text-sm text-muted">You noticed this verse.</p>
+            ) : (
+              <Button className="mt-3" variant="outline" onClick={() => notice(lesson.id)}>
+                I have noticed
+              </Button>
+            )
+          ) : null}
+          {opened && lessonNeedsWalk(lesson.id) && !ladder.noticed[lesson.id] ? (
+            <p className="mt-3 text-sm text-muted">Walk every letter. Hear is not a score.</p>
+          ) : null}
+          {opened && lessonNeedsWalk(lesson.id) && ladder.noticed[lesson.id] ? (
+            <p className="mt-3 text-sm text-muted">Notice walk finished.</p>
+          ) : null}
+        </div>
       </Panel>
 
       <Panel className="mt-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">3 · Practice</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">3 · Practice</p>
+          {gates.some((g) => g.id === "drill") ? <LessonStepBadge done={drilled} /> : null}
+        </div>
         <div className="mt-3 flex flex-col gap-2">
           {opened ? (
             practice.map((action) => (
@@ -140,16 +158,9 @@ function LessonPage() {
         {trained ? (
           <p className="text-center text-sm font-semibold text-muted">This lesson is trained.</p>
         ) : (
-          <>
-            {missing.length > 0 ? (
-              <p className="text-sm text-muted">
-                Still need: {missing.join(" · ")}
-              </p>
-            ) : null}
-            <Button className="w-full" disabled={!canTrain(ladder, lesson.id)} onClick={() => train(lesson.id)}>
-              Mark trained
-            </Button>
-          </>
+          <Button className="w-full" disabled={!canTrain(ladder, lesson.id)} onClick={() => train(lesson.id)}>
+            Mark trained
+          </Button>
         )}
         {nextLesson ? (
           <Link to="/study/lesson/$id" params={{ id: nextLesson.id }} className="block">
