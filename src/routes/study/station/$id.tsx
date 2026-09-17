@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   isStationId,
   isStationUnlocked,
+  lessonGateLine,
   lessonsFor,
   stationById,
 } from "@/lib/ladder";
@@ -49,8 +50,8 @@ function StationPage() {
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
         {lessons.map((lesson) => {
-          const opened = Boolean(ladder.openedText[lesson.id]);
           const trained = Boolean(ladder.trained[lesson.id]);
+          const line = lessonGateLine(ladder, lesson.id);
           return (
             <li key={lesson.id}>
               <Link
@@ -64,8 +65,8 @@ function StationPage() {
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-display text-2xl font-bold">{lesson.title}</span>
-                  <span className="text-xs font-semibold text-muted">
-                    {trained ? "trained" : opened ? "text opened" : "open the text"}
+                  <span className={cn("text-xs font-semibold", trained ? "text-good" : "text-muted")}>
+                    {line}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted">{lesson.labLabel}</p>

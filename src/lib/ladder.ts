@@ -431,6 +431,60 @@ export function trainMissing(progress: LadderProgress, lessonId: string): string
   return missing;
 }
 
+export type LessonGateId = "text" | "notice" | "drill";
+
+export type LessonGate = {
+  id: LessonGateId;
+  label: string;
+  short: string;
+  done: boolean;
+  hint: string;
+};
+
+export function lessonGates(progress: LadderProgress, lessonId: string): LessonGate[] {
+  const lesson = lessonById(lessonId);
+  if (!lesson) return [];
+  const walk = lessonNeedsWalk(lesson.id);
+  const gates: LessonGate[] = [
+    {
+      id: "text",
+      label: "Open the text",
+      short: "Text",
+      done: Boolean(progress.openedText[lesson.id]),
+      hint: "Open the verse in the Reading Lab.",
+    },
+    {
+      id: "notice",
+      label: walk ? "Finish the Notice walk" : "Notice the verse",
+      short: "Notice",
+      done: Boolean(progress.noticed[lesson.id]),
+      hint: walk ? "Walk every letter in Notice." : "Read Notice, then tap I have noticed.",
+    },
+  ];
+  if (lessonNeedsLetterDrill(lesson.id)) {
+    gates.push({
+      id: "drill",
+      label: `Pass the letter drill (${LADDER_DRILL_PASS}%)`,
+      short: "Drill",
+      done: Boolean(progress.drillPass[lesson.id]),
+      hint: `Get ${LADDER_DRILL_PASS}% on six letters or the whole line.`,
+    });
+  }
+  return gates;
+}
+
+export function lessonGateLine(progress: LadderProgress, lessonId: string): string {
+  const lesson = lessonById(lessonId);
+  if (!lesson) return "open the text";
+  if (progress.trained[lesson.id]) return "trained";
+  const gates = lessonGates(progress, lesson.id);
+  if (!gates.length) return "open the text";
+  const done = gates.filter((g) => g.done).length;
+  const need = gates.filter((g) => !g.done).map((g) => g.short);
+  if (need.length === 0) return `${done}/${gates.length} ready`;
+  return `${done}/${gates.length} · Need: ${need.join(" · ")}`;
+}
+
 export function canTrain(progress: LadderProgress, lessonId: string): boolean {
   return trainMissing(progress, lessonId).length === 0;
 }

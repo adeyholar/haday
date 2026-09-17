@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Unlock checklist.** Each lesson lists what Mark trained needs — Done / Not yet — so students can see the path inside a station.
+
 - **Shin, sin, tav.** Hear those three as sheen / seen / tahv — not shi-n / si-n / te-af.
 
 - **Stations gates.** Mark trained only after the text, the Notice walk, and a 90% letter drill. Opening the verse alone does not unlock the next station.
