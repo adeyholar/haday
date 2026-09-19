@@ -1,5 +1,5 @@
 import { CONSONANTS } from "@/lib/alphabet";
-import { VOCAB, itemsForChapter, itemsForWeek, type VocabItem } from "@/lib/vocab";
+import { VOCAB, itemsForSelection, type VocabItem } from "@/lib/vocab";
 import { stripNiqqud } from "@/lib/hebrew";
 
 export type TypeWord = { id: string; hebrew: string; gloss: string };
@@ -123,16 +123,5 @@ export function weightedPick(
 }
 
 export function poolForSelection(weeks: number[], chapters: number[]): TypeWord[] {
-  const seen = new Set<string>();
-  const out: TypeWord[] = [];
-  function add(items: VocabItem[]) {
-    for (const v of items) {
-      if (seen.has(v.id)) continue;
-      seen.add(v.id);
-      out.push(asTypeWord(v));
-    }
-  }
-  for (const w of weeks) add(itemsForWeek(w));
-  for (const ch of chapters) add(itemsForChapter(ch));
-  return out;
+  return itemsForSelection(weeks, chapters).map(asTypeWord);
 }

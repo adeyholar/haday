@@ -613,6 +613,22 @@ export function itemsForWeek(week: number): VocabItem[] {
   return itemsForChapters([...w.chapters]);
 }
 
+/** Union of weeks and/or chapters; first occurrence wins (deduped). */
+export function itemsForSelection(weeks: number[], chapters: number[]): VocabItem[] {
+  const seen = new Set<string>();
+  const out: VocabItem[] = [];
+  function add(items: VocabItem[]) {
+    for (const v of items) {
+      if (seen.has(v.id)) continue;
+      seen.add(v.id);
+      out.push(v);
+    }
+  }
+  for (const w of weeks) add(itemsForWeek(w));
+  for (const ch of chapters) add(itemsForChapter(ch));
+  return out;
+}
+
 export function studySetMeta(week: number): { label: string; hint: string } {
   if (week === ALL_GAME_WEEK) return { label: "All Game", hint: "Corrected BBH Ch. 2–19" };
   if (week >= 31 && week <= 49) {
