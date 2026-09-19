@@ -1,20 +1,23 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { VocabArt } from "@/components/vocab-art";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { playFeedback } from "@/lib/try-again";
-import { glossMatches, liveGloss, type VocabItem } from "@/lib/vocab";
+import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
 
 export type SelfMark = "strong" | "ok" | "weak";
+export type SelfQuizMode = "type" | "choice";
 
 export function SelfQuizPlay({
   items,
+  mode = "type",
   onMark,
   onDone,
 }: {
   items: VocabItem[];
+  mode?: SelfQuizMode;
   onMark?: (id: string, mark: SelfMark) => void;
   onDone?: (weak: VocabItem[]) => void;
 }) {
@@ -23,18 +26,23 @@ export function SelfQuizPlay({
   const [tries, setTries] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [mark, setMark] = useState<SelfMark | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [missedChoice, setMissedChoice] = useState<string | null>(null);
   const [log, setLog] = useState<{ id: string; mark: SelfMark }[]>([]);
   const logRef = useRef<{ id: string; mark: SelfMark }[]>([]);
 
   const item = items[i];
   const done = i >= items.length;
   const live = item ? liveGloss(item, typed) : "empty";
+  const choices = useMemo(() => (item ? quizChoices(item, items) : []), [item, items]);
 
   function resetItem() {
     setTyped("");
     setTries(0);
     setRevealed(false);
     setMark(null);
+    setPicked(null);
+    setMissedChoice(null);
   }
 
   function finish(nextMark: SelfMark) {
@@ -60,6 +68,23 @@ export function SelfQuizPlay({
       playFeedback("retry");
       return;
     }
+    finish("weak");
+  }
+
+  function pickChoice(c: string) {
+    if (!item || revealed || picked) return;
+    if (c === item.gloss) {
+      setPicked(c);
+      finish(tries === 0 && !missedChoice ? "strong" : "ok");
+      return;
+    }
+    if (!missedChoice) {
+      setMissedChoice(c);
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
+    setPicked(c);
     finish("weak");
   }
 
@@ -112,50 +137,103 @@ export function SelfQuizPlay({
         {revealed ? <p className="mt-3 font-display text-xl font-semibold text-ink">{item.gloss}</p> : null}
       </div>
 
-      <form
-        className="mt-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (revealed) next();
-          else check();
-        }}
-      >
-        <label className="sr-only" htmlFor="self-quiz-en">
-          English meaning
-        </label>
-        <input
-          id="self-quiz-en"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          disabled={revealed}
-          autoCapitalize="off"
-          autoCorrect="off"
-          autoComplete="off"
-          placeholder="English meaning"
-          className={cn(
-            "h-12 w-full rounded-[var(--radius-md)] bg-card px-4 text-center font-display text-xl shadow-[var(--shadow-border)]",
-            !revealed && live === "exact" && "ring-2 ring-good",
-            !revealed && live === "off" && typed && "ring-2 ring-danger",
+      {tries >= 1 && !revealed ? <AttemptBanner className="mt-3" kind="retry" /> : null}
+      {revealed ? <AttemptBanner className="mt-3" kind={mark === "weak" ? "fail" : "strong"} /> : null}
+
+      {mode === "choice" ? (
+        <>
+          <ul className="mt-4 grid gap-2">
+            {choices.map((c) => {
+              const selected = picked === c;
+              const correct = c === item.gloss;
+              const show = revealed;
+              const firstMiss = missedChoice === c;
+              return (
+                <li key={c}>
+                  <button
+                    type="button"
+                    disabled={revealed || firstMiss}
+                    onClick={() => pickChoice(c)}
+                    className={cn(
+                      "w-full min-h-12 rounded-[var(--radius-md)] px-4 py-3 text-left text-sm font-medium shadow-[var(--shadow-border)]",
+                      !show && !firstMiss && "bg-card hover:bg-surface",
+                      firstMiss && "bg-danger text-parchment",
+                      show && correct && "bg-good text-parchment",
+                      show && selected && !correct && "bg-danger text-parchment",
+                      show && !selected && !correct && !firstMiss && "bg-card text-muted",
+                    )}
+                  >
+                    {c}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {!revealed ? (
+            <DontKnowButton
+              usedTry={tries >= 1}
+              onNudge={() => {
+                if (tries < 1) {
+                  setTries(1);
+                  setMissedChoice("__nudge__");
+                  playFeedback("retry");
+                }
+              }}
+              onClick={() => {
+                setPicked(item.gloss);
+                finish("weak");
+              }}
+            />
+          ) : (
+            <Button className="mt-3 w-full" onClick={next}>
+              Next
+            </Button>
           )}
-        />
-        {tries >= 1 && !revealed ? <AttemptBanner className="mt-3" kind="retry" /> : null}
-        {revealed ? <AttemptBanner className="mt-3" kind={mark === "strong" ? "strong" : mark === "weak" ? "fail" : "strong"} /> : null}
-        {!revealed ? (
-          <DontKnowButton
-            usedTry={tries >= 1}
-            onNudge={() => {
-              if (tries < 1) {
-                setTries(1);
-                playFeedback("retry");
-              }
-            }}
-            onClick={() => finish("weak")}
+        </>
+      ) : (
+        <form
+          className="mt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (revealed) next();
+            else check();
+          }}
+        >
+          <label className="sr-only" htmlFor="self-quiz-en">
+            English meaning
+          </label>
+          <input
+            id="self-quiz-en"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            disabled={revealed}
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            placeholder="English meaning"
+            className={cn(
+              "h-12 w-full rounded-[var(--radius-md)] bg-card px-4 text-center font-display text-xl shadow-[var(--shadow-border)]",
+              !revealed && live === "exact" && "ring-2 ring-good",
+              !revealed && live === "off" && typed && "ring-2 ring-danger",
+            )}
           />
-        ) : null}
-        <Button className="mt-3 w-full" type="submit">
-          {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
-        </Button>
-      </form>
+          {!revealed ? (
+            <DontKnowButton
+              usedTry={tries >= 1}
+              onNudge={() => {
+                if (tries < 1) {
+                  setTries(1);
+                  playFeedback("retry");
+                }
+              }}
+              onClick={() => finish("weak")}
+            />
+          ) : null}
+          <Button className="mt-3 w-full" type="submit">
+            {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

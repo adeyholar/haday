@@ -787,35 +787,30 @@ export function closeItems(item: VocabItem, pool: VocabItem[], n = 3): VocabItem
   return out;
 }
 
-/** Four glosses: the lemma plus two close traps and one same-POS neighbor. */
+/** Four glosses: the lemma plus three hard traps from the same / nearby week-chapter mix. */
 export function quizChoices(item: VocabItem, pool: VocabItem[], n = 4): string[] {
-  const nearby = VOCAB.filter(
-    (v) => v.id !== item.id && (Math.abs(v.chapter - item.chapter) <= 3 || v.pos === item.pos),
-  );
-  const byId = new Map<string, VocabItem>();
-  for (const v of [...pool, ...nearby]) {
-    if (v.id === item.id) continue;
-    byId.set(v.id, v);
-  }
-  const scored = [...byId.values()]
-    .map((x) => ({ x, s: distractorScore(item, x) }))
-    .sort((a, b) => b.s - a.s);
-
-  const seen = new Set<string>([item.gloss]);
-  const hard: string[] = [];
-  const rest: string[] = [];
-  for (const { x, s } of scored) {
-    if (seen.has(x.gloss)) continue;
-    seen.add(x.gloss);
-    (s >= 14 ? hard : rest).push(x.gloss);
-  }
-
   const need = Math.max(1, n - 1);
-  const closeTake = Math.min(2, need, hard.length);
-  const distractors = hard.slice(0, closeTake);
-  for (const g of shuffle([...hard.slice(closeTake), ...rest])) {
+  const rings: VocabItem[][] = [
+    pool.filter((v) => v.id !== item.id && (v.chapter === item.chapter || Math.abs(v.chapter - item.chapter) <= 1)),
+    pool.filter((v) => v.id !== item.id && Math.abs(v.chapter - item.chapter) <= 3),
+    VOCAB.filter((v) => v.id !== item.id && Math.abs(v.chapter - item.chapter) <= 2),
+    VOCAB.filter((v) => v.id !== item.id && (Math.abs(v.chapter - item.chapter) <= 4 || v.pos === item.pos)),
+  ];
+  const seen = new Set<string>([item.gloss]);
+  const distractors: string[] = [];
+  for (let r = 0; r < rings.length; r++) {
+    const last = r === rings.length - 1;
+    const scored = rings[r]!
+      .map((x) => ({ x, s: distractorScore(item, x) }))
+      .sort((a, b) => b.s - a.s);
+    for (const { x, s } of scored) {
+      if (distractors.length >= need) break;
+      if (seen.has(x.gloss)) continue;
+      if (!last && s < 8) continue;
+      seen.add(x.gloss);
+      distractors.push(x.gloss);
+    }
     if (distractors.length >= need) break;
-    if (!distractors.includes(g)) distractors.push(g);
   }
   return shuffle([item.gloss, ...distractors]);
 }
