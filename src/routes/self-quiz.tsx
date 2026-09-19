@@ -4,7 +4,7 @@ import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { Button } from "@/components/ui/button";
-import { SelfQuizPlay } from "@/components/self-quiz-play";
+import { SelfQuizPlay, type SelfQuizMode } from "@/components/self-quiz-play";
 import { cn } from "@/lib/cn";
 import { COURSE_WEEKS, GAME_CHAPTER_TITLES, itemsForSelection, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
@@ -25,6 +25,7 @@ function SelfQuizPage() {
   const [weeks, setWeeks] = useState<number[]>([]);
   const [chapters, setChapters] = useState<number[]>([]);
   const [deck, setDeck] = useState<VocabItem[] | null>(null);
+  const [mode, setMode] = useState<SelfQuizMode>("type");
   const [run, setRun] = useState(0);
   const [lastWeak, setLastWeak] = useState<VocabItem[]>([]);
 
@@ -46,8 +47,8 @@ function SelfQuizPage() {
         {gameShell ? <GameMenu /> : <StudyMenu />}
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Quiz myself</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pick any weeks and chapters. Every word in that mix is in the sitting. You see the Hebrew; you give the
-          English. First wrong is Try again. Second is Not yet — we’ll bring it back.
+          Pick any weeks and chapters. Every word in that mix is in the sitting. Type the English, or pick from four
+          close glosses. First wrong is Try again. Second is Not yet — we’ll bring it back.
         </p>
       </Panel>
 
@@ -87,6 +88,20 @@ function SelfQuizPage() {
             ))}
           </div>
           <p className="mt-3 text-sm text-muted">{pool.length} words — full deck, no cap</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Button
+              variant={mode === "type" ? "primary" : "outline"}
+              onClick={() => setMode("type")}
+            >
+              Type English
+            </Button>
+            <Button
+              variant={mode === "choice" ? "primary" : "outline"}
+              onClick={() => setMode("choice")}
+            >
+              4 choices
+            </Button>
+          </div>
           <Button className="mt-3 w-full" disabled={!pool.length} onClick={() => start(pool)}>
             Start quiz
           </Button>
@@ -96,6 +111,7 @@ function SelfQuizPage() {
           <SelfQuizPlay
             key={run}
             items={deck}
+            mode={mode}
             onMark={(id, m) => {
               if (m === "weak") rate(id, "again");
               else if (m === "strong") rate(id, "easy");

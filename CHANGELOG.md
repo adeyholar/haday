@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Quiz myself answer modes.** Type English, or four close glosses from the same / nearby week-chapter mix. No easy throwaways.
+
 - **Type ladder.** Alef Practice → Type: home row, then א–ת map, then mixes, then short words, then Tanakh. 95% to advance. Eyes on the screen.
 
 - **Quiz myself is Hebrew→English.** Pick any weeks and chapters; the sitting is the full mix. You see the Hebrew and give the English. Typing Hebrew stays in Type.
