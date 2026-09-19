@@ -4,11 +4,9 @@ import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { Button } from "@/components/ui/button";
-import { TypeSession } from "@/components/type-session";
+import { SelfQuizPlay } from "@/components/self-quiz-play";
 import { cn } from "@/lib/cn";
-import { poolForSelection, type TypeWord } from "@/lib/hebrew-typing/bank";
-import { emptyTyping } from "@/lib/hebrew-typing/ranks";
-import { COURSE_WEEKS, GAME_CHAPTER_TITLES } from "@/lib/vocab";
+import { COURSE_WEEKS, GAME_CHAPTER_TITLES, itemsForSelection, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
 
 type Search = { shell?: "game" | "study" };
@@ -23,25 +21,22 @@ export const Route = createFileRoute("/self-quiz")({
 function SelfQuizPage() {
   const { shell } = Route.useSearch();
   const gameShell = shell === "game";
-  const game = useStudy((s) => s.game);
-  const mark = useStudy((s) => s.recordTypingMark);
-  const typing = game.typing ?? emptyTyping();
+  const rate = useStudy((s) => s.rate);
   const [weeks, setWeeks] = useState<number[]>([]);
   const [chapters, setChapters] = useState<number[]>([]);
-  const [deck, setDeck] = useState<TypeWord[] | null>(null);
+  const [deck, setDeck] = useState<VocabItem[] | null>(null);
   const [run, setRun] = useState(0);
-  const [lastWeak, setLastWeak] = useState<TypeWord[]>([]);
+  const [lastWeak, setLastWeak] = useState<VocabItem[]>([]);
 
-  const pool = useMemo(() => poolForSelection(weeks, chapters), [weeks, chapters]);
-  const play = deck;
+  const pool = useMemo(() => itemsForSelection(weeks, chapters), [weeks, chapters]);
 
   function toggle(list: number[], n: number, set: (v: number[]) => void) {
     set(list.includes(n) ? list.filter((x) => x !== n) : [...list, n]);
   }
 
-  function start(from: TypeWord[]) {
+  function start(from: VocabItem[]) {
     setLastWeak([]);
-    setDeck(from.slice(0, 12));
+    setDeck(from);
     setRun((n) => n + 1);
   }
 
@@ -51,12 +46,12 @@ function SelfQuizPage() {
         {gameShell ? <GameMenu /> : <StudyMenu />}
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Quiz myself</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pick a week, a chapter, or both. Type the pointed Hebrew. First wrong: Try again (not weak). Second wrong: Not
-          yet — we will bring it back. First try right: strong.
+          Pick any weeks and chapters. Every word in that mix is in the sitting. You see the Hebrew; you give the
+          English. First wrong is Try again. Second is Not yet — we’ll bring it back.
         </p>
       </Panel>
 
-      {!play ? (
+      {!deck ? (
         <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Weeks</p>
           <div className="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-5">
@@ -91,22 +86,22 @@ function SelfQuizPage() {
               </button>
             ))}
           </div>
-          <p className="mt-3 text-sm text-muted">{pool.length} words in this mix</p>
+          <p className="mt-3 text-sm text-muted">{pool.length} words — full deck, no cap</p>
           <Button className="mt-3 w-full" disabled={!pool.length} onClick={() => start(pool)}>
             Start quiz
           </Button>
         </Panel>
       ) : (
         <Panel>
-          <TypeSession
+          <SelfQuizPlay
             key={run}
-            mode="quiz"
-            progress={typing}
-            words={play}
-            onMark={(id, m) => mark(id, m)}
-            onDone={(log) => {
-              setLastWeak(play.filter((w) => log.some((r) => r.id === w.id && r.mark === "weak")));
+            items={deck}
+            onMark={(id, m) => {
+              if (m === "weak") rate(id, "again");
+              else if (m === "strong") rate(id, "easy");
+              else rate(id, "good");
             }}
+            onDone={(weak) => setLastWeak(weak)}
           />
           <div className="mt-4 flex flex-col gap-2">
             {lastWeak.length ? (
