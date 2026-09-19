@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TypeKeyboard } from "@/components/type-keyboard";
-import { playFeedback } from "@/lib/try-again";
 import {
   gameRound,
   type TypeWord,
@@ -119,7 +118,6 @@ export function TypeSession({
       onMark?.(gameWord.id, mark);
       setLog((rows) => [...rows, { id: gameWord.id, hebrew: gameWord.hebrew, mark }]);
     }
-    if (mark === "strong") playFeedback("strong");
     const next = i + 1;
     if (next >= total) {
       setDone(true);
@@ -157,13 +155,11 @@ export function TypeSession({
     setWordMisses(nextWordMisses);
     setCue(missCueLabel(cueKind));
     if (cueKind === "retry") {
-      playFeedback("retry");
       return;
     }
     const nextMisses = misses + 1;
     setMisses(nextMisses);
     setLocked(true);
-    playFeedback("fail");
     window.setTimeout(() => finishItem(hits, nextMisses, "weak"), 900);
   }
 
