@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GlyphInk } from "@/components/glyph-ink";
 import { VOWELS, WRITE_LETTERS, type HebrewLetter, type HebrewVowel } from "@/lib/alphabet";
 import { alefByKeys, alefKey, alefLetters, alefVowels, pickAlefRound } from "@/lib/alef";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
+import { HebrewFormChoices, ProduceModeChips, TYPE_PRODUCE_OPTIONS } from "@/components/form-mc";
+import { hebrewFormChoices, type FormMcKind } from "@/lib/hebrew-form-mc";
+import { playFeedback } from "@/lib/try-again";
+import { AttemptBanner } from "@/components/attempt-banner";
 
 type Kind = "letter" | "vowel";
 type WriteLevel = "copy" | "stave";
@@ -46,6 +50,10 @@ export function LetterWrite() {
   const [i, setI] = useState(0);
   const [right, setRight] = useState(0);
   const [padKey, setPadKey] = useState(0);
+  const [produce, setProduce] = useState<"do" | "choose" | "hard">("do");
+  const [mcMissed, setMcMissed] = useState<string | null>(null);
+  const [mcPicked, setMcPicked] = useState<string | null>(null);
+  const [mcRevealed, setMcRevealed] = useState(false);
 
   useEffect(() => {
     const q = alefByKeys(queue);
@@ -78,6 +86,10 @@ export function LetterWrite() {
     setRight(0);
     setBeat("trace");
     setPadKey((n) => n + 1);
+    setProduce("do");
+    setMcMissed(null);
+    setMcPicked(null);
+    setMcRevealed(false);
   }, [queue]);
 
   const deckLen = kind === "letter" ? letterDeck.length : vowelDeck.length;
@@ -87,6 +99,9 @@ export function LetterWrite() {
 
   function resetPad() {
     setPadKey((n) => n + 1);
+    setMcMissed(null);
+    setMcPicked(null);
+    setMcRevealed(false);
   }
 
   function switchKind(next: Kind) {
@@ -167,6 +182,8 @@ export function LetterWrite() {
     resetPad();
   }
 
+  const allowMc = level === "stave" || beat === "practice";
+
   if (done) {
     const passed = right >= Math.ceil(deckLen * 0.7);
     return (
@@ -204,6 +221,31 @@ export function LetterWrite() {
   const glyph = letter?.letter ?? vowel?.mark ?? "";
   const name = letter?.name ?? vowel?.name ?? "";
   const sound = letter?.sound ?? vowel?.sound ?? "";
+  const mcPool = (kind === "letter" ? letterDeck.map((x) => x.letter) : vowelDeck.map((x) => x.mark)).filter(Boolean);
+  const mcChoices = useMemo(
+    () => (allowMc && produce !== "do" && glyph ? hebrewFormChoices(glyph, mcPool, produce as FormMcKind) : []),
+    [allowMc, produce, glyph, kind, i],
+  );
+
+  function pickLetterForm(form: string) {
+    if (!glyph || mcRevealed) return;
+    if (form === glyph) {
+      setMcPicked(form);
+      setMcRevealed(true);
+      playFeedback("strong");
+      window.setTimeout(() => next(true), 420);
+      return;
+    }
+    if (!mcMissed) {
+      setMcMissed(form);
+      playFeedback("retry");
+      return;
+    }
+    setMcPicked(form);
+    setMcRevealed(true);
+    playFeedback("fail");
+    window.setTimeout(() => next(false), 900);
+  }
 
   return (
     <div className="mt-5">
@@ -242,6 +284,18 @@ export function LetterWrite() {
             : "Practice the same letter. Model is off. Keep the body between the lines."
           : "From the name only. Body between the lines. Lamed above the top; finals below the bottom."}
       </p>
+      {allowMc ? (
+        <div className="mt-3">
+          <ProduceModeChips
+            value={produce}
+            onChange={(next) => {
+              setProduce(next as "do" | "choose" | "hard");
+              resetPad();
+            }}
+            options={[...TYPE_PRODUCE_OPTIONS]}
+          />
+        </div>
+      ) : null}
 
       <p className="mt-3 text-sm tabular-nums text-muted">
         {i + 1} / {deckLen}
@@ -249,7 +303,13 @@ export function LetterWrite() {
       </p>
 
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-6 text-center shadow-[var(--shadow-border)]">
-        {level === "stave" ? (
+        {produce !== "do" && allowMc ? (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Pick the Hebrew</p>
+            <p className="mt-1 font-display text-3xl font-bold text-ink">{name}</p>
+            <p className="mt-1 text-sm text-muted">{sound}</p>
+          </>
+        ) : level === "stave" ? (
           <>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">
               Write this {kind === "vowel" ? "vowel on ב" : "letter"} on the stave
@@ -272,7 +332,20 @@ export function LetterWrite() {
         )}
       </div>
 
-      <GlyphInk
+      {produce !== "do" && allowMc ? (
+        <>
+          <HebrewFormChoices
+            choices={mcChoices}
+            correct={glyph}
+            revealed={mcRevealed}
+            missed={mcMissed}
+            picked={mcPicked}
+            onPick={pickLetterForm}
+          />
+          {mcRevealed ? <AttemptBanner className="mt-3" kind={mcPicked === glyph ? "strong" : "fail"} /> : null}
+        </>
+      ) : (
+        <GlyphInk
         key={`${kind}-${level}-${beat}-${i}-${padKey}`}
         expected={glyph}
         mode={kind}
@@ -289,6 +362,7 @@ export function LetterWrite() {
         }
         onPass={(ok) => next(ok)}
       />
+      )}
 
       {kind === "letter" ? (
         <LetterGrid current={letter} onPick={pickLetter} />

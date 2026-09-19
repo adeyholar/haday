@@ -21,6 +21,10 @@ import { GradeBanner } from "@/components/grade-banner";
 import { playGrade } from "@/lib/sfx";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { spliceLater } from "@/lib/quiz-draw";
+import { HebrewFormChoices, ProduceModeChips, WRITE_PRODUCE_OPTIONS } from "@/components/form-mc";
+import { hebrewFormChoices, type FormMcKind } from "@/lib/hebrew-form-mc";
+import { playFeedback } from "@/lib/try-again";
+import { AttemptBanner } from "@/components/attempt-banner";
 
 function studyLetterId(item: VocabItem): string | undefined {
   if (item.id.startsWith("ch1-")) return item.id.slice(4);
@@ -28,7 +32,7 @@ function studyLetterId(item: VocabItem): string | undefined {
 }
 
 type WriteMode = "write" | "memorize";
-type InputMethod = "pad" | "type";
+type InputMethod = "pad" | "type" | "choose" | "hard";
 
 export const Route = createFileRoute("/write")({
   validateSearch: (s: Record<string, unknown>): { mode: WriteMode } => ({
@@ -69,6 +73,8 @@ function WritePage() {
   const ratedRef = useRef(false);
   const [gaveUp, setGaveUp] = useState(false);
   const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
+  const [mcMissed, setMcMissed] = useState<string | null>(null);
+  const [mcPicked, setMcPicked] = useState<string | null>(null);
 
   useEffect(() => {
     setRound(shuffle(queueForFocus(pool, useStudy.getState().cards, focus, 12)));
@@ -89,6 +95,11 @@ function WritePage() {
   }, []);
 
   const item = round[i];
+  const mcPool = useMemo(() => round.map((w) => w.hebrew), [round]);
+  const mcChoices = useMemo(() => {
+    if (!item || (inputMethod !== "choose" && inputMethod !== "hard")) return [];
+    return hebrewFormChoices(item.hebrew, mcPool, inputMethod as FormMcKind);
+  }, [item, inputMethod, mcPool]);
 
   useEffect(() => {
     if (!item) return;
@@ -102,6 +113,8 @@ function WritePage() {
     setHandI(0);
     ratedRef.current = false;
     setGaveUp(false);
+    setMcMissed(null);
+    setMcPicked(null);
     if (!memorize) {
       setRecallLeft(0);
       return;
@@ -164,11 +177,11 @@ function WritePage() {
     ratedRef.current = false;
   }
 
-  function applyCheck(match: HandMatch, read: string, note?: string) {
+  function applyCheck(match: HandMatch, read: string, note?: string, sfx = true) {
     const nextTries = tries + 1;
     setTries(nextTries);
     setResult({ match, read, note });
-    playGrade(match === "exact" || match === "close");
+    if (sfx) playGrade(match === "exact" || match === "close");
     if (match === "exact" || match === "close" || nextTries >= 2) {
       commitRate(match, nextTries);
     }
@@ -248,6 +261,25 @@ function WritePage() {
     if (!item || !typed.trim() || busy) return;
     const compared = matchHandwriting(item.hebrew, typed);
     applyCheck(compared.match, typed);
+  }
+
+  function pickWriteForm(form: string) {
+    if (!item || locked) return;
+    if (form === item.hebrew) {
+      setMcPicked(form);
+      playFeedback("strong");
+      applyCheck("exact", form, undefined, false);
+      return;
+    }
+    if (!mcMissed) {
+      setMcMissed(form);
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
+    setMcPicked(form);
+    playFeedback("fail");
+    applyCheck("wrong", form, undefined, false);
   }
 
   if (!pool.length) {
@@ -372,27 +404,20 @@ function WritePage() {
 
       {!recalling && (
         <>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setInputMethod("type")}
-              className={cn(
-                "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-medium shadow-[var(--shadow-border)]",
-                inputMethod === "type" ? "bg-ink text-parchment" : "bg-card text-ink",
-              )}
-            >
-              Type
-            </button>
-            <button
-              type="button"
-              onClick={() => setInputMethod("pad")}
-              className={cn(
-                "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-medium shadow-[var(--shadow-border)]",
-                inputMethod === "pad" ? "bg-ink text-parchment" : "bg-card text-ink",
-              )}
-            >
-              Handwrite
-            </button>
+          <div className="mt-4">
+            <ProduceModeChips
+              value={inputMethod}
+              onChange={(next) => {
+                setInputMethod(next as InputMethod);
+                setResult(null);
+                setMcMissed(null);
+                setMcPicked(null);
+                setTyped("");
+                pad.current?.clear();
+                setEmpty(true);
+              }}
+              options={[...WRITE_PRODUCE_OPTIONS]}
+            />
           </div>
 
           {inputMethod === "type" ? (
@@ -415,7 +440,7 @@ function WritePage() {
                 Check
               </Button>
             </div>
-          ) : (
+          ) : inputMethod === "pad" ? (
             <>
               <div className="relative mt-4">
                 <InkPad
@@ -484,6 +509,20 @@ function WritePage() {
                 </>
               )}
             </>
+          ) : (
+            <div className="mt-4">
+              <HebrewFormChoices
+                choices={mcChoices}
+                correct={item.hebrew}
+                revealed={Boolean(result && result.match !== "empty")}
+                missed={mcMissed}
+                picked={mcPicked}
+                onPick={pickWriteForm}
+              />
+              {result && result.match !== "empty" ? (
+                <AttemptBanner className="mt-3" kind={result.match === "exact" || result.match === "close" ? "strong" : "fail"} />
+              ) : null}
+            </div>
           )}
         </>
       )}

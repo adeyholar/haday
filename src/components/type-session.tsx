@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TypeKeyboard } from "@/components/type-keyboard";
+import { HebrewFormChoices, ProduceModeChips, TYPE_PRODUCE_OPTIONS } from "@/components/form-mc";
 import {
+  GAME_WORDS,
   gameRound,
   type TypeWord,
 } from "@/lib/hebrew-typing/bank";
+import { hebrewFormChoices, type FormMcKind } from "@/lib/hebrew-form-mc";
+import { lettersOnly } from "@/lib/hebrew";
 import {
   TYPE_PASS,
   accuracyPct,
@@ -27,9 +31,19 @@ import {
 import { CONSONANTS } from "@/lib/alphabet";
 
 export type TypeMode = "study" | "game" | "quiz";
+export type ProduceMode = "do" | "choose" | "hard";
 
 function letterName(glyph: string): string {
   return CONSONANTS.find((c) => c.letter === glyph)?.name ?? glyph;
+}
+
+function typeEnglishPrompt(target: string, word?: TypeWord): string {
+  if (word?.gloss) return word.gloss;
+  const letter = CONSONANTS.find((c) => c.letter === target);
+  if (letter) return `${letter.name} · ${letter.sound}`;
+  const hit = GAME_WORDS.find((w) => lettersOnly(w.hebrew) === lettersOnly(target));
+  if (hit) return hit.gloss;
+  return "the Hebrew form";
 }
 
 function PromptView({ target, typed }: { target: string; typed: string }) {
@@ -79,6 +93,10 @@ export function TypeSession({
   const [log, setLog] = useState<{ id: string; hebrew: string; mark: "strong" | "weak" | "ok" }[]>([]);
   const started = useRef(Date.now());
   const [seed, setSeed] = useState(0);
+  const [produce, setProduce] = useState<ProduceMode>("do");
+  const [picked, setPicked] = useState<string | null>(null);
+  const [missed, setMissed] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   const tanakhDeep = Boolean(progress.tanakhDeep) && rung >= 4;
   const round = useMemo(() => {
@@ -104,6 +122,14 @@ export function TypeSession({
     Boolean(glow && /[\u0591-\u05C7]/.test(glow));
   const rank = typingRank(progress);
   const meta = STUDY_TYPE_RUNGS[rung];
+  const formPool = useMemo(
+    () => (mode === "study" ? studyTargets : round.map((w) => w.hebrew)),
+    [mode, studyTargets, round],
+  );
+  const formChoices = useMemo(() => {
+    if (produce === "do" || !target) return [];
+    return hebrewFormChoices(target, formPool, produce as FormMcKind);
+  }, [produce, target, formPool]);
 
   function resetItem() {
     setTyped("");
@@ -111,6 +137,9 @@ export function TypeSession({
     setCue("");
     setLocked(false);
     setMissKey(null);
+    setPicked(null);
+    setMissed(null);
+    setRevealed(false);
   }
 
   function finishItem(nextHits: number, nextMisses: number, mark: "strong" | "weak" | "ok") {
@@ -133,6 +162,7 @@ export function TypeSession({
   }
 
   function onKey(raw: string) {
+    if (produce !== "do") return;
     if (done || !target || locked) return;
     const key = raw === "Backspace" ? "Backspace" : raw;
     const result = applyTypeKey(target, typed, key);
@@ -160,6 +190,30 @@ export function TypeSession({
     const nextMisses = misses + 1;
     setMisses(nextMisses);
     setLocked(true);
+    window.setTimeout(() => finishItem(hits, nextMisses, "weak"), 900);
+  }
+
+  function pickForm(form: string) {
+    if (done || !target || locked || revealed) return;
+    if (form === target) {
+      setPicked(form);
+      setRevealed(true);
+      const mark = wordMisses === 0 ? "strong" : "ok";
+      window.setTimeout(() => finishItem(hits + 1, misses, mark), 420);
+      return;
+    }
+    if (!missed) {
+      setMissed(form);
+      setWordMisses(1);
+      setCue(missCueLabel("retry"));
+      return;
+    }
+    setPicked(form);
+    setRevealed(true);
+    setLocked(true);
+    const nextMisses = misses + 1;
+    setMisses(nextMisses);
+    setCue(missCueLabel("fail"));
     window.setTimeout(() => finishItem(hits, nextMisses, "weak"), 900);
   }
 
@@ -267,6 +321,16 @@ export function TypeSession({
 
   return (
     <div>
+      <div className="mb-3">
+        <ProduceModeChips
+          value={produce}
+          onChange={(next) => {
+            setProduce(next as ProduceMode);
+            newStudyBatch();
+          }}
+          options={[...TYPE_PRODUCE_OPTIONS]}
+        />
+      </div>
       {mode === "study" ? (
         <div className="mb-3 flex flex-wrap gap-1.5">
           {STUDY_TYPE_RUNGS.map((r, n) => {
@@ -307,20 +371,36 @@ export function TypeSession({
         </p>
       ) : null}
       {mode === "study" && meta ? <p className="text-center text-sm text-muted">{meta.hint}</p> : null}
-      {gameWord ? <p className="text-center text-sm text-muted">{gameWord.gloss}</p> : null}
-      {mode === "study" && (meta?.id === "home" || meta?.id === "map") && target ? (
+      {produce !== "do" ? (
+        <p className="text-center font-display text-2xl font-bold text-ink">{typeEnglishPrompt(target, gameWord)}</p>
+      ) : null}
+      {produce === "do" && gameWord ? <p className="text-center text-sm text-muted">{gameWord.gloss}</p> : null}
+      {produce === "do" && mode === "study" && (meta?.id === "home" || meta?.id === "map") && target ? (
         <p className="text-center text-sm text-muted">{letterName(target)} · find that key</p>
       ) : null}
       {cue ? <p className="mt-2 text-center text-sm font-semibold text-danger">{cue}</p> : null}
-      <PromptView target={target} typed={typed} />
-      {typed ? (
-        <p className="he-word mt-1 text-center text-2xl text-muted" lang="he" dir="rtl">
-          {typed}
-        </p>
-      ) : null}
-      <div className="mt-5">
-        <TypeKeyboard glow={glow} pressed={pressed} miss={missKey} nikkud={showNikkud} onKey={onKey} />
-      </div>
+      {produce === "do" ? (
+        <>
+          <PromptView target={target} typed={typed} />
+          {typed ? (
+            <p className="he-word mt-1 text-center text-2xl text-muted" lang="he" dir="rtl">
+              {typed}
+            </p>
+          ) : null}
+          <div className="mt-5">
+            <TypeKeyboard glow={glow} pressed={pressed} miss={missKey} nikkud={showNikkud} onKey={onKey} />
+          </div>
+        </>
+      ) : (
+        <HebrewFormChoices
+          choices={formChoices}
+          correct={target}
+          revealed={revealed}
+          missed={missed}
+          picked={picked}
+          onPick={pickForm}
+        />
+      )}
     </div>
   );
 }

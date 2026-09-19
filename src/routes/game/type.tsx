@@ -19,9 +19,8 @@ function TypeGamePage() {
         <GameMenu />
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type the word</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pointed Hebrew. Type what you see, including the vowels. First wrong is Try again (not weak). Second wrong is
-          Not yet — we will bring it back, with the crowd aww, and the word is weak. First try correct is strong. No
-          speech score.
+          Do it: type the pointed Hebrew. Choose / Hard choose: English gloss, four Hebrew forms. First wrong is Try
+          again (not weak). Second is Not yet. Type stays quiet. No speech score.
         </p>
       </Panel>
       <Panel>
