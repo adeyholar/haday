@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Type is quiet.** Study Type and Game Type keep the on-screen Try again / Not yet cues. No applause, no aww, no spoken try-again. Drill and Quiz still use those sounds.
+
 - **Reload on error.** If a phone or iPad holds an old Quiz myself page, tap Reload. HTML pages are no longer stored in the browser cache.
 
 - **Quiz myself loads again.** The Hebrew card had a missing picture import and crashed. That import is back.

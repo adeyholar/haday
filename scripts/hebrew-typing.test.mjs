@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
@@ -103,4 +104,12 @@ test("weak words are marked and spaced; self-quiz uses week/chapter vocab", () =
   assert.equal(ids.size, both.length);
   const picked = weightedPick(GAME_WORDS, 5, 3, { ab: 4 }, {});
   assert.equal(picked.length, 5);
+});
+
+test("Type session has no crowd or voice SFX", () => {
+  const src = readFileSync("/workspace/src/components/type-session.tsx", "utf8");
+  assert.equal(src.includes("playFeedback"), false);
+  assert.equal(src.includes("playAww"), false);
+  assert.equal(src.includes("playGrade"), false);
+  assert.equal(src.includes("playTryAgainCue"), false);
 });
