@@ -1,10 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import { cn } from "@/lib/cn";
 import {
   GRAMMAR_QUIZ_LEN,
@@ -58,6 +58,7 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
   );
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const [held, setHeld] = useState<Set<string>>(() => new Set());
   const [firstTry, setFirstTry] = useState(0);
   const [firstSeen] = useState(() => items.length);
@@ -71,16 +72,21 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
   function pick(choice: string) {
     if (!q || picked) return;
     const ok = choice === q.answer;
+    if (!ok && !retrying) {
+      setRetrying(true);
+      playFeedback("retry");
+      return;
+    }
     setPicked(choice);
     if (ok) setHeld((s) => new Set(s).add(q.key.replace(/-retry$/, "")));
-    if (!q.retry && ok) setFirstTry((n) => n + 1);
-    playGrade(ok);
+    if (!q.retry && ok && !retrying) setFirstTry((n) => n + 1);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   function admitNoIdea() {
     if (!q || picked) return;
     setPicked("__noidea__");
-    playGrade(false);
+    playFeedback("fail");
   }
 
   function next() {
@@ -99,6 +105,7 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
     }
     setI((n) => n + 1);
     setPicked(null);
+    setRetrying(false);
   }
 
   if (!items.length) {
@@ -182,10 +189,11 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
           );
         })}
       </ul>
-      {!picked && <DontKnowButton onClick={admitNoIdea} />}
+      {!picked && retrying ? <AttemptBanner className="mt-3" kind="retry" /> : null}
+      {!picked && <DontKnowButton usedTry={retrying} onClick={admitNoIdea} />}
       {picked && (
         <div className="mt-3">
-          <GradeBanner ok={ok} />
+          <AttemptBanner kind={ok ? "strong" : "fail"} />
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>

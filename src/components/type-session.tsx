@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TypeKeyboard } from "@/components/type-keyboard";
-import { playAww, playGrade, playTryAgainCue } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import {
   STUDY_WORDS,
   firstWordLetters,
@@ -49,7 +49,6 @@ export function TypeSession({
   mode,
   progress,
   words,
-  crowdAww = mode !== "study",
   onStudyPass,
   onGameFinish,
   onMark,
@@ -58,7 +57,6 @@ export function TypeSession({
   mode: TypeMode;
   progress: TypingProgress;
   words?: TypeWord[];
-  crowdAww?: boolean;
   onStudyPass?: (acc: number) => void;
   onGameFinish?: (acc: number) => void;
   onMark?: (id: string, mark: "strong" | "weak" | "ok") => void;
@@ -114,7 +112,7 @@ export function TypeSession({
       onMark?.(gameWord.id, mark);
       setLog((rows) => [...rows, { id: gameWord.id, hebrew: gameWord.hebrew, mark }]);
     }
-    if (mark === "strong") playGrade(true);
+    if (mark === "strong") playFeedback("strong");
     const next = i + 1;
     if (next >= total) {
       setDone(true);
@@ -148,22 +146,21 @@ export function TypeSession({
     setMissKey(key);
     window.setTimeout(() => setMissKey(null), 220);
     if (!missLadder) {
-      setMisses((n) => n + 1);
-      playTryAgainCue();
+      playFeedback("retry");
       return;
     }
     const cueKind = missCueFor(wordMisses);
     const nextWordMisses = wordMisses + 1;
     setWordMisses(nextWordMisses);
-    const nextMisses = misses + 1;
-    setMisses(nextMisses);
     setCue(missCueLabel(cueKind));
     if (cueKind === "retry") {
-      playTryAgainCue();
+      playFeedback("retry");
       return;
     }
+    const nextMisses = misses + 1;
+    setMisses(nextMisses);
     setLocked(true);
-    if (crowdAww) playAww();
+    playFeedback("fail");
     window.setTimeout(() => finishItem(hits, nextMisses, "weak"), 900);
   }
 

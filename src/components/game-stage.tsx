@@ -9,7 +9,8 @@ import { cn } from "@/lib/cn";
 import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { NewBadges } from "@/components/rewards-bar";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
+import { AttemptBanner } from "@/components/attempt-banner";
 import {
   CHAPTER_META,
   GAME_STAGE_PASS,
@@ -173,7 +174,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   function admitNoIdea() {
     if (!item || revealed || picked) return;
     if (stage !== "recognize" && typedOk) return;
-    playGrade(false);
+    playFeedback("fail");
     setGaveUp(true);
     if (stage === "recognize") {
       setPicked("__noidea__");
@@ -185,16 +186,18 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   }
 
   function checkTyped(ok: boolean) {
-    playGrade(ok);
     if (ok) {
+      playFeedback("strong");
       setRevealed(true);
       setPicked("ok");
       return;
     }
     if (tries < 1) {
+      playFeedback("retry");
       setTries(1);
       return;
     }
+    playFeedback("fail");
     setRevealed(true);
     setPicked("miss");
   }
@@ -402,21 +405,21 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
                           setGuessFast(true);
                           setGuessKey((n) => n + 1);
                           shownAt.current = Date.now();
-                          playGrade(false);
+                          playFeedback("retry");
                           return;
                         }
                         setPicked(c);
-                        playGrade(true);
+                        playFeedback("strong");
                         return;
                       }
                       if (!missedChoice && tries < 1) {
                         setMissedChoice(c);
                         setTries(1);
-                        playGrade(false);
+                        playFeedback("retry");
                         return;
                       }
                       setPicked(c);
-                      playGrade(false);
+                      playFeedback("fail");
                     }}
                     className={cn(
                       "w-full min-h-12 rounded-[var(--radius-md)] px-4 py-3 text-left text-sm font-medium shadow-[var(--shadow-border)]",
@@ -435,16 +438,16 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           </ul>
           {(missedChoice || tries >= 1) && !picked && (
             <>
-              {missedChoice && missedChoice !== "__nudge__" ? <GradeBanner className="mt-4" ok={false} /> : null}
+              {missedChoice && missedChoice !== "__nudge__" ? <AttemptBanner className="mt-4" kind="retry" /> : null}
               <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-                One more try
+                Try again
               </p>
               <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
             </>
           )}
           {picked && (
             <>
-              <GradeBanner className="mt-4" ok={picked === item.gloss} />
+              <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
               {picked !== item.gloss && (
                 <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}
@@ -501,14 +504,14 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           {tries >= 1 && !revealed && (
             <>
               <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-                One more try
+                Try again
               </p>
               <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
             </>
           )}
           {revealed && (
             <div className="mt-3">
-              <GradeBanner ok={typedOk} />
+              <AttemptBanner kind={typedOk ? "strong" : "fail"} />
               <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
               {!typedOk && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
@@ -552,14 +555,14 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           {tries >= 1 && !revealed && (
             <>
               <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
-                One more try
+                Try again
               </p>
               <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
             </>
           )}
           {revealed && (
             <div className="mt-3">
-              <GradeBanner ok={typedOk} />
+              <AttemptBanner kind={typedOk ? "strong" : "fail"} />
               {!typedOk && (
                 <p className="mt-2 text-center text-sm text-muted">
                   Answer: <span className="he-word text-xl text-ink">{item.hebrew}</span>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { VocabArt } from "@/components/vocab-art";
 import { cn } from "@/lib/cn";
@@ -14,7 +14,7 @@ import {
   verseTapTokens,
   type EtchTask,
 } from "@/lib/etch";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import { shuffleList } from "@/lib/quiz-draw";
 
@@ -34,6 +34,7 @@ export function EtchPlay({
   const item = task.item;
   const [typed, setTyped] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
+  const [tries, setTries] = useState(0);
   const [guessFast, setGuessFast] = useState(false);
   const [choices, setChoices] = useState(task.choices);
   const shownAt = useRef(Date.now());
@@ -42,6 +43,7 @@ export function EtchPlay({
   useEffect(() => {
     setTyped("");
     setPicked(null);
+    setTries(0);
     setGuessFast(false);
     setChoices(task.choices.length ? shuffleList(task.choices) : []);
     shownAt.current = Date.now();
@@ -78,12 +80,17 @@ export function EtchPlay({
       setGuessFast(true);
       setChoices(shuffleList(task.choices));
       shownAt.current = Date.now();
-      playGrade(false);
+      playFeedback("retry");
       return;
     }
     const ok = id === item.id;
+    if (!ok && tries < 1) {
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
     setPicked(id);
-    playGrade(ok);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   function pickVerse(token: string) {
@@ -91,19 +98,29 @@ export function EtchPlay({
     const ok = tokenFitsLemma(token, item, task.verse?.hit);
     if (ok && tooFast()) {
       setGuessFast(true);
-      playGrade(false);
+      playFeedback("retry");
       shownAt.current = Date.now();
       return;
     }
+    if (!ok && tries < 1) {
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
     setPicked(ok ? item.id : token);
-    playGrade(ok);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   function submitProduce() {
     if (picked) return;
     const ok = typedOk;
+    if (!ok && tries < 1) {
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
     setPicked(ok ? item.id : "__miss__");
-    playGrade(ok);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   const showArt = task.kind === "meet" || task.cue === "picture" || (graded && task.kind !== "verse");
@@ -118,6 +135,9 @@ export function EtchPlay({
       <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue)}</p>
       {guessFast && !graded && (
         <p className="mt-2 text-center text-sm font-semibold text-danger">Too fast — name it, don’t tap the pattern.</p>
+      )}
+      {tries >= 1 && !graded && (
+        <AttemptBanner className="mt-2" kind="retry" />
       )}
 
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
@@ -323,7 +343,7 @@ export function EtchPlay({
 
       {graded && (
         <div className="mt-4">
-          <GradeBanner ok={ok} />
+          <AttemptBanner kind={ok ? "strong" : "fail"} />
           {task.kind !== "meet" && (
             <p className="mt-2 text-center">
               <span className="he-word text-3xl">{item.hebrew}</span>
@@ -340,7 +360,7 @@ export function EtchPlay({
         <DontKnowButton
           onClick={() => {
             setPicked("__noidea__");
-            playGrade(false);
+            playFeedback("fail");
           }}
         />
       )}

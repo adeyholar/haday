@@ -51,8 +51,8 @@ function SelfQuizPage() {
         {gameShell ? <GameMenu /> : <StudyMenu />}
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Quiz myself</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pick a week, a chapter, or both. Type the pointed Hebrew. First wrong: Try again (not weak). Second wrong:
-          Missed — crowd aww and weak. First try right: strong.
+          Pick a week, a chapter, or both. Type the pointed Hebrew. First wrong: Try again (not weak). Second wrong: Not
+          yet — we will bring it back. First try right: strong.
         </p>
       </Panel>
 
@@ -103,7 +103,6 @@ function SelfQuizPage() {
             mode="quiz"
             progress={typing}
             words={play}
-            crowdAww={gameShell}
             onMark={(id, m) => mark(id, m)}
             onDone={(log) => {
               setLastWeak(play.filter((w) => log.some((r) => r.id === w.id && r.mark === "weak")));

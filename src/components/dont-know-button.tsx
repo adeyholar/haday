@@ -27,7 +27,7 @@ export function DontKnowButton({
       {waiting ? (
         <>
           <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
-            One more try
+            Try again
           </p>
           <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
         </>

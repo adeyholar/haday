@@ -1,12 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
 import { learnUnitVerses } from "@/lib/tanakh-learn-note";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import { cn } from "@/lib/cn";
 import {
   buildGrammarQuiz,
@@ -69,6 +69,7 @@ export function GrammarPlay({
   const [items, setItems] = useState<PlayQ[]>(seededExam);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const [held, setHeld] = useState<Set<string>>(() => new Set());
   const [firstTry, setFirstTry] = useState(0);
   const [firstSeen, setFirstSeen] = useState(seededExam.length);
@@ -103,6 +104,7 @@ export function GrammarPlay({
     setItems(built);
     setI(0);
     setPicked(null);
+    setRetrying(false);
     setHeld(new Set());
     setFirstTry(0);
     setFirstSeen(built.length);
@@ -113,18 +115,21 @@ export function GrammarPlay({
   function pick(choice: string) {
     if (!q || picked) return;
     const ok = choice === q.answer;
+    if (!ok && !retrying) {
+      setRetrying(true);
+      playFeedback("retry");
+      return;
+    }
     setPicked(choice);
     if (ok) setHeld((s) => new Set(s).add(q.key.replace(/-retry$/, "")));
-    if (!q.retry) {
-      if (ok) setFirstTry((n) => n + 1);
-    }
-    playGrade(ok);
+    if (!q.retry && ok && !retrying) setFirstTry((n) => n + 1);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   function admitNoIdea() {
     if (!q || picked) return;
     setPicked("__noidea__");
-    playGrade(false);
+    playFeedback("fail");
   }
 
   function next() {
@@ -151,6 +156,7 @@ export function GrammarPlay({
     }
     setI((n) => n + 1);
     setPicked(null);
+    setRetrying(false);
   }
 
   function onTile(side: "he" | "lab", id: string) {
@@ -164,12 +170,12 @@ export function GrammarPlay({
       return;
     }
     if (tap.id === id) {
-      playGrade(true);
+      playFeedback("strong");
       setLocked((s) => new Set(s).add(id));
       setTap(null);
       return;
     }
-    playGrade(false);
+    playFeedback("retry");
     setMissId(`${tap.id}:${id}`);
     window.setTimeout(() => {
       setMissId(null);
@@ -435,10 +441,11 @@ export function GrammarPlay({
           );
         })}
       </ul>
-      {!picked && <DontKnowButton onClick={admitNoIdea} />}
+      {!picked && retrying ? <AttemptBanner className="mt-3" kind="retry" /> : null}
+      {!picked && <DontKnowButton usedTry={retrying} onClick={admitNoIdea} />}
       {picked && (
         <div className="mt-3">
-          <GradeBanner ok={ok} />
+          <AttemptBanner kind={ok ? "strong" : "fail"} />
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>
