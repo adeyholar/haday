@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Reload on error.** If a phone or iPad holds an old Quiz myself page, tap Reload. HTML pages are no longer stored in the browser cache.
+
 - **Quiz myself loads again.** The Hebrew card had a missing picture import and crashed. That import is back.
 
 - **Miss shows the verse.** On the second miss only, Quiz myself and Quiz show the English and a short Tanakh line with the lemma. Try again still hides the answer.
