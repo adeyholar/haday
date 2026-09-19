@@ -19,8 +19,8 @@ function TypeGamePage() {
         <GameMenu />
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type the word</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pointed Hebrew. Type what you see, including the vowels. First miss is try again. Second miss is weak. First
-          try correct is strong. No speech score.
+          Pointed Hebrew. Type what you see, including the vowels. First wrong is Try again (not weak). Second wrong is
+          Missed — crowd aww and weak. First try correct is strong. No speech score.
         </p>
       </Panel>
       <Panel>

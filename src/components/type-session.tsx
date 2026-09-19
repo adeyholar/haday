@@ -14,6 +14,7 @@ import {
   accuracyPct,
   applyTypeKey,
   missCueFor,
+  missCueLabel,
   nextExpected,
   passedBatch,
   strengthFromMisses,
@@ -48,7 +49,7 @@ export function TypeSession({
   mode,
   progress,
   words,
-  crowdAww = mode === "game",
+  crowdAww = mode !== "study",
   onStudyPass,
   onGameFinish,
   onMark,
@@ -156,15 +157,13 @@ export function TypeSession({
     setWordMisses(nextWordMisses);
     const nextMisses = misses + 1;
     setMisses(nextMisses);
+    setCue(missCueLabel(cueKind));
     if (cueKind === "retry") {
-      setCue("Try again");
       playTryAgainCue();
       return;
     }
-    setCue("Weak — next word");
     setLocked(true);
     if (crowdAww) playAww();
-    else playTryAgainCue();
     window.setTimeout(() => finishItem(hits, nextMisses, "weak"), 900);
   }
 

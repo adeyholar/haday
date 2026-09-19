@@ -48,12 +48,19 @@ export function passedBatch(pct: number): boolean {
   return pct >= TYPE_PASS;
 }
 
-/** Word-level miss ladder: first miss = retry, second = fail. */
-export type MissCue = "retry" | "fail";
+/** Word-level miss ladder: first wrong = Try again (not weak). Second = Missed + weak. */
+export type MissCue = "retry" | "missed";
 export type Strength = "strong" | "ok" | "weak";
 
+export const CUE_TRY_AGAIN = "Try again";
+export const CUE_MISSED = "Missed";
+
 export function missCueFor(wordMissesBefore: number): MissCue {
-  return wordMissesBefore <= 0 ? "retry" : "fail";
+  return wordMissesBefore <= 0 ? "retry" : "missed";
+}
+
+export function missCueLabel(cue: MissCue): string {
+  return cue === "retry" ? CUE_TRY_AGAIN : CUE_MISSED;
 }
 
 export function strengthFromMisses(wordMisses: number): Strength {

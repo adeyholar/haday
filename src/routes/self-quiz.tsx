@@ -51,8 +51,8 @@ function SelfQuizPage() {
         {gameShell ? <GameMenu /> : <StudyMenu />}
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Quiz myself</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pick a week, a chapter, or both. Type the pointed Hebrew. First miss: try again. Second miss: weak. First try
-          right: strong.
+          Pick a week, a chapter, or both. Type the pointed Hebrew. First wrong: Try again (not weak). Second wrong:
+          Missed — crowd aww and weak. First try right: strong.
         </p>
       </Panel>
 
