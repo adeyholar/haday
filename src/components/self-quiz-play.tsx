@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
-import { VocabArt } from "@/components/vocab-art";
+import { VerseCard } from "@/components/verse-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { playFeedback } from "@/lib/try-again";
@@ -134,7 +134,12 @@ export function SelfQuizPlay({
           </p>
           <VocabArt id={item.id} />
         </div>
-        {revealed ? <p className="mt-3 font-display text-xl font-semibold text-ink">{item.gloss}</p> : null}
+        {mark === "weak" ? (
+          <>
+            <p className="mt-3 font-display text-xl font-semibold text-ink">{item.gloss}</p>
+            <VerseCard item={item} />
+          </>
+        ) : null}
       </div>
 
       {tries >= 1 && !revealed ? <AttemptBanner className="mt-3" kind="retry" /> : null}

@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Miss shows the verse.** On the second miss only, Quiz myself and Quiz show the English and a short Tanakh line with the lemma. Try again still hides the answer.
+
 - **Quiz myself answer modes.** Type English, or four close glosses from the same / nearby week-chapter mix. No easy throwaways.
 
 - **Type ladder.** Alef Practice → Type: home row, then א–ת map, then mixes, then short words, then Tanakh. 95% to advance. Eyes on the screen.
