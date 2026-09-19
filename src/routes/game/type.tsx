@@ -10,6 +10,7 @@ export const Route = createFileRoute("/game/type")({ component: TypeGamePage });
 function TypeGamePage() {
   const game = useStudy((s) => s.game);
   const record = useStudy((s) => s.recordTypingGame);
+  const mark = useStudy((s) => s.recordTypingMark);
   const typing = game.typing ?? emptyTyping();
 
   return (
@@ -18,12 +19,18 @@ function TypeGamePage() {
         <GameMenu />
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type the word</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Pointed Hebrew. Type what you see, including the vowels. Accuracy counts first; speed is extra. No speech
-          score.
+          Pointed Hebrew. Type what you see, including the vowels. First miss is try again. Second miss is weak. First
+          try correct is strong. No speech score.
         </p>
       </Panel>
       <Panel>
-        <TypeSession mode="game" progress={typing} onGameFinish={(acc) => record(acc)} />
+        <TypeSession
+          mode="game"
+          progress={typing}
+          crowdAww
+          onGameFinish={(acc) => record(acc)}
+          onMark={(id, m) => mark(id, m)}
+        />
       </Panel>
     </>
   );

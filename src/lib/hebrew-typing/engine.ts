@@ -47,3 +47,17 @@ export function wpmFrom(hits: number, ms: number): number {
 export function passedBatch(pct: number): boolean {
   return pct >= TYPE_PASS;
 }
+
+/** Word-level miss ladder: first miss = retry, second = fail. */
+export type MissCue = "retry" | "fail";
+export type Strength = "strong" | "ok" | "weak";
+
+export function missCueFor(wordMissesBefore: number): MissCue {
+  return wordMissesBefore <= 0 ? "retry" : "fail";
+}
+
+export function strengthFromMisses(wordMisses: number): Strength {
+  if (wordMisses <= 0) return "strong";
+  if (wordMisses >= 2) return "weak";
+  return "ok";
+}

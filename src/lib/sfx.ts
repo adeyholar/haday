@@ -7,6 +7,8 @@ let applause: AudioBuffer | null = null;
 let applauseLoad: Promise<AudioBuffer | null> | null = null;
 let tryAgain: AudioBuffer | null = null;
 let tryAgainLoad: Promise<AudioBuffer | null> | null = null;
+let aww: AudioBuffer | null = null;
+let awwLoad: Promise<AudioBuffer | null> | null = null;
 const listeners = new Set<(value: boolean) => void>();
 
 function readMuted() {
@@ -44,6 +46,7 @@ export function unlockSfx() {
   if (!ac) return;
   void loadApplause(ac);
   void loadTryAgain(ac);
+  void loadAww(ac);
 }
 
 export function isMuted() {
@@ -107,6 +110,17 @@ function loadTryAgain(ac: AudioContext): Promise<AudioBuffer | null> {
   return tryAgainLoad;
 }
 
+function loadAww(ac: AudioContext): Promise<AudioBuffer | null> {
+  if (aww) return Promise.resolve(aww);
+  if (awwLoad) return awwLoad;
+  awwLoad = decodeSfx(ac, "/sfx/crowd-aww.mp3").then((buf) => {
+    if (!buf) awwLoad = null;
+    else aww = buf;
+    return buf;
+  });
+  return awwLoad;
+}
+
 function startBuffer(ac: AudioContext, dest: GainNode, buf: AudioBuffer, peak = 0.95) {
   const src = ac.createBufferSource();
   src.buffer = buf;
@@ -152,6 +166,26 @@ export function playGrade(ok: boolean) {
   if (!ac || !master || muted) return;
   if (ok) playCrowdClap(ac, master);
   else playTryAgain(ac, master);
+}
+
+/** First miss: spoken try again. Not the crowd aww. */
+export function playTryAgainCue() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  playTryAgain(ac, master);
+}
+
+/** Second miss only: crowd aww. */
+export function playAww() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  if (aww) {
+    startBuffer(ac, master, aww, 0.9);
+    return;
+  }
+  void loadAww(ac).then((buf) => {
+    if (buf && !muted && master) startBuffer(ac, master, buf, 0.9);
+  });
 }
 
 export function playPop() {

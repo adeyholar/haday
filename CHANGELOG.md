@@ -10,6 +10,10 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Quiz myself.** Pick a week and/or chapter, type the pointed words, then retry the weak ones.
+
+- **Type miss ladder.** First miss is try again. Second miss is the crowd aww and the word is weak. First try right is strong.
+
 - **Hebrew typing.** Study Type (Meet → Drill → Word) and Game Type the word share one Israeli keyboard. Accuracy first; nikkud on Game words. Optional for Mark trained.
 
 - **Unlock checklist.** Each lesson lists what Mark trained needs — Done / Not yet — so students can see the path inside a station.

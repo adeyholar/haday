@@ -1,8 +1,12 @@
 import { CONSONANTS } from "@/lib/alphabet";
-import { VOCAB } from "@/lib/vocab";
+import { VOCAB, itemsForChapter, itemsForWeek, type VocabItem } from "@/lib/vocab";
 import { stripNiqqud } from "@/lib/hebrew";
 
 export type TypeWord = { id: string; hebrew: string; gloss: string };
+
+export function asTypeWord(v: VocabItem): TypeWord {
+  return { id: v.id, hebrew: v.hebrew, gloss: v.gloss };
+}
 
 /** Genesis 1:1 plus early class lemmas — all pointed. */
 export const GAME_WORDS: TypeWord[] = [
@@ -76,16 +80,59 @@ export function pointedVocabSample(limit = 12): TypeWord[] {
   return [...GAME_WORDS, ...more].slice(0, Math.max(8, limit));
 }
 
-export function gameRound(n = 10, seed = Date.now()): TypeWord[] {
-  const pool = pointedVocabSample(40);
-  let x = seed % 2147483647;
-  const out = [...pool];
-  for (let i = out.length - 1; i > 0; i--) {
+export function gameRound(
+  n = 10,
+  seed = Date.now(),
+  weak: Record<string, number> = {},
+  strong: Record<string, number> = {},
+): TypeWord[] {
+  return weightedPick(pointedVocabSample(40), n, seed, weak, strong);
+}
+
+export function weightedPick(
+  pool: TypeWord[],
+  n: number,
+  seed: number,
+  weak: Record<string, number> = {},
+  strong: Record<string, number> = {},
+): TypeWord[] {
+  if (!pool.length) return [];
+  const bag: TypeWord[] = [];
+  for (const w of pool) {
+    const copies = 1 + Math.min(4, weak[w.id] ?? 0) * 2 - (strong[w.id] ? 1 : 0);
+    for (let i = 0; i < Math.max(1, copies); i++) bag.push(w);
+  }
+  let x = Math.abs(seed) % 2147483647 || 1;
+  const out: TypeWord[] = [];
+  const used = new Set<string>();
+  for (let guard = 0; out.length < Math.min(n, pool.length) && guard < bag.length * 4; guard++) {
     x = (x * 48271) % 2147483647;
-    const j = x % (i + 1);
-    const a = out[i]!;
-    out[i] = out[j]!;
-    out[j] = a;
+    const w = bag[x % bag.length]!;
+    if (used.has(w.id)) continue;
+    used.add(w.id);
+    out.push(w);
+  }
+  for (const w of pool) {
+    if (out.length >= n) break;
+    if (!used.has(w.id)) {
+      used.add(w.id);
+      out.push(w);
+    }
   }
   return out.slice(0, n);
+}
+
+export function poolForSelection(weeks: number[], chapters: number[]): TypeWord[] {
+  const seen = new Set<string>();
+  const out: TypeWord[] = [];
+  function add(items: VocabItem[]) {
+    for (const v of items) {
+      if (seen.has(v.id)) continue;
+      seen.add(v.id);
+      out.push(asTypeWord(v));
+    }
+  }
+  for (const w of weeks) add(itemsForWeek(w));
+  for (const ch of chapters) add(itemsForChapter(ch));
+  return out;
 }

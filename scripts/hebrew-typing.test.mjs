@@ -3,12 +3,12 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected } = await jiti.import(
+const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCueFor, strengthFromMisses } = await jiti.import(
   "/workspace/src/lib/hebrew-typing/engine.ts",
 );
 const { mapPhysicalKey, QWERTY_TO_HE, fingerFor } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
-const { GAME_WORDS, gameRound } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
-const { typingRank, emptyTyping } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
+const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
+const { typingRank, emptyTyping, applyMark } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
 const { lessonById } = await jiti.import("/workspace/src/lib/ladder.ts");
 const { stripNiqqud } = await jiti.import("/workspace/src/lib/hebrew.ts");
 
@@ -55,4 +55,30 @@ test("ranks climb Ink to Ready Scribe without a speech score", () => {
 test("Alef lessons offer Type without changing Mark trained gates", () => {
   const lesson = lessonById("alef-bereshit");
   assert.ok(lesson.actions.some((a) => a.kind === "type"));
+});
+
+test("miss ladder: first retry, second fail, first-try strong", () => {
+  assert.equal(missCueFor(0), "retry");
+  assert.equal(missCueFor(1), "fail");
+  assert.equal(strengthFromMisses(0), "strong");
+  assert.equal(strengthFromMisses(1), "ok");
+  assert.equal(strengthFromMisses(2), "weak");
+});
+
+test("weak words are marked and spaced; self-quiz uses week/chapter vocab", () => {
+  let p = emptyTyping();
+  p = applyMark(p, "ab", "weak");
+  assert.equal(p.weak.ab, 1);
+  p = applyMark(p, "ab", "strong");
+  assert.equal(p.strong.ab, 1);
+  assert.equal(p.weak.ab, undefined);
+  const week1 = poolForSelection([1], []);
+  const ch3 = poolForSelection([], [3]);
+  assert.ok(week1.length > 0);
+  assert.ok(ch3.length > 0);
+  const both = poolForSelection([2], [3]);
+  const ids = new Set(both.map((w) => w.id));
+  assert.equal(ids.size, both.length);
+  const picked = weightedPick(GAME_WORDS, 5, 3, { ab: 4 }, {});
+  assert.equal(picked.length, 5);
 });

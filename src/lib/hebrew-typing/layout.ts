@@ -102,10 +102,20 @@ export function fingerFor(ch: string): FingerId | null {
   return FINGER_BY_KEY[ch] ?? null;
 }
 
+export const HE_TO_LATIN: Record<string, string> = Object.fromEntries(
+  Object.entries(QWERTY_TO_HE)
+    .filter(([, he]) => /[\u05D0-\u05EA']/.test(he))
+    .map(([lat, he]) => [he, lat]),
+);
+
 export function mapPhysicalKey(key: string): string | null {
   if (!key) return null;
   if (/^[\u05D0-\u05EA]$/.test(key)) return key;
   if (NIKKUD_KEYS.some((n) => n.mark === key)) return key;
   const lower = key.length === 1 ? key.toLowerCase() : key;
   return QWERTY_TO_HE[lower] ?? null;
+}
+
+export function isLatinLetterKey(key: string): boolean {
+  return key.length === 1 && /[a-zA-Z;,./']/.test(key);
 }
