@@ -10,11 +10,9 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
-- **Try again ≠ Missed.** First wrong key is Try again only (not weak). Second is Missed plus the crowd aww and weak. First-try right stays strong.
+- **Try again is never a miss.** First wrong is Try again only. Second wrong is Not yet — we’ll bring it back, with the crowd aww, and the word is weak. Same ladder on Drill, Quiz, lessons, and Type.
 
 - **Quiz myself.** Pick a week and/or chapter, type the pointed words, then retry the weak ones.
-
-- **Type miss ladder.** First miss is try again. Second miss is the crowd aww and the word is weak. First try right is strong.
 
 - **Hebrew typing.** Study Type (Meet → Drill → Word) and Game Type the word share one Israeli keyboard. Accuracy first; nikkud on Game words. Optional for Mark trained.
 

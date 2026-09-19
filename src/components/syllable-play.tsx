@@ -1,12 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
 import { learnUnitVerses } from "@/lib/tanakh-learn-note";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import { cn } from "@/lib/cn";
 import {
   shuffleQuiz,
@@ -79,6 +79,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
   const [items, setItems] = useState<PlayQ[]>([]);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const [right, setRight] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -101,6 +102,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
     setItems(built);
     setI(0);
     setPicked(null);
+    setRetrying(false);
     setRight(0);
     setDone(false);
     setStep("quiz");
@@ -109,15 +111,20 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
   function pick(choice: string) {
     if (!q || picked) return;
     const ok = choice === q.answer;
+    if (!ok && !retrying) {
+      setRetrying(true);
+      playFeedback("retry");
+      return;
+    }
     setPicked(choice);
     if (ok) setRight((n) => n + 1);
-    playGrade(ok);
+    playFeedback(ok ? "strong" : "fail");
   }
 
   function admitNoIdea() {
     if (!q || picked) return;
     setPicked("__noidea__");
-    playGrade(false);
+    playFeedback("fail");
   }
 
   function next() {
@@ -143,6 +150,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
     }
     setI((n) => n + 1);
     setPicked(null);
+    setRetrying(false);
   }
 
   if (!unit) {
@@ -278,10 +286,11 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
           );
         })}
       </ul>
-      {!picked && <DontKnowButton onClick={admitNoIdea} />}
+      {!picked && retrying ? <AttemptBanner className="mt-3" kind="retry" /> : null}
+      {!picked && <DontKnowButton usedTry={retrying} onClick={admitNoIdea} />}
       {picked && (
         <div className="mt-3">
-          <GradeBanner ok={ok} />
+          <AttemptBanner kind={ok ? "strong" : "fail"} />
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>

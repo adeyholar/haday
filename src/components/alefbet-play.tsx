@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { Panel } from "@/components/panel";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import {
   ALEF_BET_COUNT,
   ALEF_BET_LEVELS,
@@ -138,7 +138,7 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
 
   function admitNoIdea() {
     if (lock || !q || gaveUp) return;
-    playGrade(false);
+    playFeedback("fail");
     setGrade(false);
     setGaveUp(true);
     setLock(true);
@@ -172,7 +172,21 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
 
   function mark(ok: boolean) {
     if (lock || !q) return;
-    playGrade(ok);
+    if (!ok) {
+      if (tries < 1) {
+        playFeedback("retry");
+        setTries(1);
+        setGrade(false);
+        reshuffle();
+        return;
+      }
+      playFeedback("fail");
+      setGrade(false);
+      setGaveUp(true);
+      setLock(true);
+      return;
+    }
+    playFeedback("strong");
     setGrade(ok);
     if (!ok) {
       setTries((t) => t + 1);
@@ -273,7 +287,7 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
         ) : null}
         {grade != null ? (
           <div className="mt-4">
-            <GradeBanner ok={grade} />
+            <AttemptBanner kind={grade ? "strong" : gaveUp || tries >= 1 ? "fail" : "retry"} />
             {gaveUp ? (
               <p className="mt-3 text-lg font-semibold text-ink">
                 {q.kind === "name-of" || q.kind === "number-of" ? (

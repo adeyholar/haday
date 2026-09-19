@@ -19,12 +19,12 @@ import { alefByKeys, alefKey } from "@/lib/alef";
 import { pickByBkt } from "@/lib/bkt";
 import { shuffle } from "@/lib/vocab";
 import { cn } from "@/lib/cn";
-import { GradeBanner } from "@/components/grade-banner";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { GlyphInk } from "@/components/glyph-ink";
 import { LetterWrite } from "@/components/letter-write";
 import { HandTrain } from "@/components/hand-train";
 import { ClosedBook } from "@/components/closed-book";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
 import { useStudy } from "@/lib/store";
 import { DontKnowButton } from "@/components/dont-know-button";
 
@@ -423,18 +423,18 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
                   if (id === prompt.id) {
                     setPicked(id);
                     setRight((r) => r + 1);
-                    playGrade(true);
+                    playFeedback("strong");
                     const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
-                    if (key) rate(key, "easy");
+                    if (key) rate(key, missedId ? "good" : "easy");
                     return;
                   }
                   if (!missedId) {
                     setMissedId(id);
-                    playGrade(false);
+                    playFeedback("retry");
                     return;
                   }
                   setPicked(id);
-                  playGrade(false);
+                  playFeedback("fail");
                   const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
                   if (key) rate(key, "again");
                 }}
@@ -460,15 +460,15 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
       </ul>
       {missedId && !picked && (
         <>
-          <GradeBanner className="mt-4" ok={false} />
+          <AttemptBanner className="mt-4" kind="retry" />
           <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-            One more try
+            Try again
           </p>
         </>
       )}
       {picked && (
         <>
-          <GradeBanner className="mt-4" ok={picked === prompt.id} />
+          <AttemptBanner className="mt-4" kind={picked === prompt.id ? "strong" : "fail"} />
           {gaveUp && (
             <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
           )}
@@ -495,7 +495,7 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
         <DontKnowButton
           onClick={() => {
             if (!prompt) return;
-            playGrade(false);
+            playFeedback("fail");
             setGaveUp(true);
             setPicked(prompt.id);
             const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;

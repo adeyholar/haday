@@ -20,14 +20,14 @@ function TypeGamePage() {
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type the word</h1>
         <p className="mt-2 max-w-prose text-muted">
           Pointed Hebrew. Type what you see, including the vowels. First wrong is Try again (not weak). Second wrong is
-          Missed — crowd aww and weak. First try correct is strong. No speech score.
+          Not yet — we will bring it back, with the crowd aww, and the word is weak. First try correct is strong. No
+          speech score.
         </p>
       </Panel>
       <Panel>
         <TypeSession
           mode="game"
           progress={typing}
-          crowdAww
           onGameFinish={(acc) => record(acc)}
           onMark={(id, m) => mark(id, m)}
         />

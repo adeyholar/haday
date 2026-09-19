@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCueFor, missCueLabel, strengthFromMisses, CUE_TRY_AGAIN, CUE_MISSED } = await jiti.import(
+const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCueFor, missCueLabel, strengthFromMisses, CUE_TRY_AGAIN, CUE_NOT_YET } = await jiti.import(
   "/workspace/src/lib/hebrew-typing/engine.ts",
 );
 const { mapPhysicalKey, QWERTY_TO_HE, fingerFor } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
@@ -59,10 +59,10 @@ test("Alef lessons offer Type without changing Mark trained gates", () => {
 
 test("miss ladder: first retry, second fail, first-try strong", () => {
   assert.equal(missCueFor(0), "retry");
-  assert.equal(missCueFor(1), "missed");
+  assert.equal(missCueFor(1), "fail");
   assert.equal(missCueLabel("retry"), CUE_TRY_AGAIN);
-  assert.equal(missCueLabel("missed"), CUE_MISSED);
-  assert.notEqual(CUE_TRY_AGAIN, CUE_MISSED);
+  assert.equal(missCueLabel("fail"), CUE_NOT_YET);
+  assert.notEqual(CUE_TRY_AGAIN, CUE_NOT_YET);
   assert.equal(strengthFromMisses(0), "strong");
   assert.equal(strengthFromMisses(1), "ok");
   assert.equal(strengthFromMisses(2), "weak");

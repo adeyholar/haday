@@ -13,7 +13,8 @@ import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
-import { playGrade } from "@/lib/sfx";
+import { playFeedback } from "@/lib/try-again";
+import { AttemptBanner } from "@/components/attempt-banner";
 import { VocabArt } from "@/components/vocab-art";
 
 export const Route = createFileRoute("/quiz")({ component: QuizPage });
@@ -100,7 +101,7 @@ function QuizPage() {
 
   function admitNoIdea() {
     if (!item || picked || revealed) return;
-    playGrade(false);
+    playFeedback("fail");
     rate(item.id, "reveal");
     setGaveUp(true);
     if (mode === "choice") {
@@ -196,17 +197,17 @@ function QuizPage() {
                     if (c === item.gloss) {
                       setPicked(c);
                       mark(true);
-                      playGrade(true);
+                      playFeedback("strong");
                       return;
                     }
                     if (!missedChoice) {
                       setMissedChoice(c);
-                      playGrade(false);
+                      playFeedback("retry");
                       return;
                     }
                     setPicked(c);
                     mark(false);
-                    playGrade(false);
+                    playFeedback("fail");
                   }}
                   className={cn(
                     "w-full min-h-12 rounded-[var(--radius-md)] px-4 py-3 text-left text-sm font-medium shadow-[var(--shadow-border)]",
@@ -225,16 +226,16 @@ function QuizPage() {
         </ul>
         {missedChoice && !picked && (
           <>
-            {missedChoice !== "__nudge__" ? <GradeBanner className="mt-4" ok={false} /> : null}
+            {missedChoice !== "__nudge__" ? <AttemptBanner className="mt-4" kind="retry" /> : null}
             <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-              One more try
+              Try again
             </p>
             <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
           </>
         )}
         {picked && (
           <>
-            <GradeBanner className="mt-4" ok={picked === item.gloss} />
+            <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
             {gaveUp && (
               <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
             )}
@@ -251,16 +252,18 @@ function QuizPage() {
               return;
             }
             const ok = glossMatches(item, typed);
-            playGrade(ok);
             if (ok) {
+              playFeedback("strong");
               setRevealed(true);
               mark(true);
               return;
             }
             if (typeTries < 1) {
+              playFeedback("retry");
               setTypeTries(1);
               return;
             }
+            playFeedback("fail");
             setRevealed(true);
             mark(false);
           }}
@@ -294,14 +297,14 @@ function QuizPage() {
           {typeTries >= 1 && !revealed && (
             <>
               <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
-                One more try
+                Try again
               </p>
               <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
             </>
           )}
           {revealed && (
             <div className="mt-3">
-              <GradeBanner ok={glossMatches(item, typed)} />
+              <AttemptBanner kind={glossMatches(item, typed) ? "strong" : "fail"} />
               <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
               {gaveUp && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
