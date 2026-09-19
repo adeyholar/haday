@@ -4,6 +4,8 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { itemsForSelection, itemsForWeek, itemsForChapter, quizChoices, VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
+const { verseFor } = await jiti.import("/workspace/src/lib/verses.ts");
+const { tanakhVerseFor } = await jiti.import("/workspace/src/lib/tanakh-pool.ts");
 const { lessonById } = await jiti.import("/workspace/src/lib/ladder.ts");
 
 test("self-quiz deck is the full week/chapter union, not a 12-cap", () => {
@@ -38,4 +40,13 @@ test("four-way choices are the gloss plus three nearby traps", () => {
     const near = Math.abs(src.chapter - item.chapter) <= 4 || src.pos === item.pos;
     assert.ok(near, `${g} (ch ${src.chapter} ${src.pos}) is too far from ${item.gloss}`);
   }
+});
+
+test("complete-miss Tanakh examples have Hebrew and English", () => {
+  const week3 = itemsForWeek(3);
+  const hits = week3.filter((v) => {
+    const verse = verseFor(v.id) ?? tanakhVerseFor(v.id);
+    return Boolean(verse?.he && verse?.en);
+  });
+  assert.ok(hits.length >= Math.min(8, week3.length), "most week-3 lemmas have a short Tanakh line");
 });

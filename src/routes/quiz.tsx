@@ -56,7 +56,12 @@ function QuizPage() {
 
   const item = deck[i];
   const choices = useMemo(() => (item ? quizChoices(item, pool) : []), [item, pool]);
-  const showVerse = (mode === "choice" && picked !== null) || (mode === "type" && revealed);
+  const completeMiss = Boolean(
+    item &&
+      ((mode === "choice" && picked !== null && picked !== item.gloss) ||
+        (mode === "type" && revealed && !glossMatches(item, typed))),
+  );
+  const showVerse = completeMiss;
 
   function resetRound() {
     setI(0);
@@ -305,7 +310,9 @@ function QuizPage() {
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={glossMatches(item, typed) ? "strong" : "fail"} />
-              <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
+              {revealed && !glossMatches(item, typed) ? (
+                <p className="mt-2 text-center font-display text-lg font-semibold text-ink">{item.gloss}</p>
+              ) : null}
               {gaveUp && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}
