@@ -9,6 +9,9 @@ const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCue
 const { mapPhysicalKey, QWERTY_TO_HE, fingerFor } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
 const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
 const { typingRank, emptyTyping, applyMark } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
+const { STUDY_TYPE_RUNGS, HOME_ROW, ALEF_BET_KEYS, studyRungTargets, clampStudyRung } = await jiti.import(
+  "/workspace/src/lib/hebrew-typing/study-rungs.ts",
+);
 const { lessonById } = await jiti.import("/workspace/src/lib/ladder.ts");
 const { stripNiqqud } = await jiti.import("/workspace/src/lib/hebrew.ts");
 
@@ -55,6 +58,22 @@ test("ranks climb Ink to Ready Scribe without a speech score", () => {
 test("Alef lessons offer Type without changing Mark trained gates", () => {
   const lesson = lessonById("alef-bereshit");
   assert.ok(lesson.actions.some((a) => a.kind === "type"));
+});
+
+test("study Type ladder is home, map, mix, words, then Tanakh", () => {
+  assert.deepEqual(
+    STUDY_TYPE_RUNGS.map((r) => r.id),
+    ["home", "map", "mix", "words", "tanakh"],
+  );
+  assert.equal(HOME_ROW.length, 10);
+  assert.equal(ALEF_BET_KEYS.length, 22);
+  assert.equal(studyRungTargets(1).length, 22);
+  assert.equal(clampStudyRung(9), 4);
+  assert.ok(studyRungTargets(3).every((w) => w.length >= 2));
+  const basic = studyRungTargets(4, 1, false);
+  const deep = studyRungTargets(4, 1, true);
+  assert.ok(basic.length >= 4);
+  assert.ok(deep.length >= 4);
 });
 
 test("miss ladder: first retry, second fail, first-try strong", () => {

@@ -8,10 +8,21 @@ export type TypingProgress = {
   bestGameAcc: number;
   strong: Record<string, number>;
   weak: Record<string, number>;
+  studyRung: number;
+  tanakhDeep: boolean;
 };
 
 export function emptyTyping(): TypingProgress {
-  return { batchesPassed: 0, gameRounds: 0, bestStudyAcc: 0, bestGameAcc: 0, strong: {}, weak: {} };
+  return {
+    batchesPassed: 0,
+    gameRounds: 0,
+    bestStudyAcc: 0,
+    bestGameAcc: 0,
+    strong: {},
+    weak: {},
+    studyRung: 0,
+    tanakhDeep: false,
+  };
 }
 
 export function typingRank(p: TypingProgress): TypeRank {
@@ -32,6 +43,8 @@ export function hydrateTyping(raw: unknown): TypingProgress {
     bestGameAcc: Math.max(0, Math.min(100, Number(r.bestGameAcc) || 0)),
     strong: counts(r.strong),
     weak: counts(r.weak),
+    studyRung: Math.max(0, Math.min(4, Number(r.studyRung) || 0)),
+    tanakhDeep: Boolean(r.tanakhDeep),
   };
 }
 

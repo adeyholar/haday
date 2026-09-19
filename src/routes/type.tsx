@@ -25,15 +25,15 @@ function TypeStudyPage() {
         <StudyMenu />
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Meet the keys, then drill, then type a short word. Accuracy ≥{TYPE_PASS}% passes a batch. Speed is vanity.
-          Israeli layout. One finger per key.
+          Eyes on the screen. Home row, then where each letter lives, then mixes, then short words, then Tanakh
+          snippets. Accuracy ≥{TYPE_PASS}% opens the next step. Speed is vanity.
         </p>
       </Panel>
       <Panel>
         <TypeSession
           mode="study"
           progress={typing}
-          onStudyPass={(acc) => record(acc)}
+          onStudyPass={(acc, rung) => record(acc, rung)}
         />
       </Panel>
     </>
