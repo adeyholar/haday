@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
+import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
