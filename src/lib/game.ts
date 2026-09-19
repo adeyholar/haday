@@ -604,13 +604,21 @@ export function applyBalloonResult(
   return next;
 }
 
-export function applyTypingStudy(game: GameSnapshot, acc: number): GameSnapshot {
+export function applyTypingStudy(game: GameSnapshot, acc: number, passedRung?: number): GameSnapshot {
   const next = cloneGame(hydrateGame(game));
   const prev = next.typing ?? emptyTyping();
+  let studyRung = prev.studyRung ?? 0;
+  let tanakhDeep = Boolean(prev.tanakhDeep);
+  if (typeof passedRung === "number" && passedRung >= 0) {
+    if (passedRung >= 4) tanakhDeep = true;
+    else studyRung = Math.min(4, Math.max(studyRung, passedRung + 1));
+  }
   next.typing = {
     ...prev,
     batchesPassed: prev.batchesPassed + 1,
     bestStudyAcc: Math.max(prev.bestStudyAcc, Math.max(0, Math.min(100, acc))),
+    studyRung,
+    tanakhDeep,
   };
   next.lastPlayDay = Date.now();
   return next;

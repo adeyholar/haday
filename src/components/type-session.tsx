@@ -3,10 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TypeKeyboard } from "@/components/type-keyboard";
 import { playFeedback } from "@/lib/try-again";
 import {
-  STUDY_WORDS,
-  firstWordLetters,
   gameRound,
-  studyLetterBatch,
   type TypeWord,
 } from "@/lib/hebrew-typing/bank";
 import {
@@ -22,10 +19,15 @@ import {
 } from "@/lib/hebrew-typing/engine";
 import { isLatinLetterKey, mapPhysicalKey } from "@/lib/hebrew-typing/layout";
 import { typingRank, type TypingProgress } from "@/lib/hebrew-typing/ranks";
+import {
+  STUDY_TYPE_RUNGS,
+  clampStudyRung,
+  studyRungTargets,
+  studyRungWords,
+} from "@/lib/hebrew-typing/study-rungs";
 import { CONSONANTS } from "@/lib/alphabet";
 
 export type TypeMode = "study" | "game" | "quiz";
-export type StudyPhase = "meet" | "drill" | "word";
 
 function letterName(glyph: string): string {
   return CONSONANTS.find((c) => c.letter === glyph)?.name ?? glyph;
@@ -57,14 +59,13 @@ export function TypeSession({
   mode: TypeMode;
   progress: TypingProgress;
   words?: TypeWord[];
-  onStudyPass?: (acc: number) => void;
+  onStudyPass?: (acc: number, rung: number) => void;
   onGameFinish?: (acc: number) => void;
   onMark?: (id: string, mark: "strong" | "weak" | "ok") => void;
   onDone?: (log: { id: string; hebrew: string; mark: "strong" | "weak" | "ok" }[]) => void;
 }) {
-  const missLadder = mode !== "study";
-  const [phase, setPhase] = useState<StudyPhase>("meet");
-  const [batchI, setBatchI] = useState(0);
+  const unlocked = clampStudyRung(progress.studyRung);
+  const [rung, setRung] = useState(unlocked);
   const [i, setI] = useState(0);
   const [typed, setTyped] = useState("");
   const [hits, setHits] = useState(0);
@@ -80,24 +81,30 @@ export function TypeSession({
   const started = useRef(Date.now());
   const [seed, setSeed] = useState(0);
 
+  const tanakhDeep = Boolean(progress.tanakhDeep) && rung >= 4;
   const round = useMemo(() => {
     if (words) return words;
+    if (mode === "study") return studyRungWords(rung, tanakhDeep) ?? [];
     return gameRound(10, seed + 7, progress.weak, progress.strong);
-  }, [words, seed, progress.weak, progress.strong]);
+  }, [words, seed, progress.weak, progress.strong, mode, rung, tanakhDeep]);
 
   const studyTargets = useMemo(() => {
-    if (phase === "meet") return batchI === 0 ? firstWordLetters() : studyLetterBatch(batchI, 4);
-    if (phase === "drill") return studyLetterBatch(batchI + 3, 5);
-    return STUDY_WORDS.slice(0, 5);
-  }, [phase, batchI]);
+    if (mode !== "study") return [];
+    if (round.length) return round.map((w) => w.hebrew);
+    return studyRungTargets(rung, seed + 3, tanakhDeep);
+  }, [mode, round, rung, seed, tanakhDeep]);
 
-  const gameWord: TypeWord | undefined = missLadder ? round[i] : undefined;
-  const target = missLadder ? (gameWord?.hebrew ?? "") : (studyTargets[i] ?? "");
-  const total = missLadder ? round.length : studyTargets.length;
+  const gameWord: TypeWord | undefined = mode !== "study" ? round[i] : round[i];
+  const target = mode === "study" ? (studyTargets[i] ?? "") : (gameWord?.hebrew ?? "");
+  const total = mode === "study" ? studyTargets.length : round.length;
   const acc = accuracyPct(hits, misses);
   const glow = locked ? null : nextExpected(target, typed);
-  const showNikkud = missLadder || phase === "word" || Boolean(glow && /[\u0591-\u05C7]/.test(glow));
+  const showNikkud =
+    mode !== "study" ||
+    STUDY_TYPE_RUNGS[rung]?.id === "tanakh" ||
+    Boolean(glow && /[\u0591-\u05C7]/.test(glow));
   const rank = typingRank(progress);
+  const meta = STUDY_TYPE_RUNGS[rung];
 
   function resetItem() {
     setTyped("");
@@ -119,7 +126,7 @@ export function TypeSession({
       const pct = accuracyPct(nextHits, nextMisses);
       const nextLog = gameWord ? [...log, { id: gameWord.id, hebrew: gameWord.hebrew, mark }] : log;
       if (mode === "game" || mode === "quiz") onGameFinish?.(pct);
-      else if (passedBatch(pct)) onStudyPass?.(pct);
+      else if (passedBatch(pct)) onStudyPass?.(pct, rung);
       onDone?.(nextLog);
       return;
     }
@@ -145,10 +152,6 @@ export function TypeSession({
     }
     setMissKey(key);
     window.setTimeout(() => setMissKey(null), 220);
-    if (!missLadder) {
-      playFeedback("retry");
-      return;
-    }
     const cueKind = missCueFor(wordMisses);
     const nextWordMisses = wordMisses + 1;
     setWordMisses(nextWordMisses);
@@ -200,7 +203,7 @@ export function TypeSession({
     setMisses(0);
     setLog([]);
     resetItem();
-    setBatchI((n) => n + 1);
+    setSeed((n) => n + 1);
   }
 
   if (done) {
@@ -216,7 +219,9 @@ export function TypeSession({
         </p>
         {mode === "study" ? (
           <p className="mt-3 font-semibold text-ink">
-            {pass ? `Passed (≥${TYPE_PASS}%). Rank: ${rank}` : `Need ${TYPE_PASS}% accuracy. Try this batch again.`}
+            {pass
+              ? `Passed (≥${TYPE_PASS}%). ${rung < 4 ? "Next step is unlocked." : tanakhDeep ? "Tanakh mix done." : "Longer Tanakh snippets are next."} Rank: ${rank}`
+              : `Need ${TYPE_PASS}% accuracy. Stay on this step.`}
           </p>
         ) : (
           <p className="mt-3 font-semibold text-ink">
@@ -231,16 +236,15 @@ export function TypeSession({
         <div className="mt-4 flex flex-col gap-2">
           {mode === "study" ? (
             <>
-              <Button onClick={newStudyBatch}>{pass ? "Next batch" : "Try again"}</Button>
-              {pass && phase !== "word" ? (
+              <Button onClick={newStudyBatch}>{pass ? "Again on this step" : "Try again"}</Button>
+              {pass && rung < 4 ? (
                 <Button
-                  variant="outline"
                   onClick={() => {
-                    setPhase(phase === "meet" ? "drill" : "word");
+                    setRung(rung + 1);
                     newStudyBatch();
                   }}
                 >
-                  {phase === "meet" ? "Go to Drill" : "Go to Word"}
+                  Next: {STUDY_TYPE_RUNGS[rung + 1]?.title}
                 </Button>
               ) : null}
             </>
@@ -267,27 +271,49 @@ export function TypeSession({
 
   return (
     <div>
+      {mode === "study" ? (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {STUDY_TYPE_RUNGS.map((r, n) => {
+            const open = n <= unlocked;
+            const on = n === rung;
+            return (
+              <button
+                key={r.id}
+                type="button"
+                disabled={!open || done}
+                onClick={() => {
+                  if (!open) return;
+                  setRung(n);
+                  newStudyBatch();
+                }}
+                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                  on ? "bg-ink text-parchment" : open ? "bg-card text-ink shadow-[var(--shadow-border)]" : "bg-surface text-muted"
+                }`}
+              >
+                {n + 1}. {r.title}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
       <div className="mb-3 flex items-center justify-between gap-2 text-sm">
         <span className="font-semibold text-ink">
-          {mode === "study"
-            ? `${phase === "meet" ? "Meet" : phase === "drill" ? "Drill" : "Word"} · ${i + 1}/${total}`
-            : `Word ${i + 1}/${total}`}
+          {mode === "study" ? `${meta?.title ?? "Type"} · ${i + 1}/${total}` : `Word ${i + 1}/${total}`}
         </span>
         <span className="tabular-nums text-muted">
           {acc}% · {rank}
         </span>
       </div>
+      <p className="mb-2 text-center text-sm font-semibold text-primary">Eyes on the screen.</p>
       {latinHelper ? (
         <p className="mb-2 rounded-[var(--radius-md)] bg-surface px-3 py-2 text-center text-sm text-muted">
           English keys still work — we map them to Hebrew. You can also switch the iPad keyboard to Hebrew.
         </p>
       ) : null}
+      {mode === "study" && meta ? <p className="text-center text-sm text-muted">{meta.hint}</p> : null}
       {gameWord ? <p className="text-center text-sm text-muted">{gameWord.gloss}</p> : null}
-      {mode === "study" && phase === "meet" && target ? (
-        <p className="text-center text-sm text-muted">{letterName(target)} · find the key, then type it</p>
-      ) : null}
-      {mode === "study" && phase === "drill" ? (
-        <p className="text-center text-sm text-muted">Type the letter. Accuracy before speed.</p>
+      {mode === "study" && (meta?.id === "home" || meta?.id === "map") && target ? (
+        <p className="text-center text-sm text-muted">{letterName(target)} · find that key</p>
       ) : null}
       {cue ? <p className="mt-2 text-center text-sm font-semibold text-danger">{cue}</p> : null}
       <PromptView target={target} typed={typed} />

@@ -104,7 +104,7 @@ type StudyState = StudySnapshot & {
   noticeLadderWalk: (lessonId: string) => void;
   passLadderDrill: (lessonId: string, pct: number) => void;
   trainLadderLesson: (lessonId: string) => void;
-  recordTypingStudy: (acc: number) => void;
+  recordTypingStudy: (acc: number, passedRung?: number) => void;
   recordTypingGame: (acc: number) => void;
   recordTypingMark: (id: string, mark: "strong" | "weak" | "ok") => void;
   startUltimate: (ids: string[]) => void;
@@ -259,8 +259,8 @@ export const useStudy = create<StudyState>()(
         const game = get().game;
         set({ game: { ...game, ladder: trainLadderLesson(game.ladder, lessonId) } });
       },
-      recordTypingStudy: (acc) => {
-        set({ game: applyTypingStudy(get().game, acc) });
+      recordTypingStudy: (acc, passedRung) => {
+        set({ game: applyTypingStudy(get().game, acc, passedRung) });
       },
       recordTypingGame: (acc) => {
         set({ game: applyTypingGame(get().game, acc) });

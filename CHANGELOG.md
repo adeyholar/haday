@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Type ladder.** Alef Practice → Type: home row, then א–ת map, then mixes, then short words, then Tanakh. 95% to advance. Eyes on the screen.
+
 - **Quiz myself is Hebrew→English.** Pick any weeks and chapters; the sitting is the full mix. You see the Hebrew and give the English. Typing Hebrew stays in Type.
 
 - **Try again is never a miss.** First wrong is Try again only. Second wrong is Not yet — we’ll bring it back, with the crowd aww, and the word is weak. Same ladder on Drill, Quiz, lessons, and Type.
