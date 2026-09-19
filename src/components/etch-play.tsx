@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { VocabArt } from "@/components/vocab-art";
+import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
 import { glossMatches, liveGloss, POS_LABEL } from "@/lib/vocab";
 import {
@@ -186,6 +187,8 @@ export function EtchPlay({
           </Button>
         )}
       </div>
+
+      {task.kind === "meet" && <VerseCard item={item} showEnglish />}
 
       {task.kind === "meet" && (
         <Button className="mt-4 w-full" size="lg" onClick={() => finish("good")}>

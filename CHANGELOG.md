@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Cards.** Study → Cards: pick weeks and chapters, then meet each word with Hear and a Tanakh line. Got it / Again. Meet and Zakhor now show the verse without waiting.
+
 - **Choose and Hard choose on Type and Write.** English prompt, four Hebrew forms. Do it is still keys or ink. Type stays quiet; Write multiple-choice still uses Try again sounds.
 
 - **Type is quiet.** Study Type and Game Type keep the on-screen Try again / Not yet cues. No applause, no aww, no spoken try-again. Drill and Quiz still use those sounds.
