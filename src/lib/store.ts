@@ -21,6 +21,8 @@ import {
   applyNounResult,
   applyStageResult,
   applySyllableResult,
+  applyTypingGame,
+  applyTypingStudy,
   applyUltimateResult,
   defaultGame,
   hydrateGame,
@@ -101,6 +103,8 @@ type StudyState = StudySnapshot & {
   noticeLadderWalk: (lessonId: string) => void;
   passLadderDrill: (lessonId: string, pct: number) => void;
   trainLadderLesson: (lessonId: string) => void;
+  recordTypingStudy: (acc: number) => void;
+  recordTypingGame: (acc: number) => void;
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
   finishUltimate: (pct: number) => void;
@@ -252,6 +256,12 @@ export const useStudy = create<StudyState>()(
       trainLadderLesson: (lessonId) => {
         const game = get().game;
         set({ game: { ...game, ladder: trainLadderLesson(game.ladder, lessonId) } });
+      },
+      recordTypingStudy: (acc) => {
+        set({ game: applyTypingStudy(get().game, acc) });
+      },
+      recordTypingGame: (acc) => {
+        set({ game: applyTypingGame(get().game, acc) });
       },
       startUltimate: (ids) => {
         set({ game: startUltimateRun(get().game, ids) });

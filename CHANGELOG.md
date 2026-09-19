@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Hebrew typing.** Study Type (Meet → Drill → Word) and Game Type the word share one Israeli keyboard. Accuracy first; nikkud on Game words. Optional for Mark trained.
+
 - **Unlock checklist.** Each lesson lists what Mark trained needs — Done / Not yet — so students can see the path inside a station.
 
 - **Shin, sin, tav.** Hear those three as sheen / seen / tahv — not shi-n / si-n / te-af.

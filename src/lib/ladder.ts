@@ -2,7 +2,7 @@
 
 export type StationId = "alef" | "names" | "verbs" | "voices" | "realm";
 
-export type LadderActionKind = "lab" | "echo" | "drill" | "write" | "ask" | "listen" | "alphabet";
+export type LadderActionKind = "lab" | "echo" | "drill" | "write" | "ask" | "listen" | "alphabet" | "type";
 
 export type LabRef = { book: string; ch: number; v1?: number; v2?: number };
 
@@ -117,6 +117,7 @@ export const LESSONS: LadderLesson[] = [
       { kind: "lab", label: "Open the text", lab: { book: "Gen", ch: 1, v1: 1, v2: 1 } },
       { kind: "alphabet", label: "Practice the letters" },
       { kind: "drill", label: "Drill" },
+      { kind: "type", label: "Type" },
     ],
     wells: ["alphabet", "vowels"],
   },
@@ -137,6 +138,7 @@ export const LESSONS: LadderLesson[] = [
       { kind: "echo", label: "Echo the first verse", lab: { book: "Ps", ch: 119, v1: 1, v2: 1 } },
       { kind: "alphabet", label: "Practice the letters" },
       { kind: "drill", label: "Drill" },
+      { kind: "type", label: "Type" },
     ],
     wells: ["alphabet"],
   },
@@ -156,6 +158,7 @@ export const LESSONS: LadderLesson[] = [
       { kind: "lab", label: "Open the text", lab: { book: "Gen", ch: 1, v1: 1, v2: 1 } },
       { kind: "echo", label: "Echo the verse", lab: { book: "Gen", ch: 1, v1: 1, v2: 1 } },
       { kind: "drill", label: "Drill" },
+      { kind: "type", label: "Type" },
       { kind: "listen", label: "Listen on the go" },
     ],
     wells: ["alphabet"],

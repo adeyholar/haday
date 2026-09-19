@@ -1,6 +1,7 @@
 import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
 import { GRAMMAR_TRACK_IDS, grammarTrackCap, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
 import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder";
+import { emptyTyping, hydrateTyping, type TypingProgress } from "@/lib/hebrew-typing/ranks";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -60,6 +61,7 @@ export type GameSnapshot = {
   article: SyllableProgress;
   lessons: Record<GrammarTrackId, SyllableProgress>;
   balloons: BalloonProgress;
+  typing: TypingProgress;
   ladder: LadderProgress;
 };
 
@@ -145,6 +147,7 @@ export function defaultGame(): GameSnapshot {
     article: emptyArticle(),
     lessons: emptyLessons(),
     balloons: emptyBalloons(),
+    typing: emptyTyping(),
     ladder: defaultLadder(),
   };
 }
@@ -224,6 +227,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     article: hydrateArticle(r.article),
     lessons: hydrateLessons(r.lessons),
     balloons: hydrateBalloons(r.balloons),
+    typing: hydrateTyping(r.typing),
     ladder: hydrateLadder(r.ladder),
   };
 }
@@ -595,6 +599,32 @@ export function applyBalloonResult(
     weak: hydrateWeak(result.weak ?? prev.weak),
     vowelBest: pack === "vowels" ? Math.max(prev.vowelBest, Math.max(0, result.score)) : prev.vowelBest,
     vowelCleared: prev.vowelCleared || (pack === "vowels" && result.cleared),
+  };
+  next.lastPlayDay = Date.now();
+  return next;
+}
+
+export function applyTypingStudy(game: GameSnapshot, acc: number): GameSnapshot {
+  const next = cloneGame(hydrateGame(game));
+  const prev = next.typing ?? emptyTyping();
+  next.typing = {
+    batchesPassed: prev.batchesPassed + 1,
+    gameRounds: prev.gameRounds,
+    bestStudyAcc: Math.max(prev.bestStudyAcc, Math.max(0, Math.min(100, acc))),
+    bestGameAcc: prev.bestGameAcc,
+  };
+  next.lastPlayDay = Date.now();
+  return next;
+}
+
+export function applyTypingGame(game: GameSnapshot, acc: number): GameSnapshot {
+  const next = cloneGame(hydrateGame(game));
+  const prev = next.typing ?? emptyTyping();
+  next.typing = {
+    batchesPassed: prev.batchesPassed,
+    gameRounds: prev.gameRounds + 1,
+    bestStudyAcc: prev.bestStudyAcc,
+    bestGameAcc: Math.max(prev.bestGameAcc, Math.max(0, Math.min(100, acc))),
   };
   next.lastPlayDay = Date.now();
   return next;

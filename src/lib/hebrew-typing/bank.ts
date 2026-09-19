@@ -1,0 +1,91 @@
+import { CONSONANTS } from "@/lib/alphabet";
+import { VOCAB } from "@/lib/vocab";
+import { stripNiqqud } from "@/lib/hebrew";
+
+export type TypeWord = { id: string; hebrew: string; gloss: string };
+
+/** Genesis 1:1 plus early class lemmas — all pointed. */
+export const GAME_WORDS: TypeWord[] = [
+  { id: "bereshit", hebrew: "בְּרֵאשִׁית", gloss: "in the beginning" },
+  { id: "bara", hebrew: "בָּרָא", gloss: "he created" },
+  { id: "elohim-g", hebrew: "אֱלֹהִים", gloss: "God" },
+  { id: "et", hebrew: "אֵת", gloss: "object marker" },
+  { id: "hashamayim", hebrew: "הַשָּׁמַיִם", gloss: "the heavens" },
+  { id: "veet", hebrew: "וְאֵת", gloss: "and (object)" },
+  { id: "haarets", hebrew: "הָאָרֶץ", gloss: "the earth" },
+  { id: "or", hebrew: "אוֹר", gloss: "light" },
+  { id: "yom", hebrew: "יוֹם", gloss: "day" },
+  { id: "laylah", hebrew: "לַיְלָה", gloss: "night" },
+  { id: "mayim", hebrew: "מַיִם", gloss: "water" },
+  { id: "erets", hebrew: "אֶרֶץ", gloss: "land, earth" },
+  { id: "shamayim", hebrew: "שָׁמַיִם", gloss: "heavens" },
+  { id: "ab", hebrew: "אָב", gloss: "father" },
+  { id: "em", hebrew: "אֵם", gloss: "mother" },
+  { id: "ben", hebrew: "בֵּן", gloss: "son" },
+  { id: "bat", hebrew: "בַּת", gloss: "daughter" },
+  { id: "ish", hebrew: "אִישׁ", gloss: "man" },
+  { id: "ishah", hebrew: "אִשָּׁה", gloss: "woman" },
+  { id: "bayit", hebrew: "בַּיִת", gloss: "house" },
+  { id: "dabar", hebrew: "דָּבָר", gloss: "word" },
+  { id: "melek", hebrew: "מֶלֶךְ", gloss: "king" },
+  { id: "torah", hebrew: "תּוֹרָה", gloss: "law, instruction" },
+  { id: "sus", hebrew: "סוּס", gloss: "horse" },
+  { id: "qol", hebrew: "קוֹל", gloss: "voice" },
+  { id: "har", hebrew: "הַר", gloss: "mountain" },
+  { id: "ir", hebrew: "עִיר", gloss: "city" },
+  { id: "leb", hebrew: "לֵב", gloss: "heart" },
+  { id: "nephesh", hebrew: "נֶפֶשׁ", gloss: "life, person" },
+  { id: "kohen", hebrew: "כֹּהֵן", gloss: "priest" },
+  { id: "nabi", hebrew: "נָבִיא", gloss: "prophet" },
+  { id: "goy", hebrew: "גּוֹי", gloss: "nation" },
+  { id: "sefer", hebrew: "סֵפֶר", gloss: "scroll" },
+  { id: "ebed", hebrew: "עֶבֶד", gloss: "servant" },
+  { id: "ayin", hebrew: "עַיִן", gloss: "eye" },
+  { id: "adam", hebrew: "אָדָם", gloss: "man, Adam" },
+  { id: "elohim", hebrew: "אֱלֹהִים", gloss: "God" },
+  { id: "moshe", hebrew: "מֹשֶׁה", gloss: "Moses" },
+  { id: "israel", hebrew: "יִשְׂרָאֵל", gloss: "Israel" },
+  { id: "avraham", hebrew: "אַבְרָהָם", gloss: "Abraham" },
+  { id: "david", hebrew: "דָּוִד", gloss: "David" },
+  { id: "yhwh-pointed", hebrew: "יְהוָה", gloss: "the LORD" },
+];
+
+const BERESHIT_LETTERS = ["ב", "ר", "א", "שׁ", "י", "ת"] as const;
+
+export function studyLetterBatch(index: number, size = 4): string[] {
+  const letters = CONSONANTS.map((c) => c.letter);
+  const start = (index * size) % letters.length;
+  const batch = letters.slice(start, start + size);
+  if (batch.length < size) batch.push(...letters.slice(0, size - batch.length));
+  return batch.slice(0, size);
+}
+
+export function firstWordLetters(): string[] {
+  return [...BERESHIT_LETTERS];
+}
+
+/** 3–5 letter consonant strings from the first verse. */
+export const STUDY_WORDS = ["ברא", "ראש", "שית", "את", "ארץ", "שמים", "אלהים"];
+
+export function pointedVocabSample(limit = 12): TypeWord[] {
+  const extra = VOCAB.filter((v) => v.hebrew !== stripNiqqud(v.hebrew) && v.hebrew.length <= 12).slice(0, 8);
+  const seen = new Set(GAME_WORDS.map((w) => w.hebrew));
+  const more: TypeWord[] = extra
+    .filter((v) => !seen.has(v.hebrew))
+    .map((v) => ({ id: v.id, hebrew: v.hebrew, gloss: v.gloss }));
+  return [...GAME_WORDS, ...more].slice(0, Math.max(8, limit));
+}
+
+export function gameRound(n = 10, seed = Date.now()): TypeWord[] {
+  const pool = pointedVocabSample(40);
+  let x = seed % 2147483647;
+  const out = [...pool];
+  for (let i = out.length - 1; i > 0; i--) {
+    x = (x * 48271) % 2147483647;
+    const j = x % (i + 1);
+    const a = out[i]!;
+    out[i] = out[j]!;
+    out[j] = a;
+  }
+  return out.slice(0, n);
+}
