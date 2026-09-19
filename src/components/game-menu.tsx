@@ -20,6 +20,8 @@ export function GameMenu() {
           ? "/game/balloons"
           : pathname.startsWith("/game/type")
             ? "/game/type"
+          : pathname.startsWith("/self-quiz")
+            ? "/self-quiz"
           : pathname.startsWith("/game/alefbet")
           ? "/game/alefbet"
           : pathname.startsWith("/game/syllables")
@@ -46,6 +48,7 @@ export function GameMenu() {
           options: [
             { value: "/game", label: "BBH vocabulary" },
             { value: "/game/custom", label: "Custom mix" },
+            { value: "/self-quiz", label: "Self-quiz" },
             { value: "/challenge", label: "Ultimate Challenge" },
           ],
         },
@@ -82,6 +85,7 @@ export function GameMenu() {
         else if (to === "/game/custom") void navigate({ to: "/game/custom" });
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });
         else if (to === "/game/type") void navigate({ to: "/game/type" });
+        else if (to === "/self-quiz") void navigate({ to: "/self-quiz", search: { shell: "game" } });
         else if (to === "/game/balloons") void navigate({ to: "/game/balloons" });
         else if (to === "/game/syllables") void navigate({ to: "/game/syllables" });
         else if (to === "/game/nouns") void navigate({ to: "/game/nouns" });

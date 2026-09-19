@@ -22,6 +22,7 @@ import {
   applyStageResult,
   applySyllableResult,
   applyTypingGame,
+  applyTypingMark,
   applyTypingStudy,
   applyUltimateResult,
   defaultGame,
@@ -105,6 +106,7 @@ type StudyState = StudySnapshot & {
   trainLadderLesson: (lessonId: string) => void;
   recordTypingStudy: (acc: number) => void;
   recordTypingGame: (acc: number) => void;
+  recordTypingMark: (id: string, mark: "strong" | "weak" | "ok") => void;
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
   finishUltimate: (pct: number) => void;
@@ -262,6 +264,9 @@ export const useStudy = create<StudyState>()(
       },
       recordTypingGame: (acc) => {
         set({ game: applyTypingGame(get().game, acc) });
+      },
+      recordTypingMark: (id, mark) => {
+        set({ game: applyTypingMark(get().game, id, mark) });
       },
       startUltimate: (ids) => {
         set({ game: startUltimateRun(get().game, ids) });

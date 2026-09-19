@@ -29,6 +29,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
+import { Route as SelfQuizRouteImport } from './routes/self-quiz'
 import { Route as TypeRouteImport } from './routes/type'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
@@ -166,6 +167,11 @@ const RewardsRoute = RewardsRouteImport.update({
 const RulesRoute = RulesRouteImport.update({
   id: '/rules',
   path: '/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SelfQuizRoute = SelfQuizRouteImport.update({
+  id: '/self-quiz',
+  path: '/self-quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TypeRoute = TypeRouteImport.update({
@@ -380,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
@@ -500,6 +508,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
@@ -562,6 +571,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/self-quiz'
     | '/type'
     | '/write'
     | '/admin/query'
@@ -621,6 +631,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/self-quiz'
     | '/type'
     | '/write'
     | '/admin/query'
@@ -681,6 +692,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/self-quiz'
     | '/type'
     | '/write'
     | '/admin/query'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
   RulesRoute: typeof RulesRoute
+  SelfQuizRoute: typeof SelfQuizRoute
   TypeRoute: typeof TypeRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -915,6 +928,13 @@ declare module '@tanstack/react-router' {
       path: '/rules'
       fullPath: '/rules'
       preLoaderRoute: typeof RulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/self-quiz': {
+      id: '/self-quiz'
+      path: '/self-quiz'
+      fullPath: '/self-quiz'
+      preLoaderRoute: typeof SelfQuizRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/type': {
@@ -1238,6 +1258,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
   RulesRoute: RulesRoute,
+  SelfQuizRoute: SelfQuizRoute,
   TypeRoute: TypeRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,

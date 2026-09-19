@@ -1,7 +1,7 @@
 import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
 import { GRAMMAR_TRACK_IDS, grammarTrackCap, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
 import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder";
-import { emptyTyping, hydrateTyping, type TypingProgress } from "@/lib/hebrew-typing/ranks";
+import { emptyTyping, hydrateTyping, applyMark, type TypingProgress } from "@/lib/hebrew-typing/ranks";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -608,10 +608,9 @@ export function applyTypingStudy(game: GameSnapshot, acc: number): GameSnapshot 
   const next = cloneGame(hydrateGame(game));
   const prev = next.typing ?? emptyTyping();
   next.typing = {
+    ...prev,
     batchesPassed: prev.batchesPassed + 1,
-    gameRounds: prev.gameRounds,
     bestStudyAcc: Math.max(prev.bestStudyAcc, Math.max(0, Math.min(100, acc))),
-    bestGameAcc: prev.bestGameAcc,
   };
   next.lastPlayDay = Date.now();
   return next;
@@ -621,11 +620,21 @@ export function applyTypingGame(game: GameSnapshot, acc: number): GameSnapshot {
   const next = cloneGame(hydrateGame(game));
   const prev = next.typing ?? emptyTyping();
   next.typing = {
-    batchesPassed: prev.batchesPassed,
+    ...prev,
     gameRounds: prev.gameRounds + 1,
-    bestStudyAcc: prev.bestStudyAcc,
     bestGameAcc: Math.max(prev.bestGameAcc, Math.max(0, Math.min(100, acc))),
   };
+  next.lastPlayDay = Date.now();
+  return next;
+}
+
+export function applyTypingMark(
+  game: GameSnapshot,
+  id: string,
+  mark: "strong" | "weak" | "ok",
+): GameSnapshot {
+  const next = cloneGame(hydrateGame(game));
+  next.typing = applyMark(next.typing ?? emptyTyping(), id, mark);
   next.lastPlayDay = Date.now();
   return next;
 }
