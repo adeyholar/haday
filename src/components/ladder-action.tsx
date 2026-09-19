@@ -73,6 +73,16 @@ export function LadderActionLink({
     );
   }
 
+  if (action.kind === "type") {
+    return (
+      <Link to="/type" search={fromSearch(lessonId)} className="block">
+        <Button className="w-full" variant="outline" size="lg">
+          {action.label}
+        </Button>
+      </Link>
+    );
+  }
+
   if (action.kind === "ask") {
     return (
       <Link to="/ask" search={fromSearch(lessonId)} className="block">

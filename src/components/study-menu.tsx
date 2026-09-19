@@ -11,6 +11,7 @@ const OPTIONS = [
   { value: "/match", match: (p: string) => p.startsWith("/match"), label: "Match" },
   { value: "/browse", match: (p: string) => p.startsWith("/browse"), label: "Lexicon" },
   { value: "/alphabet", match: (p: string) => p.startsWith("/alphabet"), label: "Alef-bet lesson" },
+  { value: "/type", match: (p: string) => p.startsWith("/type"), label: "Type" },
   { value: "/keep", match: (p: string) => p.startsWith("/keep"), label: "Zakhor · Daily keep" },
   { value: "/finder", match: (p: string) => p.startsWith("/finder"), label: "Tanakh cards" },
   { value: "/lessons", match: (p: string) => p.startsWith("/lessons"), label: "Grammar lessons" },
@@ -37,6 +38,7 @@ export function StudyMenu() {
         else if (to === "/match") void navigate({ to: "/match" });
         else if (to === "/browse") void navigate({ to: "/browse" });
         else if (to === "/alphabet") void navigate({ to: "/alphabet" });
+        else if (to === "/type") void navigate({ to: "/type" });
         else if (to === "/keep") void navigate({ to: "/keep" });
         else if (to === "/finder") void navigate({ to: "/finder" });
         else if (to === "/lessons") void navigate({ to: "/lessons" });

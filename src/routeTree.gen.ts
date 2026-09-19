@@ -29,6 +29,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
+import { Route as TypeRouteImport } from './routes/type'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
@@ -37,6 +38,7 @@ import { Route as FinderIndexRouteImport } from './routes/finder/index'
 import { Route as FinderDeckRouteImport } from './routes/finder/deck'
 import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
+import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -166,6 +168,11 @@ const RulesRoute = RulesRouteImport.update({
   path: '/rules',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TypeRoute = TypeRouteImport.update({
+  id: '/type',
+  path: '/type',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WriteRoute = WriteRouteImport.update({
   id: '/write',
   path: '/write',
@@ -204,6 +211,11 @@ const FinderWordRoute = FinderWordRouteImport.update({
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/game/',
   path: '/game/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameTypeRoute = GameTypeRouteImport.update({
+  id: '/game/type',
+  path: '/game/type',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LessonsIndexRoute = LessonsIndexRouteImport.update({
@@ -368,12 +380,14 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/type': typeof GameTypeRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
@@ -425,12 +439,14 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/type': typeof GameTypeRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
@@ -484,12 +500,14 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
+  '/type': typeof TypeRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/type': typeof GameTypeRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
@@ -544,12 +562,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/type'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/type'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
@@ -601,12 +621,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/type'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/type'
     | '/listen/pet'
     | '/finder'
     | '/game'
@@ -659,12 +681,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/rules'
+    | '/type'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/type'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
@@ -718,10 +742,12 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
   RulesRoute: typeof RulesRoute
+  TypeRoute: typeof TypeRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
   FinderDeckRoute: typeof FinderDeckRoute
   FinderWordRoute: typeof FinderWordRoute
+  GameTypeRoute: typeof GameTypeRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
@@ -891,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/type': {
+      id: '/type'
+      path: '/type'
+      fullPath: '/type'
+      preLoaderRoute: typeof TypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/write': {
       id: '/write'
       path: '/write'
@@ -945,6 +978,13 @@ declare module '@tanstack/react-router' {
       path: '/game'
       fullPath: '/game/'
       preLoaderRoute: typeof GameIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/type': {
+      id: '/game/type'
+      path: '/game/type'
+      fullPath: '/game/type'
+      preLoaderRoute: typeof GameTypeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lessons/': {
@@ -1198,10 +1238,12 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
   RulesRoute: RulesRoute,
+  TypeRoute: TypeRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,
   FinderDeckRoute: FinderDeckRoute,
   FinderWordRoute: FinderWordRoute,
+  GameTypeRoute: GameTypeRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   LessonsIndexRoute: LessonsIndexRoute,
