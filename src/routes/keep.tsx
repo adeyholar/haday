@@ -186,7 +186,7 @@ function KeepPage() {
         )}
       </button>
 
-      {ui.flipped && <VerseCard item={current} showEnglish />}
+      <VerseCard item={current} showEnglish />
 
       {ui.flipped && (
         <div className="mt-4 grid grid-cols-3 gap-2">
