@@ -24,7 +24,9 @@ import { isLatinLetterKey, mapPhysicalKey } from "@/lib/hebrew-typing/layout";
 import { typingRank, type TypingProgress } from "@/lib/hebrew-typing/ranks";
 import {
   STUDY_TYPE_RUNGS,
+  STUDY_RUNG_MAX,
   clampStudyRung,
+  studyRungBlind,
   studyRungTargets,
   studyRungWords,
 } from "@/lib/hebrew-typing/study-rungs";
@@ -99,7 +101,7 @@ export function TypeSession({
   const [missed, setMissed] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  const tanakhDeep = Boolean(progress.tanakhDeep) && rung >= 4;
+  const tanakhDeep = Boolean(progress.tanakhDeep) && STUDY_TYPE_RUNGS[rung]?.id === "tanakh";
   const round = useMemo(() => {
     if (words) return words;
     if (mode === "study") return studyRungWords(rung, tanakhDeep) ?? [];
@@ -276,7 +278,7 @@ export function TypeSession({
         {mode === "study" ? (
           <p className="mt-3 font-semibold text-ink">
             {pass
-              ? `Passed (≥${TYPE_PASS}%). ${rung < 4 ? "Next step is unlocked." : tanakhDeep ? "Tanakh mix done." : "Longer Tanakh snippets are next."} Rank: ${rank}`
+              ? `Passed (≥${TYPE_PASS}%). ${rung < STUDY_RUNG_MAX ? "Next step is unlocked." : tanakhDeep ? "Tanakh mix done." : "Longer Tanakh snippets are next."} Rank: ${rank}`
               : `Need ${TYPE_PASS}% accuracy. Stay on this step.`}
           </p>
         ) : (
@@ -293,7 +295,7 @@ export function TypeSession({
           {mode === "study" ? (
             <>
               <Button onClick={newStudyBatch}>{pass ? "Again on this step" : "Try again"}</Button>
-              {pass && rung < 4 ? (
+              {pass && rung < STUDY_RUNG_MAX ? (
                 <Button
                   onClick={() => {
                     setRung(rung + 1);
@@ -370,7 +372,9 @@ export function TypeSession({
           {acc}% · {rank}
         </span>
       </div>
-      <p className="mb-2 text-center text-sm font-semibold text-primary">Eyes on the screen.</p>
+      <p className="mb-2 text-center text-sm font-semibold text-primary">
+        {meta?.hint ?? "Eyes on the screen."}
+      </p>
       {latinHelper ? (
         <p className="mb-2 rounded-[var(--radius-md)] bg-surface px-3 py-2 text-center text-sm text-muted">
           English keys still work — we map them to Hebrew. You can also switch the iPad keyboard to Hebrew.
@@ -400,6 +404,7 @@ export function TypeSession({
               miss={missKey}
               nikkud={showNikkud}
               shift={shift}
+              blind={mode === "study" && studyRungBlind(rung)}
               onKey={onKey}
               onShift={setShift}
             />

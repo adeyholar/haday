@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Type is a touch-typing path.** Home left, home right, mix, reach up, reach down, edges, whole board, then Eyes up (letters off the keys). Many repeats of a few keys. ≥95% still opens the next step.
+
 - **Hands sit on home row.** Fingers rest on ש ד ג כ and ח ל ך ף, then slide to the key you need and dip with a real press.
 
 - **Tiro keyboard with hands.** Type shows the Biblical Hebrew (Tiro) board. Hold Shift for nikkud. A hand dips with the key you press on the physical keyboard.
