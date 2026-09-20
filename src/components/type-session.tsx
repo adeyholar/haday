@@ -90,6 +90,7 @@ export function TypeSession({
   const [missKey, setMissKey] = useState<string | null>(null);
   const [latinHelper, setLatinHelper] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [shift, setShift] = useState(false);
   const [log, setLog] = useState<{ id: string; hebrew: string; mark: "strong" | "weak" | "ok" }[]>([]);
   const started = useRef(Date.now());
   const [seed, setSeed] = useState(0);
@@ -221,19 +222,24 @@ export function TypeSession({
     function onDown(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.repeat) return;
+      if (e.key === "Shift") {
+        setShift(true);
+        return;
+      }
       if (e.key === "Backspace") {
         e.preventDefault();
         onKey("Backspace");
         return;
       }
       if (isLatinLetterKey(e.key)) setLatinHelper(true);
-      const mapped = mapPhysicalKey(e.key);
+      const mapped = mapPhysicalKey(e.key, e.shiftKey);
       if (!mapped) return;
       e.preventDefault();
       setPressed(mapped);
       onKey(mapped);
     }
-    function onUp() {
+    function onUp(e: KeyboardEvent) {
+      if (e.key === "Shift") setShift(false);
       setPressed(null);
     }
     window.addEventListener("keydown", onDown);
@@ -388,7 +394,15 @@ export function TypeSession({
             </p>
           ) : null}
           <div className="mt-5">
-            <TypeKeyboard glow={glow} pressed={pressed} miss={missKey} nikkud={showNikkud} onKey={onKey} />
+            <TypeKeyboard
+              glow={glow}
+              pressed={pressed}
+              miss={missKey}
+              nikkud={showNikkud}
+              shift={shift}
+              onKey={onKey}
+              onShift={setShift}
+            />
           </div>
         </>
       ) : (
