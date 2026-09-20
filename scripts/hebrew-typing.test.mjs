@@ -7,7 +7,7 @@ const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCueFor, missCueLabel, strengthFromMisses, CUE_TRY_AGAIN, CUE_NOT_YET } = await jiti.import(
   "/workspace/src/lib/hebrew-typing/engine.ts",
 );
-const { mapPhysicalKey, QWERTY_TO_HE, fingerFor, TIRO_SHIFT } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
+const { mapPhysicalKey, QWERTY_TO_HE, fingerFor, TIRO_SHIFT, latinForGlyph, HOME_FINGER_LATIN } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
 const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
 const { typingRank, emptyTyping, applyMark } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
 const { STUDY_TYPE_RUNGS, HOME_ROW, ALEF_BET_KEYS, studyRungTargets, clampStudyRung } = await jiti.import(
@@ -31,6 +31,15 @@ test("Tiro Shift puts nikkud on the home row", () => {
   assert.equal(TIRO_SHIFT.g.name, "hireq");
   assert.equal(mapPhysicalKey("t", false), "א");
 });
+
+test("required key maps to a home-row finger that can travel", () => {
+  assert.equal(latinForGlyph("ל"), "k");
+  assert.equal(HOME_FINGER_LATIN.rm, "k");
+  assert.equal(latinForGlyph("א"), "t");
+  assert.equal(HOME_FINGER_LATIN.li, "f");
+  assert.equal(latinForGlyph("ש"), "a");
+});
+
 
 
 test("accuracy 95% is the study pass, 94 is not", () => {

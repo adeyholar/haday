@@ -170,9 +170,16 @@ export function fingerFor(ch: string): FingerId | null {
   return FINGER_BY_KEY[ch] ?? FINGER_BY_LATIN[ch] ?? null;
 }
 
-export function fingerForLatin(latin: string): FingerId | null {
-  return FINGER_BY_LATIN[latin] ?? null;
-}
+export const HOME_FINGER_LATIN: Record<Exclude<FingerId, "th">, string> = {
+  lp: "a",
+  lr: "s",
+  lm: "d",
+  li: "f",
+  ri: "j",
+  rm: "k",
+  rr: "l",
+  rp: ";",
+};
 
 export const HE_TO_LATIN: Record<string, string> = Object.fromEntries(
   Object.entries(QWERTY_TO_HE)
@@ -197,4 +204,21 @@ export function isLatinLetterKey(key: string): boolean {
 
 export function latinForMark(mark: string): string | undefined {
   return Object.entries(TIRO_SHIFT).find(([, v]) => v.mark === mark)?.[0];
+}
+
+export function latinForGlyph(ch: string): string | null {
+  if (!ch) return null;
+  if (HE_TO_LATIN[ch]) return HE_TO_LATIN[ch];
+  const fromNikkud = latinForMark(ch);
+  if (fromNikkud) return fromNikkud;
+  for (const row of TIRO_ROWS) {
+    for (const cap of row) {
+      if (cap.he === ch || cap.latin === ch) return cap.latin;
+    }
+  }
+  return FINGER_BY_LATIN[ch] ? ch : null;
+}
+
+export function fingerForLatin(latin: string): FingerId | null {
+  return FINGER_BY_LATIN[latin] ?? null;
 }

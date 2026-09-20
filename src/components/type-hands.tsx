@@ -1,54 +1,70 @@
 import { cn } from "@/lib/cn";
-import type { FingerId } from "@/lib/hebrew-typing/layout";
+import { HOME_FINGER_LATIN, type FingerId } from "@/lib/hebrew-typing/layout";
 
-/** Geometric hands over the Tiro board. One finger dips with the physical key. */
-const LEFT: { id: FingerId; d: string }[] = [
-  { id: "lp", d: "M38 118c-6-38-4-72 8-98c6-4 12 2 11 12c-2 28-2 58 6 84z" },
-  { id: "lr", d: "M62 108c-4-42 2-78 12-102c6-4 12 4 10 14c-6 30-4 58 2 82z" },
-  { id: "lm", d: "M88 100c-2-46 8-84 16-108c7-4 12 6 10 16c-8 32-6 60 0 82z" },
-  { id: "li", d: "M118 96c4-44 22-78 28-96c6-3 12 8 9 16c-12 28-14 56-8 80z" },
-];
+export type KeyBox = { x: number; y: number; w: number; h: number };
 
-const RIGHT: { id: FingerId; d: string }[] = [
-  { id: "ri", d: "M262 96c-4-44-22-78-28-96c-6-3-12 8-9 16c12 28 14 56 8 80z" },
-  { id: "rm", d: "M292 100c2-46-8-84-16-108c-7-4-12 6-10 16c8 32 6 60 0 82z" },
-  { id: "rr", d: "M318 108c4-42-2-78-12-102c-6-4-12 4-10 14c6 30 4 58-2 82z" },
-  { id: "rp", d: "M342 118c6-38 4-72-8-98c-6-4-12 2-11 12c2 28 2 58-6 84z" },
-];
+const ORDER: Exclude<FingerId, "th">[] = ["lp", "lr", "lm", "li", "ri", "rm", "rr", "rp"];
 
 export function TypeHands({
-  active,
+  boxes,
+  reach,
+  down,
   reduced,
 }: {
-  active: FingerId | null;
+  boxes: Record<string, KeyBox>;
+  reach: string | null;
+  down: boolean;
   reduced: boolean;
 }) {
+  const homeA = boxes.a;
+  const homeJ = boxes.j;
+  if (!homeA || !homeJ) return null;
+
+  const ease = reduced ? "none" : "left 180ms ease-out, top 180ms ease-out, transform 140ms ease-out";
+
   return (
-    <svg
-      viewBox="0 0 380 160"
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] w-full"
-      aria-hidden
-    >
-      <ellipse cx="108" cy="148" rx="72" ry="22" className="fill-ink/10" />
-      <ellipse cx="272" cy="148" rx="72" ry="22" className="fill-ink/10" />
-      {[...LEFT, ...RIGHT].map((f) => {
-        const on = active === f.id;
+    <div className="pointer-events-none absolute inset-0 z-10 overflow-visible" aria-hidden>
+      <div
+        className="absolute h-8 w-24 rounded-[40%] bg-ink/10"
+        style={{ left: homeA.x - 52, top: homeA.y + 28 }}
+      />
+      <div
+        className="absolute h-8 w-24 rounded-[40%] bg-ink/10"
+        style={{ left: homeJ.x - 28, top: homeJ.y + 28 }}
+      />
+      {ORDER.map((id) => {
+        const home = boxes[HOME_FINGER_LATIN[id]];
+        if (!home) return null;
+        const going = reach && boxes[reach] && (
+          (id === "lp" && ["q", "a", "z"].includes(reach)) ||
+          (id === "lr" && ["w", "s", "x"].includes(reach)) ||
+          (id === "lm" && ["e", "d", "c"].includes(reach)) ||
+          (id === "li" && ["r", "t", "f", "g", "v", "b"].includes(reach)) ||
+          (id === "ri" && ["y", "u", "h", "j", "n", "m"].includes(reach)) ||
+          (id === "rm" && ["i", "k", ","].includes(reach)) ||
+          (id === "rr" && ["o", "l", "."].includes(reach)) ||
+          (id === "rp" && ["p", ";", "/"].includes(reach))
+        );
+        const dest = going ? boxes[reach!]! : home;
+        const pressing = Boolean(going && down);
         return (
-          <path
-            key={f.id}
-            d={f.d}
+          <div
+            key={id}
             className={cn(
-              "stroke-ink/40 fill-primary/25",
-              on && "fill-primary/55 stroke-ink/70",
+              "absolute rounded-full border border-ink/25 bg-primary/40",
+              going && "z-20 bg-primary/70 border-ink/50",
             )}
             style={{
-              transformOrigin: "center bottom",
-              transform: !reduced && on ? "translateY(7px)" : undefined,
-              transition: reduced ? undefined : "transform 140ms ease-out, fill 140ms ease-out",
+              width: Math.max(14, home.w * 0.48),
+              height: Math.max(22, home.h * 0.55),
+              left: dest.x,
+              top: dest.y + dest.h * 0.28,
+              transform: `translate(-50%, -50%) ${pressing && !reduced ? "translateY(5px) scale(0.96)" : ""}`,
+              transition: ease,
             }}
           />
         );
       })}
-    </svg>
+    </div>
   );
 }

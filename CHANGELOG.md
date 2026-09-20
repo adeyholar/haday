@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Hands sit on home row.** Fingers rest on ש ד ג כ and ח ל ך ף, then slide to the key you need and dip with a real press.
+
 - **Tiro keyboard with hands.** Type shows the Biblical Hebrew (Tiro) board. Hold Shift for nikkud. A hand dips with the key you press on the physical keyboard.
 
 - **Cards.** Study → Cards: pick weeks and chapters, then meet each word with Hear and a Tanakh line. Got it / Again. Meet and Zakhor now show the verse without waiting.
