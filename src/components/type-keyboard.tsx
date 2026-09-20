@@ -40,6 +40,7 @@ export function TypeKeyboard({
   miss,
   nikkud,
   shift,
+  blind,
   onKey,
   onShift,
 }: {
@@ -48,6 +49,7 @@ export function TypeKeyboard({
   miss?: string | null;
   nikkud: boolean;
   shift?: boolean;
+  blind?: boolean;
   onKey: (ch: string) => void;
   onShift?: (down: boolean) => void;
 }) {
@@ -160,6 +162,10 @@ export function TypeKeyboard({
                             {shiftMark.name}
                           </span>
                         </>
+                      ) : blind ? (
+                        <span className={cn("font-sans text-[9px] leading-none", lit || wrong ? "text-parchment/70" : "text-muted")}>
+                          ·
+                        </span>
                       ) : (
                         <>
                           <span>{cap.he}</span>

@@ -2,6 +2,7 @@ import { VOCAB, alphabetVocab, type VocabItem } from "@/lib/vocab";
 import { GRAMMAR_TRACK_IDS, grammarTrackCap, isGrammarTrackId, type GrammarTrackId } from "@/lib/grammar";
 import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder";
 import { emptyTyping, hydrateTyping, applyMark, type TypingProgress } from "@/lib/hebrew-typing/ranks";
+import { STUDY_RUNG_MAX } from "@/lib/hebrew-typing/study-rungs";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -610,8 +611,8 @@ export function applyTypingStudy(game: GameSnapshot, acc: number, passedRung?: n
   let studyRung = prev.studyRung ?? 0;
   let tanakhDeep = Boolean(prev.tanakhDeep);
   if (typeof passedRung === "number" && passedRung >= 0) {
-    if (passedRung >= 4) tanakhDeep = true;
-    else studyRung = Math.min(4, Math.max(studyRung, passedRung + 1));
+    if (passedRung >= STUDY_RUNG_MAX) tanakhDeep = true;
+    else studyRung = Math.min(STUDY_RUNG_MAX, Math.max(studyRung, passedRung + 1));
   }
   next.typing = {
     ...prev,
@@ -619,6 +620,7 @@ export function applyTypingStudy(game: GameSnapshot, acc: number, passedRung?: n
     bestStudyAcc: Math.max(prev.bestStudyAcc, Math.max(0, Math.min(100, acc))),
     studyRung,
     tanakhDeep,
+    curriculum: 2,
   };
   next.lastPlayDay = Date.now();
   return next;

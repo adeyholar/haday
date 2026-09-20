@@ -1,3 +1,5 @@
+import { clampStudyRung, migrateOldStudyRung } from "@/lib/hebrew-typing/study-rungs";
+
 export const TYPE_RANKS = ["Ink", "Pen", "Quill", "Ready Scribe"] as const;
 export type TypeRank = (typeof TYPE_RANKS)[number];
 
@@ -10,6 +12,8 @@ export type TypingProgress = {
   weak: Record<string, number>;
   studyRung: number;
   tanakhDeep: boolean;
+  /** 2 = 10-step touch-typing path. Missing/1 = old 5 rungs. */
+  curriculum: number;
 };
 
 export function emptyTyping(): TypingProgress {
@@ -22,6 +26,7 @@ export function emptyTyping(): TypingProgress {
     weak: {},
     studyRung: 0,
     tanakhDeep: false,
+    curriculum: 2,
   };
 }
 
@@ -35,7 +40,10 @@ export function typingRank(p: TypingProgress): TypeRank {
 export function hydrateTyping(raw: unknown): TypingProgress {
   const base = emptyTyping();
   if (!raw || typeof raw !== "object") return base;
-  const r = raw as Partial<TypingProgress>;
+  const r = raw as Partial<TypingProgress> & { curriculum?: number };
+  const curriculum = Number(r.curriculum) >= 2 ? 2 : 0;
+  const rawRung = Number(r.studyRung) || 0;
+  const studyRung = curriculum >= 2 ? clampStudyRung(rawRung) : migrateOldStudyRung(Math.max(0, Math.min(4, rawRung)));
   return {
     batchesPassed: Math.max(0, Number(r.batchesPassed) || 0),
     gameRounds: Math.max(0, Number(r.gameRounds) || 0),
@@ -43,8 +51,9 @@ export function hydrateTyping(raw: unknown): TypingProgress {
     bestGameAcc: Math.max(0, Math.min(100, Number(r.bestGameAcc) || 0)),
     strong: counts(r.strong),
     weak: counts(r.weak),
-    studyRung: Math.max(0, Math.min(4, Number(r.studyRung) || 0)),
+    studyRung,
     tanakhDeep: Boolean(r.tanakhDeep),
+    curriculum: 2,
   };
 }
 

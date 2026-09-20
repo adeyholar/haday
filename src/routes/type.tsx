@@ -25,8 +25,8 @@ function TypeStudyPage() {
         <StudyMenu />
         <h1 className="mt-4 font-display text-3xl font-bold text-ink">Type</h1>
         <p className="mt-2 max-w-prose text-muted">
-          Eyes on the screen. Do it (type), Choose, or Hard choose. Home row, then where each letter lives, then mixes,
-          then short words, then Tanakh. Accuracy ≥{TYPE_PASS}% opens the next step. Type stays quiet.
+          Eyes on the word, not the keys. Small groups, many repeats, then the letters come off the board.
+          Accuracy ≥{TYPE_PASS}% opens the next step. Type stays quiet.
         </p>
       </Panel>
       <Panel>

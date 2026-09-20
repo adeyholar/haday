@@ -9,8 +9,8 @@ const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCue
 );
 const { mapPhysicalKey, QWERTY_TO_HE, fingerFor, TIRO_SHIFT, latinForGlyph, HOME_FINGER_LATIN } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
 const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
-const { typingRank, emptyTyping, applyMark } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
-const { STUDY_TYPE_RUNGS, HOME_ROW, ALEF_BET_KEYS, studyRungTargets, clampStudyRung } = await jiti.import(
+const { typingRank, emptyTyping, applyMark, hydrateTyping } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
+const { STUDY_TYPE_RUNGS, HOME_ROW, HOME_LEFT, studyRungTargets, clampStudyRung, migrateOldStudyRung, drillLines, studyRungBlind } = await jiti.import(
   "/workspace/src/lib/hebrew-typing/study-rungs.ts",
 );
 const { lessonById } = await jiti.import("/workspace/src/lib/ladder.ts");
@@ -80,20 +80,33 @@ test("Alef lessons offer Type without changing Mark trained gates", () => {
   assert.ok(lesson.actions.some((a) => a.kind === "type"));
 });
 
-test("study Type ladder is home, map, mix, words, then Tanakh", () => {
+test("study Type is a touch-typing path with repeats then blind", () => {
   assert.deepEqual(
     STUDY_TYPE_RUNGS.map((r) => r.id),
-    ["home", "map", "mix", "words", "tanakh"],
+    ["home-left", "home-right", "home-mix", "upper", "lower", "outer", "mix", "blind", "words", "tanakh"],
   );
   assert.equal(HOME_ROW.length, 10);
-  assert.equal(ALEF_BET_KEYS.length, 22);
-  assert.equal(studyRungTargets(1).length, 22);
-  assert.equal(clampStudyRung(9), 4);
-  assert.ok(studyRungTargets(3).every((w) => w.length >= 2));
-  const basic = studyRungTargets(4, 1, false);
-  const deep = studyRungTargets(4, 1, true);
+  assert.equal(HOME_LEFT.length, 5);
+  const home = studyRungTargets(0, 1);
+  assert.ok(home.length >= 20);
+  assert.ok(home.every((w) => [...w].every((ch) => HOME_LEFT.includes(ch))));
+  const lines = drillLines(["ש"], ["ד"], 2);
+  const singles = lines.filter((w) => w.length === 1);
+  assert.ok(singles.filter((w) => w === "ד").length >= 3);
+  assert.equal(clampStudyRung(99), 9);
+  assert.equal(migrateOldStudyRung(1), 3);
+  assert.equal(migrateOldStudyRung(4), 9);
+  assert.equal(studyRungBlind(7), true);
+  assert.equal(studyRungBlind(0), false);
+  const words = studyRungTargets(8);
+  assert.ok(words.every((w) => w.length >= 2));
+  const basic = studyRungTargets(9, 1, false);
+  const deep = studyRungTargets(9, 1, true);
   assert.ok(basic.length >= 4);
   assert.ok(deep.length >= 4);
+  const old = hydrateTyping({ studyRung: 3, batchesPassed: 2 });
+  assert.equal(old.studyRung, 8);
+  assert.equal(old.curriculum, 2);
 });
 
 test("miss ladder: first retry, second fail, first-try strong", () => {
