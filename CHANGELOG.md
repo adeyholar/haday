@@ -10,6 +10,8 @@ When you push a feature to `main`, put a bullet **above** this list. Update [doc
 
 ---
 
+- **Tiro keyboard with hands.** Type shows the Biblical Hebrew (Tiro) board. Hold Shift for nikkud. A hand dips with the key you press on the physical keyboard.
+
 - **Cards.** Study → Cards: pick weeks and chapters, then meet each word with Hear and a Tanakh line. Got it / Again. Meet and Zakhor now show the verse without waiting.
 
 - **Choose and Hard choose on Type and Write.** English prompt, four Hebrew forms. Do it is still keys or ink. Type stays quiet; Write multiple-choice still uses Try again sounds.
