@@ -2,6 +2,8 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Jonah follow-along.** The title trim was cutting off the start of the chapter, so the highlight showed the wrong verse. Jonah 1 now starts with the reading.
+
 Format: **date** · what shipped · why it matters.
 
 ## How to add an entry

@@ -319,7 +319,12 @@ def duration_sec(wav: Path) -> float:
 
 
 def heading_end_wav(wav: Path) -> float:
-    """Skip Shmuelof's spoken book/chapter title — MFA must not eat it as verse 1."""
+    """Skip a short spoken title only.
+
+    Shmuelof says the book and chapter, pauses, then reads. A later verse
+    pause must not be treated as that title — Jonah 1 was cut at 21s and the
+    whole chapter was aligned onto the wrong audio.
+    """
     import numpy as np
     from numpy.lib.stride_tricks import sliding_window_view
 
@@ -337,30 +342,41 @@ def heading_end_wav(wav: Path) -> float:
     energy = np.convolve(energy, np.ones(5) / 5, mode="same")
     e_p = float(np.percentile(energy, 90) or 1e-6)
     energy = np.clip(energy / e_p, 0, 2.5)
-    duration = len(samples) / sr
     speech = energy > 0.12
-    sils: list[tuple[float, float, float]] = []
-    on = False
-    st = 0
-    for i, quiet in enumerate(~speech):
-        if quiet and not on:
-            on, st = True, i
-        elif not quiet and on:
-            d = (i - st) * dt
-            if d >= 0.28:
-                sils.append((st * dt, i * dt, d))
-            on = False
-    voiced = np.flatnonzero(energy > 0.16)
-    t0 = float(voiced[0]) * dt if len(voiced) else 2.0
-    cands = [(a, b, d) for a, b, d in sils if d >= 0.85 and t0 - 0.1 <= a <= min(35.0, t0 + 32.0) and b >= t0 + 0.7]
-    if cands:
-        return float(max(cands, key=lambda s: (s[2], s[1]))[1])
-    if t0 < 1.5:
-        later = [b for a, b, d in sils if d >= 0.55 and 1.5 <= b <= 22]
-        if later:
-            return float(later[0])
-    t = max(t0, 2.0) if t0 < 1.5 else t0
-    return max(0.5, min(float(t), 40.0))
+    runs: list[tuple[float, float]] = []
+    in_run = False
+    rs = 0
+    for i, sp in enumerate(speech):
+        if sp and not in_run:
+            in_run, rs = True, i
+        elif not sp and in_run:
+            runs.append((rs * dt, i * dt))
+            in_run = False
+    if in_run:
+        runs.append((rs * dt, len(speech) * dt))
+    merged: list[tuple[float, float]] = []
+    for a, b in runs:
+        if merged and a - merged[-1][1] < 0.45:
+            merged[-1] = (merged[-1][0], b)
+        else:
+            merged.append((a, b))
+    if not merged:
+        return 0.5
+    t0 = merged[0][0]
+    speech_acc = 0.0
+    for i, (a, b) in enumerate(merged):
+        if a > t0 + 12.0:
+            break
+        speech_acc += b - a
+        if speech_acc > 7.0:
+            return float(t0)
+        if i + 1 >= len(merged):
+            break
+        resume = merged[i + 1][0]
+        gap = resume - b
+        if gap >= 0.55 and speech_acc >= 0.6 and resume <= t0 + 12.0:
+            return float(resume)
+    return float(t0)
 
 
 def trim_heading(src: Path, dest: Path, t0: float) -> None:
@@ -861,10 +877,48 @@ def progress() -> None:
     print(f"CANON kaldi {k}/{n}", flush=True)
 
 
+def chapters_with_late_verse1(min_start: float = 8.0) -> list[tuple[str, str]]:
+    """Chapters whose verse 1 starts late — the old title trim ate real reading."""
+    late: list[tuple[str, str]] = []
+    for book in CANON:
+        path = ALIGN_DIR / f"{book}.json"
+        if not path.exists():
+            continue
+        out = json.loads(path.read_text())
+        dump = json.loads((ROOT / f"public/tanakh/books/{book}.json").read_text())
+        for ch in dump["chapters"]:
+            hit = out.get(ch) or {}
+            verses = hit.get("verses") or []
+            if verses and isinstance(verses[0], (int, float)) and float(verses[0]) > min_start:
+                late.append((book, ch))
+    return late
+
+
 def main() -> None:
     args = sys.argv[1:]
     force = "--force" in args
-    args = [a for a in args if a != "--force"]
+    rehead = "--rehead" in args
+    args = [a for a in args if a not in ("--force", "--rehead")]
+    if rehead:
+        late = chapters_with_late_verse1()
+        # Jonah 1 is the reported miss; keep the whole book in this pass.
+        wanted = {("Jonah", ch) for ch in ("1", "2", "3", "4")}
+        wanted.update(late)
+        by_book: dict[str, list[str]] = {}
+        for book, ch in wanted:
+            by_book.setdefault(book, []).append(ch)
+        print(f"rehead {sum(len(v) for v in by_book.values())} chapters", flush=True)
+        for book in CANON:
+            chs = by_book.get(book)
+            if not chs:
+                continue
+            chs = sorted(set(chs), key=lambda x: int(x))
+            try:
+                align_book(book, chs, force=True)
+            except Exception as exc:
+                print(f"FAIL book {book} {exc}", flush=True)
+            progress()
+        return
     if not args or args[0] in ("--all", "all"):
         for book in CANON:
             try:
