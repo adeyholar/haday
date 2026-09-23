@@ -622,6 +622,7 @@ def chapter_meta(
         "phones": phone_times,
         "aligned": True,
         "engine": ENGINE,
+        "trim": "short",
     }
 
 
@@ -890,6 +891,8 @@ def chapters_with_late_verse1(min_start: float = 8.0) -> list[tuple[str, str]]:
             hit = out.get(ch) or {}
             verses = hit.get("verses") or []
             if verses and isinstance(verses[0], (int, float)) and float(verses[0]) > min_start:
+                if hit.get("trim") == "short":
+                    continue
                 late.append((book, ch))
     return late
 
