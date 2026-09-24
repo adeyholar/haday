@@ -192,7 +192,7 @@ export const VERSES: Record<string, VerseEx> = {
   tahat: { ref: "Exod 24:4", he: "וַיִּבֶן מִזְבֵּחַ תַּחַת הָהָר", en: "He built an altar at the foot of the mountain.", hit: "תַּחַת", hitEn: "the foot" },
   lifne: { ref: "Gen 18:22", he: "וְאַבְרָהָם עוֹדֶנּוּ עֹמֵד לִפְנֵי יְהוָה", en: "Abraham was still standing before YHWH.", hit: "לִפְנֵי" },
   "ben-prep": { ref: "Gen 1:4", he: "וַיַּבְדֵּל אֱלֹהִים בֵּין הָאוֹר וּבֵין הַחֹשֶׁךְ", en: "God separated between the light and the darkness.", hit: "בֵּין" },
-  hinneh: { ref: "Gen 22:1", he: "וַיֹּאמֶר אֵלָיו אַבְרָהָם וַיֹּאמֶר הִנֵּנִי", en: "He said to him, “Abraham,” and he said, “Here I am.”", hit: "הִנֵּנִי" },
+  hinneh: { ref: "Gen 1:31", he: "וַיַּ֤רְא אֱלֹהִים֙ אֶת כָּל אֲשֶׁ֣ר עָשָׂ֔ה וְהִנֵּה ט֖וֹב מְאֹ֑ד", en: "God saw everything that he had made, and, behold, it was very good.", hit: "וְהִנֵּה", hitEn: "behold" },
   "attah-now": { ref: "Exod 19:5", he: "וְעַתָּה אִם־שָׁמוֹעַ תִּשְׁמְעוּ בְּקֹלִי", en: "And now, if you will surely listen to my voice.", hit: "וְעַתָּה" },
   sham: { ref: "Gen 2:8", he: "וַיָּשֶׂם שָׁם אֶת־הָאָדָם אֲשֶׁר יָצָר", en: "He placed there the human he had formed.", hit: "שָׁם" },
   mah: { ref: "Gen 4:10", he: "וַיֹּאמֶר מֶה עָשִׂיתָ", en: "He said, “What have you done?”", hit: "מֶה" },
