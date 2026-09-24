@@ -16,7 +16,7 @@ import {
   groupTitle,
   huntHits,
   lemmaMatches,
-  nameHits,
+  nameChoices,
   refMatchesParts,
   ruleById,
   shuffle,
@@ -205,7 +205,7 @@ function HuntRound({
   const [book, setBook] = useState("");
   const [chapter, setChapter] = useState("");
   const [verse, setVerse] = useState("");
-  const [ruleText, setRuleText] = useState("");
+  const [missedId, setMissedId] = useState("");
   const [tries, setTries] = useState(0);
   const [hint, setHint] = useState("");
   const [revealed, setRevealed] = useState(false);
@@ -219,13 +219,14 @@ function HuntRound({
   const item = items[i];
   const rule = item ? ruleById(item.ruleId) : undefined;
   const siblings = item ? casesForRule(item.ruleId) : [];
+  const choices = useMemo(() => (item && mode === "name" ? nameChoices(item) : []), [item, mode]);
 
   function resetFields() {
     setLemma("");
     setBook("");
     setChapter("");
     setVerse("");
-    setRuleText("");
+    setMissedId("");
     setTries(0);
     setHint("");
     setRevealed(false);
@@ -272,8 +273,11 @@ function HuntRound({
       setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
       return;
     }
+  }
 
-    if (nameHits(item, ruleText)) {
+  function pickRule(choice: GrammarRule) {
+    if (!item || revealed || choice.id === missedId) return;
+    if (choice.id === item.ruleId) {
       setOk(true);
       setMatched(item);
       setRevealed(true);
@@ -283,7 +287,8 @@ function HuntRound({
     }
     if (tries < 1) {
       setTries(1);
-      setHint(`This belongs with ${groupTitle(rule.group)}.`);
+      setMissedId(choice.id);
+      setHint("Not that one. Look at the highlighted form again.");
       return;
     }
     setOk(false);
@@ -342,7 +347,7 @@ function HuntRound({
         onSubmit={(e) => {
           e.preventDefault();
           if (revealed) next();
-          else check();
+          else if (mode === "verse") check();
         }}
       >
         {mode === "verse" ? (
@@ -401,18 +406,31 @@ function HuntRound({
             </div>
           </>
         ) : (
-          <label className="grid gap-1 text-sm font-medium text-ink">
-            Which rule is applied to the highlighted form?
-            <input
-              value={ruleText}
-              onChange={(e) => setRuleText(e.target.value)}
-              disabled={revealed}
-              className={fieldClass()}
-              placeholder="Type the rule — no choices"
-              autoCapitalize="off"
-              autoComplete="off"
-            />
-          </label>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium text-ink">Which rule is applied to the highlighted form?</p>
+            {choices.map((choice) => {
+              const wrongPick = missedId === choice.id;
+              const show = revealed;
+              const correct = choice.id === item.ruleId;
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  disabled={revealed || wrongPick}
+                  onClick={() => pickRule(choice)}
+                  className={cn(
+                    "min-h-12 w-full rounded-[var(--radius-md)] px-4 py-3 text-left text-sm font-medium shadow-[var(--shadow-border)]",
+                    !show && !wrongPick && "bg-card hover:bg-surface",
+                    wrongPick && "bg-danger text-parchment",
+                    show && correct && "bg-good text-parchment",
+                    show && !correct && !wrongPick && "bg-card text-muted",
+                  )}
+                >
+                  {choice.title}
+                </button>
+              );
+            })}
+          </div>
         )}
 
         {tries > 0 && !revealed && (
@@ -437,9 +455,11 @@ function HuntRound({
           />
         )}
 
-        <Button type="submit" size="lg" className="w-full">
-          {revealed ? "Next" : "Check"}
-        </Button>
+        {(mode === "verse" || revealed) && (
+          <Button type="submit" size="lg" className="w-full">
+            {revealed ? "Next" : "Check"}
+          </Button>
+        )}
       </form>
     </>
   );
