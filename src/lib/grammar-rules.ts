@@ -34,14 +34,14 @@ export type GrammarCase = {
 };
 
 export const GRAMMAR_GROUPS = [
-  { id: "syllable", title: "Syllabification — apply these in the text" },
-  { id: "vowels", title: "Vowel syllable preferences" },
-  { id: "qamets", title: "Qamets and Qamets Hatuf" },
-  { id: "shewa", title: "Shewa and syllabification" },
-  { id: "dagesh", title: "Dagesh and syllabification" },
-  { id: "guttural", title: "Guttural characteristics" },
-  { id: "article", title: "The definite article" },
-  { id: "vav", title: "The conjunction וְ" },
+  { id: "syllable", title: "Syllabification — apply these in the text", ask: "syllables" },
+  { id: "vowels", title: "Vowel syllable preferences", ask: "vowels" },
+  { id: "qamets", title: "Qamets and Qamets Hatuf", ask: "qamets" },
+  { id: "shewa", title: "Shewa and syllabification", ask: "shewa" },
+  { id: "dagesh", title: "Dagesh and syllabification", ask: "dagesh" },
+  { id: "guttural", title: "Guttural characteristics", ask: "gutturals" },
+  { id: "article", title: "The definite article", ask: "the definite article" },
+  { id: "vav", title: "The conjunction וְ", ask: "the conjunction וְ" },
 ] as const;
 
 export const GRAMMAR_RULES: GrammarRule[] = [
@@ -1688,14 +1688,16 @@ function seededOrder<T>(arr: T[], seed: number): T[] {
 }
 
 /**
- * Four rule names for Name the rule. The three wrong ones are the closest
- * rules (same group first), so a nearby guess is not an easy elimination.
+ * Choices stay inside the asked kind (dagesh, shewa, the article).
+ * Other kinds are not listed — a word can carry several rules, and the card
+ * already says which kind is wanted.
  */
 export function nameChoices(item: GrammarCase): GrammarRule[] {
   const correct = ruleById(item.ruleId);
   if (!correct) return [];
   const banned = new Set(rulesOnForm(item).map((r) => r.id));
-  const ranked = GRAMMAR_RULES.filter((r) => !banned.has(r.id))
+  const mates = GRAMMAR_RULES.filter((r) => r.group === correct.group && !banned.has(r.id));
+  const ranked = mates
     .map((r) => ({ r, score: distractorScore(correct, r) }))
     .sort((a, b) => b.score - a.score || a.r.title.localeCompare(b.r.title));
   const wrong = ranked.slice(0, 3).map((row) => row.r);
@@ -1775,6 +1777,10 @@ export function formatRef(c: GrammarCase): string {
 
 export function groupTitle(groupId: string): string {
   return GRAMMAR_GROUPS.find((g) => g.id === groupId)?.title ?? groupId;
+}
+
+export function groupAsk(groupId: string): string {
+  return GRAMMAR_GROUPS.find((g) => g.id === groupId)?.ask ?? groupTitle(groupId);
 }
 
 export const HUNT_ROUND_LEN = ROUND_LEN;

@@ -13,6 +13,7 @@ import {
   GRAMMAR_RULES,
   casesForRule,
   formatRef,
+  groupAsk,
   groupTitle,
   huntHits,
   lemmaMatches,
@@ -54,7 +55,8 @@ function RulesPage() {
         <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">When the rule shows up</h1>
         <p className="mt-2 max-w-prose text-muted">
           These rules are not a chart to memorize. See them in the Tanakh — syllables, the article הַ, and the
-          conjunction וְ — then hunt the lemma and the verse, or name the rule from the highlighted form.
+          conjunction וְ. Hunt the lemma and the verse, or name the rule. The card says which kind is asked —
+          dagesh, shewa, the article — because more than one rule can sit on the same word.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <TabBtn active={tab === "study"} onClick={() => setTab("study")}>
@@ -339,7 +341,7 @@ function HuntRound({
           </p>
         </div>
       ) : (
-        <VersePrompt item={item} showEnglish={revealed} />
+        <VersePrompt item={item} showEnglish={revealed} ask={groupAsk(rule.group)} />
       )}
 
       <form
@@ -407,7 +409,9 @@ function HuntRound({
           </>
         ) : (
           <div className="grid gap-2">
-            <p className="text-sm font-medium text-ink">Which rule is applied to the highlighted form?</p>
+            <p className="text-sm font-medium text-ink">
+              About {groupAsk(rule.group)} — which rule applies to the highlighted form?
+            </p>
             {choices.map((choice) => {
               const wrongPick = missedId === choice.id;
               const show = revealed;
@@ -469,16 +473,16 @@ function fieldClass() {
   return "h-12 w-full rounded-[var(--radius-md)] bg-card px-3 font-medium text-ink shadow-[var(--shadow-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 }
 
-function VersePrompt({ item, showEnglish }: { item: GrammarCase; showEnglish: boolean }) {
+function VersePrompt({ item, showEnglish, ask }: { item: GrammarCase; showEnglish: boolean; ask?: string }) {
   const range = findHitRange(item.he, item.hit);
   return (
     <figure className="rounded-[var(--radius-xl)] bg-card px-5 py-6 text-start shadow-[var(--shadow-border)]">
       <figcaption className="text-xs font-semibold uppercase tracking-wide text-muted">
         Tanakh · {formatRef(item)}
-        {!showEnglish && (
-          <span className="ms-2 font-normal normal-case tracking-normal">Hebrew first — name the rule</span>
-        )}
       </figcaption>
+      {ask && (
+        <p className="mt-3 font-display text-2xl font-semibold text-ink">About {ask}</p>
+      )}
       <p className="he-word mt-3 text-2xl leading-relaxed" lang="he">
         {range ? (
           <>
