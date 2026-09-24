@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Behold.** The card for הִנֵּה now shows Genesis 1:31, “behold,” not “Here I am.”
 - **Jonah follow-along.** The title trim was cutting off the start of the chapter, so the highlight showed the wrong verse. Jonah 1 now starts with the reading.
 
 Format: **date** · what shipped · why it matters.
