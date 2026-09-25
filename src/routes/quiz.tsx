@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { VerseCard } from "@/components/verse-card";
 import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
-import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
+import { glossMatches, liveGloss, quizChoices, shuffle, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
-import { pickEloDeck } from "@/lib/elo";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
@@ -41,8 +40,7 @@ function QuizPage() {
   const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
-    const snapshot = useStudy.getState().cards;
-    setDeck(pickEloDeck(pool, snapshot, 12));
+    setDeck(shuffle(pool));
     setI(0);
     setPicked(null);
     setMissedChoice(null);

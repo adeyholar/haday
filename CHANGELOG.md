@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Study quiz.** A week or a chapter is the whole list, not a round of 12, so every word in that set comes around.
 - **Name the rule.** The card names the kind first — dagesh, shewa, the article — because more than one rule can sit on the same word. The choices are the other rules of that kind.
 - **Name the rule.** Choose among four close rules. A missed letter no longer fails a right idea, and an easy wrong rule is not on the card.
 - **Behold.** The card for הִנֵּה now shows Genesis 1:31, “behold,” not “Here I am.”
