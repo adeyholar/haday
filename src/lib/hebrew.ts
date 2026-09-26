@@ -245,6 +245,82 @@ function marksSubset(got: string[], want: string[]): boolean {
   return true;
 }
 
+function marksEqual(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const pool = [...b];
+  for (const m of a) {
+    const i = pool.indexOf(m);
+    if (i < 0) return false;
+    pool.splice(i, 1);
+  }
+  return true;
+}
+
+/** Next pad-press while spelling `target`. Marks already typed can arrive in any order. */
+export function guideProgress(
+  typed: string,
+  target: string,
+): { clean: boolean; done: boolean; next: string | null; started: boolean } {
+  const want = toClusters(normalizeHebrewFull(target));
+  const got = toClusters(normalizeHebrewFull(typed));
+  if (!want.length) return { clean: true, done: true, next: null, started: false };
+  if (got.length > want.length) return { clean: false, done: false, next: null, started: true };
+  for (let i = 0; i < got.length; i++) {
+    if (got[i].cons !== want[i].cons) return { clean: false, done: false, next: null, started: true };
+    const finished = i < got.length - 1;
+    if (finished) {
+      if (!marksEqual(got[i].marks, want[i].marks)) return { clean: false, done: false, next: null, started: true };
+    } else if (!marksSubset(got[i].marks, want[i].marks)) {
+      return { clean: false, done: false, next: null, started: true };
+    }
+  }
+  if (!got.length) return { clean: true, done: false, next: clusterInsert(want[0]), started: false };
+  const last = got.length - 1;
+  const missing = missingMark(want[last].marks, got[last].marks);
+  if (missing) return { clean: true, done: false, next: missing, started: true };
+  if (got.length === want.length) return { clean: true, done: true, next: null, started: true };
+  return { clean: true, done: false, next: clusterInsert(want[got.length]), started: true };
+}
+
+function clusterInsert(c: Cluster): string {
+  if (c.cons === "ש" && c.marks.includes("\u05C1")) return "ש\u05C1";
+  if (c.cons === "ש" && c.marks.includes("\u05C2")) return "ש\u05C2";
+  return c.cons;
+}
+
+/** Dagesh, then a shin/sin dot, then whatever vowel is still missing. */
+function missingMark(want: string[], got: string[]): string | null {
+  const have = [...got];
+  const need = want.filter((m) => {
+    const i = have.indexOf(m);
+    if (i < 0) return true;
+    have.splice(i, 1);
+    return false;
+  });
+  if (!need.length) return null;
+  const dagesh = need.find((m) => m === "\u05BC");
+  if (dagesh) return dagesh;
+  const dot = need.find((m) => m === "\u05C1" || m === "\u05C2");
+  if (dot) return dot;
+  return need[0] ?? null;
+}
+
+/** Which spelling is the student already on: the lemma, unless an alt is a longer clean prefix. */
+export function guideTarget(typed: string, lemma: string, alts: string[]): string {
+  let best = lemma;
+  let bestScore = -1;
+  for (const t of [lemma, ...alts]) {
+    const g = guideProgress(typed, t);
+    if (!g.clean) continue;
+    const score = normalizeHebrewFull(typed).length;
+    if (score > bestScore) {
+      best = t;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
 export function liveMatchFull(expected: string, typed: string): "empty" | "prefix" | "exact" | "off" {
   const want = normalizeHebrewFull(expected);
   const got = normalizeHebrewFull(typed);
