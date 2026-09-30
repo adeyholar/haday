@@ -3,16 +3,18 @@ import { verseFor, type VerseEx } from "@/lib/verses";
 import { tanakhVerseFor, isInflected } from "@/lib/tanakh-pool";
 import { closeItems, shuffle, type VocabItem } from "@/lib/vocab";
 import { vocabArtSrc } from "@/lib/vocab-art";
-import { hasMet, pickKeepRound } from "@/lib/keep";
-import { hydrateCard, type CardState } from "@/lib/srs";
+import { hydrateCard, isWeak, weaknessScore, type CardState } from "@/lib/srs";
 import type { GameSnapshot } from "@/lib/game";
 import { shuffleOffFirst } from "@/lib/quiz-draw";
+import type { FocusMode } from "@/lib/store";
 
 export const ETCH_LEN = 12;
+/** Ways each word is asked in one Drill sitting. Verse is a seventh when the word has a line. */
+export const ETCH_PASSES = 6;
 export const GUESS_MS = 400;
 
 export type EtchKind = "meet" | "contrast" | "produce" | "verse" | "keep";
-export type EtchCue = "he" | "en" | "picture" | "audio" | "consonants";
+export type EtchCue = "he" | "en" | "picture" | "audio" | "consonants" | "spell";
 
 export type EtchTask = {
   key: string;
@@ -22,8 +24,6 @@ export type EtchTask = {
   choices: VocabItem[];
   verse?: VerseEx;
 };
-
-const CUES: EtchCue[] = ["he", "en", "consonants", "picture", "audio"];
 
 export function consonantsOf(item: VocabItem): string {
   return lettersOnly(item.hebrew);
@@ -57,16 +57,6 @@ export function canPicture(item: VocabItem): boolean {
   return Boolean(vocabArtSrc(item.id));
 }
 
-function pickCue(item: VocabItem, prefer: EtchCue, used: EtchCue[]): EtchCue {
-  const tryList = [prefer, ...CUES.filter((c) => c !== prefer)];
-  for (const cue of tryList) {
-    if (cue === "picture" && !canPicture(item)) continue;
-    if (used.filter((c) => c === cue).length >= 3 && tryList.length > 1) continue;
-    return cue;
-  }
-  return "he";
-}
-
 export function contrastChoices(item: VocabItem, pool: VocabItem[], n = 4): VocabItem[] {
   const close = closeItems(item, pool, n - 1);
   const set = [item, ...close];
@@ -74,84 +64,44 @@ export function contrastChoices(item: VocabItem, pool: VocabItem[], n = 4): Voca
   return shuffleOffFirst(shuffle(set), (x) => x.id === item.id);
 }
 
-function takeUnique(from: VocabItem[], n: number, used: Set<string>): VocabItem[] {
-  const out: VocabItem[] = [];
-  for (const item of from) {
-    if (used.has(item.id)) continue;
-    out.push(item);
-    used.add(item.id);
-    if (out.length >= n) break;
-  }
-  return out;
+function drillOrder(pool: VocabItem[], cards: Record<string, CardState>, focus: FocusMode | undefined, now: number): VocabItem[] {
+  const weak = pool
+    .filter((item) => isWeak(hydrateCard(cards[item.id], now)))
+    .sort((a, b) => weaknessScore(hydrateCard(cards[b.id], now)) - weaknessScore(hydrateCard(cards[a.id], now)));
+  if (focus === "weak" && weak.length) return weak;
+  const weakIds = new Set(weak.map((item) => item.id));
+  const due = shuffle(
+    pool.filter((item) => {
+      if (weakIds.has(item.id)) return false;
+      const card = cards[item.id];
+      return !card || hydrateCard(card, now).due <= now;
+    }),
+  );
+  const front = new Set<string>([...weakIds, ...due.map((item) => item.id)]);
+  const rest = shuffle(pool.filter((item) => !front.has(item.id)));
+  return [...weak, ...due, ...rest];
 }
 
-/** One sitting: 2 meet, 3 contrast, 4 produce, 2 verse, 1 keep. */
+/**
+ * Every word in the set, once per method, methods in blocks so the cue keeps changing.
+ * Weak cards lead. Verse is added only when the lemma has a line.
+ */
 export function buildEtchSitting(
   pool: VocabItem[],
   cards: Record<string, CardState>,
-  game?: GameSnapshot,
+  _game?: GameSnapshot,
   now = Date.now(),
+  focus?: FocusMode,
 ): EtchTask[] {
   if (!pool.length) return [];
-  const used = new Set<string>();
-  const unseen = shuffle(pool.filter((item) => !hasMet(cards[item.id])));
-  const seen = pool.filter((item) => hasMet(cards[item.id]));
-  const weak = shuffle(
-    seen.filter((item) => {
-      const c = hydrateCard(cards[item.id], now);
-      return c.misses > 0 || c.reveals > 0 || c.lapses > 0;
-    }),
-  );
-  const rest = shuffle(pool);
-
-  const meetItems = takeUnique(unseen.length ? unseen : weak.length ? weak : rest, 2, used);
-  if (meetItems.length < 2) {
-    for (const item of rest) {
-      if (meetItems.length >= 2) break;
-      if (meetItems.some((x) => x.id === item.id)) continue;
-      meetItems.push(item);
-    }
-  }
-
-  const contrastPool = shuffle(
-    pool.filter((item) => closeItems(item, pool, 3).length >= 2),
-  );
-  const contrastItems = takeUnique(
-    [...contrastPool.filter((x) => meetItems.some((m) => m.id === x.id)), ...contrastPool, ...rest],
-    3,
-    new Set(),
-  );
-
-  const produceSeed = [...meetItems, ...weak, ...rest];
-  const produceItems: VocabItem[] = [];
-  const produceUsed = new Set<string>();
-  for (const item of produceSeed) {
-    if (produceUsed.has(item.id)) continue;
-    produceItems.push(item);
-    produceUsed.add(item.id);
-    if (produceItems.length >= 4) break;
-  }
-
-  const versePool = shuffle(pool.filter((item) => verseForLemma(item)));
-  const verseItems = takeUnique(versePool.length ? versePool : rest, 2, new Set());
-
-  const keepPick = pickKeepRound(cards, game, 8, now);
-  const keepItem =
-    keepPick.find((x) => !meetItems.some((m) => m.id === x.id)) ??
-    keepPick[0] ??
-    seen[0] ??
-    rest[0];
-
-  const cuesUsed: EtchCue[] = [];
+  const words = drillOrder(pool, cards, focus, now);
   const tasks: EtchTask[] = [];
-  let i = 0;
+  let n = 0;
 
-  function add(kind: EtchKind, item: VocabItem, prefer: EtchCue, extra?: Partial<EtchTask>) {
-    const cue = pickCue(item, prefer, cuesUsed);
-    cuesUsed.push(cue);
-    const needChoices = kind === "contrast" || ((kind === "produce" || kind === "keep") && cue === "en");
+  function add(kind: EtchKind, item: VocabItem, cue: EtchCue, extra?: Partial<EtchTask>) {
+    const needChoices = kind === "contrast";
     tasks.push({
-      key: `${kind}:${item.id}:${i++}`,
+      key: `${kind}:${cue}:${item.id}:${n++}`,
       kind,
       cue,
       item,
@@ -160,18 +110,23 @@ export function buildEtchSitting(
     });
   }
 
-  for (const item of meetItems.slice(0, 2)) add("meet", item, canPicture(item) ? "picture" : "he");
-  for (const item of contrastItems.slice(0, 3)) {
-    add("contrast", item, "en", { choices: contrastChoices(item, pool) });
-  }
-  const produceCues: EtchCue[] = ["he", "en", "consonants", "audio"];
-  produceItems.slice(0, 4).forEach((item, n) => add("produce", item, produceCues[n] ?? "he"));
-  for (const item of verseItems.slice(0, 2)) {
-    add("verse", item, "he", { verse: verseForLemma(item) });
-  }
-  if (keepItem) add("keep", keepItem, "en");
+  const passes: Array<(item: VocabItem) => void> = [
+    (item) => add("meet", item, "he"),
+    (item) => add("contrast", item, "en", { choices: contrastChoices(item, pool) }),
+    (item) => add("produce", item, "he"),
+    (item) => add("produce", item, "audio"),
+    (item) => add("produce", item, "consonants"),
+    (item) => add("produce", item, "spell"),
+    (item) => {
+      const verse = verseForLemma(item);
+      if (verse) add("verse", item, "he", { verse });
+    },
+  ];
 
-  return tasks.slice(0, ETCH_LEN);
+  for (const pass of passes) {
+    for (const item of shuffle(words)) pass(item);
+  }
+  return tasks;
 }
 
 export function etchLabel(kind: EtchKind): string {
@@ -186,11 +141,11 @@ export function etchHint(kind: EtchKind, cue: EtchCue): string {
   if (kind === "meet") return "Look, hear, then continue. No quiz yet.";
   if (kind === "contrast") return "Pick the lemma that matches the gloss. Twins sit together on purpose.";
   if (kind === "produce") {
-    if (cue === "en") return "Type the Hebrew in your mind — tap the matching lemma.";
+    if (cue === "spell") return "English is showing. Type the Hebrew, points included.";
     if (cue === "consonants") return "Consonants only. Type the English gloss.";
     if (cue === "picture") return "Picture only. Type the English gloss.";
     if (cue === "audio") return "Listen. Type the English gloss.";
-    return "Type the English gloss. No multiple choice.";
+    return "Type the English gloss. No list.";
   }
   if (kind === "verse") return "Tap the class lemma in the verse. The answer is still the book form.";
   return "An older word. Opposite direction.";
