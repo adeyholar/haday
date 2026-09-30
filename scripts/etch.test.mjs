@@ -3,21 +3,25 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { buildEtchSitting, contrastChoices, tokenFitsLemma, verseTapTokens, consonantsOf, ETCH_LEN } =
+const { buildEtchSitting, contrastChoices, tokenFitsLemma, verseTapTokens, consonantsOf, ETCH_PASSES } =
   await jiti.import("/workspace/src/lib/etch.ts");
 const { VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
 const { applyRating, newCard } = await jiti.import("/workspace/src/lib/srs.ts");
 
-test("sitting has meet, contrast, produce, verse, keep", () => {
-  const pool = VOCAB.filter((v) => v.chapter <= 5);
+test("every word is asked in every method", () => {
+  const pool = VOCAB.filter((v) => v.chapter === 3);
   const sitting = buildEtchSitting(pool, {}, undefined, Date.now());
-  const kinds = sitting.map((t) => t.kind);
-  assert.ok(kinds.includes("meet"));
-  assert.ok(kinds.includes("contrast"));
-  assert.ok(kinds.includes("produce"));
-  assert.ok(kinds.includes("verse"));
-  assert.ok(sitting.length <= ETCH_LEN);
-  assert.ok(sitting.length >= 8);
+  assert.ok(pool.length > 2);
+  for (const item of pool) {
+    const mine = sitting.filter((t) => t.item.id === item.id);
+    assert.ok(mine.length >= ETCH_PASSES, item.id);
+    assert.ok(mine.some((t) => t.kind === "meet"));
+    assert.ok(mine.some((t) => t.kind === "contrast"));
+    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "spell"));
+    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "audio"));
+    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "consonants"));
+  }
+  assert.ok(sitting.length > pool.length * ETCH_PASSES - 1);
 });
 
 test("contrast board never seats the answer first and includes the lemma", () => {

@@ -6,6 +6,8 @@ import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
 import { glossMatches, liveGloss, POS_LABEL } from "@/lib/vocab";
+import { liveMatchAny } from "@/lib/hebrew";
+import { HebrewType } from "@/components/hebrew-type";
 import {
   consonantsOf,
   etchHint,
@@ -61,8 +63,10 @@ export function EtchPlay({
     };
   }, [task.key, item, task.kind, task.cue, task.choices]);
 
+  const spellOk = liveMatchAny(item.hebrew, typed, item.hebrewAlts, true) === "exact";
+  const glossOk = glossMatches(item, typed);
+  const typedOk = task.cue === "spell" ? spellOk : glossOk;
   const live = liveGloss(item, typed);
-  const typedOk = glossMatches(item, typed);
   const told = picked === "__noidea__";
   const graded = picked !== null;
   const ok = !told && (picked === item.id || (typedOk && (task.kind === "produce" || task.kind === "keep") && task.cue !== "en"));
@@ -125,8 +129,8 @@ export function EtchPlay({
   }
 
   const showArt = task.kind === "meet" || task.cue === "picture" || (graded && task.kind !== "verse");
-  const hideHe = !graded && (task.cue === "en" || task.cue === "picture" || task.cue === "audio");
-  const hideEn = !graded && task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en";
+  const hideHe = !graded && (task.cue === "en" || task.cue === "picture" || task.cue === "audio" || task.cue === "spell");
+  const hideEn = !graded && task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en" && task.cue !== "spell";
 
   return (
     <>
@@ -250,7 +254,32 @@ export function EtchPlay({
         </ul>
       )}
 
-      {(task.kind === "produce" || task.kind === "keep") && task.cue !== "en" && (
+      {task.kind === "produce" && task.cue === "spell" && (
+        <form
+          className="mt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitProduce();
+          }}
+        >
+          <HebrewType
+            value={typed}
+            onChange={setTyped}
+            target={item.hebrew}
+            alts={item.hebrewAlts}
+            disabled={graded}
+            strict
+            liveGrade
+          />
+          {!graded && (
+            <Button type="submit" className="mt-3 w-full" disabled={!typed.trim()}>
+              Check
+            </Button>
+          )}
+        </form>
+      )}
+
+      {(task.kind === "produce" || task.kind === "keep") && task.cue !== "en" && task.cue !== "spell" && (
         <form
           className="mt-4"
           onSubmit={(e) => {
