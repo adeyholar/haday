@@ -39,6 +39,12 @@ function GameMapPage() {
           <GameContinue />
         </div>
         <p className="mt-3 text-sm">
+          <Link to="/game/road" className="font-semibold text-primary">
+            Road exam · Week 7
+          </Link>
+          <span className="text-muted"> — midterm words. Hebrew is spoken. Say A, B, C, or D.</span>
+        </p>
+        <p className="mt-3 text-sm">
           <Link to="/game/custom" className="font-semibold text-primary">
             Custom mix
           </Link>
