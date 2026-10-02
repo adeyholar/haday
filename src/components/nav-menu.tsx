@@ -35,6 +35,7 @@ export type NavHref =
   | "/legal"
   | "/credits"
   | "/game"
+  | "/game/road"
   | "/game/custom"
   | "/game/alefbet"
   | "/game/balloons"

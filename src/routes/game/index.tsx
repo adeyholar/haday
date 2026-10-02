@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { GameContinue } from "@/components/game-continue";
 import { GameMenu } from "@/components/game-menu";
 import { RewardsBar } from "@/components/rewards-bar";
@@ -38,12 +39,12 @@ function GameMapPage() {
         <div className="mt-4">
           <GameContinue />
         </div>
-        <p className="mt-3 text-sm">
-          <Link to="/game/road" className="font-semibold text-primary">
+        <Link to="/game/road" className="mt-4 block">
+          <Button className="w-full text-lg" size="lg">
             Road exam · Week 7
-          </Link>
-          <span className="text-muted"> — midterm words. Hebrew is spoken. Say A, B, C, or D.</span>
-        </p>
+          </Button>
+        </Link>
+        <p className="mt-2 text-sm text-muted">Hebrew is spoken. Glance at A–D and say the letter.</p>
         <p className="mt-3 text-sm">
           <Link to="/game/custom" className="font-semibold text-primary">
             Custom mix
