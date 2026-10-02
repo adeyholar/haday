@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Road exam is in the Game button.** It is the first item when you tap Game, and a large button on Home. The app says the Hebrew word. You say A, B, C, or D.
 - **Road exam.** Week 7 midterm, under Game. The app says the Hebrew word. You say A, B, C, or D. First wrong is try again. Second wrong says the letter and brings the word back once.
 - **Drill.** A week is no longer 12 cards. Every word is heard, chosen among twins, typed in English three ways, then typed in Hebrew, and found in a verse when there is one. A miss comes back once in that sitting.
 - **Show me.** On Spell (strict), Show me no longer prints the word. It lights the next letter or point, nods when you press it, and says the name only if you ask again. The word comes back once with no help.
