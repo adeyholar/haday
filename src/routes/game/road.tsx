@@ -60,7 +60,7 @@ function RoadExamPage() {
   const taskRef = useRef<RoadCard | null>(null);
   const voice = useRef({ stop: false });
   const recRef = useRef<SpeechRec | null>(null);
-  const listenGen = useRef(0);
+  const opening = useRef<Promise<void> | null>(null);
 
   const task = queue[i] ?? null;
   const finished = started && queue.length > 0 && i >= queue.length;
@@ -219,12 +219,18 @@ function RoadExamPage() {
     setNote("");
     setPhase("speak");
     stopRec();
-    const signal = { stop: false };
-    voice.current = signal;
+    const pending = opening.current;
+    opening.current = null;
+    const signal = pending ? voice.current : { stop: false };
+    if (!pending) voice.current = signal;
     let replay: number | undefined;
     void (async () => {
-      unlockSpeech();
-      await speakHebrewWord(task.item, 0.92, signal);
+      if (!pending) {
+        unlockSpeech();
+        await speakHebrewWord(task.item, 0.92, signal);
+      } else {
+        await pending;
+      }
       if (signal.stop) return;
       phaseRef.current = "listen";
       setPhase("listen");
@@ -246,7 +252,6 @@ function RoadExamPage() {
       signal.stop = true;
       if (replay) window.clearTimeout(replay);
       stopRec();
-      stopSpeech();
     };
     // startRec closes over the latest card via refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -256,31 +261,24 @@ function RoadExamPage() {
 
   function begin() {
     unlockSpeech();
-    const primed = speechCtor();
-    if (primed) {
-      try {
-        const rec = new primed();
-        rec.lang = "en-US";
-        rec.onend = () => {
-          try {
-            rec.abort();
-          } catch {
-            /* ignore */
-          }
-        };
-        rec.start();
-        window.setTimeout(() => {
-          try {
-            rec.abort();
-          } catch {
-            /* ignore */
-          }
-        }, 250);
-      } catch {
-        /* mic prompt failed; taps still work */
-      }
+    const deck = buildRoadDeck(pool);
+    const first = deck[0];
+    if (first) {
+      const signal = { stop: false };
+      voice.current = signal;
+      opening.current = speakHebrewWord(first.item, 0.92, signal);
     }
-    setQueue(buildRoadDeck(pool));
+    const media = navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+    if (media) {
+      void media({ audio: true })
+        .then((stream) => {
+          for (const track of stream.getTracks()) track.stop();
+        })
+        .catch(() => {
+          /* taps still work */
+        });
+    }
+    setQueue(deck);
     setI(0);
     setHeard(0);
     setHeld(0);
@@ -347,7 +345,10 @@ function RoadExamPage() {
           </p>
         </div>
         <p className="mt-2 text-sm text-muted">
-          {phase === "speak" ? "Listen for the Hebrew." : phase === "listen" ? "Say A, B, C, or D." : note}
+          {phase === "speak" ? "The word is on the screen, and it is being called." : phase === "listen" ? "Say A, B, C, or D." : note}
+        </p>
+        <p className="he-word mt-4 text-center text-6xl font-bold leading-tight text-ink sm:text-7xl" lang="he" dir="rtl">
+          {task.item.hebrew}
         </p>
       </Panel>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
