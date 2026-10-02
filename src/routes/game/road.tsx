@@ -60,6 +60,7 @@ function RoadExamPage() {
   const taskRef = useRef<RoadCard | null>(null);
   const voice = useRef({ stop: false });
   const recRef = useRef<SpeechRec | null>(null);
+  const listenGen = useRef(0);
   const opening = useRef<Promise<void> | null>(null);
 
   const task = queue[i] ?? null;
