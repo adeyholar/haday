@@ -800,30 +800,6 @@ export function TanakhReading({
         <p className="he-word mt-1 text-xl text-ink" lang="he" dir="rtl">
           {meta?.he}
         </p>
-        <p className="mt-3 text-muted">
-          {multi
-            ? `Playing ${passageLabel(passage)}. This chapter has ${verses.length || vw.to} verses. When it ends, the next chapter in the range starts.`
-            : !isFullChapter(passage)
-              ? `Recorded Hebrew for ${passageLabel(passage)} — all ${
-                  verses.length || vw.to - vw.from + 1
-                } ${
-                  (verses.length || vw.to - vw.from + 1) === 1 ? "verse stays" : "verses stay"
-                } on the page and play in one sitting.`
-              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. English stays on the page. 90% first-answer clears the chapter."}
-        </p>
-        {rec ? (
-          <p className="mt-2 text-sm text-muted">
-            Best {rec.best}%{rec.cleared ? " · cleared" : ""} · {rec.attempts} run{rec.attempts === 1 ? "" : "s"}
-          </p>
-        ) : null}
-        {loadErr ? <p className="mt-2 text-sm text-danger">{loadErr}</p> : null}
-        {audioErr ? (
-          <p className="mt-2 text-sm text-danger">The recording could not be loaded. Try again when you have a connection.</p>
-        ) : null}
-        {!aligned && !audioErr ? (
-          <p className="mt-2 text-sm text-muted">Word highlight follows Hebrew syllable weight until this chapter is verse-timed.</p>
-        ) : null}
-        <VerseClipBar book={book} chapter={chapter} fromV={vw.from} toV={vw.to} loop={loop} />
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
           <button
             type="button"
@@ -994,6 +970,30 @@ export function TanakhReading({
         </Panel>
       ) : null}
 
+        <p className="mt-3 text-muted">
+          {multi
+            ? `Playing ${passageLabel(passage)}. This chapter has ${verses.length || vw.to} verses. When it ends, the next chapter in the range starts.`
+            : !isFullChapter(passage)
+              ? `Recorded Hebrew for ${passageLabel(passage)} — all ${
+                  verses.length || vw.to - vw.from + 1
+                } ${
+                  (verses.length || vw.to - vw.from + 1) === 1 ? "verse stays" : "verses stay"
+                } on the page and play in one sitting.`
+              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. English stays on the page. 90% first-answer clears the chapter."}
+        </p>
+        {rec ? (
+          <p className="mt-2 text-sm text-muted">
+            Best {rec.best}%{rec.cleared ? " · cleared" : ""} · {rec.attempts} run{rec.attempts === 1 ? "" : "s"}
+          </p>
+        ) : null}
+        {loadErr ? <p className="mt-2 text-sm text-danger">{loadErr}</p> : null}
+        {audioErr ? (
+          <p className="mt-2 text-sm text-danger">The recording could not be loaded. Try again when you have a connection.</p>
+        ) : null}
+        {!aligned && !audioErr ? (
+          <p className="mt-2 text-sm text-muted">Word highlight follows Hebrew syllable weight until this chapter is verse-timed.</p>
+        ) : null}
+        <VerseClipBar book={book} chapter={chapter} fromV={vw.from} toV={vw.to} loop={loop} />
       <div className="mt-4 grid grid-cols-2 gap-2">
         {prevLoc ? (
           <Link
@@ -1105,13 +1105,20 @@ function FollowCard({
   const lastVol = useRef(vol || 1);
   const [pick, setPick] = useState<WordPick | null>(null);
   const activeRef = useRef<HTMLLIElement | null>(null);
+  const wordEl = useRef<HTMLButtonElement | null>(null);
+  const skipScroll = useRef(true);
   const list = verses.length ? verses : [verse];
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [i, verse.ref]);
+    if (skipScroll.current) {
+      skipScroll.current = false;
+      return;
+    }
+    const node = wordEl.current ?? activeRef.current;
+    node?.scrollIntoView({ block: "end", inline: "nearest", behavior: "smooth" });
+  }, [i, wordI, verse.ref]);
   useEffect(() => {
     if (vol > 0) lastVol.current = vol;
     saveReadVolume(vol);
@@ -1132,112 +1139,8 @@ function FollowCard({
   const enKeys = englishKeysForWord(focusWord);
   return (
     <>
-      <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
-        <p className="text-sm font-semibold text-ink">
-          {list[0]?.ref}
-          {list.length > 1 ? `–${list[list.length - 1]?.verse}` : ""} · {list.length} verse
-          {list.length === 1 ? "" : "s"} · one sitting
-        </p>
-        <ol className="mt-4 flex flex-col gap-6">
-          {list.map((row, idx) => {
-            const active = idx === i;
-            return (
-              <li key={row.ref} ref={active ? activeRef : undefined} className="scroll-mt-24">
-                <button
-                  type="button"
-                  className="text-xs font-semibold uppercase tracking-wide text-muted"
-                  onClick={() => (onWord ? onWord(idx, 0) : onJump(idx))}
-                >
-                  {row.ref}
-                  {active ? " · reading" : ""}
-                </button>
-                <p
-                  className={`he-verse mt-2 ${active ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl"}`}
-                  lang="he"
-                  dir="rtl"
-                >
-                  {row.words.map((w, wi) =>
-                    active ? (
-                      <button
-                        type="button"
-                        key={`${row.ref}-${wi}`}
-                        className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
-                          wi === wordI ? "he-spoken" : "text-ink"
-                        } ${pick?.index === wi ? "he-tapped" : ""}`}
-                        onClick={() => {
-                          if (onWord) {
-                            onWord(idx, wi);
-                            return;
-                          }
-                          if (pick?.index === wi) {
-                            setPick(null);
-                            return;
-                          }
-                          setPick({
-                            word: w,
-                            index: wi,
-                            book: bookId,
-                            chapter: row.chapter,
-                            verse: row.verse,
-                            he: row.he,
-                            en: row.en,
-                          });
-                        }}
-                      >
-                        {hebrewClusters(w).map((part, pi) => (
-                          <span
-                            key={`${row.ref}-${wi}-${pi}`}
-                            className={
-                              wi === wordI && (clusterI < 0 || pi === clusterI)
-                                ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
-                                : undefined
-                            }
-                          >
-                            {part.glyph}
-                          </span>
-                        ))}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        key={`${row.ref}-${wi}`}
-                        className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
-                        onClick={() => (onWord ? onWord(idx, wi) : onJump(idx))}
-                      >
-                        {w}
-                      </button>
-                    ),
-                  )}
-                </p>
-                <EnglishVerse
-                  en={row.en}
-                  keys={active ? enKeys : []}
-                  className={`max-w-full break-words leading-relaxed ${
-                    active ? "mt-2 text-base text-ink" : "mt-1 text-sm text-muted"
-                  }`}
-                />
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-2 text-xs text-muted">
-          {hideTransport
-            ? "Tap a word to start there. The lit word is yours to repeat after the pulse."
-            : list.length >= 10
-              ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
-              : "Tap a word for its card. Highlight still follows the reader."}
-        </p>
-        <p className="mt-6 text-sm tabular-nums text-muted">
-          {i + 1} / {total}
-        </p>
-        {hideTransport ? null : (
-          <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
-        )}
-      </div>
-      {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
-
       {hideTransport ? null : (
-      <div className="mt-4 rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)]">
+      <div className="sticky top-14 z-30 mb-4 rounded-[var(--radius-xl)] border border-border bg-card px-4 py-3 shadow-[var(--shadow-border)]">
         <div className="flex items-center justify-between text-sm font-semibold tabular-nums text-muted">
           <span>{formatPlayTime(rel)}</span>
           <span>{formatPlayTime(span || duration)}</span>
@@ -1332,6 +1235,111 @@ function FollowCard({
         </div>
       </div>
       )}
+      <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
+        <p className="text-sm font-semibold text-ink">
+          {list[0]?.ref}
+          {list.length > 1 ? `–${list[list.length - 1]?.verse}` : ""} · {list.length} verse
+          {list.length === 1 ? "" : "s"} · one sitting
+        </p>
+        <ol className="mt-4 flex flex-col gap-6">
+          {list.map((row, idx) => {
+            const active = idx === i;
+            return (
+              <li key={row.ref} ref={active ? activeRef : undefined} className="scroll-mb-28">
+                <button
+                  type="button"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted"
+                  onClick={() => (onWord ? onWord(idx, 0) : onJump(idx))}
+                >
+                  {row.ref}
+                  {active ? " · reading" : ""}
+                </button>
+                <p
+                  className={`he-verse mt-2 ${active ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl"}`}
+                  lang="he"
+                  dir="rtl"
+                >
+                  {row.words.map((w, wi) =>
+                    active ? (
+                      <button
+                        type="button"
+                        key={`${row.ref}-${wi}`}
+                        ref={wi === wordI ? wordEl : undefined}
+                        className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
+                          wi === wordI ? "he-spoken" : "text-ink"
+                        } ${pick?.index === wi ? "he-tapped" : ""}`}
+                        onClick={() => {
+                          if (onWord) {
+                            onWord(idx, wi);
+                            return;
+                          }
+                          if (pick?.index === wi) {
+                            setPick(null);
+                            return;
+                          }
+                          setPick({
+                            word: w,
+                            index: wi,
+                            book: bookId,
+                            chapter: row.chapter,
+                            verse: row.verse,
+                            he: row.he,
+                            en: row.en,
+                          });
+                        }}
+                      >
+                        {hebrewClusters(w).map((part, pi) => (
+                          <span
+                            key={`${row.ref}-${wi}-${pi}`}
+                            className={
+                              wi === wordI && (clusterI < 0 || pi === clusterI)
+                                ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
+                                : undefined
+                            }
+                          >
+                            {part.glyph}
+                          </span>
+                        ))}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        key={`${row.ref}-${wi}`}
+                        className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
+                        onClick={() => (onWord ? onWord(idx, wi) : onJump(idx))}
+                      >
+                        {w}
+                      </button>
+                    ),
+                  )}
+                </p>
+                <EnglishVerse
+                  en={row.en}
+                  keys={active ? enKeys : []}
+                  className={`max-w-full break-words leading-relaxed ${
+                    active ? "mt-2 text-base text-ink" : "mt-1 text-sm text-muted"
+                  }`}
+                />
+              </li>
+            );
+          })}
+        </ol>
+        <p className="mt-2 text-xs text-muted">
+          {hideTransport
+            ? "Tap a word to start there. The lit word is yours to repeat after the pulse."
+            : list.length >= 10
+              ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
+              : "Tap a word for its card. Highlight still follows the reader."}
+        </p>
+        <p className="mt-6 text-sm tabular-nums text-muted">
+          {i + 1} / {total}
+        </p>
+        {hideTransport ? null : (
+          <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
+        )}
+      </div>
+      {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
+
       <audio ref={audioRef} className="sr-only" preload={preload} playsInline />
     </>
   );
