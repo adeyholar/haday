@@ -53,6 +53,7 @@ import {
   type ReadSearch,
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
+import { playPulse, waitForSpeech, waitUntilSaid, wordSlice, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
   chapterAudioSrc,
@@ -64,7 +65,8 @@ import {
   type BookId,
 } from "@/lib/tanakh-canon";
 
-type Mode = "follow" | "grade";
+type Mode = "follow" | "after" | "grade";
+type AfterPhase = "off" | "model" | "pulse" | "wait" | "done";
 
 const VOL_KEY = "haday-read-vol";
 
@@ -103,6 +105,8 @@ export function TanakhReading({
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [audioErr, setAudioErr] = useState(false);
   const [mode, setMode] = useState<Mode>("follow");
+  const [afterPhase, setAfterPhase] = useState<AfterPhase>("off");
+  const [afterMic, setAfterMic] = useState(true);
   const [i, setI] = useState(0);
   const [wordI, setWordI] = useState(0);
   const [clusterI, setClusterI] = useState(0);
@@ -131,6 +135,9 @@ export function TanakhReading({
   const passageRef = useRef(passage);
   const audioMetaRef = useRef<ChapterAudio>(audioFor(book, chapter));
   const echoClockRef = useRef<EchoClock>(null);
+  const afterBag = useRef<AfterBag>({ stop: true, said: false, replay: false });
+  const afterCtx = useRef<AudioContext | null>(null);
+  const modeRef = useRef<Mode>("follow");
   const [audioMeta, setAudioMeta] = useState<ChapterAudio>(() => audioFor(book, chapter));
   const verse = verses[i];
   const pid = isFullChapter(passage) ? progressId(book, chapter) : `${book}.${chapter}.${vw.from}-${vw.to}`;
@@ -143,6 +150,7 @@ export function TanakhReading({
   loopRef.current = loop;
   passageRef.current = passage;
   audioMetaRef.current = audioMeta;
+  modeRef.current = mode;
 
   function applyRate(el: HTMLAudioElement, n: number) {
     const next = n > 0 ? n : 1;
@@ -205,6 +213,7 @@ export function TanakhReading({
       if (item) paintVerseWords(item, echo);
       return;
     }
+    if (modeRef.current === "after") return;
     const el = elAudio();
     const list = versesRef.current;
     const curMeta = audioMetaRef.current;
@@ -352,6 +361,8 @@ export function TanakhReading({
     wordRef.current = 0;
     setClusterI(0);
     clusterRef.current = 0;
+    afterBag.current.stop = true;
+    setAfterPhase("off");
     setMode("follow");
     setQuiz(null);
     setDone(false);
@@ -532,7 +543,157 @@ export function TanakhReading({
     void playFrom(index, true);
   }
 
+  function stopAfter() {
+    afterBag.current.stop = true;
+    const el = elAudio();
+    if (el) el.pause();
+    setPlaying(false);
+    setAfterPhase("off");
+  }
+
+  function audioCtx(): AudioContext {
+    if (!afterCtx.current) afterCtx.current = new AudioContext();
+    return afterCtx.current;
+  }
+
+  function playWordSlice(start: number, end: number, bag: AfterBag): Promise<void> {
+    const el = elAudio();
+    if (!el) return Promise.resolve();
+    const src = audioMetaRef.current.src || "";
+    if (src && !(el.src.endsWith(src) || el.src.includes(src))) el.src = src;
+    return new Promise((resolve) => {
+      let timer = 0;
+      const finish = () => {
+        el.removeEventListener("timeupdate", onTick);
+        window.clearTimeout(timer);
+        resolve();
+      };
+      const onTick = () => {
+        if (bag.stop || bag.replay) {
+          el.pause();
+          finish();
+          return;
+        }
+        if (el.currentTime >= end - 0.04) {
+          el.pause();
+          finish();
+        }
+      };
+      timer = window.setTimeout(() => {
+        el.pause();
+        finish();
+      }, Math.max(450, (end - start) * 1000 + 280));
+      el.addEventListener("timeupdate", onTick);
+      try {
+        el.currentTime = Math.max(0, start);
+      } catch {
+        /* not ready yet */
+      }
+      void el.play().then(() => setPlaying(true)).catch(() => finish());
+    });
+  }
+
+  function startAfter(verseIndex: number, wordIndex: number) {
+    afterBag.current.stop = true;
+    const bag: AfterBag = { stop: false, said: false, replay: false };
+    afterBag.current = bag;
+    const ctx = audioCtx();
+    void ctx.resume();
+    const askMic = navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+    const micP = askMic
+      ? askMic({ audio: { echoCancellation: true, noiseSuppression: true } }).catch(() => null)
+      : Promise.resolve(null);
+    setMode("after");
+    setQuiz(null);
+    setDone(false);
+    setAfterPhase("model");
+    void runAfter(bag, ctx, micP, verseIndex, wordIndex);
+  }
+
+  async function runAfter(
+    bag: AfterBag,
+    ctx: AudioContext,
+    micP: Promise<MediaStream | null>,
+    verseIndex: number,
+    wordIndex: number,
+  ) {
+    let vi = verseIndex;
+    let wi = wordIndex;
+    let stream: MediaStream | null = null;
+    let nudged = false;
+    void micP.then((live) => {
+      if (bag.stop) live?.getTracks().forEach((track) => track.stop());
+    });
+    const paint = (verseI: number, word: number) => {
+      iRef.current = verseI;
+      wordRef.current = word;
+      clusterRef.current = -1;
+      setI(verseI);
+      setWordI(word);
+      setClusterI(-1);
+    };
+    try {
+      while (!bag.stop) {
+        const list = versesRef.current;
+        const item = list[vi];
+        if (!item) {
+          setAfterPhase("done");
+          setPlaying(false);
+          break;
+        }
+        if (wi >= item.words.length) {
+          vi += 1;
+          wi = 0;
+          continue;
+        }
+        paint(vi, wi);
+        setAfterPhase("model");
+        const slice = wordSlice(audioMetaRef.current, item.verse, wi, item.words.length, elAudio()?.duration || tdur);
+        await playWordSlice(slice.start, slice.end, bag);
+        if (bag.stop) break;
+        if (bag.replay) {
+          bag.replay = false;
+          continue;
+        }
+        setPlaying(false);
+        setAfterPhase("pulse");
+        await playPulse(ctx);
+        if (bag.stop) break;
+        if (!stream) {
+          stream = await micP;
+          setAfterMic(Boolean(stream));
+        }
+        setAfterPhase("wait");
+        const heard = stream
+          ? await waitForSpeech(ctx, stream, bag, nudged ? 8000 : 8000)
+          : await waitUntilSaid(bag, 20000);
+        if (bag.stop || heard === "stop") break;
+        if (heard === "replay") continue;
+        if (heard === "timeout") {
+          if (!nudged) {
+            nudged = true;
+            continue;
+          }
+          const again = await waitUntilSaid(bag, 60000);
+          if (again === "stop" || bag.stop) break;
+          if (again === "replay") continue;
+          if (again === "timeout") continue;
+        }
+        nudged = false;
+        wi += 1;
+        if (wi >= item.words.length) {
+          vi += 1;
+          wi = 0;
+        }
+      }
+    } finally {
+      stream?.getTracks().forEach((track) => track.stop());
+      if (!bag.stop && afterBag.current === bag) setPlaying(false);
+    }
+  }
+
   function startGrade() {
+    stopAfter();
     halt();
     setMode("grade");
     setQuiz(gradeFromVerses(verses, 10));
@@ -625,10 +786,11 @@ export function TanakhReading({
           <p className="mt-2 text-sm text-muted">Word highlight follows Hebrew syllable weight until this chapter is verse-timed.</p>
         ) : null}
         <VerseClipBar book={book} chapter={chapter} fromV={vw.from} toV={vw.to} loop={loop} />
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => {
+              stopAfter();
               setMode("follow");
               setQuiz(null);
               setDone(false);
@@ -641,6 +803,16 @@ export function TanakhReading({
           </button>
           <button
             type="button"
+            onClick={() => startAfter(0, 0)}
+            disabled={!verses.length}
+            className={`min-h-12 rounded-[var(--radius-md)] px-3 text-sm font-semibold shadow-[var(--shadow-border)] ${
+              mode === "after" ? "bg-ink text-parchment" : "bg-card text-ink"
+            }`}
+          >
+            Read after me
+          </button>
+          <button
+            type="button"
             onClick={startGrade}
             disabled={!verses.length}
             className={`min-h-12 rounded-[var(--radius-md)] px-3 text-sm font-semibold shadow-[var(--shadow-border)] ${
@@ -650,9 +822,62 @@ export function TanakhReading({
             Grade reading
           </button>
         </div>
+        {mode === "after" ? (
+          <div className="mt-4 rounded-[var(--radius-md)] bg-surface px-3 py-3">
+            <p className="font-display text-2xl font-bold text-ink">
+              {afterPhase === "done"
+                ? "Sample finished"
+                : afterPhase === "wait"
+                  ? "Your turn"
+                  : afterPhase === "model"
+                    ? "Listen"
+                    : afterPhase === "pulse"
+                      ? "Your turn"
+                      : "Read after me"}
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              {afterPhase === "done"
+                ? "That was the last verse in this range."
+                : afterPhase === "wait"
+                  ? afterMic
+                    ? "Say the lit word. A short quiet moves to the next word."
+                    : "The microphone is off. Tap I said it when you have said the word."
+                  : "The recording says one word. A pulse means you repeat it."}
+            </p>
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {afterPhase === "done" || afterPhase === "off" ? (
+                <Button type="button" onClick={() => startAfter(0, 0)}>
+                  {afterPhase === "done" ? "Read it again" : "Start"}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    afterBag.current.said = true;
+                  }}
+                >
+                  I said it
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  afterBag.current.replay = true;
+                }}
+                disabled={afterPhase === "done" || afterPhase === "off"}
+              >
+                Hear it again
+              </Button>
+              <Button type="button" variant="outline" onClick={stopAfter} disabled={afterPhase === "off" || afterPhase === "done"}>
+                Stop
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </Panel>
 
-      {mode === "follow" && verse ? (
+      {(mode === "follow" || mode === "after") && verse ? (
         <FollowCard
           audioRef={audioRef}
           verse={verse}
@@ -680,6 +905,8 @@ export function TanakhReading({
           onEchoClock={onEchoClock}
           onStep={step}
           onJump={jumpTo}
+          onWord={mode === "after" ? (verseIndex, word) => startAfter(verseIndex, word) : undefined}
+          hideTransport={mode === "after"}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
           onSeeking={(yes) => {
@@ -695,7 +922,7 @@ export function TanakhReading({
         />
       ) : null}
 
-      {mode === "follow" && !verse && !loadErr ? (
+      {(mode === "follow" || mode === "after") && !verse && !loadErr ? (
         <Panel>
           <p className="text-muted">Loading {meta?.en ?? book} {chapter}…</p>
         </Panel>
@@ -796,6 +1023,8 @@ function FollowCard({
   onEchoClock,
   onStep,
   onJump,
+  onWord,
+  hideTransport,
   onNudge,
   onSeek,
   onSeeking,
@@ -825,6 +1054,8 @@ function FollowCard({
   onEchoClock: (clock: EchoClock) => void;
   onStep: (d: number) => void;
   onJump: (index: number) => void;
+  onWord?: (verseIndex: number, wordIndex: number) => void;
+  hideTransport?: boolean;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
   onSeeking: (yes: boolean) => void;
@@ -877,7 +1108,7 @@ function FollowCard({
                 <button
                   type="button"
                   className="text-xs font-semibold uppercase tracking-wide text-muted"
-                  onClick={() => onJump(idx)}
+                  onClick={() => (onWord ? onWord(idx, 0) : onJump(idx))}
                 >
                   {row.ref}
                   {active ? " · reading" : ""}
@@ -896,6 +1127,10 @@ function FollowCard({
                           wi === wordI ? "he-spoken" : "text-ink"
                         } ${pick?.index === wi ? "he-tapped" : ""}`}
                         onClick={() => {
+                          if (onWord) {
+                            onWord(idx, wi);
+                            return;
+                          }
                           if (pick?.index === wi) {
                             setPick(null);
                             return;
@@ -929,7 +1164,7 @@ function FollowCard({
                         type="button"
                         key={`${row.ref}-${wi}`}
                         className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
-                        onClick={() => onJump(idx)}
+                        onClick={() => (onWord ? onWord(idx, wi) : onJump(idx))}
                       >
                         {w}
                       </button>
@@ -948,17 +1183,22 @@ function FollowCard({
           })}
         </ol>
         <p className="mt-2 text-xs text-muted">
-          {list.length >= 10
-            ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
-            : "Tap a word for its card. Highlight still follows the reader."}
+          {hideTransport
+            ? "Tap a word to start there. The lit word is yours to repeat after the pulse."
+            : list.length >= 10
+              ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
+              : "Tap a word for its card. Highlight still follows the reader."}
         </p>
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
         </p>
-        <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
+        {hideTransport ? null : (
+          <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
+        )}
       </div>
       {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
 
+      {hideTransport ? null : (
       <div className="mt-4 rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)]">
         <div className="flex items-center justify-between text-sm font-semibold tabular-nums text-muted">
           <span>{formatPlayTime(rel)}</span>
@@ -980,7 +1220,6 @@ function FollowCard({
             onSeek(t);
           }}
         />
-        <audio ref={audioRef} className="sr-only" preload={preload} playsInline />
         <div className="mt-3 flex items-center gap-3">
           <button
             type="button"
@@ -1054,6 +1293,8 @@ function FollowCard({
           ))}
         </div>
       </div>
+      )}
+      <audio ref={audioRef} className="sr-only" preload={preload} playsInline />
     </>
   );
 }
