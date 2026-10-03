@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Read after me stays loud.** The microphone opens only after the word, so the recording is not turned down.
 - **Read after me.** In the reading lab, the recording says one Hebrew word, a pulse marks your turn, and it waits until you finish. It walks the selected range to the last verse. It does not grade the pronunciation.
 - **Follow along shows the range.** A selected verse range stays on the page and plays in one sitting. Ten verses or more are all on the page, not hidden.
 - **Road exam opens again.** The card crashed on iPad with “Can't find variable: listenGen.” That is fixed. The Hebrew word still shows and is spoken.

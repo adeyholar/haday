@@ -561,6 +561,7 @@ export function TanakhReading({
     if (!el) return Promise.resolve();
     const src = audioMetaRef.current.src || "";
     if (src && !(el.src.endsWith(src) || el.src.includes(src))) el.src = src;
+    el.volume = 1;
     return new Promise((resolve) => {
       let timer = 0;
       const finish = () => {
@@ -597,33 +598,64 @@ export function TanakhReading({
     afterBag.current.stop = true;
     const bag: AfterBag = { stop: false, said: false, replay: false };
     afterBag.current = bag;
-    const ctx = audioCtx();
-    void ctx.resume();
     const askMic = navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
-    const micP = askMic
-      ? askMic({ audio: { echoCancellation: true, noiseSuppression: true } }).catch(() => null)
-      : Promise.resolve(null);
+    const el = elAudio();
+    if (el) {
+      el.volume = 1;
+      void el.play().catch(() => {
+        /* the word play follows */
+      });
+    }
+    const prime = askMic
+      ? askMic({ audio: true })
+          .then((live) => {
+            for (const track of live.getTracks()) track.stop();
+          })
+          .catch(() => {
+            /* the sitting still runs; I said it advances */
+          })
+      : Promise.resolve();
     setMode("after");
     setQuiz(null);
     setDone(false);
     setAfterPhase("model");
-    void runAfter(bag, ctx, micP, verseIndex, wordIndex);
+    void prime.then(() => {
+      if (!bag.stop) void runAfter(bag, verseIndex, wordIndex);
+    });
   }
 
-  async function runAfter(
-    bag: AfterBag,
-    ctx: AudioContext,
-    micP: Promise<MediaStream | null>,
-    verseIndex: number,
-    wordIndex: number,
-  ) {
+  function closeMic(stream: MediaStream | null) {
+    stream?.getTracks().forEach((track) => track.stop());
+  }
+
+  async function settleSpeaker() {
+    const ctx = afterCtx.current;
+    if (ctx && ctx.state === "running") {
+      try {
+        await ctx.suspend();
+      } catch {
+        /* ignore */
+      }
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 220));
+  }
+
+  async function openMic(): Promise<MediaStream | null> {
+    const askMic = navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+    if (!askMic) return null;
+    try {
+      return await askMic({ audio: true });
+    } catch {
+      return null;
+    }
+  }
+
+  async function runAfter(bag: AfterBag, verseIndex: number, wordIndex: number) {
     let vi = verseIndex;
     let wi = wordIndex;
     let stream: MediaStream | null = null;
     let nudged = false;
-    void micP.then((live) => {
-      if (bag.stop) live?.getTracks().forEach((track) => track.stop());
-    });
+    let heardMic = false;
     const paint = (verseI: number, word: number) => {
       iRef.current = verseI;
       wordRef.current = word;
@@ -647,8 +679,13 @@ export function TanakhReading({
           continue;
         }
         paint(vi, wi);
+        closeMic(stream);
+        stream = null;
+        if (heardMic) await settleSpeaker();
+        const el = elAudio();
+        if (el) el.volume = 1;
         setAfterPhase("model");
-        const slice = wordSlice(audioMetaRef.current, item.verse, wi, item.words.length, elAudio()?.duration || tdur);
+        const slice = wordSlice(audioMetaRef.current, item.verse, wi, item.words.length, el?.duration || tdur);
         await playWordSlice(slice.start, slice.end, bag);
         if (bag.stop) break;
         if (bag.replay) {
@@ -657,15 +694,16 @@ export function TanakhReading({
         }
         setPlaying(false);
         setAfterPhase("pulse");
+        const ctx = audioCtx();
+        if (ctx.state === "suspended") await ctx.resume();
         await playPulse(ctx);
         if (bag.stop) break;
-        if (!stream) {
-          stream = await micP;
-          setAfterMic(Boolean(stream));
-        }
+        stream = await openMic();
+        heardMic = heardMic || Boolean(stream);
+        setAfterMic(Boolean(stream));
         setAfterPhase("wait");
         const heard = stream
-          ? await waitForSpeech(ctx, stream, bag, nudged ? 8000 : 8000)
+          ? await waitForSpeech(ctx, stream, bag, 8000)
           : await waitUntilSaid(bag, 20000);
         if (bag.stop || heard === "stop") break;
         if (heard === "replay") continue;
