@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import { lessonById, stationById } from "@/lib/ladder";
+import { explainMorph } from "@/lib/morph-parse";
 import { lookupStrong, type StrongEntry } from "@/lib/strongs";
 
-export function StrongGlance({ id }: { id: string }) {
+export function StrongGlance({ id, morph }: { id: string; morph?: string }) {
   const [row, setRow] = useState<StrongEntry | null | undefined>(undefined);
   const search = useSearch({ strict: false }) as { from?: unknown };
   const from = typeof search.from === "string" ? search.from : "";
   const lesson = from ? lessonById(from) : undefined;
   const station = lesson ? stationById(lesson.stationId) : undefined;
   const greek = id.toUpperCase().startsWith("G");
+  const parsing = morph ? explainMorph(morph) : "";
 
   useEffect(() => {
     let cancelled = false;
@@ -31,14 +33,22 @@ export function StrongGlance({ id }: { id: string }) {
       {row === null ? <p className="mt-2 text-sm text-muted">No lexicon entry for {id}.</p> : null}
       {row ? (
         <>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Lemma</p>
           <p className="he-word mt-1 text-3xl text-ink" dir={greek ? "ltr" : "rtl"} lang={greek ? "grc" : "he"}>
             {row.word}
           </p>
           {row.translit ? <p className="mt-1 text-sm text-ink">{row.translit}</p> : null}
           {row.pron ? <p className="text-sm text-muted">Pronounced {row.pron}</p> : null}
-          {row.def ? <p className="mt-2 text-sm leading-relaxed text-ink">{row.def}</p> : null}
-          {row.derivation ? <p className="mt-1 text-xs text-muted">{row.derivation}</p> : null}
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Dictionary</p>
+          {row.def ? <p className="mt-1 text-sm leading-relaxed text-ink">{row.def}</p> : null}
           {row.kjv ? <p className="mt-1 text-xs text-muted">KJV: {row.kjv}</p> : null}
+          {row.derivation ? <p className="mt-1 text-xs text-muted">{row.derivation}</p> : null}
+        </>
+      ) : null}
+      {parsing ? (
+        <>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Parsing</p>
+          <p className="mt-1 text-sm leading-relaxed text-ink">{parsing}</p>
         </>
       ) : null}
       {lesson ? (

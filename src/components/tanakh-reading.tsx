@@ -54,6 +54,7 @@ import {
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
 import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
+import { splitStrongTag } from "@/lib/morph-parse";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
@@ -1316,7 +1317,8 @@ function FollowCard({
                           (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
                         }`}
                         onClick={() => {
-                          const sid = strongChapter?.[String(row.verse)]?.[wi] ?? "";
+                          const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
+                          const { id: sid, morph } = splitStrongTag(tag);
                           if (onWord) {
                             onWord(idx, wi);
                             return;
@@ -1334,6 +1336,7 @@ function FollowCard({
                             he: row.he,
                             en: row.en,
                             strong: sid || undefined,
+                            morph: morph || undefined,
                           });
                         }}
                       >
@@ -1356,7 +1359,7 @@ function FollowCard({
                         key={`${row.ref}-${wi}`}
                         className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
                         onClick={() => {
-                          const sid = strongChapter?.[String(row.verse)]?.[wi] ?? "";
+                          const { id: sid, morph } = splitStrongTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
                           if (!onWord && sid) {
                             setPick({
                               word: w,
@@ -1367,6 +1370,7 @@ function FollowCard({
                               he: row.he,
                               en: row.en,
                               strong: sid,
+                              morph: morph || undefined,
                             });
                             return;
                           }

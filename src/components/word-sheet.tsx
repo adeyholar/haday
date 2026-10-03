@@ -20,6 +20,8 @@ export type WordPick = {
   en: string;
   /** Strong's number when this surface is tagged, such as H7225. */
   strong?: string;
+  /** Open Scriptures morphology code, such as HVqp3ms. */
+  morph?: string;
 };
 
 export function WordSheet({
@@ -105,7 +107,7 @@ export function WordSheet({
           Close
         </button>
       </div>
-      {pick.strong ? <StrongGlance id={pick.strong} /> : null}
+      {pick.strong ? <StrongGlance id={pick.strong} morph={pick.morph} /> : null}
       {pick.he ? (
         <div className="mt-3 space-y-2">
           <p className="he-verse he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">

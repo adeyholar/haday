@@ -78,9 +78,17 @@ def cons(text: str) -> str:
     return "".join(CONS.findall(text))
 
 
-def verse_tags(oshb: list[tuple[str, str]], ours: list[str]) -> list[str]:
+def pack(lemma: str, morph: str) -> str:
+    sid = strong_of(lemma)
+    morph = morph.strip()
+    if sid and morph:
+        return f"{sid}|{morph}"
+    return sid or morph
+
+
+def verse_tags(oshb: list[tuple[str, str, str]], ours: list[str]) -> list[str]:
     if len(oshb) == len(ours):
-        return [strong_of(lem) for lem, _word in oshb]
+        return [pack(lem, morph) for lem, morph, _word in oshb]
     out: list[str] = []
     i = 0
     for word in ours:
@@ -90,31 +98,36 @@ def verse_tags(oshb: list[tuple[str, str]], ours: list[str]) -> list[str]:
             continue
         got = ""
         chosen = ""
+        morphs: list[str] = []
         start = i
         while i < len(oshb) and len(got) < len(want):
-            lem, surface = oshb[i]
+            lem, morph, surface = oshb[i]
             got += cons(surface)
             sid = strong_of(lem)
             if sid:
                 chosen = sid
+            if morph:
+                morphs.append(morph)
             i += 1
         if got == want:
-            out.append(chosen)
+            morph = "+".join(morphs)
+            out.append(f"{chosen}|{morph}" if chosen and morph else chosen or morph)
         else:
             out.append("")
             i = start + 1
     return out
 
 
-def wlc_verses(xml: str) -> dict[str, dict[str, list[tuple[str, str]]]]:
-    chapters: dict[str, dict[str, list[tuple[str, str]]]] = {}
+def wlc_verses(xml: str) -> dict[str, dict[str, list[tuple[str, str, str]]]]:
+    chapters: dict[str, dict[str, list[tuple[str, str, str]]]] = {}
     for verse in re.finditer(r'<verse\b[^>]*osisID="([A-Za-z0-9]+)\.(\d+)\.(\d+)"[^>]*>(.*?)</verse>', xml, re.S):
         _book, ch, vs, body = verse.groups()
         words = []
         for attrs, surface in re.findall(r"<w\b([^>]*)>(.*?)</w>", body, re.S):
             lem = re.search(r'lemma="([^"]*)"', attrs)
+            morph = re.search(r'morph="([^"]*)"', attrs)
             surface = re.sub(r"<[^>]+>", "", surface)
-            words.append((lem.group(1) if lem else "", surface))
+            words.append((lem.group(1) if lem else "", morph.group(1) if morph else "", surface))
         chapters.setdefault(ch, {})[vs] = words
     return chapters
 
@@ -123,11 +136,16 @@ def main() -> None:
     LEX.mkdir(parents=True, exist_ok=True)
     TAGS.mkdir(parents=True, exist_ok=True)
     print("dictionaries")
-    heb = compact(js_object(get(HEB_URL)), "H")
-    grk = compact(js_object(get(GRK_URL)), "G")
-    (LEX / "strongs-hebrew.json").write_text(json.dumps(heb, ensure_ascii=False, separators=(",", ":")))
-    (LEX / "strongs-greek.json").write_text(json.dumps(grk, ensure_ascii=False, separators=(",", ":")))
-    print(f"hebrew {len(heb)} greek {len(grk)}")
+    heb_path = LEX / "strongs-hebrew.json"
+    grk_path = LEX / "strongs-greek.json"
+    if heb_path.exists() and grk_path.exists():
+        print("lexicon files already present")
+    else:
+        heb = compact(js_object(get(HEB_URL)), "H")
+        grk = compact(js_object(get(GRK_URL)), "G")
+        heb_path.write_text(json.dumps(heb, ensure_ascii=False, separators=(",", ":")))
+        grk_path.write_text(json.dumps(grk, ensure_ascii=False, separators=(",", ":")))
+        print(f"hebrew {len(heb)} greek {len(grk)}")
 
     matched = 0
     missed = 0
