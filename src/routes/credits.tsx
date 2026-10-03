@@ -69,7 +69,8 @@ function CreditsPage() {
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Lexicon data: Strong's Concordance via Open Scriptures. The dictionary files are marked
           CC-BY-SA by Open Scriptures. Strong's own 1890 and 1894 text is in the public domain. Verse
-          numbers on Hebrew words come from the Open Scriptures Hebrew Bible morphology (CC BY 4.0).
+          numbers on Hebrew words, and the parsing on the word card, come from the Open Scriptures Hebrew
+          Bible morphology (CC BY 4.0).
         </p>
       </Panel>
 
