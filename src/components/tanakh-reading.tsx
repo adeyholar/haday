@@ -53,7 +53,7 @@ import {
   type ReadSearch,
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
-import { playPulse, waitForSpeech, waitUntilSaid, wordSlice, type AfterBag } from "@/lib/read-after";
+import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
   chapterAudioSrc,
@@ -107,6 +107,7 @@ export function TanakhReading({
   const [mode, setMode] = useState<Mode>("follow");
   const [afterPhase, setAfterPhase] = useState<AfterPhase>("off");
   const [afterMic, setAfterMic] = useState(true);
+  const [phrase, setPhrase] = useState<{ from: number; to: number } | null>(null);
   const [i, setI] = useState(0);
   const [wordI, setWordI] = useState(0);
   const [clusterI, setClusterI] = useState(0);
@@ -363,6 +364,7 @@ export function TanakhReading({
     clusterRef.current = 0;
     afterBag.current.stop = true;
     setAfterPhase("off");
+    setPhrase(null);
     setMode("follow");
     setQuiz(null);
     setDone(false);
@@ -549,6 +551,7 @@ export function TanakhReading({
     if (el) el.pause();
     setPlaying(false);
     setAfterPhase("off");
+    setPhrase(null);
   }
 
   function audioCtx(): AudioContext {
@@ -556,7 +559,12 @@ export function TanakhReading({
     return afterCtx.current;
   }
 
-  function playWordSlice(start: number, end: number, bag: AfterBag): Promise<void> {
+  function playWordSlice(
+    start: number,
+    end: number,
+    bag: AfterBag,
+    onTime?: (t: number) => void,
+  ): Promise<void> {
     const el = elAudio();
     if (!el) return Promise.resolve();
     const src = audioMetaRef.current.src || "";
@@ -570,6 +578,7 @@ export function TanakhReading({
         resolve();
       };
       const onTick = () => {
+        onTime?.(el.currentTime);
         if (bag.stop || bag.replay) {
           el.pause();
           finish();
@@ -685,8 +694,20 @@ export function TanakhReading({
         const el = elAudio();
         if (el) el.volume = 1;
         setAfterPhase("model");
-        const slice = wordSlice(audioMetaRef.current, item.verse, wi, item.words.length, el?.duration || tdur);
-        await playWordSlice(slice.start, slice.end, bag);
+        const group = phraseAt(audioMetaRef.current, item.verse, item.words, wi, el?.duration || tdur);
+        setPhrase({ from: group.from, to: group.to });
+        const starts = audioMetaRef.current.words?.[Math.max(0, item.verse - 1)] ?? [];
+        await playWordSlice(group.start, group.end, bag, (t) => {
+          let sounding = group.from;
+          for (let n = group.from; n <= group.to; n++) {
+            const stamp = starts[n];
+            if (stamp != null && stamp <= t + 0.04) sounding = n;
+          }
+          if (sounding !== wordRef.current) {
+            wordRef.current = sounding;
+            setWordI(sounding);
+          }
+        });
         if (bag.stop) break;
         if (bag.replay) {
           bag.replay = false;
@@ -718,7 +739,7 @@ export function TanakhReading({
           if (again === "timeout") continue;
         }
         nudged = false;
-        wi += 1;
+        wi = group.to + 1;
         if (wi >= item.words.length) {
           vi += 1;
           wi = 0;
@@ -854,9 +875,9 @@ export function TanakhReading({
                 ? "That was the last verse in this range."
                 : afterPhase === "wait"
                   ? afterMic
-                    ? "Say the lit word. A short quiet moves to the next word."
-                    : "The microphone is off. Tap I said it when you have said the word."
-                  : "The recording says one word. A pulse means you repeat it."}
+                    ? "Say the marked phrase. A short quiet moves to the next one."
+                    : "The microphone is off. Tap I said it when you have said the phrase."
+                  : "The recording speaks until the reader pauses. A pulse means you repeat that phrase."}
             </p>
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
               {afterPhase === "done" || afterPhase === "off" ? (
@@ -921,6 +942,7 @@ export function TanakhReading({
           onJump={jumpTo}
           onWord={mode === "after" ? (verseIndex, word) => startAfter(verseIndex, word) : undefined}
           hideTransport={mode === "after"}
+          phrase={mode === "after" ? phrase : null}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
           onSeeking={(yes) => {
@@ -1063,6 +1085,7 @@ function FollowCard({
   onJump,
   onWord,
   hideTransport,
+  phrase,
   onNudge,
   onSeek,
   onSeeking,
@@ -1094,6 +1117,7 @@ function FollowCard({
   onJump: (index: number) => void;
   onWord?: (verseIndex: number, wordIndex: number) => void;
   hideTransport?: boolean;
+  phrase?: { from: number; to: number } | null;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
   onSeeking: (yes: boolean) => void;
@@ -1266,7 +1290,11 @@ function FollowCard({
                         key={`${row.ref}-${wi}`}
                         ref={wi === wordI ? wordEl : undefined}
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
-                          wi === wordI ? "he-spoken" : "text-ink"
+                          wi === wordI
+                            ? "he-spoken"
+                            : phrase && wi >= phrase.from && wi <= phrase.to
+                              ? "he-phrase"
+                              : "text-ink"
                         } ${pick?.index === wi ? "he-tapped" : ""}`}
                         onClick={() => {
                           if (onWord) {
@@ -1326,7 +1354,7 @@ function FollowCard({
         </ol>
         <p className="mt-2 text-xs text-muted">
           {hideTransport
-            ? "Tap a word to start there. The lit word is yours to repeat after the pulse."
+            ? "Tap a word to start there. The marked words are the phrase you repeat after the pulse."
             : list.length >= 10
               ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
               : "Tap a word for its card. Highlight still follows the reader."}
