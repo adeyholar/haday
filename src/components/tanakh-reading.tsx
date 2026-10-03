@@ -53,6 +53,7 @@ import {
   type ReadSearch,
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
+import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
@@ -108,6 +109,8 @@ export function TanakhReading({
   const [afterPhase, setAfterPhase] = useState<AfterPhase>("off");
   const [afterMic, setAfterMic] = useState(true);
   const [phrase, setPhrase] = useState<{ from: number; to: number } | null>(null);
+  const [strongBook, setStrongBook] = useState<StrongBook>({});
+  const strongChapter = strongBook[String(chapter)] ?? {};
   const [i, setI] = useState(0);
   const [wordI, setWordI] = useState(0);
   const [clusterI, setClusterI] = useState(0);
@@ -160,6 +163,17 @@ export function TanakhReading({
     el.preservesPitch = true;
     clockRef.current = { media: el.currentTime, wall: performance.now(), rate: next };
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    setStrongBook({});
+    void fetchStrongTags(book).then((data) => {
+      if (!cancelled) setStrongBook(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [book]);
 
   function elAudio(): HTMLAudioElement | null {
     return audioRef.current;
@@ -943,6 +957,7 @@ export function TanakhReading({
           onWord={mode === "after" ? (verseIndex, word) => startAfter(verseIndex, word) : undefined}
           hideTransport={mode === "after"}
           phrase={mode === "after" ? phrase : null}
+          strongChapter={strongChapter}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
           onSeeking={(yes) => {
@@ -1086,6 +1101,7 @@ function FollowCard({
   onWord,
   hideTransport,
   phrase,
+  strongChapter,
   onNudge,
   onSeek,
   onSeeking,
@@ -1118,6 +1134,7 @@ function FollowCard({
   onWord?: (verseIndex: number, wordIndex: number) => void;
   hideTransport?: boolean;
   phrase?: { from: number; to: number } | null;
+  strongChapter?: Record<string, string[]>;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
   onSeeking: (yes: boolean) => void;
@@ -1295,13 +1312,16 @@ function FollowCard({
                             : phrase && wi >= phrase.from && wi <= phrase.to
                               ? "he-phrase"
                               : "text-ink"
-                        } ${pick?.index === wi ? "he-tapped" : ""}`}
+                        } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
+                          (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
+                        }`}
                         onClick={() => {
+                          const sid = strongChapter?.[String(row.verse)]?.[wi] ?? "";
                           if (onWord) {
                             onWord(idx, wi);
                             return;
                           }
-                          if (pick?.index === wi) {
+                          if (pick?.index === wi && pick.verse === row.verse && !sid) {
                             setPick(null);
                             return;
                           }
@@ -1313,6 +1333,7 @@ function FollowCard({
                             verse: row.verse,
                             he: row.he,
                             en: row.en,
+                            strong: sid || undefined,
                           });
                         }}
                       >
@@ -1334,7 +1355,24 @@ function FollowCard({
                         type="button"
                         key={`${row.ref}-${wi}`}
                         className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
-                        onClick={() => (onWord ? onWord(idx, wi) : onJump(idx))}
+                        onClick={() => {
+                          const sid = strongChapter?.[String(row.verse)]?.[wi] ?? "";
+                          if (!onWord && sid) {
+                            setPick({
+                              word: w,
+                              index: wi,
+                              book: bookId,
+                              chapter: row.chapter,
+                              verse: row.verse,
+                              he: row.he,
+                              en: row.en,
+                              strong: sid,
+                            });
+                            return;
+                          }
+                          if (onWord) onWord(idx, wi);
+                          else onJump(idx);
+                        }}
                       >
                         {w}
                       </button>
