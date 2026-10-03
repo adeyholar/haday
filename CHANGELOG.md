@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Follow along shows the range.** A selected verse range stays on the page and plays in one sitting. Ten verses or more are all on the page, not hidden.
 - **Road exam opens again.** The card crashed on iPad with “Can't find variable: listenGen.” That is fixed. The Hebrew word still shows and is spoken.
 - **Road exam shows the Hebrew.** The word stays on the screen while it is spoken. The choices stay A–D.
 - **Road exam is in the Game button.** It is the first item when you tap Game, and a large button on Home. The app says the Hebrew word. You say A, B, C, or D.

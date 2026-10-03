@@ -520,6 +520,18 @@ export function TanakhReading({
     }
   }
 
+  function jumpTo(index: number) {
+    const list = versesRef.current;
+    if (index < 0 || index >= list.length) return;
+    iRef.current = index;
+    setI(index);
+    setWordI(0);
+    wordRef.current = 0;
+    setClusterI(0);
+    clusterRef.current = 0;
+    void playFrom(index, true);
+  }
+
   function startGrade() {
     halt();
     setMode("grade");
@@ -593,9 +605,11 @@ export function TanakhReading({
           {multi
             ? `Playing ${passageLabel(passage)}. This chapter has ${verses.length || vw.to} verses. When it ends, the next chapter in the range starts.`
             : !isFullChapter(passage)
-              ? `Recorded Hebrew for ${passageLabel(passage)} only — ${verses.length || vw.to - vw.from + 1} verse${
-                  verses.length === 1 ? "" : "s"
-                }. English stays on the page.`
+              ? `Recorded Hebrew for ${passageLabel(passage)} — all ${
+                  verses.length || vw.to - vw.from + 1
+                } ${
+                  (verses.length || vw.to - vw.from + 1) === 1 ? "verse stays" : "verses stay"
+                } on the page and play in one sitting.`
               : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. English stays on the page. 90% first-answer clears the chapter."}
         </p>
         {rec ? (
@@ -642,6 +656,7 @@ export function TanakhReading({
         <FollowCard
           audioRef={audioRef}
           verse={verse}
+          verses={verses}
           i={i}
           wordI={wordI}
           clusterI={clusterI}
@@ -664,6 +679,7 @@ export function TanakhReading({
           onHalt={halt}
           onEchoClock={onEchoClock}
           onStep={step}
+          onJump={jumpTo}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
           onSeeking={(yes) => {
@@ -759,6 +775,7 @@ export function TanakhReading({
 function FollowCard({
   audioRef,
   verse,
+  verses,
   i,
   wordI,
   clusterI,
@@ -778,6 +795,7 @@ function FollowCard({
   onHalt,
   onEchoClock,
   onStep,
+  onJump,
   onNudge,
   onSeek,
   onSeeking,
@@ -786,6 +804,7 @@ function FollowCard({
 }: {
   audioRef: RefObject<HTMLAudioElement | null>;
   verse: ReadingVerse;
+  verses: ReadingVerse[];
   i: number;
   wordI: number;
   clusterI: number;
@@ -805,6 +824,7 @@ function FollowCard({
   onHalt: () => void;
   onEchoClock: (clock: EchoClock) => void;
   onStep: (d: number) => void;
+  onJump: (index: number) => void;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
   onSeeking: (yes: boolean) => void;
@@ -815,9 +835,14 @@ function FollowCard({
   const [vol, setVol] = useState(loadReadVolume);
   const lastVol = useRef(vol || 1);
   const [pick, setPick] = useState<WordPick | null>(null);
+  const activeRef = useRef<HTMLLIElement | null>(null);
+  const list = verses.length ? verses : [verse];
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [i, verse.ref]);
   useEffect(() => {
     if (vol > 0) lastVol.current = vol;
     saveReadVolume(vol);
@@ -839,48 +864,94 @@ function FollowCard({
   return (
     <>
       <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">{verse.ref}</p>
-        <p className="he-verse mt-4 text-xl sm:text-2xl md:text-3xl" lang="he" dir="rtl">
-          {verse.words.map((w, wi) => (
-            <button
-              type="button"
-              key={`${verse.ref}-${wi}`}
-              className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
-                wi === wordI ? "he-spoken" : "text-ink"
-              } ${pick?.index === wi ? "he-tapped" : ""}`}
-              onClick={() => {
-                if (pick?.index === wi) {
-                  setPick(null);
-                  return;
-                }
-                setPick({
-                  word: w,
-                  index: wi,
-                  book: bookId,
-                  chapter: verse.chapter,
-                  verse: verse.verse,
-                  he: verse.he,
-                  en: verse.en,
-                });
-              }}
-            >
-              {hebrewClusters(w).map((part, pi) => (
-                <span
-                  key={`${verse.ref}-${wi}-${pi}`}
-                  className={
-                    wi === wordI && (clusterI < 0 || pi === clusterI)
-                      ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
-                      : undefined
-                  }
-                >
-                  {part.glyph}
-                </span>
-              ))}
-            </button>
-          ))}
+        <p className="text-sm font-semibold text-ink">
+          {list[0]?.ref}
+          {list.length > 1 ? `–${list[list.length - 1]?.verse}` : ""} · {list.length} verse
+          {list.length === 1 ? "" : "s"} · one sitting
         </p>
-        <p className="mt-2 text-xs text-muted">Tap a word for its card. Highlight still follows the reader.</p>
-        <EnglishVerse en={verse.en} keys={enKeys} />
+        <ol className="mt-4 flex flex-col gap-6">
+          {list.map((row, idx) => {
+            const active = idx === i;
+            return (
+              <li key={row.ref} ref={active ? activeRef : undefined} className="scroll-mt-24">
+                <button
+                  type="button"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted"
+                  onClick={() => onJump(idx)}
+                >
+                  {row.ref}
+                  {active ? " · reading" : ""}
+                </button>
+                <p
+                  className={`he-verse mt-2 ${active ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl"}`}
+                  lang="he"
+                  dir="rtl"
+                >
+                  {row.words.map((w, wi) =>
+                    active ? (
+                      <button
+                        type="button"
+                        key={`${row.ref}-${wi}`}
+                        className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
+                          wi === wordI ? "he-spoken" : "text-ink"
+                        } ${pick?.index === wi ? "he-tapped" : ""}`}
+                        onClick={() => {
+                          if (pick?.index === wi) {
+                            setPick(null);
+                            return;
+                          }
+                          setPick({
+                            word: w,
+                            index: wi,
+                            book: bookId,
+                            chapter: row.chapter,
+                            verse: row.verse,
+                            he: row.he,
+                            en: row.en,
+                          });
+                        }}
+                      >
+                        {hebrewClusters(w).map((part, pi) => (
+                          <span
+                            key={`${row.ref}-${wi}-${pi}`}
+                            className={
+                              wi === wordI && (clusterI < 0 || pi === clusterI)
+                                ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
+                                : undefined
+                            }
+                          >
+                            {part.glyph}
+                          </span>
+                        ))}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        key={`${row.ref}-${wi}`}
+                        className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
+                        onClick={() => onJump(idx)}
+                      >
+                        {w}
+                      </button>
+                    ),
+                  )}
+                </p>
+                <EnglishVerse
+                  en={row.en}
+                  keys={active ? enKeys : []}
+                  className={`max-w-full break-words leading-relaxed ${
+                    active ? "mt-2 text-base text-ink" : "mt-1 text-sm text-muted"
+                  }`}
+                />
+              </li>
+            );
+          })}
+        </ol>
+        <p className="mt-2 text-xs text-muted">
+          {list.length >= 10
+            ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
+            : "Tap a word for its card. Highlight still follows the reader."}
+        </p>
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
         </p>
