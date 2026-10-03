@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Read after me follows the reader’s pause.** It speaks the words the recording says in one breath, then the pulse. It no longer stops after every word.
 - **Play controls stay up.** In Follow along the player sits above the verses and stays on screen while you read. The verse being read scrolls into view.
 - **Read after me stays loud.** The microphone opens only after the word, so the recording is not turned down.
 - **Read after me.** In the reading lab, the recording says one Hebrew word, a pulse marks your turn, and it waits until you finish. It walks the selected range to the last verse. It does not grade the pronunciation.

@@ -24,7 +24,55 @@ export function wordSlice(
   return { start, end: start + span };
 }
 
-export function playPulse(ctx: AudioContext): Promise<void> {
+/** Accents where the reader takes a breath: etnachta, segol, shalshelet, zaqef, tifcha, revia, zarqa, tevir. */
+const PHRASE_ACCENT = new Set(["\u0591", "\u0592", "\u0593", "\u0594", "\u0595", "\u0596", "\u0597", "\u0598", "\u059B"]);
+
+function lettersOf(word: string): number {
+  let n = 0;
+  for (const ch of word) {
+    if (ch >= "\u05D0" && ch <= "\u05EA") n += 1;
+  }
+  return n;
+}
+
+function hasPhraseAccent(word: string): boolean {
+  for (const ch of word) {
+    if (PHRASE_ACCENT.has(ch)) return true;
+  }
+  return false;
+}
+
+export type PhraseSlice = { from: number; to: number; start: number; end: number };
+
+/** Words the reader speaks in one breath, starting at `from`. */
+export function phraseAt(
+  meta: ChapterAudio | undefined,
+  verse: number,
+  words: string[],
+  from: number,
+  duration: number,
+): PhraseSlice {
+  const count = Math.max(1, words.length);
+  const begin = Math.max(0, Math.min(from, count - 1));
+  const first = wordSlice(meta, verse, begin, count, duration);
+  let to = begin;
+  let end = first.end;
+  const limit = Math.min(count - 1, begin + 4);
+  for (let i = begin; i <= limit; i++) {
+    const slice = wordSlice(meta, verse, i, count, duration);
+    const expected = 0.16 * Math.max(1, lettersOf(words[i] ?? "")) + 0.22;
+    end = Math.min(slice.end, slice.start + expected + 0.08);
+    to = i;
+    if (i >= count - 1) break;
+    const next = wordSlice(meta, verse, i + 1, count, duration);
+    const gap = next.start - slice.start;
+    if (gap < 0.32) continue;
+    if (hasPhraseAccent(words[i] ?? "")) break;
+    if (gap - expected > 0.34) break;
+  }
+  if (!(end > first.start + 0.15)) end = first.end;
+  return { from: begin, to, start: first.start, end };
+}
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = "sine";
