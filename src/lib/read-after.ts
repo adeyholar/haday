@@ -73,6 +73,9 @@ export function phraseAt(
   if (!(end > first.start + 0.15)) end = first.end;
   return { from: begin, to, start: first.start, end };
 }
+
+/** Short tone between the recording and the student's turn. */
+export function playPulse(ctx: AudioContext): Promise<void> {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = "sine";

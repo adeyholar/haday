@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { findHitRange } from "@/lib/hebrew";
 import { cn } from "@/lib/cn";
+import { useStudy } from "@/lib/store";
 import { drawRound, ROUND_LEN, spliceLater } from "@/lib/quiz-draw";
 import {
   answerLabel,
@@ -45,6 +46,7 @@ function Round({
   const [items, setItems] = useState(deck);
   const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
   const [gaveUp, setGaveUp] = useState(false);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
 
   const item = items[i];
   const revealed = phase === "done";
@@ -61,6 +63,7 @@ function Round({
 
   function admitNoIdea() {
     if (!item || revealed) return;
+    noteActiveStudy();
     setOk(false);
     setPhase("done");
     setGaveUp(true);
@@ -72,6 +75,7 @@ function Round({
     const now = Date.now();
     if (choice === picked && choice !== item.answer && now - lastTap.current < 400) return;
     lastTap.current = now;
+    noteActiveStudy();
     const hit = choice === item.answer;
     if (hit) {
       setPicked(choice);

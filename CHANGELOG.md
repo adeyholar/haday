@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Study quiz counts as study.** Answering Quiz, Quiz myself, Rules, Shewa, Qamets, or a grammar-lesson quiz sets the study day and streak — including Try again, not only a finished card. Signing in still does not.
 - **Lemma and parsing on a word.** A tapped Tanakh word shows its Strong’s number, the dictionary lemma and meaning, and the parsing (Qal perfect 3ms, noun, article, and the rest).
 - **Strong’s on a tapped word.** In the Tanakh reading, a word with a Strong’s number opens a lexicon card: the word, transliteration, pronunciation, and short definition. Hebrew and Greek entries load from files shipped with the app. The way back to the Stations lesson stays on the page.
 - **Read after me follows the reader’s pause.** It speaks the words the recording says in one breath, then the pulse. It no longer stops after every word.

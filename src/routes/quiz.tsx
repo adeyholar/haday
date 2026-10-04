@@ -24,6 +24,7 @@ function QuizPage() {
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const rate = useStudy((s) => s.rate);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
   const pool = useMemo(() => weekPlayPool(week), [week]);
   const [mode, setMode] = useState<Mode>("choice");
   const [seed, setSeed] = useState(0);
@@ -205,6 +206,7 @@ function QuizPage() {
                     }
                     if (!missedChoice) {
                       setMissedChoice(c);
+                      noteActiveStudy();
                       playFeedback("retry");
                       return;
                     }
@@ -264,6 +266,7 @@ function QuizPage() {
             if (typeTries < 1) {
               playFeedback("retry");
               setTypeTries(1);
+              noteActiveStudy();
               return;
             }
             playFeedback("fail");

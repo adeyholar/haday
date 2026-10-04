@@ -6,6 +6,7 @@ import { ClassifyDrill } from "@/components/classify-drill";
 import { drawRound, spliceLater } from "@/lib/quiz-draw";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { cn } from "@/lib/cn";
+import { useStudy } from "@/lib/store";
 import { findHitRange } from "@/lib/hebrew";
 import {
   GRAMMAR_CASES,
@@ -222,6 +223,7 @@ function HuntRound({
   const rule = item ? ruleById(item.ruleId) : undefined;
   const siblings = item ? casesForRule(item.ruleId) : [];
   const choices = useMemo(() => (item && mode === "name" ? nameChoices(item) : []), [item, mode]);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
 
   function resetFields() {
     setLemma("");
@@ -239,6 +241,7 @@ function HuntRound({
 
   function admitNoIdea() {
     if (!item || revealed) return;
+    noteActiveStudy();
     setOk(false);
     setMatched(item);
     setRevealed(true);
@@ -252,6 +255,7 @@ function HuntRound({
     if (mode === "verse") {
       const hit = huntHits(item.ruleId, lemma, book, chapter, verse);
       if (hit) {
+        noteActiveStudy();
         setOk(true);
         setMatched(hit);
         setRevealed(true);
@@ -262,6 +266,7 @@ function HuntRound({
       const lemmaOk = siblings.some((c) => lemmaMatches(c, lemma));
       const refOk = siblings.some((c) => refMatchesParts(c, book, chapter, verse));
       if (tries < 1) {
+        noteActiveStudy();
         setTries(1);
         if (lemmaOk && !refOk) setHint("Lemma is right. Name the book, chapter, and verse.");
         else if (refOk && !lemmaOk) setHint("The place is right. Name the lemma.");
@@ -272,6 +277,7 @@ function HuntRound({
       setMatched(item);
       setRevealed(true);
       setHint("");
+      noteActiveStudy();
       setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
       return;
     }
@@ -279,6 +285,7 @@ function HuntRound({
 
   function pickRule(choice: GrammarRule) {
     if (!item || revealed || choice.id === missedId) return;
+    noteActiveStudy();
     if (choice.id === item.ruleId) {
       setOk(true);
       setMatched(item);

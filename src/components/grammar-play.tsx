@@ -58,6 +58,7 @@ export function GrammarPlay({
 }) {
   const unit = track.units.find((u) => u.id === unitId);
   const complete = useStudy((s) => s.completeGrammarUnit);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
   const game = useStudy((s) => s.game);
   const examOpen = isGrammarUnitUnlocked(game, track.id, unitId);
   const unitMax = grammarUnitMax(track);
@@ -114,6 +115,7 @@ export function GrammarPlay({
 
   function pick(choice: string) {
     if (!q || picked) return;
+    noteActiveStudy();
     const ok = choice === q.answer;
     if (!ok && !retrying) {
       setRetrying(true);
@@ -128,6 +130,7 @@ export function GrammarPlay({
 
   function admitNoIdea() {
     if (!q || picked) return;
+    noteActiveStudy();
     setPicked("__noidea__");
     playFeedback("fail");
   }
