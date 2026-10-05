@@ -15,11 +15,14 @@ export function SelfQuizPlay({
   items,
   mode = "type",
   onMark,
+  onAttempt,
   onDone,
 }: {
   items: VocabItem[];
   mode?: SelfQuizMode;
   onMark?: (id: string, mark: SelfMark) => void;
+  /** First try that is not yet a miss — still active study. */
+  onAttempt?: () => void;
   onDone?: (weak: VocabItem[]) => void;
 }) {
   const [i, setI] = useState(0);
@@ -66,6 +69,7 @@ export function SelfQuizPlay({
     }
     if (tries < 1) {
       setTries(1);
+      onAttempt?.();
       playFeedback("retry");
       return;
     }
@@ -82,6 +86,7 @@ export function SelfQuizPlay({
     if (!missedChoice) {
       setMissedChoice(c);
       setTries(1);
+      onAttempt?.();
       playFeedback("retry");
       return;
     }

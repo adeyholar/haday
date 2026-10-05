@@ -8,7 +8,7 @@ import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { EtchPlay } from "@/components/etch-play";
-import { buildEtchSitting, ETCH_LEN, type EtchTask } from "@/lib/etch";
+import { buildEtchSitting, type EtchTask } from "@/lib/etch";
 import type { Rating } from "@/lib/srs";
 
 export const Route = createFileRoute("/drill")({ component: DrillPage });
@@ -25,7 +25,7 @@ function DrillPage() {
   const [seen, setSeen] = useState(0);
 
   function deal() {
-    const sitting = buildEtchSitting(pool, useStudy.getState().cards, useStudy.getState().game);
+    const sitting = buildEtchSitting(pool, useStudy.getState().cards, useStudy.getState().game, Date.now(), focus);
     setTasks(sitting);
     setI(0);
     setReady(true);
@@ -43,12 +43,21 @@ function DrillPage() {
 
   function onGrade(rating: Rating) {
     if (!task) return;
+    const returned = task.key.endsWith(":back");
     if (task.kind !== "meet") {
       rate(task.item.id, rating);
       setSeen((n) => n + 1);
       if (rating === "good" || rating === "easy") setHits((n) => n + 1);
     } else {
       rate(task.item.id, "good");
+    }
+    if ((rating === "again" || rating === "reveal") && !returned) {
+      setTasks((prev) => {
+        const rest = prev.slice(i + 1);
+        const at = rest.length ? 1 + Math.floor(Math.random() * rest.length) : 0;
+        const again: EtchTask = { ...task, key: `${task.key}:back` };
+        return [...prev.slice(0, i + 1), ...rest.slice(0, at), again, ...rest.slice(at)];
+      });
     }
     setI((n) => n + 1);
   }
@@ -83,7 +92,7 @@ function DrillPage() {
           <p className="he-word text-4xl text-primary">שָׁלוֹם</p>
           <h1 className="mt-3 font-display text-3xl font-semibold">Sitting done</h1>
           <p className="mt-2 text-muted">
-            {hits} held of {seen} checks · {pct}%. Meet cards are not scored.
+            {hits} held of {seen} checks · {pct}%. A miss came back once. Meet cards are not scored.
           </p>
           <Button type="button" className="mt-6" onClick={deal}>
             New sitting
@@ -110,6 +119,10 @@ function DrillPage() {
           <WeekSelect />
         </div>
         <FocusToggle />
+        <p className="mt-3 text-sm text-muted">
+          {tasks.length} checks. Every word in this set, six ways, plus the verse when there is one. A miss comes back
+          once.
+        </p>
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface">
           <div
             className="h-full bg-primary transition-[width] duration-[var(--motion-fast)]"
@@ -117,7 +130,7 @@ function DrillPage() {
           />
         </div>
       </Panel>
-      <EtchPlay task={task} index={i} total={tasks.length || ETCH_LEN} onGrade={onGrade} />
+      <EtchPlay task={task} index={i} total={tasks.length} onGrade={onGrade} />
     </>
   );
 }

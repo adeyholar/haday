@@ -20,7 +20,7 @@ Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the 
 | Area | What it does | Why it helps |
 |---|---|---|
 | **Study** | **Stations** (five stops from alef-bet to the Word), Drill, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor, Grammar lessons | Path: Alef-bet Station → House of Names → Verb Tent → Many Voices Camp → Realm of the Word. Text first, rule last. Toolbox unchanged. |
-| **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. |
+| **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate, **Road exam** | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. Road exam is the Week 7 circle: it saves the open run and does not end while a miss is still out. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. Neural Hebrew is Hebrew-only (vowel **names**, no digits). |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
@@ -51,7 +51,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | Sign-in | Google, X (Grok broker), email + password |
 | New email accounts | Domain must accept mail; no throwaway inbox; classmate opens a 24-hour confirmation link before sign-in |
 | Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
-| Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). **Remove** deletes an unwanted account (not the owner). |
+| Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). Last study moves when they answer Quiz, Quiz myself, Rules, or another study task — not from signing in. **Remove** deletes an unwanted account (not the owner). |
 | Voice bank | Owner records Hebrew / English takes of the corpus (letters, vowels, names, lemmas). Alive Pet, Listen, and Ocean letters use them first. Neural Hila/Jenny fills every line that has no owner take. Corpus text: `/audio/neural/corpus.txt`. |
 | **Tanakh cards** | `/finder` hub: **Find a Hebrew word** (every verse) + grammar decks. `/finder/word` concordance. `/finder/deck` flashcards. | Flip, then open the verse in Listen/Read. English gloss is marked to the Hebrew in focus. |
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |

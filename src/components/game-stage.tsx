@@ -11,6 +11,10 @@ import { DontKnowButton } from "@/components/dont-know-button";
 import { NewBadges } from "@/components/rewards-bar";
 import { playFeedback } from "@/lib/try-again";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { hearLetterName, hushHear } from "@/lib/letter-hear";
+import { guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
+import { speakLine } from "@/lib/listen";
+import { guideGlow, pieceSay } from "@/lib/show-me";
 import {
   CHAPTER_META,
   GAME_STAGE_PASS,
@@ -24,7 +28,6 @@ import {
   stageMeta,
   type GameStageId,
 } from "@/lib/game";
-import { liveMatchAny } from "@/lib/hebrew";
 import { verseFor } from "@/lib/verses";
 import { scoreboard } from "@/lib/rewards";
 import { useStudy } from "@/lib/store";
@@ -85,7 +88,15 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const [stars, setStars] = useState(1);
   const [guessKey, setGuessKey] = useState(0);
   const [guessFast, setGuessFast] = useState(false);
+  const [guideOn, setGuideOn] = useState(false);
+  const [guideDepth, setGuideDepth] = useState(0);
+  const [nod, setNod] = useState(false);
+  const [shake, setShake] = useState<string | null>(null);
+  const [helpedThis, setHelpedThis] = useState(false);
   const shownAt = useRef(Date.now());
+  const helpedIds = useRef(new Set<string>());
+  const matchRef = useRef(0);
+  const hearSig = useRef({ stop: false });
 
   useEffect(() => {
     setQueue(shuffleCopy(pool));
@@ -101,6 +112,13 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     setStars(1);
     setGuessKey(0);
     setGuessFast(false);
+    setGuideOn(false);
+    setGuideDepth(0);
+    setNod(false);
+    setShake(null);
+    setHelpedThis(false);
+    helpedIds.current = new Set();
+    matchRef.current = 0;
     shownAt.current = Date.now();
   }, [chapter, stage, pool, mixKey]);
 
@@ -121,6 +139,50 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const chapterMeta = CHAPTER_META[chapter];
   const doneCount = total - queue.length;
   const showEnglish = Boolean(picked || revealed);
+  const built = stage === "spell-strict" && helpedThis && typedOk && !revealed;
+  const spellGuide = item && stage === "spell-strict" ? guideTarget(typed, spell.target, spell.alts) : "";
+  const progress = stage === "spell-strict" && spellGuide ? guideProgress(typed, spellGuide) : null;
+  const stepMark = progress?.clean ? normalizeHebrewFull(typed).length : -1;
+  useEffect(() => {
+    if (stage !== "spell-strict") return;
+    if (guideOn && stepMark > matchRef.current) {
+      setNod(true);
+      setGuideDepth(0);
+      setShake(null);
+    } else if (stepMark >= 0 && stepMark < matchRef.current) {
+      setNod(false);
+      setGuideDepth(0);
+    }
+    if (stepMark >= 0) matchRef.current = stepMark;
+  }, [stepMark, stage, guideOn]);
+
+  const coaching = stage === "spell-strict" && guideOn && !built && !revealed;
+  const guide =
+    coaching && progress
+      ? {
+          expected: progress.clean ? progress.next : null,
+          glow:
+            progress.clean && progress.next
+              ? guideDepth === 1
+                ? progress.next === "\u05BB"
+                  ? ["\u05BB", "\u05D5\u05BC"]
+                  : [progress.next]
+                : guideGlow(progress.next)
+              : [],
+          shake,
+          onMiss: (glyph: string) => setShake(glyph),
+        }
+      : null;
+
+  function coachLine(): string {
+    if (!progress) return "";
+    if (!progress.clean) return "Backspace to the last right piece.";
+    const say = progress.next ? pieceSay(progress.next) : null;
+    if (guideDepth === 1 && say) return say.name;
+    if (!progress.started) return "What does it start with?";
+    if (say?.kind === "point") return "Which point under it?";
+    return "Next letter.";
+  }
 
   function finishIfEmpty(nextQueue: VocabItem[], nextFirstHits: number, nextFirstSeen: number) {
     if (nextQueue.length > 0) return;
@@ -169,6 +231,58 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     setRevealed(false);
     setTries(0);
     setGaveUp(false);
+    setGuideOn(false);
+    setGuideDepth(0);
+    setNod(false);
+    setShake(null);
+    setHelpedThis(false);
+    matchRef.current = 0;
+    hearSig.current = hushHear(hearSig.current);
+  }
+
+  function sayPiece(insert: string) {
+    const piece = pieceSay(insert);
+    hearSig.current = hushHear(hearSig.current);
+    if (piece.sayId) void hearLetterName(piece.sayId, piece.name, hearSig.current);
+    else void speakLine(piece.say, "en", 0.85, hearSig.current);
+  }
+
+  function askShowMe() {
+    if (!item || revealed || typedOk) return;
+    setHelpedThis(true);
+    const progress = guideProgress(typed, guideTarget(typed, spell.target, spell.alts));
+    if (!guideOn) {
+      setGuideOn(true);
+      setGuideDepth(0);
+      return;
+    }
+    if (!progress.clean || !progress.next) return;
+    if (guideDepth === 0) {
+      setGuideDepth(1);
+      sayPiece(progress.next);
+      return;
+    }
+    sayPiece(progress.next);
+  }
+
+  function finishGuided() {
+    if (!item) return;
+    const again = helpedIds.current.has(item.id);
+    if (again) {
+      rate(item.id, "again");
+      const nextSeen = firstSeen + 1;
+      setFirstSeen(nextSeen);
+      const nextQueue = queue.slice(1);
+      setQueue(nextQueue);
+      resetItem();
+      finishIfEmpty(nextQueue, firstHits, nextSeen);
+      return;
+    }
+    helpedIds.current.add(item.id);
+    const rest = queue.slice(1);
+    const at = rest.length ? 1 + Math.floor(Math.random() * rest.length) : 0;
+    setQueue([...rest.slice(0, at), item, ...rest.slice(at)]);
+    resetItem();
   }
 
   function admitNoIdea() {
@@ -210,7 +324,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
       return;
     }
     if (picked === "ok") {
-      succeed(tries === 0);
+      succeed(tries === 0 && !helpedIds.current.has(item.id));
       return;
     }
     failAndRecycle();
@@ -540,6 +654,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               advanceAfterReveal();
               return;
             }
+            if (stage === "spell-strict" && helpedThis && typedOk) return;
             checkTyped(typedOk);
           }}
         >
@@ -548,16 +663,36 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             onChange={setTyped}
             target={spell.target}
             alts={spell.alts}
-            disabled={revealed}
+            disabled={revealed || built}
             strict
             liveGrade
+            hideHint={stage === "spell-strict" && guideOn}
+            guide={guide}
           />
-          {tries >= 1 && !revealed && (
+          {coaching && (
+            <div className="mt-3 text-center">
+              {nod && <p className="text-lg font-bold text-good">Yes.</p>}
+              <p className="mt-1 text-sm font-medium text-ink">{coachLine()}</p>
+            </div>
+          )}
+          {built && (
+            <div className="mt-3 text-center">
+              <p className="text-lg font-bold text-good">You built it.</p>
+              <p className="mt-1 text-sm font-medium text-ink">
+                {item && helpedIds.current.has(item.id)
+                  ? "We’ll bring it back next time."
+                  : "It comes back once, with no help."}
+              </p>
+            </div>
+          )}
+          {tries >= 1 && !revealed && !built && (
             <>
               <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
                 Try again
               </p>
-              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
+              <p className="mt-1 text-center text-sm font-medium text-ink">
+                {stage === "spell-strict" ? "Attempt it before I show you." : "Attempt it before I tell you."}
+              </p>
             </>
           )}
           {revealed && (
@@ -584,7 +719,12 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               )}
             </div>
           )}
-          {!revealed && (
+          {!revealed && !built && !typedOk && stage === "spell-strict" && (
+            <Button type="button" variant="outline" size="lg" className="mt-3 w-full text-lg font-bold" onClick={askShowMe}>
+              Show me
+            </Button>
+          )}
+          {!revealed && stage !== "spell-strict" && (
             <DontKnowButton
               usedTry={tries >= 1}
               onNudge={() => {
@@ -593,9 +733,15 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               onClick={admitNoIdea}
             />
           )}
-          <Button className="mt-3 w-full" type="submit" disabled={!revealed && !typed.trim()}>
-            {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
-          </Button>
+          {built ? (
+            <Button className="mt-3 w-full" type="button" onClick={finishGuided}>
+              Next
+            </Button>
+          ) : (
+            <Button className="mt-3 w-full" type="submit" disabled={!revealed && !typed.trim()}>
+              {revealed ? "Next" : tries >= 1 ? "Check retry" : "Check"}
+            </Button>
+          )}
         </form>
       )}
 

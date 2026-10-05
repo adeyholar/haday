@@ -2,6 +2,29 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Follow along starts with the verse.** Chapters whose title trim had cut off the reading now start with the text.
+- **Study quiz counts as study.** Answering Quiz, Quiz myself, Rules, Shewa, Qamets, or a grammar-lesson quiz sets the study day and streak — including Try again, not only a finished card. Signing in still does not.
+- **Road exam keeps the circle.** Leave and come back, and it continues on the same word. A miss goes to the back of the deck again and again until it is correct. A new circle starts only after every miss in that run is correct.
+- **Road exam saves a miss for the end.** A second miss goes to the back of the deck. It is not mixed into the middle. The last line is the words you missed.
+- **Road exam shows the miss.** First miss is a Retry sign and waits for a second try. Second miss says Not quite and shows the letter. Still no clap or horn.
+- **Road exam stays quiet for the microphone.** A hit does not clap or say Yes. A miss does not honk or say Not yet. The Hebrew word is still spoken. The letter shows on the screen.
+- **Lemma and parsing on a word.** A tapped Tanakh word shows its Strong’s number, the dictionary lemma and meaning, and the parsing (Qal perfect 3ms, noun, article, and the rest).
+- **Strong’s on a tapped word.** In the Tanakh reading, a word with a Strong’s number opens a lexicon card: the word, transliteration, pronunciation, and short definition. Hebrew and Greek entries load from files shipped with the app. The way back to the Stations lesson stays on the page.
+- **Read after me follows the reader’s pause.** It speaks the words the recording says in one breath, then the pulse. It no longer stops after every word.
+- **Play controls stay up.** In Follow along the player sits above the verses and stays on screen while you read. The verse being read scrolls into view.
+- **Read after me stays loud.** The microphone opens only after the word, so the recording is not turned down.
+- **Read after me.** In the reading lab, the recording says one Hebrew word, a pulse marks your turn, and it waits until you finish. It walks the selected range to the last verse. It does not grade the pronunciation.
+- **Follow along shows the range.** A selected verse range stays on the page and plays in one sitting. Ten verses or more are all on the page, not hidden.
+- **Road exam opens again.** The card crashed on iPad with “Can't find variable: listenGen.” That is fixed. The Hebrew word still shows and is spoken.
+- **Road exam shows the Hebrew.** The word stays on the screen while it is spoken. The choices stay A–D.
+- **Road exam is in the Game button.** It is the first item when you tap Game, and a large button on Home. The app says the Hebrew word. You say A, B, C, or D.
+- **Road exam.** Week 7 midterm, under Game. The app says the Hebrew word. You say A, B, C, or D. First wrong is try again. Second wrong says the letter and brings the word back once.
+- **Drill.** A week is no longer 12 cards. Every word is heard, chosen among twins, typed in English three ways, then typed in Hebrew, and found in a verse when there is one. A miss comes back once in that sitting.
+- **Show me.** On Spell (strict), Show me no longer prints the word. It lights the next letter or point, nods when you press it, and says the name only if you ask again. The word comes back once with no help.
+- **Study quiz.** A week or a chapter is the whole list, not a round of 12, so every word in that set comes around.
+- **Name the rule.** The card names the kind first — dagesh, shewa, the article — because more than one rule can sit on the same word. The choices are the other rules of that kind.
+- **Name the rule.** Choose among four close rules. A missed letter no longer fails a right idea, and an easy wrong rule is not on the card.
+- **Behold.** The card for הִנֵּה now shows Genesis 1:31, “behold,” not “Here I am.”
 - **Jonah follow-along.** The title trim was cutting off the start of the chapter, so the highlight showed the wrong verse. Jonah 1 now starts with the reading.
 
 Format: **date** · what shipped · why it matters.

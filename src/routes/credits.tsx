@@ -65,6 +65,16 @@ function CreditsPage() {
       </Panel>
 
       <Panel className="mb-3">
+        <h2 className="font-display text-2xl font-bold text-ink">Lexicon</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Lexicon data: Strong's Concordance via Open Scriptures. The dictionary files are marked
+          CC-BY-SA by Open Scriptures. Strong's own 1890 and 1894 text is in the public domain. Verse
+          numbers on Hebrew words, and the parsing on the word card, come from the Open Scriptures Hebrew
+          Bible morphology (CC BY 4.0).
+        </p>
+      </Panel>
+
+      <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">English</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Verse English is the <strong className="font-semibold text-ink">World English Bible</strong>, public

@@ -34,14 +34,14 @@ export type GrammarCase = {
 };
 
 export const GRAMMAR_GROUPS = [
-  { id: "syllable", title: "Syllabification — apply these in the text" },
-  { id: "vowels", title: "Vowel syllable preferences" },
-  { id: "qamets", title: "Qamets and Qamets Hatuf" },
-  { id: "shewa", title: "Shewa and syllabification" },
-  { id: "dagesh", title: "Dagesh and syllabification" },
-  { id: "guttural", title: "Guttural characteristics" },
-  { id: "article", title: "The definite article" },
-  { id: "vav", title: "The conjunction וְ" },
+  { id: "syllable", title: "Syllabification — apply these in the text", ask: "syllables" },
+  { id: "vowels", title: "Vowel syllable preferences", ask: "vowels" },
+  { id: "qamets", title: "Qamets and Qamets Hatuf", ask: "qamets" },
+  { id: "shewa", title: "Shewa and syllabification", ask: "shewa" },
+  { id: "dagesh", title: "Dagesh and syllabification", ask: "dagesh" },
+  { id: "guttural", title: "Guttural characteristics", ask: "gutturals" },
+  { id: "article", title: "The definite article", ask: "the definite article" },
+  { id: "vav", title: "The conjunction וְ", ask: "the conjunction וְ" },
 ] as const;
 
 export const GRAMMAR_RULES: GrammarRule[] = [
@@ -1629,6 +1629,81 @@ export function nameHits(item: GrammarCase, input: string): GrammarRule | null {
   return null;
 }
 
+const RULE_CLUSTERS = [
+  ["syllable", "vowels", "qamets", "shewa", "dagesh"],
+  ["guttural", "shewa", "dagesh", "qamets"],
+  ["article", "vav"],
+];
+
+/** Rules that name the same highlighted form, not merely the same verse. */
+export function rulesOnForm(item: GrammarCase): GrammarRule[] {
+  const ids = new Set<string>([item.ruleId]);
+  const hit = normalizeHebrew(item.hit);
+  for (const c of GRAMMAR_CASES) {
+    if (c.book !== item.book || c.chapter !== item.chapter || c.verse !== item.verse) continue;
+    if (c.hit === item.hit || normalizeHebrew(c.hit) === hit) ids.add(c.ruleId);
+  }
+  return [...ids].map((id) => ruleById(id)).filter((r): r is GrammarRule => Boolean(r));
+}
+
+function ruleTokens(title: string): Set<string> {
+  const stop = new Set(["the", "and", "with", "after", "before", "always", "only", "word", "letter", "vowel"]);
+  return new Set(
+    foldRule(title)
+      .split(" ")
+      .filter((w) => w.length > 3 && !stop.has(w)),
+  );
+}
+
+function sameCluster(a: string, b: string): boolean {
+  return RULE_CLUSTERS.some((cluster) => cluster.includes(a) && cluster.includes(b));
+}
+
+function distractorScore(correct: GrammarRule, other: GrammarRule): number {
+  let score = 0;
+  if (other.group === correct.group) score += 12;
+  else if (sameCluster(other.group, correct.group)) score += 5;
+  const want = ruleTokens(correct.title);
+  for (const token of ruleTokens(other.title)) {
+    if (want.has(token)) score += 3;
+  }
+  return score;
+}
+
+function hashStr(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+function seededOrder<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  let s = seed || 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    const j = s % (i + 1);
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
+
+/**
+ * Choices stay inside the asked kind (dagesh, shewa, the article).
+ * Other kinds are not listed — a word can carry several rules, and the card
+ * already says which kind is wanted.
+ */
+export function nameChoices(item: GrammarCase): GrammarRule[] {
+  const correct = ruleById(item.ruleId);
+  if (!correct) return [];
+  const banned = new Set(rulesOnForm(item).map((r) => r.id));
+  const mates = GRAMMAR_RULES.filter((r) => r.group === correct.group && !banned.has(r.id));
+  const ranked = mates
+    .map((r) => ({ r, score: distractorScore(correct, r) }))
+    .sort((a, b) => b.score - a.score || a.r.title.localeCompare(b.r.title));
+  const wrong = ranked.slice(0, 3).map((row) => row.r);
+  return seededOrder([correct, ...wrong], hashStr(item.id));
+}
+
 const STOP = new Set([
   "the",
   "a",
@@ -1702,6 +1777,10 @@ export function formatRef(c: GrammarCase): string {
 
 export function groupTitle(groupId: string): string {
   return GRAMMAR_GROUPS.find((g) => g.id === groupId)?.title ?? groupId;
+}
+
+export function groupAsk(groupId: string): string {
+  return GRAMMAR_GROUPS.find((g) => g.id === groupId)?.ask ?? groupTitle(groupId);
 }
 
 export const HUNT_ROUND_LEN = ROUND_LEN;

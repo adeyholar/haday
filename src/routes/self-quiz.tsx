@@ -22,6 +22,7 @@ function SelfQuizPage() {
   const { shell } = Route.useSearch();
   const gameShell = shell === "game";
   const rate = useStudy((s) => s.rate);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
   const [weeks, setWeeks] = useState<number[]>([]);
   const [chapters, setChapters] = useState<number[]>([]);
   const [deck, setDeck] = useState<VocabItem[] | null>(null);
@@ -117,6 +118,7 @@ function SelfQuizPage() {
               else if (m === "strong") rate(id, "easy");
               else rate(id, "good");
             }}
+            onAttempt={noteActiveStudy}
             onDone={(weak) => setLastWeak(weak)}
           />
           <div className="mt-4 flex flex-col gap-2">

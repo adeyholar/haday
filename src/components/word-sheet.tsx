@@ -7,6 +7,7 @@ import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
 import { EnglishVerse } from "@/components/english-verse";
+import { StrongGlance } from "@/components/strong-glance";
 import type { BookId } from "@/lib/tanakh-canon";
 
 export type WordPick = {
@@ -17,6 +18,10 @@ export type WordPick = {
   verse: number;
   he: string;
   en: string;
+  /** Strong's number when this surface is tagged, such as H7225. */
+  strong?: string;
+  /** Open Scriptures morphology code, such as HVqp3ms. */
+  morph?: string;
 };
 
 export function WordSheet({
@@ -102,6 +107,7 @@ export function WordSheet({
           Close
         </button>
       </div>
+      {pick.strong ? <StrongGlance id={pick.strong} morph={pick.morph} /> : null}
       {pick.he ? (
         <div className="mt-3 space-y-2">
           <p className="he-verse he-word text-xl leading-relaxed text-ink" dir="rtl" lang="he">

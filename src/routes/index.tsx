@@ -261,6 +261,11 @@ function Home() {
           </div>
         </div>
         <div className="mt-5 flex flex-col gap-2">
+          <Link to="/game/road" className="flex-1">
+            <Button className="w-full" size="lg">
+              Road exam · Week 7
+            </Button>
+          </Link>
           <Link to="/lessons" className="flex-1">
             <Button className="w-full" variant="outline" size="lg">
               Grammar lessons · prepare

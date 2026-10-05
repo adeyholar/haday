@@ -43,7 +43,7 @@ import { NavMenu, type NavItem } from "@/components/nav-menu";
 
 const STUDY: NavItem[] = [
   { to: "/study", label: "Stations", hint: "From the alef-bet to the Word", icon: Library },
-  { to: "/drill", label: "Drill", hint: "Flip cards", icon: Layers },
+  { to: "/drill", label: "Drill", hint: "Every word, six ways", icon: Layers },
   { to: "/write", label: "Write", hint: "Type or hand-write", icon: PenLine },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
   { to: "/rules", label: "Rules", hint: "See the rule in the text", icon: ScrollText },
@@ -56,6 +56,7 @@ const STUDY: NavItem[] = [
 ];
 
 const GAME: NavItem[] = [
+  { to: "/game/road", label: "Road exam · Week 7", hint: "Say A B C D", icon: Mic },
   { to: "/game", label: "BBH vocabulary", hint: "Chapter path", icon: Compass },
   { to: "/game/custom", label: "Custom mix", hint: "Your levels, one sitting", icon: Repeat },
   { to: "/game/alefbet", label: "Aleph-bet mastery", hint: "Letter games", icon: Languages },

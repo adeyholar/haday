@@ -6,6 +6,7 @@ import { ClassifyDrill } from "@/components/classify-drill";
 import { drawRound, spliceLater } from "@/lib/quiz-draw";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { cn } from "@/lib/cn";
+import { useStudy } from "@/lib/store";
 import { findHitRange } from "@/lib/hebrew";
 import {
   GRAMMAR_CASES,
@@ -13,10 +14,11 @@ import {
   GRAMMAR_RULES,
   casesForRule,
   formatRef,
+  groupAsk,
   groupTitle,
   huntHits,
   lemmaMatches,
-  nameHits,
+  nameChoices,
   refMatchesParts,
   ruleById,
   shuffle,
@@ -54,7 +56,8 @@ function RulesPage() {
         <h1 className="mt-1 font-display text-3xl font-bold text-ink sm:text-4xl">When the rule shows up</h1>
         <p className="mt-2 max-w-prose text-muted">
           These rules are not a chart to memorize. See them in the Tanakh — syllables, the article הַ, and the
-          conjunction וְ — then hunt the lemma and the verse, or name the rule from the highlighted form.
+          conjunction וְ. Hunt the lemma and the verse, or name the rule. The card says which kind is asked —
+          dagesh, shewa, the article — because more than one rule can sit on the same word.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <TabBtn active={tab === "study"} onClick={() => setTab("study")}>
@@ -205,7 +208,7 @@ function HuntRound({
   const [book, setBook] = useState("");
   const [chapter, setChapter] = useState("");
   const [verse, setVerse] = useState("");
-  const [ruleText, setRuleText] = useState("");
+  const [missedId, setMissedId] = useState("");
   const [tries, setTries] = useState(0);
   const [hint, setHint] = useState("");
   const [revealed, setRevealed] = useState(false);
@@ -219,13 +222,15 @@ function HuntRound({
   const item = items[i];
   const rule = item ? ruleById(item.ruleId) : undefined;
   const siblings = item ? casesForRule(item.ruleId) : [];
+  const choices = useMemo(() => (item && mode === "name" ? nameChoices(item) : []), [item, mode]);
+  const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
 
   function resetFields() {
     setLemma("");
     setBook("");
     setChapter("");
     setVerse("");
-    setRuleText("");
+    setMissedId("");
     setTries(0);
     setHint("");
     setRevealed(false);
@@ -236,6 +241,7 @@ function HuntRound({
 
   function admitNoIdea() {
     if (!item || revealed) return;
+    noteActiveStudy();
     setOk(false);
     setMatched(item);
     setRevealed(true);
@@ -249,6 +255,7 @@ function HuntRound({
     if (mode === "verse") {
       const hit = huntHits(item.ruleId, lemma, book, chapter, verse);
       if (hit) {
+        noteActiveStudy();
         setOk(true);
         setMatched(hit);
         setRevealed(true);
@@ -259,6 +266,7 @@ function HuntRound({
       const lemmaOk = siblings.some((c) => lemmaMatches(c, lemma));
       const refOk = siblings.some((c) => refMatchesParts(c, book, chapter, verse));
       if (tries < 1) {
+        noteActiveStudy();
         setTries(1);
         if (lemmaOk && !refOk) setHint("Lemma is right. Name the book, chapter, and verse.");
         else if (refOk && !lemmaOk) setHint("The place is right. Name the lemma.");
@@ -269,11 +277,16 @@ function HuntRound({
       setMatched(item);
       setRevealed(true);
       setHint("");
+      noteActiveStudy();
       setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
       return;
     }
+  }
 
-    if (nameHits(item, ruleText)) {
+  function pickRule(choice: GrammarRule) {
+    if (!item || revealed || choice.id === missedId) return;
+    noteActiveStudy();
+    if (choice.id === item.ruleId) {
       setOk(true);
       setMatched(item);
       setRevealed(true);
@@ -283,7 +296,8 @@ function HuntRound({
     }
     if (tries < 1) {
       setTries(1);
-      setHint(`This belongs with ${groupTitle(rule.group)}.`);
+      setMissedId(choice.id);
+      setHint("Not that one. Look at the highlighted form again.");
       return;
     }
     setOk(false);
@@ -334,7 +348,7 @@ function HuntRound({
           </p>
         </div>
       ) : (
-        <VersePrompt item={item} showEnglish={revealed} />
+        <VersePrompt item={item} showEnglish={revealed} ask={groupAsk(rule.group)} />
       )}
 
       <form
@@ -342,7 +356,7 @@ function HuntRound({
         onSubmit={(e) => {
           e.preventDefault();
           if (revealed) next();
-          else check();
+          else if (mode === "verse") check();
         }}
       >
         {mode === "verse" ? (
@@ -401,18 +415,33 @@ function HuntRound({
             </div>
           </>
         ) : (
-          <label className="grid gap-1 text-sm font-medium text-ink">
-            Which rule is applied to the highlighted form?
-            <input
-              value={ruleText}
-              onChange={(e) => setRuleText(e.target.value)}
-              disabled={revealed}
-              className={fieldClass()}
-              placeholder="Type the rule — no choices"
-              autoCapitalize="off"
-              autoComplete="off"
-            />
-          </label>
+          <div className="grid gap-2">
+            <p className="text-sm font-medium text-ink">
+              About {groupAsk(rule.group)} — which rule applies to the highlighted form?
+            </p>
+            {choices.map((choice) => {
+              const wrongPick = missedId === choice.id;
+              const show = revealed;
+              const correct = choice.id === item.ruleId;
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  disabled={revealed || wrongPick}
+                  onClick={() => pickRule(choice)}
+                  className={cn(
+                    "min-h-12 w-full rounded-[var(--radius-md)] px-4 py-3 text-left text-sm font-medium shadow-[var(--shadow-border)]",
+                    !show && !wrongPick && "bg-card hover:bg-surface",
+                    wrongPick && "bg-danger text-parchment",
+                    show && correct && "bg-good text-parchment",
+                    show && !correct && !wrongPick && "bg-card text-muted",
+                  )}
+                >
+                  {choice.title}
+                </button>
+              );
+            })}
+          </div>
         )}
 
         {tries > 0 && !revealed && (
@@ -437,9 +466,11 @@ function HuntRound({
           />
         )}
 
-        <Button type="submit" size="lg" className="w-full">
-          {revealed ? "Next" : "Check"}
-        </Button>
+        {(mode === "verse" || revealed) && (
+          <Button type="submit" size="lg" className="w-full">
+            {revealed ? "Next" : "Check"}
+          </Button>
+        )}
       </form>
     </>
   );
@@ -449,16 +480,16 @@ function fieldClass() {
   return "h-12 w-full rounded-[var(--radius-md)] bg-card px-3 font-medium text-ink shadow-[var(--shadow-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 }
 
-function VersePrompt({ item, showEnglish }: { item: GrammarCase; showEnglish: boolean }) {
+function VersePrompt({ item, showEnglish, ask }: { item: GrammarCase; showEnglish: boolean; ask?: string }) {
   const range = findHitRange(item.he, item.hit);
   return (
     <figure className="rounded-[var(--radius-xl)] bg-card px-5 py-6 text-start shadow-[var(--shadow-border)]">
       <figcaption className="text-xs font-semibold uppercase tracking-wide text-muted">
         Tanakh · {formatRef(item)}
-        {!showEnglish && (
-          <span className="ms-2 font-normal normal-case tracking-normal">Hebrew first — name the rule</span>
-        )}
       </figcaption>
+      {ask && (
+        <p className="mt-3 font-display text-2xl font-semibold text-ink">About {ask}</p>
+      )}
       <p className="he-word mt-3 text-2xl leading-relaxed" lang="he">
         {range ? (
           <>
