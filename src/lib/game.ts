@@ -4,6 +4,7 @@ import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder"
 import { emptyTyping, hydrateTyping, applyMark, type TypingProgress } from "@/lib/hebrew-typing/ranks";
 import { STUDY_RUNG_MAX } from "@/lib/hebrew-typing/study-rungs";
 import { hydrateRoadRun, type RoadRun } from "@/lib/road-exam";
+import { hydrateWeakRun, type WeakRun } from "@/lib/weak-pool";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -67,6 +68,8 @@ export type GameSnapshot = {
   ladder: LadderProgress;
   /** Open Week 7 road circle. Null once every miss in that circle was correct. */
   roadRun: RoadRun | null;
+  /** Open weak-word pool. Null once that sitting is finished. */
+  weakRun: WeakRun | null;
 };
 
 export type BalloonProgress = {
@@ -154,6 +157,7 @@ export function defaultGame(): GameSnapshot {
     typing: emptyTyping(),
     ladder: defaultLadder(),
     roadRun: null,
+    weakRun: null,
   };
 }
 
@@ -235,6 +239,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     typing: hydrateTyping(r.typing),
     ladder: hydrateLadder(r.ladder),
     roadRun: hydrateRoadRun(r.roadRun),
+    weakRun: hydrateWeakRun(r.weakRun),
   };
 }
 

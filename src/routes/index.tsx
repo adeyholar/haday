@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Compass, Crown, Headphones, Library, Repeat, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,13 @@ import { StudyContinue } from "@/components/study-continue";
 import { LeaderboardTeaser } from "@/components/leaderboard-teaser";
 import { RewardsBar } from "@/components/rewards-bar";
 import { COURSE_WEEKS, bbhVocab, itemsForWeek, studySetMeta } from "@/lib/vocab";
-import { statsFor, useStudy, weakestOf } from "@/lib/store";
+import { statsFor, useStudy } from "@/lib/store";
 import { isHighWeak } from "@/lib/srs";
 import { keepDoneToday, keepStats } from "@/lib/keep";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { continueLabel } from "@/lib/game";
 import { cn } from "@/lib/cn";
+import { classVocab, unpackWeakRun, weakPool } from "@/lib/weak-pool";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -31,7 +33,10 @@ function Home() {
   const all = statsFor(bbhVocab(), cards);
   const meta = studySetMeta(week);
   const pct = s.total ? Math.round((s.mastered / s.total) * 100) : 0;
-  const weakList = weakestOf(items, cards, 8);
+  const vocab = useMemo(() => classVocab(), []);
+  const allWeak = useMemo(() => weakPool(cards, vocab), [cards, vocab]);
+  const weakResume = useMemo(() => unpackWeakRun(game.weakRun, vocab), [game.weakRun, vocab]);
+  const weakList = allWeak.slice(0, 8);
   const lastKeepDay = useStudy((s) => s.lastKeepDay);
   const keepStreak = useStudy((s) => s.keepStreak);
   const keep = keepStats(cards, game);
@@ -196,23 +201,17 @@ function Home() {
       </section>
 
       <div id="study-mode" className="scroll-mt-20">
-      {weakList.length > 0 && (
+      {allWeak.length > 0 || weakResume ? (
         <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
           <div className="flex items-baseline justify-between gap-2">
-            <h2 className="font-display text-xl font-semibold">Weak book</h2>
-            <button
-              type="button"
-              className="text-sm font-medium text-primary"
-              onClick={() => setFocus("weak")}
-            >
-              Focus these
-            </button>
+            <h2 className="font-display text-xl font-semibold">Weak pool</h2>
+            <span className="text-sm tabular-nums text-muted">{allWeak.length}</span>
           </div>
           <p className="mt-1 text-sm text-muted">
-            Told (high) sit above a miss. Drill these until they leave the book.
+            Every weak word, from the whole list. Run them in one sitting. Leave, and it continues on the same word.
           </p>
           <ul className="mt-3 divide-y divide-border">
-            {weakList.map((item) => {
+            {(weakResume ? weakResume.queue.slice(weakResume.index) : weakList).slice(0, 8).map((item) => {
               const c = cards[item.id];
               const high = isHighWeak(c);
               const misses = c?.misses ?? 0;
@@ -229,20 +228,34 @@ function Home() {
               );
             })}
           </ul>
-          <div className="mt-3 flex gap-2">
-            <Link to="/drill" className="flex-1">
-              <Button className="w-full" size="sm" onClick={() => setFocus("weak")}>
-                Drill weak book
+          {(weakResume ? weakResume.queue.length - weakResume.index : allWeak.length) > 8 ? (
+            <p className="mt-2 text-sm text-muted">
+              {(weakResume ? weakResume.queue.length - weakResume.index : allWeak.length) - 8} more in the pool.
+            </p>
+          ) : null}
+          <div className="mt-3 flex flex-col gap-2">
+            <Link to="/weak">
+              <Button className="w-full" size="lg">
+                {weakResume
+                  ? `Continue — word ${weakResume.index + 1} of ${weakResume.queue.length}`
+                  : `Run all ${allWeak.length} weak ${allWeak.length === 1 ? "word" : "words"}`}
               </Button>
             </Link>
-            <Link to="/write" search={{ mode: "memorize" }} className="flex-1">
-              <Button className="w-full" size="sm" variant="outline" onClick={() => setFocus("weak")}>
-                Memorize
-              </Button>
-            </Link>
+            <div className="grid grid-cols-2 gap-2">
+              <Link to="/drill">
+                <Button className="w-full" size="sm" variant="outline" onClick={() => setFocus("weak")}>
+                  Drill this week
+                </Button>
+              </Link>
+              <Link to="/write" search={{ mode: "memorize" }}>
+                <Button className="w-full" size="sm" variant="outline" onClick={() => setFocus("weak")}>
+                  Memorize
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
-      )}
+      ) : null}
 
       <div className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Study toolbox</p>

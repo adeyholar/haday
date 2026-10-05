@@ -42,6 +42,7 @@ import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
 import type { RoadRun } from "./road-exam";
+import type { WeakRun } from "./weak-pool";
 
 type ProgressMap = Record<string, CardState>;
 export type FocusMode = "due" | "weak";
@@ -111,6 +112,7 @@ type StudyState = StudySnapshot & {
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
   saveRoadRun: (run: RoadRun | null) => void;
+  saveWeakRun: (run: WeakRun | null) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
   /** A real study answer (quiz, rules, classify) — same day, streak, and session as Drill. */
@@ -306,6 +308,9 @@ export const useStudy = create<StudyState>()(
       },
       saveRoadRun: (run) => {
         set({ game: { ...get().game, roadRun: run } });
+      },
+      saveWeakRun: (run) => {
+        set({ game: { ...get().game, weakRun: run } });
       },
       finishUltimate: (pct) => {
         const now = Date.now();

@@ -5,6 +5,7 @@ const OPTIONS = [
   { value: "/", match: (p: string) => p === "/", label: "Home" },
   { value: "/study", match: (p: string) => p.startsWith("/study"), label: "Stations" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
+  { value: "/weak", match: (p: string) => p.startsWith("/weak"), label: "Weak pool" },
   { value: "/cards", match: (p: string) => p.startsWith("/cards"), label: "Cards" },
   { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
   { value: "/quiz", match: (p: string) => p.startsWith("/quiz"), label: "Quiz" },
@@ -34,6 +35,7 @@ export function StudyMenu() {
         if (to === "/") void navigate({ to: "/" });
         else if (to === "/study") void navigate({ to: "/study" });
         else if (to === "/drill") void navigate({ to: "/drill" });
+        else if (to === "/weak") void navigate({ to: "/weak" });
         else if (to === "/cards") void navigate({ to: "/cards" });
         else if (to === "/write") void navigate({ to: "/write", search: { mode: "write" } });
         else if (to === "/quiz") void navigate({ to: "/quiz" });
