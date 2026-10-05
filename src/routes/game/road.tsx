@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
+import { GradeBanner } from "@/components/grade-banner";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
@@ -180,7 +181,7 @@ function RoadExamPage() {
       setTries(1);
       triesRef.current = 1;
       setPhase("feedback");
-      setNote("Try again");
+      setNote("Retry");
       const key = current.key;
       window.setTimeout(() => {
         if (taskRef.current?.key !== key || phaseRef.current === "done") return;
@@ -194,7 +195,7 @@ function RoadExamPage() {
     }
     setPicked(letter);
     setPhase("feedback");
-    setNote(right ? `Not yet. It is ${right.letter}.` : "Not yet");
+    setNote(right ? `Not quite. It is ${right.letter}.` : "Not quite");
     rate(current.item.id, "again");
     setHeard((n) => n + 1);
     window.setTimeout(() => {
@@ -295,7 +296,7 @@ function RoadExamPage() {
           <h1 className="mt-4 font-display text-3xl font-bold text-ink">Road exam · Week 7</h1>
           <p className="mt-2 max-w-prose text-muted">
             {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-            wrong is try again, on the screen only. Second wrong shows the letter and brings the word back once.
+            wrong shows Retry and waits for a second try. Second wrong shows Not quite and the letter.
             No clap and no horn, so the microphone is not talked over.
           </p>
         </Panel>
@@ -325,7 +326,9 @@ function RoadExamPage() {
     );
   }
 
-  const showMark = phase === "feedback" && (picked !== null || note.startsWith("Not yet"));
+  const secondMiss = phase === "feedback" && note.startsWith("Not quite");
+  const retrySign = !secondMiss && tries > 0 && phase !== "speak";
+  const showMark = secondMiss;
 
   return (
     <>
@@ -339,12 +342,30 @@ function RoadExamPage() {
           </p>
         </div>
         <p className="mt-2 text-sm text-muted">
-          {phase === "speak" ? "The word is on the screen, and it is being called." : phase === "listen" ? "Say A, B, C, or D." : note}
+          {phase === "speak"
+            ? "The word is on the screen, and it is being called."
+            : phase === "listen"
+              ? tries > 0
+                ? "Retry. Say A, B, C, or D."
+                : "Say A, B, C, or D."
+              : note}
         </p>
         <p className="he-word mt-4 text-center text-6xl font-bold leading-tight text-ink sm:text-7xl" lang="he" dir="rtl">
           {task.item.hebrew}
         </p>
       </Panel>
+      {retrySign ? (
+        <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
+          <GradeBanner ok={false} label="Retry" />
+          <p className="mt-3 text-base font-medium text-ink">Second try. The microphone is waiting.</p>
+        </div>
+      ) : null}
+      {secondMiss ? (
+        <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
+          <GradeBanner ok={false} label="Not quite" />
+          <p className="mt-3 text-base font-medium text-ink">{note}</p>
+        </div>
+      ) : null}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {task.choices.map((choice) => {
           const on = picked === choice.letter;
