@@ -113,6 +113,8 @@ type StudyState = StudySnapshot & {
   saveRoadRun: (run: RoadRun | null) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
+  /** A real study answer (quiz, rules, classify) — same day, streak, and session as Drill. */
+  noteActiveStudy: () => void;
   hydrateRemote: (snap: ProgressPayload, ownerId: string) => void;
   reset: () => void;
 };
@@ -123,6 +125,20 @@ function bumpStreak(lastStudyDay: number, streak: number, now: number) {
   if (lastStudyDay === today) return { streak, lastStudyDay };
   if (lastStudyDay === yesterday) return { streak: streak + 1, lastStudyDay: today };
   return { streak: 1, lastStudyDay: today };
+}
+
+/** Day, streak, and session count for one real study action. Same-day calls do not add a second session. */
+export function activeStudyStamp(
+  lastStudyDay: number,
+  streak: number,
+  sessions: number,
+  now = Date.now(),
+) {
+  const streakInfo = bumpStreak(lastStudyDay, streak, now);
+  return {
+    ...streakInfo,
+    sessions: lastStudyDay === startOfDay(now) ? sessions : sessions + 1,
+  };
 }
 
 export const useStudy = create<StudyState>()(
@@ -144,8 +160,8 @@ export const useStudy = create<StudyState>()(
         const now = Date.now();
         const prev = hydrateCard(get().cards[id], now);
         const next = applyRating(prev, rating, now);
-        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
-        const game = stampRewards(get().game, streakInfo.streak, get().keepStreak);
+        const day = activeStudyStamp(get().lastStudyDay, get().streak, get().sessions, now);
+        const game = stampRewards(get().game, day.streak, get().keepStreak);
         const cards = { ...get().cards, [id]: next };
         if (rating === "again" || rating === "reveal") {
           for (const twin of twinsOf(id)) {
@@ -162,9 +178,21 @@ export const useStudy = create<StudyState>()(
         }
         set({
           cards,
-          ...streakInfo,
+          streak: day.streak,
+          lastStudyDay: day.lastStudyDay,
+          sessions: day.sessions,
           game,
-          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
+      },
+      noteActiveStudy: () => {
+        const now = Date.now();
+        const day = activeStudyStamp(get().lastStudyDay, get().streak, get().sessions, now);
+        const game = stampRewards(get().game, day.streak, get().keepStreak);
+        set({
+          streak: day.streak,
+          lastStudyDay: day.lastStudyDay,
+          sessions: day.sessions,
+          game,
         });
       },
       setWeek: (week) => set({ week }),
