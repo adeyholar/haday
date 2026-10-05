@@ -80,3 +80,111 @@ export function buildRoadDeck(pool: VocabItem[]): RoadCard[] {
     choices: roadChoices(item, pool),
   }));
 }
+
+/** A miss is heard again at the back of the deck until that word is correct. */
+export function parkMiss<T extends { key: string }>(queue: T[], card: T): T[] {
+  const stem = card.key.replace(/:back(?::\d+)?$/, "");
+  const used = new Set(queue.map((row) => row.key));
+  let n = 1;
+  let key = `${stem}:back:${n}`;
+  while (used.has(key)) {
+    n += 1;
+    key = `${stem}:back:${n}`;
+  }
+  return [...queue, { ...card, key }];
+}
+
+export type RoadSlot = {
+  key: string;
+  id: string;
+  choices: RoadChoice[];
+};
+
+/** One open road circle. The deck ends only after every miss has been correct. */
+export type RoadRun = {
+  order: RoadSlot[];
+  index: number;
+  heard: number;
+  held: number;
+};
+
+export function packRoadRun(queue: RoadCard[], index: number, heard: number, held: number): RoadRun | null {
+  if (!queue.length || index < 0 || index >= queue.length) return null;
+  return {
+    order: queue.map((card) => ({
+      key: card.key,
+      id: card.item.id,
+      choices: card.choices.map((choice) => ({
+        letter: choice.letter,
+        gloss: choice.gloss,
+        correct: choice.correct,
+      })),
+    })),
+    index,
+    heard: Math.max(0, Math.floor(heard) || 0),
+    held: Math.max(0, Math.floor(held) || 0),
+  };
+}
+
+function isRoadLetter(v: unknown): v is RoadLetter {
+  return ROAD_LETTERS.includes(v as RoadLetter);
+}
+
+function slotChoices(raw: unknown): RoadChoice[] | null {
+  if (!Array.isArray(raw) || raw.length !== 4) return null;
+  const choices: RoadChoice[] = [];
+  const letters = new Set<string>();
+  let correct = 0;
+  for (const row of raw) {
+    if (!row || typeof row !== "object") return null;
+    const choice = row as Partial<RoadChoice>;
+    if (!isRoadLetter(choice.letter) || typeof choice.gloss !== "string" || !choice.gloss.trim()) return null;
+    if (letters.has(choice.letter)) return null;
+    letters.add(choice.letter);
+    if (choice.correct) correct += 1;
+    choices.push({ letter: choice.letter, gloss: choice.gloss, correct: Boolean(choice.correct) });
+  }
+  if (correct !== 1) return null;
+  return choices;
+}
+
+export function hydrateRoadRun(raw: unknown): RoadRun | null {
+  if (!raw || typeof raw !== "object") return null;
+  const run = raw as Partial<RoadRun>;
+  if (!Array.isArray(run.order) || run.order.length === 0) return null;
+  const order: RoadSlot[] = [];
+  for (const row of run.order) {
+    if (!row || typeof row !== "object") return null;
+    const slot = row as Partial<RoadSlot>;
+    if (typeof slot.key !== "string" || !slot.key || typeof slot.id !== "string" || !slot.id) return null;
+    const choices = slotChoices(slot.choices);
+    if (!choices) return null;
+    order.push({ key: slot.key, id: slot.id, choices });
+  }
+  const index = Number(run.index);
+  if (!Number.isInteger(index) || index < 0 || index >= order.length) return null;
+  return {
+    order,
+    index,
+    heard: Math.max(0, Math.floor(Number(run.heard)) || 0),
+    held: Math.max(0, Math.floor(Number(run.held)) || 0),
+  };
+}
+
+/** Rebuild the circle from saved ids. A missing word drops the whole run. */
+export function unpackRoadRun(
+  run: RoadRun | null | undefined,
+  pool: VocabItem[],
+): { queue: RoadCard[]; index: number; heard: number; held: number } | null {
+  const clean = hydrateRoadRun(run);
+  if (!clean) return null;
+  const byId = new Map(pool.map((item) => [item.id, item]));
+  const queue: RoadCard[] = [];
+  for (const slot of clean.order) {
+    const item = byId.get(slot.id);
+    if (!item) return null;
+    queue.push({ key: slot.key, item, choices: slot.choices });
+  }
+  return { queue, index: clean.index, heard: clean.heard, held: clean.held };
+}
+

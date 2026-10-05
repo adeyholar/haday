@@ -2,12 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
+import { GradeBanner } from "@/components/grade-banner";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import {
   buildRoadDeck,
+  packRoadRun,
+  parkMiss,
   parseRoadLetter,
+  unpackRoadRun,
   type RoadCard,
   type RoadLetter,
 } from "@/lib/road-exam";
@@ -40,6 +44,9 @@ function speechCtor(): (new () => SpeechRec) | null {
 function RoadExamPage() {
   const pool = useMemo(() => itemsForWeek(7), []);
   const rate = useStudy((s) => s.rate);
+  const saveRoadRun = useStudy((s) => s.saveRoadRun);
+  const storedRun = useStudy((s) => s.game.roadRun);
+  const resume = useMemo(() => unpackRoadRun(storedRun, pool), [storedRun, pool]);
   const [queue, setQueue] = useState<RoadCard[]>([]);
   const [i, setI] = useState(0);
   const [started, setStarted] = useState(false);
@@ -56,6 +63,9 @@ function RoadExamPage() {
   const triesRef = useRef(0);
   const iRef = useRef(0);
   const taskRef = useRef<RoadCard | null>(null);
+  const queueRef = useRef<RoadCard[]>([]);
+  const heardRef = useRef(0);
+  const heldRef = useRef(0);
   const voice = useRef({ stop: false });
   const recRef = useRef<SpeechRec | null>(null);
   const listenGen = useRef(0);
@@ -134,22 +144,24 @@ function RoadExamPage() {
     }
   }
 
-  function goNext(recycle: boolean) {
+  function settle(recycle: boolean, counts: { heard: number; held: number }, delay: number) {
     const current = taskRef.current;
     const index = iRef.current;
-    if (recycle && current && !current.key.endsWith(":back")) {
-      setQueue((prev) => {
-        const rest = prev.slice(index + 1);
-        const at = rest.length ? 1 + Math.floor(Math.random() * rest.length) : 0;
-        const again: RoadCard = { ...current, key: `${current.key}:back` };
-        return [...prev.slice(0, index + 1), ...rest.slice(0, at), again, ...rest.slice(at)];
-      });
-    }
-    setTries(0);
-    setPicked(null);
-    setNote("");
-    setI(index + 1);
-    lock.current = false;
+    let nextQueue = queueRef.current;
+    if (recycle && current) nextQueue = parkMiss(nextQueue, current);
+    const nextIndex = index + 1;
+    queueRef.current = nextQueue;
+    if (nextIndex >= nextQueue.length) saveRoadRun(null);
+    else saveRoadRun(packRoadRun(nextQueue, nextIndex, counts.heard, counts.held));
+    window.setTimeout(() => {
+      if (phaseRef.current === "done") return;
+      setQueue(nextQueue);
+      setTries(0);
+      setPicked(null);
+      setNote("");
+      setI(nextIndex);
+      lock.current = false;
+    }, delay);
   }
 
   function take(letter: RoadLetter) {
@@ -168,19 +180,20 @@ function RoadExamPage() {
       setPhase("feedback");
       setNote("Correct");
       rate(current.item.id, "good");
-      setHeard((n) => n + 1);
-      setHeld((n) => n + 1);
-      window.setTimeout(() => {
-        if (phaseRef.current === "done") return;
-        goNext(false);
-      }, 700);
+      const nextHeard = heardRef.current + 1;
+      const nextHeld = heldRef.current + 1;
+      heardRef.current = nextHeard;
+      heldRef.current = nextHeld;
+      setHeard(nextHeard);
+      setHeld(nextHeld);
+      settle(false, { heard: nextHeard, held: nextHeld }, 700);
       return;
     }
     if (triesRef.current < 1) {
       setTries(1);
       triesRef.current = 1;
       setPhase("feedback");
-      setNote("Try again");
+      setNote("Retry");
       const key = current.key;
       window.setTimeout(() => {
         if (taskRef.current?.key !== key || phaseRef.current === "done") return;
@@ -194,13 +207,12 @@ function RoadExamPage() {
     }
     setPicked(letter);
     setPhase("feedback");
-    setNote(right ? `Not yet. It is ${right.letter}.` : "Not yet");
+    setNote(right ? `Not quite. It is ${right.letter}.` : "Not quite");
     rate(current.item.id, "again");
-    setHeard((n) => n + 1);
-    window.setTimeout(() => {
-      if (phaseRef.current === "done") return;
-      goNext(true);
-    }, 1400);
+    const nextHeard = heardRef.current + 1;
+    heardRef.current = nextHeard;
+    setHeard(nextHeard);
+    settle(true, { heard: nextHeard, held: heldRef.current }, 1400);
   }
 
   useEffect(() => {
@@ -252,14 +264,18 @@ function RoadExamPage() {
 
   useEffect(() => () => stopRec(), []);
 
-  function begin() {
+  function begin(fresh: boolean) {
     unlockSpeech();
-    const deck = buildRoadDeck(pool);
-    const first = deck[0];
-    if (first) {
+    const restored = fresh ? null : unpackRoadRun(useStudy.getState().game.roadRun, pool);
+    const deck = restored ? restored.queue : buildRoadDeck(pool);
+    const startAt = restored ? restored.index : 0;
+    const startHeard = restored ? restored.heard : 0;
+    const startHeld = restored ? restored.held : 0;
+    const card = deck[startAt];
+    if (card) {
       const signal = { stop: false };
       voice.current = signal;
-      opening.current = speakHebrewWord(first.item, 0.92, signal);
+      opening.current = speakHebrewWord(card.item, 0.92, signal);
     }
     const media = navigator.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
     if (media) {
@@ -271,11 +287,18 @@ function RoadExamPage() {
           /* taps still work */
         });
     }
+    queueRef.current = deck;
+    heardRef.current = startHeard;
+    heldRef.current = startHeld;
     setQueue(deck);
-    setI(0);
-    setHeard(0);
-    setHeld(0);
+    setI(startAt);
+    setHeard(startHeard);
+    setHeld(startHeld);
+    setTries(0);
+    setPicked(null);
+    setNote("");
     setStarted(true);
+    saveRoadRun(packRoadRun(deck, startAt, startHeard, startHeld));
   }
 
   if (!pool.length) {
@@ -288,20 +311,36 @@ function RoadExamPage() {
   }
 
   if (!started) {
+    const place = resume ? resume.index + 1 : 0;
     return (
       <>
         <Panel className="mb-4">
           <GameMenu />
           <h1 className="mt-4 font-display text-3xl font-bold text-ink">Road exam · Week 7</h1>
-          <p className="mt-2 max-w-prose text-muted">
-            {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-            wrong is try again, on the screen only. Second wrong shows the letter and brings the word back once.
-            No clap and no horn, so the microphone is not talked over.
-          </p>
+          {resume ? (
+            <p className="mt-2 max-w-prose text-muted">
+              This circle is still open, on word {place} of {resume.queue.length}. It keeps going until every miss is
+              correct. Leaving does not start you over.
+            </p>
+          ) : (
+            <p className="mt-2 max-w-prose text-muted">
+              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
+              wrong shows Retry and waits for a second try. Second wrong shows Not quite, and that word goes to the back
+              of the deck — and back again if it is missed once more. The circle stays saved when you leave. It ends only
+              when every miss has been correct. Then a new circle can start. No clap and no horn, so the microphone is not
+              talked over.
+            </p>
+          )}
         </Panel>
-        <Button type="button" size="lg" className="w-full text-xl" onClick={begin}>
-          Start — speak, then listen for A B C D
-        </Button>
+        {resume ? (
+          <Button type="button" size="lg" className="w-full text-xl" onClick={() => begin(false)}>
+            Continue — word {place} of {resume.queue.length}
+          </Button>
+        ) : (
+          <Button type="button" size="lg" className="w-full text-xl" onClick={() => begin(true)}>
+            Start — speak, then listen for A B C D
+          </Button>
+        )}
         <p className="mt-3 text-sm text-muted">Tap a letter if the microphone will not take your voice.</p>
       </>
     );
@@ -313,19 +352,22 @@ function RoadExamPage() {
       <>
         <Panel className="mb-4">
           <GameMenu />
-          <h1 className="mt-4 font-display text-3xl font-bold text-ink">Drive done</h1>
+          <h1 className="mt-4 font-display text-3xl font-bold text-ink">Circle clear</h1>
+          <p className="mt-2 text-muted">Every miss in this circle was corrected.</p>
           <p className="mt-2 text-muted">
             {held} held of {heard} · {pct}%.
           </p>
         </Panel>
-        <Button type="button" size="lg" className="w-full" onClick={begin}>
-          Drive it again
+        <Button type="button" size="lg" className="w-full" onClick={() => begin(true)}>
+          Start a new circle
         </Button>
       </>
     );
   }
 
-  const showMark = phase === "feedback" && (picked !== null || note.startsWith("Not yet"));
+  const secondMiss = phase === "feedback" && note.startsWith("Not quite");
+  const retrySign = !secondMiss && tries > 0 && phase !== "speak";
+  const showMark = secondMiss;
 
   return (
     <>
@@ -338,13 +380,32 @@ function RoadExamPage() {
             {micOn ? " · listening" : " · tap a letter"}
           </p>
         </div>
+        <p className="mt-1 text-sm text-muted">This circle is saved. A miss stays in it until that word is correct.</p>
         <p className="mt-2 text-sm text-muted">
-          {phase === "speak" ? "The word is on the screen, and it is being called." : phase === "listen" ? "Say A, B, C, or D." : note}
+          {phase === "speak"
+            ? "The word is on the screen, and it is being called."
+            : phase === "listen"
+              ? tries > 0
+                ? "Retry. Say A, B, C, or D."
+                : "Say A, B, C, or D."
+              : note}
         </p>
         <p className="he-word mt-4 text-center text-6xl font-bold leading-tight text-ink sm:text-7xl" lang="he" dir="rtl">
           {task.item.hebrew}
         </p>
       </Panel>
+      {retrySign ? (
+        <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
+          <GradeBanner ok={false} label="Retry" />
+          <p className="mt-3 text-base font-medium text-ink">Second try. The microphone is waiting.</p>
+        </div>
+      ) : null}
+      {secondMiss ? (
+        <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
+          <GradeBanner ok={false} label="Not quite" />
+          <p className="mt-3 text-base font-medium text-ink">{note}</p>
+        </div>
+      ) : null}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {task.choices.map((choice) => {
           const on = picked === choice.letter;
