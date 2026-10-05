@@ -10,7 +10,7 @@ import {
   buildRoadDeck,
   packRoadRun,
   parkMiss,
-  parseRoadLetter,
+  parseRoadHeard,
   unpackRoadRun,
   type RoadCard,
   type RoadLetter,
@@ -53,6 +53,7 @@ function RoadExamPage() {
   const [phase, setPhase] = useState<Phase>("speak");
   const [tries, setTries] = useState(0);
   const [picked, setPicked] = useState<RoadLetter | null>(null);
+  const [missed, setMissed] = useState<RoadLetter | null>(null);
   const [note, setNote] = useState("");
   const [heard, setHeard] = useState(0);
   const [held, setHeld] = useState(0);
@@ -115,7 +116,8 @@ function RoadExamPage() {
       for (let r = ev.resultIndex; r < ev.results.length; r++) {
         const alts = ev.results[r];
         for (let a = 0; a < alts.length; a++) {
-          const letter = parseRoadLetter(alts[a].transcript);
+          const card = taskRef.current;
+          const letter = card ? parseRoadHeard(alts[a].transcript, card.choices) : null;
           if (letter) {
             take(letter);
             return;
@@ -158,6 +160,7 @@ function RoadExamPage() {
       setQueue(nextQueue);
       setTries(0);
       setPicked(null);
+      setMissed(null);
       setNote("");
       setI(nextIndex);
       lock.current = false;
@@ -186,10 +189,11 @@ function RoadExamPage() {
       heldRef.current = nextHeld;
       setHeard(nextHeard);
       setHeld(nextHeld);
-      settle(false, { heard: nextHeard, held: nextHeld }, 700);
+      settle(false, { heard: nextHeard, held: nextHeld }, 1100);
       return;
     }
     if (triesRef.current < 1) {
+      setMissed(letter);
       setTries(1);
       triesRef.current = 1;
       setPhase("feedback");
@@ -221,6 +225,7 @@ function RoadExamPage() {
     setTries(0);
     triesRef.current = 0;
     setPicked(null);
+    setMissed(null);
     setNote("");
     setPhase("speak");
     stopRec();
@@ -296,6 +301,7 @@ function RoadExamPage() {
     setHeld(startHeld);
     setTries(0);
     setPicked(null);
+    setMissed(null);
     setNote("");
     setStarted(true);
     saveRoadRun(packRoadRun(deck, startAt, startHeard, startHeld));
@@ -320,15 +326,16 @@ function RoadExamPage() {
           {resume ? (
             <p className="mt-2 max-w-prose text-muted">
               This circle is still open, on word {place} of {resume.queue.length}. It keeps going until every miss is
-              correct. Leaving does not start you over.
+              correct. Say the letter, or say the English word. Leaving does not start you over.
             </p>
           ) : (
             <p className="mt-2 max-w-prose text-muted">
-              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-              wrong shows Retry and waits for a second try. Second wrong shows Not quite, and that word goes to the back
-              of the deck — and back again if it is missed once more. The circle stays saved when you leave. It ends only
-              when every miss has been correct. Then a new circle can start. No clap and no horn, so the microphone is not
-              talked over.
+              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter, or say the
+              English word on that button. First wrong shows Retry, turns that button red, and waits for a second try.
+              Second wrong shows Not quite, turns the right letter green, and that word goes to the back of the deck — and
+              back again if it is missed once more. A right letter, or the right English word, turns that button green. The
+              circle stays saved when you leave. It ends only when every miss has been correct. Then a new circle can start.
+              Still no clap and no horn, so the microphone is not talked over.
             </p>
           )}
         </Panel>
@@ -338,10 +345,10 @@ function RoadExamPage() {
           </Button>
         ) : (
           <Button type="button" size="lg" className="w-full text-xl" onClick={() => begin(true)}>
-            Start — speak, then listen for A B C D
+            Start — say the letter or the English word
           </Button>
         )}
-        <p className="mt-3 text-sm text-muted">Tap a letter if the microphone will not take your voice.</p>
+        <p className="mt-3 text-sm text-muted">Tap a letter if the microphone will not take your voice. Saying the English word counts too.</p>
       </>
     );
   }
@@ -367,7 +374,6 @@ function RoadExamPage() {
 
   const secondMiss = phase === "feedback" && note.startsWith("Not quite");
   const retrySign = !secondMiss && tries > 0 && phase !== "speak";
-  const showMark = secondMiss;
 
   return (
     <>
@@ -386,8 +392,8 @@ function RoadExamPage() {
             ? "The word is on the screen, and it is being called."
             : phase === "listen"
               ? tries > 0
-                ? "Retry. Say A, B, C, or D."
-                : "Say A, B, C, or D."
+                ? "Retry. Say the letter, or say the English word."
+                : "Say the letter, or say the English word."
               : note}
         </p>
         <p className="he-word mt-4 text-center text-6xl font-bold leading-tight text-ink sm:text-7xl" lang="he" dir="rtl">
@@ -408,7 +414,10 @@ function RoadExamPage() {
       ) : null}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {task.choices.map((choice) => {
-          const on = picked === choice.letter;
+          const hit = phase === "feedback" && note === "Correct";
+          const reveal = secondMiss;
+          const right = (hit || reveal) && choice.correct;
+          const wrong = !choice.correct && (missed === choice.letter || (reveal && picked === choice.letter));
           return (
             <li key={choice.letter}>
               <button
@@ -417,10 +426,10 @@ function RoadExamPage() {
                 disabled={phase === "feedback"}
                 className={cn(
                   "flex min-h-28 w-full items-center gap-4 rounded-[var(--radius-xl)] px-4 py-4 text-left shadow-[var(--shadow-border)]",
-                  !showMark && "bg-card",
-                  showMark && choice.correct && "bg-good text-white",
-                  showMark && on && !choice.correct && "bg-bad text-white",
-                  showMark && !on && !choice.correct && "bg-card text-muted",
+                  right && "bg-good text-parchment",
+                  wrong && "bg-danger text-parchment",
+                  !right && !wrong && reveal && "bg-card text-muted",
+                  !right && !wrong && !reveal && "bg-card",
                 )}
               >
                 <span className="font-display text-5xl font-bold leading-none">{choice.letter}</span>

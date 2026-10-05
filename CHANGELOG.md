@@ -2,6 +2,8 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Road exam hears the English word.** Say the letter, or say the word on the button, such as “father.” The right word turns green. A wrong word turns red. A, B, C, and D still work. Still no clap or horn.
+- **Road exam marks the letter.** A right answer turns that button green. A wrong answer turns that button red. Still no clap or horn.
 - **Weak pool.** Study → Weak pool is every weak word, not a short sample. Run the whole pool in one sitting. Leave, and it continues on the same word. A new pool starts only after that sitting is finished.
 - **Follow along starts with the verse.** Chapters whose title trim had cut off the reading now start with the text.
 - **Study quiz counts as study.** Answering Quiz, Quiz myself, Rules, Shewa, Qamets, or a grammar-lesson quiz sets the study day and streak — including Try again, not only a finished card. Signing in still does not.
