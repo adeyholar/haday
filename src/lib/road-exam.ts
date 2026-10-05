@@ -80,3 +80,9 @@ export function buildRoadDeck(pool: VocabItem[]): RoadCard[] {
     choices: roadChoices(item, pool),
   }));
 }
+
+/** A miss is heard once more, at the back of the deck — not slipped into the middle. */
+export function parkMiss<T extends { key: string }>(queue: T[], card: T): T[] {
+  if (card.key.endsWith(":back")) return queue;
+  return [...queue, { ...card, key: `${card.key}:back` }];
+}

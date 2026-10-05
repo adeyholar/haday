@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseRoadLetter, roadChoices, buildRoadDeck, glossHead } = await jiti.import("/workspace/src/lib/road-exam.ts");
+const { parseRoadLetter, roadChoices, buildRoadDeck, glossHead, parkMiss } = await jiti.import("/workspace/src/lib/road-exam.ts");
 const { itemsForWeek } = await jiti.import("/workspace/src/lib/vocab.ts");
 
 test("spoken letters map to A B C D", () => {
@@ -30,6 +30,21 @@ test("week 7 road card has four different glosses and one answer", () => {
   const item = pool.find((v) => v.id === "abraham") ?? pool[0];
   const choices = roadChoices(item, pool);
   assert.equal(choices.filter((c) => c.correct)[0].gloss, glossHead(item.gloss));
+});
+
+test("a miss goes to the back of the deck, once", () => {
+  const deck = [
+    { key: "a:0" },
+    { key: "b:1" },
+    { key: "c:2" },
+  ];
+  const next = parkMiss(deck, deck[0]);
+  assert.deepEqual(
+    next.map((c) => c.key),
+    ["a:0", "b:1", "c:2", "a:0:back"],
+  );
+  const again = parkMiss(next, next[3]);
+  assert.equal(again.length, next.length);
 });
 
 test("road exam does not play clap or miss sounds", () => {

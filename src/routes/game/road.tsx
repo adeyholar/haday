@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import {
   buildRoadDeck,
+  parkMiss,
   parseRoadLetter,
   type RoadCard,
   type RoadLetter,
@@ -139,12 +140,7 @@ function RoadExamPage() {
     const current = taskRef.current;
     const index = iRef.current;
     if (recycle && current && !current.key.endsWith(":back")) {
-      setQueue((prev) => {
-        const rest = prev.slice(index + 1);
-        const at = rest.length ? 1 + Math.floor(Math.random() * rest.length) : 0;
-        const again: RoadCard = { ...current, key: `${current.key}:back` };
-        return [...prev.slice(0, index + 1), ...rest.slice(0, at), again, ...rest.slice(at)];
-      });
+      setQueue((prev) => parkMiss(prev, current));
     }
     setTries(0);
     setPicked(null);
@@ -296,7 +292,7 @@ function RoadExamPage() {
           <h1 className="mt-4 font-display text-3xl font-bold text-ink">Road exam · Week 7</h1>
           <p className="mt-2 max-w-prose text-muted">
             {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-            wrong shows Retry and waits for a second try. Second wrong shows Not quite and the letter.
+            wrong shows Retry and waits for a second try. Second wrong shows Not quite, and that word goes to the back of the deck.
             No clap and no horn, so the microphone is not talked over.
           </p>
         </Panel>
