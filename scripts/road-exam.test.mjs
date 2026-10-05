@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
@@ -29,4 +30,11 @@ test("week 7 road card has four different glosses and one answer", () => {
   const item = pool.find((v) => v.id === "abraham") ?? pool[0];
   const choices = roadChoices(item, pool);
   assert.equal(choices.filter((c) => c.correct)[0].gloss, glossHead(item.gloss));
+});
+
+test("road exam does not play clap or miss sounds", () => {
+  const src = readFileSync(new URL("../src/routes/game/road.tsx", import.meta.url), "utf8");
+  assert.equal(src.includes("playFeedback"), false);
+  assert.equal(src.includes("playGrade"), false);
+  assert.equal(src.includes("playAww"), false);
 });

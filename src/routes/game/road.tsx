@@ -12,7 +12,6 @@ import {
   type RoadCard,
   type RoadLetter,
 } from "@/lib/road-exam";
-import { playFeedback } from "@/lib/try-again";
 import { useStudy } from "@/lib/store";
 import { itemsForWeek } from "@/lib/vocab";
 
@@ -169,7 +168,6 @@ function RoadExamPage() {
       setPicked(letter);
       setPhase("feedback");
       setNote("Correct");
-      playFeedback("strong");
       rate(current.item.id, "good");
       setHeard((n) => n + 1);
       setHeld((n) => n + 1);
@@ -185,7 +183,6 @@ function RoadExamPage() {
       triesRef.current = 1;
       setPhase("feedback");
       setNote("Try again");
-      playFeedback("retry");
       const key = current.key;
       window.setTimeout(() => {
         if (taskRef.current?.key !== key || phaseRef.current === "done") return;
@@ -200,7 +197,6 @@ function RoadExamPage() {
     setPicked(letter);
     setPhase("feedback");
     setNote(right ? `Not yet. It is ${right.letter}.` : "Not yet");
-    playFeedback("fail");
     rate(current.item.id, "again");
     setHeard((n) => n + 1);
     const signal = { stop: false };
