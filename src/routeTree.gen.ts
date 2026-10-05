@@ -32,6 +32,7 @@ import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as SelfQuizRouteImport } from './routes/self-quiz'
 import { Route as TypeRouteImport } from './routes/type'
+import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
@@ -184,6 +185,11 @@ const SelfQuizRoute = SelfQuizRouteImport.update({
 const TypeRoute = TypeRouteImport.update({
   id: '/type',
   path: '/type',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeakRoute = WeakRouteImport.update({
+  id: '/weak',
+  path: '/weak',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WriteRoute = WriteRouteImport.update({
@@ -401,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
+  '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
@@ -463,6 +470,7 @@ export interface FileRoutesByTo {
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
+  '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
@@ -527,6 +535,7 @@ export interface FileRoutesById {
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
   '/type': typeof TypeRoute
+  '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/voice': typeof AdminVoiceRoute
@@ -592,6 +601,7 @@ export interface FileRouteTypes {
     | '/rules'
     | '/self-quiz'
     | '/type'
+    | '/weak'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
@@ -654,6 +664,7 @@ export interface FileRouteTypes {
     | '/rules'
     | '/self-quiz'
     | '/type'
+    | '/weak'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
@@ -717,6 +728,7 @@ export interface FileRouteTypes {
     | '/rules'
     | '/self-quiz'
     | '/type'
+    | '/weak'
     | '/write'
     | '/admin/query'
     | '/admin/voice'
@@ -781,6 +793,7 @@ export interface RootRouteChildren {
   RulesRoute: typeof RulesRoute
   SelfQuizRoute: typeof SelfQuizRoute
   TypeRoute: typeof TypeRoute
+  WeakRoute: typeof WeakRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
   FinderDeckRoute: typeof FinderDeckRoute
@@ -975,6 +988,13 @@ declare module '@tanstack/react-router' {
       path: '/type'
       fullPath: '/type'
       preLoaderRoute: typeof TypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weak': {
+      id: '/weak'
+      path: '/weak'
+      fullPath: '/weak'
+      preLoaderRoute: typeof WeakRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/write': {
@@ -1301,6 +1321,7 @@ const rootRouteChildren: RootRouteChildren = {
   RulesRoute: RulesRoute,
   SelfQuizRoute: SelfQuizRoute,
   TypeRoute: TypeRoute,
+  WeakRoute: WeakRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,
   FinderDeckRoute: FinderDeckRoute,

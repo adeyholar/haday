@@ -7,6 +7,7 @@ import { NavTip } from "@/components/nav-tip";
 export type NavHref =
   | "/"
   | "/drill"
+  | "/weak"
   | "/write"
   | "/quiz"
   | "/rules"

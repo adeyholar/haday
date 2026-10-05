@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
   CircleHelp,
+  CircleAlert,
   Compass,
   Crown,
   FileText,
@@ -44,6 +45,7 @@ import { NavMenu, type NavItem } from "@/components/nav-menu";
 const STUDY: NavItem[] = [
   { to: "/study", label: "Stations", hint: "From the alef-bet to the Word", icon: Library },
   { to: "/drill", label: "Drill", hint: "Every word, six ways", icon: Layers },
+  { to: "/weak", label: "Weak pool", hint: "Every weak word, one sitting", icon: CircleAlert },
   { to: "/write", label: "Write", hint: "Type or hand-write", icon: PenLine },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
   { to: "/rules", label: "Rules", hint: "See the rule in the text", icon: ScrollText },
