@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { speakHebrewWord, speakLine, stopSpeech, unlockSpeech } from "@/lib/listen";
+import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import {
   buildRoadDeck,
-  glossHead,
   parseRoadLetter,
   type RoadCard,
   type RoadLetter,
@@ -171,11 +170,10 @@ function RoadExamPage() {
       rate(current.item.id, "good");
       setHeard((n) => n + 1);
       setHeld((n) => n + 1);
-      const signal = { stop: false };
-      voice.current = signal;
-      void speakLine(`Yes. ${letter}. ${glossHead(current.item.gloss)}.`, "en", 1, signal).then(() => {
-        if (!signal.stop) goNext(false);
-      });
+      window.setTimeout(() => {
+        if (phaseRef.current === "done") return;
+        goNext(false);
+      }, 700);
       return;
     }
     if (triesRef.current < 1) {
@@ -199,12 +197,10 @@ function RoadExamPage() {
     setNote(right ? `Not yet. It is ${right.letter}.` : "Not yet");
     rate(current.item.id, "again");
     setHeard((n) => n + 1);
-    const signal = { stop: false };
-    voice.current = signal;
-    const line = right ? `Not yet. It is ${right.letter}. ${right.gloss}.` : "Not yet.";
-    void speakLine(line, "en", 1, signal).then(() => {
-      if (!signal.stop) goNext(true);
-    });
+    window.setTimeout(() => {
+      if (phaseRef.current === "done") return;
+      goNext(true);
+    }, 1400);
   }
 
   useEffect(() => {
@@ -299,7 +295,8 @@ function RoadExamPage() {
           <h1 className="mt-4 font-display text-3xl font-bold text-ink">Road exam · Week 7</h1>
           <p className="mt-2 max-w-prose text-muted">
             {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-            wrong is try again. Second wrong tells you the letter and brings the word back once.
+            wrong is try again, on the screen only. Second wrong shows the letter and brings the word back once.
+            No clap and no horn, so the microphone is not talked over.
           </p>
         </Panel>
         <Button type="button" size="lg" className="w-full text-xl" onClick={begin}>
