@@ -98,6 +98,9 @@ test("road exam does not play clap or miss sounds", () => {
   assert.equal(src.includes("speakLine"), false);
   assert.match(src, /label="Retry"/);
   assert.match(src, /label="Not quite"/);
+  assert.match(src, /bg-good/);
+  assert.match(src, /bg-danger/);
+  assert.equal(src.includes("bg-bad"), false);
   assert.match(src, /saveRoadRun/);
   assert.match(src, /Continue — word/);
   assert.match(src, /Circle clear/);
