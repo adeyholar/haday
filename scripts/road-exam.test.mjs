@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseRoadLetter, roadChoices, buildRoadDeck, glossHead, parkMiss, packRoadRun, unpackRoadRun } = await jiti.import("/workspace/src/lib/road-exam.ts");
+const { parseRoadLetter, parseRoadHeard, roadChoices, buildRoadDeck, glossHead, parkMiss, packRoadRun, unpackRoadRun } = await jiti.import("/workspace/src/lib/road-exam.ts");
 const { itemsForWeek } = await jiti.import("/workspace/src/lib/vocab.ts");
 
 test("spoken letters map to A B C D", () => {
@@ -13,6 +13,32 @@ test("spoken letters map to A B C D", () => {
   assert.equal(parseRoadLetter("see"), "C");
   assert.equal(parseRoadLetter("option dee"), "D");
   assert.equal(parseRoadLetter("hello there"), null);
+});
+
+test("the English word on the button counts, and a later letter can correct it", () => {
+  const choices = [
+    { letter: "A", gloss: "hat" },
+    { letter: "B", gloss: "father" },
+    { letter: "C", gloss: "Abraham" },
+    { letter: "D", gloss: "and" },
+  ];
+  assert.equal(parseRoadHeard("hat", choices), "A");
+  assert.equal(parseRoadHeard("a hat", choices), "A");
+  assert.equal(parseRoadHeard("it's Abraham", choices), "C");
+  assert.equal(parseRoadHeard("bee", choices), "B");
+  assert.equal(parseRoadHeard("father, A", choices), "A");
+  assert.equal(parseRoadHeard("A, father", choices), "B");
+  assert.equal(parseRoadHeard("Abraham and", choices), "C");
+  assert.equal(parseRoadHeard("and", choices), "D");
+  assert.equal(parseRoadHeard("hello there", choices), null);
+  const short = [
+    { letter: "A", gloss: "to" },
+    { letter: "B", gloss: "land" },
+    { letter: "C", gloss: "day" },
+    { letter: "D", gloss: "king" },
+  ];
+  assert.equal(parseRoadHeard("to", short), "A");
+  assert.equal(parseRoadHeard("to the land", short), "B");
 });
 
 test("week 7 road card has four different glosses and one answer", () => {

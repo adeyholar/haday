@@ -39,16 +39,70 @@ export function glossHead(gloss: string): string {
 
 /** Hear "A", "bee", "it's C" — not a sentence about something else. */
 export function parseRoadLetter(heard: string): RoadLetter | null {
-  const words = heard
+  return parseRoadHeard(heard, []);
+}
+
+const FILLER = new Set(["um", "uh", "er", "ah", "hmm", "please", "its", "it", "is", "option", "letter", "choice"]);
+
+function roadText(heard: string): string {
+  return heard
     .toLowerCase()
-    .replace(/[^a-z\s]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter(Boolean);
-  for (let i = words.length - 1; i >= 0; i--) {
-    const hit = SAY[words[i]];
-    if (hit) return hit;
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** Whole-phrase match. Returns the end index in `text`, or -1. */
+function phraseEnd(text: string, phrase: string): number {
+  if (!phrase) return -1;
+  const hay = ` ${text} `;
+  const at = hay.lastIndexOf(` ${phrase} `);
+  if (at < 0) return -1;
+  return at + phrase.length;
+}
+
+/** A one- or two-letter gloss counts only when that is what they said. */
+function tightGloss(text: string, gloss: string): boolean {
+  const words = text.split(" ").filter((word) => !FILLER.has(word));
+  return words.join(" ") === gloss;
+}
+
+/**
+ * The English word on the button, or A B C D.
+ * The later one wins, so "father, B" is B and "B, father" is father.
+ * A longer name beats a short word inside the same phrase ("Abraham and" is Abraham).
+ */
+export function parseRoadHeard(
+  heard: string,
+  choices: { letter: RoadLetter; gloss: string }[],
+): RoadLetter | null {
+  const text = roadText(heard);
+  if (!text) return null;
+
+  let glossHit: { letter: RoadLetter; end: number; len: number } | null = null;
+  for (const choice of choices) {
+    const gloss = roadText(choice.gloss);
+    if (!gloss) continue;
+    if (gloss.length <= 2 && !tightGloss(text, gloss)) continue;
+    const end = phraseEnd(text, gloss);
+    if (end < 0) continue;
+    if (!glossHit || gloss.length > glossHit.len || (gloss.length === glossHit.len && end > glossHit.end)) {
+      glossHit = { letter: choice.letter, end, len: gloss.length };
+    }
   }
-  return null;
+
+  let letterHit: { letter: RoadLetter; end: number } | null = null;
+  let cursor = 0;
+  for (const word of text.split(" ")) {
+    const letter = SAY[word];
+    const end = cursor + word.length;
+    if (letter) letterHit = { letter, end };
+    cursor = end + 1;
+  }
+
+  if (glossHit && letterHit) return letterHit.end > glossHit.end ? letterHit.letter : glossHit.letter;
+  return glossHit?.letter ?? letterHit?.letter ?? null;
 }
 
 export function roadChoices(item: VocabItem, pool: VocabItem[]): RoadChoice[] {

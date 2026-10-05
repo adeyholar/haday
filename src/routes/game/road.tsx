@@ -10,7 +10,7 @@ import {
   buildRoadDeck,
   packRoadRun,
   parkMiss,
-  parseRoadLetter,
+  parseRoadHeard,
   unpackRoadRun,
   type RoadCard,
   type RoadLetter,
@@ -116,7 +116,8 @@ function RoadExamPage() {
       for (let r = ev.resultIndex; r < ev.results.length; r++) {
         const alts = ev.results[r];
         for (let a = 0; a < alts.length; a++) {
-          const letter = parseRoadLetter(alts[a].transcript);
+          const card = taskRef.current;
+          const letter = card ? parseRoadHeard(alts[a].transcript, card.choices) : null;
           if (letter) {
             take(letter);
             return;
@@ -325,15 +326,16 @@ function RoadExamPage() {
           {resume ? (
             <p className="mt-2 max-w-prose text-muted">
               This circle is still open, on word {place} of {resume.queue.length}. It keeps going until every miss is
-              correct. Leaving does not start you over.
+              correct. Say the letter, or say the English word. Leaving does not start you over.
             </p>
           ) : (
             <p className="mt-2 max-w-prose text-muted">
-              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter. First
-              wrong shows Retry, turns that button red, and waits for a second try. Second wrong shows Not quite, turns the
-              right letter green, and that word goes to the back of the deck — and back again if it is missed once more.
-              A right letter turns that button green. The circle stays saved when you leave. It ends only when every miss
-              has been correct. Then a new circle can start. Still no clap and no horn, so the microphone is not talked over.
+              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter, or say the
+              English word on that button. First wrong shows Retry, turns that button red, and waits for a second try.
+              Second wrong shows Not quite, turns the right letter green, and that word goes to the back of the deck — and
+              back again if it is missed once more. A right letter, or the right English word, turns that button green. The
+              circle stays saved when you leave. It ends only when every miss has been correct. Then a new circle can start.
+              Still no clap and no horn, so the microphone is not talked over.
             </p>
           )}
         </Panel>
@@ -343,10 +345,10 @@ function RoadExamPage() {
           </Button>
         ) : (
           <Button type="button" size="lg" className="w-full text-xl" onClick={() => begin(true)}>
-            Start — speak, then listen for A B C D
+            Start — say the letter or the English word
           </Button>
         )}
-        <p className="mt-3 text-sm text-muted">Tap a letter if the microphone will not take your voice.</p>
+        <p className="mt-3 text-sm text-muted">Tap a letter if the microphone will not take your voice. Saying the English word counts too.</p>
       </>
     );
   }
@@ -390,8 +392,8 @@ function RoadExamPage() {
             ? "The word is on the screen, and it is being called."
             : phase === "listen"
               ? tries > 0
-                ? "Retry. Say A, B, C, or D."
-                : "Say A, B, C, or D."
+                ? "Retry. Say the letter, or say the English word."
+                : "Say the letter, or say the English word."
               : note}
         </p>
         <p className="he-word mt-4 text-center text-6xl font-bold leading-tight text-ink sm:text-7xl" lang="he" dir="rtl">
