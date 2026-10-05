@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Road exam keeps the circle.** Leave and come back, and it continues on the same word. A miss goes to the back of the deck again and again until it is correct. A new circle starts only after every miss in that run is correct.
 - **Road exam saves a miss for the end.** A second miss goes to the back of the deck. It is not mixed into the middle. The last line is the words you missed.
 - **Road exam shows the miss.** First miss is a Retry sign and waits for a second try. Second miss says Not quite and shows the letter. Still no clap or horn.
 - **Road exam stays quiet for the microphone.** A hit does not clap or say Yes. A miss does not honk or say Not yet. The Hebrew word is still spoken. The letter shows on the screen.

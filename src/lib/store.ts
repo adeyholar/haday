@@ -41,6 +41,7 @@ import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
+import type { RoadRun } from "./road-exam";
 
 type ProgressMap = Record<string, CardState>;
 export type FocusMode = "due" | "weak";
@@ -109,6 +110,7 @@ type StudyState = StudySnapshot & {
   recordTypingMark: (id: string, mark: "strong" | "weak" | "ok") => void;
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
+  saveRoadRun: (run: RoadRun | null) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
   hydrateRemote: (snap: ProgressPayload, ownerId: string) => void;
@@ -273,6 +275,9 @@ export const useStudy = create<StudyState>()(
       },
       saveUltimateRun: (run) => {
         set({ game: patchUltimateRun(get().game, run) });
+      },
+      saveRoadRun: (run) => {
+        set({ game: { ...get().game, roadRun: run } });
       },
       finishUltimate: (pct) => {
         const now = Date.now();
