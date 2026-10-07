@@ -59,6 +59,7 @@ const STUDY: NavItem[] = [
 
 const GAME: NavItem[] = [
   { to: "/game/road", label: "Road exam · Week 7", hint: "Say A B C D", icon: Mic },
+  { to: "/game/week7", label: "Week 7 mock exam", hint: "Grammar, then the word list", icon: ListChecks },
   { to: "/game", label: "BBH vocabulary", hint: "Chapter path", icon: Compass },
   { to: "/game/custom", label: "Custom mix", hint: "Your levels, one sitting", icon: Repeat },
   { to: "/game/alefbet", label: "Aleph-bet mastery", hint: "Letter games", icon: Languages },

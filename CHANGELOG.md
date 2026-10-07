@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Week 7 mock exam.** Game → Week 7 mock exam. One sitting covers the review sheet, then every word on the list. One grade, from the first answer on each item. A miss goes to the back until it is right. Leave, and it continues on the same item.
 - **Road exam hears the English word.** Say the letter, or say the word on the button, such as “father.” The right word turns green. A wrong word turns red. A, B, C, and D still work. Still no clap or horn.
 - **Road exam marks the letter.** A right answer turns that button green. A wrong answer turns that button red. Still no clap or horn.
 - **Weak pool.** Study → Weak pool is every weak word, not a short sample. Run the whole pool in one sitting. Leave, and it continues on the same word. A new pool starts only after that sitting is finished.
