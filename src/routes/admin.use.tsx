@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
-import { getClassUse, type ClassUse } from "@/lib/use-report.server";
+import { getClassUse, type ClassUse } from "@/lib/class-use";
 import type { UseBucket } from "@/lib/use-report";
 
 export const Route = createFileRoute("/admin/use")({ component: UsePage });
