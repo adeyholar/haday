@@ -29,6 +29,7 @@ export type NavHref =
   | "/leaderboard"
   | "/admin"
   | "/admin/voice"
+  | "/admin/use"
   | "/admin/query"
   | "/finder"
   | "/finder/deck"
