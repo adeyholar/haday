@@ -90,6 +90,8 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | `VITE_AUTH_ENABLED` | `true` |
 | `WEBSITES_PORT` | `8080` |
 | `HADAY_ADMIN_EMAILS` | Owner emails, comma-separated (Class roster). Also hardcoded for Crown. |
+| `ANTHROPIC_API_KEY` | Claude API key for Ask HaDay. Stays on the server. About $140 a month; the app stops near the end of that credit. |
+| `ANTHROPIC_MODEL` | Optional. Default `claude-haiku-5-5`. Set `claude-sonnet-5-5` if answers need to be stronger. |
 
 Optional — password reset emails (first match wins). With a mailer set, Forgot password and **Email reset** on the roster send the hour-long link to the classmate. Copy is only a backup if the inbox is empty.
 

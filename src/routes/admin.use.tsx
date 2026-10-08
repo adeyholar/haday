@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
+import { getAskMeter, type AskMeter } from "@/lib/ask-haday";
 import { getClassUse, type ClassUse } from "@/lib/class-use";
 import type { UseBucket } from "@/lib/use-report";
 
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/admin/use")({ component: UsePage });
 function UsePage() {
   const [admin, setAdmin] = useState<boolean | null>(null);
   const [report, setReport] = useState<ClassUse | null>(null);
+  const [meter, setMeter] = useState<AskMeter | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,8 +22,11 @@ function UsePage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const next = await getClassUse();
-        if (!cancelled) setReport(next);
+        const [next, spend] = await Promise.all([getClassUse(), getAskMeter()]);
+        if (!cancelled) {
+          setReport(next);
+          setMeter(spend);
+        }
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : "";
@@ -80,6 +85,13 @@ function UsePage() {
           now on, including Road exam and the Week 7 mock. Earlier visits only kept the last page. Classmates cannot
           open this.
         </p>
+        {meter ? (
+          <p className="mt-2 max-w-prose text-sm text-muted">
+            Lesson help this month: about ${(meter.cents / 100).toFixed(2)} of ${(meter.capCents / 100).toFixed(0)}.{" "}
+            {meter.calls} {meter.calls === 1 ? "question" : "questions"}. It stops near the end of the credit so a last
+            answer cannot run past it.
+          </p>
+        ) : null}
         <p className="mt-2 text-sm">
           <Link to="/admin" className="font-semibold text-primary">
             Class roster

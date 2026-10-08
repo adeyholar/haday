@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Ask HaDay can use Claude.** Lesson questions go through the owner’s Claude credit, on the server only. The credit stops near $140 for the month. Classmates do not see the key or the balance.
 - **What the class uses.** More → What the class uses, for the owner only. Saved accounts show which practice they have done most. Page opens are counted from now on.
 - **Week 7 mock exam.** Game → Week 7 mock exam. One sitting covers the review sheet, then every word on the list. One grade, from the first answer on each item. A miss goes to the back until it is right. Leave, and it continues on the same item.
 - **Road exam hears the English word.** Say the letter, or say the word on the button, such as “father.” The right word turns green. A wrong word turns red. A, B, C, and D still work. Still no clap or horn.
