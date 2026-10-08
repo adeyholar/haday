@@ -218,8 +218,8 @@ async function callClaude(
     },
     body: JSON.stringify({
       model,
-      max_tokens: 700,
-      temperature: 0.2,
+      max_tokens: 2500,
+      output_config: { effort: "low" },
       system,
       messages: [
         ...history.map((turn) => ({ role: turn.role, content: turn.text })),
@@ -227,7 +227,7 @@ async function callClaude(
       ],
     }),
   });
-  if (!res.ok) return { ok: false, error: `Could not reach HaDay Hebraic AI (${res.status}). Try again in a moment.` };
+  if (!res.ok) return { ok: false, error: await claudeRefusal(res) };
   const body = (await res.json()) as {
     content?: { type?: string; text?: string }[];
     usage?: { input_tokens?: number; output_tokens?: number };
@@ -244,6 +244,18 @@ async function callClaude(
     input: Number(body.usage?.input_tokens) || 0,
     output: Number(body.usage?.output_tokens) || 0,
   };
+}
+
+async function claudeRefusal(res: Response): Promise<string> {
+  let detail = "";
+  try {
+    const body = (await res.json()) as { error?: { message?: string } };
+    detail = (body.error?.message ?? "").replace(/\s+/g, " ").slice(0, 160);
+  } catch {
+    detail = "";
+  }
+  if (detail) return `Could not reach HaDay Hebraic AI (${res.status}: ${detail}).`;
+  return `Could not reach HaDay Hebraic AI (${res.status}). Try again in a moment.`;
 }
 
 async function callGrok(
