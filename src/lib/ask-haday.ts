@@ -215,6 +215,7 @@ async function callClaude(
       "Content-Type": "application/json",
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
+      ...workspaceHeader(),
     },
     body: JSON.stringify({
       model,
@@ -244,6 +245,13 @@ async function callClaude(
     input: Number(body.usage?.input_tokens) || 0,
     output: Number(body.usage?.output_tokens) || 0,
   };
+}
+
+function workspaceHeader(): Record<string, string> {
+  const raw = (process.env.ANTHROPIC_WORKSPACE_ID ?? "").trim();
+  const id = raw.match(/wrkspc_[A-Za-z0-9]+/)?.[0];
+  if (!id) return {};
+  return { "anthropic-workspace-id": id };
 }
 
 async function claudeRefusal(res: Response): Promise<string> {
