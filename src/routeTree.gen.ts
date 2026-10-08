@@ -35,6 +35,7 @@ import { Route as TypeRouteImport } from './routes/type'
 import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
+import { Route as AdminUseRouteImport } from './routes/admin.use'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as FinderIndexRouteImport } from './routes/finder/index'
@@ -201,6 +202,11 @@ const WriteRoute = WriteRouteImport.update({
 const AdminQueryRoute = AdminQueryRouteImport.update({
   id: '/query',
   path: '/query',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUseRoute = AdminUseRouteImport.update({
+  id: '/use',
+  path: '/use',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminVoiceRoute = AdminVoiceRouteImport.update({
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
@@ -480,6 +487,7 @@ export interface FileRoutesByTo {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
@@ -546,6 +554,7 @@ export interface FileRoutesById {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
@@ -613,6 +622,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/use'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
@@ -677,6 +687,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/use'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
@@ -742,6 +753,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/use'
     | '/admin/voice'
     | '/api/health'
     | '/finder/deck'
@@ -1024,6 +1036,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/use': {
+      id: '/admin/use'
+      path: '/use'
+      fullPath: '/admin/use'
+      preLoaderRoute: typeof AdminUseRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/voice': {
       id: '/admin/voice'
       path: '/voice'
@@ -1288,11 +1307,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminQueryRoute: typeof AdminQueryRoute
+  AdminUseRoute: typeof AdminUseRoute
   AdminVoiceRoute: typeof AdminVoiceRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminQueryRoute: AdminQueryRoute,
+  AdminUseRoute: AdminUseRoute,
   AdminVoiceRoute: AdminVoiceRoute,
 }
 

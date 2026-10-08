@@ -3,6 +3,7 @@ import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { assertAdmin } from "@/lib/admin";
 import { cleanCountry, clientIpFromHeaders, countryFromHeaders } from "@/lib/visit-geo";
+import { areaOf } from "@/lib/use-report";
 
 export { countryLabel } from "@/lib/visit-geo";
 
@@ -56,11 +57,52 @@ async function ensureVisitsTable() {
     await sql.query(
       "create index if not exists site_visitors_last_seen on site_visitors (last_seen desc)",
     );
+    await ensureAreaTables();
   })().catch((err) => {
     tableReady = null;
     throw err;
   });
   return tableReady;
+}
+
+export async function ensureAreaTables() {
+  const sql = await getSql();
+  await sql.query(`
+    create table if not exists site_area_hits (
+      area text primary key,
+      hits integer not null default 0,
+      last_seen timestamptz not null default now()
+    )
+  `);
+  await sql.query(`
+    create table if not exists site_area_people (
+      area text not null,
+      visitor_id text not null,
+      hits integer not null default 0,
+      last_seen timestamptz not null default now(),
+      primary key (area, visitor_id)
+    )
+  `);
+}
+
+async function recordArea(visitorId: string, path: string) {
+  const area = areaOf(path);
+  if (!area) return;
+  const sql = await getSql();
+  await sql`
+    insert into site_area_hits (area, hits, last_seen)
+    values (${area.id}, 1, now())
+    on conflict (area) do update set
+      hits = site_area_hits.hits + 1,
+      last_seen = now()
+  `;
+  await sql`
+    insert into site_area_people (area, visitor_id, hits, last_seen)
+    values (${area.id}, ${visitorId}, 1, now())
+    on conflict (area, visitor_id) do update set
+      hits = site_area_people.hits + 1,
+      last_seen = now()
+  `;
 }
 
 function cleanId(raw: string): string | null {
@@ -141,6 +183,7 @@ export const pingVisit = createServerFn({ method: "POST" })
           device = case when excluded.device = '' then site_visitors.device else excluded.device end,
           country = case when site_visitors.country = '' then excluded.country else site_visitors.country end
       `;
+      await recordArea(id, path);
       return { ok: true as const };
     } catch (err) {
       console.error("[visits] ping", err);

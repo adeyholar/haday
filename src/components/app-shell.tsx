@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BarChart3,
   BookOpen,
   CircleHelp,
   CircleAlert,
@@ -89,6 +90,7 @@ function moreItems(admin: boolean): NavItem[] {
   ];
   if (admin) {
     items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
+    items.push({ to: "/admin/use", label: "What the class uses", hint: "Visits and practice", icon: BarChart3 });
     items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
@@ -262,7 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/finder")}
+              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/use", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/admin") || pathname.startsWith("/finder")}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />

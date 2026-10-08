@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
@@ -13,7 +13,13 @@ import {
   type IdeaStatus,
 } from "@/lib/ideas";
 
-export const Route = createFileRoute("/admin")({ component: AdminPage });
+export const Route = createFileRoute("/admin")({ component: AdminGate });
+
+function AdminGate() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname !== "/admin") return <Outlet />;
+  return <AdminPage />;
+}
 
 function fmt(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -119,6 +125,11 @@ function AdminPage() {
           {mailer?.configured
             ? "Email reset sends the hour-long link to that classmate. Copy stays as a backup if nothing arrives."
             : "This host is not sending mail yet. Email reset still creates a link you can copy until a mailer key is on Azure or Vercel."}{" "}
+          <Link to="/admin/use" className="font-semibold text-primary">
+            What the class uses
+          </Link>
+          {" — "}
+          where people open pages, and what they practice most.{" "}
           <Link to="/admin/voice" className="font-semibold text-primary">
             Voice bank
           </Link>
