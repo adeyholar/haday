@@ -45,7 +45,7 @@ function Week7MockPage() {
   const [run, setRun] = useState<Week7Run | null>(null);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<Week7Run | null>(null);
-  const [mark, setMark] = useState<{ ok: boolean } | null>(null);
+  const [mark, setMark] = useState<{ ok: boolean; given: string } | null>(null);
 
   useEffect(() => {
     setRun(loadRun());
@@ -67,7 +67,7 @@ function Week7MockPage() {
     if (!item) return;
     const result = takeWeek7(run, raw);
     setPending(result.run);
-    setMark({ ok: result.ok });
+    setMark({ ok: result.ok, given: raw.trim() });
     setDraft("");
   }
 
@@ -178,7 +178,7 @@ function Card({
   kind: string;
   choices: string[];
   draft: string;
-  mark: { ok: boolean } | null;
+  mark: { ok: boolean; given: string } | null;
   show: string;
   onDraft: (value: string) => void;
   onSubmit: (raw: string) => void;
@@ -197,7 +197,18 @@ function Card({
       {mark ? (
         <div className="mt-5">
           <GradeBanner ok={mark.ok} label={mark.ok ? "Correct" : "Not quite"} />
-          {!mark.ok ? <p className="mt-3 text-center text-lg text-ink">{show}</p> : null}
+          <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            {mark.ok ? "Your answer" : "You wrote"}
+          </p>
+          <p className={`mt-1 text-center text-xl font-semibold ${mark.ok ? "text-good" : "text-danger"}`}>
+            {mark.given}
+          </p>
+          {!mark.ok ? (
+            <>
+              <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted">Answer</p>
+              <p className="mt-1 text-center text-xl font-semibold text-good">{show}</p>
+            </>
+          ) : null}
           <Button className="mt-5 w-full" size="lg" onClick={onNext}>
             Continue
           </Button>
