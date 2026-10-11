@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { clipAskHistory, clipVerse } = await jiti.import("/workspace/src/lib/ask-budget.ts");
-const { isInkImage } = await jiti.import("/workspace/src/lib/hebrew.ts");
-const { hydrateGame } = await jiti.import("/workspace/src/lib/game.ts");
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
+const { clipAskHistory, clipVerse } = await jiti.import(join(root, "src/lib/ask-budget.ts"));
+const { isInkImage } = await jiti.import(join(root, "src/lib/hebrew.ts"));
+const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
 
 test("ask history keeps only short user and assistant turns", () => {
   const turns = clipAskHistory([

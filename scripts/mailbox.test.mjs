@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseEmail, isDisposableDomain, inspectMailbox } = await jiti.import("/workspace/src/lib/mailbox.ts");
-const { toPublicAppUrl, passwordResetPageUrl } = await jiti.import("/workspace/src/lib/mail.ts");
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
+const { parseEmail, isDisposableDomain, inspectMailbox } = await jiti.import(join(root, "src/lib/mailbox.ts"));
+const { toPublicAppUrl, passwordResetPageUrl } = await jiti.import(join(root, "src/lib/mail.ts"));
 
 test("parseEmail accepts ordinary addresses", () => {
   assert.deepEqual(parseEmail("  Adeola@JCDisn.com  "), { local: "adeola", domain: "jcdisn.com" });
