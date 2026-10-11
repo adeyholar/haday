@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
+import { GradeBanner } from "@/components/grade-banner";
 import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
 import { glossMatches, liveGloss, POS_LABEL } from "@/lib/vocab";
-import { liveMatchAny } from "@/lib/hebrew";
+import { lettersOnly, liveMatchAny } from "@/lib/hebrew";
 import { HebrewType } from "@/components/hebrew-type";
 import {
   consonantsOf,
@@ -21,23 +22,27 @@ import { playFeedback } from "@/lib/try-again";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import { shuffleList } from "@/lib/quiz-draw";
 
-type Grade = "good" | "again" | "reveal";
+type Grade = "good" | "again" | "reveal" | "skip";
 
 export function EtchPlay({
   task,
   index,
   total,
+  label,
   onGrade,
 }: {
   task: EtchTask;
   index: number;
   total: number;
+  label?: string;
   onGrade: (rating: Grade) => void;
 }) {
   const item = task.item;
   const [typed, setTyped] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
   const [tries, setTries] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [listening, setListening] = useState(false);
   const [guessFast, setGuessFast] = useState(false);
   const [choices, setChoices] = useState(task.choices);
   const shownAt = useRef(Date.now());
@@ -48,12 +53,14 @@ export function EtchPlay({
     setPicked(null);
     setTries(0);
     setGuessFast(false);
+    setRevealed(false);
+    setListening(false);
     setChoices(task.choices.length ? shuffleList(task.choices) : []);
     shownAt.current = Date.now();
     voice.current.stop = true;
     voice.current = { stop: false };
     stopSpeech();
-    if (task.kind === "meet" || task.cue === "audio") {
+    if (task.kind === "study" || task.kind === "meet" || task.cue === "audio") {
       unlockSpeech();
       void speakHebrewWord(item, 0.85, voice.current);
     }
@@ -98,22 +105,17 @@ export function EtchPlay({
     playFeedback(ok ? "strong" : "fail");
   }
 
-  function pickVerse(token: string) {
-    if (picked) return;
-    const ok = tokenFitsLemma(token, item, task.verse?.hit);
-    if (ok && tooFast()) {
-      setGuessFast(true);
-      playFeedback("retry");
-      shownAt.current = Date.now();
-      return;
-    }
-    if (!ok && tries < 1) {
+  function submitVerse() {
+    if (picked || !task.verse) return;
+    const hit =
+      liveMatchAny(item.hebrew, typed, item.hebrewAlts, true) === "exact" || tokenFitsLemma(typed, item, task.verse.hit);
+    if (!hit && tries < 1) {
       setTries(1);
       playFeedback("retry");
       return;
     }
-    setPicked(ok ? item.id : token);
-    playFeedback(ok ? "strong" : "fail");
+    setPicked(hit ? item.id : "__miss__");
+    playFeedback(hit ? "strong" : "fail");
   }
 
   function submitProduce() {
@@ -128,14 +130,15 @@ export function EtchPlay({
     playFeedback(ok ? "strong" : "fail");
   }
 
-  const showArt = task.kind === "meet" || task.cue === "picture" || (graded && task.kind !== "verse");
-  const hideHe = !graded && (task.cue === "en" || task.cue === "picture" || task.cue === "audio" || task.cue === "spell");
-  const hideEn = !graded && task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en" && task.cue !== "spell";
+  const study = task.kind === "study" || task.kind === "meet";
+  const showArt = study || task.cue === "picture" || (graded && task.kind !== "verse");
+  const hideHe = !graded && !study && (task.cue === "en" || task.cue === "picture" || task.cue === "audio" || task.cue === "spell");
+  const hideEn = study ? !revealed : !graded && task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en" && task.cue !== "spell";
 
   return (
     <>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-        {etchLabel(task.kind)} · {index + 1} / {total}
+        {label ?? `${etchLabel(task.kind)} · ${index + 1} / ${total}`}
       </p>
       <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue)}</p>
       {guessFast && !graded && (
@@ -151,7 +154,9 @@ export function EtchPlay({
         </p>
         <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
           <div className="min-w-0">
-            {task.kind === "contrast" ? (
+            {task.kind === "contrast" && task.cue === "audio" ? (
+              <p className="font-display text-2xl text-muted">Listen</p>
+            ) : task.kind === "contrast" && task.cue !== "he" ? (
               <p className="font-display text-3xl font-semibold text-ink">{item.gloss.split(/[,;]/)[0]}</p>
             ) : task.cue === "consonants" && !graded ? (
               <p className="he-word text-5xl tracking-[0.2em]">{consonantsOf(item)}</p>
@@ -164,8 +169,22 @@ export function EtchPlay({
             ) : (
               <>
                 {!hideHe && <p className="he-word text-5xl sm:text-6xl">{item.hebrew}</p>}
-                {graded || !hideEn ? (
+                {study && revealed ? (
+                  <div className="mt-3 space-y-1 text-center">
+                    <p className="font-display text-2xl font-semibold">{[item.gloss, ...item.alts].filter(Boolean).join(" · ")}</p>
+                    <p className="text-sm text-muted">{item.translit}</p>
+                    <p className="text-sm text-muted">
+                      {POS_LABEL[item.pos]} · chapter {item.chapter}
+                      {item.freq ? ` · ${item.freq} times in the Bible` : ""}
+                    </p>
+                    {item.hebrewAlts?.length ? (
+                      <p className="he-word text-2xl text-ink">{item.hebrewAlts.join("  ")}</p>
+                    ) : null}
+                  </div>
+                ) : graded || !hideEn ? (
                   <p className="mt-3 font-display text-2xl font-semibold">{item.gloss}</p>
+                ) : study ? (
+                  <p className="mt-3 text-sm text-muted">What does it mean?</p>
                 ) : null}
               </>
             )}
@@ -175,7 +194,7 @@ export function EtchPlay({
           </div>
           {showArt ? <VocabArt id={item.id} /> : null}
         </div>
-        {(task.kind === "meet" || task.cue === "audio") && (
+        {(study || task.cue === "audio") && (
           <Button
             type="button"
             variant="outline"
@@ -192,15 +211,87 @@ export function EtchPlay({
         )}
       </div>
 
-      {task.kind === "meet" && <VerseCard item={item} showEnglish />}
-
-      {task.kind === "meet" && (
-        <Button className="mt-4 w-full" size="lg" onClick={() => finish("good")}>
-          Continue
-        </Button>
+      {study && revealed && <VerseCard item={item} showEnglish />}
+      {study && revealed && task.choices.length > 1 && (
+        <p className="mt-3 text-center text-sm text-muted">
+          Watch the look-alikes:{" "}
+          {task.choices
+            .filter((choice) => choice.id !== item.id)
+            .map((choice) => choice.hebrew)
+            .join("  ")}
+        </p>
       )}
 
-      {task.kind === "contrast" && (
+      {study && !revealed && (
+        <form
+          className="mt-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setRevealed(true);
+          }}
+        >
+          <label className="sr-only" htmlFor="study-guess">
+            Guess the English
+          </label>
+          <input
+            id="study-guess"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            placeholder="Type a guess, or show the meaning"
+            className={cn(
+              "min-h-14 w-full rounded-[var(--radius-md)] border-2 bg-card px-3 text-center font-display text-xl shadow-[var(--shadow-border)]",
+              live === "exact" && "border-good",
+              live === "off" && typed && "border-bad",
+              (live === "empty" || live === "prefix") && "border-transparent",
+            )}
+          />
+          <Button className="mt-3 w-full" size="lg" type="submit">
+            Show meaning
+          </Button>
+        </form>
+      )}
+      {study && revealed && (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button type="button" onClick={() => finish("good")}>
+            I knew it
+          </Button>
+          <Button type="button" variant="outline" onClick={() => finish("again")}>
+            Not yet
+          </Button>
+        </div>
+      )}
+
+      {task.kind === "contrast" && task.cue === "he" && (
+        <ul className="mt-4 grid grid-cols-1 gap-2">
+          {choices.map((c) => {
+            const on = picked === c.id;
+            const right = c.id === item.id;
+            return (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  disabled={graded}
+                  onClick={() => pickContrast(c.id)}
+                  className={cn(
+                    "min-h-14 w-full rounded-[var(--radius-md)] px-3 py-2 text-left font-display text-lg shadow-[var(--shadow-border)]",
+                    !graded && "bg-card",
+                    graded && right && "bg-good text-white",
+                    graded && on && !right && "bg-bad text-white",
+                    graded && !on && !right && "bg-card text-muted",
+                  )}
+                >
+                  {c.gloss.split(/[,;]/)[0]}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {task.kind === "contrast" && task.cue !== "he" && (
         <ul className="mt-4 grid grid-cols-2 gap-2" dir="rtl">
           {choices.map((c) => {
             const on = picked === c.id;
@@ -345,38 +436,103 @@ export function EtchPlay({
 
       {task.kind === "verse" && task.verse && (
         <div className="mt-4 rounded-[var(--radius-lg)] bg-surface px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">In the Tanakh · {task.verse.ref}</p>
-          <div className="mt-2 flex flex-wrap justify-end gap-2" dir="rtl" lang="he">
-            {verseTapTokens(task.verse.he).map((tok, n) => {
-              const hit = tokenFitsLemma(tok, item, task.verse?.hit);
-              const on = picked === (hit ? item.id : tok);
-              return (
-                <button
-                  key={`${tok}-${n}`}
-                  type="button"
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Fill the line · {task.verse.ref}</p>
+          <p className="he-word mt-2 text-2xl leading-relaxed" dir="rtl" lang="he">
+            {graded ? task.verse.he : blankVerse(task.verse.he, item, task.verse.hit)}
+          </p>
+          {!graded && (
+            <>
+              <ul className="mt-3 grid grid-cols-2 gap-2" dir="rtl">
+                {choices.map((c) => (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      onClick={() => pickContrast(c.id)}
+                      className="min-h-14 w-full rounded-[var(--radius-md)] bg-card px-2 py-2 shadow-[var(--shadow-border)]"
+                    >
+                      <span className="he-word text-2xl">{c.hebrew}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <form
+                className="mt-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submitVerse();
+                }}
+              >
+                <label className="sr-only" htmlFor="verse-type">
+                  Type the missing Hebrew
+                </label>
+                <input
+                  id="verse-type"
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
                   disabled={graded}
-                  onClick={() => pickVerse(tok)}
-                  className={cn(
-                    "he-word rounded-[var(--radius-sm)] px-2 py-1 text-2xl shadow-[var(--shadow-border)]",
-                    !graded && "bg-card",
-                    graded && hit && "bg-good text-white",
-                    graded && on && !hit && "bg-bad text-white",
-                    graded && !on && !hit && "bg-card text-muted",
-                  )}
-                >
-                  {tok}
-                </button>
-              );
-            })}
-          </div>
+                  dir="rtl"
+                  lang="he"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  placeholder="או הקלד"
+                  className="he-word min-h-14 w-full rounded-[var(--radius-md)] border-2 border-transparent bg-card px-3 text-center text-2xl shadow-[var(--shadow-border)]"
+                />
+                <Button type="submit" variant="outline" className="mt-2 w-full" disabled={!typed.trim()}>
+                  Check the typed word
+                </Button>
+              </form>
+            </>
+          )}
           {graded && <p className="mt-2 text-sm text-muted">{task.verse.en}</p>}
+          {graded && (
+            <Button type="button" variant="outline" className="mt-3" onClick={() => speakLine(task.verse?.he || item.hebrew)}>
+              Hear the line
+            </Button>
+          )}
         </div>
       )}
 
-      {graded && (
+      {task.kind === "say" && !graded && (
+        <div className="mt-4 grid gap-2">
+          {speechCtor() ? (
+            <Button
+              type="button"
+              disabled={listening}
+              onClick={() => {
+                setListening(true);
+                listenForHebrew(item, (hit) => {
+                  setListening(false);
+                  if (hit) {
+                    setPicked(item.id);
+                    playFeedback("strong");
+                    return;
+                  }
+                  if (tries < 1) {
+                    setTries(1);
+                    playFeedback("retry");
+                    return;
+                  }
+                  setPicked("__miss__");
+                  playFeedback("fail");
+                });
+              }}
+            >
+              {listening ? "Listening…" : tries ? "Try saying it again" : "Say the Hebrew"}
+            </Button>
+          ) : (
+            <p className="text-center text-sm text-muted">This phone cannot listen.</p>
+          )}
+          <Button type="button" variant="outline" onClick={() => finish("skip")}>
+            Skip
+          </Button>
+        </div>
+      )}
+
+      {graded && !study && (
         <div className="mt-4">
-          <AttemptBanner kind={ok ? "strong" : "fail"} />
-          {task.kind !== "meet" && (
+          <GradeBanner ok={ok} label={ok ? "Correct" : "Not quite"} />
+          {task.kind !== "meet" && task.kind !== "study" && (
             <p className="mt-2 text-center">
               <span className="he-word text-3xl">{item.hebrew}</span>
               <span className="mt-1 block font-display text-lg">{item.gloss}</span>
@@ -388,7 +544,7 @@ export function EtchPlay({
         </div>
       )}
 
-      {!graded && task.kind !== "meet" && (
+      {!graded && !study && task.kind !== "say" && (
         <DontKnowButton
           onClick={() => {
             setPicked("__noidea__");
@@ -403,4 +559,75 @@ export function EtchPlay({
 function contrastChoicesSafe(task: EtchTask) {
   if (task.choices.length) return task.choices;
   return [task.item];
+}
+
+function blankVerse(he: string, item: EtchTask["item"], hit?: string): string {
+  return verseTapTokens(he)
+    .map((tok) => (tokenFitsLemma(tok, item, hit) ? "____" : tok))
+    .join(" ");
+}
+
+function speechCtor(): (new () => {
+  lang: string;
+  interimResults: boolean;
+  onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  abort: () => void;
+}) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as Window & {
+    SpeechRecognition?: new () => {
+      lang: string;
+      interimResults: boolean;
+      onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+      onerror: (() => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+      abort: () => void;
+    };
+    webkitSpeechRecognition?: new () => {
+      lang: string;
+      interimResults: boolean;
+      onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+      onerror: (() => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+      abort: () => void;
+    };
+  };
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
+}
+
+function listenForHebrew(item: EtchTask["item"], done: (hit: boolean) => void) {
+  const Ctor = speechCtor();
+  if (!Ctor) {
+    done(false);
+    return;
+  }
+  const rec = new Ctor();
+  rec.lang = "he-IL";
+  rec.interimResults = false;
+  rec.onresult = (ev) => {
+    const transcript = ev.results?.[0]?.[0]?.transcript ?? "";
+    const heard = lettersOnly(transcript);
+    const target = lettersOnly(item.hebrew);
+    done(Boolean(heard) && (heard === target || (item.hebrewAlts ?? []).some((alt) => lettersOnly(alt) === heard)));
+  };
+  rec.onerror = () => done(false);
+  rec.onend = () => {};
+  try {
+    rec.start();
+  } catch {
+    done(false);
+  }
+}
+
+function speakLine(he: string) {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(he);
+  utter.lang = "he-IL";
+  window.speechSynthesis.speak(utter);
 }

@@ -4,6 +4,7 @@ import { defaultLadder, hydrateLadder, type LadderProgress } from "@/lib/ladder"
 import { emptyTyping, hydrateTyping, applyMark, type TypingProgress } from "@/lib/hebrew-typing/ranks";
 import { STUDY_RUNG_MAX } from "@/lib/hebrew-typing/study-rungs";
 import { hydrateRoadRun, type RoadRun } from "@/lib/road-exam";
+import { hydrateDrillRuns, type DrillRuns } from "@/lib/etch";
 import { hydrateWeakRun, type WeakRun } from "@/lib/weak-pool";
 import { emptyIibsGame, hydrateIibsGame, type IibsGameProgress } from "@/lib/iibs-game";
 
@@ -76,6 +77,8 @@ export type GameSnapshot = {
   roadFinalRun: RoadRun | null;
   /** Open weak-word pool. Null once that sitting is finished. */
   weakRun: WeakRun | null;
+  /** Open drill sittings, one per week and focus. */
+  drillRuns: DrillRuns;
   /** IIBS vocab game. A cleared lesson opens the next. A cleared level opens the next. */
   iibs: IibsGameProgress;
 };
@@ -167,6 +170,7 @@ export function defaultGame(): GameSnapshot {
     roadRun: null,
     roadFinalRun: null,
     weakRun: null,
+    drillRuns: {},
     iibs: emptyIibsGame(),
   };
 }
@@ -253,6 +257,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     roadRun: hydrateRoadRun(r.roadRun),
     roadFinalRun: hydrateRoadRun(r.roadFinalRun),
     weakRun: hydrateWeakRun(r.weakRun),
+    drillRuns: hydrateDrillRuns(r.drillRuns),
     iibs: hydrateIibsGame(r.iibs),
   };
 }
