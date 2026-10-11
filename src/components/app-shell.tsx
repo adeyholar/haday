@@ -230,7 +230,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  const iibsOnly = pathGate?.path === "iibs" && !pathGate.admin;
+  const onIibs = pathname === "/iibs" || pathname.startsWith("/iibs/");
+  const iibsOnly = onIibs || (pathGate?.path === "iibs" && !pathGate.admin);
   const blocked = pathGate && !pathGate.admin ? blockedDestination(pathname, pathGate) : null;
   if (blocked) return <Navigate to={blocked} />;
 
