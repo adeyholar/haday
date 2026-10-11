@@ -11,6 +11,7 @@ const {
   buildEtchSitting,
   buildEtchFromIds,
   applyDrillReviews,
+  choiceLabel,
   contrastChoices,
   tokenFitsLemma,
   verseTapTokens,
@@ -166,6 +167,21 @@ test("a miss rebuilds to the same cards, and a finished or changed place does no
   assert.match(page, /persist\(null\)/);
   assert.match(page, /This week's list changed/);
   assert.match(page, /Start over/);
+});
+
+test("hebrew-to-english choices stay distinct, and the meaning stays hidden", () => {
+  const shamar = VOCAB.find((item) => item.id === "shamar");
+  const natsar = VOCAB.find((item) => item.id === "natsar");
+  const shaqad = VOCAB.find((item) => item.id === "shaqad");
+  const shamad = VOCAB.find((item) => item.id === "shamad");
+  assert.ok(shamar && natsar && shaqad && shamad);
+  const board = [shamar, natsar, shaqad, shamad];
+  const labels = board.map((item) => choiceLabel(item, board));
+  assert.equal(new Set(labels).size, board.length);
+  assert.equal(choiceLabel(shamar, [shamar]), "to watch");
+  const src = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
+  assert.match(src, /answerIsEnglish/);
+  assert.match(src, /choiceLabel/);
 });
 
 test("contrast board never seats the answer first and includes the lemma", () => {

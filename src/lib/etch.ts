@@ -360,6 +360,14 @@ export function hydrateDrillRuns(raw: unknown): DrillRuns {
   return out;
 }
 
+/** Short English for a choice button. If the first sense is shared, show the whole gloss. */
+export function choiceLabel(item: VocabItem, board: VocabItem[]): string {
+  const head = (gloss: string) => gloss.split(/[,;]/)[0]?.trim() || gloss.trim();
+  const first = head(item.gloss);
+  const shared = board.filter((other) => head(other.gloss) === first).length > 1;
+  return shared ? item.gloss : first;
+}
+
 export function etchLabel(kind: EtchKind): string {
   if (kind === "study" || kind === "meet") return "Study";
   if (kind === "contrast") return "Which one";

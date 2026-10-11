@@ -11,6 +11,7 @@ import { lettersOnly, liveMatchAny } from "@/lib/hebrew";
 import { HebrewType } from "@/components/hebrew-type";
 import {
   consonantsOf,
+  choiceLabel,
   drillCardChoices,
   etchHint,
   etchLabel,
@@ -146,7 +147,10 @@ export function EtchPlay({
   const study = task.kind === "study" || task.kind === "meet";
   const showArt = study || task.cue === "picture" || (graded && task.kind !== "verse");
   const hideHe = !graded && !study && (task.cue === "en" || task.cue === "picture" || task.cue === "audio" || task.cue === "spell");
-  const hideEn = study ? !revealed : !graded && task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en" && task.cue !== "spell";
+  const answerIsEnglish = task.kind === "contrast" && task.cue === "he";
+  const hideEn = study
+    ? !revealed
+    : !graded && (answerIsEnglish || (task.kind !== "contrast" && task.kind !== "keep" && task.cue !== "en" && task.cue !== "spell"));
 
   return (
     <>
@@ -296,7 +300,7 @@ export function EtchPlay({
                     graded && !on && !right && "bg-card text-muted",
                   )}
                 >
-                  {c.gloss.split(/[,;]/)[0]}
+                  {choiceLabel(c, choices)}
                 </button>
               </li>
             );
