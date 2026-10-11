@@ -8,7 +8,7 @@ export const IIBS_GAME_LEVELS = ["A", "B", "C", "D", "E"] as const;
 export const IIBS_RANKS = [
   { id: "A", title: "Bearer of Words", short: "Words" },
   { id: "B", title: "Keeper of the Phrase", short: "Phrase" },
-  { id: "C", title: "Reader of the Clause", short: "Clause" },
+  { id: "C", title: "Parser of the Clause", short: "Parser" },
   { id: "D", title: "Steward of the Verb", short: "Verb" },
   { id: "E", title: "Scholar of the Line", short: "Line" },
   { id: "lab", title: "Reader of the Scroll", short: "Scroll" },
