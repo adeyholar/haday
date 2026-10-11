@@ -51,7 +51,7 @@ function ChapterHub() {
         <p className="mt-2 text-sm text-muted">
           {pool.length} {chapter === 1 ? "letters" : "lemmas"}
           {chapter > 1 ? " · same citation forms as the class book" : ""} · 90% first-answer to clear a
-          stage · {GAME_STAGES.filter((s) => rec.stages[s.id].cleared).length}/4 stages
+          stage · {GAME_STAGES.filter((s) => rec.stages[s.id].cleared).length}/4 stages · Strict is optional
         </p>
         <div className="mt-4">
           <GameContinue />
@@ -62,7 +62,7 @@ function ChapterHub() {
         {GAME_STAGES.map((s, i) => {
           const st = rec.stages[s.id];
           const open = isStageUnlocked(game, chapter, s.id);
-          const current = open && !st.cleared;
+          const current = open && !st.cleared && !(s.id === "spell-strict" && rec.cleared);
           const cls = cn(
             "flex w-full items-center justify-between gap-3 rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
             current && "bg-primary text-primary-foreground",

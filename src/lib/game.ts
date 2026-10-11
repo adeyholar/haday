@@ -19,10 +19,13 @@ export const GAME_STAGES = [
   { id: "recognize", name: "Recognize", short: "Recognize", prompt: "Hebrew → English" },
   { id: "gloss", name: "Gloss", short: "Gloss", prompt: "Type the English gloss" },
   { id: "spell-lenient", name: "Spell (lenient)", short: "Spell · lenient", prompt: "Type each consonant and its vowel" },
-  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Type each consonant and its vowel — live grade, no verse" },
+  { id: "spell-strict", name: "Spell (strict)", short: "Spell · strict", prompt: "Optional. Type each consonant and its vowel. The word stays hidden until Check." },
 ] as const;
 
 export type GameStageId = (typeof GAME_STAGES)[number]["id"];
+
+/** Strict is extra practice. The next chapter opens after Spell (lenient). */
+const PATH_STAGES: GameStageId[] = ["recognize", "gloss", "spell-lenient"];
 
 export type StageRecord = {
   stars: number;
@@ -215,7 +218,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
       chapters[key] = mergeChapter(val);
     }
   }
-  const unlocked = clampChapter(Number(r.unlockedChapter) || 1);
+  const unlocked = unlockedFromPath(chapters, clampChapter(Number(r.unlockedChapter) || 1));
   const currentChapter = clampChapter(Number(r.currentChapter) || 1);
   const currentStage = isStageId(r.currentStage) ? r.currentStage : "recognize";
   return {
@@ -425,6 +428,7 @@ function mergeChapter(val: unknown): ChapterRecord {
       }
     }
   }
+  retally(ch);
   return ch;
 }
 
@@ -469,11 +473,11 @@ export function continueTarget(game: GameSnapshot): { chapter: number; stage: Ga
   const cap = Math.min(Math.max(game.unlockedChapter, 1), GAME_CHAPTER_MAX);
   for (let c = 1; c <= cap; c++) {
     const rec = chapterRecord(game, c);
-    for (const s of GAME_STAGES) {
-      if (!rec.stages[s.id].cleared) return { chapter: c, stage: s.id };
+    for (const id of PATH_STAGES) {
+      if (!rec.stages[id].cleared) return { chapter: c, stage: id };
     }
   }
-  return { chapter: GAME_CHAPTER_MAX, stage: "spell-strict" };
+  return { chapter: cap, stage: "spell-lenient" };
 }
 
 export function continueLabel(game: GameSnapshot): string {
@@ -500,7 +504,17 @@ function ensureChapter(game: GameSnapshot, chapter: number): ChapterRecord {
 
 function retally(ch: ChapterRecord) {
   ch.stars = GAME_STAGES.reduce((n, s) => n + ch.stages[s.id].stars, 0);
-  ch.cleared = GAME_STAGES.every((s) => ch.stages[s.id].cleared);
+  ch.cleared = PATH_STAGES.every((id) => ch.stages[id].cleared);
+}
+
+function unlockedFromPath(chapters: Record<string, ChapterRecord>, stored: number) {
+  let open = 1;
+  for (let c = 1; c < GAME_CHAPTER_MAX; c++) {
+    const ch = chapters[String(c)];
+    if (!ch?.cleared) break;
+    open = c + 1;
+  }
+  return clampChapter(Math.max(stored, open));
 }
 
 function demoteAfter(game: GameSnapshot, chapter: number, stage: GameStageId) {
@@ -538,7 +552,7 @@ export function applyStageResult(
   };
 
   if (!passed) {
-    demoteAfter(next, chapter, stage);
+    if (stage !== "spell-strict") demoteAfter(next, chapter, stage);
     next.winStreak = 0;
   } else {
     retally(rec);
