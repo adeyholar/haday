@@ -38,8 +38,9 @@ function VocabHome() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · vocab builder</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Vocab Builder</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Level A, lesson 1 is open. Clear a lesson at {IIBS_LESSON_PASS}% to open the next lesson. Clear every lesson
-          in a level and you receive that level’s rank. The ranks run from Level A to the Reading Lab.
+          Level A, lesson 1 is open. Each lesson has four stages: Multiple, Gloss, Hebrew, then Strict. Clear a stage at{" "}
+          {IIBS_LESSON_PASS}% to open the next stage. Strict opens the next lesson. Clear every lesson in a level and
+          you receive that level’s rank.
         </p>
         <p className="mt-4">
           {held ? <HonorBadge honor={held} /> : <span className="text-sm text-muted">No rank yet. Clear Level A.</span>}

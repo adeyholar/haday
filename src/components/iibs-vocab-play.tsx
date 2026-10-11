@@ -91,7 +91,7 @@ export function IibsVocabPlay({
       <div className="rounded-[var(--radius-xl)] bg-card p-5 text-center shadow-[var(--shadow-border)]">
         <p className="font-display text-5xl font-bold tabular-nums text-ink">{done}%</p>
         <p className="mt-3 text-muted">
-          {cleared ? "Cleared. The next lesson is open." : `Not yet. ${IIBS_LESSON_PASS}% opens the next lesson.`}
+          {cleared ? "Cleared." : `Not yet. ${IIBS_LESSON_PASS}% clears this stage.`}
         </p>
         <div className="mt-5 grid gap-2">
           {cleared && onNext ? (

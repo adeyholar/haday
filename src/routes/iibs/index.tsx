@@ -37,8 +37,8 @@ function IibsHome() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · lessons</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Lessons</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Each lesson lists its words. Level A, lesson 1 is open. The next lesson opens when that lesson is cleared in
-          Vocab Builder.
+          Each lesson lists its words. Level A, lesson 1 is open. The next lesson opens when Strict is cleared in Vocab
+          Builder.
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
