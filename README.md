@@ -15,7 +15,14 @@ Azure fallback: [https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net](ht
 **Documentation (source of truth):** [Change Log](https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697) and [Developer Handbook](https://app.notion.com/p/3f6058f607b18144a482f8173456df2a) on Notion.  
 **Code that runs:** this GitHub repo, branch **`main`**. A push to `main` builds the Docker image and deploys Azure Web App **haday**.
 
-Older class notes remain in [CHANGELOG.md](CHANGELOG.md) as an archive. Do not add new entries there. Add them on the Notion Change Log the same day they merge. The picture of the running app is still [docs/ASBUILT.md](docs/ASBUILT.md) until that section is copied into the handbook.
+Older class notes remain in [CHANGELOG.md](CHANGELOG.md) as an archive. Do not add new entries there.
+
+The same day a change merges, write it in every place a reader would trust:
+
+1. The [Change Log](https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697) — what changed, why, the pull request, and what must not be reversed.
+2. The [Developer Handbook](https://app.notion.com/p/3f6058f607b18144a482f8173456df2a) — the section that would now be false.
+3. [docs/ASBUILT.md](docs/ASBUILT.md) — the section that describes that running behavior, when it has one.
+4. The in-app Guide, only if a student would follow the old words.
 
 
 ## Always ship to `main`
