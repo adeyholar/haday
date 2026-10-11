@@ -4,6 +4,7 @@ import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { IIBS_LEVELS, PASS_MARK, levelAfter, levelOpen, type IibsLevelId } from "@/lib/path";
+import { vocabLessons } from "@/lib/iibs-vocab";
 
 export const Route = createFileRoute("/iibs/")({ component: IibsHome });
 
@@ -32,7 +33,7 @@ function IibsHome() {
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Levels</h1>
         <p className="mt-3 max-w-prose text-muted">
           Level A is open. Each next level stays locked until the exam of the level under it is passed at {PASS_MARK}%.
-          The exam covers that whole level. Lessons are not in yet.
+          Levels A to E each hold 30 lessons, and each lesson has its words. Games come later.
         </p>
         <p className="mt-3 max-w-prose text-muted">
           To start above Level A, pass every exam below that level. Those exams open with the lessons.
@@ -51,9 +52,11 @@ function IibsHome() {
 
 function LevelRow({ id, title, open }: { id: IibsLevelId; title: string; open: boolean }) {
   const after = levelAfter(id);
+  const lessons = vocabLessons(id);
+  const words = lessons ? lessons.reduce((sum, lesson) => sum + lesson.length, 0) : 0;
   const note = open
-    ? id === "A"
-      ? "Open. Lessons come next."
+    ? lessons
+      ? `${lessons.length} lessons · ${words} words`
       : "Open for you."
     : `Locked until the Level ${after} exam is passed.`;
   const body = (
