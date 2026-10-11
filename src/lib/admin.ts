@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { ADMIN_EMAILS, grantsOwner, isOwnerEmail, ownerAllowList } from "@/lib/admin-access";
-import { sendPasswordResetMail, mailerConfigured, mailerVia, originFromIncomingRequest } from "@/lib/mail";
+import { sendPasswordResetMail, mailerConfigured, mailerVia } from "@/lib/mail";
 
 export { ADMIN_EMAILS };
 
@@ -233,11 +233,10 @@ export const issuePasswordReset = createServerFn({ method: "POST" })
 
     let emailed = false;
     try {
-      const origin = await originFromIncomingRequest();
       const mail = await sendPasswordResetMail({
         email: user.email,
         name: user.name,
-        url: origin ?? "",
+        url: "",
         token,
       });
       emailed = mail.sent;

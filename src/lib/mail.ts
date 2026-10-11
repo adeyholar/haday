@@ -77,37 +77,21 @@ function isUsablePublicOrigin(origin: string): boolean {
   }
 }
 
-/** Prefer the host the classmate will actually open (this Azure deploy). */
-export function passwordResetPageUrl(token: string, fallbackUrl?: string): string {
-  const origins: string[] = [];
-  const push = (raw?: string) => {
-    if (!raw) return;
+const CLASS_ORIGIN = "https://hadayhebbraimentor.jcdisn.com";
+
+/** The class site only. Never the request's Host or X-Forwarded-Host. */
+export function publicOrigin(): string {
+  for (const raw of [env("PUBLIC_APP_URL"), env("BETTER_AUTH_URL")]) {
+    if (!raw) continue;
     const origin = canonicalizeOrigin(raw);
-    if (isUsablePublicOrigin(origin) && !origins.includes(origin)) origins.push(origin);
-  };
-  push(fallbackUrl);
-  push(env("PUBLIC_APP_URL"));
-  push(env("BETTER_AUTH_URL"));
-  const origin = origins[0] ?? AZURE_LONG;
-  return `${origin}/reset-password?token=${encodeURIComponent(token)}`;
+    if (isUsablePublicOrigin(origin)) return origin;
+  }
+  return CLASS_ORIGIN;
 }
 
-export async function originFromIncomingRequest(): Promise<string | undefined> {
-  try {
-    const { getRequest } = await import("@tanstack/react-start/server");
-    const request = getRequest();
-    if (!request) return undefined;
-    const host =
-      request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
-      request.headers.get("host")?.split(",")[0]?.trim();
-    if (!host) return undefined;
-    const proto =
-      request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
-      (host.includes("localhost") || host.startsWith("127.") ? "http" : "https");
-    return canonicalizeOrigin(`${proto}://${host}`);
-  } catch {
-    return undefined;
-  }
+/** Reset links always open on the class site. A request header cannot change that. */
+export function passwordResetPageUrl(token: string): string {
+  return `${publicOrigin()}/reset-password?token=${encodeURIComponent(token)}`;
 }
 
 function escapeHtml(value: string): string {
@@ -131,7 +115,7 @@ export async function sendPasswordResetMail(opts: {
   url: string;
   token: string;
 }): Promise<{ sent: boolean; via: MailerVia }> {
-  const pageUrl = passwordResetPageUrl(opts.token, opts.url);
+  const pageUrl = passwordResetPageUrl(opts.token);
   const greeting = opts.name.trim() ? opts.name.trim() : "there";
   const subject = "Reset your HaDay password";
   const text = [
@@ -236,20 +220,12 @@ export async function sendVerificationMail(opts: {
   return result;
 }
 
-/** Rewrite sandbox/localhost verification links onto the public class host. */
+/** Rewrite any other host onto the class site. A foreign origin is not kept. */
 export function toPublicAppUrl(url: string): string {
+  const origin = publicOrigin();
   try {
     const parsed = new URL(url);
-    if (isUsablePublicOrigin(parsed.origin)) return url;
-    const origins: string[] = [];
-    const push = (raw?: string) => {
-      if (!raw) return;
-      const origin = canonicalizeOrigin(raw);
-      if (isUsablePublicOrigin(origin) && !origins.includes(origin)) origins.push(origin);
-    };
-    push(env("PUBLIC_APP_URL"));
-    push(env("BETTER_AUTH_URL"));
-    const origin = origins[0] ?? AZURE_LONG;
+    if (parsed.origin === origin) return url;
     return `${origin}${parsed.pathname}${parsed.search}`;
   } catch {
     return url;
