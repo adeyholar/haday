@@ -221,7 +221,7 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Study toolbox</h2>
         <dl className="mt-3 space-y-3 text-sm">
-          <Tool name="Drill" to="/drill" body="Every word is a study card first: Hebrew, then the meaning, then I knew it or Not yet. The same words are then asked every way, in groups of five. Leave and come back: Continue where you stopped, or Start over. A miss says Not quite and comes back in the group. Study cards are not part of the score." />
+          <Tool name="Drill" to="/drill" body="Every word is a study card first. Type a guess and Check grades it Correct or Not quite. Show meaning, with an empty box, still asks I knew it or Not yet. The same words are then asked every way, in groups of five. Leave and come back: Continue where you stopped, or Start over. A miss says Not quite and comes back in the group. Study cards are not part of the score." />
           <Tool name="Write" to="/write" body="Type or hand-write the Hebrew. Memorize mode hides the lemma first. After a miss you can save that scribble as your handwriting." />
           <Tool name="Quiz" to="/quiz" body="Multiple choice or type the English gloss. Same BBH lemmas as class, sitting near what you can still miss." />
           <Tool name="Match" to="/match" body="Select the pair: Hebrew tile to English tile. Misses come back. Boards use the class lemmas." />

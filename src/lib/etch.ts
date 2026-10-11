@@ -378,7 +378,7 @@ export function etchLabel(kind: EtchKind): string {
 }
 
 export function etchHint(kind: EtchKind, cue: EtchCue): string {
-  if (kind === "study" || kind === "meet") return "Type a guess, or show the meaning. Then say if you knew it.";
+  if (kind === "study" || kind === "meet") return "Type a guess and check it, or show the meaning and say if you knew it.";
   if (kind === "contrast" && cue === "he") return "The Hebrew is showing. Pick the English.";
   if (kind === "contrast" && cue === "audio") return "Listen. Pick the Hebrew spelling.";
   if (kind === "contrast") return "Pick the Hebrew that matches the English. Look-alikes sit together on purpose.";

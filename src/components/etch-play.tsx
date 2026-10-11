@@ -132,6 +132,18 @@ export function EtchPlay({
     playFeedback(hit ? "strong" : "fail");
   }
 
+  function submitStudy(event: { preventDefault: () => void }) {
+    event.preventDefault();
+    if (!typed.trim()) {
+      setRevealed(true);
+      return;
+    }
+    const hit = glossMatches(item, typed);
+    setRevealed(true);
+    setPicked(hit ? item.id : "__miss__");
+    playFeedback(hit ? "strong" : "fail");
+  }
+
   function submitProduce() {
     if (picked) return;
     const ok = typedOk;
@@ -242,10 +254,7 @@ export function EtchPlay({
       {study && !revealed && (
         <form
           className="mt-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setRevealed(true);
-          }}
+          onSubmit={submitStudy}
         >
           <label className="sr-only" htmlFor="study-guess">
             Guess the English
@@ -266,17 +275,25 @@ export function EtchPlay({
             )}
           />
           <Button className="mt-3 w-full" size="lg" type="submit">
-            Show meaning
+            {typed.trim() ? "Check" : "Show meaning"}
           </Button>
         </form>
       )}
-      {study && revealed && (
+      {study && revealed && !graded && (
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button type="button" onClick={() => finish("good")}>
             I knew it
           </Button>
           <Button type="button" variant="outline" onClick={() => finish("again")}>
             Not yet
+          </Button>
+        </div>
+      )}
+      {study && revealed && graded && (
+        <div className="mt-4">
+          <GradeBanner ok={picked === item.id} label={picked === item.id ? "Correct" : "Not quite"} />
+          <Button className="mt-3 w-full" onClick={() => finish(picked === item.id ? "good" : "again")}>
+            Next
           </Button>
         </div>
       )}
