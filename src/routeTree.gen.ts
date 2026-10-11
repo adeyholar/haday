@@ -44,6 +44,7 @@ import { Route as FinderIndexRouteImport } from './routes/finder/index'
 import { Route as FinderDeckRouteImport } from './routes/finder/deck'
 import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
+import { Route as GameFinalRouteImport } from './routes/game/final'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
@@ -253,6 +254,11 @@ const FinderWordRoute = FinderWordRouteImport.update({
 const GameIndexRoute = GameIndexRouteImport.update({
   id: '/game/',
   path: '/game/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameFinalRoute = GameFinalRouteImport.update({
+  id: '/game/final',
+  path: '/game/final',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameRoadRoute = GameRoadRouteImport.update({
@@ -465,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/final': typeof GameFinalRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
@@ -535,6 +542,7 @@ export interface FileRoutesByTo {
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/final': typeof GameFinalRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
@@ -608,6 +616,7 @@ export interface FileRoutesById {
   '/api/health': typeof ApiHealthRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
+  '/game/final': typeof GameFinalRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
@@ -682,6 +691,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/final'
     | '/game/road'
     | '/game/type'
     | '/game/week7'
@@ -752,6 +762,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/final'
     | '/game/road'
     | '/game/type'
     | '/game/week7'
@@ -824,6 +835,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/finder/deck'
     | '/finder/word'
+    | '/game/final'
     | '/game/road'
     | '/game/type'
     | '/game/week7'
@@ -894,6 +906,7 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   FinderDeckRoute: typeof FinderDeckRoute
   FinderWordRoute: typeof FinderWordRoute
+  GameFinalRoute: typeof GameFinalRoute
   GameRoadRoute: typeof GameRoadRoute
   GameTypeRoute: typeof GameTypeRoute
   GameWeek7Route: typeof GameWeek7Route
@@ -1169,6 +1182,13 @@ declare module '@tanstack/react-router' {
       path: '/game'
       fullPath: '/game/'
       preLoaderRoute: typeof GameIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/final': {
+      id: '/game/final'
+      path: '/game/final'
+      fullPath: '/game/final'
+      preLoaderRoute: typeof GameFinalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/road': {
@@ -1499,6 +1519,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   FinderDeckRoute: FinderDeckRoute,
   FinderWordRoute: FinderWordRoute,
+  GameFinalRoute: GameFinalRoute,
   GameRoadRoute: GameRoadRoute,
   GameTypeRoute: GameTypeRoute,
   GameWeek7Route: GameWeek7Route,

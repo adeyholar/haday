@@ -22,6 +22,8 @@ export function GameMenu() {
             ? "/game/type"
           : pathname.startsWith("/game/road")
             ? "/game/road"
+          : pathname.startsWith("/game/final")
+            ? "/game/final"
           : pathname.startsWith("/game/week7")
             ? "/game/week7"
           : pathname.startsWith("/self-quiz")
@@ -52,6 +54,7 @@ export function GameMenu() {
           options: [
             { value: "/game", label: "BBH vocabulary" },
             { value: "/game/road", label: "Road exam · Week 7" },
+            { value: "/game/final", label: "Road exam · Week 15" },
             { value: "/game/week7", label: "Week 7 mock exam" },
             { value: "/game/custom", label: "Custom mix" },
             { value: "/self-quiz", label: "Self-quiz" },
@@ -89,6 +92,7 @@ export function GameMenu() {
         if (to === "/game/lessons") void navigate({ to: "/game/lessons" });
         else if (to === "/game") void navigate({ to: "/game" });
         else if (to === "/game/road") void navigate({ to: "/game/road" });
+        else if (to === "/game/final") void navigate({ to: "/game/final" });
         else if (to === "/game/week7") void navigate({ to: "/game/week7" });
         else if (to === "/game/custom") void navigate({ to: "/game/custom" });
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });

@@ -16,7 +16,8 @@ import {
   type RoadLetter,
 } from "@/lib/road-exam";
 import { useStudy } from "@/lib/store";
-import { itemsForWeek } from "@/lib/vocab";
+import { itemsForWeek, type VocabItem } from "@/lib/vocab";
+import type { RoadRun } from "@/lib/road-exam";
 
 export const Route = createFileRoute("/game/road")({ component: RoadExamPage });
 
@@ -43,10 +44,34 @@ function speechCtor(): (new () => SpeechRec) | null {
 
 function RoadExamPage() {
   const pool = useMemo(() => itemsForWeek(7), []);
+  const run = useStudy((s) => s.game.roadRun);
+  const saveRun = useStudy((s) => s.saveRoadRun);
+  return (
+    <RoadExam
+      pool={pool}
+      title="Road exam · Week 7"
+      intro="midterm words, chapters 2–11."
+      run={run}
+      saveRun={saveRun}
+    />
+  );
+}
+
+export function RoadExam({
+  pool,
+  title,
+  intro,
+  run,
+  saveRun,
+}: {
+  pool: VocabItem[];
+  title: string;
+  intro: string;
+  run: RoadRun | null;
+  saveRun: (next: RoadRun | null) => void;
+}) {
   const rate = useStudy((s) => s.rate);
-  const saveRoadRun = useStudy((s) => s.saveRoadRun);
-  const storedRun = useStudy((s) => s.game.roadRun);
-  const resume = useMemo(() => unpackRoadRun(storedRun, pool), [storedRun, pool]);
+  const resume = useMemo(() => unpackRoadRun(run, pool), [run, pool]);
   const [queue, setQueue] = useState<RoadCard[]>([]);
   const [i, setI] = useState(0);
   const [started, setStarted] = useState(false);
@@ -153,8 +178,8 @@ function RoadExamPage() {
     if (recycle && current) nextQueue = parkMiss(nextQueue, current);
     const nextIndex = index + 1;
     queueRef.current = nextQueue;
-    if (nextIndex >= nextQueue.length) saveRoadRun(null);
-    else saveRoadRun(packRoadRun(nextQueue, nextIndex, counts.heard, counts.held));
+    if (nextIndex >= nextQueue.length) saveRun(null);
+    else saveRun(packRoadRun(nextQueue, nextIndex, counts.heard, counts.held));
     window.setTimeout(() => {
       if (phaseRef.current === "done") return;
       setQueue(nextQueue);
@@ -271,7 +296,7 @@ function RoadExamPage() {
 
   function begin(fresh: boolean) {
     unlockSpeech();
-    const restored = fresh ? null : unpackRoadRun(useStudy.getState().game.roadRun, pool);
+    const restored = fresh ? null : unpackRoadRun(run, pool);
     const deck = restored ? restored.queue : buildRoadDeck(pool);
     const startAt = restored ? restored.index : 0;
     const startHeard = restored ? restored.heard : 0;
@@ -304,14 +329,14 @@ function RoadExamPage() {
     setMissed(null);
     setNote("");
     setStarted(true);
-    saveRoadRun(packRoadRun(deck, startAt, startHeard, startHeld));
+    saveRun(packRoadRun(deck, startAt, startHeard, startHeld));
   }
 
   if (!pool.length) {
     return (
       <Panel>
         <GameMenu />
-        <p className="mt-4 text-muted">No midterm words in this set.</p>
+        <p className="mt-4 text-muted">No words in this set.</p>
       </Panel>
     );
   }
@@ -322,7 +347,7 @@ function RoadExamPage() {
       <>
         <Panel className="mb-4">
           <GameMenu />
-          <h1 className="mt-4 font-display text-3xl font-bold text-ink">Road exam · Week 7</h1>
+          <h1 className="mt-4 font-display text-3xl font-bold text-ink">{title}</h1>
           {resume ? (
             <p className="mt-2 max-w-prose text-muted">
               This circle is still open, on word {place} of {resume.queue.length}. It keeps going until every miss is
@@ -330,7 +355,7 @@ function RoadExamPage() {
             </p>
           ) : (
             <p className="mt-2 max-w-prose text-muted">
-              {pool.length} midterm words, chapters 2–11. The app says the Hebrew. Glance at A–D and say the letter, or say the
+              {pool.length} {intro} The app says the Hebrew. Glance at A–D and say the letter, or say the
               English word on that button. First wrong shows Retry, turns that button red, and waits for a second try.
               Second wrong shows Not quite, turns the right letter green, and that word goes to the back of the deck — and
               back again if it is missed once more. A right letter, or the right English word, turns that button green. The
@@ -380,7 +405,7 @@ function RoadExamPage() {
       <Panel className="mb-4">
         <GameMenu />
         <div className="mt-4 flex items-baseline justify-between gap-3">
-          <h1 className="font-display text-2xl font-bold text-ink">Road exam</h1>
+          <h1 className="font-display text-2xl font-bold text-ink">{title}</h1>
           <p className="text-sm tabular-nums text-muted">
             {i + 1} / {queue.length}
             {micOn ? " · listening" : " · tap a letter"}

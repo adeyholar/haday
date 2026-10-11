@@ -38,6 +38,7 @@ export type NavHref =
   | "/credits"
   | "/game"
   | "/game/road"
+  | "/game/final"
   | "/game/week7"
   | "/game/custom"
   | "/game/alefbet"

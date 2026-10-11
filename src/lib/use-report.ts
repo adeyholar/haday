@@ -6,6 +6,7 @@ export function areaOf(path: string): { id: string; label: string } | null {
   if (p.startsWith("/admin") || p.startsWith("/api")) return null;
   const rules: { id: string; label: string; hit: boolean }[] = [
     { id: "week7", label: "Week 7 mock exam", hit: p.startsWith("/game/week7") },
+    { id: "final", label: "Road exam · Week 15", hit: p.startsWith("/game/final") },
     { id: "road", label: "Road exam", hit: p.startsWith("/game/road") },
     { id: "alefbet", label: "Aleph-bet mastery", hit: p.startsWith("/game/alefbet") },
     { id: "balloons", label: "Ocean letters", hit: p.startsWith("/game/balloons") },
@@ -46,6 +47,7 @@ export function areaLabel(id: string): string {
     home: "Home",
     week7: "Week 7 mock exam",
     road: "Road exam",
+    final: "Road exam · Week 15",
     alefbet: "Aleph-bet mastery",
     balloons: "Ocean letters",
     syllables: "Syllables",
