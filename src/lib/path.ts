@@ -39,6 +39,7 @@ export function levelAfter(id: IibsLevelId): string | null {
 const SHARED = ["/login", "/legal", "/credits", "/reset-password", "/ask", "/ideas"];
 
 export const PATH_INTENT = "haday-path-intent";
+export const OPEN_DOOR = "haday-open-door";
 
 export function stashPathIntent(path: StudyPath) {
   if (typeof window === "undefined") return;
@@ -51,17 +52,50 @@ export function readPathIntent(): StudyPath | null {
   return isStudyPath(raw) ? raw : null;
 }
 
+export function rememberDoor(path: StudyPath) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(OPEN_DOOR, path);
+}
+
+export function currentDoor(): StudyPath | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.sessionStorage.getItem(OPEN_DOOR);
+  return isStudyPath(raw) ? raw : null;
+}
+
+export function clearDoor() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(OPEN_DOOR);
+}
+
+function isShared(pathname: string, owner = false): boolean {
+  if (pathname === "/") return true;
+  const list = owner ? ["/admin", ...SHARED] : SHARED;
+  return list.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function onIibsPath(pathname: string): boolean {
+  return pathname === "/iibs" || pathname.startsWith("/iibs/");
+}
+
+/** The owner may hold one open door. The other study sends them back to the two squares. */
+export function ownerDoorBlock(pathname: string, door: StudyPath | null): "/" | null {
+  if (isShared(pathname, true)) return null;
+  if (onIibsPath(pathname)) return door === "iibs" ? null : "/";
+  return door === "bbh" ? null : "/";
+}
+
 export function blockedDestination(
   pathname: string,
   gate: { path: StudyPath | null; admin: boolean },
 ): "/" | null {
   if (gate.admin) return null;
-  const shared = pathname === "/" || SHARED.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  const shared = isShared(pathname);
   if (gate.path === null) return shared ? null : "/";
   if (gate.path === "iibs") {
-    if (shared || pathname === "/iibs" || pathname.startsWith("/iibs/")) return null;
+    if (shared || onIibsPath(pathname)) return null;
     return "/";
   }
-  if (pathname === "/iibs" || pathname.startsWith("/iibs/")) return "/";
+  if (onIibsPath(pathname)) return "/";
   return null;
 }

@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
-import { readPathIntent, stashPathIntent, type StudyPath } from "@/lib/path";
+import { clearDoor, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
 
 export const Route = createFileRoute("/")({ component: DoorsPage });
 
@@ -22,12 +22,16 @@ function DoorsPage() {
           if (intent) {
             const chosen = await choosePath({ data: { path: intent } });
             if (chosen.ok) {
+              rememberDoor(chosen.path);
               window.location.assign(chosen.path === "iibs" ? "/iibs" : "/bbh");
               return;
             }
           }
         }
-        if (!cancelled) setGate(next);
+        if (!cancelled) {
+          clearDoor();
+          setGate(next);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the doors.");
       }
@@ -49,6 +53,7 @@ function DoorsPage() {
         setBusy(false);
         return;
       }
+      rememberDoor(result.path);
       window.location.assign(result.path === "iibs" ? "/iibs" : "/bbh");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save that choice.");
@@ -77,7 +82,7 @@ function DoorsPage() {
           {choosing
             ? "Pick one. It stays with this account. The other door stays locked."
             : gate?.admin
-              ? "You can open both. A classmate can open only the study on the account."
+              ? "Open one study. To open the other, come back to these two squares first."
               : "Your account opens one door. The other stays locked."}
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
@@ -163,7 +168,7 @@ function Door({
     );
   }
   return (
-    <Link to={href} className={className}>
+    <Link to={href} className={className} onClick={() => rememberDoor(kind)}>
       {body}
     </Link>
   );
