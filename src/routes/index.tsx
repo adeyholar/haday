@@ -75,10 +75,16 @@ function DoorsPage() {
 
   return (
     <>
-      <Panel className="mb-4">
+      <Panel className="mb-4 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Hebraic Mentor</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Choose a study</h1>
-        <p className="mt-3 max-w-prose text-muted">
+        <img
+          src="/doors/ancient-smile.jpg"
+          alt=""
+          className="mx-auto mt-4 size-28 rounded-full object-cover shadow-[var(--shadow-border)] sm:size-32"
+        />
+        <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Choose your Study Path</h1>
+        <p className="mt-2 font-display text-2xl font-semibold text-primary">Choose wisely.</p>
+        <p className="mx-auto mt-3 max-w-prose text-muted">
           {choosing
             ? "Pick one. It stays with this account. The other door stays locked."
             : gate?.admin
