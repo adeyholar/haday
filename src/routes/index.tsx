@@ -142,7 +142,15 @@ function Door({
   } ${open ? "" : "opacity-70"}`;
   const body = (
     <>
-      {modern ? <ModernMark /> : <AncientMark />}
+      <img
+        src={modern ? "/doors/bbh-modern.jpg" : "/doors/iibs-ancient.jpg"}
+        alt=""
+        className={
+          modern
+            ? "mb-3 min-h-0 w-full flex-1 rounded-[var(--radius-lg)] bg-white object-contain"
+            : "mb-3 min-h-0 w-full flex-1 rounded-full object-cover"
+        }
+      />
       <p className="mt-4 font-display text-4xl font-bold">{title}</p>
       <p className={`mt-2 text-sm ${modern ? "text-parchment/80" : "text-ink/80"}`}>{open ? line : lockedLine}</p>
       {!open ? (
@@ -171,29 +179,5 @@ function Door({
     <Link to={href} className={className} onClick={() => rememberDoor(kind)}>
       {body}
     </Link>
-  );
-}
-
-function ModernMark() {
-  return (
-    <svg viewBox="0 0 72 72" className="size-16" aria-hidden>
-      <rect x="6" y="6" width="60" height="60" rx="10" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 18h8l12 36h-8L20 18zm22 0h8L38 54h-8l12-36z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function AncientMark() {
-  return (
-    <svg viewBox="0 0 72 72" className="size-16" aria-hidden>
-      <path
-        d="M16 14h34c6 0 10 4 10 10v28c0 5-4 8-10 8H20c-8 0-12-2-12-8V24c0-6 3-10 8-10z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path d="M26 22v30M26 22c10 2 16 8 16 15s-6 13-16 15" fill="none" stroke="currentColor" strokeWidth="2.4" />
-      <path d="M44 30h10M44 37h8M44 44h10" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
   );
 }
