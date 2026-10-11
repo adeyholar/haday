@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { WeekSelect } from "@/components/week-select";
@@ -46,9 +46,10 @@ function DrillPage() {
   const [offer, setOffer] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const pool = itemsForWeek(week);
-  const fingerprint = drillFingerprint(pool.map((item) => item.id));
+  const pool = useMemo(() => itemsForWeek(week), [week]);
+  const fingerprint = useMemo(() => drillFingerprint(pool.map((item) => item.id)), [pool]);
   const setLabel = studySetMeta(week).label;
+  const prepared = useRef<EtchTask[]>([]);
 
   function persist(place: DrillPlace | null) {
     saveDrillRun(week, focus, place);
@@ -71,8 +72,9 @@ function DrillPage() {
   }
 
   function resume(place: DrillPlace) {
-    const base = buildEtchFromIds(pool, place.ids, place.seed);
-    const sitting = applyDrillReviews(base, place.reviews);
+    const sitting = prepared.current.length
+      ? prepared.current
+      : applyDrillReviews(buildEtchFromIds(pool, place.ids, place.seed), place.reviews);
     setTasks(sitting);
     setI(Math.min(place.index, sitting.length));
     setHits(place.hits);
@@ -96,10 +98,12 @@ function DrillPage() {
       return;
     }
     if (gate === "resume" && place) {
+      prepared.current = rebuilt;
       setOffer(drillProgress(rebuilt, place.index));
       setPhase("resume");
       return;
     }
+    prepared.current = [];
     begin();
     // The sitting is rebuilt only when the week or the focus changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,10 +111,19 @@ function DrillPage() {
 
   useEffect(() => {
     const flush = () => {
+      if (document.visibilityState === "hidden") {
+        void saveProgress({ data: snapshotOf(useStudy.getState()) }).catch(() => {});
+      }
+    };
+    const onHide = () => {
       void saveProgress({ data: snapshotOf(useStudy.getState()) }).catch(() => {});
     };
-    window.addEventListener("pagehide", flush);
-    return () => window.removeEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", flush);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", flush);
+      window.removeEventListener("pagehide", onHide);
+    };
   }, []);
 
   const task = tasks[i];
@@ -279,7 +292,15 @@ function DrillPage() {
           />
         </div>
       </Panel>
-      <EtchPlay task={task} index={i} total={tasks.length} label={drillProgress(tasks, i)} onGrade={onGrade} />
+      <EtchPlay
+        task={task}
+        pool={pool}
+        seed={seed}
+        index={i}
+        total={tasks.length}
+        label={drillProgress(tasks, i)}
+        onGrade={onGrade}
+      />
     </>
   );
 }

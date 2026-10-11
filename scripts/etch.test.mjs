@@ -17,12 +17,13 @@ const {
   consonantsOf,
   drillProgress,
   drillGate,
+  drillCardChoices,
   hydrateDrillRuns,
   queueDrillMiss,
   verseForLemma,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
-const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { VOCAB, itemsForWeek } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
 
 const WAYS = [
@@ -92,6 +93,43 @@ test("the study card shows the English only after Show meaning", () => {
   assert.match(src, /study && revealed/);
   assert.match(src, /Hear the line/);
   assert.match(src, /Check the typed word/);
+});
+
+test("a second miss rebuilds in the order it happened", () => {
+  const pool = VOCAB.filter((v) => v.chapter === 3);
+  const base = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 42);
+  let tasks = base.map((task) => ({ ...task, choices: task.choices.slice() }));
+  const reviews = [];
+  const first = queueDrillMiss(tasks, 0, tasks[0]);
+  tasks = first.tasks;
+  reviews.push(first.review);
+  const backAt = first.review.at;
+  const second = queueDrillMiss(tasks, backAt, tasks[backAt]);
+  tasks = second.tasks;
+  reviews.push(second.review);
+  const mid = backAt + 1;
+  const third = queueDrillMiss(tasks, mid, tasks[mid]);
+  assert.ok(third.review);
+  tasks = third.tasks;
+  reviews.push(third.review);
+  assert.ok(third.review.at < second.review.at);
+  const rebuilt = applyDrillReviews(base, reviews);
+  assert.deepEqual(
+    rebuilt.map((task) => task.key),
+    tasks.map((task) => task.key),
+  );
+});
+
+test("week 15 deals in under half a second, and a card still has choices", () => {
+  const pool = itemsForWeek(15);
+  const started = Date.now();
+  const sitting = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 42);
+  const ms = Date.now() - started;
+  assert.ok(sitting.length > 1000);
+  assert.ok(ms < 500, `deal took ${ms} ms`);
+  const choices = drillCardChoices(sitting[0], pool, 42);
+  assert.ok(choices.some((item) => item.id === sitting[0].item.id));
+  assert.ok(choices.length > 1);
 });
 
 test("a miss rebuilds to the same cards, and a finished or changed place does not continue", () => {

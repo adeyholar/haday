@@ -775,13 +775,15 @@ export function closeItems(item: VocabItem, pool: VocabItem[], n = 3): VocabItem
     if (v.id === item.id) continue;
     byId.set(v.id, v);
   }
-  const ranked = [...byId.values()].sort((a, b) => distractorScore(item, b) - distractorScore(item, a));
+  const ranked = [...byId.values()]
+    .map((other) => ({ other, score: distractorScore(item, other) }))
+    .sort((a, b) => b.score - a.score);
   const out: VocabItem[] = [];
   const seenHe = new Set([item.hebrew]);
-  for (const x of ranked) {
-    if (seenHe.has(x.hebrew)) continue;
-    seenHe.add(x.hebrew);
-    out.push(x);
+  for (const { other } of ranked) {
+    if (seenHe.has(other.hebrew)) continue;
+    seenHe.add(other.hebrew);
+    out.push(other);
     if (out.length >= n) break;
   }
   return out;
