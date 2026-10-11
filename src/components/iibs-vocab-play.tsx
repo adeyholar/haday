@@ -1,5 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GradeBanner } from "@/components/grade-banner";
 import { IIBS_LESSON_PASS } from "@/lib/iibs-game";
+import { playFeedback } from "@/lib/try-again";
 import type { IibsVocabWord } from "@/lib/iibs-vocab";
 
 function shuffle<T>(list: T[]): T[] {
@@ -45,6 +47,7 @@ export function IibsVocabPlay({
   const [done, setDone] = useState<number | null>(null);
   const first = useRef<Record<number, boolean>>({});
   const reported = useRef(false);
+  const timer = useRef<number | null>(null);
   const poolRef = useRef(pool);
   poolRef.current = pool;
   const index = queue[0];
@@ -53,6 +56,12 @@ export function IibsVocabPlay({
     () => (word ? choicesFor(word.gloss, poolRef.current) : []),
     [word],
   );
+
+  useEffect(() => {
+    return () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    };
+  }, []);
 
   function finish(pct: number) {
     if (reported.current) return;
@@ -65,18 +74,23 @@ export function IibsVocabPlay({
     if (!word || index === undefined || picked || done !== null) return;
     const correct = gloss === word.gloss;
     if (!(index in first.current)) first.current[index] = correct;
+    setPicked(gloss);
     if (!correct) {
-      setPicked(gloss);
+      playFeedback("fail");
       return;
     }
+    playFeedback("strong");
     const rest = queue.slice(1);
-    if (rest.length === 0) {
-      const hits = Object.values(first.current).filter(Boolean).length;
-      finish(Math.round((hits / words.length) * 100));
-      setQueue([]);
-      return;
-    }
-    setQueue(rest);
+    timer.current = window.setTimeout(() => {
+      setPicked(null);
+      if (rest.length === 0) {
+        const hits = Object.values(first.current).filter(Boolean).length;
+        finish(Math.round((hits / words.length) * 100));
+        setQueue([]);
+        return;
+      }
+      setQueue(rest);
+    }, 700);
   }
 
   function keepGoing() {
@@ -137,8 +151,8 @@ export function IibsVocabPlay({
               type="button"
               disabled={show}
               onClick={() => answer(gloss)}
-              className={`min-h-14 rounded-[var(--radius-lg)] bg-card px-4 text-lg text-ink shadow-[var(--shadow-border)] ${
-                show && right ? "ring-2 ring-good" : ""
+              className={`min-h-14 rounded-[var(--radius-lg)] bg-card px-4 text-lg shadow-[var(--shadow-border)] ${
+                show && right ? "text-good ring-2 ring-good" : "text-ink"
               } ${wrong ? "ring-2 ring-danger" : ""}`}
             >
               {gloss}
@@ -147,6 +161,11 @@ export function IibsVocabPlay({
         })}
       </div>
       {picked ? (
+        <div className="mt-4">
+          <GradeBanner ok={picked === word.gloss} label={picked === word.gloss ? "Correct" : "Not quite"} />
+        </div>
+      ) : null}
+      {picked && picked !== word.gloss ? (
         <button type="button" className="mt-3 min-h-14 w-full rounded-[var(--radius-lg)] bg-primary font-semibold text-primary-foreground" onClick={keepGoing}>
           Continue
         </button>

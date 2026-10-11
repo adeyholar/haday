@@ -1,7 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { GradeBanner } from "@/components/grade-banner";
 import { HebrewType } from "@/components/hebrew-type";
 import { IIBS_LESSON_PASS, iibsGlossHit, type IibsStageId } from "@/lib/iibs-game";
 import { liveMatchAny } from "@/lib/hebrew";
+import { playFeedback } from "@/lib/try-again";
 import type { IibsVocabWord } from "@/lib/iibs-vocab";
 
 function shuffle<T>(list: T[]): T[] {
@@ -35,11 +37,19 @@ export function IibsWritePlay({
   const [queue, setQueue] = useState(() => shuffle(words.map((_, index) => index)));
   const [typed, setTyped] = useState("");
   const [missed, setMissed] = useState(false);
+  const [scored, setScored] = useState(false);
   const [done, setDone] = useState<number | null>(null);
   const first = useRef<Record<number, boolean>>({});
   const reported = useRef(false);
+  const timer = useRef<number | null>(null);
   const index = queue[0];
   const word = index === undefined ? null : words[index];
+
+  useEffect(() => {
+    return () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    };
+  }, []);
 
   function finish(pct: number) {
     if (reported.current) return;
@@ -67,14 +77,18 @@ export function IibsWritePlay({
     setQueue(hit ? rest : [...rest, index]);
     setTyped("");
     setMissed(false);
+    setScored(false);
   }
 
   function check() {
-    if (!word || missed || done !== null) return;
+    if (!word || missed || scored || done !== null) return;
     if (correct(typed)) {
-      advance(true);
+      playFeedback("strong");
+      setScored(true);
+      timer.current = window.setTimeout(() => advance(true), 700);
       return;
     }
+    playFeedback("fail");
     if (!(index in first.current)) first.current[index!] = false;
     setMissed(true);
   }
@@ -120,7 +134,7 @@ export function IibsWritePlay({
       {stage === "gloss" ? (
         <input
           value={typed}
-          disabled={missed}
+          disabled={missed || scored}
           onChange={(event) => setTyped(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") check();
@@ -137,28 +151,36 @@ export function IibsWritePlay({
             value={typed}
             onChange={setTyped}
             target={word.hebrew}
-            disabled={missed}
+            disabled={missed || scored}
             strict
             liveGrade={stage === "hebrew"}
             hideHint={stage === "strict"}
           />
         </div>
       )}
+      {scored ? (
+        <div className="mt-4">
+          <GradeBanner ok label="Correct" />
+        </div>
+      ) : null}
       {missed ? (
-        <p className="mt-4 text-center text-muted">
-          {stage === "gloss" ? word.gloss : null}
-          {stage !== "gloss" ? (
-            <span className="he-word text-3xl text-ink" dir="rtl" lang="he">
-              {word.hebrew}
-            </span>
-          ) : null}
-        </p>
+        <div className="mt-4">
+          <GradeBanner ok={false} label="Not quite" />
+          <p className="mt-3 text-center text-good">
+            {stage === "gloss" ? word.gloss : null}
+            {stage !== "gloss" ? (
+              <span className="he-word text-3xl" dir="rtl" lang="he">
+                {word.hebrew}
+              </span>
+            ) : null}
+          </p>
+        </div>
       ) : null}
       {missed ? (
         <button type="button" className="mt-3 min-h-14 w-full rounded-[var(--radius-lg)] bg-primary font-semibold text-primary-foreground" onClick={() => advance(false)}>
           Continue
         </button>
-      ) : (
+      ) : scored ? null : (
         <button type="button" className="mt-3 min-h-14 w-full rounded-[var(--radius-lg)] bg-primary font-semibold text-primary-foreground" onClick={check}>
           Check
         </button>
