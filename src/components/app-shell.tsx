@@ -38,7 +38,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { blockedDestination } from "@/lib/path";
+import { blockedDestination, currentDoor, ownerDoorBlock } from "@/lib/path";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -83,21 +83,23 @@ const LISTEN: NavItem[] = [
   { to: "/listen/read", hash: "ketuvim", label: "Ketuvim", hint: "Psalms–Chronicles", icon: BookOpen },
 ];
 
-function moreItems(admin: boolean): NavItem[] {
+function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
   const items: NavItem[] = [
     { to: "/ask", label: "Ask HaDay Hebraic AI", hint: "Clarify the lesson", icon: CircleHelp },
     { to: "/ideas", label: "Suggest a feature", hint: "Class inventory", icon: Lightbulb },
-    { to: "/leaderboard", label: "Leaderboard", hint: "Class standings", icon: Medal },
-    { to: "/rewards", label: "Rewards", hint: "Ranks and badges", icon: Trophy },
   ];
+  if (!iibsSide) {
+    items.push({ to: "/leaderboard", label: "Leaderboard", hint: "Class standings", icon: Medal });
+    items.push({ to: "/rewards", label: "Rewards", hint: "Ranks and badges", icon: Trophy });
+  }
   if (admin) {
     items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
     items.push({ to: "/admin/use", label: "What the class uses", hint: "Visits and practice", icon: BarChart3 });
-    items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
+    if (!iibsSide) items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });
-  items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
+  if (!iibsSide) items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
   return items;
 }
 
@@ -110,6 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pathGate, setPathGate] = useState<MyPath | null>(null);
+  const [doorReady, setDoorReady] = useState(false);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const board = scoreboard(game, streak);
@@ -203,6 +206,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, [isPublic, userId]);
 
+  useEffect(() => {
+    setDoorReady(true);
+  }, []);
+
   if (isPublic) {
     return (
       <div className="min-h-dvh text-fg">
@@ -212,7 +219,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  if (isPending || (user && (!progressReady || !pathGate))) {
+  if (isPending || (user && (!progressReady || !pathGate)) || (user && pathGate?.admin && !doorReady)) {
     return (
       <>
         <VisitorBeacon />
@@ -232,7 +239,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const onIibs = pathname === "/iibs" || pathname.startsWith("/iibs/");
   const iibsOnly = onIibs || (pathGate?.path === "iibs" && !pathGate.admin);
-  const blocked = pathGate && !pathGate.admin ? blockedDestination(pathname, pathGate) : null;
+  const blocked =
+    pathGate?.admin && doorReady
+      ? ownerDoorBlock(pathname, currentDoor())
+      : pathGate && !pathGate.admin
+        ? blockedDestination(pathname, pathGate)
+        : null;
   if (blocked) return <Navigate to={blocked} />;
 
   return (
@@ -285,7 +297,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <NavMenu
               label="More"
               icon={MoreHorizontal}
-              items={moreItems(isAdmin)}
+              items={moreItems(isAdmin, iibsOnly)}
               active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/use", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/admin") || pathname.startsWith("/finder")}
             />
             <NavTip label="Answer sounds">
