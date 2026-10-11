@@ -8,7 +8,7 @@ The Developer Handbook is beside it:
 
 https://app.notion.com/p/3f6058f607b18144a482f8173456df2a
 
-Do not add new entries here. The same day a change merges to `main`, add a row on that Notion page: what changed, why, the pull request, and what must not be reversed.
+Do not add new entries here. The same day a change merges to `main`, write it on the Notion Change Log, in the Developer Handbook section that would now be false, and in the matching section of `docs/ASBUILT.md`. Update the in-app Guide only if a student would follow the old words.
 
 Notes below were written before 11 October 2026, plus the owner-access line that opened the Notion log.
 
@@ -62,7 +62,7 @@ Format: **date** · what shipped · why it matters.
 
 ## How to add an entry
 
-When a change merges to `main`, add a row on the Notion Change Log. Do not add it here. Update the Developer Handbook if a product rule changed. `docs/ASBUILT.md` is the older picture of the running app.
+When a change merges to `main`, write it in the Notion Change Log, the Developer Handbook section that would now be false, and the matching section of `docs/ASBUILT.md`. Update the in-app Guide only if a student would follow the old words. Do not add the entry here.
 
 ---
 

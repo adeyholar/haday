@@ -26,11 +26,11 @@ This file is the older picture of the running app. If it disagrees with Notion, 
 | Area | What it does | Why it helps |
 |---|---|---|
 | **Study** | **Stations** (five stops from alef-bet to the Word), Drill, **Weak pool**, Write, Quiz, Rules, Match, Lexicon, Alef-bet lesson, Zakhor, Grammar lessons | Path: Alef-bet Station → House of Names → Verb Tent → Many Voices Camp → Realm of the Word. Text first, rule last. The weak pool is every weak word, one sitting, and it continues if you leave. |
-| **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate, **Road exam** | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. Road exam is the Week 7 circle: it saves the open run and does not end while a miss is still out. Say the letter or the English word. A right answer turns green. A wrong answer turns red. No clap or horn. |
+| **Game** | BBH path Ch. 1–19, Custom mix, Aleph-bet, Ocean letters, Syllables, Nouns, Article & vav, **Grammar exams** (prep → numbers and Verbs & binyan), Ultimate, **Road exam · Week 7**, **Road exam · Week 15** | Grammar Game is closed-book. Prepare in Study first. **90%** to clear. Both road exams are spoken: say the letter or the English word. A right answer turns green. A miss says Not quite and returns to the back. No clap or horn. Week 7 is chapters 2–11. Week 15 is every class lemma, chapters 2–19. Each circle is saved on its own. |
 | **Listen · Vocabulary** | Isolated Eliran lexeme when we have it, else TTS, then English | Car / iPad. *Avraham*, then Abraham. Loop one chapter, a mix of chapters, or the whole list. **Owner recordings** play first when present. Neural Hebrew is Hebrew-only (vowel **names**, no digits). |
 | **Listen · Alive Pet** | Companion recites class lemmas; owner voice when recorded | Personalization data = Voice bank. Weak lemmas first. |
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
-| **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. |
+| **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. Claude or Grok, capped before the paid call. A failed quota check does not call the model. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
 | **Account** | Google, X, or email + password | Progress stays with the account. Old Vercel logins do **not** carry over. |
 
@@ -56,7 +56,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 |---|---|
 | Sign-in | Google, X (Grok broker), email + password |
 | New email accounts | Domain must accept mail; no throwaway inbox; classmate opens a 24-hour confirmation link before sign-in |
-| Reset | Forgot password emails a one-hour link (Gmail SMTP on Azure) |
+| Reset | Forgot password emails a one-hour link. The link always opens on the class site. A request header cannot point it somewhere else. |
 | Roster | Owner sees names, last login, last study, sign-in method, mail confirmed or waiting, visitor country (from IP on Azure). Last study moves when they answer Quiz, Quiz myself, Rules, or another study task — not from signing in. **Remove** deletes an unwanted account (not the owner). |
 | Voice bank | Owner records Hebrew / English takes of the corpus (letters, vowels, names, lemmas). Alive Pet, Listen, and Ocean letters use them first. Neural Hila/Jenny fills every line that has no owner take. Corpus text: `/audio/neural/corpus.txt`. |
 | **Tanakh cards** | `/finder` hub: **Find a Hebrew word** (every verse) + grammar decks. `/finder/word` concordance. `/finder/deck` flashcards. | Flip, then open the verse in Listen/Read. English gloss is marked to the Hebrew in focus. |
@@ -91,7 +91,9 @@ Postgres on Azure holds users, sessions, progress, ideas, visits. Local preview 
 When a feature ships to `main`:
 
 1. **Notion Change Log** — newest row at the top. What changed, why, the pull request, and what must not be reversed.
-2. **Developer Handbook** — change the section that is no longer true.
-3. Do not add a new entry to `CHANGELOG.md`. That file is the archive.
+2. **Developer Handbook** — the section that would now be false.
+3. **This file** — the section that describes that running behavior.
+4. **In-app Guide** — only if a student would follow the old words.
+5. Do not add a new entry to `CHANGELOG.md`. That file is the archive.
 
 In-app **Suggest a feature** is the student list. This file is the engineering picture of what actually runs. The next four builds (tap-word, echo verse, Ask on this verse, pronunciation later) live in [ROADMAP.md](ROADMAP.md).
