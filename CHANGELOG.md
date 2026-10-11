@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Owner access.** Only an allow-list email can open the owner pages. A display name such as Adeola, Crown, or Haday no longer does.
 - **BBH path.** Spell (strict) is optional. The next chapter opens after Spell (lenient). A miss on Strict does not lock the path.
 - **Brand.** The name on the doors and in the header is Haday HebRabbAi Mentor. Hebrew, rabbi, and AI stay readable in the spelling.
 - **Study path.** The two doors now open with “Choose your Study Path” and “Choose wisely,” under the ancient smile.
