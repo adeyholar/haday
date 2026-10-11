@@ -68,6 +68,8 @@ import { Route as GameNounsIndexRouteImport } from './routes/game/nouns/index'
 import { Route as GameNounsUnitRouteImport } from './routes/game/nouns/$unit'
 import { Route as GameSyllablesIndexRouteImport } from './routes/game/syllables/index'
 import { Route as GameSyllablesUnitRouteImport } from './routes/game/syllables/$unit'
+import { Route as IibsVocabIndexRouteImport } from './routes/iibs/vocab/index'
+import { Route as IibsVocabLevelRouteImport } from './routes/iibs/vocab/$level'
 import { Route as LessonsTrackIndexRouteImport } from './routes/lessons/$track/index'
 import { Route as LessonsTrackUnitRouteImport } from './routes/lessons/$track/$unit'
 import { Route as ListenReadIndexRouteImport } from './routes/listen/read/index'
@@ -373,6 +375,16 @@ const GameSyllablesUnitRoute = GameSyllablesUnitRouteImport.update({
   path: '/game/syllables/$unit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IibsVocabIndexRoute = IibsVocabIndexRouteImport.update({
+  id: '/vocab/',
+  path: '/vocab/',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsVocabLevelRoute = IibsVocabLevelRouteImport.update({
+  id: '/vocab/$level',
+  path: '/vocab/$level',
+  getParentRoute: () => IibsRoute,
+} as any)
 const LessonsTrackIndexRoute = LessonsTrackIndexRouteImport.update({
   id: '/lessons/$track/',
   path: '/lessons/$track/',
@@ -471,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/iibs/vocab/$level': typeof IibsVocabLevelRoute
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
@@ -482,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
+  '/iibs/vocab/': typeof IibsVocabIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
@@ -539,6 +553,7 @@ export interface FileRoutesByTo {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/iibs/vocab/$level': typeof IibsVocabLevelRoute
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
@@ -550,6 +565,7 @@ export interface FileRoutesByTo {
   '/game/lessons': typeof GameLessonsIndexRoute
   '/game/nouns': typeof GameNounsIndexRoute
   '/game/syllables': typeof GameSyllablesIndexRoute
+  '/iibs/vocab': typeof IibsVocabIndexRoute
   '/lessons/$track': typeof LessonsTrackIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
@@ -610,6 +626,7 @@ export interface FileRoutesById {
   '/game/custom/play': typeof GameCustomPlayRoute
   '/game/nouns/$unit': typeof GameNounsUnitRoute
   '/game/syllables/$unit': typeof GameSyllablesUnitRoute
+  '/iibs/vocab/$level': typeof IibsVocabLevelRoute
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
@@ -621,6 +638,7 @@ export interface FileRoutesById {
   '/game/lessons/': typeof GameLessonsIndexRoute
   '/game/nouns/': typeof GameNounsIndexRoute
   '/game/syllables/': typeof GameSyllablesIndexRoute
+  '/iibs/vocab/': typeof IibsVocabIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
@@ -682,6 +700,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/iibs/vocab/$level'
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
@@ -693,6 +712,7 @@ export interface FileRouteTypes {
     | '/game/lessons/'
     | '/game/nouns/'
     | '/game/syllables/'
+    | '/iibs/vocab/'
     | '/lessons/$track/'
     | '/listen/read/'
     | '/game/lessons/$track/$unit'
@@ -750,6 +770,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/iibs/vocab/$level'
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
@@ -761,6 +782,7 @@ export interface FileRouteTypes {
     | '/game/lessons'
     | '/game/nouns'
     | '/game/syllables'
+    | '/iibs/vocab'
     | '/lessons/$track'
     | '/listen/read'
     | '/game/lessons/$track/$unit'
@@ -820,6 +842,7 @@ export interface FileRouteTypes {
     | '/game/custom/play'
     | '/game/nouns/$unit'
     | '/game/syllables/$unit'
+    | '/iibs/vocab/$level'
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
@@ -831,6 +854,7 @@ export interface FileRouteTypes {
     | '/game/lessons/'
     | '/game/nouns/'
     | '/game/syllables/'
+    | '/iibs/vocab/'
     | '/lessons/$track/'
     | '/listen/read/'
     | '/game/lessons/$track/$unit'
@@ -1315,6 +1339,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameSyllablesUnitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/iibs/vocab/': {
+      id: '/iibs/vocab/'
+      path: '/vocab'
+      fullPath: '/iibs/vocab/'
+      preLoaderRoute: typeof IibsVocabIndexRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/vocab/$level': {
+      id: '/iibs/vocab/$level'
+      path: '/vocab/$level'
+      fullPath: '/iibs/vocab/$level'
+      preLoaderRoute: typeof IibsVocabLevelRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/lessons/$track/': {
       id: '/lessons/$track/'
       path: '/lessons/$track'
@@ -1398,11 +1436,15 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
   IibsIndexRoute: typeof IibsIndexRoute
+  IibsVocabLevelRoute: typeof IibsVocabLevelRoute
+  IibsVocabIndexRoute: typeof IibsVocabIndexRoute
 }
 
 const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
   IibsIndexRoute: IibsIndexRoute,
+  IibsVocabLevelRoute: IibsVocabLevelRoute,
+  IibsVocabIndexRoute: IibsVocabIndexRoute,
 }
 
 const IibsRouteWithChildren = IibsRoute._addFileChildren(IibsRouteChildren)

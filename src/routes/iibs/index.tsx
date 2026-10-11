@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
-import { HonorBadge } from "@/components/honor-badge";
+import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { IIBS_LESSON_PASS, IIBS_RANKS, heldIibsRank, levelCleared, levelUnlocked, rankForLevel } from "@/lib/iibs-game";
+import { levelUnlocked } from "@/lib/iibs-game";
 import { IIBS_LEVELS, levelAfter, type IibsLevelId } from "@/lib/path";
 import { vocabLessons } from "@/lib/iibs-vocab";
 import { useStudy } from "@/lib/store";
@@ -23,7 +22,7 @@ function IibsHome() {
         if (!cancelled) setGate(next);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the vocab game.");
+        if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the lessons.");
       });
     return () => {
       cancelled = true;
@@ -31,73 +30,46 @@ function IibsHome() {
   }, []);
 
   const admin = Boolean(gate?.admin);
-  const held = heldIibsRank(progress);
 
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · vocab</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Vocab</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · lessons</p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Lessons</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Level A, lesson 1 is open. Clear a lesson at {IIBS_LESSON_PASS}% to open the next lesson. Clear every lesson
-          in a level and you receive that level’s rank. The ranks run from Level A to the Reading Lab.
-        </p>
-        <p className="mt-4">
-          {held ? <HonorBadge honor={held} /> : <span className="text-sm text-muted">No rank yet. Clear Level A.</span>}
+          Each lesson lists its words. Level A, lesson 1 is open. The next lesson opens when that lesson is cleared in
+          Vocab Builder.
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
-      <ol className="mb-4 grid gap-2">
-        {IIBS_RANKS.map((rank) => {
-          const earned = rank.id !== "lab" && levelCleared(progress, rank.id);
-          return (
-            <li
-              key={rank.id}
-              className={`flex min-h-12 items-center justify-between gap-3 rounded-[var(--radius-lg)] px-4 ${
-                earned ? "bg-card text-ink shadow-[var(--shadow-border)]" : "text-muted"
-              }`}
-            >
-              <span>
-                <span className="block font-semibold">{rank.title}</span>
-                <span className="text-sm text-muted">{rank.id === "lab" ? "Hebrew Reading Lab" : `Level ${rank.id}`}</span>
-              </span>
-              {earned ? <Check className="size-4 shrink-0 text-good" /> : <Lock className="size-4 shrink-0" />}
-            </li>
-          );
-        })}
-      </ol>
       <ol className="grid gap-2">
         {IIBS_LEVELS.map((level) => {
           const open = levelUnlocked(progress, level.id, admin);
-          const done = level.id !== "lab" && levelCleared(progress, level.id);
-          return <LevelRow key={level.id} id={level.id} title={level.title} open={open} done={done} />;
+          return <LevelRow key={level.id} id={level.id} title={level.title} open={open} />;
         })}
       </ol>
     </>
   );
 }
 
-function LevelRow({ id, title, open, done }: { id: IibsLevelId; title: string; open: boolean; done: boolean }) {
+function LevelRow({ id, title, open }: { id: IibsLevelId; title: string; open: boolean }) {
   const after = levelAfter(id);
   const lessons = vocabLessons(id);
   const words = lessons ? lessons.reduce((sum, lesson) => sum + lesson.length, 0) : 0;
-  const rank = rankForLevel(id);
   const note = !open
     ? id === "lab"
       ? "Locked until Level E is cleared."
       : `Locked until Level ${after} is cleared.`
-    : done
-      ? rank?.title ?? "Cleared."
-      : lessons
-        ? `${lessons.length} lessons · ${words} words`
-        : "Open for you.";
+    : lessons
+      ? `${lessons.length} lessons · ${words} words`
+      : "Open for you.";
   const body = (
     <>
       <span>
         <span className="block font-display text-2xl font-bold">{title}</span>
         <span className="mt-1 block text-sm text-muted">{note}</span>
       </span>
-      {done ? <Check className="size-5 shrink-0 text-good" /> : open ? null : <Lock className="size-5 shrink-0 text-muted" />}
+      {open ? null : <Lock className="size-5 shrink-0 text-muted" />}
     </>
   );
   const className =
