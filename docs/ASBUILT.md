@@ -76,6 +76,7 @@ Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FR
 | Path | Role |
 |---|---|
 | `src/lib/vocab.ts` | BBH 3rd-ed. class lemmas (source of truth for Game and Study) |
+| Study cards | A save keeps lemma ids, `ch1-` letters, `alef:` letter and vowel cards, and `tv:` Tanakh forms. A junk key is dropped. A real card of those kinds is not. |
 | `src/lib/vocab-clips.json` | One Shmuelof clip per lemma (`scripts/vocab-clips.py`) |
 | `public/tanakh/books/` | Westminster Leningrad nikkud + WEB English |
 | `public/tanakh/align/` | Kaldi MFA word / phone times, 929/929 |

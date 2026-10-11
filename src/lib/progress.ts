@@ -4,16 +4,9 @@ import { authMiddleware } from "@/lib/auth/middleware";
 import { hydrateCard, type CardState } from "@/lib/srs";
 import { hydrateGame, type GameSnapshot } from "@/lib/game";
 import { scoreboard } from "@/lib/rewards";
-import { VOCAB, alphabetVocab } from "@/lib/vocab";
+import { keepStudyCards } from "@/lib/card-ids";
 
 const MAX_SAVE_CHARS = 256 * 1024;
-
-let knownCardIds: Set<string> | null = null;
-
-function cardIds(): Set<string> {
-  knownCardIds ??= new Set([...VOCAB.map((item) => item.id), ...alphabetVocab().map((item) => item.id)]);
-  return knownCardIds;
-}
 
 export type ProgressPayload = {
   cards: Record<string, CardState>;
@@ -80,13 +73,7 @@ export const saveProgress = createServerFn({ method: "POST" })
   .validator((input: ProgressPayload) => input)
   .middleware([authMiddleware])
   .handler(async ({ context, data }) => {
-    const cardsIn = data.cards && typeof data.cards === "object" ? data.cards : {};
-    const kept: Record<string, CardState> = {};
-    const known = cardIds();
-    for (const [id, card] of Object.entries(cardsIn)) {
-      if (!known.has(id)) continue;
-      kept[id] = hydrateCard(card);
-    }
+    const kept = keepStudyCards(data.cards);
     const gameSnap = hydrateGame({
       ...hydrateGame(data.game),
       keepStreak: Number(data.keepStreak) || Number((data.game as GameSnapshot | undefined)?.keepStreak) || 0,
