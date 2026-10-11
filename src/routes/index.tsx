@@ -137,7 +137,7 @@ function Door({
   href: "/bbh" | "/iibs";
 }) {
   const modern = kind === "bbh";
-  const className = `flex aspect-square flex-col items-start justify-end rounded-[var(--radius-xl)] p-5 text-left shadow-[var(--shadow-border)] ${
+  const className = `flex aspect-square flex-col items-center justify-center rounded-[var(--radius-xl)] p-5 text-center shadow-[var(--shadow-border)] ${
     modern ? "bg-ink text-parchment" : "bg-parchment text-ink ring-1 ring-ink/20"
   } ${open ? "" : "opacity-70"}`;
   const body = (
@@ -147,14 +147,14 @@ function Door({
         alt=""
         className={
           modern
-            ? "mb-3 min-h-0 w-full flex-1 rounded-[var(--radius-lg)] bg-white object-contain"
-            : "mb-3 min-h-0 w-full flex-1 rounded-full object-cover"
+            ? "size-36 rounded-[var(--radius-lg)] bg-white object-contain sm:size-44"
+            : "size-36 rounded-full object-cover sm:size-44"
         }
       />
       <p className="mt-4 font-display text-4xl font-bold">{title}</p>
-      <p className={`mt-2 text-sm ${modern ? "text-parchment/80" : "text-ink/80"}`}>{open ? line : lockedLine}</p>
+      <p className={`mt-2 max-w-[16rem] text-sm ${modern ? "text-parchment/80" : "text-ink/80"}`}>{open ? line : lockedLine}</p>
       {!open ? (
-        <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold">
+        <p className="mt-3 inline-flex items-center justify-center gap-1 text-sm font-semibold">
           <Lock className="size-4" />
           Locked
         </p>
