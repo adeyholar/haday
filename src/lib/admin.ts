@@ -2,15 +2,10 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { ADMIN_EMAILS, grantsOwner, isOwnerEmail, ownerAllowList } from "@/lib/admin-access";
 import { sendPasswordResetMail, mailerConfigured, mailerVia, originFromIncomingRequest } from "@/lib/mail";
 
-/** Sign-in emails that can open /admin. Also set HADAY_ADMIN_EMAILS on Azure. */
-export const ADMIN_EMAILS: string[] = [
-  "talk2pastoradeolaade@yahoo.com",
-  "adeolaa@jcdisn.com",
-];
-
-const OWNER_NAME = /crown|ha['’]?day|adegbolagun|\badeola\b/i;
+export { ADMIN_EMAILS };
 
 export type RosterPerson = {
   id: string;
@@ -28,41 +23,30 @@ export type RosterPerson = {
   path: "bbh" | "iibs" | null;
 };
 
-function envAdminEmails(): string[] {
-  const raw = typeof process !== "undefined" ? process.env.HADAY_ADMIN_EMAILS ?? "" : "";
-  return raw
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 function allowList(): string[] {
-  return [...new Set([...ADMIN_EMAILS.map((e) => e.toLowerCase()), ...envAdminEmails()])];
+  const raw = typeof process !== "undefined" ? process.env.HADAY_ADMIN_EMAILS ?? "" : "";
+  return ownerAllowList(ADMIN_EMAILS, raw);
 }
 
-function isProtectedAccount(email: string, name: string): boolean {
-  const allowed = allowList();
-  if (email && allowed.includes(email.toLowerCase())) return true;
-  if (name && OWNER_NAME.test(name)) return true;
-  return false;
+function isProtectedAccount(email: string): boolean {
+  return isOwnerEmail(email, allowList());
 }
 
 export async function assertAdmin(userId: string): Promise<void> {
   const sql = await getSql();
-  const me = await sql<{ email: string; name: string }>`
-    select email, name from "user" where id = ${userId}
+  const me = await sql<{ email: string }>`
+    select email from "user" where id = ${userId}
   `;
-  const email = (me[0]?.email ?? "").toLowerCase();
-  const name = me[0]?.name ?? "";
+  const email = me[0]?.email ?? "";
   const allowed = allowList();
-  if (email && allowed.includes(email)) return;
-  if (name && OWNER_NAME.test(name)) return;
+  let firstUserId: string | null = null;
   if (allowed.length === 0) {
     const first = await sql<{ id: string }>`
       select id from "user" order by "createdAt" asc limit 1
     `;
-    if (first[0]?.id === userId) return;
+    firstUserId = first[0]?.id ?? null;
   }
+  if (grantsOwner({ email, allow: allowed, userId, firstUserId })) return;
   throw new Error("Forbidden");
 }
 
@@ -138,7 +122,7 @@ export const listRoster = createServerFn({ method: "GET" })
       streak: Number(r.streak ?? 0),
       hasPassword: Boolean(r.has_password),
       emailVerified: Boolean(r.email_verified),
-      protectedAccount: isProtectedAccount(r.email, r.name),
+      protectedAccount: isProtectedAccount(r.email),
       providers: r.providers ?? "",
       path: r.study_path === "iibs" ? "iibs" : r.study_path === "bbh" ? "bbh" : null,
     }));
@@ -310,7 +294,7 @@ export const removeUser = createServerFn({ method: "POST" })
     `;
     const person = rows[0];
     if (!person) return { ok: false, reason: "No such account." };
-    if (isProtectedAccount(person.email, person.name)) {
+    if (isProtectedAccount(person.email)) {
       return { ok: false, reason: "Cannot remove another course owner." };
     }
     await sql`delete from study_progress where user_id = ${id}`;
