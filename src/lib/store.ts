@@ -41,6 +41,7 @@ import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
+import { applyIibsLesson } from "./iibs-game";
 import type { RoadRun } from "./road-exam";
 import type { WeakRun } from "./weak-pool";
 
@@ -113,6 +114,7 @@ type StudyState = StudySnapshot & {
   saveUltimateRun: (run: UltimateRun) => void;
   saveRoadRun: (run: RoadRun | null) => void;
   saveWeakRun: (run: WeakRun | null) => void;
+  finishIibsLesson: (level: string, lesson: number, pct: number) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
   /** A real study answer (quiz, rules, classify) — same day, streak, and session as Drill. */
@@ -311,6 +313,16 @@ export const useStudy = create<StudyState>()(
       },
       saveWeakRun: (run) => {
         set({ game: { ...get().game, weakRun: run } });
+      },
+      finishIibsLesson: (level, lesson, pct) => {
+        const now = Date.now();
+        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
+        const game = stampRewards(applyIibsLesson(get().game, level, lesson, pct), streakInfo.streak, get().keepStreak);
+        set({
+          game,
+          ...streakInfo,
+          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
       },
       finishUltimate: (pct) => {
         const now = Date.now();
