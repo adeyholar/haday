@@ -279,6 +279,11 @@ function Home() {
               Road exam · Week 7
             </Button>
           </Link>
+          <Link to="/game/final" className="flex-1">
+            <Button className="w-full" size="lg">
+              Road exam · Week 15
+            </Button>
+          </Link>
           <Link to="/game/week7" className="flex-1">
             <Button className="w-full" variant="outline" size="lg">
               Week 7 mock exam

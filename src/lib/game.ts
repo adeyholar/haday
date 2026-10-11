@@ -72,6 +72,8 @@ export type GameSnapshot = {
   ladder: LadderProgress;
   /** Open Week 7 road circle. Null once every miss in that circle was correct. */
   roadRun: RoadRun | null;
+  /** Open Week 15 final road circle. Separate from the Week 7 circle. */
+  roadFinalRun: RoadRun | null;
   /** Open weak-word pool. Null once that sitting is finished. */
   weakRun: WeakRun | null;
   /** IIBS vocab game. A cleared lesson opens the next. A cleared level opens the next. */
@@ -163,6 +165,7 @@ export function defaultGame(): GameSnapshot {
     typing: emptyTyping(),
     ladder: defaultLadder(),
     roadRun: null,
+    roadFinalRun: null,
     weakRun: null,
     iibs: emptyIibsGame(),
   };
@@ -246,6 +249,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     typing: hydrateTyping(r.typing),
     ladder: hydrateLadder(r.ladder),
     roadRun: hydrateRoadRun(r.roadRun),
+    roadFinalRun: hydrateRoadRun(r.roadFinalRun),
     weakRun: hydrateWeakRun(r.weakRun),
     iibs: hydrateIibsGame(r.iibs),
   };

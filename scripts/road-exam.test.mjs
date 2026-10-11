@@ -132,3 +132,22 @@ test("road exam does not play clap or miss sounds", () => {
   assert.match(src, /Circle clear/);
   assert.equal(src.includes('endsWith(":back")'), false);
 });
+
+test("week 15 road uses every class lemma and keeps its own circle", async () => {
+  const { bbhVocab } = await jiti.import("/workspace/src/lib/vocab.ts");
+  const { hydrateGame, defaultGame } = await jiti.import("/workspace/src/lib/game.ts");
+  const all = bbhVocab();
+  const mid = itemsForWeek(7);
+  assert.ok(all.length > mid.length);
+  assert.ok(all.every((item) => item.chapter >= 2 && item.chapter <= 19));
+  const deck = buildRoadDeck(all.slice(0, 8));
+  const run = packRoadRun(deck, 1, 2, 1);
+  const game = hydrateGame({ ...defaultGame(), roadFinalRun: run });
+  assert.equal(game.roadRun, null);
+  assert.equal(game.roadFinalRun?.index, 1);
+  assert.equal(game.roadFinalRun?.order.length, 8);
+  const page = readFileSync(new URL("../src/routes/game/final.tsx", import.meta.url), "utf8");
+  assert.match(page, /bbhVocab/);
+  assert.match(page, /roadFinalRun/);
+  assert.equal(page.includes("playFeedback"), false);
+});

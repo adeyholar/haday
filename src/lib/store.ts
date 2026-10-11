@@ -113,6 +113,7 @@ type StudyState = StudySnapshot & {
   startUltimate: (ids: string[]) => void;
   saveUltimateRun: (run: UltimateRun) => void;
   saveRoadRun: (run: RoadRun | null) => void;
+  saveRoadFinalRun: (run: RoadRun | null) => void;
   saveWeakRun: (run: WeakRun | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   finishUltimate: (pct: number) => void;
@@ -310,6 +311,9 @@ export const useStudy = create<StudyState>()(
       },
       saveRoadRun: (run) => {
         set({ game: { ...get().game, roadRun: run } });
+      },
+      saveRoadFinalRun: (run) => {
+        set({ game: { ...get().game, roadFinalRun: run } });
       },
       saveWeakRun: (run) => {
         set({ game: { ...get().game, weakRun: run } });
