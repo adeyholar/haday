@@ -1,6 +1,6 @@
 import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
 
-export const IIBS_LESSON_PASS = 80;
+export const IIBS_LESSON_PASS = 90;
 export const IIBS_LESSON_COUNT = 30;
 export const IIBS_GAME_LEVELS = ["A", "B", "C", "D", "E"] as const;
 

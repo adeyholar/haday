@@ -1,7 +1,7 @@
 export const STUDY_PATHS = ["bbh", "iibs"] as const;
 export type StudyPath = (typeof STUDY_PATHS)[number];
 
-export const PASS_MARK = 80;
+export const PASS_MARK = 90;
 
 export const IIBS_LEVELS = [
   { id: "A", title: "Level A", after: null },

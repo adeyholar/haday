@@ -16,18 +16,18 @@ test("only Level A lesson 1 starts open", () => {
   assert.equal(lessonUnlocked(progress, "A", 2, false), false);
 });
 
-test("80% opens the next lesson and a short score does not", () => {
+test("90% opens the next lesson and a short score does not", () => {
   let game = defaultGame();
-  game = applyIibsLesson(game, "A", 1, 79);
+  game = applyIibsLesson(game, "A", 1, 89);
   assert.equal(lessonUnlocked(game.iibs, "A", 2, false), false);
-  game = applyIibsLesson(game, "A", 1, 80);
+  game = applyIibsLesson(game, "A", 1, 90);
   assert.equal(lessonUnlocked(game.iibs, "A", 2, false), true);
   assert.equal(lessonUnlocked(game.iibs, "A", 3, false), false);
 });
 
 test("clearing Level A opens Level B lesson 1 only", () => {
   let game = defaultGame();
-  for (let lesson = 1; lesson <= 30; lesson += 1) game = applyIibsLesson(game, "A", lesson, 80);
+  for (let lesson = 1; lesson <= 30; lesson += 1) game = applyIibsLesson(game, "A", lesson, 90);
   assert.equal(levelCleared(game.iibs, "A"), true);
   assert.equal(levelUnlocked(game.iibs, "B", false), true);
   assert.equal(lessonUnlocked(game.iibs, "B", 1, false), true);
