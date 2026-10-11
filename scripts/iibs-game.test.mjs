@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { applyIibsLesson, emptyIibsGame, lessonUnlocked, levelCleared, levelUnlocked } = await jiti.import(
+const { applyIibsLesson, emptyIibsGame, heldIibsRank, lessonUnlocked, levelCleared, levelUnlocked } = await jiti.import(
   "/workspace/src/lib/iibs-game.ts",
 );
 const { defaultGame } = await jiti.import("/workspace/src/lib/game.ts");
@@ -33,4 +33,6 @@ test("clearing Level A opens Level B lesson 1 only", () => {
   assert.equal(lessonUnlocked(game.iibs, "B", 1, false), true);
   assert.equal(lessonUnlocked(game.iibs, "B", 2, false), false);
   assert.equal(levelUnlocked(game.iibs, "C", false), false);
+  assert.equal(heldIibsRank(emptyIibsGame()), null);
+  assert.equal(heldIibsRank(game.iibs)?.title, "Bearer of Words");
 });

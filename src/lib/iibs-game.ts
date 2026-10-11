@@ -4,6 +4,37 @@ export const IIBS_LESSON_PASS = 90;
 export const IIBS_LESSON_COUNT = 30;
 export const IIBS_GAME_LEVELS = ["A", "B", "C", "D", "E"] as const;
 
+/** One rank for each level on the ladder, from the first words to the Reading Lab. */
+export const IIBS_RANKS = [
+  { id: "A", title: "Bearer of Words", short: "Words" },
+  { id: "B", title: "Keeper of the Phrase", short: "Phrase" },
+  { id: "C", title: "Reader of the Clause", short: "Clause" },
+  { id: "D", title: "Steward of the Verb", short: "Verb" },
+  { id: "E", title: "Scholar of the Line", short: "Line" },
+  { id: "lab", title: "Reader of the Scroll", short: "Scroll" },
+] as const;
+
+export type IibsRank = (typeof IIBS_RANKS)[number];
+
+export function rankForLevel(id: string): IibsRank | null {
+  return IIBS_RANKS.find((rank) => rank.id === id) ?? null;
+}
+
+/** The highest level rank already earned. The Reading Lab rank waits until that level can be cleared. */
+export function heldIibsRank(progress: IibsGameProgress): IibsRank | null {
+  let held: IibsRank | null = null;
+  for (const rank of IIBS_RANKS) {
+    if (rank.id === "lab") continue;
+    if (levelCleared(progress, rank.id)) held = rank;
+  }
+  return held;
+}
+
+export function rankEarned(progress: IibsGameProgress, id: string) {
+  if (id === "lab") return false;
+  return levelCleared(progress, id);
+}
+
 export type IibsLessonRec = { best: number; cleared: boolean; attempts: number };
 export type IibsGameProgress = { lessons: Record<string, IibsLessonRec> };
 
