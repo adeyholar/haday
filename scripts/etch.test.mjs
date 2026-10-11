@@ -1,27 +1,133 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { buildEtchSitting, contrastChoices, tokenFitsLemma, verseTapTokens, consonantsOf, ETCH_PASSES } =
-  await jiti.import("/workspace/src/lib/etch.ts");
-const { VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { applyRating, newCard } = await jiti.import("/workspace/src/lib/srs.ts");
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
+const {
+  buildEtchSitting,
+  buildEtchFromIds,
+  applyDrillReviews,
+  contrastChoices,
+  tokenFitsLemma,
+  verseTapTokens,
+  consonantsOf,
+  drillProgress,
+  drillGate,
+  hydrateDrillRuns,
+  queueDrillMiss,
+  verseForLemma,
+} = await jiti.import(join(root, "src/lib/etch.ts"));
+const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
+const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
 
-test("every word is asked in every method", () => {
+const WAYS = [
+  "study:he",
+  "contrast:he",
+  "contrast:en",
+  "contrast:audio",
+  "produce:audio",
+  "produce:he",
+  "produce:consonants",
+  "produce:spell",
+  "say:en",
+];
+
+test("every word is asked in every way, and card 2 is a question", () => {
   const pool = VOCAB.filter((v) => v.chapter === 3);
-  const sitting = buildEtchSitting(pool, {}, undefined, Date.now());
+  const sitting = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 42);
   assert.ok(pool.length > 2);
+  assert.equal(sitting[0].kind, "study");
+  assert.notEqual(sitting[1].kind, "study");
   for (const item of pool) {
-    const mine = sitting.filter((t) => t.item.id === item.id);
-    assert.ok(mine.length >= ETCH_PASSES, item.id);
-    assert.ok(mine.some((t) => t.kind === "meet"));
-    assert.ok(mine.some((t) => t.kind === "contrast"));
-    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "spell"));
-    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "audio"));
-    assert.ok(mine.some((t) => t.kind === "produce" && t.cue === "consonants"));
+    const mine = sitting.filter((t) => t.item.id === item.id && t.back === 0);
+    const got = new Set(mine.map((t) => `${t.kind}:${t.cue}`));
+    for (const way of WAYS) assert.ok(got.has(way), `${item.id} ${way}`);
+    if (verseForLemma(item)) assert.ok(got.has("verse:he"), `${item.id} verse`);
+    else assert.equal(got.has("verse:he"), false);
   }
-  assert.ok(sitting.length > pool.length * ETCH_PASSES - 1);
+  assert.match(drillProgress(sitting, 11), /Group/);
+});
+
+test("the same seed deals the same cards, and a saved place rebuilds card N", () => {
+  const pool = VOCAB.filter((v) => v.chapter === 3);
+  const a = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 42);
+  const b = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 7);
+  const ids = a.filter((t) => t.kind === "study").map((t) => t.item.id);
+  const again = buildEtchFromIds(pool, ids, 42);
+  assert.deepEqual(again.map((t) => t.key), a.map((t) => t.key));
+  assert.notEqual(b[2].key, a[2].key);
+  const withReview = applyDrillReviews(again, [{ key: again[0].baseKey, at: 4, n: 1 }]);
+  assert.equal(withReview[4].back, 1);
+  assert.equal(withReview[4].baseKey, again[0].baseKey);
+});
+
+test("a drill place survives hydrateGame", () => {
+  const place = {
+    seed: 42,
+    ids: ["av", "ben"],
+    index: 3,
+    reviews: [{ key: "study:he:av:0", at: 4, n: 1 }],
+    hits: 2,
+    checks: 4,
+    fingerprint: "abc",
+  };
+  const game = hydrateGame({ drillRuns: { "3:due": place, "nope": { seed: 1 } } });
+  assert.deepEqual(game.drillRuns["3:due"], place);
+  assert.equal(game.drillRuns.nope, undefined);
+  assert.equal(hydrateDrillRuns(null)["3:due"], undefined);
+});
+
+test("the study card shows the English only after Show meaning", () => {
+  const src = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
+  assert.match(src, /Show meaning/);
+  assert.match(src, /Type a guess, or show the meaning/);
+  assert.match(src, /I knew it/);
+  assert.match(src, /Not yet/);
+  assert.match(src, /Not quite/);
+  assert.match(src, /study && revealed/);
+  assert.match(src, /Hear the line/);
+  assert.match(src, /Check the typed word/);
+});
+
+test("a miss rebuilds to the same cards, and a finished or changed place does not continue", () => {
+  const pool = VOCAB.filter((v) => v.chapter === 3);
+  const sitting = buildEtchSitting(pool, {}, undefined, Date.now(), undefined, 42);
+  const first = queueDrillMiss(sitting, 0, sitting[0]);
+  assert.equal(first.review?.n, 1);
+  assert.equal(first.tasks[first.review.at].back, 1);
+  const backAt = first.review.at;
+  const second = queueDrillMiss(first.tasks, backAt, first.tasks[backAt]);
+  assert.equal(second.review?.n, 2);
+  const rebuilt = applyDrillReviews(sitting, [first.review, second.review]);
+  assert.deepEqual(
+    rebuilt.map((task) => task.key),
+    second.tasks.map((task) => task.key),
+  );
+  const third = queueDrillMiss(second.tasks, second.review.at, second.tasks[second.review.at]);
+  assert.equal(third.review, null);
+
+  const place = {
+    seed: 42,
+    ids: sitting.filter((task) => task.kind === "study").map((task) => task.item.id),
+    index: 4,
+    reviews: [],
+    hits: 1,
+    checks: 2,
+    fingerprint: "abc",
+  };
+  assert.equal(drillGate(place, "other", sitting.length), "changed");
+  assert.equal(drillGate(place, "abc", sitting.length), "resume");
+  assert.equal(drillGate({ ...place, index: sitting.length }, "abc", sitting.length), "fresh");
+  assert.equal(drillGate(undefined, "abc", sitting.length), "fresh");
+  const page = readFileSync(join(root, "src/routes/drill.tsx"), "utf8");
+  assert.match(page, /persist\(null\)/);
+  assert.match(page, /This week's list changed/);
+  assert.match(page, /Start over/);
 });
 
 test("contrast board never seats the answer first and includes the lemma", () => {

@@ -34,6 +34,7 @@ import {
   type UltimateRun,
 } from "./game";
 import { stampRewards } from "./rewards";
+import { drillKey, type DrillPlace } from "./etch";
 import type { ProgressPayload } from "./progress";
 import { twinsOf } from "./confusion";
 import { observeBkt } from "./bkt";
@@ -115,6 +116,7 @@ type StudyState = StudySnapshot & {
   saveRoadRun: (run: RoadRun | null) => void;
   saveRoadFinalRun: (run: RoadRun | null) => void;
   saveWeakRun: (run: WeakRun | null) => void;
+  saveDrillRun: (week: number, focus: string, place: DrillPlace | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
@@ -317,6 +319,13 @@ export const useStudy = create<StudyState>()(
       },
       saveWeakRun: (run) => {
         set({ game: { ...get().game, weakRun: run } });
+      },
+      saveDrillRun: (week, focus, place) => {
+        const key = drillKey(week, focus);
+        const drillRuns = { ...(get().game.drillRuns ?? {}) };
+        if (place) drillRuns[key] = place;
+        else delete drillRuns[key];
+        set({ game: { ...get().game, drillRuns } });
       },
       finishIibsStage: (level, lesson, stage, pct) => {
         const now = Date.now();
