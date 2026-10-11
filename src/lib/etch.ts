@@ -175,11 +175,10 @@ const CHECKS: Array<{ kind: EtchKind; cue: EtchCue }> = [
   { kind: "say", cue: "en" },
 ];
 
-function sitWords(words: VocabItem[], pool: VocabItem[], rand: () => number): EtchTask[] {
+function sitWords(words: VocabItem[], _pool: VocabItem[], rand: () => number): EtchTask[] {
   const tasks: EtchTask[] = [];
   let n = 0;
   function add(kind: EtchKind, item: VocabItem, cue: EtchCue, group: number, extra?: Partial<EtchTask>) {
-    const needChoices = kind === "contrast" || kind === "study" || kind === "verse";
     const baseKey = `${kind}:${cue}:${item.id}:${n}`;
     tasks.push({
       key: baseKey,
@@ -189,7 +188,7 @@ function sitWords(words: VocabItem[], pool: VocabItem[], rand: () => number): Et
       item,
       group,
       back: 0,
-      choices: extra?.choices ?? (needChoices ? seededOffFirst([item, ...closeItems(item, pool, 3)], item.id, rand) : []),
+      choices: extra?.choices ?? [],
       verse: extra?.verse,
     });
     n += 1;
@@ -236,10 +235,36 @@ export function buildEtchFromIds(pool: VocabItem[], ids: string[], seed: number)
   return sitWords(words, pool, randOf((seed ^ 0x9e3779b9) >>> 0 || 1));
 }
 
+const choiceCache = new Map<string, VocabItem[]>();
+
+function choiceKey(itemId: string, pool: VocabItem[]): string {
+  return `${itemId}:${pool.length}:${pool[0]?.id ?? ""}:${pool[pool.length - 1]?.id ?? ""}`;
+}
+
+/** Look-alikes for the card on screen. The same seed and word deal the same set. */
+export function drillCardChoices(task: EtchTask, pool: VocabItem[], seed: number): VocabItem[] {
+  const need = task.kind === "contrast" || task.kind === "study" || task.kind === "verse";
+  if (!need) return [];
+  if (task.choices.length > 1) return task.choices;
+  const cached = choiceCache.get(choiceKey(task.item.id, pool));
+  const mates = cached ?? closeItems(task.item, pool, 3);
+  if (!cached) choiceCache.set(choiceKey(task.item.id, pool), mates);
+  const mixed = (seed ^ choiceMix(task.baseKey)) >>> 0 || 1;
+  return seededOffFirst([task.item, ...mates], task.item.id, randOf(mixed));
+}
+
+function choiceMix(key: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h;
+}
+
 export function applyDrillReviews(base: EtchTask[], reviews: DrillReview[]): EtchTask[] {
   const out = base.map((task) => ({ ...task, choices: task.choices.slice() }));
-  const sorted = [...reviews].sort((a, b) => a.at - b.at || a.n - b.n);
-  for (const review of sorted) {
+  for (const review of reviews) {
     if (review.n < 1 || review.n > 2) continue;
     const source = base.find((task) => task.baseKey === review.key);
     if (!source) continue;

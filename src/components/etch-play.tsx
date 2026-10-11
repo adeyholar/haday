@@ -11,6 +11,7 @@ import { lettersOnly, liveMatchAny } from "@/lib/hebrew";
 import { HebrewType } from "@/components/hebrew-type";
 import {
   consonantsOf,
+  drillCardChoices,
   etchHint,
   etchLabel,
   GUESS_MS,
@@ -18,6 +19,7 @@ import {
   verseTapTokens,
   type EtchTask,
 } from "@/lib/etch";
+import type { VocabItem } from "@/lib/vocab";
 import { playFeedback } from "@/lib/try-again";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
 import { shuffleList } from "@/lib/quiz-draw";
@@ -26,12 +28,16 @@ type Grade = "good" | "again" | "reveal" | "skip";
 
 export function EtchPlay({
   task,
+  pool,
+  seed,
   index,
   total,
   label,
   onGrade,
 }: {
   task: EtchTask;
+  pool: VocabItem[];
+  seed: number;
   index: number;
   total: number;
   label?: string;
@@ -44,7 +50,15 @@ export function EtchPlay({
   const [revealed, setRevealed] = useState(false);
   const [listening, setListening] = useState(false);
   const [guessFast, setGuessFast] = useState(false);
-  const [choices, setChoices] = useState(task.choices);
+  const [choices, setChoices] = useState<VocabItem[]>([]);
+  const board = useRef<VocabItem[]>([]);
+  const boardKey = useRef("");
+  if (boardKey.current !== task.key) {
+    boardKey.current = task.key;
+    const dealt = drillCardChoices(task, pool, seed);
+    board.current = dealt;
+    setChoices(dealt.length ? shuffleList(dealt) : []);
+  }
   const shownAt = useRef(Date.now());
   const voice = useRef({ stop: false });
 
@@ -55,7 +69,6 @@ export function EtchPlay({
     setGuessFast(false);
     setRevealed(false);
     setListening(false);
-    setChoices(task.choices.length ? shuffleList(task.choices) : []);
     shownAt.current = Date.now();
     voice.current.stop = true;
     voice.current = { stop: false };
@@ -68,7 +81,7 @@ export function EtchPlay({
       voice.current.stop = true;
       stopSpeech();
     };
-  }, [task.key, item, task.kind, task.cue, task.choices]);
+  }, [task.key, item, task.kind, task.cue]);
 
   const spellOk = liveMatchAny(item.hebrew, typed, item.hebrewAlts, true) === "exact";
   const glossOk = glossMatches(item, typed);
@@ -90,7 +103,7 @@ export function EtchPlay({
     if (picked) return;
     if (id === item.id && tooFast()) {
       setGuessFast(true);
-      setChoices(shuffleList(task.choices));
+      setChoices(shuffleList(board.current));
       shownAt.current = Date.now();
       playFeedback("retry");
       return;
@@ -212,10 +225,10 @@ export function EtchPlay({
       </div>
 
       {study && revealed && <VerseCard item={item} showEnglish />}
-      {study && revealed && task.choices.length > 1 && (
+      {study && revealed && choices.length > 1 && (
         <p className="mt-3 text-center text-sm text-muted">
           Watch the look-alikes:{" "}
-          {task.choices
+          {choices
             .filter((choice) => choice.id !== item.id)
             .map((choice) => choice.hebrew)
             .join("  ")}
