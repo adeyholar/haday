@@ -53,6 +53,7 @@ import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
+import { Route as ListenRoadRouteImport } from './routes/listen/road'
 import { Route as StudyIndexRouteImport } from './routes/study/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as GameChapterIndexRouteImport } from './routes/game/$chapter/index'
@@ -301,6 +302,11 @@ const ListenPetRoute = ListenPetRouteImport.update({
   path: '/pet',
   getParentRoute: () => ListenRoute,
 } as any)
+const ListenRoadRoute = ListenRoadRouteImport.update({
+  id: '/road',
+  path: '/road',
+  getParentRoute: () => ListenRoute,
+} as any)
 const StudyIndexRoute = StudyIndexRouteImport.update({
   id: '/study/',
   path: '/study/',
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
+  '/listen/road': typeof ListenRoadRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
@@ -548,6 +555,7 @@ export interface FileRoutesByTo {
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
+  '/listen/road': typeof ListenRoadRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
   '/iibs': typeof IibsIndexRoute
@@ -622,6 +630,7 @@ export interface FileRoutesById {
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
+  '/listen/road': typeof ListenRoadRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
@@ -697,6 +706,7 @@ export interface FileRouteTypes {
     | '/game/week7'
     | '/iibs/$level'
     | '/listen/pet'
+    | '/listen/road'
     | '/finder/'
     | '/game/'
     | '/iibs/'
@@ -768,6 +778,7 @@ export interface FileRouteTypes {
     | '/game/week7'
     | '/iibs/$level'
     | '/listen/pet'
+    | '/listen/road'
     | '/finder'
     | '/game'
     | '/iibs'
@@ -841,6 +852,7 @@ export interface FileRouteTypes {
     | '/game/week7'
     | '/iibs/$level'
     | '/listen/pet'
+    | '/listen/road'
     | '/finder/'
     | '/game/'
     | '/iibs/'
@@ -1247,6 +1259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListenPetRouteImport
       parentRoute: typeof ListenRoute
     }
+    '/listen/road': {
+      id: '/listen/road'
+      path: '/road'
+      fullPath: '/listen/road'
+      preLoaderRoute: typeof ListenRoadRouteImport
+      parentRoute: typeof ListenRoute
+    }
     '/study/': {
       id: '/study/'
       path: '/study'
@@ -1471,6 +1490,7 @@ const IibsRouteWithChildren = IibsRoute._addFileChildren(IibsRouteChildren)
 
 interface ListenRouteChildren {
   ListenPetRoute: typeof ListenPetRoute
+  ListenRoadRoute: typeof ListenRoadRoute
   ListenIndexRoute: typeof ListenIndexRoute
   ListenReadIndexRoute: typeof ListenReadIndexRoute
   ListenReadBookChRoute: typeof ListenReadBookChRoute
@@ -1479,6 +1499,7 @@ interface ListenRouteChildren {
 
 const ListenRouteChildren: ListenRouteChildren = {
   ListenPetRoute: ListenPetRoute,
+  ListenRoadRoute: ListenRoadRoute,
   ListenIndexRoute: ListenIndexRoute,
   ListenReadIndexRoute: ListenReadIndexRoute,
   ListenReadBookChRoute: ListenReadBookChRoute,

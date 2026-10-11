@@ -742,6 +742,25 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
   await pauseMs(restFor(rate, apple ? 280 : 720), signal);
 }
 
+/** Hebrew, then the meaning. Same clips and pace as Drill. No chapter announcement. */
+export async function speakRoadCard(item: ListenItem, signal: { stop: boolean }): Promise<void> {
+  if (signal.stop) return;
+  await speakHebrewWord(item, 0.85, signal);
+  if (signal.stop) return;
+  await pauseMs(restFor(0.85, 420), signal);
+  if (signal.stop) return;
+  const en = spokenEnglish(item.gloss);
+  if (en) {
+    const ownEn = await playAdminVoice(item.id, "en", 0.85, signal);
+    if (!ownEn && !signal.stop) {
+      const neuralEn = await playNeuralVoice(item.id, "en", 0.85, signal);
+      if (!neuralEn && !signal.stop) await speakLine(en, "en", 0.85, signal);
+    }
+  }
+  if (signal.stop) return;
+  await pauseMs(restFor(0.85, 720), signal);
+}
+
 export async function speakReadingVerse(verse: ReadingVerse, rate: number, signal: { stop: boolean }): Promise<void> {
   if (signal.stop) return;
   const apple = isAppleMobile();

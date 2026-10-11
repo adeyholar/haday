@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { spokenEnglish, primaryGloss, modernLatin, listenPlaylist, chapterRange, nextListenIndex, prevListenIndex } =
   await jiti.import("/workspace/src/lib/listen.ts");
 const { vocabClip } = await jiti.import("/workspace/src/lib/vocab-clips.ts");
+
+test("the road player uses the Drill voice for one week", () => {
+  const src = readFileSync("/workspace/src/lib/listen.ts", "utf8");
+  const page = readFileSync("/workspace/src/routes/listen/road.tsx", "utf8");
+  assert.match(src, /export async function speakRoadCard/);
+  assert.match(src, /speakHebrewWord\(item, 0\.85, signal\)/);
+  assert.match(page, /speakRoadCard/);
+  assert.match(page, /On the road/);
+  assert.equal(page.includes("announce"), false);
+});
 
 test("Hebrew name then English translation", () => {
   assert.equal(spokenEnglish("Abraham"), "Abraham");

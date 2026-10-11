@@ -4,6 +4,7 @@ import { fromSearch } from "@/lib/passage";
 
 const OPTIONS = [
   { value: "/listen", label: "Vocabulary" },
+  { value: "/listen/road", label: "On the road" },
   { value: "/listen/pet", label: "Alive Pet" },
   { value: "/listen/read", label: "Tanakh · 39 books" },
 ];
@@ -18,7 +19,9 @@ export function ListenMenu() {
     ? "/listen/read"
     : pathname.startsWith("/listen/pet")
       ? "/listen/pet"
-      : "/listen";
+      : pathname.startsWith("/listen/road")
+        ? "/listen/road"
+        : "/listen";
 
   return (
     <GroupSelect
@@ -27,6 +30,7 @@ export function ListenMenu() {
       options={OPTIONS}
       onChange={(to) => {
         if (to === "/listen") void navigate({ to: "/listen", search: carry });
+        else if (to === "/listen/road") void navigate({ to: "/listen/road" });
         else if (to === "/listen/pet") void navigate({ to: "/listen/pet", search: carry });
         else void navigate({ to: "/listen/read", search: carry });
       }}

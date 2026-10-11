@@ -117,6 +117,19 @@ function Home() {
       </Link>
 
       <Link
+        to="/listen/road"
+        className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <Headphones className="mt-0.5 size-6 shrink-0 text-primary" />
+        <span>
+          <span className="block font-display text-2xl font-bold">Week on the road</span>
+          <span className="mt-1 block text-sm text-muted">
+            The week’s words, Hebrew then the meaning. Same voice as Drill. It repeats until you pause.
+          </span>
+        </span>
+      </Link>
+
+      <Link
         to="/listen/read"
         className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
       >
