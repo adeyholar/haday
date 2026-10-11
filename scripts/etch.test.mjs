@@ -24,7 +24,7 @@ const {
   verseForLemma,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
-const { VOCAB, itemsForWeek } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { VOCAB, itemsForWeek, glossMatches, liveGloss } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
 
 const WAYS = [
@@ -204,12 +204,27 @@ test("verse tap tokens match the hit", () => {
   assert.equal(tokenFitsLemma("בָּרָא", erets, "הָאָרֶץ"), false);
 });
 
-test("consonants drop niqqud", () => {
-  const bayit = VOCAB.find((v) => v.id === "bayit");
-  assert.ok(bayit);
-  const c = consonantsOf(bayit);
-  assert.ok(c.includes("ב"));
-  assert.ok(!/[ְ-ֽ]/.test(c));
+test("consonants drop vowel points and keep the shin dot", () => {
+  const week = itemsForWeek(8);
+  assert.ok(week.length >= 30);
+  for (const item of week) {
+    assert.match(item.hebrew, /[\u05B0-\u05BB\u05C7]/, `${item.id} is stored with vowel points`);
+  }
+  const shamar = VOCAB.find((item) => item.id === "shamar");
+  assert.ok(shamar);
+  const bare = consonantsOf(shamar);
+  assert.match(bare, /\u05C1/);
+  assert.equal(/[\u05B0-\u05BB\u05C7]/.test(bare), false);
+  assert.equal(glossMatches(shamar, "to watch"), true);
+  assert.equal(glossMatches(shamar, "to watch, guard"), true);
+  assert.equal(glossMatches(shamar, "watch"), true);
+  assert.equal(glossMatches(shamar, "to destroy"), false);
+  assert.equal(liveGloss(shamar, "to wa"), "prefix");
+  assert.equal(liveGloss(shamar, "banana"), "off");
+  for (const item of VOCAB) {
+    const first = item.gloss.split(/[,;]/)[0]?.trim();
+    assert.equal(glossMatches(item, first), true, `${item.id}: ${first}`);
+  }
 });
 
 test("a second miss waits a day, not ten minutes", () => {

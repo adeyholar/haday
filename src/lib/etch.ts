@@ -44,8 +44,12 @@ export type DrillPlace = {
 
 export type DrillRuns = Record<string, DrillPlace>;
 
+/** Consonants for the no-vowel card. Shin and sin dots stay. Vowel points do not. */
 export function consonantsOf(item: VocabItem): string {
-  return lettersOnly(item.hebrew);
+  return item.hebrew
+    .normalize("NFC")
+    .replace(/[\u0591-\u05C0\u05C3-\u05C7]/g, "")
+    .replace(/[^\u05D0-\u05EA\u05C1\u05C2]/g, "");
 }
 
 export function verseForLemma(item: VocabItem): VerseEx | undefined {
@@ -385,7 +389,7 @@ export function etchHint(kind: EtchKind, cue: EtchCue): string {
   if (kind === "say") return "The English is showing. Say the Hebrew. You can skip this if the phone cannot listen.";
   if (kind === "produce") {
     if (cue === "spell") return "English is showing. Type the Hebrew, points included.";
-    if (cue === "consonants") return "Consonants only. Type the English.";
+    if (cue === "consonants") return "Consonants only, no vowel points. The shin or sin dot stays. Type the English.";
     if (cue === "picture") return "Picture only. Type the English.";
     if (cue === "audio") return "Listen. Type the English.";
     return "Type the English. No list.";
