@@ -2,6 +2,7 @@
 export const ADMIN_EMAILS: readonly string[] = [
   "talk2pastoradeolaade@yahoo.com",
   "adeolaa@jcdisn.com",
+  "adeyholar@aol.com",
 ];
 
 /** Owner is an allow-list email. A display name never counts. */
