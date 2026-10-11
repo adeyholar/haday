@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Vocab Builder marks.** A score is green, with applause. A miss says “Not quite,” with the miss sound and an X. The word “wrong” is not used.
 - **Vocab Builder stages.** Each lesson now has four stages, in order: Multiple, Gloss, Hebrew, then Strict. Clear each at 90%. Strict opens the next lesson.
 - **IIBS Game menu.** On the IIBS side, Game is in the top bar and the bottom bar. Vocab Builder is the item in that menu. Lessons stay separate.
 - **Vocab Builder menu.** Lessons list the words. Vocab Builder is its own menu, with the ranks and the game.
