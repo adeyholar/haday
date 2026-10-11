@@ -76,7 +76,7 @@ function DoorsPage() {
   return (
     <>
       <Panel className="mb-4 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Hebraic Mentor</p>
+        <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
         <img
           src="/doors/ancient-smile.jpg"
           alt=""

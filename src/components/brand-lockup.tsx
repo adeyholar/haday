@@ -27,15 +27,15 @@ export function BrandLockup({
             size === "hero" ? "text-5xl" : "text-xl",
           )}
         >
-          HaDay
+          Haday
         </span>
         <span
           className={cn(
-            "font-semibold uppercase text-primary",
-            size === "hero" ? "mt-1 text-sm tracking-[0.2em]" : "text-xs tracking-[0.14em]",
+            "font-semibold text-primary",
+            size === "hero" ? "mt-1 text-sm tracking-[0.08em]" : "text-xs tracking-[0.04em]",
           )}
         >
-          Hebraic Mentor
+          HebRabbAi Mentor
         </span>
       </span>
     </>
