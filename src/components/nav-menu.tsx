@@ -48,7 +48,9 @@ export type NavHref =
   | "/game/lessons"
   | "/game/lessons/$track"
   | "/ask"
-  | "/ideas";
+  | "/ideas"
+  | "/iibs"
+  | "/iibs/vocab";
 
 export type NavItem = {
   to: NavHref;

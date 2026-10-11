@@ -74,6 +74,10 @@ const GAME: NavItem[] = [
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 
+const IIBS_GAME: NavItem[] = [
+  { to: "/iibs/vocab", label: "Vocab Builder", hint: "Levels and lessons, in order", icon: Layers },
+];
+
 const LISTEN: NavItem[] = [
   { to: "/listen", label: "Vocabulary", hint: "Hebrew, then English", icon: Headphones },
   { to: "/listen/pet", label: "Alive Pet", hint: "Class voice, your weak words", icon: PawPrint },
@@ -254,7 +258,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <BrandLockup linked />
           <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
-            {iibsOnly ? null : (
+            {iibsOnly ? (
+            <NavMenu
+              label="Game"
+              icon={Compass}
+              items={IIBS_GAME}
+              active={pathname.startsWith("/iibs/vocab")}
+            />
+            ) : (
             <NavMenu
               label="Game"
               icon={Compass}
@@ -351,19 +362,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </NavTip>
               </li>
               <li>
-                <NavTip label="Vocab Builder" side="top" full>
-                  <Link
-                    to="/iibs/vocab"
-                    title="Vocab Builder"
-                    className={cn(
-                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                      pathname.startsWith("/iibs/vocab") ? "text-primary" : "text-muted",
-                    )}
-                  >
-                    <Layers className="size-5" strokeWidth={pathname.startsWith("/iibs/vocab") ? 2.2 : 1.8} />
-                    Builder
-                  </Link>
-                </NavTip>
+                <NavMenu
+                  label="Game"
+                  icon={Compass}
+                  items={IIBS_GAME}
+                  active={pathname.startsWith("/iibs/vocab")}
+                  drop="up"
+                  tipSide="top"
+                  layout="bar"
+                />
               </li>
             </>
           ) : (

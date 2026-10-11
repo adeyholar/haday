@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **IIBS Game menu.** On the IIBS side, Game is in the top bar and the bottom bar. Vocab Builder is the item in that menu. Lessons stay separate.
 - **Vocab Builder menu.** Lessons list the words. Vocab Builder is its own menu, with the ranks and the game.
 - **IIBS ranks.** Clearing a level gives its rank. The ranks cover the whole ladder: Bearer of Words, Keeper of the Phrase, Parser of the Clause, Steward of the Verb, Scholar of the Line, and Reader of the Scroll.
 - **IIBS vocab game.** Vocab is its own menu. Level A, lesson 1 starts open. Clear a lesson at 90% and the next lesson opens. Clear every lesson in a level and the next level opens. A miss shows the right gloss and the word comes back.
