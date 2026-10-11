@@ -315,7 +315,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", iibsOnly ? "grid-cols-2" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", iibsOnly ? "grid-cols-3" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -332,21 +332,40 @@ export function AppShell({ children }: { children: ReactNode }) {
             </NavTip>
           </li>
           {iibsOnly ? (
-            <li>
-              <NavTip label="Vocab" side="top" full>
-                <Link
-                  to="/iibs"
-                  title="Vocab"
-                  className={cn(
-                    "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                    pathname.startsWith("/iibs") ? "text-primary" : "text-muted",
-                  )}
-                >
-                  <Library className="size-5" strokeWidth={pathname.startsWith("/iibs") ? 2.2 : 1.8} />
-                  Vocab
-                </Link>
-              </NavTip>
-            </li>
+            <>
+              <li>
+                <NavTip label="Lessons" side="top" full>
+                  <Link
+                    to="/iibs"
+                    title="Lessons"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab"))
+                        ? "text-primary"
+                        : "text-muted",
+                    )}
+                  >
+                    <Library className="size-5" strokeWidth={pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab")) ? 2.2 : 1.8} />
+                    Lessons
+                  </Link>
+                </NavTip>
+              </li>
+              <li>
+                <NavTip label="Vocab Builder" side="top" full>
+                  <Link
+                    to="/iibs/vocab"
+                    title="Vocab Builder"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/iibs/vocab") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <Layers className="size-5" strokeWidth={pathname.startsWith("/iibs/vocab") ? 2.2 : 1.8} />
+                    Builder
+                  </Link>
+                </NavTip>
+              </li>
+            </>
           ) : (
             <>
           <li>
