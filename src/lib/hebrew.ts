@@ -763,3 +763,12 @@ export function dageshCoach(hebrew: string): string | null {
     })
     .join(" ");
 }
+
+/** A handwriting image must be a pad drawing, not a web address. */
+export function isInkImage(image: string): boolean {
+  return (
+    image.length >= 32 &&
+    image.length <= 1_800_000 &&
+    /^data:image\/(?:png|jpeg);base64,[a-z0-9+/=\r\n]+$/i.test(image)
+  );
+}

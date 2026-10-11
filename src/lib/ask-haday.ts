@@ -8,6 +8,8 @@ import {
   MONTHLY_BUDGET_CENTS,
   STOP_AT_CENTS,
   addedCents,
+  clipAskHistory,
+  clipVerse,
   dayKey,
   monthKey,
   userMonthKey,
@@ -76,24 +78,27 @@ export const askHaday = createServerFn({ method: "POST" })
     }
     const question = (data.question || "").trim().slice(0, 800);
     if (question.length < 2) return { ok: false, error: "Type a question from the lesson." };
-    const history = (data.history ?? []).slice(-8);
+    const history = clipAskHistory(data.history);
+    const verse = clipVerse(data.context);
     const system = `You are HaDay Hebraic AI, a tutor for a first-year Biblical Hebrew class using Basics of Biblical Hebrew (Pratico / Van Pelt). Be clear, brief, and kind. Answer from the lesson: letters, syllables, nouns, the article הַ, the conjunction וְ, prepositions, adjectives, pronouns, existence particles, construct chains, numbers, and the BBH vocabulary. Hebrew you cite must match the actual word (do not mix fire אֵשׁ with אשית “I will put”). Dual needs the ay diphthong. Game and Quiz use citation lemmas (יָם, not בַּיָּם). The ordinary article is הַ plus dagesh; gutturals and resh refuse dagesh (compensatory הָ on א ע ר, virtual הַ on ה ח, seghol הֶ before unaccented הָ חָ עָ). Vav is always prefixed: default וְ, bump וּ before ב מ פ, hateph match, יְ → וִי, אֱלֹהִים → וֵאלֹהִים. Inseparable prepositions are בְּ כְּ לְ; מִן may assimilate. Adjectives agree and follow attributively, or predicate without matching article. Independent pronouns add emphasis. Construct is X of Y. Numbers 3–10 often flip gender. Week 3 reads chapters 4 and 5 together; games stay chapter by chapter. Genesis 1–5 is the first reading, public-domain Masoretic text. If you are not sure, say so. Do not reprint copyrighted textbook pages.
 ${lessonBrief()}
-${verseBrief(data.context)}`;
+${verseBrief(verse)}`;
+
+    const gate = await askGate(context.userId);
+    if (gate) return { ok: false, error: gate };
 
     if (claudeKey) {
-      const gate = await askGate(context.userId);
-      if (gate) return { ok: false, error: gate };
       const model = (process.env.ANTHROPIC_MODEL || "claude-haiku-5-5").trim();
       const answered = await callClaude(claudeKey, model, system, history, question);
       if (answered.ok) {
-        await rememberAsk(context.userId, model, answered.input, answered.output);
+        await rememberAsk(model, answered.input, answered.output);
         return { ok: true, text: answered.text };
       }
       if (!grokKey) return answered;
     }
 
     const grok = await callGrok(grokKey!, system, history, question);
+    if (grok.ok) await rememberAsk("grok", 0, 0);
     return grok;
   });
 
@@ -143,6 +148,19 @@ async function ensureAskMeter() {
   return meterReady;
 }
 
+async function takeSlot(bucket: string, limit: number): Promise<boolean> {
+  const sql = await getSql();
+  const rows = await sql<{ calls: number }>`
+    insert into ask_meter (bucket, calls, cents)
+    values (${bucket}, 1, 0)
+    on conflict (bucket) do update
+      set calls = ask_meter.calls + 1
+      where ask_meter.calls < ${limit}
+    returning calls
+  `;
+  return rows.length > 0;
+}
+
 async function askGate(userId: string): Promise<string | null> {
   try {
     await ensureAskMeter();
@@ -155,48 +173,39 @@ async function askGate(userId: string): Promise<string | null> {
       owner = false;
     }
     const now = new Date();
-    const rows = await sql<{ bucket: string; calls: number; cents: number }>`
-      select bucket, calls, cents from ask_meter
-      where bucket in (${monthKey(now)}, ${userMonthKey(userId, now)}, ${dayKey(userId, now)})
+    const rows = await sql<{ bucket: string; cents: number }>`
+      select bucket, cents from ask_meter where bucket = ${monthKey(now)}
     `;
-    const by = new Map(rows.map((row) => [row.bucket, row]));
-    const month = by.get(monthKey(now));
-    if ((Number(month?.cents) || 0) >= STOP_AT_CENTS) {
+    if ((Number(rows[0]?.cents) || 0) >= STOP_AT_CENTS) {
       return "HaDay Hebraic AI has used this month’s help. Ask in class until next month.";
     }
     if (owner) return null;
-    const day = by.get(dayKey(userId, now));
-    if ((Number(day?.calls) || 0) >= ASKS_PER_DAY) {
+    if (!(await takeSlot(dayKey(userId, now), ASKS_PER_DAY))) {
       return "You have used today’s lesson help. Come back tomorrow, or ask in class.";
     }
-    const mine = by.get(userMonthKey(userId, now));
-    if ((Number(mine?.calls) || 0) >= ASKS_PER_MONTH) {
+    if (!(await takeSlot(userMonthKey(userId, now), ASKS_PER_MONTH))) {
       return "You have used this month’s lesson help. Ask in class until next month.";
     }
     return null;
   } catch (err) {
     console.error("[ask] gate", err);
-    return null;
+    return "HaDay Hebraic AI is not available right now. Ask in class, or try again later.";
   }
 }
 
-async function rememberAsk(userId: string, model: string, input: number, output: number) {
+async function rememberAsk(model: string, input: number, output: number) {
   try {
     await ensureAskMeter();
     const sql = await getSql();
     const now = new Date();
     const cents = addedCents(model, input, output);
-    const buckets = [monthKey(now), userMonthKey(userId, now), dayKey(userId, now)];
-    for (const bucket of buckets) {
-      const add = bucket.startsWith("m:") ? cents : 0;
-      await sql`
-        insert into ask_meter (bucket, calls, cents)
-        values (${bucket}, 1, ${add})
-        on conflict (bucket) do update set
-          calls = ask_meter.calls + 1,
-          cents = ask_meter.cents + ${add}
-      `;
-    }
+    await sql`
+      insert into ask_meter (bucket, calls, cents)
+      values (${monthKey(now)}, 1, ${cents})
+      on conflict (bucket) do update set
+        calls = ask_meter.calls + 1,
+        cents = ask_meter.cents + ${cents}
+    `;
   } catch (err) {
     console.error("[ask] remember", err);
   }
@@ -217,6 +226,7 @@ async function callClaude(
       "anthropic-version": "2023-06-01",
       ...workspaceHeader(),
     },
+    signal: AbortSignal.timeout(30_000),
     body: JSON.stringify({
       model,
       max_tokens: 2500,
@@ -278,6 +288,7 @@ async function callGrok(
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
+    signal: AbortSignal.timeout(30_000),
     body: JSON.stringify({
       model: "grok-4.5",
       temperature: 0.2,

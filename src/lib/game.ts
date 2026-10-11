@@ -218,6 +218,8 @@ export function hydrateGame(raw: unknown): GameSnapshot {
   const chapters: Record<string, ChapterRecord> = {};
   if (r.chapters && typeof r.chapters === "object") {
     for (const [key, val] of Object.entries(r.chapters)) {
+      const n = Number(key);
+      if (!Number.isInteger(n) || !CHAPTER_META[n]) continue;
       chapters[key] = mergeChapter(val);
     }
   }

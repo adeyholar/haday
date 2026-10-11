@@ -4,6 +4,16 @@ import { authMiddleware } from "@/lib/auth/middleware";
 import { hydrateCard, type CardState } from "@/lib/srs";
 import { hydrateGame, type GameSnapshot } from "@/lib/game";
 import { scoreboard } from "@/lib/rewards";
+import { VOCAB, alphabetVocab } from "@/lib/vocab";
+
+const MAX_SAVE_CHARS = 256 * 1024;
+
+let knownCardIds: Set<string> | null = null;
+
+function cardIds(): Set<string> {
+  knownCardIds ??= new Set([...VOCAB.map((item) => item.id), ...alphabetVocab().map((item) => item.id)]);
+  return knownCardIds;
+}
 
 export type ProgressPayload = {
   cards: Record<string, CardState>;
@@ -70,21 +80,31 @@ export const saveProgress = createServerFn({ method: "POST" })
   .validator((input: ProgressPayload) => input)
   .middleware([authMiddleware])
   .handler(async ({ context, data }) => {
+    const cardsIn = data.cards && typeof data.cards === "object" ? data.cards : {};
+    const kept: Record<string, CardState> = {};
+    const known = cardIds();
+    for (const [id, card] of Object.entries(cardsIn)) {
+      if (!known.has(id)) continue;
+      kept[id] = hydrateCard(card);
+    }
+    const gameSnap = hydrateGame({
+      ...hydrateGame(data.game),
+      keepStreak: Number(data.keepStreak) || Number((data.game as GameSnapshot | undefined)?.keepStreak) || 0,
+      lastKeepDay: Number(data.lastKeepDay) || Number((data.game as GameSnapshot | undefined)?.lastKeepDay) || 0,
+    });
+    const cards = JSON.stringify(kept);
+    const game = JSON.stringify(gameSnap);
+    if (cards.length + game.length > MAX_SAVE_CHARS) {
+      return { ok: false as const, error: "That save is too large." };
+    }
     const sql = await getSql();
     await ensureProgressExtras();
-    const cards = JSON.stringify(data.cards ?? {});
     const week = Number.isFinite(data.week) ? data.week : 1;
     const direction = data.direction === "en-he" ? "en-he" : "he-en";
     const focus = data.focus === "weak" ? "weak" : "due";
     const streak = Number.isFinite(data.streak) ? data.streak : 0;
     const lastStudyDay = Number.isFinite(data.lastStudyDay) ? data.lastStudyDay : 0;
     const sessions = Number.isFinite(data.sessions) ? data.sessions : 0;
-    const gameSnap = hydrateGame({
-      ...hydrateGame(data.game),
-      keepStreak: Number(data.keepStreak) || Number((data.game as GameSnapshot | undefined)?.keepStreak) || 0,
-      lastKeepDay: Number(data.lastKeepDay) || Number((data.game as GameSnapshot | undefined)?.lastKeepDay) || 0,
-    });
-    const game = JSON.stringify(gameSnap);
     const board = scoreboard(gameSnap, streak);
     await sql`
       insert into study_progress (

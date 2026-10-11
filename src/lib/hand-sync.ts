@@ -3,21 +3,31 @@ import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { HAND_GOAL, type HandBank, type HandSample } from "@/lib/hand-style";
 
+const MAX_HAND_KEYS = 40;
+const MAX_STROKES = 12;
+const MAX_POINTS = 80;
+
 function parseBank(raw: string | null | undefined): HandBank {
   try {
     const parsed = JSON.parse(raw || "{}") as unknown;
     if (!parsed || typeof parsed !== "object") return {};
     const out: HandBank = {};
     for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+      if (Object.keys(out).length >= MAX_HAND_KEYS) break;
+      if (k.length < 1 || k.length > 32) continue;
       if (!Array.isArray(v)) continue;
       const samples: HandSample[] = [];
       for (const s of v) {
+        if (samples.length >= HAND_GOAL) break;
         if (!s || typeof s !== "object") continue;
         const strokes = (s as HandSample).strokes;
         if (!Array.isArray(strokes) || !strokes.length) continue;
-        samples.push({ strokes, t: Number((s as HandSample).t) || 0 });
+        const trimmed = strokes.slice(0, MAX_STROKES).map((stroke) =>
+          Array.isArray(stroke) ? stroke.slice(0, MAX_POINTS) : stroke,
+        );
+        samples.push({ strokes: trimmed as HandSample["strokes"], t: Number((s as HandSample).t) || 0 });
       }
-      if (samples.length) out[k] = samples.slice(0, HAND_GOAL);
+      if (samples.length) out[k] = samples;
     }
     return out;
   } catch {

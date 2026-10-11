@@ -33,3 +33,31 @@ export function dayKey(userId: string, now = new Date()): string {
 export function userMonthKey(userId: string, now = new Date()): string {
   return `u:${monthKey(now).slice(2)}:${userId}`;
 }
+
+const ASK_FIELD = 800;
+
+export function clipAskHistory(history: { role?: string; text?: string }[] | undefined): { role: "user" | "assistant"; text: string }[] {
+  const out: { role: "user" | "assistant"; text: string }[] = [];
+  for (const turn of (history ?? []).slice(-8)) {
+    if (!turn || (turn.role !== "user" && turn.role !== "assistant")) continue;
+    const text = String(turn.text ?? "").trim().slice(0, ASK_FIELD);
+    if (text) out.push({ role: turn.role, text });
+  }
+  return out;
+}
+
+export function clipVerse<T extends { ref?: string; he?: string; en?: string; word?: string; tags?: string[]; vocab?: string }>(
+  ctx?: T,
+): T | undefined {
+  if (!ctx?.ref || !ctx.he) return undefined;
+  const clip = (value: string | undefined, max = ASK_FIELD) => String(value ?? "").slice(0, max);
+  return {
+    ...ctx,
+    ref: clip(ctx.ref, 80),
+    he: clip(ctx.he),
+    en: clip(ctx.en),
+    word: ctx.word ? clip(ctx.word, 80) : undefined,
+    tags: (ctx.tags ?? []).slice(0, 12).map((tag) => clip(tag, 80)).filter(Boolean),
+    vocab: ctx.vocab ? clip(ctx.vocab) : undefined,
+  };
+}

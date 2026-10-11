@@ -9,7 +9,7 @@
  * `server.ts` only spreads these objects — do not copy that logic into that frozen file.
  */
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { originFromIncomingRequest, sendPasswordResetMail, sendVerificationMail } from "../mail";
+import { sendPasswordResetMail, sendVerificationMail } from "../mail";
 import { inspectMailbox } from "../mailbox";
 import { pruneOlderResetTokens, resetClientIp, resetSendBlocked } from "../reset-guard";
 
@@ -29,11 +29,10 @@ export async function sendResetPassword(
       console.info(`[auth] password reset mail skipped (rate limit) for ${email}`);
       return;
     }
-    const origin = (await originFromIncomingRequest()) || data.url;
     await sendPasswordResetMail({
       email,
       name: data.user.name ?? "",
-      url: origin,
+      url: "",
       token: data.token,
     });
     if (data.user.id) await pruneOlderResetTokens(data.user.id, data.token);

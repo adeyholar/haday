@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { normalizeHebrew } from "@/lib/hebrew";
+import { getSql } from "@/lib/db";
+import { isInkImage, normalizeHebrew } from "@/lib/hebrew";
 
-const MAX_IMAGE_CHARS = 1_800_000;
+const INK_PER_DAY = 40;
 
 type Ok = { ok: true; hebrew: string; verdict: "exact" | "close" | "different" };
 type Err = { ok: false; error: string };
@@ -11,7 +12,7 @@ export type ReadHandwritingResult = Ok | Err;
 export const readHandwriting = createServerFn({ method: "POST" })
   .validator((input: { image: string; expected: string; mode?: "word" | "letter" | "vowel" }) => input)
   .middleware([authMiddleware])
-  .handler(async ({ data }): Promise<ReadHandwritingResult> => {
+  .handler(async ({ data, context }): Promise<ReadHandwritingResult> => {
     const apiKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
     if (!apiKey) {
       return {
@@ -20,8 +21,11 @@ export const readHandwriting = createServerFn({ method: "POST" })
           "The ink reader is not connected on this site (no cloud key). Letter exams now check the shape on the pad. For full words, type the Hebrew instead.",
       };
     }
-    if (!data.image || data.image.length < 32) return { ok: false, error: "Empty drawing." };
-    if (data.image.length > MAX_IMAGE_CHARS) return { ok: false, error: "Drawing is too large. Clear and try a simpler stroke." };
+    if (!isInkImage(data.image || "")) {
+      return { ok: false, error: "Send the drawing from the pad. A web address is not accepted." };
+    }
+    const quota = await reserveInk(context.userId);
+    if (quota) return { ok: false, error: quota };
 
     const mode = data.mode === "letter" || data.mode === "vowel" ? data.mode : "word";
     const target = mode === "word" ? normalizeHebrew(data.expected) : data.expected.trim();
@@ -100,6 +104,7 @@ Do not mark exact unless the strokes support it. Do not translate.`;
           },
         ],
       }),
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!res.ok) {
@@ -111,6 +116,40 @@ Do not mark exact unless the strokes support it. Do not translate.`;
     const parsed = parseReply(text);
     return { ok: true, hebrew: parsed.hebrew, verdict: parsed.verdict };
   });
+
+let inkReady: Promise<void> | null = null;
+
+async function reserveInk(userId: string): Promise<string | null> {
+  try {
+    inkReady ??= getSql().then(async (sql) => {
+      await sql.query(`
+        create table if not exists ask_meter (
+          bucket text primary key,
+          calls integer not null default 0,
+          cents integer not null default 0
+        )
+      `);
+    });
+    await inkReady;
+    const day = new Date().toISOString().slice(0, 10);
+    const bucket = `ink:${day}:${userId}`;
+    const sql = await getSql();
+    const rows = await sql<{ calls: number }>`
+      insert into ask_meter (bucket, calls, cents)
+      values (${bucket}, 1, 0)
+      on conflict (bucket) do update
+        set calls = ask_meter.calls + 1
+        where ask_meter.calls < ${INK_PER_DAY}
+      returning calls
+    `;
+    if (rows.length > 0) return null;
+    return "You have used today’s ink reading. Type the Hebrew, or try again tomorrow.";
+  } catch (err) {
+    inkReady = null;
+    console.error("[ink] quota", err);
+    return "The ink reader is not available right now. Type the Hebrew instead.";
+  }
+}
 
 function parseReply(text: string): { hebrew: string; verdict: "exact" | "close" | "different" } {
   const trimmed = text.trim();
