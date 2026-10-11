@@ -333,17 +333,17 @@ export function AppShell({ children }: { children: ReactNode }) {
           </li>
           {iibsOnly ? (
             <li>
-              <NavTip label="Levels" side="top" full>
+              <NavTip label="Vocab" side="top" full>
                 <Link
                   to="/iibs"
-                  title="Levels"
+                  title="Vocab"
                   className={cn(
                     "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
                     pathname.startsWith("/iibs") ? "text-primary" : "text-muted",
                   )}
                 >
                   <Library className="size-5" strokeWidth={pathname.startsWith("/iibs") ? 2.2 : 1.8} />
-                  Levels
+                  Vocab
                 </Link>
               </NavTip>
             </li>

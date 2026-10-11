@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **IIBS vocab game.** Vocab is its own menu. Level A, lesson 1 starts open. Clear a lesson at 80% and the next lesson opens. Clear every lesson in a level and the next level opens. A miss shows the right gloss and the word comes back.
 - **IIBS word lists.** Levels A to E each open into 30 lessons. Every lesson shows its words: Hebrew, the plural when the lexicon has one, and the English. Games are not in yet. Level E's lexicon stops at lesson 28, so lessons 29 and 30 are empty.
 - **Two studies.** Home is two doors: BBH and IIBS. The BBH door carries the modern mark. The IIBS door carries the ancient seal. Accounts already on the site stay on BBH. A new account chooses one door, and the other stays locked. You can open both, but only one at a time. Come back to the two squares before the other door will open. IIBS is a ladder: Level A, then B, C, D, E, then Hebrew Reading Lab. Each level above A stays locked until the exam under it is passed at 80%. Lessons are not in yet.
 - **Week 7 mock shows the answer you gave.** A right answer stays on the card in green. A miss stays in red, and the correct answer is printed under it.

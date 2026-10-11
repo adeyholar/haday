@@ -5,6 +5,7 @@ import { emptyTyping, hydrateTyping, applyMark, type TypingProgress } from "@/li
 import { STUDY_RUNG_MAX } from "@/lib/hebrew-typing/study-rungs";
 import { hydrateRoadRun, type RoadRun } from "@/lib/road-exam";
 import { hydrateWeakRun, type WeakRun } from "@/lib/weak-pool";
+import { emptyIibsGame, hydrateIibsGame, type IibsGameProgress } from "@/lib/iibs-game";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -70,6 +71,8 @@ export type GameSnapshot = {
   roadRun: RoadRun | null;
   /** Open weak-word pool. Null once that sitting is finished. */
   weakRun: WeakRun | null;
+  /** IIBS vocab game. A cleared lesson opens the next. A cleared level opens the next. */
+  iibs: IibsGameProgress;
 };
 
 export type BalloonProgress = {
@@ -158,6 +161,7 @@ export function defaultGame(): GameSnapshot {
     ladder: defaultLadder(),
     roadRun: null,
     weakRun: null,
+    iibs: emptyIibsGame(),
   };
 }
 
@@ -240,6 +244,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     ladder: hydrateLadder(r.ladder),
     roadRun: hydrateRoadRun(r.roadRun),
     weakRun: hydrateWeakRun(r.weakRun),
+    iibs: hydrateIibsGame(r.iibs),
   };
 }
 

@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
+import { Check, Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { IIBS_LEVELS, PASS_MARK, levelAfter, levelOpen, type IibsLevelId } from "@/lib/path";
+import { IIBS_LESSON_PASS, levelCleared, levelUnlocked } from "@/lib/iibs-game";
+import { IIBS_LEVELS, levelAfter, type IibsLevelId } from "@/lib/path";
 import { vocabLessons } from "@/lib/iibs-vocab";
+import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/iibs/")({ component: IibsHome });
 
 function IibsHome() {
+  const progress = useStudy((s) => s.game.iibs);
   const [gate, setGate] = useState<MyPath | null>(null);
   const [error, setError] = useState("");
 
@@ -19,53 +22,57 @@ function IibsHome() {
         if (!cancelled) setGate(next);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the ladder.");
+        if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the vocab game.");
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
+  const admin = Boolean(gate?.admin);
+
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · ladder</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Levels</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · vocab</p>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Vocab</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Level A is open. Each next level stays locked until the exam of the level under it is passed at {PASS_MARK}%.
-          Levels A to E each hold 30 lessons, and each lesson has its words. Games come later.
-        </p>
-        <p className="mt-3 max-w-prose text-muted">
-          To start above Level A, pass every exam below that level. Those exams open with the lessons.
+          Level A, lesson 1 is open. Clear a lesson at {IIBS_LESSON_PASS}% to open the next lesson. Clear every lesson
+          in a level to open the next level.
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
       <ol className="grid gap-2">
         {IIBS_LEVELS.map((level) => {
-          const open = gate ? levelOpen(level.id, gate.cleared, gate.admin) : level.id === "A";
-          return <LevelRow key={level.id} id={level.id} title={level.title} open={open} />;
+          const open = levelUnlocked(progress, level.id, admin);
+          const done = level.id !== "lab" && levelCleared(progress, level.id);
+          return <LevelRow key={level.id} id={level.id} title={level.title} open={open} done={done} />;
         })}
       </ol>
     </>
   );
 }
 
-function LevelRow({ id, title, open }: { id: IibsLevelId; title: string; open: boolean }) {
+function LevelRow({ id, title, open, done }: { id: IibsLevelId; title: string; open: boolean; done: boolean }) {
   const after = levelAfter(id);
   const lessons = vocabLessons(id);
   const words = lessons ? lessons.reduce((sum, lesson) => sum + lesson.length, 0) : 0;
-  const note = open
-    ? lessons
-      ? `${lessons.length} lessons · ${words} words`
-      : "Open for you."
-    : `Locked until the Level ${after} exam is passed.`;
+  const note = !open
+    ? id === "lab"
+      ? "Locked until Level E is cleared."
+      : `Locked until Level ${after} is cleared.`
+    : done
+      ? "Cleared."
+      : lessons
+        ? `${lessons.length} lessons · ${words} words`
+        : "Open for you.";
   const body = (
     <>
       <span>
         <span className="block font-display text-2xl font-bold">{title}</span>
         <span className="mt-1 block text-sm text-muted">{note}</span>
       </span>
-      {open ? null : <Lock className="size-5 shrink-0 text-muted" />}
+      {done ? <Check className="size-5 shrink-0 text-good" /> : open ? null : <Lock className="size-5 shrink-0 text-muted" />}
     </>
   );
   const className =
