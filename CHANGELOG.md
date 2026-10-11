@@ -2,6 +2,7 @@
 
 Newest first. Class-facing upgrades only — not every alignment batch.
 
+- **Two studies.** Home is two doors: BBH and IIBS. Accounts already on the site stay on BBH. A new account chooses one door, and the other stays locked. You can open both. IIBS is a ladder: Level A, then B, C, D, E, then Hebrew Reading Lab. Each level above A stays locked until the exam under it is passed at 80%. Lessons are not in yet.
 - **Week 7 mock shows the answer you gave.** A right answer stays on the card in green. A miss stays in red, and the correct answer is printed under it.
 - **Ask HaDay can use Claude.** Lesson questions go through the owner’s Claude credit, on the server only. The credit stops near $140 for the month. Classmates do not see the key or the balance.
 - **What the class uses.** More → What the class uses, for the owner only. Saved accounts show which practice they have done most. Page opens are counted from now on.

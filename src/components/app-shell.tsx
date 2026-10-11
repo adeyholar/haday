@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, Navigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   BookOpen,
@@ -37,6 +37,8 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
+import { getMyPath, type MyPath } from "@/lib/learner-path";
+import { blockedDestination } from "@/lib/path";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -107,6 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pathGate, setPathGate] = useState<MyPath | null>(null);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const board = scoreboard(game, streak);
@@ -116,6 +119,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (isPublic || !userId) {
       setProgressReady(false);
       setIsAdmin(false);
+      setPathGate(null);
       return;
     }
     let cancelled = false;
@@ -159,6 +163,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           if (!cancelled) setIsAdmin(false);
         });
 
+      void getMyPath()
+        .then((gate) => {
+          if (!cancelled) setPathGate(gate);
+        })
+        .catch(() => {
+          if (!cancelled) setPathGate({ path: "bbh", cleared: null, admin: false });
+        });
+
       unsub = useStudy.subscribe((state) => {
         if (state.ownerId !== userId) return;
         window.clearTimeout(timer);
@@ -200,7 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  if (isPending || (user && !progressReady)) {
+  if (isPending || (user && (!progressReady || !pathGate))) {
     return (
       <>
         <VisitorBeacon />
@@ -218,6 +230,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
+  const iibsOnly = pathGate?.path === "iibs" && !pathGate.admin;
+  const blocked = pathGate && !pathGate.admin ? blockedDestination(pathname, pathGate) : null;
+  if (blocked) return <Navigate to={blocked} />;
+
   return (
     <div className="min-h-dvh text-fg">
       <VisitorBeacon />
@@ -225,28 +241,33 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <BrandLockup linked />
           <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
+            {iibsOnly ? null : (
             <NavMenu
               label="Game"
               icon={Compass}
               items={GAME}
               active={pathname.startsWith("/game") || pathname.startsWith("/challenge")}
             />
+            )}
+            {iibsOnly ? null : (
             <NavMenu
               label="Study"
               icon={Library}
               items={STUDY}
               active={
                 STUDY.some((x) => (x.to === "/" ? false : pathname === x.to || pathname.startsWith(`${x.to}/`))) ||
-                pathname === "/" ||
                 pathname.startsWith("/study")
               }
             />
+            )}
+            {iibsOnly ? null : (
             <NavMenu
               label="Listen"
               icon={Headphones}
               items={LISTEN}
               active={pathname.startsWith("/listen")}
             />
+            )}
             <NavTip label="Ask HaDay Hebraic AI">
               <Link
                 to="/ask"
@@ -281,7 +302,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className="mx-auto grid max-w-3xl grid-cols-4">
+        <ul className={cn("mx-auto grid max-w-3xl", iibsOnly ? "grid-cols-2" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -297,6 +318,24 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </NavTip>
           </li>
+          {iibsOnly ? (
+            <li>
+              <NavTip label="Levels" side="top" full>
+                <Link
+                  to="/iibs"
+                  title="Levels"
+                  className={cn(
+                    "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                    pathname.startsWith("/iibs") ? "text-primary" : "text-muted",
+                  )}
+                >
+                  <Library className="size-5" strokeWidth={pathname.startsWith("/iibs") ? 2.2 : 1.8} />
+                  Levels
+                </Link>
+              </NavTip>
+            </li>
+          ) : (
+            <>
           <li>
             <NavMenu
               label="Game"
@@ -330,6 +369,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               layout="bar"
             />
           </li>
+            </>
+          )}
         </ul>
       </nav>
     </div>

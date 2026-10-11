@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { setLearnerPath } from "@/lib/learner-path";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -208,6 +209,7 @@ function AdminPage() {
               <th className="px-4 py-3 font-semibold">Last study</th>
               <th className="px-4 py-3 font-semibold tabular-nums">Streak</th>
               <th className="px-4 py-3 font-semibold">Mail</th>
+              <th className="px-4 py-3 font-semibold">Study</th>
               <th className="px-4 py-3 font-semibold">Reset</th>
               <th className="px-4 py-3 font-semibold">Remove</th>
             </tr>
@@ -226,6 +228,14 @@ function AdminPage() {
                 <td className="px-4 py-3 tabular-nums text-ink">{p.streak}d</td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">
                   {p.hasPassword ? (p.emailVerified ? "Confirmed" : "Waiting") : "OAuth"}
+                </td>
+                <td className="px-4 py-3">
+                  <PathSwitch
+                    person={p}
+                    onChanged={(id, path) =>
+                      setPeople((cur) => (cur ?? []).map((row) => (row.id === id ? { ...row, path } : row)))
+                    }
+                  />
                 </td>
                 <td className="px-4 py-3">
                   <IssueReset
@@ -248,6 +258,51 @@ function AdminPage() {
         </table>
       </div>
     </>
+  );
+}
+
+function PathSwitch({
+  person,
+  onChanged,
+}: {
+  person: RosterPerson;
+  onChanged: (id: string, path: "bbh" | "iibs") => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const next = person.path === "iibs" ? "bbh" : "iibs";
+  const label = person.path === "iibs" ? "IIBS" : person.path === "bbh" ? "BBH" : "Not chosen";
+
+  async function go() {
+    setBusy(true);
+    setNote(null);
+    try {
+      const result = await setLearnerPath({ data: { userId: person.id, path: next } });
+      if (!result.ok) {
+        setNote(result.error);
+        return;
+      }
+      onChanged(person.id, result.path);
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Could not change the study.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid min-w-[7rem] justify-items-start gap-1">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</span>
+      <button
+        type="button"
+        disabled={busy}
+        className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-primary shadow-[var(--shadow-border)] disabled:opacity-60"
+        onClick={() => void go()}
+      >
+        {busy ? "Saving…" : next === "iibs" ? "Move to IIBS" : "Move to BBH"}
+      </button>
+      {note ? <span className="max-w-[12rem] text-xs leading-snug text-muted">{note}</span> : null}
+    </div>
   );
 }
 
