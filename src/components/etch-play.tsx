@@ -188,7 +188,10 @@ export function EtchPlay({
             ) : task.kind === "contrast" && task.cue !== "he" ? (
               <p className="font-display text-3xl font-semibold text-ink">{item.gloss.split(/[,;]/)[0]}</p>
             ) : task.cue === "consonants" && !graded ? (
-              <p className="he-word text-5xl tracking-[0.2em]">{consonantsOf(item)}</p>
+              <div>
+                <p className="he-word text-5xl tracking-[0.2em]">{consonantsOf(item)}</p>
+                <p className="mt-2 text-sm text-muted">Vowel points are off on this card.</p>
+              </div>
             ) : task.cue === "audio" && !graded ? (
               <p className="font-display text-2xl text-muted">Listen</p>
             ) : task.cue === "picture" && !graded ? (
@@ -396,11 +399,11 @@ export function EtchPlay({
             strict
             liveGrade
           />
-          {!graded && (
-            <Button type="submit" className="mt-3 w-full" disabled={!typed.trim()}>
+          {!graded && typed.trim() ? (
+            <Button type="submit" className="mt-3 w-full">
               Check
             </Button>
-          )}
+          ) : null}
         </form>
       )}
 
@@ -433,11 +436,11 @@ export function EtchPlay({
               graded && !typedOk && "border-bad",
             )}
           />
-          {!graded && (
-            <Button type="submit" className="mt-3 w-full" disabled={!typed.trim()}>
+          {!graded && typed.trim() ? (
+            <Button type="submit" className="mt-3 w-full">
               Check
             </Button>
-          )}
+          ) : null}
         </form>
       )}
 
@@ -512,9 +515,11 @@ export function EtchPlay({
                   placeholder="או הקלד"
                   className="he-word min-h-14 w-full rounded-[var(--radius-md)] border-2 border-transparent bg-card px-3 text-center text-2xl shadow-[var(--shadow-border)]"
                 />
-                <Button type="submit" variant="outline" className="mt-2 w-full" disabled={!typed.trim()}>
-                  Check the typed word
-                </Button>
+                {typed.trim() ? (
+                  <Button type="submit" variant="outline" className="mt-2 w-full">
+                    Check the typed word
+                  </Button>
+                ) : null}
               </form>
             </>
           )}

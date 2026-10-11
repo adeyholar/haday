@@ -648,20 +648,36 @@ export function normalizeGloss(s: string): string {
     .trim();
 }
 
+function glossSenses(item: VocabItem): string[] {
+  const senses = new Set<string>();
+  for (const part of [item.gloss, ...item.alts]) {
+    const whole = normalizeGloss(part);
+    if (whole) senses.add(whole);
+    for (const bit of part.split(/[,;/]|\s+or\s+/)) {
+      const sense = normalizeGloss(bit);
+      if (sense) senses.add(sense);
+    }
+  }
+  return [...senses];
+}
+
 export function glossMatches(item: VocabItem, input: string): boolean {
   const n = normalizeGloss(input);
   if (!n) return false;
-  const pool = [item.gloss, ...item.alts].map(normalizeGloss);
-  if (pool.includes(n)) return true;
-  return pool.some((g) => g.split(/,|\/|\s+or\s+/).map((p) => p.trim()).includes(n));
+  const senses = glossSenses(item);
+  if (senses.includes(n)) return true;
+  const bits = input
+    .split(/[,;/]|\s+or\s+/)
+    .map((bit) => normalizeGloss(bit))
+    .filter(Boolean);
+  return bits.length > 1 && bits.every((bit) => senses.includes(bit));
 }
 
 export function liveGloss(item: VocabItem, input: string): "empty" | "prefix" | "exact" | "off" {
   const n = normalizeGloss(input);
   if (!n) return "empty";
   if (glossMatches(item, input)) return "exact";
-  const pool = [item.gloss, ...item.alts].map(normalizeGloss);
-  if (pool.some((g) => g.startsWith(n))) return "prefix";
+  if (glossSenses(item).some((sense) => sense.startsWith(n))) return "prefix";
   return "off";
 }
 
