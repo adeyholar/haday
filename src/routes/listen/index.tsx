@@ -214,6 +214,12 @@ function ListenPage() {
           Hebrew as a whole word, then English. Avraham, then Abraham. Isolated Open Hebrew Bible audio when we have
           that lemma; otherwise a spoken name. Loop this chapter, a group of chapters you pick, or the whole list.
         </p>
+        <Link
+          to="/listen/road"
+          className="mt-3 flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-ink px-3 text-sm font-semibold text-parchment"
+        >
+          Play a week on the road
+        </Link>
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">
             On iPad: open this page in Safari, turn the volume up, and make sure the side Silent switch is not orange.
