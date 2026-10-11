@@ -19,7 +19,7 @@ export function MovedSignpost() {
         <p className="he-word text-5xl font-bold text-primary" lang="he">
           הַדַּי
         </p>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Hebraic Mentor</p>
+        <p className="mt-2 text-xs font-semibold tracking-[0.08em] text-primary">HebRabbAi Mentor</p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink">This address is closed.</h1>
         <p className="mx-auto mt-4 max-w-prose text-muted">
           HaDay now lives on the class site. Bookmark the link below and use it from now on. Old logins from this

@@ -46,7 +46,7 @@ function Home() {
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Hebraic Mentor</p>
+        <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
           {firstName ? `${firstName}, learn the words that open the text.` : "Learn the words that open the text."}
         </h1>

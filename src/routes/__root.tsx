@@ -10,7 +10,7 @@ import { AppErrorComponent } from "@/lib/error-component";
 import { isRetiredVercelHost } from "@/lib/class-site";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "HaDay";
+const APP_NAME = "Haday HebRabbAi Mentor";
 
 const fetchRetiredHost = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -51,7 +51,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
-      { name: "description", content: "HaDay Hebraic Mentor — Biblical Hebrew vocabulary for first-year students." },
+      { name: "description", content: "Haday HebRabbAi Mentor — Biblical Hebrew vocabulary for first-year students." },
       { name: "theme-color", content: "#f3eee4" },
     ],
     links: [
