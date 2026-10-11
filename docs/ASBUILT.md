@@ -11,7 +11,13 @@ Living picture of **what the class site is today**. Not a wish list.
 | **Course** | BIBL 630 · *Basics of Biblical Hebrew*, 3rd ed. |
 | **Snapshot** | 7 September 2026 |
 
-Each shipped upgrade: add a row in [CHANGELOG.md](../CHANGELOG.md) and edit the section here that changed.
+Each shipped upgrade is recorded on the Notion Change Log, which is the documentation source of truth:
+
+https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697
+
+Developer Handbook: https://app.notion.com/p/3f6058f607b18144a482f8173456df2a
+
+This file is the older picture of the running app. If it disagrees with Notion, Notion wins. If it disagrees with the code, correct Notion the same day.
 
 ---
 
@@ -84,8 +90,8 @@ Postgres on Azure holds users, sessions, progress, ideas, visits. Local preview 
 
 When a feature ships to `main`:
 
-1. **CHANGELOG.md** — newest date at the top. One short bullet: what classmates can do now.
-2. **This file** — change only the section that is no longer true (table row, count, URL).
-3. Do not leave the as-built ahead of production. Azure deploys from `main`.
+1. **Notion Change Log** — newest row at the top. What changed, why, the pull request, and what must not be reversed.
+2. **Developer Handbook** — change the section that is no longer true.
+3. Do not add a new entry to `CHANGELOG.md`. That file is the archive.
 
 In-app **Suggest a feature** is the student list. This file is the engineering picture of what actually runs. The next four builds (tap-word, echo verse, Ask on this verse, pronunciation later) live in [ROADMAP.md](ROADMAP.md).

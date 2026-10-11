@@ -12,10 +12,10 @@ The old Vercel URL ([https://haday.vercel.app](https://haday.vercel.app)) is shu
 
 Azure fallback: [https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net](https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net)
 
-**As-built (what runs today):** [docs/ASBUILT.md](docs/ASBUILT.md)  
-**Each upgrade:** [CHANGELOG.md](CHANGELOG.md)
+**Documentation (source of truth):** [Change Log](https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697) and [Developer Handbook](https://app.notion.com/p/3f6058f607b18144a482f8173456df2a) on Notion.  
+**Code that runs:** this GitHub repo, branch **`main`**. A push to `main` builds the Docker image and deploys Azure Web App **haday**.
 
-Source of truth is this GitHub repo, branch **`main`**. A push to `main` builds the Docker image and deploys Azure Web App **haday**. The same Docker image (or `npm run build` + `npm start`) runs on any Node 22 host.
+Older class notes remain in [CHANGELOG.md](CHANGELOG.md) as an archive. Do not add new entries there. Add them on the Notion Change Log the same day they merge. The picture of the running app is still [docs/ASBUILT.md](docs/ASBUILT.md) until that section is copied into the handbook.
 
 
 ## Always ship to `main`

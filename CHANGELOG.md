@@ -1,6 +1,18 @@
 # Changelog
 
-Newest first. Class-facing upgrades only — not every alignment batch.
+This file is an **archive**. The living change log for auditors and developers is on Notion:
+
+https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697
+
+The Developer Handbook is beside it:
+
+https://app.notion.com/p/3f6058f607b18144a482f8173456df2a
+
+Do not add new entries here. The same day a change merges to `main`, add a row on that Notion page: what changed, why, the pull request, and what must not be reversed.
+
+Notes below were written before 11 October 2026, plus the owner-access line that opened the Notion log.
+
+---
 
 - **Owner access.** Only an allow-list email can open the owner pages. A display name such as Adeola, Crown, or Haday no longer does.
 - **BBH path.** Spell (strict) is optional. The next chapter opens after Spell (lenient). A miss on Strict does not lock the path.
@@ -50,7 +62,7 @@ Format: **date** · what shipped · why it matters.
 
 ## How to add an entry
 
-When you push a feature to `main`, put a bullet **above** this list. Update [docs/ASBUILT.md](docs/ASBUILT.md) if the current picture changed.
+When a change merges to `main`, add a row on the Notion Change Log. Do not add it here. Update the Developer Handbook if a product rule changed. `docs/ASBUILT.md` is the older picture of the running app.
 
 ---
 
