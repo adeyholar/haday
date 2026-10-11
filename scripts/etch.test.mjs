@@ -86,7 +86,7 @@ test("a drill place survives hydrateGame", () => {
 
 test("the study card shows the English only after Show meaning", () => {
   const src = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
-  assert.match(src, /Show meaning/);
+  assert.match(src, /typed\.trim\(\) \? "Check" : "Show meaning"/);
   assert.match(src, /Type a guess, or show the meaning/);
   assert.match(src, /I knew it/);
   assert.match(src, /Not yet/);
