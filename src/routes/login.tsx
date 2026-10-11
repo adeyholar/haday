@@ -5,6 +5,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
+import { stashPathIntent, type StudyPath } from "@/lib/path";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -25,6 +26,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [pathChoice, setPathChoice] = useState<StudyPath | "">("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
@@ -99,6 +101,10 @@ function Login() {
         if (!agreed) {
           throw new Error("Read Privacy and disclaimer, then tick the box.");
         }
+        if (pathChoice !== "bbh" && pathChoice !== "iibs") {
+          throw new Error("Choose BBH or the IIBS ladder.");
+        }
+        stashPathIntent(pathChoice);
         const { error: signUpError } = await authClient.signUp.email({
           name: name.trim() || email.split("@")[0] || "Student",
           email: email.trim(),
@@ -143,7 +149,7 @@ function Login() {
       <div className="rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)] sm:p-6">
         <BrandLockup size="hero" />
         <p className="mt-4 text-center text-sm text-muted">
-          BIBL 630 · Biblical Hebrew I. Create an account so your drill, writing, and quiz work stay with you.
+          Create an account, then choose BBH or the IIBS ladder. That choice stays with you.
         </p>
 
         {!authEnabled ? (
@@ -286,6 +292,35 @@ function Login() {
             ) : (
             <form className="grid gap-3" onSubmit={(event) => void onEmail(event)}>
               {mode === "up" && (
+                <fieldset className="grid grid-cols-2 gap-2">
+                  <legend className="col-span-2 mb-1 text-sm font-medium text-muted">Study</legend>
+                  <button
+                    type="button"
+                    className={cn(
+                      "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
+                      pathChoice === "bbh" ? "bg-ink text-parchment" : "bg-card text-ink",
+                    )}
+                    onClick={() => setPathChoice("bbh")}
+                  >
+                    BBH
+                    <span className={cn("mt-1 block text-xs font-medium", pathChoice === "bbh" ? "text-parchment/80" : "text-muted")}>
+                      Biblical Hebrew
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
+                      pathChoice === "iibs" ? "bg-parchment text-ink ring-1 ring-ink/30" : "bg-card text-ink",
+                    )}
+                    onClick={() => setPathChoice("iibs")}
+                  >
+                    IIBS
+                    <span className="mt-1 block text-xs font-medium text-muted">Levels A to E</span>
+                  </button>
+                </fieldset>
+              )}
+              {mode === "up" && (
                 <label className="grid gap-1 text-sm">
                   <span className="font-medium text-muted">Name</span>
                   <input
@@ -339,7 +374,7 @@ function Login() {
                 </label>
               )}
               {error && <p className="text-sm text-danger">{error}</p>}
-              <Button type="submit" className="mt-1 w-full" disabled={busy || (mode === "up" && !agreed)}>
+              <Button type="submit" className="mt-1 w-full" disabled={busy || (mode === "up" && (!agreed || !pathChoice))}>
                 {busy ? "Working…" : mode === "up" ? "Create account" : "Sign in"}
               </Button>
               {mode === "in" && (

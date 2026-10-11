@@ -25,6 +25,7 @@ export type RosterPerson = {
   emailVerified: boolean;
   protectedAccount: boolean;
   providers: string;
+  path: "bbh" | "iibs" | null;
 };
 
 function envAdminEmails(): string[] {
@@ -80,6 +81,8 @@ export const listRoster = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<RosterPerson[]> => {
     await assertAdmin(context.userId);
+    const { ensureLearnerPath } = await import("@/lib/learner-path");
+    await ensureLearnerPath();
     const sql = await getSql();
     const rows = await sql<{
       id: string;
@@ -93,6 +96,7 @@ export const listRoster = createServerFn({ method: "GET" })
       has_password: boolean | null;
       email_verified: boolean | null;
       providers: string | null;
+      study_path: string | null;
     }>`
       select
         u.id,
@@ -116,9 +120,11 @@ export const listRoster = createServerFn({ method: "GET" })
           select string_agg(distinct a."providerId", ', ')
           from account a
           where a."userId" = u.id
-        ) as providers
+        ) as providers,
+        lp.path as study_path
       from "user" u
       left join study_progress p on p.user_id = u.id
+      left join learner_path lp on lp.user_id = u.id
       order by u."createdAt" desc
     `;
     return rows.map((r) => ({
@@ -134,6 +140,7 @@ export const listRoster = createServerFn({ method: "GET" })
       emailVerified: Boolean(r.email_verified),
       protectedAccount: isProtectedAccount(r.email, r.name),
       providers: r.providers ?? "",
+      path: r.study_path === "iibs" ? "iibs" : r.study_path === "bbh" ? "bbh" : null,
     }));
   });
 

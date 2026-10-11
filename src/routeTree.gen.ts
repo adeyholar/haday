@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AlphabetRouteImport } from './routes/alphabet'
 import { Route as AskRouteImport } from './routes/ask'
+import { Route as BbhRouteImport } from './routes/bbh'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as CardsRouteImport } from './routes/cards'
 import { Route as ChallengeRouteImport } from './routes/challenge'
@@ -20,6 +21,7 @@ import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DrillRouteImport } from './routes/drill'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as IdeasRouteImport } from './routes/ideas'
+import { Route as IibsRouteImport } from './routes/iibs'
 import { Route as KeepRouteImport } from './routes/keep'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LegalRouteImport } from './routes/legal'
@@ -45,6 +47,8 @@ import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
+import { Route as IibsIndexRouteImport } from './routes/iibs/index'
+import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -94,6 +98,11 @@ const AskRoute = AskRouteImport.update({
   path: '/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BbhRoute = BbhRouteImport.update({
+  id: '/bbh',
+  path: '/bbh',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
@@ -127,6 +136,11 @@ const GuideRoute = GuideRouteImport.update({
 const IdeasRoute = IdeasRouteImport.update({
   id: '/ideas',
   path: '/ideas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IibsRoute = IibsRouteImport.update({
+  id: '/iibs',
+  path: '/iibs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KeepRoute = KeepRouteImport.update({
@@ -253,6 +267,16 @@ const GameWeek7Route = GameWeek7RouteImport.update({
   id: '/game/week7',
   path: '/game/week7',
   getParentRoute: () => rootRouteImport,
+} as any)
+const IibsIndexRoute = IibsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsLevelRoute = IibsLevelRouteImport.update({
+  id: '/$level',
+  path: '/$level',
+  getParentRoute: () => IibsRoute,
 } as any)
 const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/lessons/',
@@ -400,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
+  '/bbh': typeof BbhRoute
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
@@ -407,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
   '/ideas': typeof IdeasRoute
+  '/iibs': typeof IibsRouteWithChildren
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
@@ -430,9 +456,11 @@ export interface FileRoutesByFullPath {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
+  '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
+  '/iibs/': typeof IibsIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
@@ -466,6 +494,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
+  '/bbh': typeof BbhRoute
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
@@ -495,9 +524,11 @@ export interface FileRoutesByTo {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
+  '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
+  '/iibs': typeof IibsIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/listen': typeof ListenIndexRoute
   '/study': typeof StudyIndexRoute
@@ -532,6 +563,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
+  '/bbh': typeof BbhRoute
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
@@ -539,6 +571,7 @@ export interface FileRoutesById {
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
   '/ideas': typeof IdeasRoute
+  '/iibs': typeof IibsRouteWithChildren
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
@@ -562,9 +595,11 @@ export interface FileRoutesById {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
+  '/iibs/$level': typeof IibsLevelRoute
   '/listen/pet': typeof ListenPetRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
+  '/iibs/': typeof IibsIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
@@ -600,6 +635,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/alphabet'
     | '/ask'
+    | '/bbh'
     | '/browse'
     | '/cards'
     | '/challenge'
@@ -607,6 +643,7 @@ export interface FileRouteTypes {
     | '/drill'
     | '/guide'
     | '/ideas'
+    | '/iibs'
     | '/keep'
     | '/leaderboard'
     | '/legal'
@@ -630,9 +667,11 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/week7'
+    | '/iibs/$level'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
+    | '/iibs/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
@@ -666,6 +705,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/alphabet'
     | '/ask'
+    | '/bbh'
     | '/browse'
     | '/cards'
     | '/challenge'
@@ -695,9 +735,11 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/week7'
+    | '/iibs/$level'
     | '/listen/pet'
     | '/finder'
     | '/game'
+    | '/iibs'
     | '/lessons'
     | '/listen'
     | '/study'
@@ -731,6 +773,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/alphabet'
     | '/ask'
+    | '/bbh'
     | '/browse'
     | '/cards'
     | '/challenge'
@@ -738,6 +781,7 @@ export interface FileRouteTypes {
     | '/drill'
     | '/guide'
     | '/ideas'
+    | '/iibs'
     | '/keep'
     | '/leaderboard'
     | '/legal'
@@ -761,9 +805,11 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/week7'
+    | '/iibs/$level'
     | '/listen/pet'
     | '/finder/'
     | '/game/'
+    | '/iibs/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
@@ -798,6 +844,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AlphabetRoute: typeof AlphabetRoute
   AskRoute: typeof AskRoute
+  BbhRoute: typeof BbhRoute
   BrowseRoute: typeof BrowseRoute
   CardsRoute: typeof CardsRoute
   ChallengeRoute: typeof ChallengeRoute
@@ -805,6 +852,7 @@ export interface RootRouteChildren {
   DrillRoute: typeof DrillRoute
   GuideRoute: typeof GuideRoute
   IdeasRoute: typeof IdeasRoute
+  IibsRoute: typeof IibsRouteWithChildren
   KeepRoute: typeof KeepRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LegalRoute: typeof LegalRoute
@@ -882,6 +930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bbh': {
+      id: '/bbh'
+      path: '/bbh'
+      fullPath: '/bbh'
+      preLoaderRoute: typeof BbhRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/browse': {
       id: '/browse'
       path: '/browse'
@@ -929,6 +984,13 @@ declare module '@tanstack/react-router' {
       path: '/ideas'
       fullPath: '/ideas'
       preLoaderRoute: typeof IdeasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/iibs': {
+      id: '/iibs'
+      path: '/iibs'
+      fullPath: '/iibs'
+      preLoaderRoute: typeof IibsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/keep': {
@@ -1105,6 +1167,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/game/week7'
       preLoaderRoute: typeof GameWeek7RouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/iibs/': {
+      id: '/iibs/'
+      path: '/'
+      fullPath: '/iibs/'
+      preLoaderRoute: typeof IibsIndexRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/$level': {
+      id: '/iibs/$level'
+      path: '/$level'
+      fullPath: '/iibs/$level'
+      preLoaderRoute: typeof IibsLevelRouteImport
+      parentRoute: typeof IibsRoute
     }
     '/lessons/': {
       id: '/lessons/'
@@ -1319,6 +1395,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface IibsRouteChildren {
+  IibsLevelRoute: typeof IibsLevelRoute
+  IibsIndexRoute: typeof IibsIndexRoute
+}
+
+const IibsRouteChildren: IibsRouteChildren = {
+  IibsLevelRoute: IibsLevelRoute,
+  IibsIndexRoute: IibsIndexRoute,
+}
+
+const IibsRouteWithChildren = IibsRoute._addFileChildren(IibsRouteChildren)
+
 interface ListenRouteChildren {
   ListenPetRoute: typeof ListenPetRoute
   ListenIndexRoute: typeof ListenIndexRoute
@@ -1343,6 +1431,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AlphabetRoute: AlphabetRoute,
   AskRoute: AskRoute,
+  BbhRoute: BbhRoute,
   BrowseRoute: BrowseRoute,
   CardsRoute: CardsRoute,
   ChallengeRoute: ChallengeRoute,
@@ -1350,6 +1439,7 @@ const rootRouteChildren: RootRouteChildren = {
   DrillRoute: DrillRoute,
   GuideRoute: GuideRoute,
   IdeasRoute: IdeasRoute,
+  IibsRoute: IibsRouteWithChildren,
   KeepRoute: KeepRoute,
   LeaderboardRoute: LeaderboardRoute,
   LegalRoute: LegalRoute,
