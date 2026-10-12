@@ -65,7 +65,7 @@ function RoadListenPage() {
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [music, setMusic] = useState<RoadMusicId>("off");
-  const [musicLevel, setMusicLevel] = useState(40);
+  const [musicLevel, setMusicLevel] = useState(25);
   const list = useMemo(() => itemsForWeek(week), [week]);
   const item = list[i] ?? list[0];
   const meta = studySetMeta(week);
@@ -261,7 +261,7 @@ function RoadListenPage() {
           <p className="mt-3 text-sm text-muted">Quiet. Turn on Hatikvah or Solemn for a long drive.</p>
         ) : (
           <label className="mt-3 block text-sm text-muted">
-            Under the word
+            Volume {musicLevel}
             <input
               type="range"
               min={0}
