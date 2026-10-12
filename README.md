@@ -10,7 +10,7 @@ Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
 The old Vercel URL ([https://haday.vercel.app](https://haday.vercel.app)) is shut down. It only shows a signpost page that links to the class site.
 
-Azure fallback: [https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net](https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net)
+Azure is the host behind that name. A browser that opens the Azure address is sent to the class site. The health check at `/api/health` stays on the Azure host.
 
 **Documentation (source of truth):** [Change Log](https://app.notion.com/p/3f6058f607b18180a6eeebbcc2180697) and [Developer Handbook](https://app.notion.com/p/3f6058f607b18144a482f8173456df2a) on Notion.  
 **Code that runs:** this GitHub repo, branch **`main`**. A push to `main` builds the Docker image and deploys Azure Web App **haday**.

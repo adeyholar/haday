@@ -4,12 +4,19 @@ import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { clearDoor, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
+import { SITE_JSON_LD } from "@/lib/seo";
 
-export const Route = createFileRoute("/")({ component: DoorsPage });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    links: [{ rel: "canonical", href: "https://hadayhebbraimentor.jcdisn.com/" }],
+  }),
+  component: DoorsPage,
+});
 
 function DoorsPage() {
   const [gate, setGate] = useState<MyPath | null>(null);
   const [error, setError] = useState("");
+  const [visitor, setVisitor] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -33,7 +40,10 @@ function DoorsPage() {
           setGate(next);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not open the doors.");
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : "";
+        if (/unauthorized/i.test(message)) setVisitor(true);
+        else setError(message || "Could not open the doors.");
       }
     })();
     return () => {
@@ -46,6 +56,10 @@ function DoorsPage() {
     setBusy(true);
     setError("");
     stashPathIntent(path);
+    if (visitor) {
+      window.location.assign("/login");
+      return;
+    }
     try {
       const result = await choosePath({ data: { path } });
       if (!result.ok) {
@@ -61,30 +75,33 @@ function DoorsPage() {
     }
   }
 
-  if (!gate && !error) {
-    return (
-      <Panel>
-        <p className="text-sm text-muted">Opening the two studies…</p>
-      </Panel>
-    );
-  }
-
-  const choosing = !gate?.path;
+  const choosing = visitor || !gate?.path;
   const canBbh = Boolean(gate?.admin || gate?.path === "bbh");
   const canIibs = Boolean(gate?.admin || gate?.path === "iibs");
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }} />
       <Panel className="mb-4 text-center">
         <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
         <img
           src="/doors/ancient-smile.jpg"
           alt=""
+          width={128}
+          height={128}
           className="mx-auto mt-4 size-28 rounded-full object-cover shadow-[var(--shadow-border)] sm:size-32"
         />
         <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Choose your Study Path</h1>
         <p className="mt-2 font-display text-2xl font-semibold text-primary">Choose wisely.</p>
         <p className="mx-auto mt-3 max-w-prose text-muted">
+          Haday HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
+          its meaning, and practice until it stays.
+        </p>
+        <p className="mx-auto mt-3 max-w-prose text-muted">
+          One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
+          stay inside the signed-in study.
+        </p>
+        <p className="mx-auto mt-3 max-w-prose text-sm text-muted">
           {choosing
             ? "Pick one. It stays with this account. The other door stays locked."
             : gate?.admin

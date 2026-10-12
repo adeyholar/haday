@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, Navigate, useRouterState } from "@tanstack/react-router";
+import { Link, Navigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
   BookOpen,
@@ -110,9 +110,11 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user, isPending } = useCurrentUserState();
   const isPublic =
     pathname === "/login" || pathname === "/reset-password" || pathname === "/legal" || pathname === "/credits";
+  const doorsForVisitor = pathname === "/" && !user && sessionUser == null;
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -220,6 +222,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="min-h-dvh text-fg">
         <VisitorBeacon />
         {children}
+      </div>
+    );
+  }
+
+  if (doorsForVisitor) {
+    return (
+      <div className="min-h-dvh text-fg">
+        <VisitorBeacon />
+        <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6">{children}</main>
       </div>
     );
   }
