@@ -221,6 +221,19 @@ test("consonants drop vowel points and keep the shin dot", () => {
   assert.equal(glossMatches(shamar, "to destroy"), false);
   assert.equal(liveGloss(shamar, "to wa"), "prefix");
   assert.equal(liveGloss(shamar, "banana"), "off");
+  const halak = VOCAB.find((item) => item.id === "halak");
+  const barak = VOCAB.find((item) => item.id === "barak");
+  const al = VOCAB.find((item) => item.id === "al-neg");
+  const now = VOCAB.find((item) => item.id === "attah-now");
+  assert.match(halak?.stems ?? "", /\(Hi\) lead/);
+  assert.match(barak?.stems ?? "", /\(Pu\) be blessed/);
+  assert.match(barak?.stems ?? "", /\(Hith\)/);
+  assert.equal(al?.gloss, "do not");
+  assert.match(al?.stems ?? "", /jussive/);
+  assert.equal(now?.hebrew.includes("\u05BC"), false);
+  for (const item of week) {
+    if (item.pos === "verb") assert.ok(item.stems, `${item.id} has its stems`);
+  }
   for (const item of VOCAB) {
     const first = item.gloss.split(/[,;]/)[0]?.trim();
     assert.equal(glossMatches(item, first), true, `${item.id}: ${first}`);
