@@ -15,6 +15,8 @@ test("the road player uses the Drill voice for one week", () => {
   assert.match(src, /speakHebrewWord\(item, 0\.85, signal\)/);
   assert.match(page, /speakRoadCard/);
   assert.match(page, /On the road/);
+  assert.match(page, /Hatikvah/);
+  assert.match(page, /playRoadMusic/);
   assert.equal(page.includes("announce"), false);
 });
 
