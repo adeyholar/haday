@@ -10,7 +10,15 @@ const LOOP_KEY = "haday-listen-loop";
 const MIX_KEY = "haday-listen-mix-ch";
 
 export type ListenLoop = "off" | "chapter" | "all" | "mix";
-export type ListenItem = VocabItem & { announce?: string };
+export type ListenItem = VocabItem & {
+  announce?: string;
+  /** BBH clip id for the Hebrew, when this card is not that lemma. */
+  heVoiceId?: string;
+  /** A second Hebrew form, such as a plural, spoken after the lemma. */
+  alsoHebrew?: string;
+  /** Speak the gloss itself. Do not play another course's English clip. */
+  plainEnglish?: boolean;
+};
 
 export function listenPlaylist(): ListenItem[] {
   const items = [...alphabetVocab(), ...bbhVocab()];
@@ -695,11 +703,12 @@ export async function playNeuralVoice(
 }
 
 export async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
-  const own = await playAdminVoice(item.id, "he", rate, signal);
+  const voiceId = item.heVoiceId || item.id;
+  const own = await playAdminVoice(voiceId, "he", rate, signal);
   if (own || signal.stop) return;
-  const neural = await playNeuralVoice(item.id, "he", rate, signal);
+  const neural = await playNeuralVoice(voiceId, "he", rate, signal);
   if (neural || signal.stop) return;
-  const clip = vocabClip(item.id);
+  const clip = vocabClip(voiceId);
   if (clip?.source === "eliran" && clip.kind === "lemma") {
     const ok = await playVocabClip(clip, rate, signal);
     if (ok || signal.stop) return;
@@ -747,14 +756,28 @@ export async function speakRoadCard(item: ListenItem, signal: { stop: boolean })
   if (signal.stop) return;
   await speakHebrewWord(item, 0.85, signal);
   if (signal.stop) return;
+  if (item.alsoHebrew) {
+    await pauseMs(restFor(0.85, 280), signal);
+    if (signal.stop) return;
+    await speakHebrewWord(
+      { ...item, id: `${item.id}-also`, hebrew: item.alsoHebrew, heVoiceId: undefined, alsoHebrew: undefined },
+      0.85,
+      signal,
+    );
+    if (signal.stop) return;
+  }
   await pauseMs(restFor(0.85, 420), signal);
   if (signal.stop) return;
   const en = spokenEnglish(item.gloss);
   if (en) {
-    const ownEn = await playAdminVoice(item.id, "en", 0.85, signal);
-    if (!ownEn && !signal.stop) {
-      const neuralEn = await playNeuralVoice(item.id, "en", 0.85, signal);
-      if (!neuralEn && !signal.stop) await speakLine(en, "en", 0.85, signal);
+    if (item.plainEnglish) {
+      await speakLine(en, "en", 0.85, signal);
+    } else {
+      const ownEn = await playAdminVoice(item.id, "en", 0.85, signal);
+      if (!ownEn && !signal.stop) {
+        const neuralEn = await playNeuralVoice(item.id, "en", 0.85, signal);
+        if (!neuralEn && !signal.stop) await speakLine(en, "en", 0.85, signal);
+      }
     }
   }
   if (signal.stop) return;

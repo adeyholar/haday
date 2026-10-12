@@ -50,6 +50,7 @@ import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
+import { Route as IibsRoadRouteImport } from './routes/iibs/road'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -287,6 +288,11 @@ const IibsLevelRoute = IibsLevelRouteImport.update({
   path: '/$level',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsRoadRoute = IibsRoadRouteImport.update({
+  id: '/road',
+  path: '/road',
+  getParentRoute: () => IibsRoute,
+} as any)
 const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/lessons/',
   path: '/lessons/',
@@ -482,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/finder/': typeof FinderIndexRoute
@@ -554,6 +561,7 @@ export interface FileRoutesByTo {
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/finder': typeof FinderIndexRoute
@@ -629,6 +637,7 @@ export interface FileRoutesById {
   '/game/type': typeof GameTypeRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/finder/': typeof FinderIndexRoute
@@ -705,6 +714,7 @@ export interface FileRouteTypes {
     | '/game/type'
     | '/game/week7'
     | '/iibs/$level'
+    | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
     | '/finder/'
@@ -777,6 +787,7 @@ export interface FileRouteTypes {
     | '/game/type'
     | '/game/week7'
     | '/iibs/$level'
+    | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
     | '/finder'
@@ -851,6 +862,7 @@ export interface FileRouteTypes {
     | '/game/type'
     | '/game/week7'
     | '/iibs/$level'
+    | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
     | '/finder/'
@@ -1238,6 +1250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsLevelRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/road': {
+      id: '/iibs/road'
+      path: '/road'
+      fullPath: '/iibs/road'
+      preLoaderRoute: typeof IibsRoadRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/lessons/': {
       id: '/lessons/'
       path: '/lessons'
@@ -1474,6 +1493,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
+  IibsRoadRoute: typeof IibsRoadRoute
   IibsIndexRoute: typeof IibsIndexRoute
   IibsVocabLevelRoute: typeof IibsVocabLevelRoute
   IibsVocabIndexRoute: typeof IibsVocabIndexRoute
@@ -1481,6 +1501,7 @@ interface IibsRouteChildren {
 
 const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
+  IibsRoadRoute: IibsRoadRoute,
   IibsIndexRoute: IibsIndexRoute,
   IibsVocabLevelRoute: IibsVocabLevelRoute,
   IibsVocabIndexRoute: IibsVocabIndexRoute,
