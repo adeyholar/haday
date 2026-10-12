@@ -20,6 +20,17 @@ test("the road player uses the Drill voice for one week", () => {
   assert.equal(page.includes("announce"), false);
 });
 
+test("the road music slider can go silent and stays under the word", async () => {
+  const { musicVolume } = await jiti.import("/workspace/src/lib/road-music.ts");
+  assert.equal(musicVolume(0), 0);
+  assert.ok(musicVolume(20) < musicVolume(50));
+  assert.ok(musicVolume(50) < musicVolume(100));
+  assert.ok(musicVolume(100) <= 0.35);
+  const src = readFileSync("/workspace/src/lib/road-music.ts", "utf8");
+  assert.match(src, /createGain/);
+  assert.match(src, /gain\.value = amount/);
+});
+
 test("Hebrew name then English translation", () => {
   assert.equal(spokenEnglish("Abraham"), "Abraham");
   assert.equal(modernLatin("ʾabrāhām").toLowerCase().includes("braham"), true);
