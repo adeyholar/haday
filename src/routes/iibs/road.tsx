@@ -46,7 +46,7 @@ function IibsRoadPage() {
         </Link>
       </p>
       <RoadDeck
-        kicker="IIBS · on the road"
+        kicker="IIBS · audio"
         sets={sets}
         setId={level}
         onSet={(id) => {

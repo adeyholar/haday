@@ -51,7 +51,8 @@ export type NavHref =
   | "/ask"
   | "/ideas"
   | "/iibs"
-  | "/iibs/vocab";
+  | "/iibs/vocab"
+  | "/iibs/road";
 
 export type NavItem = {
   to: NavHref;
