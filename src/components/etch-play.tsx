@@ -209,12 +209,16 @@ export function EtchPlay({
                       {POS_LABEL[item.pos]} · chapter {item.chapter}
                       {item.freq ? ` · ${item.freq} times in the Bible` : ""}
                     </p>
+                    {item.stems ? <p className="text-sm leading-relaxed text-muted">{item.stems}</p> : null}
                     {item.hebrewAlts?.length ? (
                       <p className="he-word text-2xl text-ink">{item.hebrewAlts.join("  ")}</p>
                     ) : null}
                   </div>
                 ) : graded || !hideEn ? (
-                  <p className="mt-3 font-display text-2xl font-semibold">{item.gloss}</p>
+                  <div className="mt-3">
+                    <p className="font-display text-2xl font-semibold">{item.gloss}</p>
+                    {item.stems ? <p className="mt-2 text-sm leading-relaxed text-muted">{item.stems}</p> : null}
+                  </div>
                 ) : study ? (
                   <p className="mt-3 text-sm text-muted">What does it mean?</p>
                 ) : null}

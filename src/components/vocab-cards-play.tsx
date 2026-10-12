@@ -89,6 +89,7 @@ export function VocabCardsPlay({
               {item.hebrew}
             </p>
             <p className="mt-3 font-display text-2xl font-semibold text-ink">{item.gloss}</p>
+            {item.stems ? <p className="mt-2 text-sm leading-relaxed text-muted">{item.stems}</p> : null}
             <p className="mt-1 text-sm text-muted">{item.translit}</p>
           </div>
           <VocabArt id={item.id} />
