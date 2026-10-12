@@ -38,7 +38,11 @@ function IibsHome() {
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Lessons</h1>
         <p className="mt-3 max-w-prose text-muted">
           Each lesson lists its words. Level A, lesson 1 is open. The next lesson opens when Strict is cleared in Vocab
-          Builder.
+          Builder.{" "}
+          <Link to="/iibs/road" className="font-semibold text-primary">
+            On the road
+          </Link>{" "}
+          plays one level, or all of them, for a drive.
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
