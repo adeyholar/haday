@@ -99,7 +99,7 @@ function GuidePage() {
           lively woman voice when the phone has one. Default pace is Warm. Tap Play once; after that you can sit and
           listen. Jump to a chapter if you want a shorter stretch. Loop this chapter, pick a group of chapters (Mix), or
           loop the whole list. Listen → On the road plays one course week in the same voice and pace as Drill: Hebrew,
-          then the meaning, and the week repeats until you pause. Lock-screen skip works. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
+          then the meaning, and the week repeats until you pause. Hatikvah or a solemn bed can play under the word. The word stays louder. Lock-screen skip works. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
           off. A natural Hebrew neural voice speaks each lemma, with Hebrew loudness matched to English. Class-owner
           recordings in the Voice bank still play first when they exist. Readers and texts are named on{" "}
           <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">

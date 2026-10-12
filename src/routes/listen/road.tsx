@@ -13,6 +13,16 @@ import {
   unlockSpeech,
 } from "@/lib/listen";
 import { loadNeuralManifest } from "@/lib/neural-voice";
+import {
+  loadRoadMusic,
+  loadRoadMusicLevel,
+  pauseRoadMusic,
+  playRoadMusic,
+  saveRoadMusic,
+  saveRoadMusicLevel,
+  type RoadMusicId,
+  ROAD_MUSIC,
+} from "@/lib/road-music";
 import { COURSE_WEEKS, itemsForWeek, studySetMeta } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
 
@@ -54,6 +64,8 @@ function RoadListenPage() {
   const [week, setWeek] = useState(() => search.week ?? loadRoadWeek(studyWeek));
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [music, setMusic] = useState<RoadMusicId>("off");
+  const [musicLevel, setMusicLevel] = useState(40);
   const list = useMemo(() => itemsForWeek(week), [week]);
   const item = list[i] ?? list[0];
   const meta = studySetMeta(week);
@@ -61,11 +73,20 @@ function RoadListenPage() {
   const playGen = useRef(0);
   const weekRef = useRef(week);
   const iRef = useRef(i);
+  const musicRef = useRef(music);
+  const levelRef = useRef(musicLevel);
   weekRef.current = week;
   iRef.current = i;
+  musicRef.current = music;
+  levelRef.current = musicLevel;
 
   useEffect(() => {
     void loadNeuralManifest();
+  }, []);
+
+  useEffect(() => {
+    setMusic(loadRoadMusic());
+    setMusicLevel(loadRoadMusicLevel());
   }, []);
 
   useEffect(() => {
@@ -77,6 +98,7 @@ function RoadListenPage() {
     return () => {
       stopRef.current.stop = true;
       stopSpeech();
+      pauseRoadMusic();
     };
   }, []);
 
@@ -119,6 +141,7 @@ function RoadListenPage() {
     stopRef.current.stop = true;
     playGen.current += 1;
     stopSpeech();
+    pauseRoadMusic();
     setPlaying(false);
   }
 
@@ -128,7 +151,10 @@ function RoadListenPage() {
     const words = itemsForWeek(weekRef.current);
     if (!words.length) return;
     setPlaying(true);
-    if (kick) unlockSpeech();
+    if (kick) {
+      unlockSpeech();
+      playRoadMusic(musicRef.current, levelRef.current);
+    }
     else stopSpeech();
     void navigator.wakeLock?.request("screen").catch(() => {});
     void (async () => {
@@ -142,7 +168,10 @@ function RoadListenPage() {
         if (stopRef.current.stop || gen !== playGen.current) break;
         at = at + 1 < words.length ? at + 1 : 0;
       }
-      if (gen === playGen.current) setPlaying(false);
+      if (gen === playGen.current) {
+        pauseRoadMusic();
+        setPlaying(false);
+      }
     })();
   }
 
@@ -153,6 +182,17 @@ function RoadListenPage() {
     setI(next);
     iRef.current = next;
     if (playing) startFrom(next, false);
+  }
+
+  function chooseMusic(next: RoadMusicId) {
+    setMusic(next);
+    saveRoadMusic(next);
+    if (playing) playRoadMusic(next, musicLevel);
+  }
+
+  function chooseLevel(next: number) {
+    const level = saveRoadMusicLevel(next);
+    setMusicLevel(level);
   }
 
   function pickWeek(next: number, restart: boolean) {
@@ -173,7 +213,7 @@ function RoadListenPage() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">On the road</p>
         <p className="mt-3 text-muted">
           {meta.label} · {meta.hint} · {list.length} words. Hebrew, then the meaning, in the same voice as Drill. The
-          week repeats until you pause. The lock screen can skip.
+          week repeats until you pause. The lock screen can skip. Music, if you turn it on, stays under the word.
         </p>
       </Panel>
 
@@ -198,6 +238,40 @@ function RoadListenPage() {
           <SkipForward className="size-6" />
           <span className="sr-only">Next</span>
         </Button>
+      </div>
+
+      <div className="mt-4 rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Music</p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {ROAD_MUSIC.map((track) => (
+            <button
+              key={track.id}
+              type="button"
+              onClick={() => chooseMusic(track.id)}
+              className={cn(
+                "min-h-11 rounded-[var(--radius-md)] text-sm font-semibold",
+                music === track.id ? "bg-primary text-primary-foreground" : "bg-parchment text-ink",
+              )}
+            >
+              {track.label}
+            </button>
+          ))}
+        </div>
+        {music === "off" ? (
+          <p className="mt-3 text-sm text-muted">Quiet. Turn on Hatikvah or Solemn for a long drive.</p>
+        ) : (
+          <label className="mt-3 block text-sm text-muted">
+            Under the word
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={musicLevel}
+              onChange={(event) => chooseLevel(Number(event.target.value))}
+              className="mt-2 w-full accent-[var(--color-primary)]"
+            />
+          </label>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-5 gap-1.5">

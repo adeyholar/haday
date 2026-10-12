@@ -109,6 +109,15 @@ function CreditsPage() {
       </Panel>
 
       <Panel className="mb-3">
+        <h2 className="font-display text-2xl font-bold text-ink">Road music</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Hatikvah on On the road is the instrumental played by the United States Navy Band (1974). The tune is
+          Samuel Cohen’s 1888 setting of a much older melody. The tune and that recording are in the public domain.
+          Solemn is an original quiet piece made for this class. It is not a hymn and not an anthem.
+        </p>
+      </Panel>
+
+      <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">What is HaDay’s</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Class path, games, pictures, and notes are for BIBL 630. Pictures are original classroom plates, not
