@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
+import { Check, Headphones, Lock } from "lucide-react";
 import { HonorBadge } from "@/components/honor-badge";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
@@ -42,17 +42,21 @@ function VocabHome() {
           {IIBS_LESSON_PASS}% to open the next stage. Strict opens the next lesson. Clear every lesson in a level and
           you receive that level’s rank.
         </p>
-        <p className="mt-3">
-          <Link to="/iibs/road" className="font-semibold text-primary">
-            On the road
-          </Link>
-          <span className="text-muted"> — Level A through E, or all of them, with music under the words.</span>
-        </p>
         <p className="mt-4">
           {held ? <HonorBadge honor={held} /> : <span className="text-sm text-muted">No rank yet. Clear Level A.</span>}
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
+      <Link
+        to="/iibs/road"
+        className="mb-4 flex min-h-24 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <span>
+          <span className="block font-display text-2xl font-bold">Audio</span>
+          <span className="mt-1 block text-sm text-muted">Level A through E, or all of them. Music under the words.</span>
+        </span>
+        <Headphones className="size-6 shrink-0 text-primary" />
+      </Link>
       <ol className="mb-4 grid gap-2">
         {IIBS_RANKS.map((rank) => {
           const earned = rank.id !== "lab" && levelCleared(progress, rank.id);

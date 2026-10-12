@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
+import { Lock, Headphones } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { levelUnlocked } from "@/lib/iibs-game";
@@ -38,14 +38,20 @@ function IibsHome() {
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Lessons</h1>
         <p className="mt-3 max-w-prose text-muted">
           Each lesson lists its words. Level A, lesson 1 is open. The next lesson opens when Strict is cleared in Vocab
-          Builder.{" "}
-          <Link to="/iibs/road" className="font-semibold text-primary">
-            On the road
-          </Link>{" "}
-          plays one level, or all of them, for a drive.
+          Builder.
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
+      <Link
+        to="/iibs/road"
+        className="mb-4 flex min-h-24 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <span>
+          <span className="block font-display text-2xl font-bold">Audio</span>
+          <span className="mt-1 block text-sm text-muted">Level A through E, or all of them. Music under the words.</span>
+        </span>
+        <Headphones className="size-6 shrink-0 text-primary" />
+      </Link>
       <ol className="grid gap-2">
         {IIBS_LEVELS.map((level) => {
           const open = levelUnlocked(progress, level.id, admin);
