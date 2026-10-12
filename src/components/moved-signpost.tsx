@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AZURE_FALLBACK, CLASS_SITE, CLASS_SITE_HOST, classSiteUrl } from "@/lib/class-site";
+import { CLASS_SITE, CLASS_SITE_HOST, classSiteUrl } from "@/lib/class-site";
 
 export function MovedSignpost() {
   const [href, setHref] = useState(CLASS_SITE);
@@ -32,12 +32,6 @@ export function MovedSignpost() {
           {label}
         </a>
         <p className="mt-3 text-sm font-medium text-ink">That is the real HaDay. Tap it to continue.</p>
-        <p className="mt-4 text-xs text-muted">
-          If the class host is down:{" "}
-          <a className="font-semibold text-primary" href={AZURE_FALLBACK}>
-            haday.azurewebsites.net
-          </a>
-        </p>
       </div>
     </main>
   );

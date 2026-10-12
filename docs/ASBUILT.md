@@ -33,6 +33,7 @@ This file is the older picture of the running app. If it disagrees with Notion, 
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. Claude or Grok, capped before the paid call. A failed quota check does not call the model. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
+| **Search** | The doors page, privacy, and credits are the public pages. They render their text without waiting for sign-in. `robots.txt` blocks `/admin` and `/api/`. `sitemap.xml` lists only those three pages. Other pages send `X-Robots-Tag: noindex`. The share title is the full product title. An Azure host 301s to the class site, except `/api/health`. | No textbook pages and no answer keys on a public page. |
 | **Account** | Google, X, or email + password | Progress stays with the account. Old Vercel logins do **not** carry over. |
 
 Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.

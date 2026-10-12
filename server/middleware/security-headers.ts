@@ -1,3 +1,5 @@
+import { canonicalUrl, robotsNoindex, shouldRedirectAzure } from "../../src/lib/seo";
+
 /** Security headers for every response. CSP only blocks framing, so the app's own scripts still run. */
 const HEADERS: Record<string, string> = {
   "Content-Security-Policy": "frame-ancestors 'none'",
@@ -7,16 +9,41 @@ const HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
 };
 
+type HeaderEvent = {
+  url?: URL;
+  req?: { method?: string; headers?: Headers };
+};
+
+function requestHost(event: HeaderEvent): string {
+  const headers = event.req?.headers;
+  return headers?.get?.("x-forwarded-host") || headers?.get?.("host") || event.url?.host || "";
+}
+
 export default async function securityHeaders(
-  _event: unknown,
+  event: HeaderEvent,
   next: () => unknown | Promise<unknown>,
 ): Promise<unknown> {
+  const method = event.req?.method || "GET";
+  const path = event.url?.pathname || "/";
+  const host = requestHost(event);
+  if (event.url && shouldRedirectAzure(host, path, method)) {
+    return new Response(null, {
+      status: 301,
+      headers: {
+        ...HEADERS,
+        Location: canonicalUrl(path) + event.url.search,
+      },
+    });
+  }
+
   const result = await next();
   if (!(result instanceof Response)) return result;
   const headers = new Headers(result.headers);
   for (const [key, value] of Object.entries(HEADERS)) {
     if (!headers.has(key)) headers.set(key, value);
   }
+  if (robotsNoindex(host, path)) headers.set("X-Robots-Tag", "noindex, nofollow");
+  else if (!headers.has("Link")) headers.set("Link", `<${canonicalUrl(path)}>; rel="canonical"`);
   return new Response(result.body, {
     status: result.status,
     statusText: result.statusText,
