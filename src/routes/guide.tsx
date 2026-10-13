@@ -20,6 +20,10 @@ function GuidePage() {
           <strong>Scripture Path</strong> teaches through reading the Tanakh, Levels A to E. You choose one; it stays
           with your account.
         </p>
+        <p className="mt-3 max-w-prose text-muted">
+          A phone shortcut is named Haday and shows a brown ה on parchment. If you already saved this site on an
+          iPhone, remove that shortcut and add it again. The old one keeps the old picture.
+        </p>
       </Panel>
 
       <Panel className="mb-3">

@@ -10,6 +10,15 @@ function CreditsPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <div className="mb-6 flex justify-center">
+        <img
+          src="/brand-logo.jpg"
+          alt="HaDay HebRabbAi Mentor. Read the Word as it is written."
+          width={1200}
+          height={630}
+          className="w-full rounded-[var(--radius-xl)] shadow-[var(--shadow-border)]"
+        />
+      </div>
+      <div className="mb-6 flex justify-center">
         <BrandLockup size="hero" />
       </div>
       <Panel className="mb-4">
