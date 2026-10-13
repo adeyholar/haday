@@ -89,7 +89,7 @@ function VoiceBankPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Voice bank</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Closed list: letters, vowels, names, and BBH lemmas. A natural Hebrew neural voice already speaks every line,
+          Closed list: letters, vowels, names, and class words. A natural Hebrew neural voice already speaks every line,
           loudness-matched so Hebrew is not quieter than English. Record here to replace any line with your own voice —
           that take always wins. To use another engine later: download the text list, synthesize{" "}
           <code className="text-ink">{`{id}.he.mp3`}</code> and <code className="text-ink">{`{id}.en.mp3`}</code>, drop

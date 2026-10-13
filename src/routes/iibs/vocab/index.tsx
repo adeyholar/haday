@@ -35,7 +35,7 @@ function VocabHome() {
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · vocab builder</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path · vocab builder</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Vocab Builder</h1>
         <p className="mt-3 max-w-prose text-muted">
           Level A, lesson 1 is open. Each lesson has four stages: Multiple, Gloss, Hebrew, then Strict. Clear a stage at{" "}

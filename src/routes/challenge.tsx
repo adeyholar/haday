@@ -134,7 +134,7 @@ function ChallengePage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Optional</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Ultimate Challenge</h1>
         <p className="mt-3 max-w-prose text-muted">
-          One sitting. All {n} BBH 3rd-ed. lemmas (Ch. 2–19). Hebrew on the card; type the English gloss. No marks until
+          One sitting. All {n} class words (Ch. 2–19). Hebrew on the card; type the English gloss. No marks until
           you finish.
         </p>
         <ul className="mt-4 list-disc space-y-1 ps-5 text-sm text-ink">

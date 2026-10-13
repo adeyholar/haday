@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
 import { stashPathIntent, type StudyPath } from "@/lib/path";
+import { GRAMMAR_PATH, PATH_CHOICE, PATH_CHOICE_STAYS, SCRIPTURE_PATH } from "@/lib/path-names";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -102,7 +103,7 @@ function Login() {
           throw new Error("Read Privacy and disclaimer, then tick the box.");
         }
         if (pathChoice !== "bbh" && pathChoice !== "iibs") {
-          throw new Error("Choose BBH or the IIBS ladder.");
+          throw new Error(PATH_CHOICE);
         }
         stashPathIntent(pathChoice);
         const { error: signUpError } = await authClient.signUp.email({
@@ -149,7 +150,7 @@ function Login() {
       <div className="rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)] sm:p-6">
         <BrandLockup size="hero" />
         <p className="mt-4 text-center text-sm text-muted">
-          Create an account, then choose BBH or the IIBS ladder. That choice stays with you.
+          {PATH_CHOICE_STAYS}
         </p>
 
         {!authEnabled ? (
@@ -302,9 +303,9 @@ function Login() {
                     )}
                     onClick={() => setPathChoice("bbh")}
                   >
-                    BBH
-                    <span className={cn("mt-1 block text-xs font-medium", pathChoice === "bbh" ? "text-parchment/80" : "text-muted")}>
-                      Biblical Hebrew
+                    {GRAMMAR_PATH.title}
+                    <span className={cn("he-word mt-1 block text-lg font-normal", pathChoice === "bbh" ? "text-parchment" : "text-ink")} dir="rtl" lang="he">
+                      {GRAMMAR_PATH.hebrew}
                     </span>
                   </button>
                   <button
@@ -315,8 +316,10 @@ function Login() {
                     )}
                     onClick={() => setPathChoice("iibs")}
                   >
-                    IIBS
-                    <span className="mt-1 block text-xs font-medium text-muted">Levels A to E</span>
+                    {SCRIPTURE_PATH.title}
+                    <span className="he-word mt-1 block text-lg font-normal" dir="rtl" lang="he">
+                      {SCRIPTURE_PATH.hebrew}
+                    </span>
                   </button>
                 </fieldset>
               )}

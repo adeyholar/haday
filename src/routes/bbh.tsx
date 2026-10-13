@@ -170,7 +170,7 @@ function Home() {
         <span>
           <span className="block font-display text-2xl font-bold">Ultimate Challenge</span>
           <span className="mt-1 block text-sm text-muted">
-            Optional. Whole BBH list, one sitting, graded at the end. 90% Full Scroll · 100% Crown of the Text.
+            Optional. The whole class list, one sitting, graded at the end. 90% Full Scroll · 100% Crown of the Text.
           </span>
         </span>
       </Link>
@@ -388,7 +388,7 @@ function Home() {
 
       <Panel className="mt-8">
         <p className="text-xs text-muted">
-          Full lexicon {bbhVocab().length} BBH lemmas (Ch. 2–19, same as Game) · {all.mastered} mastered · {(all.weak ?? 0) + (all.high ?? 0)} weak overall.
+          Full lexicon {bbhVocab().length} class words (Ch. 2–19, same as Game) · {all.mastered} mastered · {(all.weak ?? 0) + (all.high ?? 0)} weak overall.
         </p>
         <button
           type="button"

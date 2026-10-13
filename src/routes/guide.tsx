@@ -15,6 +15,11 @@ function GuidePage() {
           <em>Basics of Biblical Hebrew</em> (3rd ed.). Sign in so your game path and study
           scores stay with your account.
         </p>
+        <p className="mt-3 max-w-prose text-muted">
+          Two study paths. The <strong>Grammar Path</strong> builds the language step by step, chapter by chapter. The{" "}
+          <strong>Scripture Path</strong> teaches through reading the Tanakh, Levels A to E. You choose one; it stays
+          with your account.
+        </p>
       </Panel>
 
       <Panel className="mb-3">
@@ -27,7 +32,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists BBH vocabulary, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar exams, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
+            class book. The Game menu lists Chapter path, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar exams, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -35,7 +40,7 @@ function GuidePage() {
               Study mode
             </Link>
             <span className="text-ink"> — </span>
-            pick a course week or a Game chapter — same BBH 3rd-ed. lemmas as Game — then Drill, Write, Quiz, Match, or Lex.
+            pick a course week or a Game chapter — same class words as Game — then Drill, Write, Quiz, Match, or Lex.
             Grammar lessons (Study) prepare the topic with notes and verses; Game grammar is the closed-book exam (90%).
             Stations (Study → Stations) is the path: Alef-bet Station to the Realm of the Word — text first, rule last.
             Closed-book Exam is from memory; misses lead the next Write and Quiz rounds.
@@ -85,7 +90,7 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Custom mix</h2>
         <p className="mt-2 text-sm text-muted">
-          Game → Custom mix has two tabs. Vocabulary is the class lemmas only (tick open BBH chapters, then Recognize,
+          Game → Custom mix has two tabs. Vocabulary is the class lemmas only (tick open chapters, then Recognize,
           Gloss, or Spell). Grammar is the six topics only (tick topics, then a 12-question mix from units already
           open). The two lists never mix. Review only — it does not change the path. Every signed-in student can use it.
         </p>
@@ -94,12 +99,12 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Listen · hands-free</h2>
         <p className="mt-2 text-sm text-muted">
-          One continuous reading of the BBH list, made for the car. Each lemma is the Hebrew name, then the English —
+          One continuous reading of the class word list, made for the car. Each lemma is the Hebrew name, then the English —
           Avraham, then Abraham. No letter spelling. From chapter 1 (alef-bet) through 19. Modern Israeli pronunciation,
           lively woman voice when the phone has one. Default pace is Warm. Tap Play once; after that you can sit and
           listen. Jump to a chapter if you want a shorter stretch. Loop this chapter, pick a group of chapters (Mix), or
           loop the whole list. Listen → On the road plays one course week in the same voice and pace as Drill: Hebrew,
-          then the meaning, and the week repeats until you pause. On the IIBS door, the bottom bar has Audio. It plays Level A, B, C, D,
+          then the meaning, and the week repeats until you pause. On the Scripture Path, the bottom bar has Audio. It plays Level A, B, C, D,
           or E, and all five together. Leaving that page starts the level again at the first word. Hatikvah or a solemn bed can play under the word. The word stays louder. The volume slider moves a gain control, because a phone ignores the player’s own volume. Lock-screen skip works. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
           off. A natural Hebrew neural voice speaks each lemma, with Hebrew loudness matched to English. Class-owner
           recordings in the Voice bank still play first when they exist. Readers and texts are named on{" "}
@@ -225,7 +230,7 @@ function GuidePage() {
         <dl className="mt-3 space-y-3 text-sm">
           <Tool name="Drill" to="/drill" body="Every word is a study card first. Type a guess and Check grades it Correct or Not quite. Show meaning, with an empty box, still asks I knew it or Not yet. The same words are then asked every way, in groups of five. Leave and come back: Continue where you stopped, or Start over. A miss says Not quite and comes back in the group. Study cards are not part of the score." />
           <Tool name="Write" to="/write" body="Type or hand-write the Hebrew. Memorize mode hides the lemma first. After a miss you can save that scribble as your handwriting." />
-          <Tool name="Quiz" to="/quiz" body="Multiple choice or type the English gloss. Same BBH lemmas as class, sitting near what you can still miss." />
+          <Tool name="Quiz" to="/quiz" body="Multiple choice or type the English gloss. Same class words, sitting near what you can still miss." />
           <Tool name="Match" to="/match" body="Select the pair: Hebrew tile to English tile. Misses come back. Boards use the class lemmas." />
           <Tool name="Lex" to="/browse" body="Browse the week’s lemmas with verses." />
           <Tool name="Alef" to="/alphabet" body="The lesson for the letters: See → Follow the moving stroke → My hand → Quiz → Exam. Study Write is the test. Passing copies become your grader." />
@@ -240,7 +245,7 @@ function GuidePage() {
         <ul className="mt-3 list-disc space-y-2 ps-5 text-sm text-ink">
           <li>Daily flame: study or play at least once a calendar day. Miss a day and it resets to 1.</li>
           <li>Win streak: consecutive game stages you clear. A poor replay can break it.</li>
-          <li>Ladder: each BBH chapter is a rung. Clear Recognize, Gloss, and Spell (lenient) to climb. Strict is optional. 19 is the summit.</li>
+          <li>Ladder: each chapter is a rung. Clear Recognize, Gloss, and Spell (lenient) to climb. Strict is optional. 19 is the summit.</li>
           <li>Honor rank: Hearer → Catechumen → … → Masorete. It sits beside your name and on the class board. Clear a chapter to rise.</li>
         </ul>
         <p className="mt-3 text-sm">

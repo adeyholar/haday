@@ -106,7 +106,7 @@ function VocabLevelPage() {
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · vocab builder</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path · vocab builder</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">
           {stageMeta && lesson !== null ? `Lesson ${lessonNo} · ${stageMeta.name}` : lesson !== null ? `Lesson ${lessonNo}` : meta.title}
         </h1>

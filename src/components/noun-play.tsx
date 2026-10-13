@@ -6,6 +6,7 @@ import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
 import { learnUnitVerses } from "@/lib/tanakh-learn-note";
+import { CLASS_VERSE_NOTE } from "@/lib/path-names";
 import { playFeedback } from "@/lib/try-again";
 import { cn } from "@/lib/cn";
 import {
@@ -234,8 +235,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
         <Panel className="mt-3">
           <h2 className="font-display text-xl font-bold text-ink">In the Tanakh</h2>
           <p className="mt-1 text-sm text-muted">
-            The marked word is class vocabulary when it is on the BBH list. Other class words in the same verse are
-            listed so you meet them again.
+            {CLASS_VERSE_NOTE}
           </p>
           <ul className="mt-3 space-y-4">
             {learnUnitVerses(unit.verses, unit.samples).map((v) => (

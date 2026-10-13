@@ -120,10 +120,8 @@ function CreditsPage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">What is HaDay’s</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Class path, games, pictures, and notes are for BIBL 630. Pictures are original classroom plates, not
-          stock photos. Vocabulary order follows <em>Basics of Biblical Hebrew</em>, 3rd ed., for the course;
-          we do not copy the textbook. Grammar explanations use public-domain tradition (Gesenius, Davidson)
-          and Tanakh examples — not a photocopy of a copyrighted grammar.
+          The Grammar Path follows the chapter order of <em>Basics of Biblical Hebrew</em>, 3rd ed. (Pratico & Van Pelt), the class textbook. Haday HebRabbAi Mentor is not affiliated with the authors or publisher.
+          Pictures are original classroom plates, not stock photos. Grammar explanations use public-domain tradition (Gesenius, Davidson) and Tanakh examples — not a photocopy of a copyrighted grammar.
         </p>
       </Panel>
 

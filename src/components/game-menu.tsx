@@ -52,7 +52,7 @@ export function GameMenu() {
         {
           label: "Play",
           options: [
-            { value: "/game", label: "BBH vocabulary" },
+            { value: "/game", label: "Chapter path" },
             { value: "/game/road", label: "Road exam · Week 7" },
             { value: "/game/final", label: "Road exam · Week 15" },
             { value: "/game/week7", label: "Week 7 mock exam" },

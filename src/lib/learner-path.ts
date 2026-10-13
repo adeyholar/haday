@@ -3,6 +3,7 @@ import { assertAdmin } from "@/lib/admin";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import { isIibsLevel, isStudyPath, type IibsLevelId, type StudyPath } from "@/lib/path";
+import { PATH_CHOICE } from "@/lib/path-names";
 
 export type MyPath = {
   path: StudyPath | null;
@@ -74,7 +75,7 @@ export const choosePath = createServerFn({ method: "POST" })
   .validator((input: { path: string }) => input)
   .middleware([authMiddleware])
   .handler(async ({ data, context }): Promise<{ ok: true; path: StudyPath } | { ok: false; error: string }> => {
-    if (!isStudyPath(data.path)) return { ok: false, error: "Choose BBH or the IIBS ladder." };
+    if (!isStudyPath(data.path)) return { ok: false, error: PATH_CHOICE };
     await ensureLearnerPath();
     const sql = await getSql();
     const existing = await sql<{ path: string }>`
@@ -93,7 +94,7 @@ export const setLearnerPath = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .handler(async ({ data, context }): Promise<{ ok: true; path: StudyPath } | { ok: false; error: string }> => {
     await assertAdmin(context.userId);
-    if (!isStudyPath(data.path)) return { ok: false, error: "Choose BBH or the IIBS ladder." };
+    if (!isStudyPath(data.path)) return { ok: false, error: PATH_CHOICE };
     const userId = data.userId.trim();
     if (!userId) return { ok: false, error: "Missing account." };
     await ensureLearnerPath();

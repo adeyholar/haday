@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { setLearnerPath } from "@/lib/learner-path";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
@@ -271,7 +272,7 @@ function PathSwitch({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const next = person.path === "iibs" ? "bbh" : "iibs";
-  const label = person.path === "iibs" ? "IIBS" : person.path === "bbh" ? "BBH" : "Not chosen";
+  const label = person.path === "iibs" ? SCRIPTURE_PATH.short : person.path === "bbh" ? GRAMMAR_PATH.short : "Not chosen";
 
   async function go() {
     setBusy(true);
@@ -299,7 +300,7 @@ function PathSwitch({
         className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-primary shadow-[var(--shadow-border)] disabled:opacity-60"
         onClick={() => void go()}
       >
-        {busy ? "Saving…" : next === "iibs" ? "Move to IIBS" : "Move to BBH"}
+        {busy ? "Saving…" : next === "iibs" ? SCRIPTURE_PATH.move : GRAMMAR_PATH.move}
       </button>
       {note ? <span className="max-w-[12rem] text-xs leading-snug text-muted">{note}</span> : null}
     </div>

@@ -27,7 +27,7 @@ function RewardsPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Rewards</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Climb the ladder</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Daily streak for showing up. Win streak for clearing stages. Each BBH chapter is a rung — 19 to the summit.
+          Daily streak for showing up. Win streak for clearing stages. Each chapter is a rung — 19 to the summit.
           Honor ranks follow the church’s old formation names, from Hearer to Masorete.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
