@@ -2,6 +2,8 @@
 
 Biblical Hebrew vocabulary trainer for first-year students (BIBL 630).
 
+Two study doors. The **Grammar Path** builds the language chapter by chapter. The **Scripture Path** teaches by reading the Tanakh, Levels A to E. A student chooses one. The stored ids stay `bbh` and `iibs`, and the addresses stay `/bbh` and `/iibs`.
+
 - Study, game, and listen
 - Tanakh follow-along: all 39 books, recorded Hebrew
 - Each classmate creates an account; progress stays with that account

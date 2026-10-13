@@ -80,7 +80,7 @@ function VocabMixPicker() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Custom mix</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Vocabulary, one sitting</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Lemmas only — the class word list you need to memorize. Grammar topics have their own mix. Tick open BBH
+          Lemmas only — the class word list you need to memorize. Grammar topics have their own mix. Tick open
           chapters, pick Recognize, Gloss, or Spell. Chapter 1 starts open. This mix does not unlock or lock the path.
         </p>
         <MixTabs kind="vocab" />
@@ -192,7 +192,7 @@ function GrammarMixPicker() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Custom mix</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Grammar, one sitting</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Topics only — not the BBH word list. Tick the grammar paths you want, then play a 12-question mix from the
+          Topics only — not the class word list. Tick the grammar paths you want, then play a 12-question mix from the
           units already open on those paths. Practice only: this mix does not unlock or lock a topic.
         </p>
         <MixTabs kind="grammar" />

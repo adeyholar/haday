@@ -113,7 +113,7 @@ function ListenPage() {
     ms.metadata = new MediaMetadata({
       title: item ? `${item.hebrew} · ${item.gloss}` : "HaDay Listen",
       artist: "HaDay",
-      album: item ? `Chapter ${item.chapter}` : "BBH vocabulary",
+      album: item ? `Chapter ${item.chapter}` : "Grammar Path words",
     });
     ms.playbackState = "playing";
     ms.setActionHandler("play", () => startFrom(iRef.current, true));

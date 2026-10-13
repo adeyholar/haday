@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
+import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { clearDoor, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
 import { SITE_JSON_LD } from "@/lib/seo";
 
@@ -113,22 +114,24 @@ function DoorsPage() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Door
           kind="bbh"
-          title="BBH"
-          line="Basics of Biblical Hebrew. Letters, vocabulary, and the class games."
+          title={GRAMMAR_PATH.title}
+          hebrew={GRAMMAR_PATH.hebrew}
+          line={GRAMMAR_PATH.line}
           choosing={choosing}
           open={choosing || canBbh}
-          lockedLine="Locked. This account is the IIBS ladder."
+          lockedLine={GRAMMAR_PATH.locked}
           busy={busy}
           onChoose={() => void choose("bbh")}
           href="/bbh"
         />
         <Door
           kind="iibs"
-          title="IIBS"
-          line="Levels A to E, then Hebrew Reading Lab."
+          title={SCRIPTURE_PATH.title}
+          hebrew={SCRIPTURE_PATH.hebrew}
+          line={SCRIPTURE_PATH.line}
           choosing={choosing}
           open={choosing || canIibs}
-          lockedLine="Locked. This account is BBH."
+          lockedLine={SCRIPTURE_PATH.locked}
           busy={busy}
           onChoose={() => void choose("iibs")}
           href="/iibs"
@@ -141,6 +144,7 @@ function DoorsPage() {
 function Door({
   kind,
   title,
+  hebrew,
   line,
   choosing,
   open,
@@ -151,6 +155,7 @@ function Door({
 }: {
   kind: StudyPath;
   title: string;
+  hebrew: string;
   line: string;
   choosing: boolean;
   open: boolean;
@@ -174,7 +179,10 @@ function Door({
             : "size-36 rounded-full object-cover sm:size-44"
         }
       />
-      <p className="mt-4 font-display text-4xl font-bold">{title}</p>
+      <p className="mt-4 font-display text-3xl font-bold leading-tight">{title}</p>
+      <p className="he-word text-2xl" dir="rtl" lang="he">
+        {hebrew}
+      </p>
       <p className={`mt-2 max-w-[16rem] text-sm ${modern ? "text-parchment/80" : "text-ink/80"}`}>{open ? line : lockedLine}</p>
       {!open ? (
         <p className="mt-3 inline-flex items-center justify-center gap-1 text-sm font-semibold">

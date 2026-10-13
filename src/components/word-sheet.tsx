@@ -130,7 +130,7 @@ export function WordSheet({
           {shortGloss(lemma.gloss)}
         </p>
       ) : (
-        <p className="mt-3 text-sm text-muted">Not a BBH citation lemma — tags below are from the form in this verse.</p>
+        <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>
       )}
       {busy ? <p className="mt-2 text-sm text-muted">Looking up the form…</p> : null}
       {labels.length ? (

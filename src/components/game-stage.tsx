@@ -626,7 +626,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={typedOk ? "strong" : "fail"} />
-              <p className="mt-2 text-center text-sm text-muted">BBH: {item.gloss}</p>
+              <p className="mt-2 text-center text-sm text-muted">Class gloss: {item.gloss}</p>
               {!typedOk && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}

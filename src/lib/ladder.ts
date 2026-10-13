@@ -579,7 +579,7 @@ export function continueLabel(progress: LadderProgress): string {
   return `Continue · ${station.name} · ${lesson.title}`;
 }
 
-export const BRAND_BLOCK = /BBH|Pratico|Van Pelt|K\s*&\s*J|Ross|Futato|Gesenius|Davidson|Basics of Biblical Hebrew/i;
+export const BRAND_BLOCK = /BBH|IIBS|Israel Institute|Pratico|Van Pelt|K\s*&\s*J|Ross|Futato|Gesenius|Davidson|Basics of Biblical Hebrew/i;
 
 export function labSearch(lab: LabRef, from?: string): { v1?: number; v2?: number; from?: string } {
   const out: { v1?: number; v2?: number; from?: string } = {};

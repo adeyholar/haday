@@ -58,7 +58,7 @@ function LevelPage() {
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">IIBS · lessons</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path · lessons</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">
           {words && lesson !== null ? `Lesson ${lesson + 1}` : meta.title}
         </h1>

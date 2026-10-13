@@ -46,7 +46,7 @@ function IibsRoadPage() {
         </Link>
       </p>
       <RoadDeck
-        kicker="IIBS · audio"
+        kicker="Scripture Path · audio"
         sets={sets}
         setId={level}
         onSet={(id) => {

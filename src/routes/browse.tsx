@@ -52,7 +52,7 @@ function BrowsePage() {
       <Panel>
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Lexicon</h1>
         <p className="mt-1 text-sm text-muted">
-          {bbhVocab().length} BBH lemmas, same list as Game (Ch. 2–19). Tap a word for a Tanakh example.
+          {bbhVocab().length} class words, same list as Game (Ch. 2–19). Tap a word for a Tanakh example.
         </p>
         <div className="mt-4">
           <WeekSelect />

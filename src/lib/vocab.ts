@@ -632,7 +632,7 @@ export function itemsForSelection(weeks: number[], chapters: number[]): VocabIte
 }
 
 export function studySetMeta(week: number): { label: string; hint: string } {
-  if (week === ALL_GAME_WEEK) return { label: "All Game", hint: "Corrected BBH Ch. 2–19" };
+  if (week === ALL_GAME_WEEK) return { label: "All Game", hint: "Class list, Ch. 2–19" };
   if (week >= 31 && week <= 49) {
     const ch = week - GAME_CHAPTER_WEEK_BASE;
     return { label: `Chapter ${ch}`, hint: GAME_CHAPTER_TITLES[ch] ?? "Game chapter" };

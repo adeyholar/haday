@@ -110,7 +110,7 @@ function StudyList() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">How to keep them</p>
         <h2 className="mt-1 font-display text-xl font-semibold text-ink">Understand, then find it in the text</h2>
         <p className="mt-2 text-sm text-muted">
-          BBH: these rules are not to be rigorously memorized. They should be understood and applied to
+          From the class textbook: these rules are not to be rigorously memorized. They should be understood and applied to
           syllabification and pronunciation. Every card below is a live Tanakh line. Hunt and Name use the same
           verses — no multiple choice.
         </p>
