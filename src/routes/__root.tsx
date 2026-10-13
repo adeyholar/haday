@@ -52,8 +52,8 @@ export const Route = createRootRoute({
       { title: SEO_TITLE },
       { name: "description", content: SEO_DESCRIPTION },
       { name: "theme-color", content: "#f3eee4" },
-      { name: "application-name", content: "Haday" },
-      { name: "apple-mobile-web-app-title", content: "Haday" },
+      { name: "application-name", content: "HaDay" },
+      { name: "apple-mobile-web-app-title", content: "HaDay" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [

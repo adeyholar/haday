@@ -8,7 +8,7 @@ function GuidePage() {
   return (
     <>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
+        <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">How to use HaDay</h1>
         <p className="mt-3 max-w-prose text-muted">
           HaDay drills first-year Biblical Hebrew vocabulary from{" "}
@@ -21,7 +21,7 @@ function GuidePage() {
           with your account.
         </p>
         <p className="mt-3 max-w-prose text-muted">
-          A phone shortcut is named Haday and shows a brown ה on parchment. If you already saved this site on an
+          A phone shortcut is named HaDay and shows a brown ה on parchment. If you already saved this site on an
           iPhone, remove that shortcut and add it again. The old one keeps the old picture.
         </p>
       </Panel>

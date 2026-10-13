@@ -40,8 +40,8 @@ test("the doors page states the product in the first render", () => {
   assert.match(page, /Choose wisely/);
   assert.match(page, /vocabulary trainer for first-year students/);
   assert.equal(page.includes("Opening the two studies"), false);
-  assert.match(SEO_TITLE, /Haday HebRabbAi Mentor/);
+  assert.match(SEO_TITLE, /HaDay HebRabbAi Mentor/);
   const site = readFileSync("/workspace/src/lib/og/site.json", "utf8");
-  assert.match(site, /Haday HebRabbAi Mentor/);
+  assert.match(site, /HaDay HebRabbAi Mentor/);
   assert.equal(site.includes('"title": "HaDay"'), false);
 });

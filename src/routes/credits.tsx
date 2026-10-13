@@ -13,8 +13,8 @@ function CreditsPage() {
         <img
           src="/brand-logo.jpg"
           alt="HaDay HebRabbAi Mentor. Read the Word as it is written."
-          width={1200}
-          height={630}
+          width={1280}
+          height={720}
           className="w-full rounded-[var(--radius-xl)] shadow-[var(--shadow-border)]"
         />
       </div>
@@ -129,7 +129,7 @@ function CreditsPage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">What is HaDay’s</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          The Grammar Path follows the chapter order of <em>Basics of Biblical Hebrew</em>, 3rd ed. (Pratico & Van Pelt), the class textbook. Haday HebRabbAi Mentor is not affiliated with the authors or publisher.
+          The Grammar Path follows the chapter order of <em>Basics of Biblical Hebrew</em>, 3rd ed. (Pratico & Van Pelt), the class textbook. HaDay HebRabbAi Mentor is not affiliated with the authors or publisher.
           Pictures are original classroom plates, not stock photos. Grammar explanations use public-domain tradition (Gesenius, Davidson) and Tanakh examples — not a photocopy of a copyrighted grammar.
         </p>
       </Panel>

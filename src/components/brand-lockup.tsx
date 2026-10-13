@@ -27,7 +27,7 @@ export function BrandLockup({
             size === "hero" ? "text-5xl" : "text-xl",
           )}
         >
-          Haday
+          HaDay
         </span>
         <span
           className={cn(

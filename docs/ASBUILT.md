@@ -35,7 +35,7 @@ This file is the older picture of the running app. If it disagrees with Notion, 
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. Claude or Grok, capped before the paid call. A failed quota check does not call the model. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
 | **Search** | The doors page, privacy, and credits are the public pages. They render their text without waiting for sign-in. `robots.txt` blocks `/admin` and `/api/`. `sitemap.xml` lists only those three pages. Other pages send `X-Robots-Tag: noindex`. The share title is the full product title. An Azure host 301s to the class site, except `/api/health`. | No textbook pages and no answer keys on a public page. |
-| **Account** | Google, X, or email + password | Progress stays with the account. Old Vercel logins do **not** carry over. A saved shortcut is named **Haday** and shows a brown ה on parchment (`#603619` on `#F3EEE4`). iPhone keeps an old shortcut’s picture until it is removed and added again. |
+| **Account** | Google, X, or email + password | Progress stays with the account. Old Vercel logins do **not** carry over. A saved shortcut is named **HaDay** and shows a brown ה on parchment (`#603619` on `#F3EEE4`). iPhone keeps an old shortcut’s picture until it is removed and added again. |
 
 Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
