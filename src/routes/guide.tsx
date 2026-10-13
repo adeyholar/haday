@@ -108,7 +108,7 @@ function GuidePage() {
           lively woman voice when the phone has one. Default pace is Warm. Tap Play once; after that you can sit and
           listen. Jump to a chapter if you want a shorter stretch. Loop this chapter, pick a group of chapters (Mix), or
           loop the whole list. Listen → On the road plays one course week in the same voice and pace as Drill: Hebrew,
-          then the meaning, and the week repeats until you pause. On the Scripture Path, the bottom bar has Audio. It plays Level A, B, C, D,
+          then the meaning, and the week repeats until you pause. On the Scripture Path, Study is thirty weeks in each level. A week is only that week’s words: study them, then the drill asks every way. Audio, in the bottom bar, plays Level A, B, C, D,
           or E, and all five together. Leaving that page starts the level again at the first word. Hatikvah or a solemn bed can play under the word. The word stays louder. The volume slider moves a gain control, because a phone ignores the player’s own volume. Lock-screen skip works. Keep the screen awake so the phone does not stop the voice. On iPad use Safari, volume up, Silent switch
           off. A natural Hebrew neural voice speaks each lemma, with Hebrew loudness matched to English. Class-owner
           recordings in the Voice bank still play first when they exist. Readers and texts are named on{" "}

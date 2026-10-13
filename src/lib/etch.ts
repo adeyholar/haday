@@ -331,10 +331,19 @@ export function drillProgress(tasks: EtchTask[], index: number): string {
 }
 
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
+  return takeDrillRuns(raw, (key) => /^\d+:(due|weak)$/.test(key));
+}
+
+/** Scripture Path sittings. The key is the level, the week, and the focus. */
+export function hydrateIibsDrillRuns(raw: unknown): DrillRuns {
+  return takeDrillRuns(raw, (key) => /^[A-E]:(?:[1-9]|[12]\d|30):(due|weak)$/.test(key));
+}
+
+function takeDrillRuns(raw: unknown, accept: (key: string) => boolean): DrillRuns {
   const out: DrillRuns = {};
   if (!raw || typeof raw !== "object") return out;
   for (const [key, val] of Object.entries(raw as Record<string, unknown>)) {
-    if (!/^\d+:(due|weak)$/.test(key)) continue;
+    if (!accept(key)) continue;
     if (!val || typeof val !== "object") continue;
     const row = val as Partial<DrillPlace>;
     const ids = Array.isArray(row.ids) ? row.ids.filter((id) => typeof id === "string").slice(0, 800) : [];

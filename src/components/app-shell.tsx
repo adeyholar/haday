@@ -278,6 +278,19 @@ export function AppShell({ children }: { children: ReactNode }) {
               items={IIBS_GAME}
               active={pathname.startsWith("/iibs/vocab")}
             />
+            <NavTip label="Study">
+              <Link
+                to="/iibs/study"
+                aria-label="Study"
+                title="Study"
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-[var(--radius-md)]",
+                  pathname.startsWith("/iibs/study") ? "text-primary" : "text-muted",
+                )}
+              >
+                <ListChecks className="size-5" strokeWidth={pathname.startsWith("/iibs/study") ? 2.2 : 1.8} />
+              </Link>
+            </NavTip>
             <NavTip label="Audio">
               <Link
                 to="/iibs/road"
@@ -353,7 +366,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className="mx-auto grid max-w-3xl grid-cols-4">
+        <ul className={cn("mx-auto grid max-w-3xl", iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -378,13 +391,32 @@ export function AppShell({ children }: { children: ReactNode }) {
                     title="Lessons"
                     className={cn(
                       "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                      pathname === "/iibs" || pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab") && !pathname.startsWith("/iibs/road")
+                      pathname === "/iibs" ||
+                      (pathname.startsWith("/iibs/") &&
+                        !pathname.startsWith("/iibs/vocab") &&
+                        !pathname.startsWith("/iibs/road") &&
+                        !pathname.startsWith("/iibs/study"))
                         ? "text-primary"
                         : "text-muted",
                     )}
                   >
-                    <Library className="size-5" strokeWidth={pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab") && !pathname.startsWith("/iibs/road")) ? 2.2 : 1.8} />
+                    <Library className="size-5" strokeWidth={pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab") && !pathname.startsWith("/iibs/road") && !pathname.startsWith("/iibs/study")) ? 2.2 : 1.8} />
                     Lessons
+                  </Link>
+                </NavTip>
+              </li>
+              <li>
+                <NavTip label="Study" side="top" full>
+                  <Link
+                    to="/iibs/study"
+                    title="Study"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/iibs/study") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <ListChecks className="size-5" strokeWidth={pathname.startsWith("/iibs/study") ? 2.2 : 1.8} />
+                    Study
                   </Link>
                 </NavTip>
               </li>

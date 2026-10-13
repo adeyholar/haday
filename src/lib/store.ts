@@ -117,6 +117,7 @@ type StudyState = StudySnapshot & {
   saveRoadFinalRun: (run: RoadRun | null) => void;
   saveWeakRun: (run: WeakRun | null) => void;
   saveDrillRun: (week: number, focus: string, place: DrillPlace | null) => void;
+  saveIibsDrill: (level: string, week: number, focus: string, place: DrillPlace | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
@@ -326,6 +327,14 @@ export const useStudy = create<StudyState>()(
         if (place) drillRuns[key] = place;
         else delete drillRuns[key];
         set({ game: { ...get().game, drillRuns } });
+      },
+      saveIibsDrill: (level, week, focus, place) => {
+        const face = focus === "weak" ? "weak" : "due";
+        const key = `${level}:${Math.round(Number(week))}:${face}`;
+        const iibsDrillRuns = { ...(get().game.iibsDrillRuns ?? {}) };
+        if (place) iibsDrillRuns[key] = place;
+        else delete iibsDrillRuns[key];
+        set({ game: { ...get().game, iibsDrillRuns } });
       },
       finishIibsStage: (level, lesson, stage, pct) => {
         const now = Date.now();
