@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock, Headphones } from "lucide-react";
+import { Lock, Headphones, ListChecks } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { levelUnlocked } from "@/lib/iibs-game";
@@ -42,6 +42,16 @@ function IibsHome() {
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
+      <Link
+        to="/iibs/study"
+        className="mb-4 flex min-h-24 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <span>
+          <span className="block font-display text-2xl font-bold">Study</span>
+          <span className="mt-1 block text-sm text-muted">Thirty weeks in each level. Study the week, then drill it.</span>
+        </span>
+        <ListChecks className="size-6 shrink-0 text-primary" />
+      </Link>
       <Link
         to="/iibs/road"
         className="mb-4 flex min-h-24 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"

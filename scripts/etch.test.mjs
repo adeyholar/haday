@@ -163,10 +163,11 @@ test("a miss rebuilds to the same cards, and a finished or changed place does no
   assert.equal(drillGate(place, "abc", sitting.length), "resume");
   assert.equal(drillGate({ ...place, index: sitting.length }, "abc", sitting.length), "fresh");
   assert.equal(drillGate(undefined, "abc", sitting.length), "fresh");
-  const page = readFileSync(join(root, "src/routes/drill.tsx"), "utf8");
+  const page = readFileSync(join(root, "src/components/drill-sitting.tsx"), "utf8");
   assert.match(page, /persist\(null\)/);
   assert.match(page, /This week's list changed/);
   assert.match(page, /Start over/);
+  assert.match(readFileSync(join(root, "src/routes/drill.tsx"), "utf8"), /DrillSitting/);
 });
 
 test("hebrew-to-english choices stay distinct, and the meaning stays hidden", () => {
