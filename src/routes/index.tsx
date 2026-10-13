@@ -84,7 +84,7 @@ function DoorsPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }} />
       <Panel className="mb-4 text-center">
-        <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
+        <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
         <img
           src="/doors/ancient-smile.jpg"
           alt=""
@@ -95,7 +95,7 @@ function DoorsPage() {
         <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Choose your Study Path</h1>
         <p className="mt-2 font-display text-2xl font-semibold text-primary">Choose wisely.</p>
         <p className="mx-auto mt-3 max-w-prose text-muted">
-          Haday HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
+          HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
           its meaning, and practice until it stays.
         </p>
         <p className="mx-auto mt-3 max-w-prose text-muted">

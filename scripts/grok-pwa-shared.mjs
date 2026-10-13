@@ -151,9 +151,10 @@ export function stripInstallParams(url) {
   return rest ? `${path}?${rest}` : path;
 }
 
-export function renderInstallPageHtml(template, { host, url } = {}) {
+export function renderInstallPageHtml(template, { host, url, name } = {}) {
+  const appName = name || appNameFromHost(host);
   return String(template)
-    .replaceAll("{{APP_NAME}}", escapeHtml(appNameFromHost(host)))
+    .replaceAll("{{APP_NAME}}", escapeHtml(appName))
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 

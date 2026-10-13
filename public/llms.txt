@@ -1,4 +1,4 @@
-# Haday HebRabbAi Mentor
+# HaDay HebRabbAi Mentor
 
 Biblical Hebrew vocabulary trainer for first-year students.
 

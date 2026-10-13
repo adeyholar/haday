@@ -468,7 +468,7 @@ function ShellSkeleton() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl px-4 pt-6">
-        <p className="text-xs font-semibold tracking-[0.08em] text-primary">Haday · HebRabbAi Mentor</p>
+        <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
         <div className="mt-3 h-10 w-2/3 animate-pulse rounded-[var(--radius-md)] bg-surface/80" />
         <div className="mt-3 h-16 animate-pulse rounded-[var(--radius-lg)] bg-surface/80" />
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

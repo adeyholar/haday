@@ -1,10 +1,10 @@
 import { CLASS_SITE, isRetiredVercelHost } from "@/lib/class-site";
 
 export const SEO_TITLE =
-  "Biblical Hebrew Vocabulary Trainer for First-Year Students | Haday HebRabbAi Mentor";
+  "Biblical Hebrew Vocabulary Trainer for First-Year Students | HaDay HebRabbAi Mentor";
 
 export const SEO_DESCRIPTION =
-  "Haday HebRabbAi Mentor trains Biblical Hebrew vocabulary for first-year students. Hear a word, then its meaning. Lessons stay behind sign-in.";
+  "HaDay HebRabbAi Mentor trains Biblical Hebrew vocabulary for first-year students. Hear a word, then its meaning. Lessons stay behind sign-in.";
 
 const INDEXABLE = new Set(["/", "/legal", "/credits", "/robots.txt", "/sitemap.xml", "/llms.txt"]);
 
@@ -46,13 +46,13 @@ export const SITE_JSON_LD = {
   "@graph": [
     {
       "@type": "WebSite",
-      name: "Haday HebRabbAi Mentor",
+      name: "HaDay HebRabbAi Mentor",
       url: `${CLASS_SITE}/`,
       description: SEO_DESCRIPTION,
     },
     {
       "@type": "WebApplication",
-      name: "Haday HebRabbAi Mentor",
+      name: "HaDay HebRabbAi Mentor",
       url: `${CLASS_SITE}/`,
       applicationCategory: "EducationalApplication",
       operatingSystem: "Web",
