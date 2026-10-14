@@ -29,7 +29,14 @@ function Login() {
   const [agreed, setAgreed] = useState(false);
   const [heard, setHeard] = useState<HeardSource | "">("");
   const [pathChoice, setPathChoice] = useState<StudyPath | "">("");
-  const placed = pathForHeard(heard, pathChoice);
+  const [confirmed, setConfirmed] = useState(false);
+  const suggested: StudyPath | "" = heard === "college" ? "bbh" : heard === "iibs" ? "iibs" : "";
+  const placed: StudyPath | null =
+    heard === "other"
+      ? pathForHeard(heard, pathChoice)
+      : confirmed && (pathChoice === "bbh" || pathChoice === "iibs")
+        ? pathChoice
+        : null;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
@@ -230,8 +237,8 @@ function Login() {
                 <legend className="mb-1 text-sm font-medium text-muted">{HEARD_PROMPT}</legend>
                 {(
                   [
-                    ["college", "College or school", "You are placed on the Grammar Path."],
-                    ["iibs", "IIBS", "You are placed on the Scripture Path."],
+                    ["college", "College or school", "Opens the Grammar Path. You confirm it next."],
+                    ["iibs", "An online Bible school", "Opens the Scripture Path. You confirm it next."],
                     ["other", "Internet or a friend", "Choose the course."],
                   ] as const
                 ).map(([id, label, note]) => (
@@ -244,6 +251,7 @@ function Login() {
                     )}
                     onClick={() => {
                       setHeard(id);
+                      setConfirmed(false);
                       setPathChoice(id === "college" ? "bbh" : id === "iibs" ? "iibs" : "");
                       setError(null);
                     }}
@@ -257,6 +265,41 @@ function Login() {
               </fieldset>
             )}
 
+            {mode === "up" && suggested && (
+              <div className="mt-3 rounded-[var(--radius-md)] bg-surface p-3">
+                <p className="text-sm text-ink">
+                  You'll study on the {pathChoice === "iibs" ? SCRIPTURE_PATH.title : GRAMMAR_PATH.title}.
+                </p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    className={cn(
+                      "min-h-11 rounded-[var(--radius-sm)] px-3 text-sm font-semibold",
+                      confirmed && pathChoice === suggested ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]",
+                    )}
+                    onClick={() => setConfirmed(true)}
+                  >
+                    Continue on this path
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "min-h-11 rounded-[var(--radius-sm)] px-3 text-sm font-semibold",
+                      confirmed && pathChoice !== suggested
+                        ? "bg-ink text-parchment"
+                        : "bg-card text-ink shadow-[var(--shadow-border)]",
+                    )}
+                    onClick={() => {
+                      setPathChoice(pathChoice === "bbh" ? "iibs" : "bbh");
+                      setConfirmed(true);
+                      setError(null);
+                    }}
+                  >
+                    Choose the other path
+                  </button>
+                </div>
+              </div>
+            )}
             {mode === "up" && heard === "other" && (
               <fieldset className="mt-3 grid grid-cols-2 gap-2">
                 <legend className="col-span-2 mb-1 text-sm font-medium text-muted">Course</legend>

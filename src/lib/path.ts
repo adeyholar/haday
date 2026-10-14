@@ -1,7 +1,7 @@
 export const STUDY_PATHS = ["bbh", "iibs"] as const;
 export type StudyPath = (typeof STUDY_PATHS)[number];
 
-/** How a new student heard about HaDay. College and IIBS place the course. */
+/** How a new student heard about HaDay. College and an online Bible school suggest a path. */
 export const HEARD_SOURCES = ["college", "iibs", "other"] as const;
 export type HeardSource = (typeof HEARD_SOURCES)[number];
 
@@ -9,7 +9,7 @@ export function isHeardSource(value: string | null | undefined): value is HeardS
   return value === "college" || value === "iibs" || value === "other";
 }
 
-/** College opens Grammar Path. IIBS opens Scripture Path. Internet or a friend must choose. */
+/** College suggests Grammar Path. An online Bible school suggests Scripture Path. Internet or a friend must choose. The student confirms before the account is created. */
 export function pathForHeard(source: HeardSource | "", chosen: StudyPath | ""): StudyPath | null {
   if (source === "college") return "bbh";
   if (source === "iibs") return "iibs";
