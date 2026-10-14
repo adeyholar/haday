@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { isHighWeak } from "@/lib/srs";
 import { useStudy } from "@/lib/store";
+import { playSittingClap } from "@/lib/sfx";
 import { playFeedback } from "@/lib/try-again";
 import { quizChoices, type VocabItem } from "@/lib/vocab";
 import { classVocab, packWeakRun, unpackWeakRun, weakPool } from "@/lib/weak-pool";
@@ -91,11 +92,13 @@ function WeakPoolPage() {
   }
 
   function goNext() {
+    const next = i + 1;
     setPicked(null);
     setMissedChoice(null);
     setGaveUp(false);
     settled.current = false;
-    setI((n) => n + 1);
+    if (next >= queue.length) playSittingClap();
+    setI(next);
   }
 
   if (!started) {
