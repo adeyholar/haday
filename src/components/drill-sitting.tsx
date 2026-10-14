@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { EtchPlay } from "@/components/etch-play";
 import { Panel } from "@/components/panel";
+import { playSittingClap } from "@/lib/sfx";
 import { snapshotOf, statsFor, useStudy } from "@/lib/store";
 import { saveProgress } from "@/lib/progress";
 import {
@@ -174,6 +175,7 @@ export function DrillSitting({
     if (nextIndex >= nextTasks.length) {
       setPhase("done");
       persist(null);
+      playSittingClap();
       return;
     }
     persist({

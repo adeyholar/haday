@@ -1,4 +1,4 @@
-import { playAww, playGrade, playTryAgainCue } from "@/lib/sfx";
+import { playChime, playTick } from "@/lib/sfx";
 
 /** Global ladder: try-again is never a miss. */
 export const CUE_TRY_AGAIN = "Try again";
@@ -26,7 +26,6 @@ export function isStrong(kind: FeedbackKind): boolean {
 }
 
 export function playFeedback(kind: FeedbackKind) {
-  if (kind === "strong") playGrade(true);
-  else if (kind === "retry") playTryAgainCue();
-  else playAww();
+  if (kind === "strong") playChime();
+  else playTick();
 }

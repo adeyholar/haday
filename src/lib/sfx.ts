@@ -5,10 +5,6 @@ let master: GainNode | null = null;
 let muted = false;
 let applause: AudioBuffer | null = null;
 let applauseLoad: Promise<AudioBuffer | null> | null = null;
-let tryAgain: AudioBuffer | null = null;
-let tryAgainLoad: Promise<AudioBuffer | null> | null = null;
-let aww: AudioBuffer | null = null;
-let awwLoad: Promise<AudioBuffer | null> | null = null;
 const listeners = new Set<(value: boolean) => void>();
 
 function readMuted() {
@@ -45,8 +41,6 @@ export function unlockSfx() {
   const ac = ensureGraph();
   if (!ac) return;
   void loadApplause(ac);
-  void loadTryAgain(ac);
-  void loadAww(ac);
 }
 
 export function isMuted() {
@@ -99,28 +93,6 @@ function loadApplause(ac: AudioContext): Promise<AudioBuffer | null> {
   return applauseLoad;
 }
 
-function loadTryAgain(ac: AudioContext): Promise<AudioBuffer | null> {
-  if (tryAgain) return Promise.resolve(tryAgain);
-  if (tryAgainLoad) return tryAgainLoad;
-  tryAgainLoad = decodeSfx(ac, "/sfx/try-again.mp3").then((buf) => {
-    if (!buf) tryAgainLoad = null;
-    else tryAgain = buf;
-    return buf;
-  });
-  return tryAgainLoad;
-}
-
-function loadAww(ac: AudioContext): Promise<AudioBuffer | null> {
-  if (aww) return Promise.resolve(aww);
-  if (awwLoad) return awwLoad;
-  awwLoad = decodeSfx(ac, "/sfx/crowd-aww.mp3").then((buf) => {
-    if (!buf) awwLoad = null;
-    else aww = buf;
-    return buf;
-  });
-  return awwLoad;
-}
-
 function startBuffer(ac: AudioContext, dest: GainNode, buf: AudioBuffer, peak = 0.95) {
   const src = ac.createBufferSource();
   src.buffer = buf;
@@ -151,41 +123,56 @@ function playCrowdClap(ac: AudioContext, dest: GainNode) {
   });
 }
 
-function playTryAgain(ac: AudioContext, dest: GainNode) {
-  if (tryAgain) {
-    startBuffer(ac, dest, tryAgain, 1);
-    return;
-  }
-  void loadTryAgain(ac).then((buf) => {
-    if (buf && !muted) startBuffer(ac, dest, buf, 1);
-  });
-}
-
 export function playGrade(ok: boolean) {
-  const ac = ensureGraph();
-  if (!ac || !master || muted) return;
-  if (ok) playCrowdClap(ac, master);
-  else playTryAgain(ac, master);
+  if (ok) playChime();
+  else playTick();
 }
 
-/** First miss: spoken try again. Not the crowd aww. */
+/** A correct card: two quiet notes, under a third of a second. */
+export function playChime() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  const t0 = ac.currentTime;
+  tone(ac, master, 523, t0, 0.11, 0.07);
+  tone(ac, master, 659, t0 + 0.09, 0.14, 0.06);
+}
+
+/** A miss: one soft tick. No groan. */
+export function playTick() {
+  const ac = ensureGraph();
+  if (!ac || !master || muted) return;
+  tone(ac, master, 392, ac.currentTime, 0.07, 0.045);
+}
+
+/** First miss: the same soft tick. The words say Try again. */
 export function playTryAgainCue() {
-  const ac = ensureGraph();
-  if (!ac || !master || muted) return;
-  playTryAgain(ac, master);
+  playTick();
 }
 
-/** Second miss only: crowd aww. */
+/** Second miss: the same soft tick. Not the crowd aww. */
 export function playAww() {
+  playTick();
+}
+
+/** Once, when a sitting is finished. Not on each card. */
+export function playSittingClap() {
   const ac = ensureGraph();
   if (!ac || !master || muted) return;
-  if (aww) {
-    startBuffer(ac, master, aww, 0.9);
-    return;
-  }
-  void loadAww(ac).then((buf) => {
-    if (buf && !muted && master) startBuffer(ac, master, buf, 0.9);
-  });
+  playCrowdClap(ac, master);
+}
+
+function tone(ac: AudioContext, dest: GainNode, freq: number, start: number, dur: number, peak: number) {
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(freq, start);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.linearRampToValueAtTime(peak, start + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  o.connect(g);
+  g.connect(dest);
+  o.start(start);
+  o.stop(start + dur + 0.02);
 }
 
 export function playPop() {
