@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { EtchPlay } from "@/components/etch-play";
 import { Panel } from "@/components/panel";
-import { snapshotOf, useStudy } from "@/lib/store";
+import { snapshotOf, statsFor, useStudy } from "@/lib/store";
 import { saveProgress } from "@/lib/progress";
 import {
   applyDrillReviews,
@@ -11,6 +11,8 @@ import {
   drillFingerprint,
   drillGate,
   drillProgress,
+  drillDistance,
+  vocabDistance,
   drillSeed,
   queueDrillMiss,
   type DrillPlace,
@@ -41,6 +43,7 @@ export function DrillSitting({
   chrome?: ReactNode;
 }) {
   const focus = useStudy((s) => s.focus);
+  const cards = useStudy((s) => s.cards);
   const rate = useStudy((s) => s.rate);
   const [tasks, setTasks] = useState<EtchTask[]>([]);
   const [i, setI] = useState(0);
@@ -141,6 +144,11 @@ export function DrillSitting({
 
   const task = tasks[i];
   const finished = phase === "run" && tasks.length > 0 && i >= tasks.length;
+  const words = statsFor(pool, cards);
+  const vocab = vocabDistance(words.seen, words.mastered, words.total);
+  const sittingTasks = phase === "resume" && prepared.current.length ? prepared.current : tasks;
+  const sittingIndex = phase === "resume" ? (readPlace()?.index ?? 0) : i;
+  const drill = drillDistance(sittingIndex, sittingTasks.length);
 
   function onGrade(rating: DrillGrade) {
     if (!task) return;
@@ -197,6 +205,7 @@ export function DrillSitting({
           <p className="mt-2 text-muted">
             {label} · {offer}
           </p>
+          <DrillMeters drill={drill} vocab={vocab} />
           <div className="mt-5 grid gap-2">
             <Button
               type="button"
@@ -256,6 +265,7 @@ export function DrillSitting({
           <p className="mt-2 text-muted">
             {hits} held of {checks} checks · {pct}%. Study cards are not scored. A miss came back in the group.
           </p>
+          <DrillMeters drill={drillDistance(tasks.length, tasks.length)} vocab={vocab} />
           <Button type="button" className="mt-6" onClick={begin}>
             New sitting
           </Button>
@@ -282,12 +292,7 @@ export function DrillSitting({
           the group.
         </p>
         {saved ? <p className="mt-1 text-xs text-muted">Saved</p> : null}
-        <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface">
-          <div
-            className="h-full bg-primary transition-[width] duration-[var(--motion-fast)]"
-            style={{ width: `${tasks.length ? (i / tasks.length) * 100 : 0}%` }}
-          />
-        </div>
+        <DrillMeters drill={drill} vocab={vocab} />
       </Panel>
       <EtchPlay
         key={task.key}
@@ -300,5 +305,39 @@ export function DrillSitting({
         onGrade={onGrade}
       />
     </>
+  );
+}
+
+function DrillMeters({
+  drill,
+  vocab,
+}: {
+  drill: { done: number; total: number; left: number; pct: number };
+  vocab: { met: number; mastered: number; total: number; left: number; pct: number };
+}) {
+  return (
+    <div className="mt-3 grid gap-3 text-left">
+      <Meter title="This drill" pct={drill.pct} line={`${drill.done} of ${drill.total} cards · ${drill.left} left`} />
+      <Meter
+        title="These words"
+        pct={vocab.pct}
+        line={`${vocab.mastered} of ${vocab.total} mastered · ${vocab.left} still to learn · ${vocab.met} met`}
+      />
+    </div>
+  );
+}
+
+function Meter({ title, pct, line }: { title: string; pct: number; line: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3 text-sm">
+        <span className="font-semibold text-ink">{title}</span>
+        <span className="tabular-nums text-muted">{pct}%</span>
+      </div>
+      <p className="text-sm text-muted">{line}</p>
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface" role="meter" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={title}>
+        <div className="h-full bg-primary transition-[width] duration-[var(--motion-fast)]" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
   );
 }

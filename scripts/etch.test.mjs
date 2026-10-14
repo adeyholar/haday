@@ -19,6 +19,8 @@ const {
   drillProgress,
   drillGate,
   drillCardChoices,
+  drillDistance,
+  vocabDistance,
   hydrateDrillRuns,
   queueDrillMiss,
   verseForLemma,
@@ -249,6 +251,17 @@ test("a second miss waits a day, not ten minutes", () => {
   assert.ok(first.due - now < 15 * 60_000);
   const second = applyRating(first, "again", now);
   assert.ok(second.due - now >= 20 * 60 * 60_000);
+});
+
+test("a drill shows the sitting left and the week's words left", () => {
+  assert.deepEqual(drillDistance(0, 40), { done: 0, total: 40, left: 40, pct: 0 });
+  assert.deepEqual(drillDistance(10, 40), { done: 10, total: 40, left: 30, pct: 25 });
+  assert.deepEqual(drillDistance(40, 40), { done: 40, total: 40, left: 0, pct: 100 });
+  assert.deepEqual(vocabDistance(12, 4, 34), { met: 12, mastered: 4, total: 34, left: 30, pct: 12 });
+  assert.deepEqual(vocabDistance(40, 40, 34), { met: 34, mastered: 34, total: 34, left: 0, pct: 100 });
+  const play = readFileSync(join(root, "src/components/drill-sitting.tsx"), "utf8");
+  assert.match(play, /This drill/);
+  assert.match(play, /These words/);
 });
 
 test("a tap that leaves with the last card does not grade the next one", () => {
