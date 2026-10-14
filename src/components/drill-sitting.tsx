@@ -290,6 +290,7 @@ export function DrillSitting({
         </div>
       </Panel>
       <EtchPlay
+        key={task.key}
         task={task}
         pool={pool}
         seed={seed}

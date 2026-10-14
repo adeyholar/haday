@@ -14,6 +14,11 @@ export const ETCH_PASSES = 9;
 export const DRILL_GROUP = 5;
 export const GUESS_MS = 400;
 
+/** True when this tap is still the finger that left the previous card. */
+export function tapCarriesOver(shownAt: number, now: number): boolean {
+  return now - shownAt < GUESS_MS;
+}
+
 export type EtchKind = "study" | "meet" | "contrast" | "produce" | "verse" | "say" | "keep";
 export type EtchCue = "he" | "en" | "picture" | "audio" | "consonants" | "spell";
 

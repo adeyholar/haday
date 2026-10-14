@@ -22,6 +22,8 @@ const {
   hydrateDrillRuns,
   queueDrillMiss,
   verseForLemma,
+  tapCarriesOver,
+  GUESS_MS,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
 const { VOCAB, itemsForWeek, glossMatches, liveGloss } = await jiti.import(join(root, "src/lib/vocab.ts"));
@@ -247,4 +249,17 @@ test("a second miss waits a day, not ten minutes", () => {
   assert.ok(first.due - now < 15 * 60_000);
   const second = applyRating(first, "again", now);
   assert.ok(second.due - now >= 20 * 60 * 60_000);
+});
+
+test("a tap that leaves with the last card does not grade the next one", () => {
+  const shown = 1_000;
+  assert.equal(tapCarriesOver(shown, shown + GUESS_MS - 1), true);
+  assert.equal(tapCarriesOver(shown, shown + GUESS_MS), false);
+  const play = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
+  assert.match(play, /if \(boardKey\.current !== task\.key\)/);
+  assert.match(play, /setPicked\(null\)/);
+  assert.match(play, /carryOver\(\)/);
+  assert.match(play, /listenGen/);
+  const sitting = readFileSync(join(root, "src/components/drill-sitting.tsx"), "utf8");
+  assert.match(sitting, /key=\{task\.key\}/);
 });

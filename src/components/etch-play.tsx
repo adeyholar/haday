@@ -15,7 +15,7 @@ import {
   drillCardChoices,
   etchHint,
   etchLabel,
-  GUESS_MS,
+  tapCarriesOver,
   tokenFitsLemma,
   verseTapTokens,
   type EtchTask,
@@ -54,26 +54,35 @@ export function EtchPlay({
   const [choices, setChoices] = useState<VocabItem[]>([]);
   const board = useRef<VocabItem[]>([]);
   const boardKey = useRef("");
+  const shownAt = useRef(Date.now());
+  const voice = useRef({ stop: false });
+  const listenGen = useRef(0);
+  const ear = useRef<{ abort: () => void } | null>(null);
   if (boardKey.current !== task.key) {
     boardKey.current = task.key;
     const dealt = drillCardChoices(task, pool, seed);
     board.current = dealt;
     setChoices(dealt.length ? shuffleList(dealt) : []);
-  }
-  const shownAt = useRef(Date.now());
-  const voice = useRef({ stop: false });
-
-  useEffect(() => {
     setTyped("");
     setPicked(null);
     setTries(0);
-    setGuessFast(false);
     setRevealed(false);
     setListening(false);
+    setGuessFast(false);
     shownAt.current = Date.now();
+    listenGen.current += 1;
+  }
+
+  useEffect(() => {
     voice.current.stop = true;
     voice.current = { stop: false };
     stopSpeech();
+    try {
+      ear.current?.abort();
+    } catch {
+      /* already stopped */
+    }
+    ear.current = null;
     if (task.kind === "study" || task.kind === "meet" || task.cue === "audio") {
       unlockSpeech();
       void speakHebrewWord(item, 0.85, voice.current);
@@ -81,6 +90,13 @@ export function EtchPlay({
     return () => {
       voice.current.stop = true;
       stopSpeech();
+      listenGen.current += 1;
+      try {
+        ear.current?.abort();
+      } catch {
+        /* already stopped */
+      }
+      ear.current = null;
     };
   }, [task.key, item, task.kind, task.cue]);
 
@@ -97,30 +113,29 @@ export function EtchPlay({
   }
 
   function tooFast(): boolean {
-    return Date.now() - shownAt.current < GUESS_MS;
+    return tapCarriesOver(shownAt.current, Date.now());
+  }
+
+  function carryOver(): boolean {
+    if (!tooFast()) return false;
+    setGuessFast(true);
+    return true;
   }
 
   function pickContrast(id: string) {
-    if (picked) return;
-    if (id === item.id && tooFast()) {
-      setGuessFast(true);
-      setChoices(shuffleList(board.current));
-      shownAt.current = Date.now();
-      playFeedback("retry");
-      return;
-    }
-    const ok = id === item.id;
-    if (!ok && tries < 1) {
+    if (picked || carryOver()) return;
+    const hit = id === item.id;
+    if (!hit && tries < 1) {
       setTries(1);
       playFeedback("retry");
       return;
     }
     setPicked(id);
-    playFeedback(ok ? "strong" : "fail");
+    playFeedback(hit ? "strong" : "fail");
   }
 
   function submitVerse() {
-    if (picked || !task.verse) return;
+    if (picked || !task.verse || carryOver()) return;
     const hit =
       liveMatchAny(item.hebrew, typed, item.hebrewAlts, true) === "exact" || tokenFitsLemma(typed, item, task.verse.hit);
     if (!hit && tries < 1) {
@@ -134,6 +149,7 @@ export function EtchPlay({
 
   function submitStudy(event: { preventDefault: () => void }) {
     event.preventDefault();
+    if (carryOver()) return;
     if (!typed.trim()) {
       setRevealed(true);
       return;
@@ -145,7 +161,7 @@ export function EtchPlay({
   }
 
   function submitProduce() {
-    if (picked) return;
+    if (picked || carryOver()) return;
     const ok = typedOk;
     if (!ok && tries < 1) {
       setTries(1);
@@ -544,8 +560,11 @@ export function EtchPlay({
               type="button"
               disabled={listening}
               onClick={() => {
+                if (carryOver()) return;
+                const gen = listenGen.current;
                 setListening(true);
-                listenForHebrew(item, (hit) => {
+                ear.current = listenForHebrew(item, (hit) => {
+                  if (gen !== listenGen.current) return;
                   setListening(false);
                   if (hit) {
                     setPicked(item.id);
@@ -591,6 +610,7 @@ export function EtchPlay({
       {!graded && !study && task.kind !== "say" && (
         <DontKnowButton
           onClick={() => {
+            if (carryOver()) return;
             setPicked("__noidea__");
             playFeedback("fail");
           }}
@@ -644,28 +664,43 @@ function speechCtor(): (new () => {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-function listenForHebrew(item: EtchTask["item"], done: (hit: boolean) => void) {
+function listenForHebrew(item: EtchTask["item"], done: (hit: boolean) => void): { abort: () => void } | null {
   const Ctor = speechCtor();
   if (!Ctor) {
     done(false);
-    return;
+    return null;
   }
   const rec = new Ctor();
+  let stopped = false;
   rec.lang = "he-IL";
   rec.interimResults = false;
   rec.onresult = (ev) => {
+    if (stopped) return;
     const transcript = ev.results?.[0]?.[0]?.transcript ?? "";
     const heard = lettersOnly(transcript);
     const target = lettersOnly(item.hebrew);
     done(Boolean(heard) && (heard === target || (item.hebrewAlts ?? []).some((alt) => lettersOnly(alt) === heard)));
   };
-  rec.onerror = () => done(false);
+  rec.onerror = () => {
+    if (!stopped) done(false);
+  };
   rec.onend = () => {};
   try {
     rec.start();
   } catch {
     done(false);
+    return null;
   }
+  return {
+    abort() {
+      stopped = true;
+      try {
+        rec.abort();
+      } catch {
+        /* already stopped */
+      }
+    },
+  };
 }
 
 function speakLine(he: string) {
