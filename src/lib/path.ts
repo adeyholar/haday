@@ -36,6 +36,12 @@ export function isStudyPath(value: string | null | undefined): value is StudyPat
   return value === "bbh" || value === "iibs";
 }
 
+/** A signed-in student opens their study. The owner stays on the two doors. */
+export function homeForAccount(gate: { path: StudyPath | null; admin: boolean }): "/bbh" | "/iibs" | null {
+  if (gate.admin || !gate.path) return null;
+  return gate.path === "iibs" ? "/iibs" : "/bbh";
+}
+
 export function isIibsLevel(value: string | null | undefined): value is IibsLevelId {
   return IIBS_LEVELS.some((level) => level.id === value);
 }

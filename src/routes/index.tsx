@@ -4,7 +4,7 @@ import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
-import { clearDoor, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
+import { clearDoor, homeForAccount, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
 import { SITE_JSON_LD } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
@@ -35,6 +35,12 @@ function DoorsPage() {
               return;
             }
           }
+        }
+        const home = homeForAccount(next);
+        if (home) {
+          rememberDoor(next.path!);
+          window.location.assign(home);
+          return;
         }
         if (!cancelled) {
           clearDoor();
