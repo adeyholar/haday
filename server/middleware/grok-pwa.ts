@@ -73,12 +73,21 @@ export default async function grokPwaMiddleware(
   const urlWithQuery = path + event.url.search;
 
   if (path === "/__grok/manifest.webmanifest" || path === "/__grok/manifest.json") {
-    return new Response(renderWebManifest(requestHost(event)), {
-      headers: {
-        "content-type": "application/manifest+json; charset=utf-8",
-        "cache-control": "no-cache",
+    return new Response(
+      renderWebManifest(requestHost(event), {
+        name: "HaDay HebRabbAi Mentor",
+        shortName: "HaDay",
+        icon: "/apple-touch-icon.png",
+        background: "#F3EEE4",
+        theme: "#F3EEE4",
+      }),
+      {
+        headers: {
+          "content-type": "application/manifest+json; charset=utf-8",
+          "cache-control": "no-cache",
+        },
       },
-    });
+    );
   }
 
   if (

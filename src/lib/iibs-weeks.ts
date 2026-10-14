@@ -1,8 +1,7 @@
-import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { vocabLessons, type IibsVocabLevel, type IibsVocabWord } from "@/lib/iibs-vocab";
 import type { Pos, VocabItem } from "@/lib/vocab";
 
-/** Scripture Path study. Each level's words, in lesson order, split across thirty weeks. A word is kept once. */
+/** Scripture Path study. Each level's words stay in lesson order and split across thirty weeks. The same pointed word with the same meaning is kept once. Different vowels stay. */
 export const IIBS_WEEK_LEVELS = ["A", "B", "C", "D", "E"] as const;
 export const IIBS_WEEKS = 30;
 
@@ -30,20 +29,33 @@ export function iibsWeekLabel(level: string, week: number): string {
 }
 
 const WORDS = new Map<IibsVocabLevel, VocabItem[]>();
+let studyIds: Set<string> | null = null;
 
 function levelWords(level: IibsVocabLevel): VocabItem[] {
   const cached = WORDS.get(level);
   if (cached) return cached;
   const seen = new Set<string>();
   const out: VocabItem[] = [];
-  for (const lesson of vocabLessons(level) ?? []) {
-    for (const word of lesson) {
-      const item = toItem(level, word, seen);
+  const lessons = vocabLessons(level) ?? [];
+  lessons.forEach((lesson, lessonIndex) => {
+    lesson.forEach((word, index) => {
+      const item = toItem(level, lessonIndex + 1, index + 1, word, seen);
       if (item) out.push(item);
-    }
-  }
+    });
+  });
   WORDS.set(level, out);
   return out;
+}
+
+/** Ids the week builder actually deals. A save may keep these and no other `iibs-` key. */
+export function iibsStudyIdSet(): Set<string> {
+  if (studyIds) return studyIds;
+  const ids = new Set<string>();
+  for (const level of IIBS_WEEK_LEVELS) {
+    for (const item of levelWords(level)) ids.add(item.id);
+  }
+  studyIds = ids;
+  return ids;
 }
 
 function posOf(kind: string): Pos {
@@ -65,15 +77,21 @@ function cleanGloss(gloss: string): string {
     .trim();
 }
 
-function toItem(level: IibsVocabLevel, word: IibsVocabWord, seen: Set<string>): VocabItem | null {
-  const key = foldFinals(lettersOnly(word.hebrew));
-  if (!key || seen.has(key)) return null;
-  seen.add(key);
+function toItem(
+  level: IibsVocabLevel,
+  lesson: number,
+  place: number,
+  word: IibsVocabWord,
+  seen: Set<string>,
+): VocabItem | null {
   const gloss = cleanGloss(word.gloss);
-  if (!gloss) return null;
+  if (!word.hebrew || !gloss) return null;
+  const key = `${word.hebrew}\n${gloss}`;
+  if (seen.has(key)) return null;
+  seen.add(key);
   const plural = word.plural.replace(/\s+/g, " ").trim();
   return {
-    id: `iibs-${level.toLowerCase()}-${key}`,
+    id: `iibs-${level.toLowerCase()}-${String(lesson).padStart(2, "0")}-${String(place).padStart(2, "0")}`,
     hebrew: word.hebrew,
     translit: "",
     gloss,
