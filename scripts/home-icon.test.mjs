@@ -54,6 +54,11 @@ test("a saved shortcut is HaDay, with the parchment he, and not the template ico
   });
   assert.match(install, /Add HaDay/);
   assert.doesNotMatch(install, /Grok App/);
+  const installPage = readFileSync("/workspace/scripts/install-page.html", "utf8");
+  assert.match(installPage, /href="\/apple-touch-icon\.png"/);
+  assert.match(installPage, /href="\/manifest\.webmanifest"/);
+  assert.doesNotMatch(installPage, /__grok\/icon-180/);
   const middleware = readFileSync("/workspace/server/middleware/grok-pwa.ts", "utf8");
-  assert.match(middleware, /name: "HaDay"/);
+  assert.match(middleware, /name: "HaDay HebRabbAi Mentor"/);
+  assert.match(middleware, /icon: "\/apple-touch-icon\.png"/);
 });

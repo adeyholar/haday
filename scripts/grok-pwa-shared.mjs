@@ -158,21 +158,23 @@ export function renderInstallPageHtml(template, { host, url, name } = {}) {
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
-export function renderWebManifest(hostHeader) {
-  const name = appNameFromHost(hostHeader);
+export function renderWebManifest(hostHeader, options = {}) {
+  const name = options.name || appNameFromHost(hostHeader);
+  const shortName = options.shortName || name;
+  const icon = options.icon || "/__grok/icon-180.png";
   return JSON.stringify(
     {
       name,
-      short_name: name,
+      short_name: shortName,
       id: "/",
       start_url: "/",
       scope: "/",
       display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
+      background_color: options.background || "#000000",
+      theme_color: options.theme || "#000000",
       icons: [
         {
-          src: "/__grok/icon-180.png",
+          src: icon,
           sizes: "180x180",
           type: "image/png",
         },
