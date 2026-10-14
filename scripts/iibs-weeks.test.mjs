@@ -7,11 +7,12 @@ import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
-const { IIBS_WEEK_LEVELS, IIBS_WEEKS, iibsWeekCount, iibsWeekItems, iibsStudyIdSet } = await jiti.import(
+const { IIBS_WEEK_LEVELS, IIBS_WEEKS, iibsWeekCount, iibsWeekItems, iibsStudyIdSet, iibsWordId } = await jiti.import(
   join(root, "src/lib/iibs-weeks.ts"),
 );
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
 const { keepStudyCards } = await jiti.import(join(root, "src/lib/card-ids.ts"));
+const { glossMatches } = await jiti.import(join(root, "src/lib/vocab.ts"));
 
 test("each Scripture Path level is thirty weeks, and a week is not the whole level", () => {
   for (const level of IIBS_WEEK_LEVELS) {
@@ -25,7 +26,9 @@ test("each Scripture Path level is thirty weeks, and a week is not the whole lev
       for (const item of list) {
         assert.equal(ids.has(item.id), false, item.id);
         ids.add(item.id);
-        assert.match(item.id, /^iibs-[a-e]-\d{2}-\d{2}$/);
+        assert.match(item.id, /^iibs-[a-e]-[0-9a-z]+$/);
+        assert.equal(item.id, iibsWordId(level, item.hebrew, item.gloss));
+        assert.doesNotMatch(item.id, /^iibs-[a-e]-\d{2}-\d{2}$/);
         assert.equal(item.gloss.includes("("), false);
         assert.equal(item.chapter, 0);
       }
@@ -49,6 +52,12 @@ test("each Scripture Path level is thirty weeks, and a week is not the whole lev
   const they = levelA.find((item) => item.hebrew === "הֵנָּה");
   assert.ok(behold && they);
   assert.notEqual(behold.id, they.id);
+  const said = levelA.find((item) => item.hebrew === "אָמַר" && item.gloss === "he said");
+  assert.ok(said);
+  assert.equal(said.id, iibsWordId("A", "אָמַר", "he said"));
+  const carried = keepStudyCards({ "iibs-a-01-01": { reps: 4, interval: 2 } });
+  assert.equal(carried[said.id].reps, 4);
+  assert.equal(carried["iibs-a-01-01"], undefined);
   const sample = first[0];
   const kept = keepStudyCards({
     [sample.id]: { reps: 3, interval: 2 },
@@ -59,6 +68,10 @@ test("each Scripture Path level is thirty weeks, and a week is not the whole lev
   assert.equal(kept["iibs-a-שלום"], undefined);
   assert.equal(kept["iibs-a-99-99"], undefined);
   assert.equal(iibsStudyIdSet().has(sample.id), true);
+  const baal = levelA.filter((item) => item.hebrew === "בַּעַל");
+  assert.equal(baal.length, 2);
+  assert.equal(glossMatches(baal[0], baal[1].gloss.split(",")[0].trim()), true);
+  assert.equal(glossMatches(baal[1], baal[0].gloss.split(",")[0].trim()), true);
   const place = { seed: 1, ids: ["iibs-a-x"], index: 2, reviews: [], hits: 1, checks: 2, fingerprint: "abc" };
   const game = hydrateGame({
     drillRuns: { "3:due": place },

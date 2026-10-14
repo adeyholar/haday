@@ -29,7 +29,19 @@ export function iibsWeekLabel(level: string, week: number): string {
 }
 
 const WORDS = new Map<IibsVocabLevel, VocabItem[]>();
+const LEGACY = new Map<string, string>();
 let studyIds: Set<string> | null = null;
+
+/** Stable id. It is a hash of the pointed word and its meaning, not its place in the lesson. */
+export function iibsWordId(level: IibsVocabLevel, hebrew: string, gloss: string): string {
+  let hash = 2166136261;
+  const text = `${hebrew}\n${gloss}`;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `iibs-${level.toLowerCase()}-${(hash >>> 0).toString(36)}`;
+}
 
 function levelWords(level: IibsVocabLevel): VocabItem[] {
   const cached = WORDS.get(level);
@@ -43,8 +55,15 @@ function levelWords(level: IibsVocabLevel): VocabItem[] {
       if (item) out.push(item);
     });
   });
+  noteTwinMeanings(out);
   WORDS.set(level, out);
   return out;
+}
+
+/** The place-based id dealt on 14 Oct, rewritten to the word id. Unknown keys are left alone. */
+export function iibsLegacyId(id: string): string | undefined {
+  for (const level of IIBS_WEEK_LEVELS) levelWords(level);
+  return LEGACY.get(id);
 }
 
 /** Ids the week builder actually deals. A save may keep these and no other `iibs-` key. */
@@ -89,9 +108,12 @@ function toItem(
   const key = `${word.hebrew}\n${gloss}`;
   if (seen.has(key)) return null;
   seen.add(key);
+  const id = iibsWordId(level, word.hebrew, gloss);
+  const slot = `iibs-${level.toLowerCase()}-${String(lesson).padStart(2, "0")}-${String(place).padStart(2, "0")}`;
+  if (slot !== id) LEGACY.set(slot, id);
   const plural = word.plural.replace(/\s+/g, " ").trim();
   return {
-    id: `iibs-${level.toLowerCase()}-${String(lesson).padStart(2, "0")}-${String(place).padStart(2, "0")}`,
+    id,
     hebrew: word.hebrew,
     translit: "",
     gloss,
@@ -101,4 +123,23 @@ function toItem(
     freq: 0,
     stems: plural ? `Plural ${plural}` : undefined,
   };
+}
+
+/** The same pointed spelling kept twice, with two meanings, accepts either meaning. */
+function noteTwinMeanings(items: VocabItem[]) {
+  const twins = new Map<string, VocabItem[]>();
+  for (const item of items) {
+    const group = twins.get(item.hebrew) ?? [];
+    group.push(item);
+    twins.set(item.hebrew, group);
+  }
+  for (const group of twins.values()) {
+    if (group.length < 2) continue;
+    for (const item of group) {
+      const others = group.filter((other) => other !== item).map((other) => other.gloss);
+      item.alts = others;
+      const note = `Also ${others.join("; ")}`;
+      item.stems = item.stems ? `${item.stems}. ${note}` : note;
+    }
+  }
 }
