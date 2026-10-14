@@ -22,8 +22,12 @@ export const SCRIPTURE_PATH = {
 
 export const PATH_CHOICE = "Choose the Grammar Path or the Scripture Path.";
 
+export const HEARD_PROMPT = "How did you hear about HaDay?";
+
+export const HEARD_NEED = "Tell us how you heard about HaDay.";
+
 export const PATH_CHOICE_STAYS =
-  "Create an account, then choose the Grammar Path or the Scripture Path. That choice stays with you.";
+  "College or school opens the Grammar Path. IIBS opens the Scripture Path. Internet or a friend chooses the course. That choice stays with you.";
 
 export const CLASS_VERSE_NOTE =
   "The marked word is class vocabulary when it is on the class word list. Other class words in the same verse are listed so you meet them again.";

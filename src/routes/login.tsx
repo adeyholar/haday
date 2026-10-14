@@ -5,8 +5,8 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
-import { stashPathIntent, type StudyPath } from "@/lib/path";
-import { GRAMMAR_PATH, PATH_CHOICE, PATH_CHOICE_STAYS, SCRIPTURE_PATH } from "@/lib/path-names";
+import { stashPathIntent, pathForHeard, type HeardSource, type StudyPath } from "@/lib/path";
+import { GRAMMAR_PATH, HEARD_NEED, HEARD_PROMPT, PATH_CHOICE, PATH_CHOICE_STAYS, SCRIPTURE_PATH } from "@/lib/path-names";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -27,7 +27,9 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [heard, setHeard] = useState<HeardSource | "">("");
   const [pathChoice, setPathChoice] = useState<StudyPath | "">("");
+  const placed = pathForHeard(heard, pathChoice);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
@@ -48,6 +50,13 @@ function Login() {
 
   async function onOauth(providerId: string) {
     setError(null);
+    if (mode === "up") {
+      if (!placed) {
+        setError(heard === "other" ? PATH_CHOICE : HEARD_NEED);
+        return;
+      }
+      stashPathIntent(placed);
+    }
     setBusy(true);
     try {
       await signIn(providerId, { callbackURL: "/" });
@@ -102,10 +111,10 @@ function Login() {
         if (!agreed) {
           throw new Error("Read Privacy and disclaimer, then tick the box.");
         }
-        if (pathChoice !== "bbh" && pathChoice !== "iibs") {
-          throw new Error(PATH_CHOICE);
+        if (!placed) {
+          throw new Error(heard === "other" ? PATH_CHOICE : HEARD_NEED);
         }
-        stashPathIntent(pathChoice);
+        stashPathIntent(placed);
         const { error: signUpError } = await authClient.signUp.email({
           name: name.trim() || email.split("@")[0] || "Student",
           email: email.trim(),
@@ -183,28 +192,7 @@ function Login() {
           </div>
         ) : (
           <>
-            <div className="mt-6 grid gap-2">
-              {GROK_PROVIDERS.map((provider) => (
-                <Button
-                  key={provider.providerId}
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled={busy}
-                  onClick={() => void onOauth(provider.providerId)}
-                >
-                  Continue with {provider.label}
-                </Button>
-              ))}
-            </div>
-
-            <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-subtle">
-              <span className="h-px flex-1 bg-border" />
-              or email
-              <span className="h-px flex-1 bg-border" />
-            </div>
-
-            <div className="mb-4 grid grid-cols-2 rounded-[var(--radius-md)] bg-surface p-1">
+            <div className="mt-6 grid grid-cols-2 rounded-[var(--radius-md)] bg-surface p-1">
               <button
                 type="button"
                 className={cn(
@@ -236,6 +224,95 @@ function Login() {
                 Sign in
               </button>
             </div>
+
+            {mode === "up" && (
+              <fieldset className="mt-4 grid gap-2">
+                <legend className="mb-1 text-sm font-medium text-muted">{HEARD_PROMPT}</legend>
+                {(
+                  [
+                    ["college", "College or school", "You are placed on the Grammar Path."],
+                    ["iibs", "IIBS", "You are placed on the Scripture Path."],
+                    ["other", "Internet or a friend", "Choose the course."],
+                  ] as const
+                ).map(([id, label, note]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={cn(
+                      "min-h-14 rounded-[var(--radius-md)] px-3 py-2 text-left shadow-[var(--shadow-border)]",
+                      heard === id ? "bg-ink text-parchment" : "bg-card text-ink",
+                    )}
+                    onClick={() => {
+                      setHeard(id);
+                      setPathChoice(id === "college" ? "bbh" : id === "iibs" ? "iibs" : "");
+                      setError(null);
+                    }}
+                  >
+                    <span className="block text-sm font-semibold">{label}</span>
+                    <span className={cn("mt-0.5 block text-xs", heard === id ? "text-parchment/80" : "text-muted")}>
+                      {note}
+                    </span>
+                  </button>
+                ))}
+              </fieldset>
+            )}
+
+            {mode === "up" && heard === "other" && (
+              <fieldset className="mt-3 grid grid-cols-2 gap-2">
+                <legend className="col-span-2 mb-1 text-sm font-medium text-muted">Course</legend>
+                <button
+                  type="button"
+                  className={cn(
+                    "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
+                    pathChoice === "bbh" ? "bg-ink text-parchment" : "bg-card text-ink",
+                  )}
+                  onClick={() => setPathChoice("bbh")}
+                >
+                  {GRAMMAR_PATH.title}
+                  <span className={cn("he-word mt-1 block text-lg font-normal", pathChoice === "bbh" ? "text-parchment" : "text-ink")} dir="rtl" lang="he">
+                    {GRAMMAR_PATH.hebrew}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
+                    pathChoice === "iibs" ? "bg-parchment text-ink ring-1 ring-ink/30" : "bg-card text-ink",
+                  )}
+                  onClick={() => setPathChoice("iibs")}
+                >
+                  {SCRIPTURE_PATH.title}
+                  <span className="he-word mt-1 block text-lg font-normal" dir="rtl" lang="he">
+                    {SCRIPTURE_PATH.hebrew}
+                  </span>
+                </button>
+              </fieldset>
+            )}
+
+            {mode !== "reset" && (
+            <div className="mt-4 grid gap-2">
+              {GROK_PROVIDERS.map((provider) => (
+                <Button
+                  key={provider.providerId}
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={busy || (mode === "up" && !placed)}
+                  onClick={() => void onOauth(provider.providerId)}
+                >
+                  Continue with {provider.label}
+                </Button>
+              ))}
+            </div>
+            )}
+
+            {mode !== "reset" && (
+            <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-subtle">
+              <span className="h-px flex-1 bg-border" />
+              or email
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            )}
 
             {mode === "reset" ? (
               resetSent ? (
@@ -293,37 +370,6 @@ function Login() {
             ) : (
             <form className="grid gap-3" onSubmit={(event) => void onEmail(event)}>
               {mode === "up" && (
-                <fieldset className="grid grid-cols-2 gap-2">
-                  <legend className="col-span-2 mb-1 text-sm font-medium text-muted">Study</legend>
-                  <button
-                    type="button"
-                    className={cn(
-                      "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
-                      pathChoice === "bbh" ? "bg-ink text-parchment" : "bg-card text-ink",
-                    )}
-                    onClick={() => setPathChoice("bbh")}
-                  >
-                    {GRAMMAR_PATH.title}
-                    <span className={cn("he-word mt-1 block text-lg font-normal", pathChoice === "bbh" ? "text-parchment" : "text-ink")} dir="rtl" lang="he">
-                      {GRAMMAR_PATH.hebrew}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(
-                      "min-h-16 rounded-[var(--radius-md)] px-3 text-left text-sm font-semibold shadow-[var(--shadow-border)]",
-                      pathChoice === "iibs" ? "bg-parchment text-ink ring-1 ring-ink/30" : "bg-card text-ink",
-                    )}
-                    onClick={() => setPathChoice("iibs")}
-                  >
-                    {SCRIPTURE_PATH.title}
-                    <span className="he-word mt-1 block text-lg font-normal" dir="rtl" lang="he">
-                      {SCRIPTURE_PATH.hebrew}
-                    </span>
-                  </button>
-                </fieldset>
-              )}
-              {mode === "up" && (
                 <label className="grid gap-1 text-sm">
                   <span className="font-medium text-muted">Name</span>
                   <input
@@ -377,7 +423,7 @@ function Login() {
                 </label>
               )}
               {error && <p className="text-sm text-danger">{error}</p>}
-              <Button type="submit" className="mt-1 w-full" disabled={busy || (mode === "up" && (!agreed || !pathChoice))}>
+              <Button type="submit" className="mt-1 w-full" disabled={busy || (mode === "up" && (!agreed || !placed))}>
                 {busy ? "Working…" : mode === "up" ? "Create account" : "Sign in"}
               </Button>
               {mode === "in" && (
