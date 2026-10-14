@@ -302,6 +302,11 @@ function Home() {
               Week 7 mock exam
             </Button>
           </Link>
+          <Link to="/game/final-vocab" className="flex-1">
+            <Button className="w-full" variant="outline" size="lg">
+              Final vocab
+            </Button>
+          </Link>
           <Link to="/lessons" className="flex-1">
             <Button className="w-full" variant="outline" size="lg">
               Grammar lessons · prepare
