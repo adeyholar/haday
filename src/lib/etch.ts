@@ -335,6 +335,32 @@ export function drillProgress(tasks: EtchTask[], index: number): string {
   return `Group ${(task?.group ?? 0) + 1} of ${groups} · card ${card} of ${tasks.length}`;
 }
 
+/** Cards finished in this sitting, and how many remain. */
+export function drillDistance(index: number, total: number): { done: number; total: number; left: number; pct: number } {
+  const cards = Math.max(0, Math.round(total) || 0);
+  const done = Math.min(cards, Math.max(0, Math.round(index) || 0));
+  const left = cards - done;
+  return { done, total: cards, left, pct: cards ? Math.round((done / cards) * 100) : 0 };
+}
+
+/** The week's list: words met, words mastered, and how many are still unmastered. */
+export function vocabDistance(
+  met: number,
+  mastered: number,
+  total: number,
+): { met: number; mastered: number; total: number; left: number; pct: number } {
+  const words = Math.max(0, Math.round(total) || 0);
+  const seen = Math.min(words, Math.max(0, Math.round(met) || 0));
+  const held = Math.min(words, Math.max(0, Math.round(mastered) || 0));
+  return {
+    met: seen,
+    mastered: held,
+    total: words,
+    left: words - held,
+    pct: words ? Math.round((held / words) * 100) : 0,
+  };
+}
+
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
   return takeDrillRuns(raw, (key) => /^\d+:(due|weak)$/.test(key));
 }
