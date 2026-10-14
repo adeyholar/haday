@@ -409,6 +409,7 @@ export function keepSpeechAlive() {
 
 let clipEl: HTMLAudioElement | null = null;
 let clipPoll = 0;
+let clipGen = 0;
 
 function getClipEl(): HTMLAudioElement | null {
   if (typeof Audio === "undefined") return null;
@@ -421,6 +422,7 @@ function getClipEl(): HTMLAudioElement | null {
 }
 
 function stopClip() {
+  clipGen += 1;
   if (clipPoll) {
     window.clearInterval(clipPoll);
     clipPoll = 0;
@@ -436,15 +438,17 @@ function stopClip() {
 function unlockClipAudio() {
   const el = getClipEl();
   if (!el) return;
+  const mine = clipGen;
   el.muted = true;
   void el
     .play()
     .then(() => {
+      if (mine !== clipGen) return;
       el.pause();
       el.muted = false;
     })
     .catch(() => {
-      el.muted = false;
+      if (mine === clipGen) el.muted = false;
     });
 }
 
@@ -476,49 +480,54 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
   const el = getClipEl();
   if (!el || signal.stop) return false;
   stopClip();
+  const mine = clipGen;
   try {
     if (!clipSrcMatches(el, clip.src)) {
       el.src = clip.src;
       el.load();
     }
     const ready = await waitClipMeta(el);
-    if (!ready || signal.stop) return false;
+    if (!ready || signal.stop || mine !== clipGen) return false;
     const whole = clip.kind === "lemma" || clip.end <= 0;
     const start = whole ? 0 : Math.max(0, clip.start);
-    const end = whole ? (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 2.4) : Math.max(start + 0.14, clip.end);
+    const known = Number.isFinite(el.duration) && el.duration > 0.2;
+    const end = whole ? (known ? el.duration : Number.POSITIVE_INFINITY) : Math.max(start + 0.14, clip.end);
     el.playbackRate = Math.min(1.2, Math.max(0.7, rate));
     el.volume = 1;
+    el.muted = false;
     el.currentTime = start;
     await el.play();
+    if (mine !== clipGen) return false;
     return await new Promise<boolean>((resolve) => {
       let settled = false;
       const finish = (ok: boolean) => {
         if (settled) return;
         settled = true;
-        if (clipPoll) {
-          window.clearInterval(clipPoll);
-          clipPoll = 0;
-        }
+        window.clearInterval(poll);
+        if (clipPoll === poll) clipPoll = 0;
         window.clearTimeout(safety);
-        try {
-          el.pause();
-        } catch {
-          /* ignore */
+        if (mine === clipGen) {
+          try {
+            el.pause();
+          } catch {
+            /* ignore */
+          }
         }
         resolve(ok);
       };
-      clipPoll = window.setInterval(() => {
-        if (signal.stop) {
+      const poll = window.setInterval(() => {
+        if (mine !== clipGen || signal.stop) {
           finish(true);
           return;
         }
-        if (el.ended || el.currentTime >= end - 0.02) finish(true);
+        if (el.ended || (Number.isFinite(end) && el.currentTime >= end - 0.02)) finish(true);
       }, 40);
-      el.onended = () => finish(true);
-      const safety = window.setTimeout(
-        () => finish(true),
-        Math.min(9000, ((end - start) / Math.max(el.playbackRate, 0.5)) * 1000 + 1000),
-      );
+      clipPoll = poll;
+      el.onended = () => {
+        if (mine === clipGen) finish(true);
+      };
+      const span = Number.isFinite(end) ? (end - start) / Math.max(el.playbackRate, 0.5) : 8;
+      const safety = window.setTimeout(() => finish(true), Math.min(15000, span * 1000 + 1500));
     });
   } catch {
     return false;

@@ -255,6 +255,7 @@ export function EtchPlay({
             onClick={() => {
               voice.current.stop = true;
               voice.current = { stop: false };
+              stopSpeech();
               unlockSpeech();
               void speakHebrewWord(item, 0.85, voice.current);
             }}

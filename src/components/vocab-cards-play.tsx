@@ -45,6 +45,7 @@ export function VocabCardsPlay({
     if (!item) return;
     voice.current.stop = true;
     voice.current = { stop: false };
+    stopSpeech();
     unlockSpeech();
     void speakHebrewWord(item, 0.85, voice.current);
   }

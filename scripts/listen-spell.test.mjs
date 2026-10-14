@@ -8,16 +8,27 @@ const { spokenEnglish, primaryGloss, modernLatin, listenPlaylist, chapterRange, 
   await jiti.import("/workspace/src/lib/listen.ts");
 const { vocabClip } = await jiti.import("/workspace/src/lib/vocab-clips.ts");
 
+test("a replay does not let the last sound cut the new one", () => {
+  const src = readFileSync("/workspace/src/lib/listen.ts", "utf8");
+  const play = readFileSync("/workspace/src/components/etch-play.tsx", "utf8");
+  assert.match(src, /if \(mine !== clipGen\) return/);
+  assert.match(src, /if \(mine === clipGen\)/);
+  assert.equal(src.includes("el.duration : 2.4"), false);
+  assert.match(play, /stopSpeech\(\);\s*unlockSpeech\(\);\s*void speakHebrewWord/);
+});
+
 test("the road player uses the Drill voice for one week", () => {
   const src = readFileSync("/workspace/src/lib/listen.ts", "utf8");
   const page = readFileSync("/workspace/src/routes/listen/road.tsx", "utf8");
+  const deck = readFileSync("/workspace/src/components/road-deck.tsx", "utf8");
   assert.match(src, /export async function speakRoadCard/);
   assert.match(src, /speakHebrewWord\(item, 0\.85, signal\)/);
-  assert.match(page, /speakRoadCard/);
+  assert.match(deck, /speakRoadCard/);
   assert.match(page, /On the road/);
-  assert.match(page, /Hatikvah/);
-  assert.match(page, /playRoadMusic/);
+  assert.match(deck, /Hatikvah/);
+  assert.match(deck, /playRoadMusic/);
   assert.equal(page.includes("announce"), false);
+  assert.equal(deck.includes("announce"), false);
 });
 
 test("the road music slider can go silent and stays under the word", async () => {
