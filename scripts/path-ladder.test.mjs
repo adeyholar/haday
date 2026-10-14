@@ -3,7 +3,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { blockedDestination, levelOpen, ownerDoorBlock, pathForHeard } = await jiti.import("/workspace/src/lib/path.ts");
+const { blockedDestination, homeForAccount, levelOpen, ownerDoorBlock, pathForHeard } = await jiti.import("/workspace/src/lib/path.ts");
 
 test("only Level A is open until an exam is passed", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -50,4 +50,12 @@ test("college and IIBS place the course, and internet or a friend must choose", 
   assert.equal(pathForHeard("other", "bbh"), "bbh");
   assert.equal(pathForHeard("other", "iibs"), "iibs");
   assert.equal(pathForHeard("", "bbh"), null);
+});
+
+test("a signed-in student opens their study from home", () => {
+  assert.equal(homeForAccount({ path: "bbh", admin: false }), "/bbh");
+  assert.equal(homeForAccount({ path: "iibs", admin: false }), "/iibs");
+  assert.equal(homeForAccount({ path: null, admin: false }), null);
+  assert.equal(homeForAccount({ path: "bbh", admin: true }), null);
+  assert.equal(homeForAccount({ path: "iibs", admin: true }), null);
 });
