@@ -179,7 +179,7 @@ export function EtchPlay({
 
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
-          {POS_LABEL[item.pos]} · Ch. {item.chapter}
+          {item.chapter > 0 ? `${POS_LABEL[item.pos]} · Ch. ${item.chapter}` : POS_LABEL[item.pos]}
         </p>
         <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
           <div className="min-w-0">
@@ -206,7 +206,8 @@ export function EtchPlay({
                     <p className="font-display text-2xl font-semibold">{[item.gloss, ...item.alts].filter(Boolean).join(" · ")}</p>
                     <p className="text-sm text-muted">{item.translit}</p>
                     <p className="text-sm text-muted">
-                      {POS_LABEL[item.pos]} · chapter {item.chapter}
+                      {POS_LABEL[item.pos]}
+                      {item.chapter > 0 ? ` · chapter ${item.chapter}` : ""}
                       {item.freq ? ` · ${item.freq} times in the Bible` : ""}
                     </p>
                     {item.stems ? <p className="text-sm leading-relaxed text-muted">{item.stems}</p> : null}

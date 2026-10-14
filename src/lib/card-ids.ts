@@ -1,5 +1,5 @@
 import { VOWELS, WRITE_LETTERS } from "@/lib/alphabet";
-import { iibsStudyIdSet } from "@/lib/iibs-weeks";
+import { iibsLegacyId, iibsStudyIdSet } from "@/lib/iibs-weeks";
 import { hydrateCard, type CardState } from "@/lib/srs";
 import { VOCAB, alphabetVocab } from "@/lib/vocab";
 
@@ -13,7 +13,7 @@ export function isStudyCardId(id: string): boolean {
   if (known.has(id)) return true;
   if (id.startsWith("alef:letter:")) return letters.has(id.slice("alef:letter:".length));
   if (id.startsWith("alef:vowel:")) return vowels.has(id.slice("alef:vowel:".length));
-  if (/^iibs-[a-e]-\d{2}-\d{2}$/.test(id)) return iibsStudyIdSet().has(id);
+  if (/^iibs-[a-e]-[0-9a-z]+$/.test(id)) return iibsStudyIdSet().has(id);
   const form = /^tv:([a-z0-9-]+):(\d{1,4})$/.exec(id);
   return Boolean(form && vocabIds.has(form[1]));
 }
@@ -22,8 +22,11 @@ export function keepStudyCards(cards: Record<string, Partial<CardState> | CardSt
   const kept: Record<string, CardState> = {};
   if (!cards || typeof cards !== "object") return kept;
   for (const [id, card] of Object.entries(cards)) {
-    if (!isStudyCardId(id)) continue;
-    kept[id] = hydrateCard(card);
+    const nextId = iibsLegacyId(id) ?? id;
+    if (!isStudyCardId(nextId)) continue;
+    const next = hydrateCard(card);
+    const prev = kept[nextId];
+    if (!prev || next.reps >= prev.reps) kept[nextId] = next;
   }
   return kept;
 }
