@@ -22,6 +22,8 @@ export function GameMenu() {
             ? "/game/type"
           : pathname.startsWith("/game/road")
             ? "/game/road"
+          : pathname.startsWith("/game/final-vocab")
+            ? "/game/final-vocab"
           : pathname.startsWith("/game/final")
             ? "/game/final"
           : pathname.startsWith("/game/week7")
@@ -56,6 +58,7 @@ export function GameMenu() {
             { value: "/game/road", label: "Road exam · Week 7" },
             { value: "/game/final", label: "Road exam · Week 15" },
             { value: "/game/week7", label: "Week 7 mock exam" },
+            { value: "/game/final-vocab", label: "Final vocab" },
             { value: "/game/custom", label: "Custom mix" },
             { value: "/self-quiz", label: "Self-quiz" },
             { value: "/challenge", label: "Ultimate Challenge" },
@@ -94,6 +97,7 @@ export function GameMenu() {
         else if (to === "/game/road") void navigate({ to: "/game/road" });
         else if (to === "/game/final") void navigate({ to: "/game/final" });
         else if (to === "/game/week7") void navigate({ to: "/game/week7" });
+        else if (to === "/game/final-vocab") void navigate({ to: "/game/final-vocab" });
         else if (to === "/game/custom") void navigate({ to: "/game/custom" });
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });
         else if (to === "/game/type") void navigate({ to: "/game/type" });

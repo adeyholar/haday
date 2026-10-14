@@ -40,6 +40,7 @@ export type NavHref =
   | "/game/road"
   | "/game/final"
   | "/game/week7"
+  | "/game/final-vocab"
   | "/game/custom"
   | "/game/alefbet"
   | "/game/balloons"
