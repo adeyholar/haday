@@ -132,3 +132,24 @@ export function guideGlow(insert: string): string[] {
   }
   return seededOrder(trio, hash(insert));
 }
+
+/** The line under the pad. Depth 1 names the piece. Before that, it only points. */
+export function coachLine(
+  progress: { clean: boolean; started: boolean; next: string | null } | null,
+  depth: number,
+): string {
+  if (!progress) return "";
+  if (!progress.clean) return "Backspace to the last right piece.";
+  const say = progress.next ? pieceSay(progress.next) : null;
+  if (depth === 1 && say) return say.name;
+  if (!progress.started) return "What does it start with?";
+  if (say?.kind === "point") return "Which point under it?";
+  return "Next letter.";
+}
+
+/** First look lights the right key and two lookalikes. The next look lights only the right key. */
+export function guideKeys(next: string | null, depth: number): string[] {
+  if (!next) return [];
+  if (depth === 1) return next === "\u05BB" ? ["\u05BB", "\u05D5\u05BC"] : [next];
+  return guideGlow(next);
+}

@@ -424,16 +424,16 @@ export function etchLabel(kind: EtchKind): string {
 export function etchHint(kind: EtchKind, cue: EtchCue): string {
   if (kind === "study" || kind === "meet") return "Type a guess and check it, or show the meaning and say if you knew it.";
   if (kind === "contrast" && cue === "he") return "The Hebrew is showing. Pick the English.";
-  if (kind === "contrast" && cue === "audio") return "Listen. Pick the Hebrew spelling.";
-  if (kind === "contrast") return "Pick the Hebrew that matches the English. Look-alikes sit together on purpose.";
+  if (kind === "contrast" && cue === "audio") return "Listen, then pick the Hebrew. Show me walks the next letter. It does not print the word.";
+  if (kind === "contrast") return "Pick the Hebrew that matches the English. Show me walks the next letter. It does not print the word.";
   if (kind === "say") return "The English is showing. Say the Hebrew. You can skip this if the phone cannot listen.";
   if (kind === "produce") {
-    if (cue === "spell") return "English is showing. Type the Hebrew, points included.";
+    if (cue === "spell") return "English is showing. Type the Hebrew, points included. Show me walks the next letter. It does not print the word.";
     if (cue === "consonants") return "Consonants only, no vowel points. The shin or sin dot stays. Type the English.";
     if (cue === "picture") return "Picture only. Type the English.";
     if (cue === "audio") return "Listen. Type the English.";
     return "Type the English. No list.";
   }
-  if (kind === "verse") return "The word is missing from the line. Choose it or type it, then hear the line.";
+  if (kind === "verse") return "The word is missing from the line. Choose it, or type it. Show me walks the next letter. It does not print the word.";
   return "An older word. Opposite direction.";
 }
