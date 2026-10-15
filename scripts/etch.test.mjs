@@ -118,10 +118,15 @@ test("a Hebrew answer is walked, not printed", () => {
   assert.match(src, /You built it/);
   assert.match(src, /It comes back once, with no help/);
   assert.match(src, /!guidedKind && \(/);
-  assert.match(etchHint("produce", "spell"), /does not print the word/);
-  assert.match(etchHint("contrast", "en"), /does not print the word/);
-  assert.match(etchHint("verse", "he"), /does not print the word/);
-  assert.equal(etchHint("contrast", "he").includes("Show me"), false);
+  assert.match(src, /showMeOnce/);
+  assert.equal(etchHint("produce", "spell").includes("Show me"), false);
+  assert.equal(etchHint("contrast", "en").includes("Show me"), false);
+  assert.equal(etchHint("verse", "he").includes("Show me"), false);
+  assert.match(etchHint("produce", "spell", true), /does not print the word/);
+  assert.match(etchHint("contrast", "en", true), /does not print the word/);
+  assert.match(etchHint("verse", "he", true), /does not print the word/);
+  assert.equal(etchHint("contrast", "he", true).includes("Show me"), false);
+  assert.match(readFileSync(join(root, "src/components/drill-sitting.tsx"), "utf8"), /answerIsHebrew/);
   assert.match(readFileSync(join(root, "src/components/game-stage.tsx"), "utf8"), /coachLine\(progress, guideDepth\)/);
 });
 

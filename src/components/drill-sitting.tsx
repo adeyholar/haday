@@ -16,6 +16,7 @@ import {
   vocabDistance,
   drillSeed,
   queueDrillMiss,
+  answerIsHebrew,
   type DrillPlace,
   type DrillReview,
   type EtchTask,
@@ -304,6 +305,7 @@ export function DrillSitting({
         index={i}
         total={tasks.length}
         label={drillProgress(tasks, i)}
+        showMeOnce={tasks.findIndex((card) => answerIsHebrew(card)) === i}
         onGrade={onGrade}
       />
     </>

@@ -421,19 +421,30 @@ export function etchLabel(kind: EtchKind): string {
   return "Keep";
 }
 
-export function etchHint(kind: EtchKind, cue: EtchCue): string {
-  if (kind === "study" || kind === "meet") return "Type a guess and check it, or show the meaning and say if you knew it.";
-  if (kind === "contrast" && cue === "he") return "The Hebrew is showing. Pick the English.";
-  if (kind === "contrast" && cue === "audio") return "Listen, then pick the Hebrew. Show me walks the next letter. It does not print the word.";
-  if (kind === "contrast") return "Pick the Hebrew that matches the English. Show me walks the next letter. It does not print the word.";
-  if (kind === "say") return "The English is showing. Say the Hebrew. You can skip this if the phone cannot listen.";
-  if (kind === "produce") {
-    if (cue === "spell") return "English is showing. Type the Hebrew, points included. Show me walks the next letter. It does not print the word.";
-    if (cue === "consonants") return "Consonants only, no vowel points. The shin or sin dot stays. Type the English.";
-    if (cue === "picture") return "Picture only. Type the English.";
-    if (cue === "audio") return "Listen. Type the English.";
-    return "Type the English. No list.";
-  }
-  if (kind === "verse") return "The word is missing from the line. Choose it, or type it. Show me walks the next letter. It does not print the word.";
-  return "An older word. Opposite direction.";
+export function answerIsHebrew(task: { kind: EtchKind; cue: EtchCue }): boolean {
+  return (
+    (task.kind === "produce" && (task.cue === "spell" || task.cue === "en")) ||
+    (task.kind === "contrast" && task.cue !== "he") ||
+    (task.kind === "keep" && task.cue === "en") ||
+    task.kind === "verse"
+  );
+}
+
+export const SHOW_ME_NOTE = "Show me walks the next letter. It does not print the word.";
+
+export function etchHint(kind: EtchKind, cue: EtchCue, showMe = false): string {
+  let line = "An older word. Opposite direction.";
+  if (kind === "study" || kind === "meet") line = "Type a guess and check it, or show the meaning and say if you knew it.";
+  else if (kind === "contrast" && cue === "he") line = "The Hebrew is showing. Pick the English.";
+  else if (kind === "contrast" && cue === "audio") line = "Listen, then pick the Hebrew.";
+  else if (kind === "contrast") line = "Pick the Hebrew that matches the English.";
+  else if (kind === "say") line = "The English is showing. Say the Hebrew. You can skip this if the phone cannot listen.";
+  else if (kind === "produce" && cue === "spell") line = "English is showing. Type the Hebrew, points included.";
+  else if (kind === "produce" && cue === "consonants") line = "Consonants only, no vowel points. The shin or sin dot stays. Type the English.";
+  else if (kind === "produce" && cue === "picture") line = "Picture only. Type the English.";
+  else if (kind === "produce" && cue === "audio") line = "Listen. Type the English.";
+  else if (kind === "produce") line = "Type the English. No list.";
+  else if (kind === "verse") line = "The word is missing from the line. Choose it, or type it.";
+  if (showMe && answerIsHebrew({ kind, cue })) return `${line} ${SHOW_ME_NOTE}`;
+  return line;
 }

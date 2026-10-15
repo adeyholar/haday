@@ -37,6 +37,7 @@ export function EtchPlay({
   index,
   total,
   label,
+  showMeOnce = false,
   onGrade,
 }: {
   task: EtchTask;
@@ -45,6 +46,7 @@ export function EtchPlay({
   index: number;
   total: number;
   label?: string;
+  showMeOnce?: boolean;
   onGrade: (rating: Grade) => void;
 }) {
   const item = task.item;
@@ -284,7 +286,7 @@ export function EtchPlay({
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
         {label ?? `${etchLabel(task.kind)} · ${index + 1} / ${total}`}
       </p>
-      <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue)}</p>
+      <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue, showMeOnce)}</p>
       {guessFast && !graded && (
         <p className="mt-2 text-center text-sm font-semibold text-danger">Too fast — name it, don’t tap the pattern.</p>
       )}
