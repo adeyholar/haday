@@ -29,7 +29,7 @@ const {
   GUESS_MS,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
-const { VOCAB, itemsForWeek, glossMatches, liveGloss } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { VOCAB, itemsForWeek, glossMatches, liveGloss, studySenseLine } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
 const { coachLine, guideKeys } = await jiti.import(join(root, "src/lib/show-me.ts"));
 
@@ -252,6 +252,12 @@ test("consonants drop vowel points and keep the shin dot", () => {
   assert.equal(liveGloss(shamar, "to wa"), "prefix");
   assert.equal(liveGloss(shamar, "banana"), "off");
   const halak = VOCAB.find((item) => item.id === "halak");
+  assert.ok(halak);
+  assert.equal(glossMatches(halak, "to walk"), true);
+  assert.equal(glossMatches(halak, "walk"), true);
+  assert.equal(glossMatches(halak, "to go"), true);
+  assert.equal(liveGloss(halak, "to wal"), "prefix");
+  assert.equal(studySenseLine(halak), "to go, walk · behave · lead · bring");
   const barak = VOCAB.find((item) => item.id === "barak");
   const al = VOCAB.find((item) => item.id === "al-neg");
   const now = VOCAB.find((item) => item.id === "attah-now");

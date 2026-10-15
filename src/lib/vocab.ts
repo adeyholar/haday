@@ -663,10 +663,20 @@ function glossSenses(item: VocabItem): string[] {
   return [...senses];
 }
 
+/** Listed senses, plus "to walk" when the verb is stored as "walk". */
+function acceptedSenses(item: VocabItem): string[] {
+  const out = new Set<string>();
+  for (const sense of glossSenses(item)) {
+    out.add(sense);
+    if (item.pos === "verb" && !sense.startsWith("to ")) out.add(`to ${sense}`);
+  }
+  return [...out];
+}
+
 export function glossMatches(item: VocabItem, input: string): boolean {
   const n = normalizeGloss(input);
   if (!n) return false;
-  const senses = glossSenses(item);
+  const senses = acceptedSenses(item);
   if (senses.includes(n)) return true;
   const bits = input
     .split(/[,;/]|\s+or\s+/)
@@ -679,8 +689,33 @@ export function liveGloss(item: VocabItem, input: string): "empty" | "prefix" | 
   const n = normalizeGloss(input);
   if (!n) return "empty";
   if (glossMatches(item, input)) return "exact";
-  if (glossSenses(item).some((sense) => sense.startsWith(n))) return "prefix";
+  if (acceptedSenses(item).some((sense) => sense.startsWith(n) && sense !== n)) return "prefix";
   return "off";
+}
+
+/** The study card lists the gloss once, then only senses that are not already in it. */
+export function studySenseLine(item: VocabItem): string {
+  const covered = new Set<string>();
+  const cover = (text: string) => {
+    const whole = normalizeGloss(text);
+    if (whole) covered.add(whole);
+    if (whole.startsWith("to ")) covered.add(whole.slice(3));
+    for (const bit of text.split(/[,;/]|\s+or\s+/)) {
+      const sense = normalizeGloss(bit);
+      if (!sense) continue;
+      covered.add(sense);
+      if (sense.startsWith("to ")) covered.add(sense.slice(3));
+    }
+  };
+  cover(item.gloss);
+  const extra: string[] = [];
+  for (const alt of item.alts) {
+    const n = normalizeGloss(alt);
+    if (!n || covered.has(n)) continue;
+    covered.add(n);
+    extra.push(alt);
+  }
+  return [item.gloss, ...extra].filter(Boolean).join(" · ");
 }
 
 export function shuffle<T>(arr: T[]): T[] {

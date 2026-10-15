@@ -6,7 +6,7 @@ import { GradeBanner } from "@/components/grade-banner";
 import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
-import { glossMatches, liveGloss, POS_LABEL } from "@/lib/vocab";
+import { glossMatches, liveGloss, POS_LABEL, studySenseLine } from "@/lib/vocab";
 import { lettersOnly, guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
 import { HebrewType } from "@/components/hebrew-type";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
@@ -318,7 +318,7 @@ export function EtchPlay({
                 {!hideHe && <p className="he-word text-5xl sm:text-6xl">{item.hebrew}</p>}
                 {study && revealed ? (
                   <div className="mt-3 space-y-1 text-center">
-                    <p className="font-display text-2xl font-semibold">{[item.gloss, ...item.alts].filter(Boolean).join(" · ")}</p>
+                    <p className="font-display text-2xl font-semibold">{studySenseLine(item)}</p>
                     <p className="text-sm text-muted">{item.translit}</p>
                     <p className="text-sm text-muted">
                       {POS_LABEL[item.pos]}
