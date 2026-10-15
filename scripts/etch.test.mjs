@@ -25,11 +25,13 @@ const {
   queueDrillMiss,
   verseForLemma,
   tapCarriesOver,
+  etchHint,
   GUESS_MS,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
 const { VOCAB, itemsForWeek, glossMatches, liveGloss } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
+const { coachLine, guideKeys } = await jiti.import(join(root, "src/lib/show-me.ts"));
 
 const WAYS = [
   "study:he",
@@ -98,6 +100,29 @@ test("the study card shows the English only after Show meaning", () => {
   assert.match(src, /study && revealed/);
   assert.match(src, /Hear the line/);
   assert.match(src, /Check the typed word/);
+});
+
+test("a Hebrew answer is walked, not printed", () => {
+  const src = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
+  const start = { clean: true, started: false, next: "ב" };
+  assert.equal(coachLine(start, 0), "What does it start with?");
+  assert.equal(coachLine(start, 1), "Bet");
+  assert.equal(coachLine({ clean: true, started: true, next: "\u05B7" }, 0), "Which point under it?");
+  assert.equal(coachLine({ clean: false, started: true, next: null }, 0), "Backspace to the last right piece.");
+  const keys = guideKeys("ב", 0);
+  assert.equal(keys.length, 3);
+  assert.ok(keys.includes("ב"));
+  assert.deepEqual(guideKeys("ב", 1), ["ב"]);
+  assert.match(src, /Show me/);
+  assert.match(src, /guideKeys/);
+  assert.match(src, /You built it/);
+  assert.match(src, /It comes back once, with no help/);
+  assert.match(src, /!guidedKind && \(/);
+  assert.match(etchHint("produce", "spell"), /does not print the word/);
+  assert.match(etchHint("contrast", "en"), /does not print the word/);
+  assert.match(etchHint("verse", "he"), /does not print the word/);
+  assert.equal(etchHint("contrast", "he").includes("Show me"), false);
+  assert.match(readFileSync(join(root, "src/components/game-stage.tsx"), "utf8"), /coachLine\(progress, guideDepth\)/);
 });
 
 test("a second miss rebuilds in the order it happened", () => {

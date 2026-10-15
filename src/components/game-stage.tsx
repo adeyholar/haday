@@ -14,7 +14,7 @@ import { AttemptBanner } from "@/components/attempt-banner";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
 import { speakLine } from "@/lib/listen";
-import { guideGlow, pieceSay } from "@/lib/show-me";
+import { guideKeys, coachLine, pieceSay } from "@/lib/show-me";
 import {
   CHAPTER_META,
   GAME_STAGE_PASS,
@@ -161,28 +161,11 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     coaching && progress
       ? {
           expected: progress.clean ? progress.next : null,
-          glow:
-            progress.clean && progress.next
-              ? guideDepth === 1
-                ? progress.next === "\u05BB"
-                  ? ["\u05BB", "\u05D5\u05BC"]
-                  : [progress.next]
-                : guideGlow(progress.next)
-              : [],
+          glow: progress.clean ? guideKeys(progress.next, guideDepth) : [],
           shake,
           onMiss: (glyph: string) => setShake(glyph),
         }
       : null;
-
-  function coachLine(): string {
-    if (!progress) return "";
-    if (!progress.clean) return "Backspace to the last right piece.";
-    const say = progress.next ? pieceSay(progress.next) : null;
-    if (guideDepth === 1 && say) return say.name;
-    if (!progress.started) return "What does it start with?";
-    if (say?.kind === "point") return "Which point under it?";
-    return "Next letter.";
-  }
 
   function finishIfEmpty(nextQueue: VocabItem[], nextFirstHits: number, nextFirstSeen: number) {
     if (nextQueue.length > 0) return;
@@ -672,7 +655,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           {coaching && (
             <div className="mt-3 text-center">
               {nod && <p className="text-lg font-bold text-good">Yes.</p>}
-              <p className="mt-1 text-sm font-medium text-ink">{coachLine()}</p>
+              <p className="mt-1 text-sm font-medium text-ink">{coachLine(progress, guideDepth)}</p>
             </div>
           )}
           {built && (

@@ -7,8 +7,11 @@ import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
 import { glossMatches, liveGloss, POS_LABEL } from "@/lib/vocab";
-import { lettersOnly, liveMatchAny } from "@/lib/hebrew";
+import { lettersOnly, guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
 import { HebrewType } from "@/components/hebrew-type";
+import { hearLetterName, hushHear } from "@/lib/letter-hear";
+import { speakLine as speakCoach } from "@/lib/listen";
+import { coachLine, guideKeys, pieceSay } from "@/lib/show-me";
 import {
   consonantsOf,
   choiceLabel,
@@ -51,6 +54,11 @@ export function EtchPlay({
   const [revealed, setRevealed] = useState(false);
   const [listening, setListening] = useState(false);
   const [guessFast, setGuessFast] = useState(false);
+  const [guideOn, setGuideOn] = useState(false);
+  const [guideDepth, setGuideDepth] = useState(0);
+  const [nod, setNod] = useState(false);
+  const [shake, setShake] = useState<string | null>(null);
+  const [helpedThis, setHelpedThis] = useState(false);
   const [choices, setChoices] = useState<VocabItem[]>([]);
   const board = useRef<VocabItem[]>([]);
   const boardKey = useRef("");
@@ -58,6 +66,7 @@ export function EtchPlay({
   const voice = useRef({ stop: false });
   const listenGen = useRef(0);
   const ear = useRef<{ abort: () => void } | null>(null);
+  const matchRef = useRef(0);
   if (boardKey.current !== task.key) {
     boardKey.current = task.key;
     const dealt = drillCardChoices(task, pool, seed);
@@ -69,6 +78,12 @@ export function EtchPlay({
     setRevealed(false);
     setListening(false);
     setGuessFast(false);
+    setGuideOn(false);
+    setGuideDepth(0);
+    setNod(false);
+    setShake(null);
+    setHelpedThis(false);
+    matchRef.current = 0;
     shownAt.current = Date.now();
     listenGen.current += 1;
   }
@@ -171,6 +186,90 @@ export function EtchPlay({
     setPicked(ok ? item.id : "__miss__");
     playFeedback(ok ? "strong" : "fail");
   }
+
+  const spelling = task.kind === "produce" && task.cue === "spell";
+  const hebrewChoice =
+    (task.kind === "contrast" && task.cue !== "he") ||
+    (task.kind === "keep" && task.cue === "en") ||
+    (task.kind === "produce" && task.cue === "en");
+  const verseCard = task.kind === "verse";
+  const guidedKind = spelling || hebrewChoice || verseCard;
+  const spellLemma = (verseCard && task.verse?.hit) || item.hebrew;
+  const spellAlts =
+    verseCard && task.verse?.hit && task.verse.hit !== item.hebrew
+      ? [...(item.hebrewAlts ?? []), item.hebrew]
+      : [...(item.hebrewAlts ?? [])];
+  const hebrewOk = liveMatchAny(spellLemma, typed, spellAlts, true) === "exact";
+  const built = Boolean(helpedThis && hebrewOk && !graded && guidedKind);
+  const spellGuide = guidedKind ? guideTarget(typed, spellLemma, spellAlts) : "";
+  const progress = spellGuide ? guideProgress(typed, spellGuide) : null;
+  const stepMark = progress?.clean ? normalizeHebrewFull(typed).length : -1;
+
+  useEffect(() => {
+    if (!guideOn) return;
+    if (stepMark > matchRef.current) {
+      setNod(true);
+      setGuideDepth(0);
+      setShake(null);
+    } else if (stepMark >= 0 && stepMark < matchRef.current) {
+      setNod(false);
+      setGuideDepth(0);
+    }
+    if (stepMark >= 0) matchRef.current = stepMark;
+  }, [stepMark, guideOn]);
+
+  function sayPiece(insert: string) {
+    const piece = pieceSay(insert);
+    voice.current = hushHear(voice.current);
+    if (piece.sayId) void hearLetterName(piece.sayId, piece.name, voice.current);
+    else void speakCoach(piece.say, "en", 0.85, voice.current);
+  }
+
+  function askShowMe() {
+    if (graded || !guidedKind || hebrewOk || carryOver()) return;
+    setHelpedThis(true);
+    const now = guideProgress(typed, guideTarget(typed, spellLemma, spellAlts));
+    if (!guideOn) {
+      setGuideOn(true);
+      setGuideDepth(0);
+      return;
+    }
+    if (!now.clean || !now.next) return;
+    if (guideDepth === 0) {
+      setGuideDepth(1);
+      sayPiece(now.next);
+      return;
+    }
+    sayPiece(now.next);
+  }
+
+  function submitHebrew(event?: { preventDefault: () => void }) {
+    event?.preventDefault();
+    if (picked || carryOver() || built) return;
+    if (hebrewOk) {
+      setPicked(item.id);
+      playFeedback("strong");
+      return;
+    }
+    if (tries < 1) {
+      setTries(1);
+      playFeedback("retry");
+      return;
+    }
+    setPicked("__miss__");
+    playFeedback("fail");
+  }
+
+  const coaching = guideOn && !built && !graded && guidedKind;
+  const guide =
+    coaching && progress
+      ? {
+          expected: progress.clean ? progress.next : null,
+          glow: progress.clean ? guideKeys(progress.next, guideDepth) : [],
+          shake,
+          onMiss: (glyph: string) => setShake(glyph),
+        }
+      : null;
 
   const study = task.kind === "study" || task.kind === "meet";
   const showArt = study || task.cue === "picture" || (graded && task.kind !== "verse");
@@ -350,7 +449,7 @@ export function EtchPlay({
         </ul>
       )}
 
-      {task.kind === "contrast" && task.cue !== "he" && (
+      {task.kind === "contrast" && task.cue !== "he" && !guideOn && (
         <ul className="mt-4 grid grid-cols-2 gap-2" dir="rtl">
           {choices.map((c) => {
             const on = picked === c.id;
@@ -377,7 +476,7 @@ export function EtchPlay({
         </ul>
       )}
 
-      {task.kind === "produce" && task.cue === "en" && (
+      {task.kind === "produce" && task.cue === "en" && !guideOn && (
         <ul className="mt-4 grid grid-cols-2 gap-2" dir="rtl">
           {(choices.length ? choices : contrastChoicesSafe(task)).map((c) => {
             const on = picked === c.id;
@@ -404,24 +503,26 @@ export function EtchPlay({
         </ul>
       )}
 
-      {task.kind === "produce" && task.cue === "spell" && (
-        <form
-          className="mt-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submitProduce();
-          }}
-        >
+      {spelling && (
+        <form className="mt-4" onSubmit={submitHebrew}>
           <HebrewType
             value={typed}
             onChange={setTyped}
-            target={item.hebrew}
-            alts={item.hebrewAlts}
-            disabled={graded}
+            target={spellLemma}
+            alts={spellAlts}
+            disabled={graded || built}
             strict
             liveGrade
+            hideHint={guideOn}
+            guide={guide}
           />
-          {!graded && typed.trim() ? (
+          {coaching && (
+            <div className="mt-3 text-center">
+              {nod && <p className="text-lg font-bold text-good">Yes.</p>}
+              <p className="mt-1 text-sm font-medium text-ink">{coachLine(progress, guideDepth)}</p>
+            </div>
+          )}
+          {!graded && !built && typed.trim() ? (
             <Button type="submit" className="mt-3 w-full">
               Check
             </Button>
@@ -466,7 +567,7 @@ export function EtchPlay({
         </form>
       )}
 
-      {task.kind === "keep" && task.cue === "en" && (
+      {task.kind === "keep" && task.cue === "en" && !guideOn && (
         <ul className="mt-4 grid grid-cols-2 gap-2" dir="rtl">
           {(choices.length ? choices : contrastChoicesSafe(task)).map((c) => {
             const on = picked === c.id;
@@ -499,7 +600,7 @@ export function EtchPlay({
           <p className="he-word mt-2 text-2xl leading-relaxed" dir="rtl" lang="he">
             {graded ? task.verse.he : blankVerse(task.verse.he, item, task.verse.hit)}
           </p>
-          {!graded && (
+          {!graded && !guideOn && (
             <>
               <ul className="mt-3 grid grid-cols-2 gap-2" dir="rtl">
                 {choices.map((c) => (
@@ -593,6 +694,33 @@ export function EtchPlay({
         </div>
       )}
 
+      {guideOn && !spelling && (hebrewChoice || verseCard) && !graded && (
+        <form className="mt-4" onSubmit={submitHebrew}>
+          <HebrewType
+            value={typed}
+            onChange={setTyped}
+            target={spellLemma}
+            alts={spellAlts}
+            disabled={built}
+            strict
+            liveGrade
+            hideHint
+            guide={guide}
+          />
+          {coaching && (
+            <div className="mt-3 text-center">
+              {nod && <p className="text-lg font-bold text-good">Yes.</p>}
+              <p className="mt-1 text-sm font-medium text-ink">{coachLine(progress, guideDepth)}</p>
+            </div>
+          )}
+          {!built && typed.trim() ? (
+            <Button type="submit" className="mt-3 w-full">
+              Check
+            </Button>
+          ) : null}
+        </form>
+      )}
+
       {graded && !study && (
         <div className="mt-4">
           <GradeBanner ok={ok} label={ok ? "Correct" : "Not quite"} />
@@ -608,7 +736,25 @@ export function EtchPlay({
         </div>
       )}
 
-      {!graded && !study && task.kind !== "say" && (
+      {built && (
+        <div className="mt-3 text-center">
+          <p className="text-lg font-bold text-good">You built it.</p>
+          <p className="mt-1 text-sm font-medium text-ink">
+            {task.back >= 1 ? "We'll bring it back next time." : "It comes back once, with no help."}
+          </p>
+          <Button className="mt-3 w-full" type="button" onClick={() => finish("again")}>
+            Next
+          </Button>
+        </div>
+      )}
+
+      {!graded && !built && guidedKind && !hebrewOk && (
+        <Button type="button" variant="outline" size="lg" className="mt-3 w-full text-lg font-bold" onClick={askShowMe}>
+          Show me
+        </Button>
+      )}
+
+      {!graded && !study && task.kind !== "say" && !guidedKind && (
         <DontKnowButton
           onClick={() => {
             if (carryOver()) return;
