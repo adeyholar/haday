@@ -1,6 +1,6 @@
 /** The live class host. Old Vercel URLs must not serve the app. */
-export const CLASS_SITE = "https://hadayhebbraimentor.jcdisn.com";
-export const CLASS_SITE_HOST = "hadayhebbraimentor.jcdisn.com";
+export const CLASS_SITE = "https://hebrewmentor.haday.app";
+export const CLASS_SITE_HOST = "hebrewmentor.haday.app";
 export const AZURE_FALLBACK = "https://haday.azurewebsites.net";
 
 export function isRetiredVercelHost(host: string | undefined | null): boolean {

@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://hadayhebbraimentor.jcdisn.com/sitemap.xml
+Sitemap: https://hebrewmentor.haday.app/sitemap.xml

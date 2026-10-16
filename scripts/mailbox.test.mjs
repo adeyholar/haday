@@ -40,11 +40,11 @@ test("verification links on localhost rewrite to the public class host", () => {
   const rewritten = toPublicAppUrl(
     "http://localhost:8080/api/auth/verify-email?token=abc&callbackURL=%2Flogin",
   );
-  assert.match(rewritten, /^https:\/\/hadayhebbraimentor\.jcdisn\.com/);
+  assert.match(rewritten, /^https:\/\/hebrewmentor\.haday\.app/);
   assert.match(rewritten, /\/api\/auth\/verify-email\?token=abc/);
 });
 
-test("the new host is trusted, and the public address has not flipped", () => {
+test("both hosts are trusted, and the public address is the new host", () => {
   const src = readFileSync(join(root, "src/lib/auth/server.ts"), "utf8");
   assert.match(src, /CLASS_SIGN_IN_HOSTS/);
   assert.match(src, /hadayhebbraimentor\.jcdisn\.com/);
@@ -53,14 +53,14 @@ test("the new host is trusted, and the public address has not flipped", () => {
   assert.equal(src.includes("const baseURL = explicitBaseURL ??"), false);
   assert.match(src, /https:\/\/hebrew\.haday\.app/);
   const site = readFileSync(join(root, "src/lib/class-site.ts"), "utf8");
-  assert.match(site, /https:\/\/hadayhebbraimentor\.jcdisn\.com/);
-  assert.equal(site.includes("hebrewmentor.haday.app"), false);
+  assert.match(site, /https:\/\/hebrewmentor\.haday\.app/);
+  assert.equal(site.includes("hadayhebbraimentor.jcdisn.com"), false);
 });
 
 test("a foreign host cannot own a reset or confirmation link", () => {
   const reset = passwordResetPageUrl("secret-token");
-  assert.match(reset, /^https:\/\/hadayhebbraimentor\.jcdisn\.com\/reset-password\?token=secret-token$/);
+  assert.match(reset, /^https:\/\/hebrewmentor\.haday\.app\/reset-password\?token=secret-token$/);
   const confirm = toPublicAppUrl("https://example.com/api/auth/verify-email?token=abc");
-  assert.match(confirm, /^https:\/\/hadayhebbraimentor\.jcdisn\.com\/api\/auth\/verify-email\?token=abc$/);
+  assert.match(confirm, /^https:\/\/hebrewmentor\.haday\.app\/api\/auth\/verify-email\?token=abc$/);
   assert.equal(confirm.includes("example.com"), false);
 });

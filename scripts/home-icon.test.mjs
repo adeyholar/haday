@@ -48,7 +48,7 @@ test("a saved shortcut is HaDay, with the parchment he, and not the template ico
   assert.doesNotMatch(served, /Grok App/);
   assert.doesNotMatch(served, /__grok\/icon/);
   const install = renderInstallPageHtml("<title>Add {{APP_NAME}}</title>", {
-    host: "hadayhebbraimentor.jcdisn.com",
+    host: "hebrewmentor.haday.app",
     url: "/?install=1&platform=ios",
     name: "HaDay",
   });
