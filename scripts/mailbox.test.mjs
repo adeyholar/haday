@@ -46,9 +46,12 @@ test("verification links on localhost rewrite to the public class host", () => {
 
 test("the new host is trusted, and the public address has not flipped", () => {
   const src = readFileSync(join(root, "src/lib/auth/server.ts"), "utf8");
-  assert.match(src, /https:\/\/hebrewmentor\.haday\.app/);
+  assert.match(src, /CLASS_SIGN_IN_HOSTS/);
+  assert.match(src, /hadayhebbraimentor\.jcdisn\.com/);
+  assert.match(src, /hebrewmentor\.haday\.app/);
+  assert.match(src, /protocol: "https"/);
+  assert.equal(src.includes("const baseURL = explicitBaseURL ??"), false);
   assert.match(src, /https:\/\/hebrew\.haday\.app/);
-  assert.match(src, /https:\/\/hadayhebbraimentor\.jcdisn\.com/);
   const site = readFileSync(join(root, "src/lib/class-site.ts"), "utf8");
   assert.match(site, /https:\/\/hadayhebbraimentor\.jcdisn\.com/);
   assert.equal(site.includes("hebrewmentor.haday.app"), false);
