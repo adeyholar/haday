@@ -103,15 +103,34 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
-const baseURL = explicitBaseURL ?? {
-  // Include loopback hosts so dynamic baseURL resolves for local email/password
-  // (not only the preview wildcard).
-  allowedHosts: [...previewAllowedHosts, "localhost", "127.0.0.1", "[::1]"],
-  // `auto` → trust both http:// and https:// expansions of allowedHosts
-  // (preview is https; local dev is http).
-  protocol: "auto" as const,
-  fallback: "http://localhost:8080",
-};
+// The two class hosts. While both are live, Google and X must return to the
+// host the student started on. A single BETTER_AUTH_URL would send the new
+// host's sign-in back to the old one.
+const CLASS_SIGN_IN_HOSTS = ["hadayhebbraimentor.jcdisn.com", "hebrewmentor.haday.app"];
+function hostnameOf(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
+const envHost = hostnameOf(explicitBaseURL);
+const baseURL = explicitBaseURL
+  ? {
+      allowedHosts: [...new Set([...CLASS_SIGN_IN_HOSTS, ...(envHost ? [envHost] : [])])],
+      protocol: "https" as const,
+      fallback: explicitBaseURL,
+    }
+  : {
+      // Include loopback hosts so dynamic baseURL resolves for local email/password
+      // (not only the preview wildcard).
+      allowedHosts: [...previewAllowedHosts, "localhost", "127.0.0.1", "[::1]"],
+      // `auto` → trust both http:// and https:// expansions of allowedHosts
+      // (preview is https; local dev is http).
+      protocol: "auto" as const,
+      fallback: "http://localhost:8080",
+    };
 
 // Origins Better Auth accepts on credentialed POSTs (sign-up/sign-in, etc.).
 // Missing entries here surface as FORBIDDEN "Invalid origin".
