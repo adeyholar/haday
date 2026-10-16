@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
@@ -41,6 +42,16 @@ test("verification links on localhost rewrite to the public class host", () => {
   );
   assert.match(rewritten, /^https:\/\/hadayhebbraimentor\.jcdisn\.com/);
   assert.match(rewritten, /\/api\/auth\/verify-email\?token=abc/);
+});
+
+test("the new host is trusted, and the public address has not flipped", () => {
+  const src = readFileSync(join(root, "src/lib/auth/server.ts"), "utf8");
+  assert.match(src, /https:\/\/hebrewmentor\.haday\.app/);
+  assert.match(src, /https:\/\/hebrew\.haday\.app/);
+  assert.match(src, /https:\/\/hadayhebbraimentor\.jcdisn\.com/);
+  const site = readFileSync(join(root, "src/lib/class-site.ts"), "utf8");
+  assert.match(site, /https:\/\/hadayhebbraimentor\.jcdisn\.com/);
+  assert.equal(site.includes("hebrewmentor.haday.app"), false);
 });
 
 test("a foreign host cannot own a reset or confirmation link", () => {

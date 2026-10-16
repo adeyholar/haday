@@ -129,6 +129,8 @@ const trustedOrigins: string[] = [
   "https://haday.vercel.app",
   "https://hadayhebbraimentor.jcdisn.com",
   "https://HadayHebbraimentor.jcdisn.com",
+  "https://hebrewmentor.haday.app",
+  "https://hebrew.haday.app",
   "https://haday.class.app",
   "https://www.haday.class.app",
 ];
