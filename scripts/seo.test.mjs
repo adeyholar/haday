@@ -25,7 +25,9 @@ test("the Azure host redirects except the health check", () => {
   assert.equal(shouldRedirectAzure(host, "/api/health", "GET"), false);
   assert.equal(shouldRedirectAzure(host, "/", "POST"), false);
   assert.equal(shouldRedirectAzure("hadayhebbraimentor.jcdisn.com", "/", "GET"), false);
-  assert.equal(canonicalUrl("/legal"), "https://hadayhebbraimentor.jcdisn.com/legal");
+  assert.equal(canonicalUrl("/legal"), "https://hebrewmentor.haday.app/legal");
+  assert.equal(shouldRedirectAzure("hebrewmentor.haday.app", "/", "GET"), false);
+  assert.equal(robotsNoindex("hebrewmentor.haday.app", "/"), false);
 });
 
 test("sign-in pages and the old Vercel host are noindex", () => {

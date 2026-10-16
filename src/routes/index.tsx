@@ -9,7 +9,7 @@ import { SITE_JSON_LD } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    links: [{ rel: "canonical", href: "https://hadayhebbraimentor.jcdisn.com/" }],
+    links: [{ rel: "canonical", href: "https://hebrewmentor.haday.app/" }],
   }),
   component: DoorsPage,
 });

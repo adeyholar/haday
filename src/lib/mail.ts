@@ -77,7 +77,7 @@ function isUsablePublicOrigin(origin: string): boolean {
   }
 }
 
-const CLASS_ORIGIN = "https://hadayhebbraimentor.jcdisn.com";
+const CLASS_ORIGIN = "https://hebrewmentor.haday.app";
 
 /** The class site only. Never the request's Host or X-Forwarded-Host. */
 export function publicOrigin(): string {
