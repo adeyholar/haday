@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { blockedDestination, homeForAccount, levelOpen, ownerDoorBlock, pathForHeard } = await jiti.import("/workspace/src/lib/path.ts");
+const { blockedDestination, homeForAccount, levelOpen, ownerDoorBlock, pathForHeard, shouldShowPathChooser } = await jiti.import("/workspace/src/lib/path.ts");
 
 test("only Level A is open until an exam is passed", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -58,4 +59,12 @@ test("a signed-in student opens their study from home", () => {
   assert.equal(homeForAccount({ path: null, admin: false }), null);
   assert.equal(homeForAccount({ path: "bbh", admin: true }), null);
   assert.equal(homeForAccount({ path: "iibs", admin: true }), null);
+  assert.equal(shouldShowPathChooser({ signedIn: true, resolved: false, admin: false, path: "bbh" }), false);
+  assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: false, path: "iibs" }), false);
+  assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: true, path: "bbh" }), true);
+  assert.equal(shouldShowPathChooser({ signedIn: false, resolved: false, admin: false, path: null }), true);
+  const shell = readFileSync("/workspace/src/components/app-shell.tsx", "utf8");
+  assert.match(shell, /pathname === "\/" && studentHome/);
+  const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  assert.match(doors, /shouldShowPathChooser/);
 });
