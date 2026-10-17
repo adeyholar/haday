@@ -10,7 +10,7 @@ const {
   buildArticleQuiz,
   articleQuizPool,
 } = await jiti.import("/workspace/src/lib/article.ts");
-const { COURSE_WEEKS, GAME_CHAPTER_TITLES, weekForChapter, itemsForWeek } = await jiti.import(
+const { COURSE_WEEKS, GAME_CHAPTER_TITLES, weekForChapter, itemsForWeek, chaptersInWeek } = await jiti.import(
   "/workspace/src/lib/vocab.ts",
 );
 
@@ -77,6 +77,10 @@ test("week 3 covers chapters 4 and 5; games stay chapter-titled", () => {
   assert.deepEqual([...w3.chapters], [4, 5]);
   assert.equal(weekForChapter(4), 3);
   assert.equal(weekForChapter(5), 3);
+  assert.deepEqual(chaptersInWeek(2), [3]);
+  assert.deepEqual(chaptersInWeek(3), [4, 5]);
+  assert.deepEqual(chaptersInWeek(8), [12, 13]);
+  assert.equal(chaptersInWeek(99).length, 0);
   const items = itemsForWeek(3);
   assert.ok(items.some((v) => v.id === "torah"));
   assert.ok(items.some((v) => v.id === "ha"));
