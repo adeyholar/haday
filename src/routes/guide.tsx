@@ -36,7 +36,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists Chapter path, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar exams, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
+            class book. The Game menu lists Vocabulary, Custom mix, Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -94,9 +94,9 @@ function GuidePage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Custom mix</h2>
         <p className="mt-2 text-sm text-muted">
-          Game → Custom mix has two tabs. Vocabulary is the class lemmas only (tick open chapters, then Recognize,
-          Gloss, or Spell). Grammar is the six topics only (tick topics, then a 12-question mix from units already
-          open). The two lists never mix. Review only — it does not change the path. Every signed-in student can use it.
+          Game → Custom mix. Vocabulary is a chapter or a week. A chapter plays that chapter only. A week plays the
+          chapters in that week, then Recognize, Gloss, or Spell. Grammar is the topics only. The two lists never mix.
+          Review only — it does not change the path. Every signed-in student can use it.
         </p>
       </Panel>
 

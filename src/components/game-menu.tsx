@@ -1,16 +1,9 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
-import { grammarTopicLabel } from "@/lib/grammar";
-import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 
 export function GameMenu() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const grammarValue =
-    GRAMMAR_TRACKS.find(
-      (t) => pathname === `/game/lessons/${t.id}` || pathname.startsWith(`/game/lessons/${t.id}/`),
-    )?.id ?? (pathname.startsWith("/game/lessons") ? "hub" : null);
-
   const current =
     pathname === "/game" || /^\/game\/\d+/.test(pathname)
       ? "/game"
@@ -38,10 +31,8 @@ export function GameMenu() {
               ? "/game/nouns"
               : pathname.startsWith("/game/article")
                 ? "/game/article"
-                : grammarValue === "hub"
+                : pathname.startsWith("/game/lessons")
                   ? "/game/lessons"
-                  : grammarValue
-                    ? `/game/lessons/${grammarValue}`
                     : pathname.startsWith("/challenge")
                       ? "/challenge"
                       : "/game";
@@ -54,7 +45,7 @@ export function GameMenu() {
         {
           label: "Play",
           options: [
-            { value: "/game", label: "Chapter path" },
+            { value: "/game", label: "Vocabulary" },
             { value: "/game/road", label: "Road exam · Week 7" },
             { value: "/game/final", label: "Road exam · Week 15" },
             { value: "/game/week7", label: "Week 7 mock exam" },
@@ -77,21 +68,10 @@ export function GameMenu() {
         },
         {
           label: "Grammar",
-          options: [
-            { value: "/game/lessons", label: "All topics" },
-            ...GRAMMAR_TRACKS.map((t) => ({
-              value: `/game/lessons/${t.id}`,
-              label: grammarTopicLabel(t),
-            })),
-          ],
+          options: [{ value: "/game/lessons", label: "Grammar" }],
         },
       ]}
       onChange={(to) => {
-        const g = GRAMMAR_TRACKS.find((t) => to === `/game/lessons/${t.id}`);
-        if (g) {
-          void navigate({ to: "/game/lessons/$track", params: { track: g.id } });
-          return;
-        }
         if (to === "/game/lessons") void navigate({ to: "/game/lessons" });
         else if (to === "/game") void navigate({ to: "/game" });
         else if (to === "/game/road") void navigate({ to: "/game/road" });

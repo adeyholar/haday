@@ -599,6 +599,11 @@ export const COURSE_WEEKS = [
   { week: 15, label: "Week 15", chapters: CHAPTERS, hint: "All Game · Ch. 2–19" },
 ] as const;
 
+export function chaptersInWeek(week: number): number[] {
+  const row = COURSE_WEEKS.find((item) => item.week === week);
+  return row ? [...row.chapters] : [];
+}
+
 export function itemsForChapters(chapters: number[]): VocabItem[] {
   const set = new Set(chapters);
   const out = VOCAB.filter((v) => set.has(v.chapter));

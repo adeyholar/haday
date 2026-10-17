@@ -25,7 +25,7 @@ function GameMapPage() {
     <>
       <Panel className="mb-4">
         <GameMenu />
-        <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">Chapter path</h1>
+        <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">Vocabulary</h1>
         <p className="mt-3 max-w-prose text-muted">
           Each chapter is a level. Clear Recognize, Gloss, then Spell (lenient) to unlock the next. Spell (strict) is
           optional. Cards use the citation form from the class book. Both spell stages need the right consonants and
@@ -49,7 +49,7 @@ function GameMapPage() {
           <Link to="/game/custom" className="font-semibold text-primary">
             Custom mix
           </Link>
-          <span className="text-muted"> — every student: pick open chapters and play them in one sitting.</span>
+          <span className="text-muted"> — one chapter, or every open chapter in a week.</span>
         </p>
         <p className="mt-3 text-sm">
           <Link to="/challenge" className="font-semibold text-primary">
