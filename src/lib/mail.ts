@@ -11,6 +11,8 @@
  * requester.
  */
 
+import { CLASS_SITE } from "@/lib/class-site";
+
 export type MailerVia = "resend" | "sendgrid" | "smtp" | "none";
 
 const env = (key: string): string | undefined => {
@@ -77,7 +79,7 @@ function isUsablePublicOrigin(origin: string): boolean {
   }
 }
 
-const CLASS_ORIGIN = "https://hadayhebbraimentor.jcdisn.com";
+const CLASS_ORIGIN = CLASS_SITE;
 
 /** The class site only. Never the request's Host or X-Forwarded-Host. */
 export function publicOrigin(): string {

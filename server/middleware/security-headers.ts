@@ -1,4 +1,4 @@
-import { canonicalUrl, robotsNoindex, shouldRedirectAzure } from "../../src/lib/seo";
+import { canonicalUrl, retiredHostRedirect, robotsNoindex, shouldRedirectAzure } from "../../src/lib/seo";
 
 /** Security headers for every response. CSP only blocks framing, so the app's own scripts still run. */
 const HEADERS: Record<string, string> = {
@@ -26,9 +26,10 @@ export default async function securityHeaders(
   const method = event.req?.method || "GET";
   const path = event.url?.pathname || "/";
   const host = requestHost(event);
-  if (event.url && shouldRedirectAzure(host, path, method)) {
+  const retired = event.url ? retiredHostRedirect(host, path, method) : null;
+  if (event.url && (shouldRedirectAzure(host, path, method) || retired)) {
     return new Response(null, {
-      status: 301,
+      status: retired ?? 301,
       headers: {
         ...HEADERS,
         Location: canonicalUrl(path) + event.url.search,

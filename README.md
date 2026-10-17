@@ -8,7 +8,9 @@ Two study doors. The **Grammar Path** builds the language chapter by chapter. Th
 - Tanakh follow-along: all 39 books, recorded Hebrew
 - Each classmate creates an account; progress stays with that account
 
-**Class site:** [https://hadayhebbraimentor.jcdisn.com](https://hadayhebbraimentor.jcdisn.com)
+**Class site:** [https://hebrewmentor.haday.app](https://hebrewmentor.haday.app)
+
+The previous address ([https://hadayhebbraimentor.jcdisn.com](https://hadayhebbraimentor.jcdisn.com)) redirects here. Keep that name and its certificate for at least a year.
 
 The old Vercel URL ([https://haday.vercel.app](https://haday.vercel.app)) is shut down. It only shows a signpost page that links to the class site.
 
@@ -93,7 +95,7 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | Name | Value |
 |---|---|
 | `DATABASE_URL` | Azure Postgres URL above |
-| `BETTER_AUTH_URL` | `https://hadayhebbraimentor.jcdisn.com` (or the Azure URL until DNS is live) |
+| `BETTER_AUTH_URL` | `https://hebrewmentor.haday.app` |
 | `PUBLIC_APP_URL` | Same as `BETTER_AUTH_URL` |
 | `BETTER_AUTH_SECRET` | Long random string |
 | `VITE_AUTH_ENABLED` | `true` |
@@ -132,7 +134,7 @@ Wait 5–30 minutes. Keep the record DNS-only (not proxied) until Azure validate
 
 1. Web App → **Custom domains** → Add `hadayhebbraimentor.jcdisn.com`
 2. **TLS/SSL** → Create **App Service managed certificate** (free) and bind it
-3. Application settings: set `BETTER_AUTH_URL` and `PUBLIC_APP_URL` to `https://hadayhebbraimentor.jcdisn.com`
+3. Application settings: set `BETTER_AUTH_URL` and `PUBLIC_APP_URL` to `https://hebrewmentor.haday.app`
 4. Save and restart
 
 Until the certificate and `BETTER_AUTH_URL` are set, the pretty URL can load the site but sign-in will fail.

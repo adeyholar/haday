@@ -35,8 +35,9 @@ import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
 import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
-import { ensureDbReady, getPglite } from "../db";
+import { PREVIOUS_CLASS_HOST } from "../class-site";
 import { resolveDatabaseUrl, pgPoolOptions } from "../database-url";
+import { ensureDbReady, getPglite } from "../db";
 import { emailAndPasswordEnabled, emailAndPassword, emailVerification, authHooks } from "./email-password";
 import { GROK_PROVIDERS } from "./providers";
 import { pgliteDialect } from "./pglite-dialect";
@@ -106,7 +107,7 @@ const LOCAL_DEV_ORIGINS: string[] = [
 // The two class hosts. While both are live, Google and X must return to the
 // host the student started on. A single BETTER_AUTH_URL would send the new
 // host's sign-in back to the old one.
-const CLASS_SIGN_IN_HOSTS = ["hadayhebbraimentor.jcdisn.com", "hebrewmentor.haday.app"];
+const CLASS_SIGN_IN_HOSTS = [PREVIOUS_CLASS_HOST, "hebrewmentor.haday.app"];
 function hostnameOf(url: string | undefined): string | null {
   if (!url) return null;
   try {
@@ -146,8 +147,7 @@ const trustedOrigins: string[] = [
   "https://haday-bud9cwczfeakh8ce.westus3-01.azurewebsites.net",
   "https://haday.azurewebsites.net",
   "https://haday.vercel.app",
-  "https://hadayhebbraimentor.jcdisn.com",
-  "https://HadayHebbraimentor.jcdisn.com",
+  `https://${PREVIOUS_CLASS_HOST}`,
   "https://hebrewmentor.haday.app",
   "https://hebrew.haday.app",
   "https://haday.class.app",
