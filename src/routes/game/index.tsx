@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GameContinue } from "@/components/game-continue";
-import { GameMenu } from "@/components/game-menu";
+import { GameMenu, WordPlayChoice } from "@/components/game-menu";
 import { RewardsBar } from "@/components/rewards-bar";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
@@ -26,6 +26,7 @@ function GameMapPage() {
       <Panel className="mb-4">
         <GameMenu />
         <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">Vocabulary</h1>
+        <WordPlayChoice which="path" />
         <p className="mt-3 max-w-prose text-muted">
           Each chapter is a level. Clear Recognize, Gloss, then Spell (lenient) to unlock the next. Spell (strict) is
           optional. Cards use the citation form from the class book. Both spell stages need the right consonants and
@@ -45,12 +46,6 @@ function GameMapPage() {
           </Button>
         </Link>
         <p className="mt-2 text-sm text-muted">Hebrew is spoken. Glance at A–D and say the letter.</p>
-        <p className="mt-3 text-sm">
-          <Link to="/game/custom" className="font-semibold text-primary">
-            Custom mix
-          </Link>
-          <span className="text-muted"> — one chapter, or every open chapter in a week.</span>
-        </p>
         <p className="mt-3 text-sm">
           <Link to="/challenge" className="font-semibold text-primary">
             Ultimate Challenge

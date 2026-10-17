@@ -1,14 +1,13 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
+import { cn } from "@/lib/cn";
 
 export function GameMenu() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const current =
-    pathname === "/game" || /^\/game\/\d+/.test(pathname)
+    pathname === "/game" || /^\/game\/\d+/.test(pathname) || pathname.startsWith("/game/custom")
       ? "/game"
-      : pathname.startsWith("/game/custom")
-        ? "/game/custom"
         : pathname.startsWith("/game/balloons")
           ? "/game/balloons"
           : pathname.startsWith("/game/type")
@@ -50,7 +49,6 @@ export function GameMenu() {
             { value: "/game/final", label: "Road exam · Week 15" },
             { value: "/game/week7", label: "Week 7 mock exam" },
             { value: "/game/final-vocab", label: "Final vocab" },
-            { value: "/game/custom", label: "Custom mix" },
             { value: "/self-quiz", label: "Self-quiz" },
             { value: "/challenge", label: "Ultimate Challenge" },
           ],
@@ -78,7 +76,6 @@ export function GameMenu() {
         else if (to === "/game/final") void navigate({ to: "/game/final" });
         else if (to === "/game/week7") void navigate({ to: "/game/week7" });
         else if (to === "/game/final-vocab") void navigate({ to: "/game/final-vocab" });
-        else if (to === "/game/custom") void navigate({ to: "/game/custom" });
         else if (to === "/game/alefbet") void navigate({ to: "/game/alefbet" });
         else if (to === "/game/type") void navigate({ to: "/game/type" });
         else if (to === "/self-quiz") void navigate({ to: "/self-quiz", search: { shell: "game" } });
@@ -89,5 +86,31 @@ export function GameMenu() {
         else if (to === "/challenge") void navigate({ to: "/challenge" });
       }}
     />
+  );
+}
+
+export function WordPlayChoice({ which }: { which: "path" | "mix" }) {
+  return (
+    <div className="mt-4 flex gap-2">
+      <Link
+        to="/game"
+        className={cn(
+          "min-h-11 flex-1 rounded-[var(--radius-md)] px-3 py-2 text-center text-sm font-semibold",
+          which === "path" ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]",
+        )}
+      >
+        Vocabulary
+      </Link>
+      <Link
+        to="/game/custom"
+        search={{ kind: "vocab" }}
+        className={cn(
+          "min-h-11 flex-1 rounded-[var(--radius-md)] px-3 py-2 text-center text-sm font-semibold",
+          which === "mix" ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]",
+        )}
+      >
+        Custom mix
+      </Link>
+    </div>
   );
 }

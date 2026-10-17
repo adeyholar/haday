@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GameMenu } from "@/components/game-menu";
+import { GameMenu, WordPlayChoice } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import {
@@ -47,7 +47,7 @@ function MixTabs({ kind }: { kind: Kind }) {
           kind === "vocab" ? "bg-ink text-parchment" : "bg-card text-ink",
         )}
       >
-        Vocabulary
+        Words
       </Link>
       <Link
         to="/game/custom"
@@ -85,6 +85,7 @@ function VocabMixPicker() {
         <GameMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Custom mix</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Chapter or week</h1>
+        <WordPlayChoice which="mix" />
         <p className="mt-3 max-w-prose text-muted">
           A chapter plays that chapter only. A week plays the chapters in that week. Pick one, then Recognize, Gloss,
           or Spell. This mix does not unlock or lock the path.
@@ -241,6 +242,7 @@ function GrammarMixPicker() {
         <GameMenu />
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Custom mix</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Grammar, one sitting</h1>
+        <WordPlayChoice which="mix" />
         <p className="mt-3 max-w-prose text-muted">
           Topics only — not the class word list. Tick the grammar paths you want, then play a 12-question mix from the
           units already open on those paths. Practice only: this mix does not unlock or lock a topic.
