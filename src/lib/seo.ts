@@ -6,7 +6,15 @@ export const SEO_TITLE =
 export const SEO_DESCRIPTION =
   "HaDay HebRabbAi Mentor trains Biblical Hebrew vocabulary for first-year students. Hear a word, then its meaning. Lessons stay behind sign-in.";
 
-const INDEXABLE = new Set(["/", "/legal", "/credits", "/robots.txt", "/sitemap.xml", "/llms.txt"]);
+const INDEXABLE = new Set([
+  "/",
+  "/legal",
+  "/credits",
+  "/how-to-memorize-biblical-hebrew-vocabulary",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+]);
 
 export function requestPath(pathname: string): string {
   const bare = (pathname.split("?")[0] ?? "/").split("#")[0] ?? "/";

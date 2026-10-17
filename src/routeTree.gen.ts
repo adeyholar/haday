@@ -20,6 +20,7 @@ import { Route as ChallengeRouteImport } from './routes/challenge'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DrillRouteImport } from './routes/drill'
 import { Route as GuideRouteImport } from './routes/guide'
+import { Route as HowToMemorizeBiblicalHebrewVocabularyRouteImport } from './routes/how-to-memorize-biblical-hebrew-vocabulary'
 import { Route as IdeasRouteImport } from './routes/ideas'
 import { Route as IibsRouteImport } from './routes/iibs'
 import { Route as KeepRouteImport } from './routes/keep'
@@ -142,6 +143,12 @@ const GuideRoute = GuideRouteImport.update({
   path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HowToMemorizeBiblicalHebrewVocabularyRoute =
+  HowToMemorizeBiblicalHebrewVocabularyRouteImport.update({
+    id: '/how-to-memorize-biblical-hebrew-vocabulary',
+    path: '/how-to-memorize-biblical-hebrew-vocabulary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const IdeasRoute = IdeasRouteImport.update({
   id: '/ideas',
   path: '/ideas',
@@ -485,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
+  '/how-to-memorize-biblical-hebrew-vocabulary': typeof HowToMemorizeBiblicalHebrewVocabularyRoute
   '/ideas': typeof IdeasRoute
   '/iibs': typeof IibsRouteWithChildren
   '/keep': typeof KeepRoute
@@ -564,6 +572,7 @@ export interface FileRoutesByTo {
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
+  '/how-to-memorize-biblical-hebrew-vocabulary': typeof HowToMemorizeBiblicalHebrewVocabularyRoute
   '/ideas': typeof IdeasRoute
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -642,6 +651,7 @@ export interface FileRoutesById {
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
+  '/how-to-memorize-biblical-hebrew-vocabulary': typeof HowToMemorizeBiblicalHebrewVocabularyRoute
   '/ideas': typeof IdeasRoute
   '/iibs': typeof IibsRouteWithChildren
   '/keep': typeof KeepRoute
@@ -723,6 +733,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/drill'
     | '/guide'
+    | '/how-to-memorize-biblical-hebrew-vocabulary'
     | '/ideas'
     | '/iibs'
     | '/keep'
@@ -802,6 +813,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/drill'
     | '/guide'
+    | '/how-to-memorize-biblical-hebrew-vocabulary'
     | '/ideas'
     | '/keep'
     | '/leaderboard'
@@ -879,6 +891,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/drill'
     | '/guide'
+    | '/how-to-memorize-biblical-hebrew-vocabulary'
     | '/ideas'
     | '/iibs'
     | '/keep'
@@ -959,6 +972,7 @@ export interface RootRouteChildren {
   CreditsRoute: typeof CreditsRoute
   DrillRoute: typeof DrillRoute
   GuideRoute: typeof GuideRoute
+  HowToMemorizeBiblicalHebrewVocabularyRoute: typeof HowToMemorizeBiblicalHebrewVocabularyRoute
   IdeasRoute: typeof IdeasRoute
   IibsRoute: typeof IibsRouteWithChildren
   KeepRoute: typeof KeepRoute
@@ -1087,6 +1101,13 @@ declare module '@tanstack/react-router' {
       path: '/guide'
       fullPath: '/guide'
       preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-to-memorize-biblical-hebrew-vocabulary': {
+      id: '/how-to-memorize-biblical-hebrew-vocabulary'
+      path: '/how-to-memorize-biblical-hebrew-vocabulary'
+      fullPath: '/how-to-memorize-biblical-hebrew-vocabulary'
+      preLoaderRoute: typeof HowToMemorizeBiblicalHebrewVocabularyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ideas': {
@@ -1635,6 +1656,8 @@ const rootRouteChildren: RootRouteChildren = {
   CreditsRoute: CreditsRoute,
   DrillRoute: DrillRoute,
   GuideRoute: GuideRoute,
+  HowToMemorizeBiblicalHebrewVocabularyRoute:
+    HowToMemorizeBiblicalHebrewVocabularyRoute,
   IdeasRoute: IdeasRoute,
   IibsRoute: IibsRouteWithChildren,
   KeepRoute: KeepRoute,

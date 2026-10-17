@@ -114,7 +114,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user, isPending } = useCurrentUserState();
   const isPublic =
-    pathname === "/login" || pathname === "/reset-password" || pathname === "/legal" || pathname === "/credits";
+    pathname === "/login" ||
+    pathname === "/reset-password" ||
+    pathname === "/legal" ||
+    pathname === "/credits" ||
+    pathname === "/how-to-memorize-biblical-hebrew-vocabulary";
   const doorsForVisitor = pathname === "/" && !user && sessionUser == null;
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
 import { Panel } from "@/components/panel";
+import { PublicFooter } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/legal")({ component: LegalPage });
@@ -128,6 +129,7 @@ function LegalPage() {
           Credits
         </Link>
       </p>
+      <PublicFooter />
     </main>
   );
 }
