@@ -6,9 +6,11 @@ type Size = "compact" | "hero";
 export function BrandLockup({
   size = "compact",
   linked = false,
+  to = "/",
 }: {
   size?: Size;
   linked?: boolean;
+  to?: "/" | "/bbh" | "/iibs";
 }) {
   const inner = (
     <>
@@ -48,7 +50,7 @@ export function BrandLockup({
 
   if (linked) {
     return (
-      <Link to="/" className={className}>
+      <Link to={to} className={className}>
         {inner}
       </Link>
     );

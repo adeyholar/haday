@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
-import { clearDoor, homeForAccount, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
+import { clearDoor, homeForAccount, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
 import { CLASS_SITE } from "@/lib/class-site";
 import { SITE_JSON_LD } from "@/lib/seo";
 
@@ -17,6 +18,9 @@ export const Route = createFileRoute("/")({
 });
 
 function DoorsPage() {
+  const { sessionUser } = useRouteContext({ from: "__root__" });
+  const { user } = useCurrentUserState();
+  const signedIn = sessionUser != null || user != null;
   const [gate, setGate] = useState<MyPath | null>(null);
   const [error, setError] = useState("");
   const [visitor, setVisitor] = useState(false);
@@ -25,40 +29,50 @@ function DoorsPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        let next = await getMyPath();
-        if (!next.path) {
-          const intent = readPathIntent();
-          if (intent) {
-            const chosen = await choosePath({ data: { path: intent } });
-            if (chosen.ok) {
-              rememberDoor(chosen.path);
-              window.location.assign(chosen.path === "iibs" ? "/iibs" : "/bbh");
-              return;
+      let lastError = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          let next = await getMyPath();
+          if (!next.path) {
+            const intent = readPathIntent();
+            if (intent) {
+              const chosen = await choosePath({ data: { path: intent } });
+              if (chosen.ok) {
+                rememberDoor(chosen.path);
+                window.location.replace(chosen.path === "iibs" ? "/iibs" : "/bbh");
+                return;
+              }
             }
           }
-        }
-        const home = homeForAccount(next);
-        if (home) {
-          rememberDoor(next.path!);
-          window.location.assign(home);
+          const home = homeForAccount(next);
+          if (home) {
+            rememberDoor(next.path!);
+            window.location.replace(home);
+            return;
+          }
+          if (!cancelled) {
+            clearDoor();
+            setVisitor(false);
+            setGate(next);
+          }
           return;
+        } catch (err) {
+          if (cancelled) return;
+          lastError = err instanceof Error ? err.message : "";
+          const unauthorized = /unauthorized/i.test(lastError);
+          if (unauthorized && !signedIn) {
+            setVisitor(true);
+            return;
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 300));
         }
-        if (!cancelled) {
-          clearDoor();
-          setGate(next);
-        }
-      } catch (err) {
-        if (cancelled) return;
-        const message = err instanceof Error ? err.message : "";
-        if (/unauthorized/i.test(message)) setVisitor(true);
-        else setError(message || "Could not open the doors.");
       }
+      if (!cancelled) setError(lastError || "Could not open your study.");
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [signedIn]);
 
   async function choose(path: StudyPath) {
     if (busy) return;
@@ -87,6 +101,16 @@ function DoorsPage() {
   const choosing = visitor || !gate?.path;
   const canBbh = Boolean(gate?.admin || gate?.path === "bbh");
   const canIibs = Boolean(gate?.admin || gate?.path === "iibs");
+  const showChooser = shouldShowPathChooser({
+    signedIn,
+    resolved: gate != null || (visitor && !signedIn),
+    admin: Boolean(gate?.admin),
+    path: gate?.path ?? null,
+  });
+
+  if (!showChooser) {
+    return <p className="py-16 text-center text-sm text-muted">{error || "Opening your study."}</p>;
+  }
 
   return (
     <>

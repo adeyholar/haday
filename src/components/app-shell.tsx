@@ -38,7 +38,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { blockedDestination, currentDoor, ownerDoorBlock } from "@/lib/path";
+import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock } from "@/lib/path";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -260,6 +260,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const onIibs = pathname === "/iibs" || pathname.startsWith("/iibs/");
   const iibsOnly = onIibs || (pathGate?.path === "iibs" && !pathGate.admin);
+  const studentHome = pathGate ? homeForAccount(pathGate) : null;
+  if (pathname === "/" && studentHome) return <Navigate to={studentHome} replace />;
   const blocked =
     pathGate?.admin && doorReady
       ? ownerDoorBlock(pathname, currentDoor())
@@ -273,7 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <VisitorBeacon />
       <header className="sticky top-0 z-20 border-b border-border bg-card">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
-          <BrandLockup linked />
+          <BrandLockup linked to={studentHome ?? "/"} />
           <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
             {iibsOnly ? (
             <>
@@ -375,14 +377,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <li>
             <NavTip label="Home" side="top" full>
               <Link
-                to="/"
+                to={studentHome ?? "/"}
                 title="Home"
                 className={cn(
                   "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                  pathname === "/" ? "text-primary" : "text-muted",
+                  pathname === "/" || pathname === studentHome ? "text-primary" : "text-muted",
                 )}
               >
-                <House className="size-5" strokeWidth={pathname === "/" ? 2.2 : 1.8} />
+                <House className="size-5" strokeWidth={pathname === "/" || pathname === studentHome ? 2.2 : 1.8} />
                 Home
               </Link>
             </NavTip>
