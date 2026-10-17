@@ -4,7 +4,8 @@ Living picture of **what the class site is today**. Not a wish list.
 
 | | |
 |---|---|
-| **Class site** | https://hadayhebbraimentor.jcdisn.com |
+| **Class site** | https://hebrewmentor.haday.app |
+| **Previous address** | https://hadayhebbraimentor.jcdisn.com — redirects here |
 | **Old Vercel URL** | https://haday.vercel.app — signpost only; not the app |
 | **Repo** | https://github.com/adeyholar/haday (`main`) |
 | **Host** | Azure Web App `haday` (Linux container) + Azure Postgres `haday-pg` |

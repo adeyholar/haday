@@ -1,4 +1,4 @@
-import { CLASS_SITE, isRetiredVercelHost } from "@/lib/class-site";
+import { CLASS_SITE, PREVIOUS_CLASS_HOST, isRetiredVercelHost } from "@/lib/class-site";
 
 export const SEO_TITLE =
   "Biblical Hebrew Vocabulary Trainer for First-Year Students | HaDay HebRabbAi Mentor";
@@ -33,6 +33,15 @@ export function shouldRedirectAzure(host: string, pathname: string, method: stri
   if (verb !== "GET" && verb !== "HEAD") return false;
   if (!hostName(host).endsWith(".azurewebsites.net")) return false;
   return requestPath(pathname) !== "/api/health";
+}
+
+/** Old class host. 301 for a page, 308 for a form, never the health check. */
+export function retiredHostRedirect(host: string, pathname: string, method: string): 301 | 308 | null {
+  if (hostName(host) !== PREVIOUS_CLASS_HOST) return null;
+  if (requestPath(pathname) === "/api/health") return null;
+  const verb = method.toUpperCase();
+  if (verb === "GET" || verb === "HEAD") return 301;
+  return 308;
 }
 
 /** noindex for sign-in pages, the study, admin, and the retired Vercel host. */

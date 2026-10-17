@@ -5,11 +5,12 @@ import { Panel } from "@/components/panel";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { clearDoor, homeForAccount, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
+import { CLASS_SITE } from "@/lib/class-site";
 import { SITE_JSON_LD } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    links: [{ rel: "canonical", href: "https://hadayhebbraimentor.jcdisn.com/" }],
+    links: [{ rel: "canonical", href: `${CLASS_SITE}/` }],
   }),
   component: DoorsPage,
 });
