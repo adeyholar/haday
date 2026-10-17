@@ -42,6 +42,7 @@ import { updateElo } from "./elo";
 import { findStudyItem } from "./tanakh-pool";
 import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
+import type { VerbQuestProgress } from "./verb-paradigm-quest";
 import { applyIibsStage, type IibsStageId } from "./iibs-game";
 import type { RoadRun } from "./road-exam";
 import type { WeakRun } from "./weak-pool";
@@ -119,6 +120,7 @@ type StudyState = StudySnapshot & {
   saveDrillRun: (week: number, focus: string, place: DrillPlace | null) => void;
   saveIibsDrill: (level: string, week: number, focus: string, place: DrillPlace | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
+  saveVerbQuest: (quest: VerbQuestProgress) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
   /** A real study answer (quiz, rules, classify) — same day, streak, and session as Drill. */
@@ -345,6 +347,9 @@ export const useStudy = create<StudyState>()(
           ...streakInfo,
           sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
         });
+      },
+      saveVerbQuest: (quest) => {
+        set({ game: { ...get().game, verbParadigmQuest: quest } });
       },
       finishUltimate: (pct) => {
         const now = Date.now();

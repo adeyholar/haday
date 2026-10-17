@@ -44,6 +44,22 @@ const VOWEL_LETTERS: PadKeyDef[] = [
   { id: "qamets-he", insert: "ָה", show: "◌ָה", name: "Qamets he" },
 ];
 
+function samePiece(a: string, b: string) {
+  const left = normalizeHebrewFull(a);
+  const right = normalizeHebrewFull(b);
+  if (left || right) return left === right;
+  return a === b;
+}
+
+function dropLastMark(s: string) {
+  if (!s) return s;
+  const parts = [...s];
+  const last = parts[parts.length - 1] ?? "";
+  const cp = last.codePointAt(0) ?? 0;
+  if (cp >= 0x0591 && cp <= 0x05c7) return parts.slice(0, -1).join("");
+  return dropLastGrapheme(s);
+}
+
 function dropLastGrapheme(s: string) {
   if (!s) return s;
   if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
@@ -135,6 +151,14 @@ type Props = {
   liveGrade?: boolean;
   /** Spell-strict walk: only the expected piece is inserted. Others shake. */
   guide?: { expected: string | null; glow: string[]; shake: string | null; onMiss: (glyph: string) => void } | null;
+  /** Accent and meteg. Off everywhere except the verb paradigm. */
+  extraMarks?: boolean;
+  /** Hide one-tap endings such as qamets-he, so the student builds them. */
+  hideVowelLetters?: boolean;
+  /** Backspace removes one mark, not the whole letter. */
+  markBackspace?: boolean;
+  /** When it returns true, the accent or meteg is placed by the parent. */
+  onSpecialMark?: (insert: string) => boolean;
 };
 
 export function HebrewType({
@@ -147,6 +171,10 @@ export function HebrewType({
   hideHint = false,
   liveGrade = true,
   guide = null,
+  extraMarks = false,
+  hideVowelLetters = false,
+  markBackspace = false,
+  onSpecialMark,
 }: Props) {
   const live = liveMatchAny(target, value, alts, strict);
   const extra = live === "off" ? pointingHint(target, value) : null;
@@ -173,20 +201,21 @@ export function HebrewType({
     if (disabled) return;
     if (guide) {
       const want = guide.expected;
-      const same = want != null && normalizeHebrewFull(chunk) === normalizeHebrewFull(want);
+      const same = want != null && samePiece(chunk, want);
       if (!same) {
         guide.onMiss(chunk);
         return;
       }
     }
+    if ((chunk === "\u05AB" || chunk === "\u05BD") && onSpecialMark?.(chunk)) return;
     onChange(value + chunk);
   }
 
   function keyFace(insert: string) {
     if (!guide) return {};
-    const lit = guide.glow.some((g) => normalizeHebrewFull(g) === normalizeHebrewFull(insert));
+    const lit = guide.glow.some((g) => samePiece(g, insert));
     const shaken = guide.shake;
-    const shake = shaken != null && normalizeHebrewFull(shaken) === normalizeHebrewFull(insert);
+    const shake = shaken != null && samePiece(shaken, insert);
     return { lit, quiet: !lit, shake };
   }
 
@@ -231,7 +260,7 @@ export function HebrewType({
         <button
           type="button"
           disabled={disabled || !value}
-          onClick={() => onChange(dropLastGrapheme(value))}
+          onClick={() => onChange(markBackspace ? dropLastMark(value) : dropLastGrapheme(value))}
           className={cn(
             "min-h-11 rounded-[var(--radius-sm)] bg-card text-sm font-medium text-ink shadow-[var(--shadow-border)] disabled:opacity-40",
             guide && guide.expected == null && "ring-2 ring-primary",
@@ -273,6 +302,12 @@ export function HebrewType({
         {MARKS.map((k) => (
           <PadKey key={k.id} glyph={k.show} name={k.name} disabled={disabled} {...keyFace(k.insert)} onClick={() => add(k.insert)} />
         ))}
+        {extraMarks ? (
+          <>
+            <PadKey glyph="◌֫" name="Accent" disabled={disabled} {...keyFace("\u05AB")} onClick={() => add("\u05AB")} />
+            <PadKey glyph="◌ֽ" name="Meteg" disabled={disabled} {...keyFace("\u05BD")} onClick={() => add("\u05BD")} />
+          </>
+        ) : null}
       </PadSection>
 
       <PadSection title="Final forms" cols="five" rtl>
@@ -293,11 +328,13 @@ export function HebrewType({
         ))}
       </PadSection>
 
+      {hideVowelLetters ? null : (
       <PadSection title="Vowel letters" hint="Adds the letter + vowel" cols="five">
         {VOWEL_LETTERS.map((k) => (
           <PadKey key={k.id} glyph={k.show} name={k.name} disabled={disabled} {...keyFace(k.insert)} onClick={() => add(k.insert)} />
         ))}
       </PadSection>
+      )}
 
     </div>
   );

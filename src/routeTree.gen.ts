@@ -49,6 +49,7 @@ import { Route as GameFinalRouteImport } from './routes/game/final'
 import { Route as GameFinalVocabRouteImport } from './routes/game/final-vocab'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
+import { Route as GameVerbParadigmQuestRouteImport } from './routes/game/verb-paradigm-quest'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
@@ -289,6 +290,11 @@ const GameTypeRoute = GameTypeRouteImport.update({
   path: '/game/type',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameVerbParadigmQuestRoute = GameVerbParadigmQuestRouteImport.update({
+  id: '/game/verb-paradigm-quest',
+  path: '/game/verb-paradigm-quest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameWeek7Route = GameWeek7RouteImport.update({
   id: '/game/week7',
   path: '/game/week7',
@@ -519,6 +525,7 @@ export interface FileRoutesByFullPath {
   '/game/final-vocab': typeof GameFinalVocabRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
+  '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -597,6 +604,7 @@ export interface FileRoutesByTo {
   '/game/final-vocab': typeof GameFinalVocabRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
+  '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -678,6 +686,7 @@ export interface FileRoutesById {
   '/game/final-vocab': typeof GameFinalVocabRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
+  '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -760,6 +769,7 @@ export interface FileRouteTypes {
     | '/game/final-vocab'
     | '/game/road'
     | '/game/type'
+    | '/game/verb-paradigm-quest'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -838,6 +848,7 @@ export interface FileRouteTypes {
     | '/game/final-vocab'
     | '/game/road'
     | '/game/type'
+    | '/game/verb-paradigm-quest'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -918,6 +929,7 @@ export interface FileRouteTypes {
     | '/game/final-vocab'
     | '/game/road'
     | '/game/type'
+    | '/game/verb-paradigm-quest'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -996,6 +1008,7 @@ export interface RootRouteChildren {
   GameFinalVocabRoute: typeof GameFinalVocabRoute
   GameRoadRoute: typeof GameRoadRoute
   GameTypeRoute: typeof GameTypeRoute
+  GameVerbParadigmQuestRoute: typeof GameVerbParadigmQuestRoute
   GameWeek7Route: typeof GameWeek7Route
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
@@ -1304,6 +1317,13 @@ declare module '@tanstack/react-router' {
       path: '/game/type'
       fullPath: '/game/type'
       preLoaderRoute: typeof GameTypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/verb-paradigm-quest': {
+      id: '/game/verb-paradigm-quest'
+      path: '/game/verb-paradigm-quest'
+      fullPath: '/game/verb-paradigm-quest'
+      preLoaderRoute: typeof GameVerbParadigmQuestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/week7': {
@@ -1681,6 +1701,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameFinalVocabRoute: GameFinalVocabRoute,
   GameRoadRoute: GameRoadRoute,
   GameTypeRoute: GameTypeRoute,
+  GameVerbParadigmQuestRoute: GameVerbParadigmQuestRoute,
   GameWeek7Route: GameWeek7Route,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,

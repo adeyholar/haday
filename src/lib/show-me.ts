@@ -15,6 +15,8 @@ const MARK_NAME: Record<string, string> = {
   "\u05BC": "Dagesh",
   "\u05C1": "Shin dot",
   "\u05C2": "Sin dot",
+  "\u05AB": "Accent (stress)",
+  "\u05BD": "Meteg",
 };
 
 /** Nearby points, so the lit set is a real choice. */

@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { StudyMenu } from "@/components/study-menu";
 import { GrammarPlay } from "@/components/grammar-play";
 import { grammarTrack } from "@/lib/grammar-tracks";
@@ -19,6 +19,14 @@ function StudyUnitPage() {
       <div className="mb-4">
         <StudyMenu />
       </div>
+      {track.id === "verbs" && n === 3 ? (
+        <p className="mb-4 text-sm">
+          <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
+            Practice this paradigm
+          </Link>
+          <span className="text-muted"> · build the Qal perfect, ending and accent included.</span>
+        </p>
+      ) : null}
       <GrammarPlay key={`${track.id}-${n}-prep`} track={track} unitId={n} mode="prepare" />
     </>
   );
