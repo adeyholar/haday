@@ -58,7 +58,15 @@ export function levelAfter(id: IibsLevelId): string | null {
   return IIBS_LEVELS.find((level) => level.id === id)?.after ?? null;
 }
 
-const SHARED = ["/login", "/legal", "/credits", "/reset-password", "/ask", "/ideas"];
+const SHARED = [
+  "/login",
+  "/legal",
+  "/credits",
+  "/how-to-memorize-biblical-hebrew-vocabulary",
+  "/reset-password",
+  "/ask",
+  "/ideas",
+];
 
 export const PATH_INTENT = "haday-path-intent";
 export const OPEN_DOOR = "haday-open-door";

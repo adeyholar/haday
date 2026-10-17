@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Panel } from "@/components/panel";
+import { PublicFooter } from "@/components/public-footer";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { clearDoor, homeForAccount, readPathIntent, rememberDoor, stashPathIntent, type StudyPath } from "@/lib/path";
@@ -99,7 +100,10 @@ function DoorsPage() {
           height={128}
           className="mx-auto mt-4 size-28 rounded-full object-cover shadow-[var(--shadow-border)] sm:size-32"
         />
-        <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Choose your Study Path</h1>
+        <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+          Biblical Hebrew Vocabulary Trainer
+        </h1>
+        <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
         <p className="mt-2 font-display text-2xl font-semibold text-primary">Choose wisely.</p>
         <p className="mx-auto mt-3 max-w-prose text-muted">
           HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
@@ -117,6 +121,11 @@ function DoorsPage() {
               : "Your account opens one door. The other stays locked."}
         </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
+        <p className="mx-auto mt-3 max-w-prose text-sm">
+          <Link to="/how-to-memorize-biblical-hebrew-vocabulary" className="font-semibold text-primary underline-offset-4 hover:underline">
+            New to Hebrew vocab? Read the method.
+          </Link>
+        </p>
       </Panel>
       <div className="grid gap-3 sm:grid-cols-2">
         <Door
@@ -144,6 +153,7 @@ function DoorsPage() {
           href="/iibs"
         />
       </div>
+      <PublicFooter />
     </>
   );
 }

@@ -11,7 +11,7 @@ const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect,
 test("only the doors, privacy, and credits are indexable", () => {
   assert.equal(isIndexablePath("/"), true);
   assert.equal(isIndexablePath("/legal"), true);
-  assert.equal(isIndexablePath("/credits"), true);
+  assert.equal(isIndexablePath("/how-to-memorize-biblical-hebrew-vocabulary"), true);
   assert.equal(isIndexablePath("/login"), false);
   assert.equal(isIndexablePath("/reset-password"), false);
   assert.equal(isIndexablePath("/admin"), false);
@@ -44,7 +44,9 @@ test("sign-in pages and the old Vercel host are noindex", () => {
 
 test("the doors page states the product in the first render", () => {
   const page = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  assert.match(page, /Biblical Hebrew Vocabulary Trainer/);
   assert.match(page, /Choose your Study Path/);
+  assert.match(page, /New to Hebrew vocab\? Read the method/);
   assert.match(page, /Choose wisely/);
   assert.match(page, /vocabulary trainer for first-year students/);
   assert.equal(page.includes("Opening the two studies"), false);
@@ -52,6 +54,27 @@ test("the doors page states the product in the first render", () => {
   const site = readFileSync("/workspace/src/lib/og/site.json", "utf8");
   assert.match(site, /HaDay HebRabbAi Mentor/);
   assert.equal(site.includes('"title": "HaDay"'), false);
+});
+
+test("the memorization guide is public, cited, and in the sitemap", () => {
+  const page = readFileSync("/workspace/src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx", "utf8");
+  const method = readFileSync("/workspace/src/lib/vocab-method.ts", "utf8");
+  const sitemap = readFileSync("/workspace/public/sitemap.xml", "utf8");
+  assert.match(page, /how to memorize Biblical Hebrew vocabulary/i);
+  assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks/);
+  assert.match(page, /twenty-eight/);
+  assert.match(page, /686/);
+  assert.match(page, /47 or more times/);
+  assert.match(method, /HowTo/);
+  assert.match(method, /FAQPage/);
+  assert.match(method, /BreadcrumbList/);
+  assert.match(sitemap, /how-to-memorize-biblical-hebrew-vocabulary/);
+  assert.match(sitemap, /<lastmod>2026-10-17<\/lastmod>/);
+  const title = "How to Memorize Biblical Hebrew Vocabulary | HaDay";
+  assert.ok(title.length <= 60);
+  const meta =
+    "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for first-year Hebrew students.";
+  assert.ok(meta.length <= 155);
 });
 
 test("the retired Vercel page points at the class site", () => {
