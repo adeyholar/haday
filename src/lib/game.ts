@@ -7,6 +7,7 @@ import { hydrateRoadRun, type RoadRun } from "@/lib/road-exam";
 import { hydrateDrillRuns, hydrateIibsDrillRuns, type DrillRuns } from "@/lib/etch";
 import { hydrateWeakRun, type WeakRun } from "@/lib/weak-pool";
 import { emptyIibsGame, hydrateIibsGame, type IibsGameProgress } from "@/lib/iibs-game";
+import { emptyVerbQuest, hydrateVerbQuest, type VerbQuestProgress } from "@/lib/verb-paradigm-quest";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -81,8 +82,10 @@ export type GameSnapshot = {
   drillRuns: DrillRuns;
   /** Scripture Path study sittings. Key is level, week, and focus. Not the Grammar Path weeks. */
   iibsDrillRuns: DrillRuns;
-  /** IIBS vocab game. A cleared lesson opens the next. A cleared level opens the next. */
+  /** Scripture Path vocab game. A cleared lesson opens the next. A cleared level opens the next. */
   iibs: IibsGameProgress;
+  /** Qal perfect paradigm game. A cleared level opens the next. */
+  verbParadigmQuest: VerbQuestProgress;
 };
 
 export type BalloonProgress = {
@@ -175,6 +178,7 @@ export function defaultGame(): GameSnapshot {
     drillRuns: {},
     iibsDrillRuns: {},
     iibs: emptyIibsGame(),
+    verbParadigmQuest: emptyVerbQuest(),
   };
 }
 
@@ -263,6 +267,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     drillRuns: hydrateDrillRuns(r.drillRuns),
     iibsDrillRuns: hydrateIibsDrillRuns(r.iibsDrillRuns),
     iibs: hydrateIibsGame(r.iibs),
+    verbParadigmQuest: hydrateVerbQuest(r.verbParadigmQuest),
   };
 }
 
