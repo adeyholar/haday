@@ -54,6 +54,12 @@ test("the doors page states the product in the first render", () => {
   assert.equal(site.includes('"title": "HaDay"'), false);
 });
 
+test("the retired Vercel page points at the class site", () => {
+  const page = readFileSync("/workspace/vercel-gone/index.html", "utf8");
+  assert.match(page, /https:\/\/hebrewmentor\.haday\.app/);
+  assert.equal(page.includes("hadayhebbraimentor.jcdisn.com"), false);
+});
+
 test("the old host remains only on the redirect constant", () => {
   const allow = new Set(["src/lib/class-site.ts"]);
   const hits = [];
