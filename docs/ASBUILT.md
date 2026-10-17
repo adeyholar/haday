@@ -10,7 +10,7 @@ Living picture of **what the class site is today**. Not a wish list.
 | **Repo** | https://github.com/adeyholar/haday (`main`) |
 | **Host** | Azure Web App `haday` (Linux container) + Azure Postgres `haday-pg` |
 | **Course** | BIBL 630 · *Basics of Biblical Hebrew*, 3rd ed. |
-| **Snapshot** | 7 September 2026 |
+| **Snapshot** | 16 October 2026 |
 
 Each shipped upgrade is recorded on the Notion Change Log, which is the documentation source of truth:
 
@@ -36,7 +36,7 @@ This file is the older picture of the running app. If it disagrees with Notion, 
 | **Listen · Tanakh** | All **39 books / 929 chapters**. Follow-along highlight. **Tap a word** for a grammar card. **Echo** the verse (hear / record / hear both). **Ask** HaDay about the open verse. | Recorded Shmuelof audio. Book, chapter, or verse range. |
 | **Ask HaDay Hebraic AI** | Questions from the lesson | Clarify without leaving the app. Claude or Grok, capped before the paid call. A failed quota check does not call the model. |
 | **Suggest a feature** | Class inventory | Owner reviews: new → planned → building → shipped. |
-| **Search** | The doors page, privacy, and credits are the public pages. They render their text without waiting for sign-in. `robots.txt` blocks `/admin` and `/api/`. `sitemap.xml` lists only those three pages. Other pages send `X-Robots-Tag: noindex`. The share title is the full product title. An Azure host 301s to the class site, except `/api/health`. | No textbook pages and no answer keys on a public page. |
+| **Search** | The doors page, privacy, and credits are the public pages. They render their text without waiting for sign-in. `robots.txt` blocks `/admin` and `/api/`. `sitemap.xml` lists only those three pages. Other pages send `X-Robots-Tag: noindex`. The share title is the full product title. An Azure host 301s to the class site, except `/api/health`. The previous class address does the same, and a form there uses 308. | No textbook pages and no answer keys on a public page. |
 | **Account** | Google, X, or email + password | Progress stays with the account. On create, the student says how they heard about HaDay. College or school suggests the Grammar Path. An online Bible school suggests the Scripture Path. Internet or a friend chooses the course. The student confirms the path before the account is created. After sign-in, Home opens that study. The owner still sees both doors. Old Vercel logins do **not** carry over. A saved shortcut is named **HaDay** and shows a brown ה on parchment (`#603619` on `#F3EEE4`). iPhone keeps an old shortcut’s picture until it is removed and added again. |
 
 Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
