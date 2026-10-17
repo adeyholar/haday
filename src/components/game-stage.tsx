@@ -71,8 +71,8 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   const mixKey = mixChapters?.join(",") ?? "";
   const isMix = Boolean(mixChapters?.length);
   const pool = useMemo(
-    () => (mixChapters?.length ? mixPlayPool(mixChapters) : chapterPlayPool(chapter, stage)),
-    [chapter, stage, deal, mixChapters, mixKey],
+    () => (mixKey ? mixPlayPool(mixKey.split(",").map(Number)) : chapterPlayPool(chapter, stage)),
+    [chapter, stage, mixKey],
   );
   const [queue, setQueue] = useState<VocabItem[]>(() => shuffleCopy(pool));
   const [total, setTotal] = useState(pool.length);
@@ -120,7 +120,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     helpedIds.current = new Set();
     matchRef.current = 0;
     shownAt.current = Date.now();
-  }, [chapter, stage, pool, mixKey]);
+  }, [chapter, stage, deal, mixKey, pool]);
 
   const item = queue[0];
   useEffect(() => {
