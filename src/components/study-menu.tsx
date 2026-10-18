@@ -25,6 +25,9 @@ const OPTIONS = [
 
 const TERM2_OPTIONS = [
   { value: "/bbh", match: (p: string) => p === "/bbh", label: "Home" },
+  { value: "/study/term2/game", match: (p: string) => p.startsWith("/study/term2/game"), label: "Game" },
+  { value: "/study/term2/listen", match: (p: string) => p.startsWith("/study/term2/listen"), label: "Listen" },
+  { value: "/study/term2/exam", match: (p: string) => p.startsWith("/study/term2/exam"), label: "Exam" },
   { value: "/study/term2", match: (p: string) => p.startsWith("/study/term2"), label: "Lessons" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/weak", match: (p: string) => p.startsWith("/weak"), label: "Weak pool" },
@@ -51,6 +54,9 @@ export function StudyMenu() {
         else if (to === "/bbh") void navigate({ to: "/bbh" });
         else if (to === "/study") void navigate({ to: "/study" });
         else if (to === "/study/term2") void navigate({ to: "/study/term2" });
+        else if (to === "/study/term2/game") void navigate({ to: "/study/term2/game" });
+        else if (to === "/study/term2/listen") void navigate({ to: "/study/term2/listen" });
+        else if (to === "/study/term2/exam") void navigate({ to: "/study/term2/exam/$chapter", params: { chapter: "20" } });
         else if (to === "/drill") void navigate({ to: "/drill" });
         else if (to === "/weak") void navigate({ to: "/weak" });
         else if (to === "/cards") void navigate({ to: "/cards" });

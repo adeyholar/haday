@@ -44,6 +44,11 @@ function Term2Chapter() {
       </Panel>
 
       <div className="mt-4 flex flex-col gap-2">
+        <Link to="/study/term2/exam/$chapter" params={{ chapter: String(lesson.chapter) }}>
+          <Button className="w-full" size="lg">
+            Closed-book exam
+          </Button>
+        </Link>
         <Link to="/drill" onClick={() => useStudy.getState().setWeek(weekForTerm2Chapter(lesson.chapter))}>
           <Button className="w-full" size="lg">
             Drill chapter {lesson.chapter}

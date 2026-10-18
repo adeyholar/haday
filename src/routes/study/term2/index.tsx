@@ -13,7 +13,7 @@ function Term2Lessons() {
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Semester 2</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Lessons</h1>
         <p className="mt-3 max-w-prose text-muted">
-          Read the chapter, then drill its words. These lessons stay in this room.
+          Read the chapter, then sit its closed-book exam. Drill its words from the chapter page. These lessons stay in this room.
         </p>
       </Panel>
       <ul className="mt-3 grid gap-2">
