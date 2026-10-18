@@ -114,12 +114,18 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
 
 const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"];
 
+/** Study tools that read the open week. Semester 2 may use these. Game, Listen, and Keep stay in Semester 1. */
+const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2"];
+
 /** A semester room is closed while the other is open, and while they are still choosing. */
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {
   if (term !== 2 && !hall) return null;
   if (pathname === "/" || pathname === "/bbh") return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/iibs")) return null;
   if (SECOND_ROOM.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
+  if (term === 2 && !hall && TERM2_STUDY.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+    return null;
+  }
   return "/bbh";
 }
 

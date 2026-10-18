@@ -13,12 +13,14 @@ import { useStudy } from "@/lib/store";
 import { playSittingClap } from "@/lib/sfx";
 import { playFeedback } from "@/lib/try-again";
 import { quizChoices, type VocabItem } from "@/lib/vocab";
+import { isTerm2Week, term2Vocab } from "@/lib/vocab-s2";
 import { classVocab, packWeakRun, unpackWeakRun, weakPool } from "@/lib/weak-pool";
 
 export const Route = createFileRoute("/weak")({ component: WeakPoolPage });
 
 function WeakPoolPage() {
-  const vocab = useMemo(() => classVocab(), []);
+  const week = useStudy((s) => s.week);
+  const vocab = useMemo(() => (isTerm2Week(week) ? term2Vocab() : classVocab()), [week]);
   const cards = useStudy((s) => s.cards);
   const stored = useStudy((s) => s.game.weakRun);
   const rate = useStudy((s) => s.rate);

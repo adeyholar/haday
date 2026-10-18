@@ -35,7 +35,7 @@ export const TERM_WHICH_LINE =
 export const TERM_ONE_TITLE = "Semester 1";
 export const TERM_ONE_LINE = "Letters, forms, and the words of the first term.";
 export const TERM_TWO_TITLE = "Semester 2";
-export const TERM_TWO_LINE = "The next term. Its lessons are not in this room yet.";
+export const TERM_TWO_LINE = "Derived stems, and the words of the second term.";
 export const TERM_TWO_NOTE = "Semester 1 stays behind this door. Its words and scores are not in this room.";
 export const TERM_LEAVE = "Leave this room";
 

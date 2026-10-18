@@ -83,6 +83,8 @@ import { Route as LessonsTrackUnitRouteImport } from './routes/lessons/$track/$u
 import { Route as ListenReadIndexRouteImport } from './routes/listen/read/index'
 import { Route as StudyLessonIdRouteImport } from './routes/study/lesson/$id'
 import { Route as StudyStationIdRouteImport } from './routes/study/station/$id'
+import { Route as StudyTerm2IndexRouteImport } from './routes/study/term2/index'
+import { Route as StudyTerm2ChapterRouteImport } from './routes/study/term2/$chapter'
 import { Route as GameLessonsTrackIndexRouteImport } from './routes/game/lessons/$track/index'
 import { Route as GameLessonsTrackUnitRouteImport } from './routes/game/lessons/$track/$unit'
 import { Route as IibsStudyLevelWeekRouteImport } from './routes/iibs/study/$level/$week'
@@ -460,6 +462,16 @@ const StudyStationIdRoute = StudyStationIdRouteImport.update({
   path: '/study/station/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudyTerm2IndexRoute = StudyTerm2IndexRouteImport.update({
+  id: '/study/term2/',
+  path: '/study/term2/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudyTerm2ChapterRoute = StudyTerm2ChapterRouteImport.update({
+  id: '/study/term2/$chapter',
+  path: '/study/term2/$chapter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameLessonsTrackIndexRoute = GameLessonsTrackIndexRouteImport.update({
   id: '/game/lessons/$track/',
   path: '/game/lessons/$track/',
@@ -549,6 +561,7 @@ export interface FileRoutesByFullPath {
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
+  '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
@@ -561,6 +574,7 @@ export interface FileRoutesByFullPath {
   '/iibs/vocab/': typeof IibsVocabIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
+  '/study/term2/': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -628,6 +642,7 @@ export interface FileRoutesByTo {
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
+  '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
   '/game/article': typeof GameArticleIndexRoute
@@ -640,6 +655,7 @@ export interface FileRoutesByTo {
   '/iibs/vocab': typeof IibsVocabIndexRoute
   '/lessons/$track': typeof LessonsTrackIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
+  '/study/term2': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -710,6 +726,7 @@ export interface FileRoutesById {
   '/lessons/$track/$unit': typeof LessonsTrackUnitRoute
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
+  '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
   '/game/article/': typeof GameArticleIndexRoute
@@ -722,6 +739,7 @@ export interface FileRoutesById {
   '/iibs/vocab/': typeof IibsVocabIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
+  '/study/term2/': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
@@ -793,6 +811,7 @@ export interface FileRouteTypes {
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
+    | '/study/term2/$chapter'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
@@ -805,6 +824,7 @@ export interface FileRouteTypes {
     | '/iibs/vocab/'
     | '/lessons/$track/'
     | '/listen/read/'
+    | '/study/term2/'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
@@ -872,6 +892,7 @@ export interface FileRouteTypes {
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
+    | '/study/term2/$chapter'
     | '/game/$chapter'
     | '/game/alefbet'
     | '/game/article'
@@ -884,6 +905,7 @@ export interface FileRouteTypes {
     | '/iibs/vocab'
     | '/lessons/$track'
     | '/listen/read'
+    | '/study/term2'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
@@ -953,6 +975,7 @@ export interface FileRouteTypes {
     | '/lessons/$track/$unit'
     | '/study/lesson/$id'
     | '/study/station/$id'
+    | '/study/term2/$chapter'
     | '/game/$chapter/'
     | '/game/alefbet/'
     | '/game/article/'
@@ -965,6 +988,7 @@ export interface FileRouteTypes {
     | '/iibs/vocab/'
     | '/lessons/$track/'
     | '/listen/read/'
+    | '/study/term2/'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
@@ -1024,6 +1048,7 @@ export interface RootRouteChildren {
   LessonsTrackUnitRoute: typeof LessonsTrackUnitRoute
   StudyLessonIdRoute: typeof StudyLessonIdRoute
   StudyStationIdRoute: typeof StudyStationIdRoute
+  StudyTerm2ChapterRoute: typeof StudyTerm2ChapterRoute
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
   GameArticleIndexRoute: typeof GameArticleIndexRoute
@@ -1033,6 +1058,7 @@ export interface RootRouteChildren {
   GameNounsIndexRoute: typeof GameNounsIndexRoute
   GameSyllablesIndexRoute: typeof GameSyllablesIndexRoute
   LessonsTrackIndexRoute: typeof LessonsTrackIndexRoute
+  StudyTerm2IndexRoute: typeof StudyTerm2IndexRoute
   GameLessonsTrackUnitRoute: typeof GameLessonsTrackUnitRoute
   GameLessonsTrackIndexRoute: typeof GameLessonsTrackIndexRoute
 }
@@ -1557,6 +1583,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudyStationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/study/term2/': {
+      id: '/study/term2/'
+      path: '/study/term2'
+      fullPath: '/study/term2/'
+      preLoaderRoute: typeof StudyTerm2IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/$chapter': {
+      id: '/study/term2/$chapter'
+      path: '/study/term2/$chapter'
+      fullPath: '/study/term2/$chapter'
+      preLoaderRoute: typeof StudyTerm2ChapterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/lessons/$track/': {
       id: '/game/lessons/$track/'
       path: '/game/lessons/$track'
@@ -1717,6 +1757,7 @@ const rootRouteChildren: RootRouteChildren = {
   LessonsTrackUnitRoute: LessonsTrackUnitRoute,
   StudyLessonIdRoute: StudyLessonIdRoute,
   StudyStationIdRoute: StudyStationIdRoute,
+  StudyTerm2ChapterRoute: StudyTerm2ChapterRoute,
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
   GameArticleIndexRoute: GameArticleIndexRoute,
@@ -1726,6 +1767,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameNounsIndexRoute: GameNounsIndexRoute,
   GameSyllablesIndexRoute: GameSyllablesIndexRoute,
   LessonsTrackIndexRoute: LessonsTrackIndexRoute,
+  StudyTerm2IndexRoute: StudyTerm2IndexRoute,
   GameLessonsTrackUnitRoute: GameLessonsTrackUnitRoute,
   GameLessonsTrackIndexRoute: GameLessonsTrackIndexRoute,
 }

@@ -74,7 +74,14 @@ test("each semester is its own room, and the hall is not a room", () => {
   assert.equal(termForAccount({ term: 1 }), 1);
   assert.equal(secondTermBlock("/drill", 1), null);
   assert.equal(secondTermBlock("/drill", 1, true), "/bbh");
-  assert.equal(secondTermBlock("/drill", 2), "/bbh");
+  assert.equal(secondTermBlock("/drill", 2), null);
+  assert.equal(secondTermBlock("/quiz", 2), null);
+  assert.equal(secondTermBlock("/study/term2/20", 2), null);
+  assert.equal(secondTermBlock("/game", 2), "/bbh");
+  assert.equal(secondTermBlock("/listen", 2), "/bbh");
+  assert.equal(secondTermBlock("/keep", 2), "/bbh");
+  assert.equal(secondTermBlock("/study", 2), "/bbh");
+  assert.equal(secondTermBlock("/drill", 2, true), "/bbh");
   assert.equal(secondTermBlock("/bbh", 2, true), null);
   assert.equal(secondTermBlock("/ask", 2), null);
   const seen = termRevisionNow();

@@ -1,5 +1,6 @@
 import { CONSONANTS } from "./alphabet";
 import { foldFinals, lettersOnly } from "./hebrew";
+import { isTerm2Week, itemsForTerm2Week, term2StudyMeta } from "./vocab-s2";
 
 export type Pos = "noun" | "verb" | "adj" | "prep" | "particle" | "name" | "pron";
 
@@ -612,6 +613,7 @@ export function itemsForChapters(chapters: number[]): VocabItem[] {
 }
 
 export function itemsForWeek(week: number): VocabItem[] {
+  if (isTerm2Week(week)) return itemsForTerm2Week(week);
   if (week === ALL_GAME_WEEK || week === 15) return bbhVocab();
   if (week >= 31 && week <= 49) return itemsForChapter(week - GAME_CHAPTER_WEEK_BASE);
   const w = COURSE_WEEKS.find((x) => x.week === week);
@@ -637,6 +639,7 @@ export function itemsForSelection(weeks: number[], chapters: number[]): VocabIte
 }
 
 export function studySetMeta(week: number): { label: string; hint: string } {
+  if (isTerm2Week(week)) return term2StudyMeta(week);
   if (week === ALL_GAME_WEEK) return { label: "All Game", hint: "Class list, Ch. 2–19" };
   if (week >= 31 && week <= 49) {
     const ch = week - GAME_CHAPTER_WEEK_BASE;

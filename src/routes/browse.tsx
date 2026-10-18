@@ -5,6 +5,7 @@ import { VerseCard } from "@/components/verse-card";
 import { Panel } from "@/components/panel";
 import { AppErrorComponent } from "@/lib/error-component";
 import { POS_LABEL, bbhVocab, itemsForWeek, type Pos } from "@/lib/vocab";
+import { isTerm2Week, term2Vocab } from "@/lib/vocab-s2";
 import { hydrateCard, isHighWeak, isMastered, isWeak } from "@/lib/srs";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
@@ -52,7 +53,9 @@ function BrowsePage() {
       <Panel>
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Lexicon</h1>
         <p className="mt-1 text-sm text-muted">
-          {bbhVocab().length} class words, same list as Game (Ch. 2–19). Tap a word for a Tanakh example.
+          {isTerm2Week(week)
+            ? `${term2Vocab().length} Semester 2 words. This week has ${base.length}. Tap a word for a Tanakh example.`
+            : `${bbhVocab().length} class words, same list as Game (Ch. 2–19). Tap a word for a Tanakh example.`}
         </p>
         <div className="mt-4">
           <WeekSelect />

@@ -39,6 +39,7 @@ import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { blockedDestination, currentDoor, homeForAccount, markTermHall, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
+import { enterTermWeek } from "@/lib/term-week";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -74,6 +75,16 @@ const GAME: NavItem[] = [
   { to: "/game/lessons", label: "Grammar", hint: "Prepositions to numbers", icon: ScrollText },
   { to: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest", hint: "Build a Qal perfect", icon: PenLine },
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
+];
+
+const TERM2_STUDY: NavItem[] = [
+  { to: "/study/term2", label: "Lessons", hint: "Chapter by chapter", icon: Library },
+  { to: "/drill", label: "Drill", hint: "This week’s words", icon: Layers },
+  { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
+  { to: "/write", label: "Write", hint: "Type the meaning", icon: PenLine },
+  { to: "/match", label: "Match", hint: "Select pairs", icon: Link2 },
+  { to: "/browse", label: "Lexicon", hint: "This week’s lemmas", icon: BookOpen },
+  { to: "/weak", label: "Weak pool", hint: "Missed words only", icon: CircleAlert },
 ];
 
 const IIBS_GAME: NavItem[] = [
@@ -238,6 +249,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     setPathGate((gate) => (gate ? { ...gate, term } : gate));
   }), []);
 
+  useEffect(() => {
+    if (!pathGate) return;
+    if (pathname.startsWith("/iibs")) return;
+    if (hall) return;
+    enterTermWeek(termForAccount(pathGate));
+  }, [pathGate, hall, pathname]);
+
   if (isPublic) {
     return (
       <div className="min-h-dvh text-fg">
@@ -293,6 +311,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const termHome = secondTermBlock(pathname, term, choosingTerm);
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
+  const inSecondStudy = term === 2 && !choosingTerm && !onIibs;
 
   return (
     <div className="min-h-dvh text-fg">
@@ -344,7 +363,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               active={pathname.startsWith("/game") || pathname.startsWith("/challenge")}
             />
             )}
-            {iibsOnly || secondRoom ? null : (
+            {inSecondStudy ? (
+            <NavMenu
+              label="Study"
+              icon={Library}
+              items={TERM2_STUDY}
+              active={TERM2_STUDY.some((x) => pathname === x.to || pathname.startsWith(`${x.to}/`))}
+            />
+            ) : iibsOnly || secondRoom ? null : (
             <NavMenu
               label="Study"
               icon={Library}
@@ -399,7 +425,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", secondRoom ? "grid-cols-1" : iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", inSecondStudy ? "grid-cols-4" : secondRoom ? "grid-cols-1" : iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -415,7 +441,55 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </NavTip>
           </li>
-          {iibsOnly ? (
+          {inSecondStudy ? (
+            <>
+              <li>
+                <NavTip label="Lessons" side="top" full>
+                  <Link
+                    to="/study/term2"
+                    title="Lessons"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/study/term2") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <Library className="size-5" strokeWidth={pathname.startsWith("/study/term2") ? 2.2 : 1.8} />
+                    Lessons
+                  </Link>
+                </NavTip>
+              </li>
+              <li>
+                <NavTip label="Drill" side="top" full>
+                  <Link
+                    to="/drill"
+                    title="Drill"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/drill") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <Layers className="size-5" strokeWidth={pathname.startsWith("/drill") ? 2.2 : 1.8} />
+                    Drill
+                  </Link>
+                </NavTip>
+              </li>
+              <li>
+                <NavTip label="Quiz" side="top" full>
+                  <Link
+                    to="/quiz"
+                    title="Quiz"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/quiz") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <ListChecks className="size-5" strokeWidth={pathname.startsWith("/quiz") ? 2.2 : 1.8} />
+                    Quiz
+                  </Link>
+                </NavTip>
+              </li>
+            </>
+          ) : iibsOnly ? (
             <>
               <li>
                 <NavTip label="Lessons" side="top" full>

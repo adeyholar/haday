@@ -6,15 +6,45 @@ import {
   studySetMeta,
   weekForGameChapter,
 } from "@/lib/vocab";
+import { isTerm2Week, TERM2_WEEKS } from "@/lib/vocab-s2";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
 
 export function WeekSelect() {
   const week = useStudy((s) => s.week);
   const setWeek = useStudy((s) => s.setWeek);
-  const gameMode = week >= 30;
+  const gameMode = week >= 30 && !isTerm2Week(week);
   const meta = studySetMeta(week);
   const count = itemsForWeek(week).length;
+
+  if (isTerm2Week(week)) {
+    return (
+      <div>
+        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">Study set</span>
+        <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+          {TERM2_WEEKS.map((w) => (
+            <button
+              key={w.week}
+              type="button"
+              title={`${w.label} — ${w.hint}`}
+              onClick={() => setWeek(w.week)}
+              className={cn(
+                "min-h-11 rounded-[var(--radius-md)] px-1 text-xs font-semibold",
+                week === w.week ? "bg-primary text-primary-foreground" : "bg-card text-ink shadow-[var(--shadow-border)]",
+              )}
+            >
+              Wk {w.show}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-sm text-ink">
+          <span className="font-semibold">{meta.label}</span>
+          {meta.hint ? ` · ${meta.hint}` : ""}
+          <span className="text-muted"> · {count} words</span>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
