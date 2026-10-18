@@ -169,8 +169,11 @@ function WeakPoolPage() {
         <Panel className="mb-4">
           <StudyMenu />
           <h1 className="mt-4 font-display text-3xl font-bold text-ink">Pool finished</h1>
+          <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
+            {score.right + score.wrong ? Math.round((score.right / (score.right + score.wrong)) * 100) : 0}%
+          </p>
           <p className="mt-2 text-muted">
-            {score.right} correct of {score.right + score.wrong}.
+            {score.right} correct of {score.right + score.wrong}. This does not open the next chapter.
             {again.length
               ? ` ${again.length} still weak. A new pool can start.`
               : " Nothing in this list is weak."}

@@ -164,10 +164,13 @@ function MatchPage() {
         <WeekSelect />
         <FocusToggle />
         <Panel className="mt-4 text-center">
-          <p className="font-display text-4xl font-bold text-ink">
+          <p className="font-display text-5xl font-bold tabular-nums text-ink">
+            {right + wrongN ? Math.round((right / (right + wrongN)) * 100) : 0}%
+          </p>
+          <p className="mt-1 text-xl text-ink">
             {right} right · {wrongN} miss
           </p>
-          <p className="mt-2 text-sm text-muted">You had to select both sides, then pick the lemma from the pad.</p>
+          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next chapter.</p>
           <Button className="mt-4 w-full" onClick={() => setSeed((n) => n + 1)}>
             New match board
           </Button>

@@ -147,14 +147,16 @@ export function GrammarPlay({
       setItems(nextItems);
     }
     if (i + 1 >= nextItems.length) {
-      const keys = new Set(nextItems.map((x) => x.key.replace(/-retry$/, "")));
-      const scorePct = Math.round((held.size / keys.size) * 100);
-      const firstPct = firstSeen ? firstTry / firstSeen : 0;
-      complete(track.id, unitId, {
-        stars: starsFromGrammarScore(scorePct),
-        score: scorePct,
-        firstTryRate: firstPct,
-      });
+      if (mode === "exam") {
+        const keys = new Set(nextItems.map((x) => x.key.replace(/-retry$/, "")));
+        const scorePct = Math.round((held.size / keys.size) * 100);
+        const firstPct = firstSeen ? firstTry / firstSeen : 0;
+        complete(track.id, unitId, {
+          stars: starsFromGrammarScore(scorePct),
+          score: scorePct,
+          firstTryRate: firstPct,
+        });
+      }
       setDone(true);
       return;
     }
@@ -256,8 +258,11 @@ export function GrammarPlay({
         <Button className="mt-4 w-full" onClick={startMatch}>
           Practice pairing
         </Button>
+        <Button className="mt-2 w-full" variant="outline" onClick={startQuiz}>
+          Quiz this unit
+        </Button>
         <p className="mt-2 text-center text-sm text-muted">
-          Pairing is practice. The Game path is the exam — 12 questions, 90% to open the next unit.
+          The quiz shows your score. It does not open the next exam. That stays in Game, at {GAME_STAGE_PASS}%.
         </p>
       </>
     );
@@ -339,6 +344,9 @@ export function GrammarPlay({
                 Exam locked until the previous Game unit is held at {GAME_STAGE_PASS}%.
               </p>
             )}
+            <Button variant="outline" onClick={startQuiz}>
+              Quiz this unit
+            </Button>
             <Button variant="outline" onClick={() => setStep("learn")}>
               Review the notes
             </Button>
@@ -360,6 +368,24 @@ export function GrammarPlay({
   }
 
   if (done) {
+    if (mode === "prepare") {
+      return (
+        <Panel className="text-center">
+          <p className="font-display text-4xl font-bold text-ink">{pct}%</p>
+          <p className="mt-2 text-sm text-muted">
+            {held.size} / {unique} held
+            {unique ? ` · first look ${Math.round((firstTry / unique) * 100)}%` : ""}
+          </p>
+          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next exam.</p>
+          <div className="mt-4 flex flex-col gap-2">
+            <Button onClick={startQuiz}>Quiz again</Button>
+            <Button variant="outline" onClick={() => setStep("learn")}>
+              Back to the notes
+            </Button>
+          </div>
+        </Panel>
+      );
+    }
     const passed = pct >= GAME_STAGE_PASS;
     return (
       <Panel className="text-center">
@@ -405,11 +431,11 @@ export function GrammarPlay({
     <>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          {track.title} · Unit {unit.id} · Exam · {i + 1} / {items.length}
+          {track.title} · Unit {unit.id} · {mode === "prepare" ? "Practice quiz" : "Exam"} · {i + 1} / {items.length}
           {q.review ? " · review" : ""}
           {q.retry ? " · again" : ""}
         </p>
-        <p className="mt-1 text-xs font-semibold text-muted">Closed book · prepare first in Study</p>
+        {mode === "exam" ? <p className="mt-1 text-xs font-semibold text-muted">Closed book · prepare first in Study</p> : null}
         <h1 className="mt-1 font-display text-2xl font-bold text-ink">
           <MixHe text={q.q} />
         </h1>

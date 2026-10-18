@@ -318,9 +318,11 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
       <div className="mt-5">
         <QuizPicker kind={kind} onKind={(k) => { setKind(k); setSeed((s) => s + 1); }} />
         <div className="mt-4 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
-          <p className="font-display text-3xl font-bold text-ink">
+          <p className="font-display text-5xl font-bold tabular-nums text-ink">
+            {total ? Math.round((right / total) * 100) : 0}%
+          </p>
+          <p className="mt-1 text-xl tabular-nums text-muted">
             {right} / {total}
-            {fromAlef && isLetter && !isScribble ? ` · ${drillPct}%` : ""}
           </p>
           {fromAlef && isLetter && !isScribble ? (
             <p className="mt-2 text-sm text-muted">
@@ -328,7 +330,9 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
                 ? `Passed the letter drill (${LADDER_DRILL_PASS}%+). You can mark the lesson trained.`
                 : `Need ${LADDER_DRILL_PASS}% on six letters or the whole line. Try again.`}
             </p>
-          ) : null}
+          ) : (
+            <p className="mt-2 text-sm text-muted">Practice score. This does not open the next station.</p>
+          )}
           <Button className="mt-4" onClick={() => setSeed((s) => s + 1)}>
             New round
           </Button>
