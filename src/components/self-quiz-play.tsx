@@ -117,7 +117,7 @@ export function SelfQuizPlay({
         <p className="mt-2 font-display text-xl text-ink">
           {strong} strong · {weak.length} weak
         </p>
-        <p className="mt-2 text-sm text-muted">Practice score. This does not open the next lesson.</p>
+        <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next lesson.</p>
         {weak.length ? (
           <p className="he-word mt-3 text-2xl" lang="he" dir="rtl">
             {weak.map((w) => items.find((it) => it.id === w.id)?.hebrew).filter(Boolean).join(" · ")}

@@ -173,7 +173,7 @@ function WeakPoolPage() {
             {score.right + score.wrong ? Math.round((score.right / (score.right + score.wrong)) * 100) : 0}%
           </p>
           <p className="mt-2 text-muted">
-            {score.right} correct of {score.right + score.wrong}. This does not open the next chapter.
+            {score.right} correct of {score.right + score.wrong}. Only the first answer counts. This does not open the next chapter.
             {again.length
               ? ` ${again.length} still weak. A new pool can start.`
               : " Nothing in this list is weak."}
@@ -223,7 +223,7 @@ function WeakPoolPage() {
                 onClick={() => {
                   if (choice === item.gloss) {
                     setPicked(choice);
-                    mark(true);
+                    mark(!missedChoice);
                     playFeedback("strong");
                     return;
                   }

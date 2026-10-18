@@ -118,7 +118,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
       return;
     }
     setPicked(choice);
-    if (ok) setRight((n) => n + 1);
+    if (ok && !retrying && !q.retry) setRight((n) => n + 1);
     playFeedback(ok ? "strong" : "fail");
   }
 
@@ -220,7 +220,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
       <Panel className="text-center">
         <p className="font-display text-4xl font-bold text-ink">{pct}%</p>
         <p className="mt-2 text-sm text-muted">
-          {right} / {unique} · {passed ? "Unit cleared." : `Need ${GAME_STAGE_PASS}% to unlock the next unit.`}
+          {right} / {unique} on the first answer · {passed ? "Unit cleared." : `Need ${GAME_STAGE_PASS}% on the first answer to open the next unit.`}
         </p>
         <div className="mt-4 flex flex-col gap-2">
           {passed && unitId < 8 ? (

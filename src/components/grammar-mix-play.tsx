@@ -59,14 +59,13 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
-  const [held, setHeld] = useState<Set<string>>(() => new Set());
   const [firstTry, setFirstTry] = useState(0);
   const [firstSeen] = useState(() => items.length);
   const [done, setDone] = useState(false);
 
   const q = items[i];
   const unique = firstSeen || items.filter((x) => !x.retry).length;
-  const pct = useMemo(() => (unique ? Math.round((held.size / unique) * 100) : 0), [held, unique]);
+  const pct = useMemo(() => (unique ? Math.round((firstTry / unique) * 100) : 0), [firstTry, unique]);
   const names = tracks.map((t) => t.title).join(" · ");
 
   function pick(choice: string) {
@@ -78,7 +77,6 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
       return;
     }
     setPicked(choice);
-    if (ok) setHeld((s) => new Set(s).add(q.key.replace(/-retry$/, "")));
     if (!q.retry && ok && !retrying) setFirstTry((n) => n + 1);
     playFeedback(ok ? "strong" : "fail");
   }
@@ -125,8 +123,7 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar mix · practice</p>
         <p className="mt-2 font-display text-4xl font-bold text-ink">{pct}%</p>
         <p className="mt-2 text-sm text-muted">
-          {held.size} / {unique} held
-          {unique ? ` · first look ${Math.round((firstTry / unique) * 100)}%` : ""}
+          {firstTry} / {unique} on the first answer. Only the first answer counts.
         </p>
         <p className="mt-2 text-sm text-muted">
           {names}. This mix does not unlock or lock a topic.

@@ -72,7 +72,6 @@ export function GrammarPlay({
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
-  const [held, setHeld] = useState<Set<string>>(() => new Set());
   const [firstTry, setFirstTry] = useState(0);
   const [firstSeen, setFirstSeen] = useState(seededExam.length);
   const [done, setDone] = useState(false);
@@ -86,7 +85,7 @@ export function GrammarPlay({
 
   const q = items[i];
   const unique = firstSeen || items.filter((x) => !x.retry).length;
-  const pct = useMemo(() => (unique ? Math.round((held.size / unique) * 100) : 0), [held, unique]);
+  const pct = useMemo(() => (unique ? Math.round((firstTry / unique) * 100) : 0), [firstTry, unique]);
 
   function startMatch() {
     if (!unit) return;
@@ -107,7 +106,6 @@ export function GrammarPlay({
     setI(0);
     setPicked(null);
     setRetrying(false);
-    setHeld(new Set());
     setFirstTry(0);
     setFirstSeen(built.length);
     setDone(false);
@@ -124,7 +122,6 @@ export function GrammarPlay({
       return;
     }
     setPicked(choice);
-    if (ok) setHeld((s) => new Set(s).add(q.key.replace(/-retry$/, "")));
     if (!q.retry && ok && !retrying) setFirstTry((n) => n + 1);
     playFeedback(ok ? "strong" : "fail");
   }
@@ -148,8 +145,7 @@ export function GrammarPlay({
     }
     if (i + 1 >= nextItems.length) {
       if (mode === "exam") {
-        const keys = new Set(nextItems.map((x) => x.key.replace(/-retry$/, "")));
-        const scorePct = Math.round((held.size / keys.size) * 100);
+        const scorePct = firstSeen ? Math.round((firstTry / firstSeen) * 100) : 0;
         const firstPct = firstSeen ? firstTry / firstSeen : 0;
         complete(track.id, unitId, {
           stars: starsFromGrammarScore(scorePct),
@@ -373,10 +369,8 @@ export function GrammarPlay({
         <Panel className="text-center">
           <p className="font-display text-4xl font-bold text-ink">{pct}%</p>
           <p className="mt-2 text-sm text-muted">
-            {held.size} / {unique} held
-            {unique ? ` · first look ${Math.round((firstTry / unique) * 100)}%` : ""}
+            {firstTry} / {unique} on the first answer. This does not open the next exam.
           </p>
-          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next exam.</p>
           <div className="mt-4 flex flex-col gap-2">
             <Button onClick={startQuiz}>Quiz again</Button>
             <Button variant="outline" onClick={() => setStep("learn")}>
@@ -391,12 +385,11 @@ export function GrammarPlay({
       <Panel className="text-center">
         <p className="font-display text-4xl font-bold text-ink">{pct}%</p>
         <p className="mt-2 text-sm text-muted">
-          {held.size} / {unique} held
-          {unique ? ` · first look ${Math.round((firstTry / unique) * 100)}%` : ""}
+          {firstTry} / {unique} on the first answer
           {" · "}
-          {passed ? "Exam cleared." : `Need ${GAME_STAGE_PASS}% held to unlock the next exam.`}
+          {passed ? "Exam cleared." : `Need ${GAME_STAGE_PASS}% on the first answer to open the next exam.`}
         </p>
-        <p className="mt-2 text-sm text-muted">Misses came back later. A later hit still counts as held.</p>
+        <p className="mt-2 text-sm text-muted">Only the first answer counts. A later try is practice.</p>
         <div className="mt-4 flex flex-col gap-2">
           {passed && unitId < unitMax ? (
             <Link

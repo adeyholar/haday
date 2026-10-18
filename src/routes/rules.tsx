@@ -260,7 +260,8 @@ function HuntRound({
         setMatched(hit);
         setRevealed(true);
         setHint("");
-        setScore((s) => ({ ...s, right: s.right + 1 }));
+        if (tries < 1) setScore((s) => ({ ...s, right: s.right + 1 }));
+        else setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
         return;
       }
       const lemmaOk = siblings.some((c) => lemmaMatches(c, lemma));
@@ -291,7 +292,8 @@ function HuntRound({
       setMatched(item);
       setRevealed(true);
       setHint("");
-      setScore((s) => ({ ...s, right: s.right + 1 }));
+      if (tries < 1) setScore((s) => ({ ...s, right: s.right + 1 }));
+      else setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
       return;
     }
     if (tries < 1) {
@@ -327,7 +329,7 @@ function HuntRound({
         <p className="mt-1 text-xl tabular-nums text-muted">
           {score.right} / {total}
         </p>
-        <p className="mt-2 text-sm text-muted">Practice score. This does not open the next level.</p>
+        <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next level.</p>
         <Button className="mt-6" onClick={onAgain}>
           New round
         </Button>
