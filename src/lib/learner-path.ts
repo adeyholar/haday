@@ -2,13 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { assertAdmin } from "@/lib/admin";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
-import { isIibsLevel, isStudyPath, type IibsLevelId, type StudyPath } from "@/lib/path";
+import { isIibsLevel, isStudyPath, grammarTerm, termForAccount, type GrammarTerm, type IibsLevelId, type StudyPath } from "@/lib/path";
 import { PATH_CHOICE } from "@/lib/path-names";
 
 export type MyPath = {
   path: StudyPath | null;
   cleared: IibsLevelId | null;
   admin: boolean;
+  term: GrammarTerm;
 };
 
 let ready: Promise<void> | null = null;
@@ -34,6 +35,9 @@ export async function ensureLearnerPath() {
       insert into app_flag (key, value)
       values ('path_seed_at', now()::text)
       on conflict (key) do nothing
+    `;
+    await sql`
+      alter table learner_path add column if not exists term text not null default '1'
     `;
     await sql`
       insert into learner_path (user_id, path)
@@ -63,12 +67,14 @@ export const getMyPath = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<MyPath> => {
     await ensureLearnerPath();
     const sql = await getSql();
-    const rows = await sql<{ path: string; cleared: string | null }>`
-      select path, cleared from learner_path where user_id = ${context.userId}
+    const rows = await sql<{ path: string; cleared: string | null; term: string | null }>`
+      select path, cleared, term from learner_path where user_id = ${context.userId}
     `;
     const path = isStudyPath(rows[0]?.path) ? rows[0].path : null;
     const cleared = isIibsLevel(rows[0]?.cleared) ? rows[0].cleared : null;
-    return { path, cleared, admin: await readAdmin(context.userId) };
+    const admin = await readAdmin(context.userId);
+    const term = termForAccount({ admin, term: grammarTerm(rows[0]?.term) });
+    return { path, cleared, admin, term };
   });
 
 export const choosePath = createServerFn({ method: "POST" })
@@ -107,4 +113,23 @@ export const setLearnerPath = createServerFn({ method: "POST" })
         updated_at = now()
     `;
     return { ok: true, path: data.path };
+  });
+
+export const setMyTerm = createServerFn({ method: "POST" })
+  .validator((input: { done: boolean }) => input)
+  .middleware([authMiddleware])
+  .handler(async ({ data, context }): Promise<{ ok: true; term: GrammarTerm } | { ok: false; error: string }> => {
+    await assertAdmin(context.userId);
+    await ensureLearnerPath();
+    const term: GrammarTerm = data.done ? 2 : 1;
+    const stored = term === 2 ? "2" : "1";
+    const sql = await getSql();
+    await sql`
+      insert into learner_path (user_id, path, term)
+      values (${context.userId}, 'bbh', ${stored})
+      on conflict (user_id) do update set
+        term = ${stored},
+        updated_at = now()
+    `;
+    return { ok: true, term };
   });

@@ -29,5 +29,16 @@ export const HEARD_NEED = "Tell us how you heard about HaDay.";
 export const PATH_CHOICE_STAYS =
   "College or school opens the Grammar Path. An online Bible school opens the Scripture Path. Internet or a friend chooses the course. You confirm the path before the account is created.";
 
+export const TERM_ASK = "Are you done with Semester 1?";
+export const TERM_YES = "Yes. Open Semester 2.";
+export const TERM_NO = "No. Stay in Semester 1.";
+export const TERM_STAY = "You stay in Semester 1.";
+export const TERM_TWO_TITLE = "Semester 2";
+export const TERM_TWO_LINE =
+  "Same order as a college first-year grammar class. The lessons for this semester are not in this room yet.";
+export const TERM_LEAVE = "Leave Semester 2";
+export const TERM_TWO_NOTE = "Semester 1 stays behind this door. Its words and scores are not in this room.";
+export const TERM_OWNER = "Only you see this door for now.";
+
 export const CLASS_VERSE_NOTE =
   "The marked word is class vocabulary when it is on the class word list. Other class words in the same verse are listed so you meet them again.";

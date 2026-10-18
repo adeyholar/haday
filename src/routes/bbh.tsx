@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Compass, Crown, Headphones, Library, Repeat, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { continueLabel } from "@/lib/game";
 import { cn } from "@/lib/cn";
 import { classVocab, unpackWeakRun, weakPool } from "@/lib/weak-pool";
+import { getMyPath, type MyPath } from "@/lib/learner-path";
+import { FirstTermDoor, SecondTerm } from "@/components/term-door";
 
 export const Route = createFileRoute("/bbh")({ component: Home });
 
@@ -42,9 +44,34 @@ function Home() {
   const keep = keepStats(cards, game);
   const keepDone = keepDoneToday(lastKeepDay);
   const firstName = user?.displayName?.split(" ")[0];
+  const [gate, setGate] = useState<MyPath | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancel = false;
+    getMyPath()
+      .then((next) => {
+        if (!cancel) setGate(next);
+      })
+      .catch(() => {
+        if (!cancel) setGate({ path: "bbh", cleared: null, admin: false, term: 1 });
+      })
+      .finally(() => {
+        if (!cancel) setReady(true);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  if (!ready || !gate) return <p className="text-sm text-muted">Opening the term.</p>;
+  if (gate.admin && gate.term === 2) {
+    return <SecondTerm onLeave={() => setGate({ ...gate, term: 1 })} />;
+  }
 
   return (
     <>
+      {gate.admin ? <FirstTermDoor onEnter={() => setGate({ ...gate, term: 2 })} /> : null}
       <Panel className="mb-4">
         <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">

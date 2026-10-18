@@ -71,6 +71,58 @@ export function levelAfter(id: IibsLevelId): string | null {
   return IIBS_LEVELS.find((level) => level.id === id)?.after ?? null;
 }
 
+export type GrammarTerm = 1 | 2;
+
+export function grammarTerm(value: string | number | null | undefined): GrammarTerm {
+  return value === 2 || value === "2" ? 2 : 1;
+}
+
+/** Students stay in Semester 1 until that choice is opened for them. */
+export function termForAccount(gate: { admin: boolean; term: GrammarTerm }): GrammarTerm {
+  return gate.admin && gate.term === 2 ? 2 : 1;
+}
+
+const termListeners = new Set<(term: GrammarTerm) => void>();
+let termRevision = 0;
+let heldTerm: GrammarTerm = 1;
+
+export function readTerm(): GrammarTerm {
+  return heldTerm;
+}
+
+export function termRevisionNow(): number {
+  return termRevision;
+}
+
+/** A door the admin just walked through. A slower account read must not pull them back. */
+export function publishTerm(term: GrammarTerm) {
+  termRevision += 1;
+  heldTerm = term;
+  for (const hear of termListeners) hear(term);
+}
+
+export function noteServerTerm(term: GrammarTerm, seenRevision: number): GrammarTerm {
+  if (termRevision !== seenRevision) return heldTerm;
+  heldTerm = term;
+  return term;
+}
+
+export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
+  termListeners.add(hear);
+  return () => termListeners.delete(hear);
+}
+
+const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits"];
+
+/** Semester 2 is its own room. A first-term page sends the admin back to that room. */
+export function secondTermBlock(pathname: string, term: GrammarTerm): "/bbh" | null {
+  if (term !== 2) return null;
+  if (pathname === "/" || pathname === "/bbh") return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/iibs")) return null;
+  if (SECOND_ROOM.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
+  return "/bbh";
+}
+
 const SHARED = [
   "/login",
   "/legal",
