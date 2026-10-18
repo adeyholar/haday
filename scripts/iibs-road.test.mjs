@@ -34,6 +34,7 @@ test("the road voice speaks an IIBS gloss, not another course's clip", () => {
   assert.match(src, /alsoHebrew/);
   assert.match(src, /heVoiceId/);
   const page = readFileSync("/workspace/src/routes/iibs/road.tsx", "utf8");
-  assert.match(page, /iibsRoadList\("all"\)/);
+  assert.doesNotMatch(page, /iibsRoadList\("all"\)/);
+  assert.match(page, /iibsRoadList\(room\.level\)/);
   assert.match(page, /Scripture Path · audio/);
 });

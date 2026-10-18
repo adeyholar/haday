@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { DrillSitting } from "@/components/drill-sitting";
 import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
+import { useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { levelUnlocked } from "@/lib/iibs-game";
 import { levelAfter } from "@/lib/path";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/iibs/study/$level/$week")({ component: We
 
 function WeekStudy() {
   const { level, week: weekParam } = Route.useParams();
+  const room = useIibsRoom();
   const week = Math.round(Number(weekParam));
   const progress = useStudy((s) => s.game.iibs);
   const focus = useStudy((s) => s.focus);
@@ -36,12 +38,22 @@ function WeekStudy() {
     };
   }, []);
 
+  if (!room.ready) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening this week…</p>
+      </Panel>
+    );
+  }
+
+  if (!room.level || room.level !== level) return <Navigate to="/iibs" />;
+
   if (!known || week < 1 || week > count) {
     return (
       <Panel>
         <h1 className="font-display text-3xl font-bold text-ink">No such week</h1>
-        <Link to="/iibs/study" className="mt-4 inline-block font-semibold text-primary">
-          All levels
+        <Link to="/iibs/study/$level" params={{ level: room.level ?? level }} className="mt-4 inline-block font-semibold text-primary">
+          This level
         </Link>
       </Panel>
     );
@@ -60,8 +72,8 @@ function WeekStudy() {
       <Panel>
         <h1 className="font-display text-3xl font-bold text-ink">Level {level} is locked</h1>
         <p className="mt-3 text-muted">Clear Level {levelAfter(level)} in Vocab Builder first.</p>
-        <Link to="/iibs/study" className="mt-4 inline-block font-semibold text-primary">
-          All levels
+        <Link to="/iibs/study/$level" params={{ level: room.level ?? level }} className="mt-4 inline-block font-semibold text-primary">
+          This level
         </Link>
       </Panel>
     );

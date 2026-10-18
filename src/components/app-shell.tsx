@@ -40,6 +40,8 @@ import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { blockedDestination, currentDoor, homeForAccount, markTermHall, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
 import { enterTermWeek } from "@/lib/term-week";
+import { readIibsRoom, subscribeIibsRoom } from "@/lib/iibs-room";
+import type { IibsVocabLevel } from "@/lib/iibs-vocab";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -109,7 +111,7 @@ function term2StudyOpen(pathname: string) {
 }
 
 const IIBS_GAME: NavItem[] = [
-  { to: "/iibs/vocab", label: "Vocab Builder", hint: "Levels and lessons, in order", icon: Layers },
+  { to: "/iibs/vocab", label: "Vocab Builder", hint: "This level’s thirty lessons", icon: Layers },
 ];
 
 const LISTEN: NavItem[] = [
@@ -160,6 +162,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [pathGate, setPathGate] = useState<MyPath | null>(null);
   const [doorReady, setDoorReady] = useState(false);
   const [hall, setHall] = useState(false);
+  const [iibsRoom, setIibsRoom] = useState<IibsVocabLevel | null>(null);
+  const [iibsReady, setIibsReady] = useState(false);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const board = scoreboard(game, streak);
@@ -265,6 +269,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => subscribeHall(() => setHall(termHallOpen())), []);
+  useEffect(() => {
+    setIibsRoom(readIibsRoom());
+    setIibsReady(true);
+    return subscribeIibsRoom(() => setIibsRoom(readIibsRoom()));
+  }, []);
 
   useEffect(() => subscribeTerm((term) => {
     setPathGate((gate) => (gate ? { ...gate, term } : gate));
@@ -333,6 +342,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
   const inSecondStudy = term === 2 && !choosingTerm && !onIibs;
+  const choosingLevel = iibsOnly && iibsReady && !iibsRoom;
 
   return (
     <div className="min-h-dvh text-fg">
@@ -341,7 +351,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <BrandLockup linked to={studentHome ?? "/"} />
           <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
-            {iibsOnly ? (
+            {choosingLevel ? null : iibsOnly ? (
             <>
             <NavMenu
               label="Game"
@@ -460,7 +470,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", inSecondStudy || iibsOnly ? "grid-cols-5" : secondRoom ? "grid-cols-1" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", choosingLevel || secondRoom ? "grid-cols-1" : inSecondStudy || iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -532,7 +542,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 />
               </li>
             </>
-          ) : iibsOnly ? (
+          ) : iibsOnly && !choosingLevel ? (
             <>
               <li>
                 <NavTip label="Lessons" side="top" full>
@@ -597,7 +607,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 />
               </li>
             </>
-          ) : secondRoom ? null : (
+          ) : choosingLevel || secondRoom ? null : (
             <>
           <li>
             <NavMenu

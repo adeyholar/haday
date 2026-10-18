@@ -39,5 +39,10 @@ export const TERM_TWO_LINE = "Derived stems, and the words of the second term.";
 export const TERM_TWO_NOTE = "Semester 1 stays behind this door. Its words and scores are not in this room.";
 export const TERM_LEAVE = "Leave this room";
 
+export const LEVEL_WHICH = "Which level?";
+export const LEVEL_WHICH_LINE =
+  "Each level is its own room. You stay there for its thirty lessons. Vocab, study, and listening stay with that level.";
+export const LEVEL_LEAVE = "Leave this level";
+
 export const CLASS_VERSE_NOTE =
   "The marked word is class vocabulary when it is on the class word list. Other class words in the same verse are listed so you meet them again.";

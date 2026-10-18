@@ -1,61 +1,41 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RoadDeck, type RoadSet } from "@/components/road-deck";
-import { IIBS_ROAD_LEVELS, iibsRoadList, isIibsRoadId, type IibsRoadId } from "@/lib/iibs-road";
-
-const LEVEL_KEY = "haday-iibs-road-level";
-
-function loadLevel(): IibsRoadId {
-  try {
-    const saved = localStorage.getItem(LEVEL_KEY);
-    if (isIibsRoadId(saved)) return saved;
-  } catch {
-    /* ignore */
-  }
-  return "A";
-}
-
-function saveLevel(id: IibsRoadId) {
-  try {
-    localStorage.setItem(LEVEL_KEY, id);
-  } catch {
-    /* ignore */
-  }
-}
+import { useIibsRoom } from "@/components/iibs-door";
+import { iibsRoadList } from "@/lib/iibs-road";
 
 export const Route = createFileRoute("/iibs/road")({
   component: IibsRoadPage,
 });
 
 function IibsRoadPage() {
-  const [level, setLevel] = useState<IibsRoadId>(loadLevel);
+  const room = useIibsRoom();
   const sets = useMemo<RoadSet[]>(() => {
-    const levels = IIBS_ROAD_LEVELS.map((id) => {
-      const items = iibsRoadList(id);
-      return { id, label: id, title: `Level ${id}`, hint: `${items.length} words`, items };
-    });
-    const all = iibsRoadList("all");
-    return [...levels, { id: "all", label: "All", title: "Levels A–E", hint: `${all.length} words`, items: all }];
-  }, []);
+    if (!room.level) return [];
+    const items = iibsRoadList(room.level);
+    return [{ id: room.level, label: room.level, title: `Level ${room.level}`, hint: `${items.length} words`, items }];
+  }, [room.level]);
+
+  if (!room.ready) return <p className="text-sm text-muted">Opening this level…</p>;
+  if (!room.level) return <Navigate to="/iibs" />;
+
+  const set = sets[0];
+  if (!set) return <Navigate to="/iibs" />;
 
   return (
     <>
       <p className="mb-3 text-sm">
-        <Link to="/iibs/vocab" className="font-semibold text-primary">
-          Vocab Builder
+        <Link to="/iibs" className="font-semibold text-primary">
+          This level
         </Link>
       </p>
       <RoadDeck
         kicker="Scripture Path · audio"
         sets={sets}
-        setId={level}
-        onSet={(id) => {
-          if (!isIibsRoadId(id)) return;
-          saveLevel(id);
-          setLevel(id);
-        }}
-        blurb={(set) =>
-          `${set.title} · ${set.items.length} words, in one sitting. Hebrew, then the plural when there is one, then the meaning. Same voice as Drill. The list repeats until you pause. Leave, and this level starts again at the first word. Hatikvah or Solemn stays under the words. The volume slider sets how loud the music is.`
+        setId={room.level}
+        onSet={() => {}}
+        blurb={(current) =>
+          `${current.title} · ${current.items.length} words. Hebrew, then the plural when there is one, then the meaning. This level repeats. Other levels stay outside.`
         }
       />
     </>
