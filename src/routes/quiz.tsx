@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { VerseCard } from "@/components/verse-card";
 import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
-import { glossMatches, liveGloss, quizChoices, shuffle, type VocabItem } from "@/lib/vocab";
-import { useStudy } from "@/lib/store";
+import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
+import { quizDeck, useStudy } from "@/lib/store";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
@@ -41,7 +41,8 @@ function QuizPage() {
   const [retryIds, setRetryIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
-    setDeck(shuffle(pool));
+    const cards = useStudy.getState().cards;
+    setDeck(quizDeck(pool, cards, focus));
     setI(0);
     setPicked(null);
     setMissedChoice(null);
@@ -50,6 +51,7 @@ function QuizPage() {
     setTypeTries(0);
     setGaveUp(false);
     setRetryIds(new Set());
+    setScore({ right: 0, wrong: 0 });
     setReady(true);
   }, [pool, seed, focus]);
 
@@ -125,6 +127,22 @@ function QuizPage() {
     );
   }
 
+  if (ready && focus === "weak" && deck.length === 0) {
+    return (
+      <>
+        <Panel className="mb-4">
+          <StudyMenu />
+          <div className="mt-4">
+            <WeekSelect />
+          </div>
+          <FocusToggle />
+          <p className="mt-4 text-sm text-muted">
+            Nothing in the weak book for this week. A miss puts a word here, most misses first. Words you know stay out.
+          </p>
+        </Panel>
+      </>
+    );
+  }
   if (!ready || (deck.length > 0 && !item && i === 0)) {
     return (
       <>
@@ -172,6 +190,11 @@ function QuizPage() {
             Type the gloss
           </Button>
         </div>
+        <p className="mt-4 text-sm text-muted">
+          {focus === "weak"
+            ? "Weak book. Missed words only, most misses first. Words you know stay out."
+            : "Every word in this week. Weak and due come first."}
+        </p>
         <p className="mt-4 text-sm font-medium tabular-nums text-ink">
           {i + 1} / {deck.length} · {score.right} correct
         </p>

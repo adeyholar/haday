@@ -495,6 +495,42 @@ export function weakQueue(items: VocabItem[], cards: ProgressMap, limit = 18) {
     .slice(0, limit);
 }
 
+/** Quiz order. Weak book is missed words only, most misses first. Due keeps every word, weak then due, then the rest. */
+export function quizDeck(
+  pool: VocabItem[],
+  cards: ProgressMap,
+  focus: FocusMode,
+  now = Date.now(),
+): VocabItem[] {
+  const rank = (item: VocabItem) => {
+    const c = hydrateCard(cards[item.id], now);
+    return Math.max(c.misses, c.lapses);
+  };
+  const missed = (item: VocabItem) => {
+    const raw = cards[item.id];
+    if (!raw || isMastered(raw)) return false;
+    const c = hydrateCard(raw, now);
+    return c.misses > 0 || c.lapses > 0 || c.reveals > 0;
+  };
+  const weak = pool.filter(missed).sort((a, b) => {
+    const gap = rank(b) - rank(a);
+    if (gap !== 0) return gap;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+  if (focus === "weak") return weak;
+  const weakIds = new Set(weak.map((item) => item.id));
+  const due = shuffle(
+    pool.filter((item) => {
+      if (weakIds.has(item.id)) return false;
+      const c = cards[item.id];
+      return !c || hydrateCard(c, now).due <= now;
+    }),
+  );
+  const dueIds = new Set(due.map((item) => item.id));
+  const rest = shuffle(pool.filter((item) => !weakIds.has(item.id) && !dueIds.has(item.id)));
+  return [...weak, ...due, ...rest];
+}
+
 /** Random round: shuffle within weak / due / the rest, then deal `limit` cards. */
 export function pickStudyRound(
   pool: VocabItem[],
