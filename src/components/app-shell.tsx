@@ -77,17 +77,36 @@ const GAME: NavItem[] = [
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 
+const TERM2_GAME: NavItem[] = [
+  { to: "/study/term2/game", label: "Vocabulary", hint: "Chapter path, 90%", icon: Compass },
+];
+
 const TERM2_STUDY: NavItem[] = [
   { to: "/study/term2", label: "Lessons", hint: "Chapter by chapter", icon: Library },
-  { to: "/study/term2/game", label: "Game", hint: "Chapter path, 90%", icon: Compass },
-  { to: "/study/term2/listen", label: "Listen", hint: "Hebrew, then English", icon: Headphones },
-  { to: "/drill", label: "Drill", hint: "This week’s words", icon: Layers },
+  { to: "/drill", label: "Drill", hint: "This chapter’s words", icon: Layers },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
   { to: "/write", label: "Write", hint: "Type the meaning", icon: PenLine },
   { to: "/match", label: "Match", hint: "Select pairs", icon: Link2 },
-  { to: "/browse", label: "Lexicon", hint: "This week’s lemmas", icon: BookOpen },
+  { to: "/browse", label: "Lexicon", hint: "This chapter’s lemmas", icon: BookOpen },
   { to: "/weak", label: "Weak pool", hint: "Missed words only", icon: CircleAlert },
 ];
+
+const TERM2_LISTEN: NavItem[] = [
+  { to: "/study/term2/listen", label: "Vocabulary", hint: "Hebrew, then English", icon: Headphones },
+  { to: "/study/term2/listen/road", label: "On the road", hint: "This chapter, while you drive", icon: Headphones },
+];
+
+function term2StudyOpen(pathname: string) {
+  return (
+    pathname.startsWith("/drill") ||
+    pathname.startsWith("/quiz") ||
+    pathname.startsWith("/write") ||
+    pathname.startsWith("/match") ||
+    pathname.startsWith("/browse") ||
+    pathname.startsWith("/weak") ||
+    pathname.startsWith("/study/term2/exam")
+  );
+}
 
 const IIBS_GAME: NavItem[] = [
   { to: "/iibs/vocab", label: "Vocab Builder", hint: "Levels and lessons, in order", icon: Layers },
@@ -366,12 +385,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
             )}
             {inSecondStudy ? (
+            <>
+            <NavMenu
+              label="Game"
+              icon={Compass}
+              items={TERM2_GAME}
+              active={pathname.startsWith("/study/term2/game")}
+            />
             <NavMenu
               label="Study"
-              icon={Library}
+              icon={ListChecks}
               items={TERM2_STUDY}
-              active={TERM2_STUDY.some((x) => pathname === x.to || pathname.startsWith(`${x.to}/`))}
+              active={term2StudyOpen(pathname) || (pathname.startsWith("/study/term2") && !pathname.startsWith("/study/term2/game") && !pathname.startsWith("/study/term2/listen"))}
             />
+            <NavMenu
+              label="Listen"
+              icon={Headphones}
+              items={TERM2_LISTEN}
+              active={pathname.startsWith("/study/term2/listen")}
+            />
+            </>
             ) : iibsOnly || secondRoom ? null : (
             <NavMenu
               label="Study"
@@ -427,7 +460,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", inSecondStudy ? "grid-cols-4" : secondRoom ? "grid-cols-1" : iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", inSecondStudy || iibsOnly ? "grid-cols-5" : secondRoom ? "grid-cols-1" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -454,45 +487,49 @@ export function AppShell({ children }: { children: ReactNode }) {
                       "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
                       pathname.startsWith("/study/term2") &&
                       !pathname.startsWith("/study/term2/game") &&
-                      !pathname.startsWith("/study/term2/listen")
+                      !pathname.startsWith("/study/term2/listen") &&
+                      !pathname.startsWith("/study/term2/exam")
                         ? "text-primary"
                         : "text-muted",
                     )}
                   >
-                    <Library className="size-5" strokeWidth={pathname.startsWith("/study/term2") ? 2.2 : 1.8} />
+                    <Library className="size-5" strokeWidth={pathname.startsWith("/study/term2") && !pathname.startsWith("/study/term2/game") && !pathname.startsWith("/study/term2/listen") && !pathname.startsWith("/study/term2/exam") ? 2.2 : 1.8} />
                     Lessons
                   </Link>
                 </NavTip>
               </li>
               <li>
-                <NavTip label="Drill" side="top" full>
-                  <Link
-                    to="/drill"
-                    title="Drill"
-                    className={cn(
-                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                      pathname.startsWith("/drill") ? "text-primary" : "text-muted",
-                    )}
-                  >
-                    <Layers className="size-5" strokeWidth={pathname.startsWith("/drill") ? 2.2 : 1.8} />
-                    Drill
-                  </Link>
-                </NavTip>
+                <NavMenu
+                  label="Study"
+                  icon={ListChecks}
+                  items={TERM2_STUDY}
+                  active={term2StudyOpen(pathname)}
+                  drop="up"
+                  tipSide="top"
+                  layout="bar"
+                />
               </li>
               <li>
-                <NavTip label="Quiz" side="top" full>
-                  <Link
-                    to="/quiz"
-                    title="Quiz"
-                    className={cn(
-                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                      pathname.startsWith("/quiz") ? "text-primary" : "text-muted",
-                    )}
-                  >
-                    <ListChecks className="size-5" strokeWidth={pathname.startsWith("/quiz") ? 2.2 : 1.8} />
-                    Quiz
-                  </Link>
-                </NavTip>
+                <NavMenu
+                  label="Listen"
+                  icon={Headphones}
+                  items={TERM2_LISTEN}
+                  active={pathname.startsWith("/study/term2/listen")}
+                  drop="up"
+                  tipSide="top"
+                  layout="bar"
+                />
+              </li>
+              <li>
+                <NavMenu
+                  label="Game"
+                  icon={Compass}
+                  items={TERM2_GAME}
+                  active={pathname.startsWith("/study/term2/game")}
+                  drop="up"
+                  tipSide="top"
+                  layout="bar"
+                />
               </li>
             </>
           ) : iibsOnly ? (
