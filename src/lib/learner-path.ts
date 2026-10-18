@@ -73,7 +73,7 @@ export const getMyPath = createServerFn({ method: "GET" })
     const path = isStudyPath(rows[0]?.path) ? rows[0].path : null;
     const cleared = isIibsLevel(rows[0]?.cleared) ? rows[0].cleared : null;
     const admin = await readAdmin(context.userId);
-    const term = termForAccount({ admin, term: grammarTerm(rows[0]?.term) });
+    const term = termForAccount({ term: grammarTerm(rows[0]?.term) });
     return { path, cleared, admin, term };
   });
 
@@ -119,11 +119,16 @@ export const setMyTerm = createServerFn({ method: "POST" })
   .validator((input: { done: boolean }) => input)
   .middleware([authMiddleware])
   .handler(async ({ data, context }): Promise<{ ok: true; term: GrammarTerm } | { ok: false; error: string }> => {
-    await assertAdmin(context.userId);
     await ensureLearnerPath();
+    const sql = await getSql();
+    const rows = await sql<{ path: string }>`
+      select path from learner_path where user_id = ${context.userId}
+    `;
+    const path = isStudyPath(rows[0]?.path) ? rows[0].path : null;
+    const admin = await readAdmin(context.userId);
+    if (!admin && path !== "bbh") return { ok: false, error: "Open the Grammar Path first." };
     const term: GrammarTerm = data.done ? 2 : 1;
     const stored = term === 2 ? "2" : "1";
-    const sql = await getSql();
     await sql`
       insert into learner_path (user_id, path, term)
       values (${context.userId}, 'bbh', ${stored})

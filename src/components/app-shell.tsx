@@ -38,7 +38,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock, secondTermBlock, subscribeTerm, termForAccount, termRevisionNow, noteServerTerm } from "@/lib/path";
+import { blockedDestination, currentDoor, homeForAccount, markTermHall, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -125,6 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pathGate, setPathGate] = useState<MyPath | null>(null);
   const [doorReady, setDoorReady] = useState(false);
+  const [hall, setHall] = useState(false);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const board = scoreboard(game, streak);
@@ -225,6 +226,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     setDoorReady(true);
   }, []);
 
+  useEffect(() => {
+    setHall(termHallOpen());
+  }, [pathname]);
+
+  useEffect(() => subscribeHall(() => setHall(termHallOpen())), []);
+
   useEffect(() => subscribeTerm((term) => {
     setPathGate((gate) => (gate ? { ...gate, term } : gate));
   }), []);
@@ -268,7 +275,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const onIibs = pathname === "/iibs" || pathname.startsWith("/iibs/");
   const iibsOnly = onIibs || (pathGate?.path === "iibs" && !pathGate.admin);
   const studentHome = pathGate ? homeForAccount(pathGate) : null;
-  if (pathname === "/" && studentHome) return <Navigate to={studentHome} replace />;
+  if (pathname === "/" && studentHome) {
+    if (studentHome === "/bbh") markTermHall();
+    return <Navigate to={studentHome} replace />;
+  }
   const blocked =
     pathGate?.admin && doorReady
       ? ownerDoorBlock(pathname, currentDoor())
@@ -277,9 +287,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         : null;
   if (blocked) return <Navigate to={blocked} />;
   const term = pathGate ? termForAccount(pathGate) : 1;
-  const termHome = secondTermBlock(pathname, term);
+  const choosingTerm = hall && !onIibs;
+  const termHome = secondTermBlock(pathname, term, choosingTerm);
   if (termHome) return <Navigate to={termHome} replace />;
-  const secondRoom = term === 2 && !onIibs;
+  const secondRoom = (term === 2 || choosingTerm) && !onIibs;
 
   return (
     <div className="min-h-dvh text-fg">

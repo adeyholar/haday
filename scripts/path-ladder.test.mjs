@@ -69,25 +69,22 @@ test("a signed-in student opens their study from home", () => {
   assert.match(doors, /shouldShowPathChooser/);
 });
 
-test("semester 2 is a separate room, and a student cannot enter it yet", () => {
-  assert.equal(termForAccount({ admin: false, term: 2 }), 1);
-  assert.equal(termForAccount({ admin: false, term: 1 }), 1);
-  assert.equal(termForAccount({ admin: true, term: 1 }), 1);
-  assert.equal(termForAccount({ admin: true, term: 2 }), 2);
+test("each semester is its own room, and the hall is not a room", () => {
+  assert.equal(termForAccount({ term: 2 }), 2);
+  assert.equal(termForAccount({ term: 1 }), 1);
   assert.equal(secondTermBlock("/drill", 1), null);
+  assert.equal(secondTermBlock("/drill", 1, true), "/bbh");
   assert.equal(secondTermBlock("/drill", 2), "/bbh");
-  assert.equal(secondTermBlock("/game/verb-paradigm-quest", 2), "/bbh");
-  assert.equal(secondTermBlock("/bbh", 2), null);
-  assert.equal(secondTermBlock("/admin/voice", 2), null);
+  assert.equal(secondTermBlock("/bbh", 2, true), null);
   assert.equal(secondTermBlock("/ask", 2), null);
-  assert.equal(secondTermBlock("/iibs/study", 2), null);
   const seen = termRevisionNow();
   publishTerm(2);
   assert.equal(noteServerTerm(1, seen), 2);
-  assert.equal(readTerm(), 2);
   publishTerm(1);
   const shell = readFileSync("/workspace/src/components/app-shell.tsx", "utf8");
-  assert.match(shell, /secondTermBlock/);
+  assert.match(shell, /markTermHall/);
   const home = readFileSync("/workspace/src/routes/bbh.tsx", "utf8");
-  assert.match(home, /Are you done with Semester 1\?|TERM_ASK|FirstTermDoor/);
+  assert.match(home, /SemesterHall/);
+  const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  assert.match(doors, /markTermHall/);
 });
