@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Panel } from "@/components/panel";
-import { PublicFooter } from "@/components/public-footer";
+import { PublicFooter, PublicReturn } from "@/components/public-footer";
 import {
   METHOD_DATE,
   METHOD_DESCRIPTION,
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/how-to-memorize-biblical-hebrew-vocabular
 function MethodPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
+      <PublicReturn />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(METHOD_JSON_LD) }} />
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · first-year method</p>
       <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">{METHOD_H1}</h1>

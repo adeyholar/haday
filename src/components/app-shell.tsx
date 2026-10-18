@@ -113,12 +113,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user, isPending } = useCurrentUserState();
-  const isPublic =
-    pathname === "/login" ||
-    pathname === "/reset-password" ||
+  const openReading =
     pathname === "/legal" ||
     pathname === "/credits" ||
     pathname === "/how-to-memorize-biblical-hebrew-vocabulary";
+  const isPublic =
+    pathname === "/login" ||
+    pathname === "/reset-password" ||
+    (openReading && !user && sessionUser == null);
   const doorsForVisitor = pathname === "/" && !user && sessionUser == null;
   const userId = user?.id ?? null;
   const [progressReady, setProgressReady] = useState(false);

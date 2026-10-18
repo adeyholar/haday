@@ -112,7 +112,7 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
   return () => termListeners.delete(hear);
 }
 
-const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits"];
+const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"];
 
 /** A semester room is closed while the other is open, and while they are still choosing. */
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {

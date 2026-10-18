@@ -61,7 +61,7 @@ function ResetPassword() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
       <div className="rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)] sm:p-6">
-        <BrandLockup size="hero" />
+        <BrandLockup size="hero" linked />
         <h1 className="mt-4 text-center font-display text-2xl font-bold text-ink">Choose a new password</h1>
 
         {done ? (
