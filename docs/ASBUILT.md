@@ -49,7 +49,7 @@ Pass a stage at **90%**. Honor badges and a class leaderboard sit under More.
 
 **Swap engine.** Download `/audio/neural/corpus.txt`. Synthesize `{id}.he.mp3` / `{id}.en.mp3`. Put them in `public/audio/neural/inbox/`. `python3 scripts/voice-import.py` normalizes and rebuilds the manifest.
 
-**Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
+**Tanakh follow-along.** Nikkud text is `public/tanakh/books/*.json`. That file drops the cantillation. The accented text is a separate dataset, not loaded by this site: repo `adeyholar/haday-hebrew-data`, release `v1.0.0`, as-built in that repo at `docs/ASBUILT.md`. Do not replace these JSON files with that dataset in the same change as the player. Word intervals are `public/tanakh/align/*.json` with `engine: "mfa-kaldi-v1"` for every chapter. Audio is Mechon Mamre MP3s (Genesis 1–5 also local). Highlight uses the spoken interval, not a guessed clock lead.
 
 Passage picker: whole book, one chapter, or a continuous verse range.
 
