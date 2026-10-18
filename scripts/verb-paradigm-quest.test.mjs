@@ -116,6 +116,13 @@ test("a wrong vowel is not hidden behind the accent note", () => {
   assert.equal(graded.lines[0].startsWith("Almost"), false);
 });
 
+test("the first check is the grade", () => {
+  assert.equal(quest.firstAnswer(null, true, false), true);
+  assert.equal(quest.firstAnswer(null, false, false), false);
+  assert.equal(quest.firstAnswer(false, true, false), false);
+  assert.equal(quest.firstAnswer(null, true, true), false);
+});
+
 test("eight of nine opens the next level", () => {
   const passed = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 89, null);
   assert.equal(passed.unlocked, 2);

@@ -11,6 +11,7 @@ import {
   PGN_ORDER,
   QATAL,
   gradeVerb,
+  firstAnswer,
   placeRequiredMark,
   qalPerfect,
   recordVerbQuest,
@@ -36,7 +37,7 @@ function Pointed({ form, pgn, className }: { form: string; pgn: Pgn; className?:
   return (
     <span className={cn("he-word", className)} dir="rtl" lang="he">
       {parts.map((part, i) => (
-        <span key={`${part}-${i}`} className={i >= cut ? "text-danger" : undefined}>
+        <span key={`${part}-${i}`} className={i >= cut ? "text-ocean" : undefined}>
           {part}
         </span>
       ))}
@@ -128,6 +129,7 @@ function VerbQuestSitting({
   const [helped, setHelped] = useState(false);
   const [tries, setTries] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [firstClean, setFirstClean] = useState<boolean | null>(null);
   const [donePct, setDonePct] = useState<number | null>(null);
   const hear = useRef({ stop: false });
   useEffect(() => {
@@ -159,6 +161,7 @@ function VerbQuestSitting({
     setHelped(false);
     setTries(0);
     setRevealed(false);
+    setFirstClean(null);
   }, [card]);
 
   function speak(row: VerbForm) {
@@ -209,13 +212,16 @@ function VerbQuestSitting({
   function checkBuild() {
     if (!card) return;
     if (level === 1 && card.pgn === "3ms" && ending.trim()) {
+      if (firstClean === null) setFirstClean(false);
       setLines(["3ms has no ending. The bare stem is the form."]);
       setTries(1);
       return;
     }
     const graded = gradeVerb(currentAnswer(), card.form, card.pgn, root.letters[1]);
+    const clean = firstAnswer(firstClean, graded.correct, helped);
+    if (firstClean === null) setFirstClean(clean);
     if (graded.correct) {
-      finishCard(card, !helped);
+      finishCard(card, clean);
       return;
     }
     if (graded.nudge && !nudge) {
@@ -320,7 +326,10 @@ function VerbQuestSitting({
                   type="button"
                   onClick={() => {
                     setChoice(id);
-                    if (id === card.pgn) finishCard(card, !helped);
+                    const correct = id === card.pgn;
+                    const clean = firstAnswer(firstClean, correct, helped);
+                    if (firstClean === null) setFirstClean(clean);
+                    if (correct) finishCard(card, clean);
                     else {
                       setHelped(true);
                       setLines([`That is ${id}. This form is ${card.pgn}: ${card.gloss}.`]);
@@ -365,7 +374,7 @@ function VerbQuestSitting({
                     {part}
                   </button>
                 ))}
-                <span className="he-word text-4xl text-danger">{ending}</span>
+                <span className="he-word text-4xl text-ocean">{ending}</span>
               </div>
             </div>
           ) : null}
