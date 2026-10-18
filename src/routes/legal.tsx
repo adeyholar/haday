@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
 import { Panel } from "@/components/panel";
-import { PublicFooter } from "@/components/public-footer";
+import { PublicFooter, PublicReturn } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/legal")({ component: LegalPage });
@@ -14,8 +14,9 @@ function LegalPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <div className="mb-6 flex justify-center">
-        <BrandLockup size="hero" />
+        <BrandLockup size="hero" linked />
       </div>
+      <PublicReturn />
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · BIBL 630</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Privacy and disclaimer</h1>

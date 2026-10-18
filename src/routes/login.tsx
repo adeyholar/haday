@@ -47,7 +47,7 @@ function Login() {
     return (
       <main className="grid min-h-dvh place-items-center px-5">
         <div className="w-full max-w-sm rounded-[var(--radius-xl)] bg-card p-6 shadow-[var(--shadow-border)]">
-          <BrandLockup size="hero" />
+          <BrandLockup size="hero" linked />
         </div>
       </main>
     );
@@ -164,7 +164,7 @@ function Login() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
       <div className="rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)] sm:p-6">
-        <BrandLockup size="hero" />
+        <BrandLockup size="hero" linked />
         <p className="mt-4 text-center text-sm text-muted">
           {PATH_CHOICE_STAYS}
         </p>

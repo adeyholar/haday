@@ -68,7 +68,7 @@ Passage picker: whole book, one chapter, or a continuous verse range.
 | Email reset | Owner can send or copy a link; **Revoke** / **Revoke all** kills it immediately |
 | Flood cap | Forgot password: one live token per person; a few mails per address and network per 15 minutes |
 | Privacy | Public `/legal` — what we store, that we do not sell it, local/international disclaimer, 13+ |
-| Credits | Public `/credits` — Shmuelof / Talking Bibles / Mechon Mamre audio, WLC, WEB, OSHB, Eliran Wong, MFA |
+| Credits | Public `/credits` — Shmuelof / Talking Bibles / Mechon Mamre audio, WLC, WEB, OSHB, Eliran Wong, MFA. Legal, Credits, and the method page have **Back to your study** at the top. A signed-in student keeps the study header on those pages. |
 
 Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FROM`. Optional Resend / SendGrid instead.
 
