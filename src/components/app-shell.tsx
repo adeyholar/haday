@@ -72,7 +72,7 @@ const GAME: NavItem[] = [
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
   { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },
   { to: "/game/lessons", label: "Grammar", hint: "Prepositions to numbers", icon: ScrollText },
-  { to: "/game/verb-paradigm-quest", label: "Verb paradigm", hint: "Build a Qal perfect", icon: PenLine },
+  { to: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest", hint: "Build a Qal perfect", icon: PenLine },
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 

@@ -86,7 +86,51 @@ test("new roots keep dagesh, shin, and final kaf, and weak roots stay out", () =
   assert.equal(reigned.find((row) => row.pgn === "2ms").form.includes("כ"), true);
 });
 
-test("ninety percent opens the next level and the save keeps the board", () => {
+test("a guttural at the start takes hateph pathach, not plain shewa", () => {
+  const roots = quest.transferRoots();
+  const akol = roots.find((row) => row.id === "akol");
+  const ate = quest.qalPerfect(akol).find((row) => row.pgn === "2mp").form;
+  assert.equal(ate.includes("\u05B2"), true);
+  assert.equal(ate.startsWith("א\u05B0"), false);
+  const said = quest.qalPerfect(roots.find((row) => row.id === "amar")).find((row) => row.pgn === "2mp").form;
+  assert.equal(said.includes("א\u05B2"), true);
+});
+
+test("a second accent miss only moves the mark", () => {
+  const form = quest.qalPerfect(quest.QATAL).find((row) => row.pgn === "2ms").form;
+  const missing = form.replaceAll("\u05AB", "");
+  const placed = quest.placeRequiredMark(missing, form);
+  assert.equal(placed, form);
+  assert.equal([...placed].length > 4, true);
+  const wrongPlace = missing + "\u05AB";
+  assert.equal(quest.placeRequiredMark(wrongPlace, form), form);
+});
+
+test("a wrong vowel is not hidden behind the accent note", () => {
+  const form = quest.qalPerfect(quest.QATAL).find((row) => row.pgn === "2ms").form;
+  const bad = form.replace("\u05B7", "\u05B6").replaceAll("\u05AB", "");
+  const graded = quest.gradeVerb(bad, form, "2ms");
+  assert.equal(graded.nudge, null);
+  assert.equal(graded.correct, false);
+  assert.equal(graded.lines.some((line) => line.startsWith("Check the vowel")), true);
+  assert.equal(graded.lines[0].startsWith("Almost"), false);
+});
+
+test("eight of nine opens the next level", () => {
+  const passed = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 89, null);
+  assert.equal(passed.unlocked, 2);
+  const held = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 78, null);
+  assert.equal(held.unlocked, 1);
+});
+
+test("the voice bank can find a paradigm form", async () => {
+  const voice = await jiti.import(join(root, "src/lib/voice-corpus.ts"));
+  const ids = [...voice.corpusIds()];
+  assert.equal(ids.includes("vpq-qal-pf-qatal-2ms"), true);
+  assert.equal(ids.includes("vpq-qal-pf-akol-2mp"), true);
+});
+
+test("a cleared board stays in the save", () => {
   const first = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 90, null);
   assert.equal(first.unlocked, 2);
   assert.equal(first.cleared[1], true);
