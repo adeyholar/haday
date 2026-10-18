@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { HebrewType } from "@/components/hebrew-type";
 import { Panel } from "@/components/panel";
+import { QalPerfectBuilder } from "@/components/qal-perfect-builder";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord } from "@/lib/listen";
@@ -12,13 +13,11 @@ import {
   QATAL,
   gradeVerb,
   firstAnswer,
-  placeRequiredMark,
   qalPerfect,
   questPercent,
   recordVerbQuest,
   redFrom,
   splitClusters,
-  stepToward,
   transferRoots,
   type Pgn,
   type VerbForm,
@@ -26,10 +25,10 @@ import {
 } from "@/lib/verb-paradigm-quest";
 
 const LEVELS = [
-  { id: 1, name: "Endings", hint: "The stem is written. Add the ending, and the accent or the meteg." },
-  { id: 2, name: "Build the verb", hint: "The root is קטל. Type the whole form. Every mark counts." },
+  { id: 1, name: "Build from the root", hint: "Only the three letters are given. You add every vowel, the ending, the accent, and the meteg." },
+  { id: 2, name: "Build it again", hint: "Same root. The screen still shows only the letters. Every mark counts." },
   { id: 3, name: "Read it", hint: "The form is written. Name who did it." },
-  { id: 4, name: "New roots", hint: "Same pattern, a class verb." },
+  { id: 4, name: "New roots", hint: "A class verb. Still only the root letters. You add the vowels." },
 ] as const;
 
 function Pointed({ form, pgn, className }: { form: string; pgn: Pgn; className?: string }) {
@@ -46,18 +45,24 @@ function Pointed({ form, pgn, className }: { form: string; pgn: Pgn; className?:
   );
 }
 
-function toggleMark(cluster: string, mark: string) {
-  const parts = [...cluster];
-  const next = parts.includes(mark) ? parts.filter((ch) => ch !== mark) : [...parts, mark];
-  return next.join("");
-}
-
 export function VerbQuestHome() {
   const quest = useStudy((s) => s.game.verbParadigmQuest);
   const [level, setLevel] = useState(0);
+  const [builder, setBuilder] = useState(false);
   const roots = useMemo(() => transferRoots(), []);
   const [rootAt, setRootAt] = useState(0);
   const root = level === 4 ? (roots[rootAt % Math.max(roots.length, 1)] ?? QATAL) : QATAL;
+
+  if (builder) {
+    return (
+      <div>
+        <button type="button" onClick={() => setBuilder(false)} className="mb-4 text-sm font-medium text-primary">
+          Levels
+        </button>
+        <QalPerfectBuilder />
+      </div>
+    );
+  }
 
   if (!level) {
     return (
@@ -65,9 +70,21 @@ export function VerbQuestHome() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Verb Paradigm Quest</h1>
         <p className="mt-3 text-sm text-muted">
-          The root is given. You build the stem, the ending, and the person. A missing vowel, dagesh, shin dot, accent, or meteg is a wrong word.
+          Only the root letters are on the screen. You add the vowels. The app does not write them on the root for you.
         </p>
         <ul className="mt-4 grid gap-2">
+          <li>
+            <button
+              type="button"
+              onClick={() => setBuilder(true)}
+              className="w-full rounded-[var(--radius-md)] bg-primary px-4 py-3 text-left text-primary-foreground"
+            >
+              <span className="font-semibold">Qal Perfect Builder</span>
+              <span className="mt-1 block text-sm text-primary-foreground/80">
+                All nine forms of one root. You choose both vowels and the ending.
+              </span>
+            </button>
+          </li>
           {LEVELS.map((row) => {
             const open = row.id <= quest.unlocked;
             return (
@@ -121,10 +138,7 @@ function VerbQuestSitting({
   const [log, setLog] = useState<boolean[]>([]);
   const [deal, setDeal] = useState(0);
   const [filled, setFilled] = useState<Partial<Record<Pgn, boolean>>>({});
-  const [ending, setEnding] = useState("");
   const [built, setBuilt] = useState("");
-  const [stem, setStem] = useState<string[]>([]);
-  const [picked, setPicked] = useState<number>(0);
   const [choice, setChoice] = useState<Pgn | null>(null);
   const [lines, setLines] = useState<string[]>([]);
   const [nudge, setNudge] = useState(false);
@@ -154,10 +168,7 @@ function VerbQuestSitting({
 
   useEffect(() => {
     if (!card) return;
-    setEnding("");
     setBuilt("");
-    setStem(splitClusters(card.stem));
-    setPicked(card.pgn === "3fs" || card.pgn === "3cp" ? 0 : 1);
     setChoice(null);
     setLines([]);
     setNudge(false);
@@ -205,21 +216,9 @@ function VerbQuestSitting({
     }
   }
 
-  function currentAnswer() {
-    if (!card) return "";
-    if (level === 2 || level === 4) return built;
-    return stem.join("") + ending;
-  }
-
   function checkBuild() {
     if (!card) return;
-    if (level === 1 && card.pgn === "3ms" && ending.trim()) {
-      if (firstClean === null) setFirstClean(false);
-      setLines(["3ms has no ending. The bare stem is the form."]);
-      setTries(1);
-      return;
-    }
-    const graded = gradeVerb(currentAnswer(), card.form, card.pgn, root.letters[1]);
+    const graded = gradeVerb(built, card.form, card.pgn, root.letters[1]);
     const clean = firstAnswer(firstClean, graded.correct, helped);
     if (firstClean === null) setFirstClean(clean);
     if (graded.correct) {
@@ -231,20 +230,7 @@ function VerbQuestSitting({
       setLines(graded.lines);
       return;
     }
-    if (graded.nudge && nudge) {
-      const placed = placeRequiredMark(currentAnswer(), card.form);
-      if (level === 2 || level === 4) setBuilt(placed);
-      else {
-        const parts = splitClusters(placed);
-        const stemCount = splitClusters(card.stem).length;
-        setStem(parts.slice(0, stemCount));
-        setEnding(parts.slice(stemCount).join(""));
-      }
-      setHelped(true);
-      setLines([...graded.lines, "The mark is in place. Check again."]);
-      return;
-    }
-    if (tries < 1) {
+    if (tries < 1 && !graded.nudge) {
       setTries(1);
       setLines(graded.lines);
       return;
@@ -252,19 +238,6 @@ function VerbQuestSitting({
     setLines([card.hook]);
     setHelped(true);
     setRevealed(true);
-  }
-
-  function showNext() {
-    if (!card) return;
-    const next = stepToward(currentAnswer(), card.form);
-    if (level === 2 || level === 4) setBuilt(next);
-    else {
-      const parts = splitClusters(next);
-      const stemCount = splitClusters(card.stem).length;
-      setStem(parts.slice(0, stemCount));
-      setEnding(parts.slice(stemCount).join(""));
-    }
-    setHelped(true);
   }
 
   if (donePct != null) {
@@ -359,69 +332,31 @@ function VerbQuestSitting({
 
       {building ? (
         <div className="mt-4">
-          {level === 1 ? (
-            <div className="mb-3 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Stem · tap a letter, then Accent or Meteg</p>
-              <div className="mt-2 flex justify-center gap-2" dir="rtl">
-                {stem.map((part, i) => (
-                  <button
-                    key={`${part}-${i}`}
-                    type="button"
-                    onClick={() => setPicked(i)}
-                    className={cn(
-                      "he-word min-h-14 min-w-14 rounded-[var(--radius-md)] bg-card px-2 text-4xl shadow-[var(--shadow-border)]",
-                      picked === i && "ring-2 ring-primary",
-                    )}
-                  >
-                    {part}
-                  </button>
-                ))}
-                <span className="he-word text-4xl text-ocean">{ending}</span>
-              </div>
-            </div>
-          ) : null}
-          {level === 1 && card.pgn === "3ms" ? (
-            <Button className="w-full" onClick={checkBuild}>
-              No ending
-            </Button>
-          ) : (
-            <HebrewType
-              value={level === 1 ? ending : built}
-              onChange={level === 1 ? setEnding : setBuilt}
-              target={card.form}
-              liveGrade={false}
-              hideHint
-              extraMarks
-              hideVowelLetters
-              markBackspace
-              onSpecialMark={
-                level === 1
-                  ? (mark) => {
-                      setStem((prev) => prev.map((part, i) => (i === picked ? toggleMark(part, mark) : part)));
-                      return true;
-                    }
-                  : undefined
-              }
-            />
-          )}
+          <HebrewType
+            value={built}
+            onChange={setBuilt}
+            target={card.form}
+            liveGrade={false}
+            hideHint
+            extraMarks
+            hideVowelLetters
+            markBackspace
+          />
           {revealed ? (
             <p className="mt-3 text-center">
               <Pointed form={card.form} pgn={card.pgn} className="text-4xl" />
             </p>
           ) : null}
           {lines.length ? <Feedback lines={lines} nudge={nudge && !helped} /> : null}
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3">
             {revealed ? (
-              <Button className="col-span-2" onClick={() => finishCard(card, false)}>
+              <Button className="w-full" onClick={() => finishCard(card, false)}>
                 Next
               </Button>
             ) : (
-              <>
-                <Button variant="outline" onClick={showNext}>
-                  Show me
-                </Button>
-                <Button onClick={checkBuild}>Check</Button>
-              </>
+              <Button className="w-full" onClick={checkBuild}>
+                Check
+              </Button>
             )}
           </div>
         </div>

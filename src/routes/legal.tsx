@@ -6,7 +6,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 export const Route = createFileRoute("/legal")({ component: LegalPage });
 
-const CONTACT = "talk2pastoradeolaade@yahoo.com";
+const CONTACT = "adengongo@gmail.com";
 const EFFECTIVE = "6 September 2026";
 
 function LegalPage() {

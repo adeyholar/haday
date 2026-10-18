@@ -81,6 +81,23 @@
   line-height: 1.2;
 }
 
+/* Scripture Path Text. Ezra SIL carries the te‘amim; Frank Ruhl does not. */
+@font-face {
+  font-family: "Ezra SIL";
+  src: url("/fonts/EzraSIL.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.he-taam {
+  font-family: "Ezra SIL", "Frank Ruhl Libre", serif;
+  font-weight: 400;
+  direction: rtl;
+  unicode-bidi: isolate;
+  line-height: 2.45;
+}
+
 .finder-flash {
   min-height: 22rem;
 }

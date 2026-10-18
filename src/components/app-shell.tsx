@@ -3,6 +3,7 @@ import { Link, Navigate, useRouteContext, useRouterState } from "@tanstack/react
 import {
   BarChart3,
   BookOpen,
+  Blocks,
   CircleHelp,
   CircleAlert,
   Compass,
@@ -64,6 +65,8 @@ const STUDY: NavItem[] = [
 ];
 
 const GAME: NavItem[] = [
+  { to: "/game/qal-perfect", label: "Qal Perfect Builder", hint: "Nine forms, vowels and ending", icon: Blocks },
+  { to: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest", hint: "Only the root. You add the vowels", icon: PenLine },
   { to: "/game/road", label: "Road exam · Week 7", hint: "Say A B C D", icon: Mic },
   { to: "/game/final", label: "Road exam · Week 15", hint: "All the words, on the road", icon: Mic },
   { to: "/game/week7", label: "Week 7 mock exam", hint: "Grammar, then the word list", icon: ListChecks },
@@ -75,7 +78,6 @@ const GAME: NavItem[] = [
   { to: "/game/nouns", label: "Nouns", hint: "Gender and number", icon: BookOpen },
   { to: "/game/article", label: "Article & vav", hint: "The, and", icon: Layers },
   { to: "/game/lessons", label: "Grammar", hint: "Prepositions to numbers", icon: ScrollText },
-  { to: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest", hint: "Build a Qal perfect", icon: PenLine },
   { to: "/challenge", label: "Ultimate Challenge", hint: "Whole list, one sitting", icon: Crown },
 ];
 
@@ -351,7 +353,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <BrandLockup linked to={studentHome ?? "/"} />
           <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
-            {choosingLevel ? null : iibsOnly ? (
+            {iibsOnly ? (
+            <>
+            {choosingLevel ? null : (
             <>
             <NavMenu
               label="Game"
@@ -383,6 +387,21 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Headphones className="size-5" strokeWidth={pathname.startsWith("/iibs/road") ? 2.2 : 1.8} />
+              </Link>
+            </NavTip>
+            </>
+            )}
+            <NavTip label="Reading Lab">
+              <Link
+                to="/iibs/wlc"
+                aria-label="Reading Lab"
+                title="Reading Lab · Leningrad Tanakh"
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-[var(--radius-md)]",
+                  pathname.startsWith("/iibs/wlc") ? "text-primary" : "text-muted",
+                )}
+              >
+                <ScrollText className="size-5" strokeWidth={pathname.startsWith("/iibs/wlc") ? 2.2 : 1.8} />
               </Link>
             </NavTip>
             </>
@@ -470,7 +489,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", choosingLevel || secondRoom ? "grid-cols-1" : inSecondStudy || iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", choosingLevel ? "grid-cols-2" : secondRoom ? "grid-cols-1" : iibsOnly ? "grid-cols-6" : inSecondStudy ? "grid-cols-5" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -555,12 +574,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                       (pathname.startsWith("/iibs/") &&
                         !pathname.startsWith("/iibs/vocab") &&
                         !pathname.startsWith("/iibs/road") &&
-                        !pathname.startsWith("/iibs/study"))
+                        !pathname.startsWith("/iibs/study") &&
+                        !pathname.startsWith("/iibs/wlc"))
                         ? "text-primary"
                         : "text-muted",
                     )}
                   >
-                    <Library className="size-5" strokeWidth={pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab") && !pathname.startsWith("/iibs/road") && !pathname.startsWith("/iibs/study")) ? 2.2 : 1.8} />
+                    <Library className="size-5" strokeWidth={pathname === "/iibs" || (pathname.startsWith("/iibs/") && !pathname.startsWith("/iibs/vocab") && !pathname.startsWith("/iibs/road") && !pathname.startsWith("/iibs/study") && !pathname.startsWith("/iibs/wlc")) ? 2.2 : 1.8} />
                     Lessons
                   </Link>
                 </NavTip>
@@ -606,8 +626,39 @@ export function AppShell({ children }: { children: ReactNode }) {
                   layout="bar"
                 />
               </li>
+              <li>
+                <NavTip label="Reading Lab" side="top" full>
+                  <Link
+                    to="/iibs/wlc"
+                    title="Reading Lab"
+                    className={cn(
+                      "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                      pathname.startsWith("/iibs/wlc") ? "text-primary" : "text-muted",
+                    )}
+                  >
+                    <ScrollText className="size-5" strokeWidth={pathname.startsWith("/iibs/wlc") ? 2.2 : 1.8} />
+                    <span className="leading-tight">Reading Lab</span>
+                  </Link>
+                </NavTip>
+              </li>
             </>
-          ) : choosingLevel || secondRoom ? null : (
+          ) : choosingLevel ? (
+            <li>
+              <NavTip label="Reading Lab" side="top" full>
+                <Link
+                  to="/iibs/wlc"
+                  title="Reading Lab"
+                  className={cn(
+                    "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                    pathname.startsWith("/iibs/wlc") ? "text-primary" : "text-muted",
+                  )}
+                >
+                  <ScrollText className="size-5" strokeWidth={pathname.startsWith("/iibs/wlc") ? 2.2 : 1.8} />
+                  Reading Lab
+                </Link>
+              </NavTip>
+            </li>
+          ) : secondRoom ? null : (
             <>
           <li>
             <NavMenu

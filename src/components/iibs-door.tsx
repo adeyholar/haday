@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Headphones, ListChecks, Lock, Layers } from "lucide-react";
+import { Headphones, ListChecks, Lock, Layers, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { levelUnlocked, lessonUnlocked } from "@/lib/iibs-game";
 import { enterIibsRoom, leaveIibsRoom, readIibsRoom, subscribeIibsRoom } from "@/lib/iibs-room";
@@ -23,6 +23,23 @@ export function useIibsRoom() {
   return { level, ready };
 }
 
+export function ScriptureTabs({ active }: { active: "levels" | "lab" }) {
+  const face = (on: boolean) =>
+    `flex min-h-11 items-center justify-center rounded-[var(--radius-lg)] px-3 text-sm font-semibold ${
+      on ? "bg-ink text-parchment" : "text-muted"
+    }`;
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-1 rounded-[var(--radius-xl)] bg-card p-1 shadow-[var(--shadow-border)]" role="tablist" aria-label="Scripture Path">
+      <Link to="/iibs" role="tab" aria-selected={active === "levels"} className={face(active === "levels")}>
+        Levels
+      </Link>
+      <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={face(active === "lab")}>
+        Reading Lab
+      </Link>
+    </div>
+  );
+}
+
 export function LevelHall({
   progress,
   admin,
@@ -32,6 +49,7 @@ export function LevelHall({
 }) {
   return (
     <>
+      <ScriptureTabs active="levels" />
       <section className="mb-4 rounded-[var(--radius-xl)] bg-card p-5 text-center shadow-[var(--shadow-border)]">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path</p>
         <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">{LEVEL_WHICH}</h1>
@@ -115,7 +133,7 @@ export function LevelRoom({
       </section>
 
       {lesson === null ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <Link
             to="/iibs/vocab/$level"
             params={{ level }}
@@ -141,6 +159,14 @@ export function LevelRoom({
             <Headphones className="size-5 text-primary" />
             <span className="mt-2 font-display text-xl font-bold">Listen</span>
             <span className="text-sm text-muted">This level, on the road</span>
+          </Link>
+          <Link
+            to="/iibs/wlc"
+            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+          >
+            <ScrollText className="size-5 text-primary" />
+            <span className="mt-2 font-display text-xl font-bold">Reading Lab</span>
+            <span className="text-sm text-muted">Leningrad Tanakh. Accents stay.</span>
           </Link>
         </div>
       ) : null}

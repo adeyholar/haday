@@ -22,6 +22,7 @@ COPY --from=build /app/.output ./.output
 COPY --from=build /app/public/tanakh/query-index.json ./.output/public/tanakh/query-index.json
 COPY --from=build /app/public/tanakh/query-index.json ./public/tanakh/query-index.json
 COPY --from=build /app/public/vocab-art ./.output/public/vocab-art
+COPY data/wlc ./data/wlc
 COPY migrations ./migrations
 COPY scripts ./scripts
 EXPOSE 8080

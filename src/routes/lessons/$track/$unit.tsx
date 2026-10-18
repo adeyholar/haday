@@ -24,7 +24,11 @@ function StudyUnitPage() {
           <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
             Verb Paradigm Quest
           </Link>
-          <span className="text-muted"> · build the Qal perfect, ending and accent included.</span>
+          <span className="text-muted"> · build the Qal perfect, ending and accent included. </span>
+          <Link to="/game/qal-perfect" className="font-semibold text-primary">
+            Qal Perfect Builder
+          </Link>
+          <span className="text-muted"> · all nine forms from the vowels and the ending.</span>
         </p>
       ) : null}
       <GrammarPlay key={`${track.id}-${n}-prep`} track={track} unitId={n} mode="prepare" />

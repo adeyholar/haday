@@ -72,6 +72,7 @@ function CreditsPage() {
             Open Scriptures Hebrew Bible
           </a>{" "}
           (morphology CC BY 4.0). Word tags on Tanakh cards (qal, construct, shewa…) come from that morphology.
+          The Reading Lab uses Ezra SIL (SIL Open Font License) so the te‘amim can draw. The recorded reading does not.
         </p>
       </Panel>
 

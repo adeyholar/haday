@@ -385,7 +385,7 @@ export function TypeSession({
         <p className="text-center font-display text-2xl font-bold text-ink">{typeEnglishPrompt(target, gameWord)}</p>
       ) : null}
       {produce === "do" && gameWord ? <p className="text-center text-sm text-muted">{gameWord.gloss}</p> : null}
-      {produce === "do" && mode === "study" && (meta?.id === "home" || meta?.id === "map") && target ? (
+      {produce === "do" && mode === "study" && (String(meta?.id) === "home" || String(meta?.id) === "map") && target ? (
         <p className="text-center text-sm text-muted">{letterName(target)} · find that key</p>
       ) : null}
       {cue ? <p className="mt-2 text-center text-sm font-semibold text-danger">{cue}</p> : null}

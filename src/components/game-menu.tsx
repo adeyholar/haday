@@ -34,6 +34,8 @@ export function GameMenu() {
                   ? "/game/lessons"
                   : pathname.startsWith("/game/verb-paradigm-quest")
                     ? "/game/verb-paradigm-quest"
+                    : pathname.startsWith("/game/qal-perfect")
+                      ? "/game/qal-perfect"
                     : pathname.startsWith("/challenge")
                       ? "/challenge"
                       : "/game";
@@ -69,14 +71,16 @@ export function GameMenu() {
         {
           label: "Grammar",
           options: [
-            { value: "/game/lessons", label: "Grammar" },
+            { value: "/game/qal-perfect", label: "Qal Perfect Builder" },
             { value: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest" },
+            { value: "/game/lessons", label: "Grammar" },
           ],
         },
       ]}
       onChange={(to) => {
         if (to === "/game/lessons") void navigate({ to: "/game/lessons" });
         else if (to === "/game/verb-paradigm-quest") void navigate({ to: "/game/verb-paradigm-quest" });
+        else if (to === "/game/qal-perfect") void navigate({ to: "/game/qal-perfect" });
         else if (to === "/game") void navigate({ to: "/game" });
         else if (to === "/game/road") void navigate({ to: "/game/road" });
         else if (to === "/game/final") void navigate({ to: "/game/final" });
