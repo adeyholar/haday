@@ -4,7 +4,7 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
 const { itemsForWeek, bbhVocab } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { VOCAB_S2, itemsForTerm2Week, isTerm2Week } = await jiti.import("/workspace/src/lib/vocab-s2.ts");
+const { VOCAB_S2, itemsForTerm2Week, isTerm2Week, TERM2_WEEKS, weekForTerm2Chapter } = await jiti.import("/workspace/src/lib/vocab-s2.ts");
 const { TERM2_LESSONS } = await jiti.import("/workspace/src/lib/term2-lessons.ts");
 const { secondTermBlock } = await jiti.import("/workspace/src/lib/path.ts");
 
@@ -13,14 +13,22 @@ test("semester 2 words stay off the first-term list", () => {
   assert.ok(VOCAB_S2.every((item) => item.id.startsWith("s2-")));
   assert.equal(bbhVocab().some((item) => item.id.startsWith("s2-")), false);
   assert.equal(itemsForWeek(1).some((item) => item.id.startsWith("s2-")), false);
-  const week1 = itemsForWeek(101);
-  assert.ok(week1.length > 0);
-  assert.ok(week1.every((item) => item.chapter === 20));
+  const chapter20 = itemsForWeek(101);
+  assert.ok(chapter20.length > 0);
+  assert.ok(chapter20.every((item) => item.chapter === 20));
+  assert.equal(TERM2_WEEKS.length, 16);
+  assert.ok(TERM2_WEEKS.every((row) => row.chapters.length === 1 && !row.label.startsWith("Week")));
+  assert.equal(weekForTerm2Chapter(24), 105);
+  assert.ok(itemsForWeek(105).every((item) => item.chapter === 24));
+  assert.equal(weekForTerm2Chapter(35), 116);
+  assert.ok(itemsForTerm2Week(116).every((item) => item.chapter === 35));
   assert.equal(isTerm2Week(101), true);
+  assert.equal(isTerm2Week(116), true);
   assert.equal(isTerm2Week(15), false);
-  const all = itemsForTerm2Week(112);
-  const pala = all.filter((item) => item.hebrew.includes("פָּלָא") || item.hebrew.includes("פָּלָא"));
-  assert.equal(pala.length, 1);
+  assert.equal(isTerm2Week(112), true);
+  const pala = VOCAB_S2.filter((item) => item.hebrew.includes("פָּלָא") || item.hebrew.includes("פָּלָא"));
+  assert.equal(pala.length, 2);
+  assert.equal(itemsForTerm2Week(weekForTerm2Chapter(24)).filter((item) => item.hebrew.includes("לָא")).length, 1);
   assert.equal(secondTermBlock("/drill", 2), null);
   assert.equal(secondTermBlock("/game", 2), "/bbh");
   assert.equal(TERM2_LESSONS.length, 16);

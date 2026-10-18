@@ -212,20 +212,33 @@ export const VOCAB_S2: VocabItem[] = [
   { id: "s2-35-12", hebrew: "חָלָל", translit: "ḥālāl", gloss: "pierced, slain, defiled", alts: ["pierced", "slain", "defiled"], pos: "adj", chapter: 35, freq: 94, stems: "pierced, slain, defiled" },
 ];
 
-export const TERM2_WEEKS = [
-  { week: 101, show: 1, label: "Week 1", chapters: [20], hint: "Infinitive construct" },
-  { week: 102, show: 2, label: "Week 2", chapters: [21], hint: "Infinitive absolute" },
-  { week: 103, show: 3, label: "Week 3", chapters: [22], hint: "Participle" },
-  { week: 104, show: 4, label: "Week 4", chapters: [23], hint: "Sentence order" },
-  { week: 105, show: 5, label: "Week 5", chapters: [24, 25], hint: "Niphal" },
-  { week: 106, show: 6, label: "Week 6", chapters: [26, 27], hint: "Hiphil" },
-  { week: 107, show: 7, label: "Week 7", chapters: [20, 21, 22, 23, 24, 25, 26, 27], hint: "Midterm · chapters 20–27" },
-  { week: 108, show: 8, label: "Week 8", chapters: [28, 29], hint: "Hophal" },
-  { week: 109, show: 9, label: "Week 9", chapters: [30, 31], hint: "Piel" },
-  { week: 110, show: 10, label: "Week 10", chapters: [32, 33], hint: "Pual" },
-  { week: 111, show: 11, label: "Week 11", chapters: [34, 35], hint: "Hithpael" },
-  { week: 112, show: 12, label: "Week 12", chapters: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], hint: "All of Semester 2" },
+/** One study set per chapter. Weeks wait for the class syllabus. */
+const TERM2_CHAPTERS = [
+  { chapter: 20, hint: "Infinitive construct" },
+  { chapter: 21, hint: "Infinitive absolute" },
+  { chapter: 22, hint: "Participle" },
+  { chapter: 23, hint: "Sentence order" },
+  { chapter: 24, hint: "Niphal, strong verbs" },
+  { chapter: 25, hint: "Niphal, weak verbs" },
+  { chapter: 26, hint: "Hiphil, strong verbs" },
+  { chapter: 27, hint: "Hiphil, weak verbs" },
+  { chapter: 28, hint: "Hophal, strong verbs" },
+  { chapter: 29, hint: "Hophal, weak verbs" },
+  { chapter: 30, hint: "Piel, strong verbs" },
+  { chapter: 31, hint: "Piel, weak verbs" },
+  { chapter: 32, hint: "Pual, strong verbs" },
+  { chapter: 33, hint: "Pual, weak verbs" },
+  { chapter: 34, hint: "Hithpael, strong verbs" },
+  { chapter: 35, hint: "Hithpael, weak verbs" },
 ] as const;
+
+export const TERM2_WEEKS = TERM2_CHAPTERS.map((row) => ({
+  week: TERM2_WEEK_BASE + (row.chapter - 20),
+  show: row.chapter,
+  label: `Chapter ${row.chapter}`,
+  chapters: [row.chapter] as const,
+  hint: row.hint,
+}));
 
 export function isTerm2Week(week: number): boolean {
   return TERM2_WEEKS.some((row) => row.week === week);
@@ -262,8 +275,6 @@ export function term2StudyMeta(week: number): { label: string; hint: string } {
 }
 
 export function weekForTerm2Chapter(chapter: number): number {
-  const row = TERM2_WEEKS.find(
-    (item) => item.chapters.length <= 2 && (item.chapters as readonly number[]).includes(chapter),
-  );
+  const row = TERM2_WEEKS.find((item) => item.chapters[0] === chapter);
   return row?.week ?? TERM2_WEEK_BASE;
 }

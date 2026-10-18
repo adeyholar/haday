@@ -20,8 +20,8 @@ export function WeekSelect() {
   if (isTerm2Week(week)) {
     return (
       <div>
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">Study set</span>
-        <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">Chapter</span>
+        <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
           {TERM2_WEEKS.map((w) => (
             <button
               key={w.week}
@@ -29,11 +29,11 @@ export function WeekSelect() {
               title={`${w.label} — ${w.hint}`}
               onClick={() => setWeek(w.week)}
               className={cn(
-                "min-h-11 rounded-[var(--radius-md)] px-1 text-xs font-semibold",
+                "min-h-11 rounded-[var(--radius-md)] px-1 text-sm font-semibold tabular-nums",
                 week === w.week ? "bg-primary text-primary-foreground" : "bg-card text-ink shadow-[var(--shadow-border)]",
               )}
             >
-              Wk {w.show}
+              {w.show}
             </button>
           ))}
         </div>
