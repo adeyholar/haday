@@ -77,9 +77,9 @@ export function grammarTerm(value: string | number | null | undefined): GrammarT
   return value === 2 || value === "2" ? 2 : 1;
 }
 
-/** Students stay in Semester 1 until that choice is opened for them. */
-export function termForAccount(gate: { admin: boolean; term: GrammarTerm }): GrammarTerm {
-  return gate.admin && gate.term === 2 ? 2 : 1;
+/** The semester stored on the account. */
+export function termForAccount(gate: { term: GrammarTerm }): GrammarTerm {
+  return gate.term === 2 ? 2 : 1;
 }
 
 const termListeners = new Set<(term: GrammarTerm) => void>();
@@ -114,13 +114,44 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
 
 const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits"];
 
-/** Semester 2 is its own room. A first-term page sends the admin back to that room. */
-export function secondTermBlock(pathname: string, term: GrammarTerm): "/bbh" | null {
-  if (term !== 2) return null;
+/** A semester room is closed while the other is open, and while they are still choosing. */
+export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {
+  if (term !== 2 && !hall) return null;
   if (pathname === "/" || pathname === "/bbh") return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/iibs")) return null;
   if (SECOND_ROOM.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
   return "/bbh";
+}
+
+export const TERM_HALL = "haday-term-hall";
+
+const hallListeners = new Set<() => void>();
+
+export function termHallOpen(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.sessionStorage.getItem(TERM_HALL) === "1";
+}
+
+/** Mark the hall without telling the open page. Used before a navigation. */
+export function markTermHall() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(TERM_HALL, "1");
+}
+
+export function openTermHall() {
+  markTermHall();
+  for (const hear of hallListeners) hear();
+}
+
+export function closeTermHall() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(TERM_HALL);
+  for (const hear of hallListeners) hear();
+}
+
+export function subscribeHall(hear: () => void): () => void {
+  hallListeners.add(hear);
+  return () => hallListeners.delete(hear);
 }
 
 const SHARED = [

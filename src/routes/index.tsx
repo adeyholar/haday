@@ -6,7 +6,7 @@ import { PublicFooter } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
-import { clearDoor, homeForAccount, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
+import { clearDoor, homeForAccount, markTermHall, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
 import { CLASS_SITE } from "@/lib/class-site";
 import { SITE_JSON_LD } from "@/lib/seo";
 
@@ -39,6 +39,7 @@ function DoorsPage() {
               const chosen = await choosePath({ data: { path: intent } });
               if (chosen.ok) {
                 rememberDoor(chosen.path);
+                if (chosen.path === "bbh") markTermHall();
                 window.location.replace(chosen.path === "iibs" ? "/iibs" : "/bbh");
                 return;
               }
@@ -47,6 +48,7 @@ function DoorsPage() {
           const home = homeForAccount(next);
           if (home) {
             rememberDoor(next.path!);
+            if (home === "/bbh") markTermHall();
             window.location.replace(home);
             return;
           }
@@ -91,6 +93,7 @@ function DoorsPage() {
         return;
       }
       rememberDoor(result.path);
+      if (result.path === "bbh") markTermHall();
       window.location.assign(result.path === "iibs" ? "/iibs" : "/bbh");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save that choice.");
@@ -248,7 +251,14 @@ function Door({
     );
   }
   return (
-    <Link to={href} className={className} onClick={() => rememberDoor(kind)}>
+    <Link
+      to={href}
+      className={className}
+      onClick={() => {
+        rememberDoor(kind);
+        if (kind === "bbh") markTermHall();
+      }}
+    >
       {body}
     </Link>
   );
