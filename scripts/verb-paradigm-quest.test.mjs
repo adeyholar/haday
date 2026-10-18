@@ -123,10 +123,18 @@ test("the first check is the grade", () => {
   assert.equal(quest.firstAnswer(null, true, true), false);
 });
 
-test("eight of nine opens the next level", () => {
-  const passed = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 89, null);
+test("one miss can still be ninety percent", () => {
+  const nineClean = Array.from({ length: 9 }, () => true);
+  assert.equal(quest.questPercent(nineClean), 100);
+  const oneMiss = [...Array.from({ length: 8 }, () => true), false, true];
+  assert.equal(quest.questPercent(oneMiss), 90);
+  const missedAgain = [...Array.from({ length: 8 }, () => true), false, false];
+  assert.equal(quest.questPercent(missedAgain), 80);
+  const twoMisses = [...Array.from({ length: 7 }, () => true), false, false, true, true];
+  assert.equal(quest.questPercent(twoMisses), 82);
+  const passed = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 90, null);
   assert.equal(passed.unlocked, 2);
-  const held = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 78, null);
+  const held = quest.recordVerbQuest(quest.emptyVerbQuest(), 1, 89, null);
   assert.equal(held.unlocked, 1);
 });
 

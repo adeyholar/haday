@@ -245,6 +245,13 @@ export function firstAnswer(locked: boolean | null, correct: boolean, helped: bo
   return correct && !helped;
 }
 
+/** A sitting is the nine forms. Each miss is dealt once more and graded on its own first Check. */
+export function questPercent(results: readonly boolean[]): number {
+  if (!results.length) return 0;
+  const clean = results.filter(Boolean).length;
+  return Math.round((clean / results.length) * 100);
+}
+
 export function questVoiceRows(): { id: string; glyph: string; speakEn: string }[] {
   const roots = [QATAL, ...transferRoots()];
   const rows: { id: string; glyph: string; speakEn: string }[] = [];
@@ -431,7 +438,7 @@ export function recordVerbQuest(prev: VerbQuestProgress, level: number, pct: num
   const score = Math.max(0, Math.min(100, Math.round(pct)));
   if (level >= 1 && level <= 4) {
     next.best[level] = Math.max(next.best[level] ?? 0, score);
-    if (score >= 89) {
+    if (score >= 90) {
       next.cleared[level] = true;
       if (level === next.unlocked && next.unlocked < 4) next.unlocked += 1;
       if (rootId && (level === 2 || level === 4) && !next.sealed.includes(rootId)) next.sealed = [...next.sealed, rootId].slice(0, 40);

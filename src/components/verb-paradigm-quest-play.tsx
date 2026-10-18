@@ -14,6 +14,7 @@ import {
   firstAnswer,
   placeRequiredMark,
   qalPerfect,
+  questPercent,
   recordVerbQuest,
   redFrom,
   splitClusters,
@@ -81,7 +82,7 @@ export function VerbQuestHome() {
                     {row.id}. {row.name}
                   </span>
                   {quest.cleared[row.id] ? <span className="ml-2 text-sm text-good">Cleared</span> : null}
-                  <span className="mt-1 block text-sm text-muted">{open ? row.hint : "8 of 9 on the previous level opens this."}</span>
+                  <span className="mt-1 block text-sm text-muted">{open ? row.hint : "90% on the previous level opens this."}</span>
                 </button>
               </li>
             );
@@ -117,7 +118,8 @@ function VerbQuestSitting({
   const byPgn = useMemo(() => Object.fromEntries(forms.map((row) => [row.pgn, row])) as Record<Pgn, VerbForm>, [forms]);
   const [queue, setQueue] = useState<Pgn[]>(() => shuffle([...PGN_ORDER]));
   const [returned, setReturned] = useState<Partial<Record<Pgn, boolean>>>({});
-  const [outcome, setOutcome] = useState<Partial<Record<Pgn, "clean" | "miss">>>({});
+  const [log, setLog] = useState<boolean[]>([]);
+  const [deal, setDeal] = useState(0);
   const [filled, setFilled] = useState<Partial<Record<Pgn, boolean>>>({});
   const [ending, setEnding] = useState("");
   const [built, setBuilt] = useState("");
@@ -144,7 +146,8 @@ function VerbQuestSitting({
   useEffect(() => {
     setQueue(shuffle([...PGN_ORDER]));
     setReturned({});
-    setOutcome({});
+    setLog([]);
+    setDeal(0);
     setFilled({});
     setDonePct(null);
   }, [level, root.id]);
@@ -162,7 +165,7 @@ function VerbQuestSitting({
     setTries(0);
     setRevealed(false);
     setFirstClean(null);
-  }, [card]);
+  }, [card, deal]);
 
   function speak(row: VerbForm) {
     hear.current.stop = true;
@@ -185,19 +188,18 @@ function VerbQuestSitting({
   }
 
   function finishCard(row: VerbForm, clean: boolean) {
-    const nextOutcome = outcome[row.pgn] ?? (clean ? "clean" : "miss");
-    const outcomes = { ...outcome, [row.pgn]: nextOutcome };
+    const results = [...log, clean];
     const back = !clean && !returned[row.pgn];
     const rest = queue.slice(1);
     const nextQueue = back ? [...rest, row.pgn] : rest;
-    setOutcome(outcomes);
+    setLog(results);
     setFilled((prev) => ({ ...prev, [row.pgn]: true }));
     setReturned((prev) => (back ? { ...prev, [row.pgn]: true } : prev));
+    setDeal((n) => n + 1);
     setQueue(nextQueue);
     if (clean) speak(row);
     if (!nextQueue.length) {
-      const cleans = PGN_ORDER.filter((id) => outcomes[id] === "clean").length;
-      const pct = Math.round((cleans / PGN_ORDER.length) * 100);
+      const pct = questPercent(results);
       setDonePct(pct);
       save(recordVerbQuest(useStudy.getState().game.verbParadigmQuest, level, pct, level === 2 || level === 4 ? root.id : null));
     }
@@ -266,12 +268,12 @@ function VerbQuestSitting({
   }
 
   if (donePct != null) {
-    const cleared = donePct >= 89;
+    const cleared = donePct >= 90;
     return (
       <Panel className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{LEVELS[level - 1]?.name}</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">{cleared ? "Paradigm sealed" : "Not yet"}</h1>
-        <p className="mt-2 text-sm text-muted">{donePct}% clean. 8 of 9 opens the next.</p>
+        <p className="mt-2 text-sm text-muted">{donePct}% clean. 90% opens the next. A miss comes back once, and that card counts.</p>
         <div className="mt-4">
           <Board forms={forms} filled={Object.fromEntries(PGN_ORDER.map((id) => [id, true]))} active={null} />
         </div>
