@@ -246,10 +246,10 @@ export const VOCAB: VocabItem[] = [
   { id: "raah", hebrew: "רָאָה", translit: "rāʾâ", gloss: "to see, perceive, understand", alts: ["see", "perceive", "understand", "look", "appear"], stems: "(Q) see, perceive, understand. (Ni) appear. (Pu) be seen. (Hi) show.", pos: "verb", chapter: 12, freq: 1311 },
   { id: "shama", hebrew: "שָׁמַע", translit: "šāmaʿ", gloss: "to hear, listen, obey", alts: ["hear", "listen", "understand", "obey", "proclaim"], stems: "(Q) hear, listen, understand, obey. (Ni) be heard. (Hi) proclaim.", pos: "verb", chapter: 12, freq: 1165 },
   { id: "ak", hebrew: "אַךְ", translit: "ʾak", gloss: "only, surely, nevertheless", alts: ["only", "surely", "nevertheless"], pos: "particle", chapter: 12, freq: 161 },
-  { id: "al-neg", hebrew: "אַל", translit: "ʾal", gloss: "do not", alts: ["do not", "don't", "no", "not"], stems: "Do not. It takes a jussive. לֹא is the general “not.”", pos: "particle", chapter: 12, freq: 729 },
+  { id: "al-neg", hebrew: "אַל", translit: "ʾal", gloss: "do not (command)", alts: ["do not", "don't"], stems: "A command not to. It takes a jussive. It is not the general לֹא.", pos: "particle", chapter: 12, freq: 729 },
   { id: "im-if", hebrew: "אִם", translit: "ʾim", gloss: "if", alts: ["if", "whether", "or"], hebrewAlts: ["כִּי־אִם"], stems: "If. Also “or” in a double question. כִּי־אִם means but, except, only.", pos: "particle", chapter: 12, freq: 1070 },
   { id: "bal", hebrew: "בַּל", translit: "bal", gloss: "no, never", alts: ["no", "never", "not"], stems: "Poetic “no, never.” Mostly Isaiah, Psalms, and Proverbs.", pos: "particle", chapter: 12, freq: 73 },
-  { id: "lo", hebrew: "לֹא", translit: "lōʾ", gloss: "no, not", alts: ["no", "not"], hebrewAlts: ["לוֹא"], stems: "The general “not.” Also spelled לוֹא.", pos: "particle", chapter: 12, freq: 5189 },
+  { id: "lo", hebrew: "לֹא", translit: "lōʾ", gloss: "not (statement)", alts: ["not", "no", "no, not"], hebrewAlts: ["לוֹא"], stems: "The general “not” on a statement. Also spelled לוֹא.", pos: "particle", chapter: 12, freq: 5189 },
   { id: "attah-now", hebrew: "עַתָה", translit: "ʿattâ", gloss: "now, after all, at last, then", alts: ["now", "after all", "at last", "then"], pos: "particle", chapter: 12, freq: 435 },
   { id: "tamid", hebrew: "תָּמִיד", translit: "tāmîd", gloss: "continually", alts: ["continually", "always", "regularly"], stems: "Continually, regularly.", pos: "particle", chapter: 12, freq: 104 },
 
@@ -866,6 +866,7 @@ export function quizChoices(item: VocabItem, pool: VocabItem[], n = 4): string[]
     for (const { x, s } of scored) {
       if (distractors.length >= need) break;
       if (seen.has(x.gloss)) continue;
+      if (glossMatches(item, x.gloss) || glossMatches(x, item.gloss)) continue;
       if (!last && s < 8) continue;
       seen.add(x.gloss);
       distractors.push(x.gloss);
