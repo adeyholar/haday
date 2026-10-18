@@ -22,6 +22,7 @@ export type NavHref =
   | "/keep"
   | "/guide"
   | "/study"
+  | "/study/term2"
   | "/study/station/$id"
   | "/study/lesson/$id"
   | "/challenge"

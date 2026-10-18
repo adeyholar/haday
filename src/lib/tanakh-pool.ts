@@ -2,6 +2,7 @@ import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { SYLLABLE_UNITS } from "@/lib/syllables";
 import { VERSES, type VerseEx } from "@/lib/verses";
 import { VOCAB, itemsForWeek, shuffle, type VocabItem } from "@/lib/vocab";
+import { term2ById } from "@/lib/vocab-s2";
 
 const FORM_VERSES: Record<string, VerseEx> = {};
 
@@ -611,7 +612,7 @@ export function lemmaIdOf(id: string): string {
 
 export function findStudyItem(id: string): VocabItem | undefined {
   if (id.startsWith("alef:") || id.startsWith("ch1-")) return undefined;
-  const lemma = VOCAB.find((v) => v.id === id);
+  const lemma = VOCAB.find((v) => v.id === id) ?? term2ById(id);
   if (lemma) return lemma;
   return tanakhForms().find((v) => v.id === id);
 }

@@ -1,9 +1,11 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { GroupSelect } from "@/components/group-select";
+import { useStudy } from "@/lib/store";
+import { isTerm2Week } from "@/lib/vocab-s2";
 
 const OPTIONS = [
   { value: "/", match: (p: string) => p === "/", label: "Home" },
-  { value: "/study", match: (p: string) => p.startsWith("/study"), label: "Stations" },
+  { value: "/study", match: (p: string) => p.startsWith("/study") && !p.startsWith("/study/term2"), label: "Stations" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/weak", match: (p: string) => p.startsWith("/weak"), label: "Weak pool" },
   { value: "/cards", match: (p: string) => p.startsWith("/cards"), label: "Cards" },
@@ -21,19 +23,34 @@ const OPTIONS = [
   { value: "/guide", match: (p: string) => p.startsWith("/guide"), label: "Guide" },
 ] as const;
 
+const TERM2_OPTIONS = [
+  { value: "/bbh", match: (p: string) => p === "/bbh", label: "Home" },
+  { value: "/study/term2", match: (p: string) => p.startsWith("/study/term2"), label: "Lessons" },
+  { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
+  { value: "/weak", match: (p: string) => p.startsWith("/weak"), label: "Weak pool" },
+  { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
+  { value: "/quiz", match: (p: string) => p.startsWith("/quiz"), label: "Quiz" },
+  { value: "/match", match: (p: string) => p.startsWith("/match"), label: "Match" },
+  { value: "/browse", match: (p: string) => p.startsWith("/browse"), label: "Lexicon" },
+] as const;
+
 export function StudyMenu() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const current = OPTIONS.find((o) => o.match(pathname))?.value ?? "/";
+  const week = useStudy((s) => s.week);
+  const options = isTerm2Week(week) ? TERM2_OPTIONS : OPTIONS;
+  const current = options.find((o) => o.match(pathname))?.value ?? options[0].value;
 
   return (
     <GroupSelect
       title="Study"
       value={current}
-      options={OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+      options={options.map((o) => ({ value: o.value, label: o.label }))}
       onChange={(to) => {
         if (to === "/") void navigate({ to: "/" });
+        else if (to === "/bbh") void navigate({ to: "/bbh" });
         else if (to === "/study") void navigate({ to: "/study" });
+        else if (to === "/study/term2") void navigate({ to: "/study/term2" });
         else if (to === "/drill") void navigate({ to: "/drill" });
         else if (to === "/weak") void navigate({ to: "/weak" });
         else if (to === "/cards") void navigate({ to: "/cards" });
