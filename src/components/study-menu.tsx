@@ -23,12 +23,10 @@ const OPTIONS = [
   { value: "/guide", match: (p: string) => p.startsWith("/guide"), label: "Guide" },
 ] as const;
 
-const TERM2_OPTIONS = [
+const TERM2_STUDY = [
   { value: "/bbh", match: (p: string) => p === "/bbh", label: "Home" },
-  { value: "/study/term2/game", match: (p: string) => p.startsWith("/study/term2/game"), label: "Game" },
-  { value: "/study/term2/listen", match: (p: string) => p.startsWith("/study/term2/listen"), label: "Listen" },
+  { value: "/study/term2", match: (p: string) => p.startsWith("/study/term2") && !p.startsWith("/study/term2/game") && !p.startsWith("/study/term2/listen") && !p.startsWith("/study/term2/exam"), label: "Lessons" },
   { value: "/study/term2/exam", match: (p: string) => p.startsWith("/study/term2/exam"), label: "Exam" },
-  { value: "/study/term2", match: (p: string) => p.startsWith("/study/term2"), label: "Lessons" },
   { value: "/drill", match: (p: string) => p.startsWith("/drill"), label: "Drill" },
   { value: "/weak", match: (p: string) => p.startsWith("/weak"), label: "Weak pool" },
   { value: "/write", match: (p: string) => p.startsWith("/write"), label: "Write" },
@@ -37,16 +35,34 @@ const TERM2_OPTIONS = [
   { value: "/browse", match: (p: string) => p.startsWith("/browse"), label: "Lexicon" },
 ] as const;
 
+const TERM2_GAME = [
+  { value: "/bbh", match: (p: string) => p === "/bbh", label: "Home" },
+  { value: "/study/term2/game", match: (p: string) => p.startsWith("/study/term2/game"), label: "Vocabulary" },
+] as const;
+
+const TERM2_LISTEN = [
+  { value: "/bbh", match: (p: string) => p === "/bbh", label: "Home" },
+  { value: "/study/term2/listen/road", match: (p: string) => p.startsWith("/study/term2/listen/road"), label: "On the road" },
+  { value: "/study/term2/listen", match: (p: string) => p.startsWith("/study/term2/listen"), label: "Vocabulary" },
+] as const;
+
 export function StudyMenu() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const week = useStudy((s) => s.week);
-  const options = isTerm2Week(week) ? TERM2_OPTIONS : OPTIONS;
+  const term2 = isTerm2Week(week) || pathname.startsWith("/study/term2");
+  const term2Kind = pathname.startsWith("/study/term2/game")
+    ? "game"
+    : pathname.startsWith("/study/term2/listen")
+      ? "listen"
+      : "study";
+  const options = !term2 ? OPTIONS : term2Kind === "game" ? TERM2_GAME : term2Kind === "listen" ? TERM2_LISTEN : TERM2_STUDY;
   const current = options.find((o) => o.match(pathname))?.value ?? options[0].value;
+  const title = !term2 ? "Study" : term2Kind === "game" ? "Game" : term2Kind === "listen" ? "Listen" : "Study";
 
   return (
     <GroupSelect
-      title="Study"
+      title={title}
       value={current}
       options={options.map((o) => ({ value: o.value, label: o.label }))}
       onChange={(to) => {
@@ -56,6 +72,7 @@ export function StudyMenu() {
         else if (to === "/study/term2") void navigate({ to: "/study/term2" });
         else if (to === "/study/term2/game") void navigate({ to: "/study/term2/game" });
         else if (to === "/study/term2/listen") void navigate({ to: "/study/term2/listen" });
+        else if (to === "/study/term2/listen/road") void navigate({ to: "/study/term2/listen/road" });
         else if (to === "/study/term2/exam") void navigate({ to: "/study/term2/exam/$chapter", params: { chapter: "20" } });
         else if (to === "/drill") void navigate({ to: "/drill" });
         else if (to === "/weak") void navigate({ to: "/weak" });
