@@ -81,7 +81,8 @@ function Round({
       setPicked(choice);
       setOk(true);
       setPhase("done");
-      setScore((s) => ({ ...s, right: s.right + 1 }));
+      if (phase === "ask") setScore((s) => ({ ...s, right: s.right + 1 }));
+      else setScore((s) => ({ ...s, wrong: s.wrong + 1 }));
       return;
     }
     if (phase === "ask") {
@@ -127,7 +128,7 @@ function Round({
         <p className="mt-1 text-xl tabular-nums text-muted">
           {score.right} / {total}
         </p>
-        <p className="mt-2 text-sm text-muted">Practice score. This does not open the next level.</p>
+        <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next level.</p>
         <Button className="mt-6" onClick={onAgain}>
           New round
         </Button>

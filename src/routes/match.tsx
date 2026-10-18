@@ -126,8 +126,9 @@ function MatchPage() {
     setPickSel(id);
     playGrade(ok);
     rate(item.id, ok ? "good" : "again");
-    if (ok) setRight((n) => n + 1);
-    else setWrongN((n) => n + 1);
+    if (ok) {
+      if (!retryIds.has(item.id)) setRight((n) => n + 1);
+    } else if (!retryIds.has(item.id)) setWrongN((n) => n + 1);
   }
 
   function nextPick() {
@@ -170,7 +171,7 @@ function MatchPage() {
           <p className="mt-1 text-xl text-ink">
             {right} right · {wrongN} miss
           </p>
-          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next chapter.</p>
+          <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next chapter.</p>
           <Button className="mt-4 w-full" onClick={() => setSeed((n) => n + 1)}>
             New match board
           </Button>

@@ -147,7 +147,7 @@ function QuizPage() {
           <p className="mt-1 font-display text-xl tabular-nums text-muted">
             {score.right} / {total}
           </p>
-          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next chapter.</p>
+          <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next chapter.</p>
           <Button className="mt-6" onClick={resetRound}>
             New round
           </Button>
@@ -203,7 +203,7 @@ function QuizPage() {
                   onClick={() => {
                     if (c === item.gloss) {
                       setPicked(c);
-                      mark(true);
+                      mark(!missedChoice);
                       playFeedback("strong");
                       return;
                     }
@@ -263,7 +263,7 @@ function QuizPage() {
             if (ok) {
               playFeedback("strong");
               setRevealed(true);
-              mark(true);
+              mark(typeTries < 1);
               return;
             }
             if (typeTries < 1) {

@@ -331,7 +331,7 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
                 : `Need ${LADDER_DRILL_PASS}% on six letters or the whole line. Try again.`}
             </p>
           ) : (
-            <p className="mt-2 text-sm text-muted">Practice score. This does not open the next station.</p>
+            <p className="mt-2 text-sm text-muted">Only the first answer counts. This does not open the next station.</p>
           )}
           <Button className="mt-4" onClick={() => setSeed((s) => s + 1)}>
             New round
@@ -426,10 +426,10 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
                 onClick={() => {
                   if (id === prompt.id) {
                     setPicked(id);
-                    setRight((r) => r + 1);
+                    if (!missedId) setRight((r) => r + 1);
                     playFeedback("strong");
                     const key = isLetter && letter ? alefKey("letter", letter.id) : vowel ? alefKey("vowel", vowel.id) : null;
-                    if (key) rate(key, missedId ? "good" : "easy");
+                    if (key) rate(key, missedId ? "again" : "easy");
                     return;
                   }
                   if (!missedId) {

@@ -732,7 +732,7 @@ export function EtchPlay({
               <span className="mt-1 block font-display text-lg">{item.gloss}</span>
             </p>
           )}
-          <Button className="mt-3 w-full" onClick={() => finish(told ? "reveal" : ok ? "good" : "again")}>
+          <Button className="mt-3 w-full" onClick={() => finish(told ? "reveal" : ok && tries < 1 ? "good" : "again")}>
             Next
           </Button>
         </div>
