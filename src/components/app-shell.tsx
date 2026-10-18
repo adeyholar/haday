@@ -38,7 +38,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock } from "@/lib/path";
+import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock, secondTermBlock, subscribeTerm, termForAccount, termRevisionNow, noteServerTerm } from "@/lib/path";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
@@ -178,12 +178,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           if (!cancelled) setIsAdmin(false);
         });
 
+      const seenTerm = termRevisionNow();
       void getMyPath()
         .then((gate) => {
-          if (!cancelled) setPathGate(gate);
+          if (cancelled) return;
+          const term = noteServerTerm(termForAccount(gate), seenTerm);
+          setPathGate({ ...gate, term });
         })
         .catch(() => {
-          if (!cancelled) setPathGate({ path: "bbh", cleared: null, admin: false });
+          if (!cancelled) setPathGate({ path: "bbh", cleared: null, admin: false, term: 1 });
         });
 
       unsub = useStudy.subscribe((state) => {
@@ -221,6 +224,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     setDoorReady(true);
   }, []);
+
+  useEffect(() => subscribeTerm((term) => {
+    setPathGate((gate) => (gate ? { ...gate, term } : gate));
+  }), []);
 
   if (isPublic) {
     return (
@@ -269,6 +276,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         ? blockedDestination(pathname, pathGate)
         : null;
   if (blocked) return <Navigate to={blocked} />;
+  const term = pathGate ? termForAccount(pathGate) : 1;
+  const termHome = secondTermBlock(pathname, term);
+  if (termHome) return <Navigate to={termHome} replace />;
+  const secondRoom = term === 2 && !onIibs;
 
   return (
     <div className="min-h-dvh text-fg">
@@ -312,7 +323,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             </NavTip>
             </>
-            ) : (
+            ) : secondRoom ? null : (
             <NavMenu
               label="Game"
               icon={Compass}
@@ -320,7 +331,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               active={pathname.startsWith("/game") || pathname.startsWith("/challenge")}
             />
             )}
-            {iibsOnly ? null : (
+            {iibsOnly || secondRoom ? null : (
             <NavMenu
               label="Study"
               icon={Library}
@@ -331,7 +342,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               }
             />
             )}
-            {iibsOnly ? null : (
+            {iibsOnly || secondRoom ? null : (
             <NavMenu
               label="Listen"
               icon={Headphones}
@@ -355,14 +366,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <NavMenu
               label="More"
               icon={MoreHorizontal}
-              items={moreItems(isAdmin, iibsOnly)}
+              items={moreItems(isAdmin, iibsOnly || secondRoom)}
               active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/use", "/admin/voice", "/admin/query", "/finder", "/ask", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/admin") || pathname.startsWith("/finder")}
             />
             <NavTip label="Answer sounds">
               <SfxToggle />
             </NavTip>
+            {secondRoom ? null : (
             <HonorBadge honor={honor} compact className="hidden max-w-[7.5rem] sm:inline-flex" />
-            {board.crown ? <CrownBadge compact className="hidden sm:inline-flex" /> : null}
+            )}
+            {secondRoom || !board.crown ? null : <CrownBadge compact className="hidden sm:inline-flex" />}
             <div className="account-chip min-w-0 shrink">
               <UserButton />
             </div>
@@ -373,7 +386,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
-        <ul className={cn("mx-auto grid max-w-3xl", iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
+        <ul className={cn("mx-auto grid max-w-3xl", secondRoom ? "grid-cols-1" : iibsOnly ? "grid-cols-5" : "grid-cols-4")}>
           <li>
             <NavTip label="Home" side="top" full>
               <Link
@@ -454,7 +467,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 />
               </li>
             </>
-          ) : (
+          ) : secondRoom ? null : (
             <>
           <li>
             <NavMenu

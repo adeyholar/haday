@@ -43,7 +43,7 @@ function VocabLevelPage() {
         if (!cancelled) setGate(next);
       })
       .catch(() => {
-        if (!cancelled) setGate({ path: null, cleared: null, admin: false });
+        if (!cancelled) setGate({ path: null, cleared: null, admin: false, term: 1 });
       });
     return () => {
       cancelled = true;
