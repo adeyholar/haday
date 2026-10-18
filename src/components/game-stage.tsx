@@ -32,6 +32,8 @@ import { verseFor } from "@/lib/verses";
 import { scoreboard } from "@/lib/rewards";
 import { useStudy } from "@/lib/store";
 import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
+import { term2Lesson } from "@/lib/term2-lessons";
+import { term2ChapterPool, term2ChapterRecord, term2ContinueTarget, TERM2_CHAPTER_MAX } from "@/lib/term2-game";
 import { GUESS_MS } from "@/lib/etch";
 
 function spellTargets(item: VocabItem, stage: GameStageId): { target: string; alts: string[] } {
@@ -57,22 +59,26 @@ type Props = {
   stage: GameStageId;
   /** Combined review of already-cleared chapters. Does not change the path. */
   mixChapters?: number[];
+  /** Semester 2 uses its own word list and its own scores. */
+  room?: "class" | "term2";
 };
 
 type Phase = "play" | "done";
 
-export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
+export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: Props) {
+  const term2 = room === "term2";
   const navigate = useNavigate();
   const completeGameStage = useStudy((s) => s.completeGameStage);
+  const completeTerm2Stage = useStudy((s) => s.completeTerm2Stage);
   const rate = useStudy((s) => s.rate);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const [deal, setDeal] = useState(0);
   const mixKey = mixChapters?.join(",") ?? "";
-  const isMix = Boolean(mixChapters?.length);
+  const isMix = !term2 && Boolean(mixChapters?.length);
   const pool = useMemo(
-    () => (mixKey ? mixPlayPool(mixKey.split(",").map(Number)) : chapterPlayPool(chapter, stage)),
-    [chapter, stage, mixKey],
+    () => (term2 ? term2ChapterPool(chapter) : mixKey ? mixPlayPool(mixKey.split(",").map(Number)) : chapterPlayPool(chapter, stage)),
+    [term2, chapter, stage, mixKey],
   );
   const [queue, setQueue] = useState<VocabItem[]>(() => shuffleCopy(pool));
   const [total, setTotal] = useState(pool.length);
@@ -136,7 +142,8 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
         : liveMatchAny(spell.target, typed, spell.alts, true) === "exact";
   const choices = useMemo(() => (item ? quizChoices(item, pool) : []), [item, pool, guessKey]);
   const meta = stageMeta(stage);
-  const chapterMeta = CHAPTER_META[chapter];
+  const lesson = term2 ? term2Lesson(chapter) : undefined;
+  const chapterMeta = term2 ? (lesson ? { title: lesson.title, blurb: lesson.short } : undefined) : CHAPTER_META[chapter];
   const doneCount = total - queue.length;
   const showEnglish = Boolean(picked || revealed);
   const built = stage === "spell-strict" && helpedThis && typedOk && !revealed;
@@ -174,7 +181,11 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     const score = Math.round(rateValue * 100);
     setStars(earned);
     setPhase("done");
-    if (!isMix) completeGameStage(chapter, stage, { stars: earned, score, firstTryRate: rateValue });
+    if (!isMix) {
+      const payload = { stars: earned, score, firstTryRate: rateValue };
+      if (term2) completeTerm2Stage(chapter, stage, payload);
+      else completeGameStage(chapter, stage, payload);
+    }
   }
 
   function succeed(firstTry: boolean) {
@@ -317,7 +328,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
     return (
       <Panel>
         <p className="text-muted">No words in this chapter yet.</p>
-        <Link to="/game" className="mt-4 inline-block text-sm font-medium text-primary">
+        <Link to={term2 ? "/study/term2/game" : "/game"} className="mt-4 inline-block text-sm font-medium text-primary">
           Back to map
         </Link>
       </Panel>
@@ -327,10 +338,12 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
   if (phase === "done") {
     const idx = GAME_STAGES.findIndex((s) => s.id === stage);
     const nextStage = GAME_STAGES[idx + 1];
-    const next = continueTarget(game);
-    const chapterCleared = Boolean(game.chapters[String(chapter)]?.cleared);
+    const next = term2 ? term2ContinueTarget(game.term2) : continueTarget(game);
+    const chapterCleared = term2
+      ? Boolean(game.term2.chapters[String(chapter)]?.cleared)
+      : Boolean(game.chapters[String(chapter)]?.cleared);
     const board = scoreboard(game, streak);
-    const rec = chapterRecord(game, chapter).stages[stage];
+    const rec = term2 ? term2ChapterRecord(game.term2, chapter).stages[stage] : chapterRecord(game, chapter).stages[stage];
     const run = isMix ? 1 : rec.attempts || 1;
     const pct = Math.round((firstSeen ? firstHits / firstSeen : 1) * 100);
     const passed = pct >= GAME_STAGE_PASS;
@@ -356,16 +369,24 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
           {pct}% this round · {firstHits}/{firstSeen} clean on first answer
           {!isMix && rec.best ? ` · best ${rec.best}%` : ""}
         </p>
-        <p className="mt-1 text-sm text-muted">
-          Level {board.level} · {board.points.toLocaleString()} pts
-        </p>
+        {!term2 && (
+          <p className="mt-1 text-sm text-muted">
+            Level {board.level} · {board.points.toLocaleString()} pts
+          </p>
+        )}
         {isMix && (
           <p className="mt-3 text-sm text-muted">Review only — this mix does not unlock or lock the chapter path.</p>
         )}
         {!isMix && chapterCleared && (
           <p className="mt-3 text-sm font-medium text-good">
             Chapter {chapter} cleared
-            {chapter < 19 ? ` · Chapter ${chapter + 1} unlocked` : " · path complete"}
+            {term2
+              ? chapter < TERM2_CHAPTER_MAX
+                ? ` · Chapter ${chapter + 1} unlocked`
+                : " · path complete"
+              : chapter < 19
+                ? ` · Chapter ${chapter + 1} unlocked`
+                : " · path complete"}
           </p>
         )}
         {!isMix && !passed && (
@@ -373,7 +394,7 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
             First-answer score must be {GAME_STAGE_PASS}% or better to open the next stage.
           </p>
         )}
-        <NewBadges ids={game.justEarned ?? []} />
+        {!term2 && <NewBadges ids={game.justEarned ?? []} />}
         <div className="mt-6 flex flex-col gap-2">
           {isMix ? (
             <>
@@ -387,30 +408,57 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
               </Link>
             </>
           ) : passed && nextStage && !chapterCleared ? (
-            <Link to="/game/$chapter/$stage" params={{ chapter: String(chapter), stage: nextStage.id }}>
-              <Button className="w-full" size="lg">
-                Continue · {nextStage.name}
-              </Button>
-            </Link>
+            term2 ? (
+              <Link to="/study/term2/game/$chapter/$stage" params={{ chapter: String(chapter), stage: nextStage.id }}>
+                <Button className="w-full" size="lg">
+                  Continue · {nextStage.name}
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/game/$chapter/$stage" params={{ chapter: String(chapter), stage: nextStage.id }}>
+                <Button className="w-full" size="lg">
+                  Continue · {nextStage.name}
+                </Button>
+              </Link>
+            )
           ) : passed ? (
-            <Link
-              to="/game/$chapter/$stage"
-              params={{ chapter: String(next.chapter), stage: next.stage }}
-            >
-              <Button className="w-full" size="lg">
-                Continue · Chapter {next.chapter} · {stageMeta(next.stage).name}
-              </Button>
-            </Link>
+            term2 ? (
+              <Link
+                to="/study/term2/game/$chapter/$stage"
+                params={{ chapter: String(next.chapter), stage: next.stage }}
+              >
+                <Button className="w-full" size="lg">
+                  Continue · Chapter {next.chapter} · {stageMeta(next.stage).name}
+                </Button>
+              </Link>
+            ) : (
+              <Link
+                to="/game/$chapter/$stage"
+                params={{ chapter: String(next.chapter), stage: next.stage }}
+              >
+                <Button className="w-full" size="lg">
+                  Continue · Chapter {next.chapter} · {stageMeta(next.stage).name}
+                </Button>
+              </Link>
+            )
           ) : (
             <Button className="w-full" size="lg" onClick={replayStage}>
               Try again
             </Button>
           )}
-          <Link to={isMix ? "/game/custom" : "/game"}>
-            <Button className="w-full" variant="outline">
-              {isMix ? "Custom mix" : "Chapter map"}
-            </Button>
-          </Link>
+          {term2 ? (
+            <Link to="/study/term2/game">
+              <Button className="w-full" variant="outline">
+                Chapter map
+              </Button>
+            </Link>
+          ) : (
+            <Link to={isMix ? "/game/custom" : "/game"}>
+              <Button className="w-full" variant="outline">
+                {isMix ? "Custom mix" : "Chapter map"}
+              </Button>
+            </Link>
+          )}
           {passed && !isMix && (
             <Button className="w-full" variant="outline" onClick={replayStage}>
               New round
@@ -736,11 +784,11 @@ export function GameStagePlay({ chapter, stage, mixChapters }: Props) {
         <button
           type="button"
           className="min-h-11 text-sm font-medium text-muted"
-          onClick={() =>
-            isMix
-              ? navigate({ to: "/game/custom" })
-              : navigate({ to: "/game/$chapter", params: { chapter: String(chapter) } })
-          }
+          onClick={() => {
+            if (term2) navigate({ to: "/study/term2/game/$chapter", params: { chapter: String(chapter) } });
+            else if (isMix) navigate({ to: "/game/custom" });
+            else navigate({ to: "/game/$chapter", params: { chapter: String(chapter) } });
+          }}
         >
           {isMix ? "Change levels" : "Back to chapter"}
         </button>

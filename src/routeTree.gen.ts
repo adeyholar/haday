@@ -90,6 +90,12 @@ import { Route as GameLessonsTrackUnitRouteImport } from './routes/game/lessons/
 import { Route as IibsStudyLevelWeekRouteImport } from './routes/iibs/study/$level/$week'
 import { Route as ListenReadBookIndexRouteImport } from './routes/listen/read/$book/index'
 import { Route as ListenReadBookChRouteImport } from './routes/listen/read/$book/$ch'
+import { Route as StudyTerm2ExamChapterRouteImport } from './routes/study/term2/exam/$chapter'
+import { Route as StudyTerm2GameIndexRouteImport } from './routes/study/term2/game/index'
+import { Route as StudyTerm2ListenIndexRouteImport } from './routes/study/term2/listen/index'
+import { Route as StudyTerm2ListenRoadRouteImport } from './routes/study/term2/listen/road'
+import { Route as StudyTerm2GameChapterIndexRouteImport } from './routes/study/term2/game/$chapter/index'
+import { Route as StudyTerm2GameChapterStageRouteImport } from './routes/study/term2/game/$chapter/$stage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -497,6 +503,38 @@ const ListenReadBookChRoute = ListenReadBookChRouteImport.update({
   path: '/read/$book/$ch',
   getParentRoute: () => ListenRoute,
 } as any)
+const StudyTerm2ExamChapterRoute = StudyTerm2ExamChapterRouteImport.update({
+  id: '/study/term2/exam/$chapter',
+  path: '/study/term2/exam/$chapter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudyTerm2GameIndexRoute = StudyTerm2GameIndexRouteImport.update({
+  id: '/study/term2/game/',
+  path: '/study/term2/game/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudyTerm2ListenIndexRoute = StudyTerm2ListenIndexRouteImport.update({
+  id: '/study/term2/listen/',
+  path: '/study/term2/listen/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudyTerm2ListenRoadRoute = StudyTerm2ListenRoadRouteImport.update({
+  id: '/study/term2/listen/road',
+  path: '/study/term2/listen/road',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudyTerm2GameChapterIndexRoute =
+  StudyTerm2GameChapterIndexRouteImport.update({
+    id: '/study/term2/game/$chapter/',
+    path: '/study/term2/game/$chapter/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const StudyTerm2GameChapterStageRoute =
+  StudyTerm2GameChapterStageRouteImport.update({
+    id: '/study/term2/game/$chapter/$stage',
+    path: '/study/term2/game/$chapter/$stage',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -578,8 +616,14 @@ export interface FileRoutesByFullPath {
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
+  '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
+  '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
   '/game/lessons/$track/': typeof GameLessonsTrackIndexRoute
   '/listen/read/$book/': typeof ListenReadBookIndexRoute
+  '/study/term2/game/': typeof StudyTerm2GameIndexRoute
+  '/study/term2/listen/': typeof StudyTerm2ListenIndexRoute
+  '/study/term2/game/$chapter/$stage': typeof StudyTerm2GameChapterStageRoute
+  '/study/term2/game/$chapter/': typeof StudyTerm2GameChapterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -659,8 +703,14 @@ export interface FileRoutesByTo {
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
+  '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
+  '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
   '/game/lessons/$track': typeof GameLessonsTrackIndexRoute
   '/listen/read/$book': typeof ListenReadBookIndexRoute
+  '/study/term2/game': typeof StudyTerm2GameIndexRoute
+  '/study/term2/listen': typeof StudyTerm2ListenIndexRoute
+  '/study/term2/game/$chapter/$stage': typeof StudyTerm2GameChapterStageRoute
+  '/study/term2/game/$chapter': typeof StudyTerm2GameChapterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -743,8 +793,14 @@ export interface FileRoutesById {
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
+  '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
+  '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
   '/game/lessons/$track/': typeof GameLessonsTrackIndexRoute
   '/listen/read/$book/': typeof ListenReadBookIndexRoute
+  '/study/term2/game/': typeof StudyTerm2GameIndexRoute
+  '/study/term2/listen/': typeof StudyTerm2ListenIndexRoute
+  '/study/term2/game/$chapter/$stage': typeof StudyTerm2GameChapterStageRoute
+  '/study/term2/game/$chapter/': typeof StudyTerm2GameChapterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -828,8 +884,14 @@ export interface FileRouteTypes {
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
+    | '/study/term2/exam/$chapter'
+    | '/study/term2/listen/road'
     | '/game/lessons/$track/'
     | '/listen/read/$book/'
+    | '/study/term2/game/'
+    | '/study/term2/listen/'
+    | '/study/term2/game/$chapter/$stage'
+    | '/study/term2/game/$chapter/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -909,8 +971,14 @@ export interface FileRouteTypes {
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
+    | '/study/term2/exam/$chapter'
+    | '/study/term2/listen/road'
     | '/game/lessons/$track'
     | '/listen/read/$book'
+    | '/study/term2/game'
+    | '/study/term2/listen'
+    | '/study/term2/game/$chapter/$stage'
+    | '/study/term2/game/$chapter'
   id:
     | '__root__'
     | '/'
@@ -992,8 +1060,14 @@ export interface FileRouteTypes {
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
     | '/listen/read/$book/$ch'
+    | '/study/term2/exam/$chapter'
+    | '/study/term2/listen/road'
     | '/game/lessons/$track/'
     | '/listen/read/$book/'
+    | '/study/term2/game/'
+    | '/study/term2/listen/'
+    | '/study/term2/game/$chapter/$stage'
+    | '/study/term2/game/$chapter/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1060,7 +1134,13 @@ export interface RootRouteChildren {
   LessonsTrackIndexRoute: typeof LessonsTrackIndexRoute
   StudyTerm2IndexRoute: typeof StudyTerm2IndexRoute
   GameLessonsTrackUnitRoute: typeof GameLessonsTrackUnitRoute
+  StudyTerm2ExamChapterRoute: typeof StudyTerm2ExamChapterRoute
+  StudyTerm2ListenRoadRoute: typeof StudyTerm2ListenRoadRoute
   GameLessonsTrackIndexRoute: typeof GameLessonsTrackIndexRoute
+  StudyTerm2GameIndexRoute: typeof StudyTerm2GameIndexRoute
+  StudyTerm2ListenIndexRoute: typeof StudyTerm2ListenIndexRoute
+  StudyTerm2GameChapterStageRoute: typeof StudyTerm2GameChapterStageRoute
+  StudyTerm2GameChapterIndexRoute: typeof StudyTerm2GameChapterIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1632,6 +1712,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListenReadBookChRouteImport
       parentRoute: typeof ListenRoute
     }
+    '/study/term2/exam/$chapter': {
+      id: '/study/term2/exam/$chapter'
+      path: '/study/term2/exam/$chapter'
+      fullPath: '/study/term2/exam/$chapter'
+      preLoaderRoute: typeof StudyTerm2ExamChapterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/game/': {
+      id: '/study/term2/game/'
+      path: '/study/term2/game'
+      fullPath: '/study/term2/game/'
+      preLoaderRoute: typeof StudyTerm2GameIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/listen/': {
+      id: '/study/term2/listen/'
+      path: '/study/term2/listen'
+      fullPath: '/study/term2/listen/'
+      preLoaderRoute: typeof StudyTerm2ListenIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/listen/road': {
+      id: '/study/term2/listen/road'
+      path: '/study/term2/listen/road'
+      fullPath: '/study/term2/listen/road'
+      preLoaderRoute: typeof StudyTerm2ListenRoadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/game/$chapter/': {
+      id: '/study/term2/game/$chapter/'
+      path: '/study/term2/game/$chapter'
+      fullPath: '/study/term2/game/$chapter/'
+      preLoaderRoute: typeof StudyTerm2GameChapterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/study/term2/game/$chapter/$stage': {
+      id: '/study/term2/game/$chapter/$stage'
+      path: '/study/term2/game/$chapter/$stage'
+      fullPath: '/study/term2/game/$chapter/$stage'
+      preLoaderRoute: typeof StudyTerm2GameChapterStageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1769,7 +1891,13 @@ const rootRouteChildren: RootRouteChildren = {
   LessonsTrackIndexRoute: LessonsTrackIndexRoute,
   StudyTerm2IndexRoute: StudyTerm2IndexRoute,
   GameLessonsTrackUnitRoute: GameLessonsTrackUnitRoute,
+  StudyTerm2ExamChapterRoute: StudyTerm2ExamChapterRoute,
+  StudyTerm2ListenRoadRoute: StudyTerm2ListenRoadRoute,
   GameLessonsTrackIndexRoute: GameLessonsTrackIndexRoute,
+  StudyTerm2GameIndexRoute: StudyTerm2GameIndexRoute,
+  StudyTerm2ListenIndexRoute: StudyTerm2ListenIndexRoute,
+  StudyTerm2GameChapterStageRoute: StudyTerm2GameChapterStageRoute,
+  StudyTerm2GameChapterIndexRoute: StudyTerm2GameChapterIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

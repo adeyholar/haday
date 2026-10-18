@@ -8,6 +8,7 @@ import { hydrateDrillRuns, hydrateIibsDrillRuns, type DrillRuns } from "@/lib/et
 import { hydrateWeakRun, type WeakRun } from "@/lib/weak-pool";
 import { emptyIibsGame, hydrateIibsGame, type IibsGameProgress } from "@/lib/iibs-game";
 import { emptyVerbQuest, hydrateVerbQuest, type VerbQuestProgress } from "@/lib/verb-paradigm-quest";
+import { emptyTerm2Game, hydrateTerm2Game, type Term2Game } from "@/lib/term2-game";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -86,6 +87,8 @@ export type GameSnapshot = {
   iibs: IibsGameProgress;
   /** Qal perfect paradigm game. A cleared level opens the next. */
   verbParadigmQuest: VerbQuestProgress;
+  /** Semester 2 vocabulary path and closed-book exams. Not chapters 1–19. */
+  term2: Term2Game;
 };
 
 export type BalloonProgress = {
@@ -179,6 +182,7 @@ export function defaultGame(): GameSnapshot {
     iibsDrillRuns: {},
     iibs: emptyIibsGame(),
     verbParadigmQuest: emptyVerbQuest(),
+    term2: emptyTerm2Game(),
   };
 }
 
@@ -268,6 +272,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     iibsDrillRuns: hydrateIibsDrillRuns(r.iibsDrillRuns),
     iibs: hydrateIibsGame(r.iibs),
     verbParadigmQuest: hydrateVerbQuest(r.verbParadigmQuest),
+    term2: hydrateTerm2Game(r.term2),
   };
 }
 

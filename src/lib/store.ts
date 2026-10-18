@@ -44,6 +44,7 @@ import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
 import type { VerbQuestProgress } from "./verb-paradigm-quest";
 import { applyIibsStage, type IibsStageId } from "./iibs-game";
+import { applyTerm2Exam, applyTerm2Stage, type Term2StageId } from "./term2-game";
 import type { RoadRun } from "./road-exam";
 import type { WeakRun } from "./weak-pool";
 
@@ -104,6 +105,12 @@ type StudyState = StudySnapshot & {
     unit: number,
     result: { stars: number; score: number; firstTryRate: number },
   ) => void;
+  completeTerm2Stage: (
+    chapter: number,
+    stage: Term2StageId,
+    result: { stars: number; score: number; firstTryRate: number },
+  ) => void;
+  completeTerm2Exam: (chapter: number, result: { stars: number; score: number }) => void;
   visitLadder: (stationId: Parameters<typeof visitLadder>[1], lessonId: string) => void;
   openLadderText: (lessonId: string) => void;
   noticeLadderWalk: (lessonId: string) => void;
@@ -273,6 +280,36 @@ export const useStudy = create<StudyState>()(
         const now = Date.now();
         const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
         const game = stampRewards(applyGrammarResult(get().game, trackId, unit, result), streakInfo.streak, get().keepStreak);
+        set({
+          game,
+          ...streakInfo,
+          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
+      },
+      completeTerm2Stage: (chapter, stage, result) => {
+        const now = Date.now();
+        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
+        const base = hydrateGame(get().game);
+        const game = stampRewards(
+          { ...base, term2: applyTerm2Stage(base.term2, chapter, stage, result) },
+          streakInfo.streak,
+          get().keepStreak,
+        );
+        set({
+          game,
+          ...streakInfo,
+          sessions: get().lastStudyDay === startOfDay(now) ? get().sessions : get().sessions + 1,
+        });
+      },
+      completeTerm2Exam: (chapter, result) => {
+        const now = Date.now();
+        const streakInfo = bumpStreak(get().lastStudyDay, get().streak, now);
+        const base = hydrateGame(get().game);
+        const game = stampRewards(
+          { ...base, term2: applyTerm2Exam(base.term2, chapter, result) },
+          streakInfo.streak,
+          get().keepStreak,
+        );
         set({
           game,
           ...streakInfo,

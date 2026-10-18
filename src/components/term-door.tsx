@@ -173,6 +173,23 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
               Lexicon
             </Button>
           </Link>
+          <Link to="/study/term2/game">
+            <Button className="w-full" variant="outline" size="lg">
+              Game
+            </Button>
+          </Link>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/study/term2/listen">
+              <Button className="w-full" variant="outline" size="lg">
+                Listen
+              </Button>
+            </Link>
+            <Link to="/study/term2/listen/road">
+              <Button className="w-full" variant="outline" size="lg">
+                On the road
+              </Button>
+            </Link>
+          </div>
           {weak.length > 0 ? (
             <Link to="/weak">
               <Button className="w-full" variant="outline" size="lg" onClick={() => setFocus("weak")}>
@@ -185,7 +202,7 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
 
       <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
         <h2 className="font-display text-xl font-bold text-ink">Lessons</h2>
-        <p className="mt-1 text-sm text-muted">One chapter at a time. Then drill that chapter’s words.</p>
+        <p className="mt-1 text-sm text-muted">Read the note, then sit the closed-book exam. Drill the chapter’s words after that.</p>
         <ul className="mt-3 grid gap-2">
           {TERM2_LESSONS.map((lesson) => (
             <li key={lesson.chapter}>

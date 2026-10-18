@@ -1,4 +1,5 @@
 import { alphabetVocab, bbhVocab, GAME_CHAPTER_TITLES, type VocabItem } from "@/lib/vocab";
+import { term2Vocab } from "@/lib/vocab-s2";
 import type { ReadingVerse } from "@/lib/reading";
 import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
@@ -27,6 +28,17 @@ export function listenPlaylist(): ListenItem[] {
     const announce = item.chapter !== prev ? `Chapter ${chapterWordEn(item.chapter)}. ${GAME_CHAPTER_TITLES[item.chapter] ?? ""}` : undefined;
     prev = item.chapter;
     return { ...item, announce };
+  });
+}
+
+/** Semester 2 lemmas only. A separate place from the first-term listen list. */
+export function term2ListenPlaylist(): ListenItem[] {
+  const items = term2Vocab();
+  let prev = -1;
+  return items.map((item) => {
+    const announce = item.chapter !== prev ? `Chapter ${chapterWordEn(item.chapter)}.` : undefined;
+    prev = item.chapter;
+    return { ...item, announce, plainEnglish: true };
   });
 }
 

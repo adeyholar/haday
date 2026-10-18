@@ -79,6 +79,8 @@ const GAME: NavItem[] = [
 
 const TERM2_STUDY: NavItem[] = [
   { to: "/study/term2", label: "Lessons", hint: "Chapter by chapter", icon: Library },
+  { to: "/study/term2/game", label: "Game", hint: "Chapter path, 90%", icon: Compass },
+  { to: "/study/term2/listen", label: "Listen", hint: "Hebrew, then English", icon: Headphones },
   { to: "/drill", label: "Drill", hint: "This week’s words", icon: Layers },
   { to: "/quiz", label: "Quiz", hint: "Choice or type the gloss", icon: ListChecks },
   { to: "/write", label: "Write", hint: "Type the meaning", icon: PenLine },
@@ -450,7 +452,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                     title="Lessons"
                     className={cn(
                       "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                      pathname.startsWith("/study/term2") ? "text-primary" : "text-muted",
+                      pathname.startsWith("/study/term2") &&
+                      !pathname.startsWith("/study/term2/game") &&
+                      !pathname.startsWith("/study/term2/listen")
+                        ? "text-primary"
+                        : "text-muted",
                     )}
                   >
                     <Library className="size-5" strokeWidth={pathname.startsWith("/study/term2") ? 2.2 : 1.8} />

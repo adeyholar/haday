@@ -23,6 +23,8 @@ export type NavHref =
   | "/guide"
   | "/study"
   | "/study/term2"
+  | "/study/term2/game"
+  | "/study/term2/listen"
   | "/study/station/$id"
   | "/study/lesson/$id"
   | "/challenge"
