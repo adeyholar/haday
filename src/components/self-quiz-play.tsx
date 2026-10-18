@@ -111,10 +111,13 @@ export function SelfQuizPlay({
     const weak = log.filter((r) => r.mark === "weak");
     return (
       <div className="rounded-[var(--radius-xl)] bg-card p-6 text-center shadow-[var(--shadow-border)]">
-        <p className="font-display text-3xl font-bold text-ink">
+        <p className="font-display text-5xl font-bold tabular-nums text-ink">
+          {items.length ? Math.round((strong / items.length) * 100) : 0}%
+        </p>
+        <p className="mt-2 font-display text-xl text-ink">
           {strong} strong · {weak.length} weak
         </p>
-        <p className="mt-2 text-sm text-muted">{items.length} words in this sitting</p>
+        <p className="mt-2 text-sm text-muted">Practice score. This does not open the next lesson.</p>
         {weak.length ? (
           <p className="he-word mt-3 text-2xl" lang="he" dir="rtl">
             {weak.map((w) => items.find((it) => it.id === w.id)?.hebrew).filter(Boolean).join(" · ")}

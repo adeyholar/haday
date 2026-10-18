@@ -141,10 +141,13 @@ function QuizPage() {
         <WeekSelect />
         <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Round complete</h1>
-          <p className="mt-2 font-display text-4xl tabular-nums">
-            {score.right}
-            <span className="text-xl text-muted"> / {total}</span>
+          <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
+            {total ? Math.round((score.right / total) * 100) : 0}%
           </p>
+          <p className="mt-1 font-display text-xl tabular-nums text-muted">
+            {score.right} / {total}
+          </p>
+          <p className="mt-2 text-sm text-muted">Practice score. This does not open the next chapter.</p>
           <Button className="mt-6" onClick={resetRound}>
             New round
           </Button>
