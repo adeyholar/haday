@@ -22,7 +22,7 @@ function StudyUnitPage() {
       {track.id === "verbs" && n === 3 ? (
         <p className="mb-4 text-sm">
           <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
-            Practice this paradigm
+            Verb Paradigm Quest
           </Link>
           <span className="text-muted"> · build the Qal perfect, ending and accent included.</span>
         </p>

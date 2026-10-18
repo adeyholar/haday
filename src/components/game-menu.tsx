@@ -70,7 +70,7 @@ export function GameMenu() {
           label: "Grammar",
           options: [
             { value: "/game/lessons", label: "Grammar" },
-            { value: "/game/verb-paradigm-quest", label: "Verb paradigm" },
+            { value: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest" },
           ],
         },
       ]}

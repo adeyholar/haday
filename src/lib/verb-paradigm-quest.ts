@@ -6,6 +6,7 @@ export const OLE = "\u05AB";
 export const METEG = "\u05BD";
 const DAGESH = "\u05BC";
 const SHEWA = "\u05B0";
+const HATEPH_PATAH = "\u05B2";
 const HIREQ = "\u05B4";
 const SEGOL = "\u05B6";
 const PATAH = "\u05B7";
@@ -137,6 +138,11 @@ function letterOf(token: string): { base: string; dots: string } {
   return { base: pieces[0] ?? "", dots: pieces.slice(1).join("") };
 }
 
+function reducedFirst(token: string): string {
+  const { base } = letterOf(token);
+  return withMarks(token, "lene", GUTTURAL.has(base) ? HATEPH_PATAH : SHEWA);
+}
+
 function withMarks(token: string, ...marks: string[]): string {
   const { base, dots } = letterOf(token);
   const dagesh = BGDKPT.has(base) && marks.includes("lene") ? DAGESH : "";
@@ -165,7 +171,7 @@ export function pgnGloss(pgn: Pgn, past: string): string {
 function formOf(pgn: Pgn, letters: [string, string, string]): string {
   const [c1, c2, c3] = letters;
   const q1 = withMarks(c1, "lene", QAMETS);
-  const shewa1 = withMarks(c1, "lene", SHEWA);
+  const light1 = reducedFirst(c1);
   const a2 = withMarks(c2, PATAH);
   const a2accent = withMarks(c2, PATAH, OLE);
   const shewa2 = withMarks(c2, SHEWA);
@@ -178,21 +184,21 @@ function formOf(pgn: Pgn, letters: [string, string, string]): string {
   if (pgn === "2fs") return q1 + a2 + shewa3 + tav(SHEWA);
   if (pgn === "1cs") return q1 + a2accent + shewa3 + tav(HIREQ) + "י";
   if (pgn === "3cp") return withMarks(c1, "lene", QAMETS, METEG) + shewa2 + open3 + "ו" + DAGESH;
-  if (pgn === "2mp") return shewa1 + a2 + shewa3 + tav(SEGOL) + "ם";
-  if (pgn === "2fp") return shewa1 + a2 + shewa3 + tav(SEGOL) + "ן";
+  if (pgn === "2mp") return light1 + a2 + shewa3 + tav(SEGOL) + "ם";
+  if (pgn === "2fp") return light1 + a2 + shewa3 + tav(SEGOL) + "ן";
   return q1 + a2accent + shewa3 + "נ" + "ו" + DAGESH;
 }
 
 function stemOf(pgn: Pgn, letters: [string, string, string]): string {
   const [c1, c2, c3] = letters;
   const q1 = withMarks(c1, "lene", QAMETS);
-  const shewa1 = withMarks(c1, "lene", SHEWA);
+  const light1 = reducedFirst(c1);
   const a2 = withMarks(c2, PATAH);
   const shewa2 = withMarks(c2, SHEWA);
   const shewa3 = withMarks(c3, SHEWA);
   if (pgn === "3ms") return formOf(pgn, letters);
   if (pgn === "3fs" || pgn === "3cp") return q1 + shewa2 + withMarks(c3);
-  if (pgn === "2mp" || pgn === "2fp") return shewa1 + a2 + shewa3;
+  if (pgn === "2mp" || pgn === "2fp") return light1 + a2 + shewa3;
   return q1 + a2 + shewa3;
 }
 
@@ -231,6 +237,21 @@ export function acceptsStrongRoot(item: VocabItem): [string, string, string] | n
   const made = canonicalize(formOf("3ms", triple));
   if (made !== canonicalize(item.hebrew)) return null;
   return triple;
+}
+
+export function questVoiceRows(): { id: string; glyph: string; speakEn: string }[] {
+  const roots = [QATAL, ...transferRoots()];
+  const rows: { id: string; glyph: string; speakEn: string }[] = [];
+  for (const root of roots) {
+    for (const form of qalPerfect(root)) {
+      rows.push({
+        id: `vpq-qal-pf-${root.id}-${form.pgn}`,
+        glyph: form.form,
+        speakEn: `${form.pgn}. ${form.gloss}`,
+      });
+    }
+  }
+  return rows;
 }
 
 export function transferRoots(): VerbRoot[] {
@@ -299,6 +320,8 @@ export function gradeVerb(answer: string, expected: string, pgn: Pgn, r2 = "ט")
   const lines: string[] = [];
   const shape = clusterLine(exp, got);
   if (shape) lines.push(shape);
+  const vowel = vowelLine(exp, got);
+  if (vowel) lines.push(vowel);
   const tav = exp.find((cluster) => baseOf(cluster) === "ת");
   const tavGot = got.find((cluster) => baseOf(cluster) === "ת");
   if (tav && marksOf(tav).includes(DAGESH) && tavGot && !marksOf(tavGot).includes(DAGESH)) {
@@ -329,6 +352,30 @@ export function gradeVerb(answer: string, expected: string, pgn: Pgn, r2 = "ט")
   }
   if (!lines.length) lines.push("Every mark has to match. One missing dot makes it a different word.");
   return { correct: false, nudge: null, lines: lines.slice(0, 3) };
+}
+
+function vowelLine(expected: string[], got: string[]): string | null {
+  const count = Math.min(expected.length, got.length);
+  for (let i = 0; i < count; i++) {
+    if (baseOf(expected[i]) !== baseOf(got[i])) continue;
+    const want = marksOf(expected[i]).filter((mark) => mark !== OLE && mark !== METEG).join("");
+    const have = marksOf(got[i]).filter((mark) => mark !== OLE && mark !== METEG).join("");
+    if (want !== have) return `Check the vowel under ${baseOf(expected[i])}.`;
+  }
+  return null;
+}
+
+export function placeRequiredMark(current: string, target: string): string {
+  const want = splitClusters(target);
+  const have = splitClusters(current);
+  const out = have.map((cluster, i) => {
+    const goal = want[i];
+    const marks = marksOf(cluster).filter((mark) => mark !== OLE && mark !== METEG);
+    if (goal && marksOf(goal).includes(OLE)) marks.push(OLE);
+    if (goal && marksOf(goal).includes(METEG)) marks.push(METEG);
+    return baseOf(cluster) + marks.join("");
+  });
+  return canonicalize(out.join(""));
 }
 
 /** One step closer. A helped build is not a clean answer. */
@@ -378,7 +425,7 @@ export function recordVerbQuest(prev: VerbQuestProgress, level: number, pct: num
   const score = Math.max(0, Math.min(100, Math.round(pct)));
   if (level >= 1 && level <= 4) {
     next.best[level] = Math.max(next.best[level] ?? 0, score);
-    if (score >= 90) {
+    if (score >= 89) {
       next.cleared[level] = true;
       if (level === next.unlocked && next.unlocked < 4) next.unlocked += 1;
       if (rootId && (level === 2 || level === 4) && !next.sealed.includes(rootId)) next.sealed = [...next.sealed, rootId].slice(0, 40);

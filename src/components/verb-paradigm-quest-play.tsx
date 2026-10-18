@@ -11,6 +11,7 @@ import {
   PGN_ORDER,
   QATAL,
   gradeVerb,
+  placeRequiredMark,
   qalPerfect,
   recordVerbQuest,
   redFrom,
@@ -60,7 +61,7 @@ export function VerbQuestHome() {
     return (
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
-        <h1 className="mt-1 font-display text-3xl font-bold text-ink">Verb paradigm</h1>
+        <h1 className="mt-1 font-display text-3xl font-bold text-ink">Verb Paradigm Quest</h1>
         <p className="mt-3 text-sm text-muted">
           The root is given. You build the stem, the ending, and the person. A missing vowel, dagesh, shin dot, accent, or meteg is a wrong word.
         </p>
@@ -79,7 +80,7 @@ export function VerbQuestHome() {
                     {row.id}. {row.name}
                   </span>
                   {quest.cleared[row.id] ? <span className="ml-2 text-sm text-good">Cleared</span> : null}
-                  <span className="mt-1 block text-sm text-muted">{open ? row.hint : "90% on the previous level opens this."}</span>
+                  <span className="mt-1 block text-sm text-muted">{open ? row.hint : "8 of 9 on the previous level opens this."}</span>
                 </button>
               </li>
             );
@@ -129,6 +130,12 @@ function VerbQuestSitting({
   const [revealed, setRevealed] = useState(false);
   const [donePct, setDonePct] = useState<number | null>(null);
   const hear = useRef({ stop: false });
+  useEffect(() => {
+    const signal = hear;
+    return () => {
+      signal.current.stop = true;
+    };
+  }, []);
   const pgn = queue[0];
   const card = pgn ? byPgn[pgn] : null;
 
@@ -152,11 +159,12 @@ function VerbQuestSitting({
     setHelped(false);
     setTries(0);
     setRevealed(false);
-    hear.current.stop = true;
-    hear.current = { stop: false };
   }, [card]);
 
   function speak(row: VerbForm) {
+    hear.current.stop = true;
+    const signal = { stop: false };
+    hear.current = signal;
     void speakHebrewWord(
       {
         id: `vpq-qal-pf-${root.id}-${row.pgn}`,
@@ -169,7 +177,7 @@ function VerbQuestSitting({
         freq: 0,
       },
       0.9,
-      hear.current,
+      signal,
     );
   }
 
@@ -216,7 +224,7 @@ function VerbQuestSitting({
       return;
     }
     if (graded.nudge && nudge) {
-      const placed = stepToward(currentAnswer(), card.form);
+      const placed = placeRequiredMark(currentAnswer(), card.form);
       if (level === 2 || level === 4) setBuilt(placed);
       else {
         const parts = splitClusters(placed);
@@ -252,12 +260,12 @@ function VerbQuestSitting({
   }
 
   if (donePct != null) {
-    const cleared = donePct >= 90;
+    const cleared = donePct >= 89;
     return (
       <Panel className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{LEVELS[level - 1]?.name}</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">{cleared ? "Paradigm sealed" : "Not yet"}</h1>
-        <p className="mt-2 text-sm text-muted">{donePct}% clean on the first answer. 90% opens the next.</p>
+        <p className="mt-2 text-sm text-muted">{donePct}% clean. 8 of 9 opens the next.</p>
         <div className="mt-4">
           <Board forms={forms} filled={Object.fromEntries(PGN_ORDER.map((id) => [id, true]))} active={null} />
         </div>
@@ -419,7 +427,7 @@ function VerbQuestSitting({
 
 function Feedback({ lines, nudge }: { lines: string[]; nudge: boolean }) {
   return (
-    <div className={cn("mt-3 rounded-[var(--radius-md)] px-3 py-2 text-sm", nudge ? "bg-card text-ink" : "bg-card text-ink")}>
+    <div className={cn("mt-3 rounded-[var(--radius-md)] px-3 py-2 text-sm", nudge ? "bg-balloon text-ink" : "bg-card text-ink")}>
       {lines.map((line) => (
         <p key={line} className={nudge ? "font-medium" : undefined}>
           {line}

@@ -1,5 +1,6 @@
 import { CONSONANTS, FINAL_FORMS, VOWELS } from "@/lib/alphabet";
 import { bbhVocab, GAME_CHAPTER_TITLES } from "@/lib/vocab";
+import { questVoiceRows } from "@/lib/verb-paradigm-quest";
 
 export type CorpusKind = "letter" | "vowel" | "vocab";
 
@@ -186,6 +187,18 @@ export function voiceCorpus(): VoiceCorpusItem[] {
       glyph: item.hebrew,
       speakHe: item.hebrew,
       speakEn: englishLine(item.gloss),
+      aliases: [],
+    });
+  }
+
+  for (const row of questVoiceRows()) {
+    add({
+      id: row.id,
+      kind: "vocab",
+      group: "Verb Paradigm Quest",
+      glyph: row.glyph,
+      speakHe: row.glyph,
+      speakEn: row.speakEn,
       aliases: [],
     });
   }
