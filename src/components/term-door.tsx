@@ -19,7 +19,7 @@ import { statsFor, useStudy } from "@/lib/store";
 import { enterTermWeek } from "@/lib/term-week";
 import { TERM2_LESSONS } from "@/lib/term2-lessons";
 import { itemsForWeek, studySetMeta } from "@/lib/vocab";
-import { TERM2_WEEKS, term2Vocab } from "@/lib/vocab-s2";
+import { term2Vocab, weekForTerm2Chapter } from "@/lib/vocab-s2";
 import { weakPool } from "@/lib/weak-pool";
 
 export function SemesterHall({ onEnter }: { onEnter: (term: GrammarTerm) => void }) {
@@ -143,7 +143,7 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
         <div className="mt-5 flex flex-col gap-2">
           <Link to="/drill">
             <Button className="w-full" size="lg">
-              Drill this week
+              Drill this chapter
             </Button>
           </Link>
           <Link to="/quiz">
@@ -204,53 +204,25 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
         <h2 className="font-display text-xl font-bold text-ink">Lessons</h2>
         <p className="mt-1 text-sm text-muted">Read the note, then sit the closed-book exam. Drill the chapter’s words after that.</p>
         <ul className="mt-3 grid gap-2">
-          {TERM2_LESSONS.map((lesson) => (
-            <li key={lesson.chapter}>
-              <Link
-                to="/study/term2/$chapter"
-                params={{ chapter: String(lesson.chapter) }}
-                className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]"
-              >
-                <p className="text-sm font-semibold text-ink">
-                  Chapter {lesson.chapter} · {lesson.title}
-                </p>
-                <p className="mt-1 text-sm text-muted">{lesson.short}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="mt-4">
-        <h2 className="font-display text-xl font-bold text-ink">Course map</h2>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-          {TERM2_WEEKS.map((row) => {
-            const st = statsFor(itemsForWeek(row.week), cards);
-            const active = row.week === week;
+          {TERM2_LESSONS.map((lesson) => {
+            const st = statsFor(itemsForWeek(weekForTerm2Chapter(lesson.chapter)), cards);
             return (
-              <li key={row.week}>
-                <button
-                  type="button"
-                  onClick={() => useStudy.getState().setWeek(row.week)}
-                  className={`w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)] ${
-                    active ? "bg-primary text-primary-foreground" : "bg-surface"
-                  }`}
+              <li key={lesson.chapter}>
+                <Link
+                  to="/study/term2/$chapter"
+                  params={{ chapter: String(lesson.chapter) }}
+                  className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]"
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-semibold">
-                      {row.label}
-                      {(row.week === 107 || row.week === 112) && (
-                        <span className={`ms-2 text-xs font-medium uppercase tracking-wide ${active ? "text-primary-foreground/70" : "text-primary"}`}>
-                          {row.week === 107 ? "Midterm" : "All"}
-                        </span>
-                      )}
-                    </span>
-                    <span className={`text-xs tabular-nums ${active ? "text-primary-foreground/80" : "text-muted"}`}>
+                    <p className="text-sm font-semibold text-ink">
+                      Chapter {lesson.chapter} · {lesson.title}
+                    </p>
+                    <span className="text-xs tabular-nums text-muted">
                       {st.mastered}/{st.total}
                     </span>
                   </div>
-                  <p className={`mt-1 text-sm ${active ? "text-primary-foreground/80" : "text-muted"}`}>{row.hint}</p>
-                </button>
+                  <p className="mt-1 text-sm text-muted">{lesson.short}</p>
+                </Link>
               </li>
             );
           })}

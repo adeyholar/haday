@@ -15,6 +15,7 @@ import { DontKnowButton } from "@/components/dont-know-button";
 import { playFeedback } from "@/lib/try-again";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { VocabArt } from "@/components/vocab-art";
+import { isTerm2Week } from "@/lib/vocab-s2";
 
 export const Route = createFileRoute("/quiz")({ component: QuizPage });
 
@@ -137,7 +138,7 @@ function QuizPage() {
           </div>
           <FocusToggle />
           <p className="mt-4 text-sm text-muted">
-            Nothing in the weak book for this week. A miss puts a word here, most misses first. Words you know stay out.
+            Nothing in the weak book for this {isTerm2Week(week) ? "chapter" : "week"}. A miss puts a word here, most misses first. Words you know stay out.
           </p>
         </Panel>
       </>
@@ -193,7 +194,7 @@ function QuizPage() {
         <p className="mt-4 text-sm text-muted">
           {focus === "weak"
             ? "Weak book. Missed words only, most misses first. Words you know stay out."
-            : "Every word in this week. Weak and due come first."}
+            : `Every word in this ${isTerm2Week(week) ? "chapter" : "week"}. Weak and due come first.`}
         </p>
         <p className="mt-4 text-sm font-medium tabular-nums text-ink">
           {i + 1} / {deck.length} · {score.right} correct

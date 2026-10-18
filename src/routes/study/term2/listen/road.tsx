@@ -51,7 +51,7 @@ function Term2RoadPage() {
         setWeek(next);
       }}
       blurb={(set) =>
-        `${set.title} · ${set.hint} · ${set.items.length} words. Hebrew, then the meaning. The week repeats. This is the Semester 2 list.`
+        `${set.title} · ${set.hint} · ${set.items.length} words. Hebrew, then the meaning. The chapter repeats. This is the Semester 2 list.`
       }
     />
   );
