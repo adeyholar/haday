@@ -239,6 +239,12 @@ export function acceptsStrongRoot(item: VocabItem): [string, string, string] | n
   return triple;
 }
 
+/** The first Check is the grade. null means this card has not been checked yet. */
+export function firstAnswer(locked: boolean | null, correct: boolean, helped: boolean): boolean {
+  if (locked !== null) return locked;
+  return correct && !helped;
+}
+
 export function questVoiceRows(): { id: string; glyph: string; speakEn: string }[] {
   const roots = [QATAL, ...transferRoots()];
   const rows: { id: string; glyph: string; speakEn: string }[] = [];
