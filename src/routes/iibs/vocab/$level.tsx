@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Check, Lock } from "lucide-react";
 import { IibsVocabPlay } from "@/components/iibs-vocab-play";
 import { IibsWritePlay } from "@/components/iibs-write-play";
 import { Panel } from "@/components/panel";
+import { useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import {
   IIBS_GAME_LEVELS,
@@ -28,7 +29,7 @@ function isGameLevel(value: string): value is IibsVocabLevel {
 
 function VocabLevelPage() {
   const { level } = Route.useParams();
-  const navigate = useNavigate();
+  const room = useIibsRoom();
   const progress = useStudy((s) => s.game.iibs);
   const finishIibsStage = useStudy((s) => s.finishIibsStage);
   const [gate, setGate] = useState<MyPath | null>(null);
@@ -51,23 +52,18 @@ function VocabLevelPage() {
   }, []);
 
   if (!isGameLevel(level)) {
-    return (
-      <Panel>
-        <h1 className="font-display text-3xl font-bold text-ink">Not in Vocab Builder</h1>
-        <Link to="/iibs/vocab" className="mt-4 inline-block font-semibold text-primary">
-          Back to Vocab Builder
-        </Link>
-      </Panel>
-    );
+    return <Navigate to="/iibs" />;
   }
 
-  if (!gate) {
+  if (!room.ready || !gate) {
     return (
       <Panel>
         <p className="text-sm text-muted">Opening this level…</p>
       </Panel>
     );
   }
+
+  if (!room.level || room.level !== level) return <Navigate to="/iibs" />;
 
   const admin = gate.admin;
   const meta = IIBS_LEVELS.find((item) => item.id === level)!;
@@ -76,7 +72,6 @@ function VocabLevelPage() {
   const playing = lesson !== null ? lists?.[lesson] : null;
   const lessonNo = lesson === null ? 0 : lesson + 1;
   const pool = (lists ?? []).flatMap((row) => row.map((word) => word.gloss));
-  const nextLevel = IIBS_GAME_LEVELS[IIBS_GAME_LEVELS.indexOf(level) + 1];
   const stageIndex = stage ? IIBS_STAGES.findIndex((item) => item.id === stage) : -1;
   const nextStage = stageIndex >= 0 ? IIBS_STAGES[stageIndex + 1] : undefined;
   const stageMeta = IIBS_STAGES.find((item) => item.id === stage);
@@ -97,11 +92,11 @@ function VocabLevelPage() {
       setStage(null);
       return;
     }
-    if (nextLevel) void navigate({ to: "/iibs/vocab/$level", params: { level: nextLevel } });
-    else void navigate({ to: "/iibs/vocab" });
+    setLesson(null);
+    setStage(null);
   }
 
-  const nextLabel = nextStage ? nextStage.name : lessonNo < 30 ? `Lesson ${lessonNo + 1}` : nextLevel ? `Level ${nextLevel}` : "Vocab Builder";
+  const nextLabel = nextStage ? nextStage.name : lessonNo < 30 ? `Lesson ${lessonNo + 1}` : "This level";
 
   return (
     <>
@@ -138,8 +133,8 @@ function VocabLevelPage() {
             All lessons
           </button>
         ) : (
-          <Link to="/iibs/vocab" className="mt-4 inline-block font-semibold text-primary">
-            Back to Vocab Builder
+          <Link to="/iibs" className="mt-4 inline-block font-semibold text-primary">
+            Back to this level
           </Link>
         )}
       </Panel>

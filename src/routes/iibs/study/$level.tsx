@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { levelUnlocked } from "@/lib/iibs-game";
 import { IIBS_LEVELS, isIibsLevel, levelAfter } from "@/lib/path";
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/iibs/study/$level")({ component: LevelWee
 
 function LevelWeeks() {
   const { level } = Route.useParams();
+  const room = useIibsRoom();
   const progress = useStudy((s) => s.game.iibs);
   const [gate, setGate] = useState<MyPath | null>(null);
 
@@ -28,12 +30,22 @@ function LevelWeeks() {
     };
   }, []);
 
+  if (!room.ready) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening this level…</p>
+      </Panel>
+    );
+  }
+
+  if (!room.level || room.level !== level) return <Navigate to="/iibs" />;
+
   if (!isIibsWeekLevel(level) || !isIibsLevel(level)) {
     return (
       <Panel>
         <h1 className="font-display text-3xl font-bold text-ink">Not a study level</h1>
-        <Link to="/iibs/study" className="mt-4 inline-block font-semibold text-primary">
-          All levels
+        <Link to="/iibs" className="mt-4 inline-block font-semibold text-primary">
+          Back to this level
         </Link>
       </Panel>
     );
@@ -63,8 +75,8 @@ function LevelWeeks() {
         ) : (
           <p className="mt-3 max-w-prose text-muted">This level is locked. Clear Level {levelAfter(level)} in Vocab Builder first.</p>
         )}
-        <Link to="/iibs/study" className="mt-4 inline-block font-semibold text-primary">
-          All levels
+        <Link to="/iibs" className="mt-4 inline-block font-semibold text-primary">
+          Back to this level
         </Link>
       </Panel>
       {open ? (
