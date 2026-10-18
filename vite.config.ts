@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readdirSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
@@ -11,6 +11,28 @@ import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { appEnvPlugin } from "./scripts/app-env-plugin.mjs";
 import { isMigrationFile } from "./scripts/migration-plan.mjs";
+
+function copyWlcBundle(root: string) {
+  const from = join(root, "data", "wlc");
+  if (!existsSync(from)) return;
+  for (const dest of [
+    join(root, ".output", "server", "wlc"),
+    join(root, ".vercel", "output", "functions", "__server.func", "wlc"),
+  ]) {
+    if (!existsSync(join(dest, ".."))) continue;
+    cpSync(from, dest, { recursive: true });
+  }
+}
+
+function copyWlcPlugin(): Plugin {
+  return {
+    name: "copy-wlc",
+    apply: "build",
+    closeBundle() {
+      copyWlcBundle(process.cwd());
+    },
+  };
+}
 
 /** The files `src/lib/db.ts` globs — same directory, same non-recursive scope. */
 function hasGlobbedMigrations(root: string): boolean {
@@ -226,10 +248,16 @@ export default defineConfig(({ command, isPreview }) => {
             // still exits 0. Single-file SSR avoids that. Remove once Rolldown
             // ships the fix: https://github.com/TanStack/router/issues/8031
             inlineDynamicImports: true,
+            hooks: {
+              async compiled(built) {
+                copyWlcBundle(built.options.rootDir);
+              },
+            },
           }),
         ]
       : []),
     viteReact(),
+    copyWlcPlugin(),
   ],
 };
 });

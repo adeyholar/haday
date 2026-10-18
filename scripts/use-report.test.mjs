@@ -12,6 +12,8 @@ test("pages land in the area a student would name", () => {
   assert.equal(areaOf("/listen/pet")?.id, "pet");
   assert.equal(areaOf("/admin") , null);
   assert.equal(areaOf("/admin/use"), null);
+  assert.equal(areaOf("/iibs/wlc/Gen/1")?.id, "text");
+  assert.equal(areaOf("/listen/read")?.id, "tanakh");
 });
 
 test("saved practice ranks what a student has done most", () => {

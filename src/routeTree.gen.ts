@@ -47,6 +47,7 @@ import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as GameFinalRouteImport } from './routes/game/final'
 import { Route as GameFinalVocabRouteImport } from './routes/game/final-vocab'
+import { Route as GameQalPerfectRouteImport } from './routes/game/qal-perfect'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameVerbParadigmQuestRouteImport } from './routes/game/verb-paradigm-quest'
@@ -78,6 +79,7 @@ import { Route as IibsStudyIndexRouteImport } from './routes/iibs/study/index'
 import { Route as IibsStudyLevelRouteImport } from './routes/iibs/study/$level'
 import { Route as IibsVocabIndexRouteImport } from './routes/iibs/vocab/index'
 import { Route as IibsVocabLevelRouteImport } from './routes/iibs/vocab/$level'
+import { Route as IibsWlcIndexRouteImport } from './routes/iibs/wlc/index'
 import { Route as LessonsTrackIndexRouteImport } from './routes/lessons/$track/index'
 import { Route as LessonsTrackUnitRouteImport } from './routes/lessons/$track/$unit'
 import { Route as ListenReadIndexRouteImport } from './routes/listen/read/index'
@@ -88,6 +90,7 @@ import { Route as StudyTerm2ChapterRouteImport } from './routes/study/term2/$cha
 import { Route as GameLessonsTrackIndexRouteImport } from './routes/game/lessons/$track/index'
 import { Route as GameLessonsTrackUnitRouteImport } from './routes/game/lessons/$track/$unit'
 import { Route as IibsStudyLevelWeekRouteImport } from './routes/iibs/study/$level/$week'
+import { Route as IibsWlcBookChRouteImport } from './routes/iibs/wlc/$book/$ch'
 import { Route as ListenReadBookIndexRouteImport } from './routes/listen/read/$book/index'
 import { Route as ListenReadBookChRouteImport } from './routes/listen/read/$book/$ch'
 import { Route as StudyTerm2ExamChapterRouteImport } from './routes/study/term2/exam/$chapter'
@@ -288,6 +291,11 @@ const GameFinalVocabRoute = GameFinalVocabRouteImport.update({
   path: '/game/final-vocab',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameQalPerfectRoute = GameQalPerfectRouteImport.update({
+  id: '/game/qal-perfect',
+  path: '/game/qal-perfect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GameRoadRoute = GameRoadRouteImport.update({
   id: '/game/road',
   path: '/game/road',
@@ -443,6 +451,11 @@ const IibsVocabLevelRoute = IibsVocabLevelRouteImport.update({
   path: '/vocab/$level',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsWlcIndexRoute = IibsWlcIndexRouteImport.update({
+  id: '/wlc/',
+  path: '/wlc/',
+  getParentRoute: () => IibsRoute,
+} as any)
 const LessonsTrackIndexRoute = LessonsTrackIndexRouteImport.update({
   id: '/lessons/$track/',
   path: '/lessons/$track/',
@@ -492,6 +505,11 @@ const IibsStudyLevelWeekRoute = IibsStudyLevelWeekRouteImport.update({
   id: '/$week',
   path: '/$week',
   getParentRoute: () => IibsStudyLevelRoute,
+} as any)
+const IibsWlcBookChRoute = IibsWlcBookChRouteImport.update({
+  id: '/wlc/$book/$ch',
+  path: '/wlc/$book/$ch',
+  getParentRoute: () => IibsRoute,
 } as any)
 const ListenReadBookIndexRoute = ListenReadBookIndexRouteImport.update({
   id: '/read/$book/',
@@ -573,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
@@ -610,11 +629,13 @@ export interface FileRoutesByFullPath {
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/iibs/study/': typeof IibsStudyIndexRoute
   '/iibs/vocab/': typeof IibsVocabIndexRoute
+  '/iibs/wlc/': typeof IibsWlcIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/study/term2/': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
+  '/iibs/wlc/$book/$ch': typeof IibsWlcBookChRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
   '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
   '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
@@ -660,6 +681,7 @@ export interface FileRoutesByTo {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
@@ -697,11 +719,13 @@ export interface FileRoutesByTo {
   '/game/syllables': typeof GameSyllablesIndexRoute
   '/iibs/study': typeof IibsStudyIndexRoute
   '/iibs/vocab': typeof IibsVocabIndexRoute
+  '/iibs/wlc': typeof IibsWlcIndexRoute
   '/lessons/$track': typeof LessonsTrackIndexRoute
   '/listen/read': typeof ListenReadIndexRoute
   '/study/term2': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
+  '/iibs/wlc/$book/$ch': typeof IibsWlcBookChRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
   '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
   '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
@@ -750,6 +774,7 @@ export interface FileRoutesById {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
@@ -787,11 +812,13 @@ export interface FileRoutesById {
   '/game/syllables/': typeof GameSyllablesIndexRoute
   '/iibs/study/': typeof IibsStudyIndexRoute
   '/iibs/vocab/': typeof IibsVocabIndexRoute
+  '/iibs/wlc/': typeof IibsWlcIndexRoute
   '/lessons/$track/': typeof LessonsTrackIndexRoute
   '/listen/read/': typeof ListenReadIndexRoute
   '/study/term2/': typeof StudyTerm2IndexRoute
   '/game/lessons/$track/$unit': typeof GameLessonsTrackUnitRoute
   '/iibs/study/$level/$week': typeof IibsStudyLevelWeekRoute
+  '/iibs/wlc/$book/$ch': typeof IibsWlcBookChRoute
   '/listen/read/$book/$ch': typeof ListenReadBookChRoute
   '/study/term2/exam/$chapter': typeof StudyTerm2ExamChapterRoute
   '/study/term2/listen/road': typeof StudyTerm2ListenRoadRoute
@@ -841,6 +868,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
@@ -878,11 +906,13 @@ export interface FileRouteTypes {
     | '/game/syllables/'
     | '/iibs/study/'
     | '/iibs/vocab/'
+    | '/iibs/wlc/'
     | '/lessons/$track/'
     | '/listen/read/'
     | '/study/term2/'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
+    | '/iibs/wlc/$book/$ch'
     | '/listen/read/$book/$ch'
     | '/study/term2/exam/$chapter'
     | '/study/term2/listen/road'
@@ -928,6 +958,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
@@ -965,11 +996,13 @@ export interface FileRouteTypes {
     | '/game/syllables'
     | '/iibs/study'
     | '/iibs/vocab'
+    | '/iibs/wlc'
     | '/lessons/$track'
     | '/listen/read'
     | '/study/term2'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
+    | '/iibs/wlc/$book/$ch'
     | '/listen/read/$book/$ch'
     | '/study/term2/exam/$chapter'
     | '/study/term2/listen/road'
@@ -1017,6 +1050,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
@@ -1054,11 +1088,13 @@ export interface FileRouteTypes {
     | '/game/syllables/'
     | '/iibs/study/'
     | '/iibs/vocab/'
+    | '/iibs/wlc/'
     | '/lessons/$track/'
     | '/listen/read/'
     | '/study/term2/'
     | '/game/lessons/$track/$unit'
     | '/iibs/study/$level/$week'
+    | '/iibs/wlc/$book/$ch'
     | '/listen/read/$book/$ch'
     | '/study/term2/exam/$chapter'
     | '/study/term2/listen/road'
@@ -1104,6 +1140,7 @@ export interface RootRouteChildren {
   FinderWordRoute: typeof FinderWordRoute
   GameFinalRoute: typeof GameFinalRoute
   GameFinalVocabRoute: typeof GameFinalVocabRoute
+  GameQalPerfectRoute: typeof GameQalPerfectRoute
   GameRoadRoute: typeof GameRoadRoute
   GameTypeRoute: typeof GameTypeRoute
   GameVerbParadigmQuestRoute: typeof GameVerbParadigmQuestRoute
@@ -1411,6 +1448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameFinalVocabRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/qal-perfect': {
+      id: '/game/qal-perfect'
+      path: '/game/qal-perfect'
+      fullPath: '/game/qal-perfect'
+      preLoaderRoute: typeof GameQalPerfectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/game/road': {
       id: '/game/road'
       path: '/game/road'
@@ -1628,6 +1672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsVocabLevelRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/wlc/': {
+      id: '/iibs/wlc/'
+      path: '/wlc'
+      fullPath: '/iibs/wlc/'
+      preLoaderRoute: typeof IibsWlcIndexRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/lessons/$track/': {
       id: '/lessons/$track/'
       path: '/lessons/$track'
@@ -1697,6 +1748,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/iibs/study/$level/$week'
       preLoaderRoute: typeof IibsStudyLevelWeekRouteImport
       parentRoute: typeof IibsStudyLevelRoute
+    }
+    '/iibs/wlc/$book/$ch': {
+      id: '/iibs/wlc/$book/$ch'
+      path: '/wlc/$book/$ch'
+      fullPath: '/iibs/wlc/$book/$ch'
+      preLoaderRoute: typeof IibsWlcBookChRouteImport
+      parentRoute: typeof IibsRoute
     }
     '/listen/read/$book/': {
       id: '/listen/read/$book/'
@@ -1791,6 +1849,8 @@ interface IibsRouteChildren {
   IibsVocabLevelRoute: typeof IibsVocabLevelRoute
   IibsStudyIndexRoute: typeof IibsStudyIndexRoute
   IibsVocabIndexRoute: typeof IibsVocabIndexRoute
+  IibsWlcIndexRoute: typeof IibsWlcIndexRoute
+  IibsWlcBookChRoute: typeof IibsWlcBookChRoute
 }
 
 const IibsRouteChildren: IibsRouteChildren = {
@@ -1801,6 +1861,8 @@ const IibsRouteChildren: IibsRouteChildren = {
   IibsVocabLevelRoute: IibsVocabLevelRoute,
   IibsStudyIndexRoute: IibsStudyIndexRoute,
   IibsVocabIndexRoute: IibsVocabIndexRoute,
+  IibsWlcIndexRoute: IibsWlcIndexRoute,
+  IibsWlcBookChRoute: IibsWlcBookChRoute,
 }
 
 const IibsRouteWithChildren = IibsRoute._addFileChildren(IibsRouteChildren)
@@ -1861,6 +1923,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinderWordRoute: FinderWordRoute,
   GameFinalRoute: GameFinalRoute,
   GameFinalVocabRoute: GameFinalVocabRoute,
+  GameQalPerfectRoute: GameQalPerfectRoute,
   GameRoadRoute: GameRoadRoute,
   GameTypeRoute: GameTypeRoute,
   GameVerbParadigmQuestRoute: GameVerbParadigmQuestRoute,

@@ -54,11 +54,13 @@ export type NavHref =
   | "/game/lessons"
   | "/game/lessons/$track"
   | "/game/verb-paradigm-quest"
+  | "/game/qal-perfect"
   | "/ask"
   | "/ideas"
   | "/iibs"
   | "/iibs/vocab"
-  | "/iibs/road";
+  | "/iibs/road"
+  | "/iibs/wlc";
 
 export type NavItem = {
   to: NavHref;
@@ -149,7 +151,7 @@ export function NavMenu({
             drop === "down" ? "end-0 top-full pt-2" : "bottom-full start-1/2 -translate-x-1/2 pb-2",
           )}
         >
-          <ul role="menu" className="min-w-48 rounded-[var(--radius-md)] bg-card py-1 shadow-[var(--shadow-border)]">
+          <ul role="menu" className="max-h-[70vh] min-w-56 overflow-y-auto rounded-[var(--radius-md)] bg-card py-1 shadow-[var(--shadow-border)]">
             {items.map((item) => {
               const ItemIcon = item.icon;
               const key = `${item.to}:${item.params?.book ?? ""}:${item.params?.ch ?? ""}:${item.hash ?? ""}:${item.label}`;
