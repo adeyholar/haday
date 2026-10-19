@@ -41,6 +41,8 @@ export type NavHref =
   | "/legal"
   | "/credits"
   | "/about"
+  | "/teachings"
+  | "/admin/teachings"
   | "/game"
   | "/game/road"
   | "/game/final"

@@ -41,6 +41,7 @@ import { Route as TypeRouteImport } from './routes/type'
 import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
+import { Route as AdminTeachingsRouteImport } from './routes/admin.teachings'
 import { Route as AdminUseRouteImport } from './routes/admin.use'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
@@ -69,6 +70,9 @@ import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
 import { Route as ListenRoadRouteImport } from './routes/listen/road'
 import { Route as StudyIndexRouteImport } from './routes/study/index'
+import { Route as TeachingsIndexRouteImport } from './routes/teachings/index'
+import { Route as TeachingsSlugRouteImport } from './routes/teachings/$slug'
+import { Route as TeachingsRssDotxmlRouteImport } from './routes/teachings/rss[.]xml'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as GameChapterIndexRouteImport } from './routes/game/$chapter/index'
 import { Route as GameChapterStageRouteImport } from './routes/game/$chapter/$stage'
@@ -270,6 +274,11 @@ const AdminQueryRoute = AdminQueryRouteImport.update({
   path: '/query',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTeachingsRoute = AdminTeachingsRouteImport.update({
+  id: '/teachings',
+  path: '/teachings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUseRoute = AdminUseRouteImport.update({
   id: '/use',
   path: '/use',
@@ -408,6 +417,21 @@ const ListenRoadRoute = ListenRoadRouteImport.update({
 const StudyIndexRoute = StudyIndexRouteImport.update({
   id: '/study/',
   path: '/study/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeachingsIndexRoute = TeachingsIndexRouteImport.update({
+  id: '/teachings/',
+  path: '/teachings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeachingsSlugRoute = TeachingsSlugRouteImport.update({
+  id: '/teachings/$slug',
+  path: '/teachings/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeachingsRssDotxmlRoute = TeachingsRssDotxmlRouteImport.update({
+  id: '/teachings/rss.xml',
+  path: '/teachings/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -641,6 +665,7 @@ export interface FileRoutesByFullPath {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
@@ -663,12 +688,15 @@ export interface FileRoutesByFullPath {
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
+  '/teachings/$slug': typeof TeachingsSlugRoute
+  '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
+  '/teachings/': typeof TeachingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
@@ -740,6 +768,7 @@ export interface FileRoutesByTo {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
@@ -762,12 +791,15 @@ export interface FileRoutesByTo {
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
+  '/teachings/$slug': typeof TeachingsSlugRoute
+  '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
   '/iibs': typeof IibsIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/listen': typeof ListenIndexRoute
   '/study': typeof StudyIndexRoute
+  '/teachings': typeof TeachingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
@@ -842,6 +874,7 @@ export interface FileRoutesById {
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/query': typeof AdminQueryRoute
+  '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
@@ -864,12 +897,15 @@ export interface FileRoutesById {
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
+  '/teachings/$slug': typeof TeachingsSlugRoute
+  '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
+  '/teachings/': typeof TeachingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/game/$chapter/$stage': typeof GameChapterStageRoute
   '/game/alefbet/$level': typeof GameAlefbetLevelRoute
@@ -945,6 +981,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
@@ -967,12 +1004,15 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
+    | '/teachings/$slug'
+    | '/teachings/rss.xml'
     | '/finder/'
     | '/game/'
     | '/iibs/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
+    | '/teachings/'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
@@ -1044,6 +1084,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
@@ -1066,12 +1107,15 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
+    | '/teachings/$slug'
+    | '/teachings/rss.xml'
     | '/finder'
     | '/game'
     | '/iibs'
     | '/lessons'
     | '/listen'
     | '/study'
+    | '/teachings'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
@@ -1145,6 +1189,7 @@ export interface FileRouteTypes {
     | '/weak'
     | '/write'
     | '/admin/query'
+    | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
@@ -1167,12 +1212,15 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
+    | '/teachings/$slug'
+    | '/teachings/rss.xml'
     | '/finder/'
     | '/game/'
     | '/iibs/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
+    | '/teachings/'
     | '/api/auth/$'
     | '/game/$chapter/$stage'
     | '/game/alefbet/$level'
@@ -1261,10 +1309,13 @@ export interface RootRouteChildren {
   HubListenRoute: typeof HubListenRoute
   HubPlayRoute: typeof HubPlayRoute
   HubPracticeRoute: typeof HubPracticeRoute
+  TeachingsSlugRoute: typeof TeachingsSlugRoute
+  TeachingsRssDotxmlRoute: typeof TeachingsRssDotxmlRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
   StudyIndexRoute: typeof StudyIndexRoute
+  TeachingsIndexRoute: typeof TeachingsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   GameChapterStageRoute: typeof GameChapterStageRoute
   GameAlefbetLevelRoute: typeof GameAlefbetLevelRoute
@@ -1522,6 +1573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQueryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/teachings': {
+      id: '/admin/teachings'
+      path: '/teachings'
+      fullPath: '/admin/teachings'
+      preLoaderRoute: typeof AdminTeachingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/use': {
       id: '/admin/use'
       path: '/use'
@@ -1716,6 +1774,27 @@ declare module '@tanstack/react-router' {
       path: '/study'
       fullPath: '/study/'
       preLoaderRoute: typeof StudyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teachings/': {
+      id: '/teachings/'
+      path: '/teachings'
+      fullPath: '/teachings/'
+      preLoaderRoute: typeof TeachingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teachings/$slug': {
+      id: '/teachings/$slug'
+      path: '/teachings/$slug'
+      fullPath: '/teachings/$slug'
+      preLoaderRoute: typeof TeachingsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teachings/rss.xml': {
+      id: '/teachings/rss.xml'
+      path: '/teachings/rss.xml'
+      fullPath: '/teachings/rss.xml'
+      preLoaderRoute: typeof TeachingsRssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -1996,12 +2075,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminQueryRoute: typeof AdminQueryRoute
+  AdminTeachingsRoute: typeof AdminTeachingsRoute
   AdminUseRoute: typeof AdminUseRoute
   AdminVoiceRoute: typeof AdminVoiceRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminQueryRoute: AdminQueryRoute,
+  AdminTeachingsRoute: AdminTeachingsRoute,
   AdminUseRoute: AdminUseRoute,
   AdminVoiceRoute: AdminVoiceRoute,
 }
@@ -2117,10 +2198,13 @@ const rootRouteChildren: RootRouteChildren = {
   HubListenRoute: HubListenRoute,
   HubPlayRoute: HubPlayRoute,
   HubPracticeRoute: HubPracticeRoute,
+  TeachingsSlugRoute: TeachingsSlugRoute,
+  TeachingsRssDotxmlRoute: TeachingsRssDotxmlRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   LessonsIndexRoute: LessonsIndexRoute,
   StudyIndexRoute: StudyIndexRoute,
+  TeachingsIndexRoute: TeachingsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   GameChapterStageRoute: GameChapterStageRoute,
   GameAlefbetLevelRoute: GameAlefbetLevelRoute,

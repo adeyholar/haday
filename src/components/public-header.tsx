@@ -10,6 +10,9 @@ export function PublicHeader() {
           <BrandLockup linked />
         </div>
         <nav aria-label="Public" className="flex shrink-0 items-center gap-3 text-sm font-semibold">
+          <Link to="/teachings" className="text-ink underline-offset-4 hover:underline">
+            Teachings
+          </Link>
           <Link to="/about" className="text-ink underline-offset-4 hover:underline">
             About
           </Link>

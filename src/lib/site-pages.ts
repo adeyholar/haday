@@ -40,6 +40,12 @@ export const STATIC_PAGES: SitePage[] = [
     summary: "Adeola Adegbolagun leads Fathers' Faith International Ministries and created HaDay HebRabbAi Mentor.",
     lastmod: "2026-10-19",
   },
+  {
+    path: "/teachings",
+    title: "Teachings",
+    summary: "Short readings from HaDay HebRabbAi Mentor that send you back to the Hebrew text.",
+    lastmod: "2026-10-19",
+  },
 ];
 
 /** Public pages a person can open. Later pages are added here. */
@@ -69,7 +75,10 @@ export const LLMS_INTRO =
   "Learn to read the Hebrew Bible in its original language, for beginners, students and believers who want to understand Scripture more deeply.";
 
 export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
-  const lines = pages.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const teachings = pages.filter((page) => page.path === "/teachings" || page.path.startsWith("/teachings/"));
+  const rest = pages.filter((page) => !teachings.includes(page));
+  const lines = rest.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const teachingLines = teachings.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
   return [
     "# HaDay HebRabbAi Mentor",
     "",
@@ -79,6 +88,7 @@ export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
     ...lines,
     "",
     "Teachings:",
+    ...teachingLines,
     "",
     "The class study, games, listen pages, and lexicon require sign-in. Textbook pages and answer keys are not published here.",
     "",

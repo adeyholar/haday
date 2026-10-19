@@ -38,7 +38,9 @@ export function isPublicReadingPath(pathname: string): boolean {
     path === "/about" ||
     path === "/legal" ||
     path === "/credits" ||
-    path === "/how-to-memorize-biblical-hebrew-vocabulary"
+    path === "/how-to-memorize-biblical-hebrew-vocabulary" ||
+    path === "/teachings" ||
+    path.startsWith("/teachings/")
   );
 }
 
