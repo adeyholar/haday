@@ -27,6 +27,7 @@ import { Route as KeepRouteImport } from './routes/keep'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ListenRouteImport } from './routes/listen'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as QuizRouteImport } from './routes/quiz'
@@ -34,6 +35,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as SelfQuizRouteImport } from './routes/self-quiz'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TypeRouteImport } from './routes/type'
 import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
@@ -197,6 +199,11 @@ const ListenRoute = ListenRouteImport.update({
   path: '/listen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -230,6 +237,11 @@ const RulesRoute = RulesRouteImport.update({
 const SelfQuizRoute = SelfQuizRouteImport.update({
   id: '/self-quiz',
   path: '/self-quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TypeRoute = TypeRouteImport.update({
@@ -609,6 +621,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/listen': typeof ListenRouteWithChildren
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
@@ -616,6 +629,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
@@ -705,6 +719,7 @@ export interface FileRoutesByTo {
   '/keep': typeof KeepRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
@@ -712,6 +727,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
@@ -804,6 +820,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/listen': typeof ListenRouteWithChildren
+  '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/quiz': typeof QuizRoute
@@ -811,6 +828,7 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/rules': typeof RulesRoute
   '/self-quiz': typeof SelfQuizRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
@@ -904,6 +922,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/legal'
     | '/listen'
+    | '/llms.txt'
     | '/login'
     | '/match'
     | '/quiz'
@@ -911,6 +930,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/self-quiz'
+    | '/sitemap.xml'
     | '/type'
     | '/weak'
     | '/write'
@@ -1000,6 +1020,7 @@ export interface FileRouteTypes {
     | '/keep'
     | '/leaderboard'
     | '/legal'
+    | '/llms.txt'
     | '/login'
     | '/match'
     | '/quiz'
@@ -1007,6 +1028,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/self-quiz'
+    | '/sitemap.xml'
     | '/type'
     | '/weak'
     | '/write'
@@ -1098,6 +1120,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/legal'
     | '/listen'
+    | '/llms.txt'
     | '/login'
     | '/match'
     | '/quiz'
@@ -1105,6 +1128,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/rules'
     | '/self-quiz'
+    | '/sitemap.xml'
     | '/type'
     | '/weak'
     | '/write'
@@ -1197,6 +1221,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   LegalRoute: typeof LegalRoute
   ListenRoute: typeof ListenRouteWithChildren
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
   QuizRoute: typeof QuizRoute
@@ -1204,6 +1229,7 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   RulesRoute: typeof RulesRoute
   SelfQuizRoute: typeof SelfQuizRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TypeRoute: typeof TypeRoute
   WeakRoute: typeof WeakRoute
   WriteRoute: typeof WriteRoute
@@ -1385,6 +1411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -1432,6 +1465,13 @@ declare module '@tanstack/react-router' {
       path: '/self-quiz'
       fullPath: '/self-quiz'
       preLoaderRoute: typeof SelfQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/type': {
@@ -2029,6 +2069,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   LegalRoute: LegalRoute,
   ListenRoute: ListenRouteWithChildren,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
   QuizRoute: QuizRoute,
@@ -2036,6 +2077,7 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRoute,
   RulesRoute: RulesRoute,
   SelfQuizRoute: SelfQuizRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TypeRoute: TypeRoute,
   WeakRoute: WeakRoute,
   WriteRoute: WriteRoute,
