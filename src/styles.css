@@ -270,6 +270,80 @@
   font-weight: 400;
   line-height: 2.6;
 }
+.ms-verses {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ms-verse {
+  gap: 0.75rem;
+}
+.manuscript-sheet .ms-word-face,
+.manuscript-sheet .ms-trailer {
+  font-size: 1.85rem;
+}
+.manuscript-sheet .ms-qere {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+@media (min-width: 640px) {
+  .manuscript-page .ms-word-face,
+  .manuscript-page .ms-trailer {
+    font-size: 2.25rem;
+  }
+}
+.manuscript-tight {
+  padding: 0.65rem 0.7rem 1.1rem;
+}
+.manuscript-tight .manuscript-note {
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+}
+.manuscript-tight .ms-verses {
+  gap: 0.28rem;
+}
+.manuscript-tight .ms-verse {
+  gap: 0.35rem;
+}
+.manuscript-tight .ms-verse-no {
+  margin-top: 0.2rem;
+  width: 1.35rem;
+  font-size: 0.7rem;
+}
+.manuscript-tight .ms-word {
+  min-height: 1.7rem;
+  padding-block: 0;
+}
+.manuscript-tight .ms-word-face,
+.manuscript-tight .ms-trailer {
+  font-size: 1.12rem;
+  line-height: 2.05;
+}
+.manuscript-tight .ms-qere {
+  font-size: 0.78rem;
+}
+.manuscript-small .ms-verses {
+  gap: 0.5rem;
+}
+.manuscript-small .ms-verse {
+  gap: 0.45rem;
+}
+.manuscript-small .ms-word {
+  min-height: 2rem;
+  padding-block: 0;
+}
+.manuscript-small .ms-word-face,
+.manuscript-small .ms-trailer {
+  font-size: 1.42rem;
+  line-height: 2.15;
+}
+.manuscript-small .ms-qere {
+  font-size: 0.9rem;
+}
+.manuscript-large .ms-word-face,
+.manuscript-large .ms-trailer {
+  font-size: 2.55rem;
+}
 .manuscript-sheet .ms-stress {
   text-decoration: underline;
   text-decoration-thickness: 2px;
