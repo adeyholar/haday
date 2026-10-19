@@ -34,6 +34,12 @@ export const STATIC_PAGES: SitePage[] = [
     summary: "The readers, texts, and open works behind HaDay HebRabbAi Mentor.",
     lastmod: "2026-10-18",
   },
+  {
+    path: "/about",
+    title: "About HaDay HebRabbAi Mentor",
+    summary: "Adeola Adegbolagun leads Fathers' Faith International Ministries and created HaDay HebRabbAi Mentor.",
+    lastmod: "2026-10-19",
+  },
 ];
 
 /** Public pages a person can open. Later pages are added here. */
@@ -46,7 +52,7 @@ function pageUrl(path: string): string {
 }
 
 function escapeXml(value: string): string {
-  return value.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+  return value.replace(/&/g, "\u0026amp;").replace(/</g, "\u0026lt;").replace(/>/g, "\u0026gt;");
 }
 
 export function sitemapXml(pages: SitePage[] = allPublicPages()): string {

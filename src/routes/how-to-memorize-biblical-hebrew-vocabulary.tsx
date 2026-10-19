@@ -27,11 +27,15 @@ function MethodPage() {
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <PublicReturn />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(METHOD_JSON_LD) }} />
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · first-year method</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · method</p>
       <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">{METHOD_H1}</h1>
       <p className="mt-3 text-sm text-muted">
-        Written by the HaDay team for first-year students. Published {METHOD_DATE}. This page is free to read. The
-        lessons stay behind sign-in.
+        <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Adeola "Ade" Adegbolagun
+        </Link>{" "}
+        is a prophetic teacher with an itinerant ministry, leads Fathers' Faith International Ministries, and
+        created HaDay HebRabbAi Mentor to help readers meet God in the Hebrew text. Published {METHOD_DATE}. This
+        page is free to read. The lessons stay behind sign-in.
       </p>
       <p className="mt-4 max-w-prose leading-relaxed text-muted">
         This is how to memorize Biblical Hebrew vocabulary so the words stay. Learn the most frequent words, hear
@@ -83,7 +87,7 @@ function MethodPage() {
         </p>
         <p>
           Recognition is not the same as being able to parse a verb or explain a clause. It means you have met the
-          word often enough to know what it is doing in the line. First-year work is that meeting, repeated.
+          word often enough to know what it is doing in the line. The work is that meeting, repeated.
         </p>
       </Section>
 
@@ -168,12 +172,12 @@ function MethodPage() {
           Read with the audio on. The point is to meet a word you studied, inside a real line, while someone is
           saying it. A gloss in a list and a gloss in a verse are not the same memory. If the line uses a form you
           have not drilled, do not stop the week. Note the form, finish the verse, and bring that form back in the
-          next short review. A first-year reading is allowed to be slow. It is not allowed to be a hunt through an
+          next short review. A reading is allowed to be slow. It is not allowed to be a hunt through an
           answer key. The key is not on this site. The work is the point.
         </p>
       </Section>
 
-      <Section title="A simple weekly plan for first-year students">
+      <Section title="A simple weekly plan">
         <p>Use the class week as the unit. Do not turn the whole vocabulary into one sitting.</p>
         <p>
           Keep the same hour if you can. A student who reviews after breakfast remembers the slot, and the slot
@@ -210,7 +214,7 @@ function MethodPage() {
 
       <Section title="Practice with HaDay">
         <p>
-          HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. The Grammar Path
+          HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer. The Grammar Path
           is the class vocabulary and the games, in the order of the textbook. The Scripture Path is the leveled
           reading ladder. You choose one path. It stays with the account. The home page is those two doors. Start
           the Grammar Path if you are in the class. Start the Scripture Path if you are learning by reading. Either
@@ -259,7 +263,7 @@ function MethodPage() {
           </li>
           <li>
             Miles V. Van Pelt and Gary D. Pratico, <em>The Vocabulary Guide to Biblical Hebrew</em> (Zondervan). A
-            frequency list many first-year students already use beside the grammar.
+            frequency list many students already use beside the grammar.
           </li>
           <li>
             Hermann Ebbinghaus, on memory fading without review. Named here only for the idea of spaced review. No

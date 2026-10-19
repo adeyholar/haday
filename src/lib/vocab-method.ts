@@ -1,11 +1,12 @@
 import { CLASS_SITE } from "@/lib/class-site";
+import { AUTHOR, FFIM } from "@/lib/author";
 
 export const METHOD_PATH = "/how-to-memorize-biblical-hebrew-vocabulary";
 export const METHOD_URL = `${CLASS_SITE}${METHOD_PATH}`;
 export const METHOD_TITLE = "How to Memorize Biblical Hebrew Vocabulary | HaDay";
 export const METHOD_DESCRIPTION =
-  "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for first-year Hebrew students.";
-export const METHOD_H1 = "How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks";
+  "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for Hebrew students.";
+export const METHOD_H1 = "How to Memorize Biblical Hebrew Vocabulary: A Method That Sticks";
 export const METHOD_DATE = "2026-10-17";
 
 export const METHOD_STEPS = [
@@ -69,10 +70,23 @@ export const METHOD_JSON_LD = {
       headline: METHOD_H1,
       description: METHOD_DESCRIPTION,
       datePublished: METHOD_DATE,
-      dateModified: METHOD_DATE,
+      dateModified: "2026-10-19",
       image: `${CLASS_SITE}/og.jpg`,
-      author: { "@type": "Organization", name: "HaDay HebRabbAi Mentor" },
-      publisher: { "@type": "Organization", name: "HaDay" },
+      author: {
+        "@type": "Person",
+        "@id": AUTHOR.id,
+        name: AUTHOR.name,
+        alternateName: AUTHOR.alternateName,
+        jobTitle: AUTHOR.jobTitle,
+        url: AUTHOR.url,
+        image: AUTHOR.image,
+      },
+      publisher: {
+        "@type": "Organization",
+        "@id": FFIM.id,
+        name: FFIM.name,
+        logo: { "@type": "ImageObject", url: `${CLASS_SITE}/og.jpg` },
+      },
       mainEntityOfPage: METHOD_URL,
     },
     {
