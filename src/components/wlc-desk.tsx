@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { verseLabel, wlcClusters, type WlcChapter, type WlcWord } from "@/lib/wlc";
 
 export type SheetTone = "light" | "dim";
+export type SheetSize = "tight" | "small" | "page" | "large";
 
 function WordFace({
   word,
@@ -23,7 +24,7 @@ function WordFace({
       onClick={() => onPick(word)}
       className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""}`}
     >
-      <span className="he-taam ms-word-face text-[1.85rem] sm:text-4xl" lang="he">
+      <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (
           <span key={`${word.id}-${index}`} className={index === stressAt ? "ms-stress" : undefined}>
             {cluster.letter}
@@ -32,12 +33,12 @@ function WordFace({
         ))}
       </span>
       {qere ? (
-        <span className="he-taam ms-qere ms-1 text-lg leading-none" lang="he">
+        <span className="he-taam ms-qere ms-1" lang="he">
           ({qere.surface})
         </span>
       ) : null}
       {word.trailer ? (
-        <span className="he-taam text-[1.85rem] sm:text-4xl" lang="he">
+        <span className="he-taam ms-trailer" lang="he">
           {word.trailer}
         </span>
       ) : null}
@@ -121,7 +122,7 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
   );
 }
 
-export function WlcReading({ chapter, tone }: { chapter: WlcChapter; tone: SheetTone }) {
+export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone: SheetTone; size: SheetSize }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
@@ -142,16 +143,16 @@ export function WlcReading({ chapter, tone }: { chapter: WlcChapter; tone: Sheet
         ref={frame}
         tabIndex={0}
         aria-label="Chapter manuscript"
-        className={`manuscript-sheet ${tone === "dim" ? "manuscript-dim" : "manuscript-light"}`}
+        className={`manuscript-sheet manuscript-${size} ${tone === "dim" ? "manuscript-dim" : "manuscript-light"}`}
       >
         <p className="manuscript-note">
           {system}
           {chapter.dataset_version ? ` · Leningrad ${chapter.dataset_version}` : ""}. Accents and meteg stay on the word.
           A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the qere.
         </p>
-        <div className="space-y-4">
+        <div className="ms-verses">
           {chapter.verses.map((verse) => (
-            <div key={verse.ref} className="flex items-start gap-3" dir="rtl">
+            <div key={verse.ref} className="ms-verse flex items-start" dir="rtl">
               <span className="ms-verse-no mt-3 w-8 shrink-0 text-sm font-semibold" dir="ltr">
                 {verseLabel(verse.ref)}
               </span>
