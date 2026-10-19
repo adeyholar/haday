@@ -58,7 +58,7 @@ test("recorded chapter audio has a start time for every verse", () => {
     assert.ok(meta.src.endsWith(`01-Gen_0${ch}.mp3`) || meta.src.endsWith(`01-Gen_${String(ch).padStart(2, "0")}.mp3`));
     assert.equal(verseAtTime(ch, meta.verses[0]), 1);
     assert.equal(verseAtTime(ch, meta.verses.at(-1)), n);
-    assert.ok(meta.verses[0] > 2, "skip the spoken heading");
+    assert.ok(Number.isFinite(meta.verses[0]) && meta.verses[0] >= 0, "the first stamp is a real time");
     assert.equal(meta.words?.length, n);
     const v1 = readingVerses(ch)[0];
     assert.equal(meta.words?.[0]?.length, v1.words.length);

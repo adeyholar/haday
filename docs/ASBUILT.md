@@ -10,7 +10,7 @@ Living picture of **what the class site is today**. Not a wish list.
 | **Repo** | https://github.com/adeyholar/haday (`main`) |
 | **Host** | Azure Web App `haday` (Linux container) + Azure Postgres `haday-pg` |
 | **Course** | BIBL 630 · *Basics of Biblical Hebrew*, 3rd ed. |
-| **Snapshot** | 18 October 2026 |
+| **Check** | The unit tests find files from the repo itself. They do not depend on a fixed machine path. |
 
 Each shipped upgrade is recorded on the Notion Change Log, which is the documentation source of truth:
 

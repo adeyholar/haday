@@ -8,7 +8,7 @@ function pngSize(buf) {
 }
 
 test("a saved shortcut is HaDay, with the parchment he, and not the template icon", () => {
-  const manifest = JSON.parse(readFileSync("/workspace/public/manifest.webmanifest", "utf8"));
+  const manifest = JSON.parse(readFileSync(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"));
   assert.equal(manifest.name, "HaDay HebRabbAi Mentor");
   assert.equal(manifest.short_name, "HaDay");
   assert.equal(manifest.background_color, "#F3EEE4");
@@ -18,14 +18,14 @@ test("a saved shortcut is HaDay, with the parchment he, and not the template ico
     ["192x192", "512x512", "512x512"],
   );
   assert.equal(manifest.icons[2].purpose, "maskable");
-  assert.equal(pngSize(readFileSync("/workspace/public/icon-192.png")).w, 192);
-  assert.equal(pngSize(readFileSync("/workspace/public/icon-512.png")).w, 512);
-  assert.equal(pngSize(readFileSync("/workspace/public/apple-touch-icon.png")).w, 180);
-  const ico = readFileSync("/workspace/public/favicon.ico");
+  assert.equal(pngSize(readFileSync(new URL("../public/icon-192.png", import.meta.url))).w, 192);
+  assert.equal(pngSize(readFileSync(new URL("../public/icon-512.png", import.meta.url))).w, 512);
+  assert.equal(pngSize(readFileSync(new URL("../public/apple-touch-icon.png", import.meta.url))).w, 180);
+  const ico = readFileSync(new URL("../public/favicon.ico", import.meta.url));
   assert.equal(ico.readUInt16LE(0), 0);
   assert.equal(ico.readUInt16LE(2), 1);
   assert.ok(ico.readUInt16LE(4) >= 3);
-  const svg = readFileSync("/workspace/public/favicon.svg", "utf8");
+  const svg = readFileSync(new URL("../public/favicon.svg", import.meta.url), "utf8");
   assert.match(svg, /#F3EEE4/);
   assert.match(svg, /#603619/);
   assert.doesNotMatch(svg, /Times New Roman/);
@@ -54,11 +54,11 @@ test("a saved shortcut is HaDay, with the parchment he, and not the template ico
   });
   assert.match(install, /Add HaDay/);
   assert.doesNotMatch(install, /Grok App/);
-  const installPage = readFileSync("/workspace/scripts/install-page.html", "utf8");
+  const installPage = readFileSync(new URL("./install-page.html", import.meta.url), "utf8");
   assert.match(installPage, /href="\/apple-touch-icon\.png"/);
   assert.match(installPage, /href="\/manifest\.webmanifest"/);
   assert.doesNotMatch(installPage, /__grok\/icon-180/);
-  const middleware = readFileSync("/workspace/server/middleware/grok-pwa.ts", "utf8");
+  const middleware = readFileSync(new URL("../server/middleware/grok-pwa.ts", import.meta.url), "utf8");
   assert.match(middleware, /name: "HaDay HebRabbAi Mentor"/);
   assert.match(middleware, /icon: "\/apple-touch-icon\.png"/);
 });
