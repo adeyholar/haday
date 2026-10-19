@@ -1,7 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { verseLabel, wlcClusters, type WlcChapter, type WlcWord } from "@/lib/wlc";
 
-function WordFace({ word, onPick }: { word: WlcWord; onPick: (word: WlcWord) => void }) {
+export type SheetTone = "light" | "dim";
+
+function WordFace({
+  word,
+  picked,
+  onPick,
+}: {
+  word: WlcWord;
+  picked: boolean;
+  onPick: (word: WlcWord) => void;
+}) {
   const clusters = wlcClusters(word.surface);
   const stressAt = word.stress?.letter_index;
   const qere = word.qere?.[0];
@@ -9,22 +19,20 @@ function WordFace({ word, onPick }: { word: WlcWord; onPick: (word: WlcWord) => 
     <button
       type="button"
       dir="rtl"
+      aria-pressed={picked}
       onClick={() => onPick(word)}
-      className="inline-flex min-h-11 items-end rounded-md px-0.5 text-ink hover:bg-primary/10"
+      className={`ms-word inline-flex min-h-11 items-end px-0.5 ${picked ? "ms-picked" : ""}`}
     >
       <span className="he-taam text-[1.85rem] sm:text-4xl" lang="he">
         {clusters.map((cluster, index) => (
-          <span
-            key={`${word.id}-${index}`}
-            className={index === stressAt ? "underline decoration-primary decoration-2 underline-offset-[0.35em]" : undefined}
-          >
+          <span key={`${word.id}-${index}`} className={index === stressAt ? "ms-stress" : undefined}>
             {cluster.letter}
             {cluster.marks}
           </span>
         ))}
       </span>
       {qere ? (
-        <span className="he-taam ms-1 text-lg leading-none text-primary" lang="he">
+        <span className="he-taam ms-qere ms-1 text-lg leading-none" lang="he">
           ({qere.surface})
         </span>
       ) : null}
@@ -96,39 +104,48 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
   );
 }
 
-export function WlcReading({ chapter }: { chapter: WlcChapter }) {
+export function WlcReading({ chapter, tone }: { chapter: WlcChapter; tone: SheetTone }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
+  const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
 
   useEffect(() => {
     setPicked(null);
+    frame.current?.scrollTo({ top: 0 });
   }, [chapter.book, chapter.chapter]);
 
   return (
-    <div>
-      <p className="text-xs text-muted">
-        {system} · dataset {chapter.dataset_version}. The line marks the stressed letter. A word in parentheses is the qere. Tap a word for the pause path.
-      </p>
+    <div className="flex min-h-0 flex-1 flex-col">
       {picked ? (
-        <div className="sticky top-16 z-10 mt-3">
+        <div className="mb-2 max-h-[42%] shrink-0 overflow-y-auto">
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
       ) : null}
-      <div className="mt-4 space-y-4">
-        {chapter.verses.map((verse) => (
-          <div key={verse.ref} className="flex items-start gap-3" dir="rtl">
-            <span className="mt-3 w-8 shrink-0 text-sm font-semibold text-muted" dir="ltr">
-              {verseLabel(verse.ref)}
-            </span>
-            <p className="he-verse min-w-0 flex-1">
-              {verse.words
-                .filter((word) => word.kq_role !== "qere")
-                .map((word) => (
-                  <WordFace key={word.id} word={word} onPick={setPicked} />
-                ))}
-            </p>
-          </div>
-        ))}
+      <div
+        ref={frame}
+        tabIndex={0}
+        aria-label="Chapter manuscript"
+        className={`manuscript-sheet ${tone === "dim" ? "manuscript-dim" : "manuscript-light"}`}
+      >
+        <p className="manuscript-note">
+          {system}. The line marks the stressed letter. A word in parentheses is the qere. Tap a word for the pause path.
+        </p>
+        <div className="space-y-4">
+          {chapter.verses.map((verse) => (
+            <div key={verse.ref} className="flex items-start gap-3" dir="rtl">
+              <span className="ms-verse-no mt-3 w-8 shrink-0 text-sm font-semibold" dir="ltr">
+                {verseLabel(verse.ref)}
+              </span>
+              <p className="he-verse min-w-0 flex-1">
+                {verse.words
+                  .filter((word) => word.kq_role !== "qere")
+                  .map((word) => (
+                    <WordFace key={word.id} word={word} picked={picked?.id === word.id} onPick={setPicked} />
+                  ))}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

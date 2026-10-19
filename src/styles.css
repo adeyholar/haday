@@ -177,6 +177,110 @@
   background: var(--color-primary);
 }
 
+/* Reading Lab: the chapter is a leaf. The page does not scroll it. */
+.wlc-stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  /* sticky header h-14, main pt-6, bottom bar clearance pb-28 */
+  height: calc(100dvh - 3.5rem - 1.5rem - 7rem - 2px);
+}
+@media (min-width: 640px) {
+  .wlc-stage {
+    height: calc(100dvh - 3.5rem - 1.5rem - 6rem - 2px);
+  }
+}
+
+.manuscript-sheet {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 2px;
+  padding: 1.35rem 1.2rem 2.4rem;
+  scrollbar-width: thin;
+  outline: none;
+}
+.manuscript-sheet:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 3px;
+}
+.manuscript-light {
+  color: #2a2118;
+  background-color: #f6edd8;
+  background-image:
+    linear-gradient(to left, rgba(92, 58, 24, 0.16), transparent 18px),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 252, 245, 0.9), transparent 58%),
+    radial-gradient(ellipse at 0% 100%, rgba(176, 132, 74, 0.18), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(90, 60, 30, 0.02) 0 1px, transparent 1px 4px);
+  box-shadow:
+    inset 0 0 0 1px rgba(92, 58, 24, 0.38),
+    inset 0 0 0 6px #f6edd8,
+    inset 0 0 0 7px rgba(92, 58, 24, 0.5),
+    0 18px 36px -22px rgba(48, 32, 12, 0.55);
+  scrollbar-color: rgba(92, 58, 24, 0.45) transparent;
+}
+.manuscript-dim {
+  color: #f3e7d4;
+  background-color: #1b1612;
+  background-image:
+    linear-gradient(to left, rgba(232, 210, 170, 0.1), transparent 18px),
+    radial-gradient(ellipse at 50% 0%, rgba(120, 86, 42, 0.32), transparent 56%),
+    repeating-linear-gradient(0deg, rgba(255, 236, 210, 0.02) 0 1px, transparent 1px 4px);
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 210, 170, 0.3),
+    inset 0 0 0 6px #1b1612,
+    inset 0 0 0 7px rgba(232, 210, 170, 0.38),
+    0 18px 36px -18px rgba(0, 0, 0, 0.72);
+  scrollbar-color: rgba(232, 210, 170, 0.4) transparent;
+}
+.manuscript-note {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.35;
+  opacity: 0.72;
+}
+.manuscript-sheet .ms-verse-no {
+  color: #6d5644;
+}
+.manuscript-dim .ms-verse-no {
+  color: #cbb89a;
+}
+.manuscript-sheet .ms-word {
+  color: inherit;
+  border-radius: 4px;
+}
+.manuscript-sheet .ms-word:hover,
+.manuscript-sheet .ms-word:focus-visible {
+  background: color-mix(in oklab, currentColor 10%, transparent);
+}
+.manuscript-light .ms-picked {
+  background: rgba(47, 74, 66, 0.14);
+}
+.manuscript-dim .ms-picked {
+  background: rgba(232, 210, 170, 0.16);
+}
+.manuscript-sheet .ms-stress {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+.manuscript-light .ms-stress {
+  text-decoration-color: #8a4b2a;
+}
+.manuscript-dim .ms-stress {
+  text-decoration-color: #e4c98a;
+}
+.manuscript-light .ms-qere {
+  color: var(--color-primary);
+}
+.manuscript-dim .ms-qere {
+  color: #e7c27a;
+}
+
 .he-hit {
   background: color-mix(in oklab, var(--color-primary) 16%, transparent);
   color: var(--color-primary);
