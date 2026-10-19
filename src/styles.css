@@ -192,6 +192,56 @@
   }
 }
 
+/*
+ * Phones, short landscape screens and touch tablets in landscape: the fixed
+ * leaf left only 60–180px for the text under the controls. Here the page
+ * scrolls instead, so the controls scroll away and the chapter gets the
+ * screen. The picked-word card becomes a bottom sheet. Keep the query in step
+ * with WLC_PAGE_SCROLL_QUERY in wlc-desk.tsx. Desktop keeps the leaf.
+ */
+@media (max-width: 639px), (max-height: 560px), (pointer: coarse) and (max-height: 820px) {
+  .wlc-stage {
+    height: auto;
+    overflow: visible;
+  }
+  .wlc-stage .manuscript-sheet {
+    flex: none;
+    overflow: visible;
+    padding-bottom: calc(2.4rem + var(--wlc-card-h, 0px));
+  }
+  .wlc-stage .manuscript-tight {
+    padding-bottom: calc(1.1rem + var(--wlc-card-h, 0px));
+  }
+  .wlc-stage .wlc-card {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    max-height: min(55dvh, 26rem);
+    margin: 0;
+    padding: 0 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+  .wlc-stage .wlc-card > div {
+    box-shadow:
+      var(--shadow-border),
+      0 -12px 32px -12px rgba(28, 24, 20, 0.35);
+  }
+}
+/* Touch screens: keep every word a 44px target, even at Tight. */
+@media (pointer: coarse) {
+  .wlc-stage .manuscript-tight .ms-word {
+    min-height: 2.75rem;
+  }
+}
+@media (max-width: 639px) {
+  .wlc-stage .manuscript-sheet:not(.manuscript-tight) {
+    padding-inline: 0.85rem;
+  }
+  .wlc-stage .manuscript-sheet:not(.manuscript-tight) .manuscript-note {
+    font-size: 0.9rem;
+  }
+}
 .manuscript-sheet {
   min-height: 0;
   flex: 1 1 auto;
@@ -273,7 +323,9 @@
 /* A maqaf binds its word to the next: one unit, no gap, no line break inside. */
 .ms-chain {
   display: inline-flex;
-  flex-wrap: nowrap;
+  /* The chain moves to a new line as one unit. Only a chain wider than the
+     whole line (long words at Large on a phone) may wrap inside itself. */
+  flex-wrap: wrap;
   align-items: center;
   white-space: nowrap;
   max-width: 100%;
