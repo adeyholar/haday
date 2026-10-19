@@ -10,11 +10,23 @@ const repo = fileURLToPath(new URL("..", import.meta.url));
 const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect, robotsNoindex, SEO_TITLE, SEO_DESCRIPTION, shareMeta } = await jiti.import(
   new URL("../src/lib/seo.ts", import.meta.url).pathname,
 );
+const { STATIC_PAGES, sitemapXml, llmsTxt, LLMS_INTRO } = await jiti.import(
+  new URL("../src/lib/site-pages.ts", import.meta.url).pathname,
+);
 
 test("only the doors, privacy, and credits are indexable", () => {
   assert.equal(isIndexablePath("/"), true);
   assert.equal(isIndexablePath("/legal"), true);
+  assert.equal(isIndexablePath("/credits"), true);
   assert.equal(isIndexablePath("/how-to-memorize-biblical-hebrew-vocabulary"), true);
+  assert.equal(isIndexablePath("/about"), true);
+  assert.equal(isIndexablePath("/teachings"), true);
+  assert.equal(isIndexablePath("/teachings/a-post"), true);
+  assert.equal(isIndexablePath("/teachings/rss.xml"), true);
+  assert.equal(isIndexablePath("/sitemap.xml"), true);
+  assert.equal(isIndexablePath("/llms.txt"), true);
+  assert.equal(isIndexablePath("/ads.txt"), true);
+  for (const page of STATIC_PAGES) assert.equal(isIndexablePath(page.path), true);
   assert.equal(isIndexablePath("/login"), false);
   assert.equal(isIndexablePath("/reset-password"), false);
   assert.equal(isIndexablePath("/admin"), false);
@@ -87,7 +99,7 @@ test("the doors page states the product in the first render", () => {
 test("the memorization guide is public, cited, and in the sitemap", () => {
   const page = readFileSync(new URL("../src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx", import.meta.url).pathname, "utf8");
   const method = readFileSync(new URL("../src/lib/vocab-method.ts", import.meta.url).pathname, "utf8");
-  const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
+  const sitemap = sitemapXml();
   assert.match(page, /how to memorize Biblical Hebrew vocabulary/i);
   assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks/);
   assert.match(page, /twenty-eight/);
@@ -103,6 +115,22 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
   const meta =
     "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for first-year Hebrew students.";
   assert.ok(meta.length <= 155);
+});
+
+test("the sitemap and llms.txt come from the public page list", () => {
+  const xml = sitemapXml();
+  assert.match(xml, /<loc>https:\/\/hebrewmentor\.haday\.app\/<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/hebrewmentor\.haday\.app\/legal<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/hebrewmentor\.haday\.app\/credits<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/hebrewmentor\.haday\.app\/how-to-memorize-biblical-hebrew-vocabulary<\/loc>/);
+  assert.equal(xml.match(/<lastmod>/g)?.length, STATIC_PAGES.length);
+  const lines = llmsTxt().split("\n");
+  assert.equal(lines[2], LLMS_INTRO);
+  assert.match(llmsTxt(), /Teachings:/);
+  const robots = readFileSync(new URL("../public/robots.txt", import.meta.url), "utf8");
+  assert.match(robots, /Allow: \//);
+  assert.match(robots, /Sitemap: https:\/\/hebrewmentor\.haday\.app\/sitemap\.xml/);
+  assert.equal(robots.includes("Mediapartners-Google"), false);
 });
 
 test("the retired Vercel page points at the class site", () => {

@@ -1,4 +1,5 @@
 import { CLASS_SITE, PREVIOUS_CLASS_HOST, isRetiredVercelHost } from "@/lib/class-site";
+import { allPublicPages } from "@/lib/site-pages";
 
 export const SEO_TITLE = "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor";
 
@@ -7,25 +8,28 @@ export const SEO_DESCRIPTION =
 
 export const SITE_OG_IMAGE = `${CLASS_SITE}/og.jpg`;
 
-const INDEXABLE = new Set([
-  "/",
-  "/legal",
-  "/credits",
-  "/how-to-memorize-biblical-hebrew-vocabulary",
-  "/robots.txt",
-  "/sitemap.xml",
-  "/llms.txt",
-]);
-
 export function requestPath(pathname: string): string {
   const bare = (pathname.split("?")[0] ?? "/").split("#")[0] ?? "/";
   if (bare.length > 1 && bare.endsWith("/")) return bare.slice(0, -1);
   return bare || "/";
 }
 
+const INDEX_EXTRAS = new Set([
+  "/about",
+  "/teachings",
+  "/teachings/rss.xml",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/llms.txt",
+  "/ads.txt",
+]);
+
 /** Pages a search engine may index. Sign-in, reset, admin, and the study stay out. */
 export function isIndexablePath(pathname: string): boolean {
-  return INDEXABLE.has(requestPath(pathname));
+  const path = requestPath(pathname);
+  if (allPublicPages().some((page) => page.path === path)) return true;
+  if (INDEX_EXTRAS.has(path)) return true;
+  return path.startsWith("/teachings/");
 }
 
 export function canonicalUrl(pathname: string): string {
