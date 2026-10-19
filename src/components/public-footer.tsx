@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getMyPath } from "@/lib/learner-path";
 import { homeForAccount } from "@/lib/path";
+import { CONTACT_EMAIL } from "@/lib/class-site";
 
 /** Legal and Credits on every public page, plus a way back to the front door. */
 export function PublicFooter() {
@@ -24,8 +25,27 @@ export function PublicFooter() {
         <Link to="/credits" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
           Credits
         </Link>
+        <ContactLink />
       </nav>
     </footer>
+  );
+}
+
+/** The public address. The mailto link is added in the browser so the page source has no mailto. */
+export function ContactLink({ className }: { className?: string }) {
+  const [href, setHref] = useState<string | undefined>();
+  useEffect(() => {
+    setHref(`mailto:${CONTACT_EMAIL}`);
+  }, []);
+  return (
+    <a
+      href={href}
+      className={
+        className ?? "inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+      }
+    >
+      {CONTACT_EMAIL}
+    </a>
   );
 }
 

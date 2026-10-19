@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
 import { Panel } from "@/components/panel";
-import { PublicFooter, PublicReturn } from "@/components/public-footer";
+import { PublicFooter, PublicReturn, ContactLink } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { shareMeta } from "@/lib/seo";
 
@@ -13,7 +13,6 @@ export const Route = createFileRoute("/legal")({
   component: LegalPage,
 });
 
-const CONTACT = "adengongo@gmail.com";
 const EFFECTIVE = "6 September 2026";
 
 function LegalPage() {
@@ -37,11 +36,7 @@ function LegalPage() {
         <h2 className="font-display text-2xl font-bold text-ink">Who runs HaDay</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
           HaDay is operated by Adeola Adegbolagun (Crown Ha’Day) from Indiana, United States, for
-          BIBL 630 Biblical Hebrew I. Contact for privacy or account requests:{" "}
-          <a className="font-semibold text-primary underline-offset-4 hover:underline" href={`mailto:${CONTACT}`}>
-            {CONTACT}
-          </a>
-          .
+          BIBL 630 Biblical Hebrew I. Contact for privacy or account requests: <ContactLink />.
         </p>
       </Panel>
 

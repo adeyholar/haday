@@ -148,6 +148,8 @@ test("the sitemap and llms.txt come from the public page list", () => {
   const robots = readFileSync(new URL("../public/robots.txt", import.meta.url), "utf8");
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Sitemap: https:\/\/hebrewmentor\.haday\.app\/sitemap\.xml/);
+  assert.equal(readFileSync(new URL("../src/routes/legal.tsx", import.meta.url).pathname, "utf8").includes("adengongo@gmail.com"), false);
+  assert.match(readFileSync(new URL("../src/lib/class-site.ts", import.meta.url).pathname, "utf8"), /haday\.assistant@mail\.grokbot\.com/);
   assert.equal(robots.includes("Mediapartners-Google"), false);
 });
 

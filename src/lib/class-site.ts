@@ -3,7 +3,8 @@ export const CLASS_SITE = "https://hebrewmentor.haday.app";
 export const CLASS_SITE_HOST = "hebrewmentor.haday.app";
 /** Kept so the old address can redirect. Do not use it as the public address. */
 export const PREVIOUS_CLASS_HOST = "hadayhebbraimentor.jcdisn.com";
-export const AZURE_FALLBACK = "https://haday.azurewebsites.net";
+/** Public enquiries. The only address shown on the site. */
+export const CONTACT_EMAIL = "haday.assistant@mail.grokbot.com";
 
 export function isRetiredVercelHost(host: string | undefined | null): boolean {
   const h = (host ?? "").toLowerCase().split(":")[0];
