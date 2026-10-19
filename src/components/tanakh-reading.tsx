@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, FastForward, Pause, Play, Repeat, Rewind, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Ellipsis, Pause, Play, Repeat, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
-import { ListenMenu } from "@/components/listen-menu";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { Panel } from "@/components/panel";
+import { readLineInComfort, shouldFollowScroll } from "@/lib/read-follow";
 import { playGrade } from "@/lib/sfx";
 import {
   AUDIO_CREDIT,
@@ -43,7 +43,6 @@ import {
   passageLabel,
   passageSearch,
   fromSearch,
-  playingLabel,
   prevPlayLoc,
   resolvePassage,
   sameLoc,
@@ -820,112 +819,61 @@ export function TanakhReading({
   return (
     <>
       <StudyReturnBanner />
-      <Panel className="mb-4">
-        <ListenMenu />
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          <Link to="/listen/read" search={fromSearch(passage.from)} className="hover:underline">
-            Tanakh
-          </Link>
-          {" · "}
+      <div className="mb-3 flex items-center gap-1.5">
+        <h1 className="shrink-0 font-display text-lg font-bold text-ink">
           <Link to="/listen/read/$book" params={{ book }} search={fromSearch(passage.from)} className="hover:underline">
-            {meta?.en ?? book}
+            {meta?.en ?? book} {chapter}
           </Link>
-          {` ${chapter}`}
-        </p>
-        <h1 className="mt-1 font-display text-3xl font-bold text-ink">{playingLabel(passage)}</h1>
-        <p className="he-word mt-1 text-xl text-ink" lang="he" dir="rtl">
-          {meta?.he}
-        </p>
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        </h1>
+        <div className="grid min-w-0 flex-1 grid-cols-3 gap-1" role="tablist" aria-label="Reading mode">
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "follow"}
+            aria-label="Follow along"
             onClick={() => {
               stopAfter();
               setMode("follow");
               setQuiz(null);
               setDone(false);
             }}
-            className={`min-h-12 rounded-[var(--radius-md)] px-3 text-sm font-semibold shadow-[var(--shadow-border)] ${
-              mode === "follow" ? "bg-ink text-parchment" : "bg-card text-ink"
+            className={`min-h-11 rounded-[var(--radius-md)] px-1 text-xs font-semibold ${
+              mode === "follow" ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]"
             }`}
           >
-            Follow along
+            Follow
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "after"}
+            aria-label="Read after me"
             onClick={() => startAfter(0, 0)}
             disabled={!verses.length}
-            className={`min-h-12 rounded-[var(--radius-md)] px-3 text-sm font-semibold shadow-[var(--shadow-border)] ${
-              mode === "after" ? "bg-ink text-parchment" : "bg-card text-ink"
+            className={`min-h-11 rounded-[var(--radius-md)] px-1 text-xs font-semibold ${
+              mode === "after" ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]"
             }`}
           >
-            Read after me
+            Repeat
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "grade"}
+            aria-label="Grade reading"
             onClick={startGrade}
             disabled={!verses.length}
-            className={`min-h-12 rounded-[var(--radius-md)] px-3 text-sm font-semibold shadow-[var(--shadow-border)] ${
-              mode === "grade" ? "bg-ink text-parchment" : "bg-card text-ink"
+            className={`min-h-11 rounded-[var(--radius-md)] px-1 text-xs font-semibold ${
+              mode === "grade" ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]"
             }`}
           >
-            Grade reading
+            Grade
           </button>
         </div>
-        {mode === "after" ? (
-          <div className="mt-4 rounded-[var(--radius-md)] bg-surface px-3 py-3">
-            <p className="font-display text-2xl font-bold text-ink">
-              {afterPhase === "done"
-                ? "Sample finished"
-                : afterPhase === "wait"
-                  ? "Your turn"
-                  : afterPhase === "model"
-                    ? "Listen"
-                    : afterPhase === "pulse"
-                      ? "Your turn"
-                      : "Read after me"}
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              {afterPhase === "done"
-                ? "That was the last verse in this range."
-                : afterPhase === "wait"
-                  ? afterMic
-                    ? "Say the marked phrase. A short quiet moves to the next one."
-                    : "The microphone is off. Tap I said it when you have said the phrase."
-                  : "The recording speaks until the reader pauses. A pulse means you repeat that phrase."}
-            </p>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {afterPhase === "done" || afterPhase === "off" ? (
-                <Button type="button" onClick={() => startAfter(0, 0)}>
-                  {afterPhase === "done" ? "Read it again" : "Start"}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={() => {
-                    afterBag.current.said = true;
-                  }}
-                >
-                  I said it
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  afterBag.current.replay = true;
-                }}
-                disabled={afterPhase === "done" || afterPhase === "off"}
-              >
-                Hear it again
-              </Button>
-              <Button type="button" variant="outline" onClick={stopAfter} disabled={afterPhase === "off" || afterPhase === "done"}>
-                Stop
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </Panel>
+        <p className="shrink-0 text-xs font-semibold tabular-nums text-muted">
+          {verse ? `${verse.verse} of ${versesInChapter(book, chapter)}` : ""}
+        </p>
+      </div>
 
       {(mode === "follow" || mode === "after") && verse ? (
         <FollowCard
@@ -971,7 +919,58 @@ export function TanakhReading({
             if (node) applyRate(node, n);
           }}
           onLoop={setLoopOn}
+          fromV={vw.from}
+          toV={vw.to}
         />
+      ) : null}
+
+      {mode === "after" ? (
+        <div className="read-dock">
+          <p className="mx-auto max-w-3xl truncate px-3 pt-1 text-center text-xs font-semibold text-muted">
+            {afterPhase === "done"
+              ? "Sample finished"
+              : afterPhase === "wait" || afterPhase === "pulse"
+                ? "Your turn"
+                : afterPhase === "model"
+                  ? "Listen"
+                  : "Read after me"}
+          </p>
+          <div className="mx-auto flex max-w-3xl items-center justify-center gap-1 px-2 pb-1">
+            {afterPhase === "done" || afterPhase === "off" ? (
+              <button type="button" className="min-h-11 min-w-11 rounded-[var(--radius-md)] bg-ink px-3 text-xs font-semibold text-parchment" onClick={() => startAfter(0, 0)}>
+                {afterPhase === "done" ? "Again" : "Start"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="min-h-11 min-w-11 rounded-[var(--radius-md)] bg-ink px-3 text-xs font-semibold text-parchment"
+                onClick={() => {
+                  afterBag.current.said = true;
+                }}
+              >
+                I said it
+              </button>
+            )}
+            <button
+              type="button"
+              className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-xs font-semibold text-ink shadow-[var(--shadow-border)]"
+              onClick={() => {
+                afterBag.current.replay = true;
+              }}
+              disabled={afterPhase === "done" || afterPhase === "off"}
+            >
+              Hear it again
+            </button>
+            <button
+              type="button"
+              className="min-h-11 rounded-[var(--radius-md)] bg-card px-3 text-xs font-semibold text-ink shadow-[var(--shadow-border)]"
+              onClick={stopAfter}
+              disabled={afterPhase === "off" || afterPhase === "done"}
+            >
+              Stop
+            </button>
+          </div>
+        </div>
       ) : null}
 
       {(mode === "follow" || mode === "after") && !verse && !loadErr ? (
@@ -1031,7 +1030,6 @@ export function TanakhReading({
         {!aligned && !audioErr ? (
           <p className="mt-2 text-sm text-muted">Word highlight follows Hebrew syllable weight until this chapter is verse-timed.</p>
         ) : null}
-        <VerseClipBar book={book} chapter={chapter} fromV={vw.from} toV={vw.to} loop={loop} />
       <div className="mt-4 grid grid-cols-2 gap-2">
         {prevLoc ? (
           <Link
@@ -1065,7 +1063,7 @@ export function TanakhReading({
         )}
       </div>
 
-      <p className="mt-6 text-xs text-muted">
+      <p className="mb-28 mt-6 text-xs text-muted">
         {AUDIO_CREDIT}{" "}
         <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
           Full credits
@@ -1108,6 +1106,8 @@ function FollowCard({
   onSeeking,
   onRate,
   onLoop,
+  fromV,
+  toV,
 }: {
   audioRef: RefObject<HTMLAudioElement | null>;
   verse: ReadingVerse;
@@ -1141,6 +1141,8 @@ function FollowCard({
   onSeeking: (yes: boolean) => void;
   onRate: (n: number) => void;
   onLoop: (on: boolean) => void;
+  fromV: number;
+  toV: number;
 }) {
   const lo = windowStart;
   const [vol, setVol] = useState(loadReadVolume);
@@ -1148,19 +1150,78 @@ function FollowCard({
   const [pick, setPick] = useState<WordPick | null>(null);
   const activeRef = useRef<HTMLLIElement | null>(null);
   const wordEl = useRef<HTMLButtonElement | null>(null);
+  const dockRef = useRef<HTMLDivElement | null>(null);
+  const followRef = useRef(true);
   const skipScroll = useRef(true);
+  const [pausedFollow, setPausedFollow] = useState(false);
+  const [more, setMore] = useState(false);
   const list = verses.length ? verses : [verse];
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
   useEffect(() => {
+    const pause = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Node && dockRef.current?.contains(target)) return;
+      if (!followRef.current) return;
+      followRef.current = false;
+      setPausedFollow(true);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (!hideTransport && event.key === "ArrowLeft") {
+        event.preventDefault();
+        onNudge(-5);
+        return;
+      }
+      if (!hideTransport && event.key === "ArrowRight") {
+        event.preventDefault();
+        onNudge(5);
+        return;
+      }
+      if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "PageUp" || event.key === "PageDown" || event.key === "Home" || event.key === "End") {
+        pause(event);
+      }
+    };
+    window.addEventListener("wheel", pause, { passive: true });
+    window.addEventListener("touchmove", pause, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("wheel", pause);
+      window.removeEventListener("touchmove", pause);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [hideTransport, onNudge]);
+  useEffect(() => {
     if (skipScroll.current) {
       skipScroll.current = false;
       return;
     }
-    const node = wordEl.current ?? activeRef.current;
-    node?.scrollIntoView({ block: "end", inline: "nearest", behavior: "smooth" });
-  }, [i, wordI, verse.ref]);
+    if (!followRef.current) return;
+    const node = activeRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    const landscape = window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
+    const viewTop = 56;
+    const viewBottom = window.innerHeight - 88 - (landscape ? 0 : 56);
+    if (!shouldFollowScroll(true, readLineInComfort(rect.top, rect.bottom, viewTop, viewBottom))) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    node.scrollIntoView({ block: "center", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }, [i, verse.ref]);
+  function resumeFollow() {
+    followRef.current = true;
+    setPausedFollow(false);
+    const node = activeRef.current;
+    if (!node) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    node.scrollIntoView({ block: "center", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
+  }
+  function cycleRate() {
+    const at = READ_RATES.findIndex((row) => row.value === rate);
+    const next = READ_RATES[(at + 1) % READ_RATES.length] ?? READ_RATES[0];
+    onRate(next.value);
+  }
   useEffect(() => {
     if (vol > 0) lastVol.current = vol;
     saveReadVolume(vol);
@@ -1182,119 +1243,128 @@ function FollowCard({
   return (
     <>
       {hideTransport ? null : (
-      <div className="sticky top-14 z-30 mb-4 rounded-[var(--radius-xl)] border border-border bg-card px-4 py-3 shadow-[var(--shadow-border)]">
-        <div className="flex items-center justify-between text-sm font-semibold tabular-nums text-muted">
-          <span>{formatPlayTime(rel)}</span>
-          <span>{formatPlayTime(span || duration)}</span>
-        </div>
-        <input
-          className="audio-seek mt-1"
-          type="range"
-          min={lo}
-          max={hi || 1}
-          step={0.1}
-          value={Math.min(Math.max(now, lo), hi || now)}
-          aria-label="Seek recording"
-          onPointerDown={() => onSeeking(true)}
-          onPointerUp={() => onSeeking(false)}
-          onChange={(e) => {
-            const t = Number(e.target.value);
-            onSeeking(true);
-            onSeek(t);
-          }}
-        />
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink"
-            aria-label={vol === 0 ? "Unmute" : "Mute"}
-            onClick={() => setVol((v) => (v === 0 ? lastVol.current || 1 : 0))}
-          >
-            {vol === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
-          </button>
-          <input
-            className="audio-seek flex-1"
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={vol}
-            aria-label="Volume"
-            onChange={(e) => setVol(Number(e.target.value))}
-          />
-        </div>
-        <div className="mt-3 grid grid-cols-5 gap-2">
-          <Button type="button" variant="outline" size="lg" className="min-h-14" onClick={() => onNudge(-5)}>
-            <Rewind className="size-5" />
-            <span className="sr-only">Back 5 seconds</span>
-          </Button>
-          <Button type="button" variant="outline" size="lg" className="min-h-14" onClick={() => onStep(-1)}>
-            <SkipBack className="size-5" />
-            <span className="sr-only">Previous verse</span>
-          </Button>
-          <Button type="button" size="lg" className="min-h-14" onClick={onToggle}>
-            {playing ? <Pause className="size-6" /> : <Play className="size-6 ms-0.5" />}
-            <span className="sr-only">{playing ? "Pause" : "Play"}</span>
-          </Button>
-          <Button type="button" variant="outline" size="lg" className="min-h-14" onClick={() => onStep(1)}>
-            <SkipForward className="size-5" />
-            <span className="sr-only">Next verse</span>
-          </Button>
-          <Button type="button" variant="outline" size="lg" className="min-h-14" onClick={() => onNudge(5)}>
-            <FastForward className="size-5" />
-            <span className="sr-only">Forward 5 seconds</span>
-          </Button>
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onLoop(!loop)}
-            className={`flex min-h-12 items-center justify-center gap-2 rounded-[var(--radius-md)] px-2 text-sm font-semibold shadow-[var(--shadow-border)] ${
-              loop ? "bg-ink text-parchment" : "bg-surface text-ink"
-            }`}
-          >
-            <Repeat className="size-4" />
-            {loop ? "Loop on" : "Loop off"}
-          </button>
-          <p className="flex min-h-12 items-center justify-center text-center text-xs text-muted">
-            {loop ? "Repeats this passage." : "Stops at the last verse."}
-          </p>
-        </div>
-        <p className="mt-3 text-center text-xs font-semibold uppercase tracking-wide text-muted">Speed</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {READ_RATES.map((r) => (
+        <div className="read-dock" ref={dockRef}>
+          <div className="mx-auto flex max-w-3xl items-center gap-2 px-3 pt-1">
+            <span className="w-10 shrink-0 text-xs tabular-nums text-muted">{formatPlayTime(rel)}</span>
+            <input
+              className="audio-seek min-w-0 flex-1"
+              type="range"
+              min={lo}
+              max={hi || 1}
+              step={0.1}
+              value={Math.min(Math.max(now, lo), hi || now)}
+              aria-label="Seek recording"
+              onPointerDown={() => onSeeking(true)}
+              onPointerUp={() => onSeeking(false)}
+              onChange={(e) => {
+                const t = Number(e.target.value);
+                onSeeking(true);
+                onSeek(t);
+              }}
+            />
+            <span className="w-10 shrink-0 text-end text-xs tabular-nums text-muted">{formatPlayTime(span || duration)}</span>
+          </div>
+          <div className="mx-auto flex max-w-3xl items-center justify-center gap-1 px-2 pb-1">
+            <button type="button" className="inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-ink" aria-label="Previous verse" onClick={() => onStep(-1)}>
+              <SkipBack className="size-5" />
+            </button>
             <button
-              key={r.value}
               type="button"
-              onClick={() => onRate(r.value)}
-              className={`min-h-12 rounded-[var(--radius-md)] px-2 text-sm font-semibold shadow-[var(--shadow-border)] ${
-                rate === r.value ? "bg-ink text-parchment" : "bg-surface text-ink"
+              className="inline-flex size-11 items-center justify-center rounded-full bg-ink text-parchment"
+              aria-label={playing ? "Pause" : "Play"}
+              onClick={() => {
+                if (!playing) resumeFollow();
+                onToggle();
+              }}
+            >
+              {playing ? <Pause className="size-5" /> : <Play className="size-5 ms-0.5" />}
+            </button>
+            <button type="button" className="inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-ink" aria-label="Next verse" onClick={() => onStep(1)}>
+              <SkipForward className="size-5" />
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-11 min-w-11 items-center justify-center rounded-[var(--radius-sm)] px-2 text-sm font-semibold tabular-nums text-ink"
+              aria-label={`Speed ${rate}×. Tap for the next speed.`}
+              onClick={cycleRate}
+            >
+              {rate}×
+            </button>
+            <button
+              type="button"
+              className="inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-ink"
+              aria-label="More player controls"
+              aria-expanded={more}
+              onClick={() => setMore((open) => !open)}
+            >
+              <Ellipsis className="size-5" />
+            </button>
+          </div>
+        </div>
+      )}
+      {hideTransport || !more ? null : (
+        <div className="read-more mx-auto max-w-3xl px-3 py-3">
+          <div className="flex flex-wrap items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onLoop(!loop)}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] px-3 text-sm font-semibold ${
+                loop ? "bg-ink text-parchment" : "bg-surface text-ink"
               }`}
             >
-              {r.label}
+              <Repeat className="size-4" />
+              {loop ? "Loop on" : "Loop off"}
             </button>
-          ))}
+            <button type="button" className="min-h-11 rounded-[var(--radius-md)] bg-surface px-3 text-sm font-semibold text-ink" onClick={() => onNudge(-5)}>
+              Back 5 seconds
+            </button>
+            <button type="button" className="min-h-11 rounded-[var(--radius-md)] bg-surface px-3 text-sm font-semibold text-ink" onClick={() => onNudge(5)}>
+              Forward 5 seconds
+            </button>
+            <button type="button" className="min-h-11 rounded-[var(--radius-md)] bg-surface px-3 text-sm font-semibold text-ink" onClick={() => onJump(i)}>
+              Replay verse
+            </button>
+          </div>
+          <div className="mt-3 hidden items-center gap-3 md:flex">
+            <button
+              type="button"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink"
+              aria-label={vol === 0 ? "Unmute" : "Mute"}
+              onClick={() => setVol((v) => (v === 0 ? lastVol.current || 1 : 0))}
+            >
+              {vol === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+            </button>
+            <input
+              className="audio-seek flex-1"
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={vol}
+              aria-label="Volume"
+              onChange={(e) => setVol(Number(e.target.value))}
+            />
+          </div>
+          <VerseClipBar book={verse.book as BookId} chapter={verse.chapter} fromV={fromV} toV={toV} loop={loop} />
         </div>
-      </div>
       )}
-      <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
-        <p className="text-sm font-semibold text-ink">
-          {list[0]?.ref}
-          {list.length > 1 ? `–${list[list.length - 1]?.verse}` : ""} · {list.length} verse
-          {list.length === 1 ? "" : "s"} · one sitting
-        </p>
-        <ol className="mt-4 flex flex-col gap-6">
+      {pausedFollow ? (
+        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resumeFollow}>
+          Back to the reader
+        </button>
+      ) : null}
+      <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)] sm:px-5">
+        <ol className="flex flex-col gap-6">
           {list.map((row, idx) => {
             const active = idx === i;
             return (
-              <li key={row.ref} ref={active ? activeRef : undefined} className="scroll-mb-28">
+              <li key={row.ref} ref={active ? activeRef : undefined} className="read-line">
                 <button
                   type="button"
                   className="text-xs font-semibold uppercase tracking-wide text-muted"
                   onClick={() => (onWord ? onWord(idx, 0) : onJump(idx))}
                 >
                   {row.ref}
-                  {active ? " · reading" : ""}
                 </button>
                 <p
                   className={`he-verse mt-2 ${active ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl"}`}

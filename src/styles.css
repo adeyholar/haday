@@ -176,6 +176,60 @@
   background: var(--color-primary);
 }
 
+.read-dock {
+  position: fixed;
+  inset-inline: 0;
+  z-index: 25;
+  bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  background: var(--color-card);
+  border-top: 1px solid var(--color-border);
+}
+.read-dock .audio-seek {
+  height: 1.75rem;
+}
+.read-more {
+  position: fixed;
+  inset-inline: 0;
+  z-index: 30;
+  bottom: calc(3.5rem + 5.5rem + env(safe-area-inset-bottom));
+  max-height: min(50vh, 22rem);
+  overflow: auto;
+  background: var(--color-card);
+  border-top: 1px solid var(--color-border);
+}
+.read-back {
+  position: fixed;
+  left: 50%;
+  z-index: 31;
+  bottom: calc(3.5rem + 5.75rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+}
+.read-line {
+  scroll-margin-top: 4.5rem;
+  scroll-margin-bottom: calc(9.5rem + env(safe-area-inset-bottom));
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .read-dock {
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .read-more {
+    bottom: 5.5rem;
+  }
+  .read-back {
+    bottom: 6rem;
+  }
+  .read-line {
+    scroll-margin-top: 0.5rem;
+    scroll-margin-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+  body:has(.read-dock) header.sticky,
+  body:has(.read-dock) nav.fixed {
+    display: none;
+  }
+}
+
 /* Reading Lab: the chapter is a leaf. The page does not scroll it. */
 .wlc-stage {
   display: flex;
