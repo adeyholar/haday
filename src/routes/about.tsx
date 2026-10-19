@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
-import { AUTHOR, FFIM, PERSON_JSON_LD } from "@/lib/author";
+import { AUTHOR, ABOUT_DESCRIPTION, FFIM, PERSON_JSON_LD } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
 
@@ -44,7 +44,7 @@ const ABOUT_JSON_LD = {
 
 export const Route = createFileRoute("/about")({
   head: () => ({
-    meta: shareMeta(TITLE, AUTHOR.mission, "/about"),
+    meta: shareMeta(TITLE, ABOUT_DESCRIPTION, "/about"),
     links: [{ rel: "canonical", href: AUTHOR.url }],
   }),
   component: AboutPage,

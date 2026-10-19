@@ -130,7 +130,7 @@ function DoorsPage() {
   });
 
   if (!showChooser) {
-    return <p className="py-16 text-center text-sm text-muted">{error || "Opening your study."}</p>;
+    return <Panel className="text-center"><p className="text-sm text-muted">{error || "Opening your study."}</p></Panel>;
   }
 
   return (
@@ -179,7 +179,7 @@ function DoorsPage() {
           action="Start the Scripture Path"
         />
       </div>
-      <section className="mx-auto mt-6 max-w-prose">
+      <Panel className="mt-6">
         <h2 className="font-display text-2xl font-semibold text-ink">From the letters to the living Word</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-muted">
           <li>Reading the Hebrew alphabet and vowel points</li>
@@ -187,23 +187,23 @@ function DoorsPage() {
           <li>Grammar: forms, roots, and how words are built</li>
           <li>Reading real verses, Levels A to E, then the Reading Lab</li>
         </ul>
-      </section>
-      <p className="mx-auto mt-4 max-w-prose text-sm text-muted">
-        One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
-        stay inside the signed-in study.{" "}
-        {choosing
-          ? "Pick one. It stays with this account. The other door stays locked."
-          : gate?.admin
-            ? "Open one study. To open the other, come back to these two squares first."
-            : "Your account opens one door. The other stays locked."}
-      </p>
-      <p className="mx-auto mt-3 max-w-prose text-sm">
-        <Link to="/how-to-memorize-biblical-hebrew-vocabulary" className="font-semibold text-primary underline-offset-4 hover:underline">
-          New to Hebrew vocab? Read the method.
-        </Link>
-      </p>
+        <p className="mt-4 text-sm text-muted">
+          One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
+          stay inside the signed-in study.{" "}
+          {choosing
+            ? "Pick one. It stays with this account. The other door stays locked."
+            : gate?.admin
+              ? "Open one study. To open the other, come back to these two squares first."
+              : "Your account opens one door. The other stays locked."}
+        </p>
+        <p className="mt-3 text-sm">
+          <Link to="/how-to-memorize-biblical-hebrew-vocabulary" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+            New to Hebrew vocab? Read the method.
+          </Link>
+        </p>
+      </Panel>
       {teachings.length > 0 ? (
-        <Panel className="mx-auto mt-4 max-w-prose">
+        <Panel className="mt-4">
           <h2 className="font-display text-2xl font-semibold text-ink">Latest teachings</h2>
           <ul className="mt-3 space-y-3">
             {teachings.map((post) => (

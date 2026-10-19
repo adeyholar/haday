@@ -25,9 +25,10 @@ export const Route = createFileRoute("/how-to-memorize-biblical-hebrew-vocabular
 function MethodPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
-      <PublicReturn />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(METHOD_JSON_LD) }} />
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · method</p>
+      <Panel>
+        <PublicReturn />
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · method</p>
       <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">{METHOD_H1}</h1>
       <p className="mt-3 text-sm text-muted">
         <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
@@ -44,6 +45,7 @@ function MethodPage() {
         This is how to memorize Biblical Hebrew vocabulary so the words stay. Learn the most frequent words, hear
         each one before you see its meaning, review a little every day, and read those words in real verses early.
       </p>
+      </Panel>
 
       <Section title="What is the fastest way to memorize Biblical Hebrew vocabulary?">
         <p>

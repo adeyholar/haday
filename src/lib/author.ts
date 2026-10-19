@@ -17,6 +17,9 @@ export const AUTHOR = {
   sameAs: [] as string[],
 };
 
+export const ABOUT_DESCRIPTION =
+  "Meet Adeola 'Ade' Adegbolagun and the mission behind HaDay HebRabbAi Mentor: helping anyone read the Hebrew Bible in its own language and grow in faith.";
+
 export const FFIM = {
   name: "Fathers' Faith International Ministries",
   alternateName: "FFIM",
