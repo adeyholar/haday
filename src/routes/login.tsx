@@ -5,12 +5,44 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
-import { stashPathIntent, pathForHeard, type HeardSource, type StudyPath } from "@/lib/path";
+import { homeForAccount, markTermHall, pathForHeard, rememberDoor, stashPathIntent, type HeardSource, type StudyPath } from "@/lib/path";
+import { getMyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, HEARD_NEED, HEARD_PROMPT, PATH_CHOICE, PATH_CHOICE_STAYS, SCRIPTURE_PATH } from "@/lib/path-names";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
 type Mode = "up" | "in" | "reset";
+
+function GoToStudy() {
+  const [to, setTo] = useState<"/" | "/bbh" | "/iibs" | null>(null);
+  useEffect(() => {
+    let cancel = false;
+    getMyPath()
+      .then((gate) => {
+        if (cancel) return;
+        const home = homeForAccount(gate);
+        if (home && gate.path) {
+          rememberDoor(gate.path);
+          if (home === "/bbh") markTermHall();
+        }
+        setTo(home ?? "/");
+      })
+      .catch(() => {
+        if (!cancel) setTo("/");
+      });
+    return () => {
+      cancel = true;
+    };
+  }, []);
+  if (!to) {
+    return (
+      <main className="grid min-h-dvh place-items-center px-5">
+        <p className="text-sm text-muted">Opening your study.</p>
+      </main>
+    );
+  }
+  return <Navigate to={to} replace />;
+}
 
 function Login() {
   const { user, isPending } = useCurrentUserState();
@@ -62,7 +94,7 @@ function Login() {
     );
   }
 
-  if (user) return <Navigate to="/" />;
+  if (user) return <GoToStudy />;
 
   async function onOauth(providerId: string) {
     setError(null);
@@ -75,7 +107,7 @@ function Login() {
     }
     setBusy(true);
     try {
-      await signIn(providerId, { callbackURL: "/" });
+      await signIn(providerId, { callbackURL: "/login" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
       setBusy(false);
@@ -163,7 +195,13 @@ function Login() {
         throw new Error(message);
       }
       await authClient.getSession();
-      window.location.assign("/");
+      const gate = await getMyPath();
+      const home = homeForAccount(gate);
+      if (home && gate.path) {
+        rememberDoor(gate.path);
+        if (home === "/bbh") markTermHall();
+      }
+      window.location.assign(home ?? "/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setBusy(false);

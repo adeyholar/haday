@@ -1,3 +1,5 @@
+import { isPublicReadingPath } from "@/lib/seo";
+
 export const STUDY_PATHS = ["bbh", "iibs"] as const;
 export type StudyPath = (typeof STUDY_PATHS)[number];
 
@@ -112,7 +114,7 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
   return () => termListeners.delete(hear);
 }
 
-const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"];
+const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide"];
 
 /** Study tools that read the open week, plus Semester 2’s own game, exams, and listen under /study/term2. Semester 1 Game, Listen, and Keep stay blocked. */
 const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/hub"];
@@ -130,6 +132,7 @@ const TERM2_VERBS = [
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {
   if (term !== 2 && !hall) return null;
   if (pathname === "/" || pathname === "/bbh") return null;
+  if (isPublicReadingPath(pathname)) return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/iibs")) return null;
   if (SECOND_ROOM.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
   if (term === 2 && !hall && TERM2_STUDY.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
@@ -172,15 +175,7 @@ export function subscribeHall(hear: () => void): () => void {
   return () => hallListeners.delete(hear);
 }
 
-const SHARED = [
-  "/login",
-  "/legal",
-  "/credits",
-  "/how-to-memorize-biblical-hebrew-vocabulary",
-  "/reset-password",
-  "/ask",
-  "/ideas",
-];
+const SHARED = ["/login", "/reset-password", "/ask", "/ideas"];
 
 export const PATH_INTENT = "haday-path-intent";
 export const OPEN_DOOR = "haday-open-door";
@@ -214,6 +209,7 @@ export function clearDoor() {
 
 function isShared(pathname: string, owner = false): boolean {
   if (pathname === "/") return true;
+  if (isPublicReadingPath(pathname)) return true;
   const list = owner ? ["/admin", ...SHARED] : SHARED;
   return list.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }

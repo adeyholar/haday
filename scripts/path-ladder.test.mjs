@@ -30,6 +30,15 @@ test("a student cannot walk into the other door", () => {
   assert.equal(blockedDestination("/game", { path: "iibs", admin: true }), null);
   assert.equal(blockedDestination("/bbh", { path: null, admin: false }), "/");
   assert.equal(blockedDestination("/", { path: null, admin: false }), null);
+  for (const page of ["/about", "/teachings", "/teachings/aleph", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"]) {
+    assert.equal(blockedDestination(page, { path: "iibs", admin: false }), null);
+    assert.equal(blockedDestination(page, { path: "bbh", admin: false }), null);
+    assert.equal(blockedDestination(page, { path: null, admin: false }), null);
+    assert.equal(ownerDoorBlock(page, "bbh"), null);
+    assert.equal(ownerDoorBlock(page, "iibs"), null);
+    assert.equal(secondTermBlock(page, 2), null);
+    assert.equal(secondTermBlock(page, 2, true), null);
+  }
 });
 
 test("the owner must come back to the doors before switching", () => {
@@ -64,9 +73,10 @@ test("a signed-in student opens their study from home", () => {
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: true, path: "bbh" }), true);
   assert.equal(shouldShowPathChooser({ signedIn: false, resolved: false, admin: false, path: null }), true);
   const shell = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
-  assert.match(shell, /pathname === "\/" && studentHome/);
+  assert.equal(shell.includes('pathname === "/" && studentHome'), false);
   const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(doors, /shouldShowPathChooser/);
+  assert.match(doors, /Continue to your study/);
 });
 
 test("each semester is its own room, and the hall is not a room", () => {
@@ -88,8 +98,6 @@ test("each semester is its own room, and the hall is not a room", () => {
   publishTerm(2);
   assert.equal(noteServerTerm(1, seen), 2);
   publishTerm(1);
-  const shell = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
-  assert.match(shell, /markTermHall/);
   const home = readFileSync(new URL("../src/routes/bbh.tsx", import.meta.url).pathname, "utf8");
   assert.match(home, /SemesterHall/);
   const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
