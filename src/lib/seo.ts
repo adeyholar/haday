@@ -1,10 +1,11 @@
 import { CLASS_SITE, PREVIOUS_CLASS_HOST, isRetiredVercelHost } from "@/lib/class-site";
 
-export const SEO_TITLE =
-  "Biblical Hebrew Vocabulary Trainer for First-Year Students | HaDay HebRabbAi Mentor";
+export const SEO_TITLE = "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor";
 
 export const SEO_DESCRIPTION =
-  "HaDay HebRabbAi Mentor trains Biblical Hebrew vocabulary for first-year students. Hear a word, then its meaning. Lessons stay behind sign-in.";
+  "Learn to read the Hebrew Bible in its original language. Hear each word, build vocabulary and grammar, and read real verses step by step, so you understand the text more deeply and draw closer to God.";
+
+export const SITE_OG_IMAGE = `${CLASS_SITE}/og.jpg`;
 
 const INDEXABLE = new Set([
   "/",
@@ -60,19 +61,28 @@ export function robotsNoindex(host: string, pathname: string): boolean {
 
 export const SITE_NAME = "HaDay HebRabbAi Mentor";
 
-export function shareMeta(title: string, description: string, path: string) {
+export function shareMeta(
+  title: string,
+  description: string,
+  path: string,
+  opts?: { type?: "website" | "article"; image?: string },
+) {
   const url = canonicalUrl(path);
+  const image = opts?.image ?? SITE_OG_IMAGE;
   return [
     { title },
     { name: "description", content: description },
     { property: "og:title", content: title },
     { property: "og:description", content: description },
     { property: "og:url", content: url },
-    { property: "og:type", content: "website" },
+    { property: "og:type", content: opts?.type ?? "website" },
     { property: "og:site_name", content: SITE_NAME },
+    { property: "og:image", content: image },
+    { property: "og:image:alt", content: title },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
+    { name: "twitter:image", content: image },
   ];
 }
 

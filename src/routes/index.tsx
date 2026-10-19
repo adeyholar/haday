@@ -8,10 +8,11 @@ import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { clearDoor, homeForAccount, markTermHall, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
 import { CLASS_SITE } from "@/lib/class-site";
-import { SITE_JSON_LD } from "@/lib/seo";
+import { SEO_DESCRIPTION, SEO_TITLE, SITE_JSON_LD, shareMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
+    meta: shareMeta(SEO_TITLE, SEO_DESCRIPTION, "/"),
     links: [{ rel: "canonical", href: `${CLASS_SITE}/` }],
   }),
   component: DoorsPage,
@@ -121,13 +122,14 @@ function DoorsPage() {
       <Panel className="mb-4 text-center">
         <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-          Biblical Hebrew Vocabulary Trainer
+          Learn to Read the Bible in Hebrew
         </h1>
-        <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
-        <p className="mx-auto mt-2 max-w-prose text-muted">
-          HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
-          its meaning, and practice until it stays.
+        <p className="mx-auto mt-3 max-w-prose text-muted">
+          HaDay HebRabbAi Mentor is for anyone who wants to read Scripture in the language it was written in. Whether
+          you're a student, a pastor, or simply hungry for the Word, you'll start with the letters, hear every word, and
+          step by step read the Tanakh for yourself, seeing what the text says and meeting God in it.
         </p>
+        <h2 className="mt-4 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -160,6 +162,15 @@ function DoorsPage() {
           action="Start the Scripture Path"
         />
       </div>
+      <section className="mx-auto mt-6 max-w-prose">
+        <h2 className="font-display text-2xl font-semibold text-ink">From the letters to the living Word</h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-muted">
+          <li>Reading the Hebrew alphabet and vowel points</li>
+          <li>Vocabulary, with audio for every word</li>
+          <li>Grammar: forms, roots, and how words are built</li>
+          <li>Reading real verses, Levels A to E, then the Reading Lab</li>
+        </ul>
+      </section>
       <p className="mx-auto mt-4 max-w-prose text-sm text-muted">
         One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
         stay inside the signed-in study.{" "}

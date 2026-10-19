@@ -1,6 +1,6 @@
 # HaDay HebRabbAi Mentor
 
-Biblical Hebrew vocabulary trainer for first-year students.
+Learn to read the Hebrew Bible in its original language, for beginners, students and believers who want to understand Scripture more deeply.
 
 Public pages:
 - https://hebrewmentor.haday.app/
