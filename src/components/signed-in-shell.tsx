@@ -331,6 +331,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   const termHome = secondTermBlock(pathname, term, choosingTerm);
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
+  const tabRoom = choosingTerm ? "home-only" : iibsOnly ? "scripture" : "grammar";
 
   return (
     <div className="min-h-dvh text-fg">
@@ -368,8 +369,8 @@ export function SignedInShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
 
       <nav className={`fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] transition-transform ${hideBars ? "shell-hide-bottom" : ""}`}>
-        <ul className={`mx-auto grid max-w-3xl ${secondRoom ? "grid-cols-1" : "grid-cols-5"}`}>
-          {(secondRoom ? shellTabs("home-only", pathname) : shellTabs(iibsOnly ? "scripture" : "grammar", pathname)).map((tab) => (
+        <ul className={`mx-auto grid max-w-3xl ${tabRoom === "home-only" ? "grid-cols-1" : "grid-cols-5"}`}>
+          {shellTabs(tabRoom, pathname).map((tab) => (
             <li key={tab.label}>
               <Link
                 to={tab.to}
