@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { derangeAgainst, shuffleOffFirst, derange } = await jiti.import("/workspace/src/lib/quiz-draw.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { derangeAgainst, shuffleOffFirst, derange } = await jiti.import(new URL("../src/lib/quiz-draw.ts", import.meta.url).pathname);
 
 function tiles(n) {
   return Array.from({ length: n }, (_, i) => ({ id: `w${i}` }));

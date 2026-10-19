@@ -3,14 +3,14 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { spokenEnglish, primaryGloss, modernLatin, listenPlaylist, chapterRange, nextListenIndex, prevListenIndex } =
-  await jiti.import("/workspace/src/lib/listen.ts");
-const { vocabClip } = await jiti.import("/workspace/src/lib/vocab-clips.ts");
+  await jiti.import(new URL("../src/lib/listen.ts", import.meta.url).pathname);
+const { vocabClip } = await jiti.import(new URL("../src/lib/vocab-clips.ts", import.meta.url).pathname);
 
 test("a replay does not let the last sound cut the new one", () => {
-  const src = readFileSync("/workspace/src/lib/listen.ts", "utf8");
-  const play = readFileSync("/workspace/src/components/etch-play.tsx", "utf8");
+  const src = readFileSync(new URL("../src/lib/listen.ts", import.meta.url).pathname, "utf8");
+  const play = readFileSync(new URL("../src/components/etch-play.tsx", import.meta.url).pathname, "utf8");
   assert.match(src, /if \(mine !== clipGen\) return/);
   assert.match(src, /if \(mine === clipGen\)/);
   assert.equal(src.includes("el.duration : 2.4"), false);
@@ -18,9 +18,9 @@ test("a replay does not let the last sound cut the new one", () => {
 });
 
 test("the road player uses the Drill voice for one week", () => {
-  const src = readFileSync("/workspace/src/lib/listen.ts", "utf8");
-  const page = readFileSync("/workspace/src/routes/listen/road.tsx", "utf8");
-  const deck = readFileSync("/workspace/src/components/road-deck.tsx", "utf8");
+  const src = readFileSync(new URL("../src/lib/listen.ts", import.meta.url).pathname, "utf8");
+  const page = readFileSync(new URL("../src/routes/listen/road.tsx", import.meta.url).pathname, "utf8");
+  const deck = readFileSync(new URL("../src/components/road-deck.tsx", import.meta.url).pathname, "utf8");
   assert.match(src, /export async function speakRoadCard/);
   assert.match(src, /speakHebrewWord\(item, 0\.85, signal\)/);
   assert.match(deck, /speakRoadCard/);
@@ -32,12 +32,12 @@ test("the road player uses the Drill voice for one week", () => {
 });
 
 test("the road music slider can go silent and stays under the word", async () => {
-  const { musicVolume } = await jiti.import("/workspace/src/lib/road-music.ts");
+  const { musicVolume } = await jiti.import(new URL("../src/lib/road-music.ts", import.meta.url).pathname);
   assert.equal(musicVolume(0), 0);
   assert.ok(musicVolume(20) < musicVolume(50));
   assert.ok(musicVolume(50) < musicVolume(100));
   assert.ok(musicVolume(100) <= 0.35);
-  const src = readFileSync("/workspace/src/lib/road-music.ts", "utf8");
+  const src = readFileSync(new URL("../src/lib/road-music.ts", import.meta.url).pathname, "utf8");
   assert.match(src, /createGain/);
   assert.match(src, /gain\.value = amount/);
 });

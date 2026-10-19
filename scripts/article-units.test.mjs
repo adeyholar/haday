@@ -2,16 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   ARTICLE_UNITS,
   ARTICLE_QUIZ_LEN,
   ARTICLE_UNIT_MAX,
   buildArticleQuiz,
   articleQuizPool,
-} = await jiti.import("/workspace/src/lib/article.ts");
+} = await jiti.import(new URL("../src/lib/article.ts", import.meta.url).pathname);
 const { COURSE_WEEKS, GAME_CHAPTER_TITLES, weekForChapter, itemsForWeek, chaptersInWeek } = await jiti.import(
-  "/workspace/src/lib/vocab.ts",
+  new URL("../src/lib/vocab.ts", import.meta.url).pathname,
 );
 
 test("six article units, Tanakh verses, long quiz pools", () => {
@@ -105,7 +105,7 @@ test("rules keep whole Hebrew words, not shredded niqqud clusters", () => {
 
 test("83% does not open the next article unit; 90% does", async () => {
   const { applyArticleResult, applyNounResult, applySyllableResult, applyAlefBetResult, defaultGame, GAME_STAGE_PASS } =
-    await jiti.import("/workspace/src/lib/game.ts");
+    await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
   assert.equal(GAME_STAGE_PASS, 90);
   const miss = { stars: 2, score: 83, firstTryRate: 0.83 };
   const hit = { stars: 3, score: 90, firstTryRate: 0.9 };

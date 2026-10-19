@@ -3,9 +3,9 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { parseRoadLetter, parseRoadHeard, roadChoices, buildRoadDeck, glossHead, parkMiss, packRoadRun, unpackRoadRun } = await jiti.import("/workspace/src/lib/road-exam.ts");
-const { itemsForWeek } = await jiti.import("/workspace/src/lib/vocab.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { parseRoadLetter, parseRoadHeard, roadChoices, buildRoadDeck, glossHead, parkMiss, packRoadRun, unpackRoadRun } = await jiti.import(new URL("../src/lib/road-exam.ts", import.meta.url).pathname);
+const { itemsForWeek } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
 
 test("spoken letters map to A B C D", () => {
   assert.equal(parseRoadLetter("A"), "A");
@@ -103,7 +103,7 @@ test("a road circle packs, resumes, and drops when it is finished", () => {
 });
 
 test("a saved road circle survives game hydrate", async () => {
-  const { hydrateGame, defaultGame } = await jiti.import("/workspace/src/lib/game.ts");
+  const { hydrateGame, defaultGame } = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
   const pool = itemsForWeek(7);
   const deck = buildRoadDeck(pool);
   const run = packRoadRun(deck, 3, 5, 4);
@@ -134,8 +134,8 @@ test("road exam does not play clap or miss sounds", () => {
 });
 
 test("week 15 road uses every class lemma and keeps its own circle", async () => {
-  const { bbhVocab } = await jiti.import("/workspace/src/lib/vocab.ts");
-  const { hydrateGame, defaultGame } = await jiti.import("/workspace/src/lib/game.ts");
+  const { bbhVocab } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
+  const { hydrateGame, defaultGame } = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
   const all = bbhVocab();
   const mid = itemsForWeek(7);
   assert.ok(all.length > mid.length);

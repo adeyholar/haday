@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { applyIibsLesson, applyIibsStage, emptyIibsGame, heldIibsRank, iibsGlossHit, lessonUnlocked, levelCleared, levelUnlocked, stageUnlocked } =
-  await jiti.import("/workspace/src/lib/iibs-game.ts");
-const { defaultGame } = await jiti.import("/workspace/src/lib/game.ts");
+  await jiti.import(new URL("../src/lib/iibs-game.ts", import.meta.url).pathname);
+const { defaultGame } = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
 
 test("only Level A lesson 1 starts open", () => {
   const progress = emptyIibsGame();

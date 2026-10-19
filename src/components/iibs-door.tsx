@@ -23,17 +23,33 @@ export function useIibsRoom() {
   return { level, ready };
 }
 
-export function ScriptureTabs({ active }: { active: "levels" | "lab" }) {
+export function ScriptureTabs({ active, compact = false }: { active: "levels" | "lab"; compact?: boolean }) {
   const face = (on: boolean) =>
+    `flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2 text-xs font-semibold ${
+      on ? "bg-ink text-parchment" : "text-muted"
+    }`;
+  if (compact) {
+    return (
+      <div className="flex shrink-0 rounded-[var(--radius-md)] bg-surface p-0.5" role="tablist" aria-label="Scripture Path">
+        <Link to="/iibs" role="tab" aria-selected={active === "levels"} className={face(active === "levels")}>
+          Levels
+        </Link>
+        <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={face(active === "lab")}>
+          Lab
+        </Link>
+      </div>
+    );
+  }
+  const wide = (on: boolean) =>
     `flex min-h-11 items-center justify-center rounded-[var(--radius-lg)] px-3 text-sm font-semibold ${
       on ? "bg-ink text-parchment" : "text-muted"
     }`;
   return (
     <div className="mb-4 grid grid-cols-2 gap-1 rounded-[var(--radius-xl)] bg-card p-1 shadow-[var(--shadow-border)]" role="tablist" aria-label="Scripture Path">
-      <Link to="/iibs" role="tab" aria-selected={active === "levels"} className={face(active === "levels")}>
+      <Link to="/iibs" role="tab" aria-selected={active === "levels"} className={wide(active === "levels")}>
         Levels
       </Link>
-      <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={face(active === "lab")}>
+      <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={wide(active === "lab")}>
         Reading Lab
       </Link>
     </div>

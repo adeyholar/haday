@@ -230,55 +230,72 @@
   }
 }
 
-/* Reading Lab: the chapter is a leaf. The page does not scroll it. */
-.wlc-stage {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  /* sticky header h-14, main pt-6, bottom bar clearance pb-28 */
-  height: calc(100dvh - 3.5rem - 1.5rem - 7rem - 2px);
-}
-@media (min-width: 640px) {
-  .wlc-stage {
-    height: calc(100dvh - 3.5rem - 1.5rem - 6rem - 2px);
-  }
+html {
+  --nav-h: calc(3.5rem + env(safe-area-inset-bottom));
 }
 
-/*
- * Phones, short landscape screens and touch tablets in landscape: the fixed
- * leaf left only 60–180px for the text under the controls. Here the page
- * scrolls instead, so the controls scroll away and the chapter gets the
- * screen. The picked-word card becomes a bottom sheet. Keep the query in step
- * with WLC_PAGE_SCROLL_QUERY in wlc-desk.tsx. Desktop keeps the leaf.
- */
-@media (max-width: 639px), (max-height: 560px), (pointer: coarse) and (max-height: 820px) {
-  .wlc-stage {
-    height: auto;
-    overflow: visible;
+/* Reading Lab: the chapter is the page. One scrollbar, the browser's. */
+.wlc-stage {
+  display: block;
+  min-height: 0;
+}
+.wlc-toolbar {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 20;
+  background: color-mix(in oklab, var(--color-card) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+.manuscript-sheet {
+  min-height: 0;
+  overflow-x: hidden;
+  border-radius: 2px;
+  padding: 0.75rem 0.85rem calc(1.25rem + var(--wlc-card-h, 0px));
+  outline: none;
+}
+.wlc-card {
+  position: fixed;
+  inset-inline: 0;
+  bottom: var(--nav-h);
+  z-index: 40;
+  max-height: min(55dvh, 26rem);
+  margin: 0;
+  padding: 0 0.5rem 0.5rem;
+  overscroll-behavior: contain;
+}
+.wlc-card > div {
+  box-shadow:
+    var(--shadow-border),
+    0 -12px 32px -12px rgba(28, 24, 20, 0.35);
+}
+@media (min-width: 1024px) {
+  .wlc-reading:has(.wlc-card) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    align-items: start;
+    gap: 0.75rem;
   }
-  .wlc-stage .manuscript-sheet {
-    flex: none;
-    overflow: visible;
-    padding-bottom: calc(2.4rem + var(--wlc-card-h, 0px));
+  .wlc-reading:has(.wlc-card) .manuscript-sheet {
+    grid-column: 1;
+    grid-row: 1;
   }
-  .wlc-stage .manuscript-tight {
-    padding-bottom: calc(1.1rem + var(--wlc-card-h, 0px));
-  }
-  .wlc-stage .wlc-card {
-    position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    z-index: 40;
-    max-height: min(55dvh, 26rem);
+  .wlc-card {
+    position: sticky;
+    top: calc(3.5rem + 3.25rem);
+    bottom: auto;
+    z-index: 10;
+    grid-column: 2;
+    grid-row: 1;
+    max-height: calc(100dvh - var(--nav-h) - 8rem);
     margin: 0;
-    padding: 0 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
-    overscroll-behavior: contain;
+    padding: 0;
+    overflow-y: auto;
   }
-  .wlc-stage .wlc-card > div {
-    box-shadow:
-      var(--shadow-border),
-      0 -12px 32px -12px rgba(28, 24, 20, 0.35);
+  .wlc-card > div {
+    box-shadow: var(--shadow-border);
+  }
+  .manuscript-sheet {
+    padding-bottom: 1.25rem;
   }
 }
 /* Touch screens: keep every word a 44px target, even at Tight. */
@@ -294,17 +311,6 @@
   .wlc-stage .manuscript-sheet:not(.manuscript-tight) .manuscript-note {
     font-size: 0.9rem;
   }
-}
-.manuscript-sheet {
-  min-height: 0;
-  flex: 1 1 auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-radius: 2px;
-  padding: 1.35rem 1.2rem 2.4rem;
-  scrollbar-width: thin;
-  outline: none;
 }
 .manuscript-sheet:focus-visible {
   outline: 2px solid var(--color-ring);
@@ -338,6 +344,14 @@
     inset 0 0 0 7px rgba(232, 210, 170, 0.38),
     0 18px 36px -18px rgba(0, 0, 0, 0.72);
   scrollbar-color: rgba(232, 210, 170, 0.4) transparent;
+}
+@media (max-width: 1023px) {
+  .manuscript-light {
+    box-shadow: inset 0 0 0 1px rgba(92, 58, 24, 0.28);
+  }
+  .manuscript-dim {
+    box-shadow: inset 0 0 0 1px rgba(232, 210, 170, 0.28);
+  }
 }
 .manuscript-note {
   margin: 0 0 0.85rem;

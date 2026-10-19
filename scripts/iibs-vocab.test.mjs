@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { IIBS_VOCAB, vocabLessons } = await jiti.import("/workspace/src/lib/iibs-vocab.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { IIBS_VOCAB, vocabLessons } = await jiti.import(new URL("../src/lib/iibs-vocab.ts", import.meta.url).pathname);
 
 test("levels A to E each have 30 lessons of words", () => {
   for (const level of ["A", "B", "C", "D", "E"]) {

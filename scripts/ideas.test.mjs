@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { cleanTitle, cleanBody, parseArea, parseStatus, IDEA_STATUSES } = await jiti.import("/workspace/src/lib/idea-text.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { cleanTitle, cleanBody, parseArea, parseStatus, IDEA_STATUSES } = await jiti.import(new URL("../src/lib/idea-text.ts", import.meta.url).pathname);
 
 test("idea text is trimmed and capped", () => {
   assert.equal(cleanTitle("  Slow   Genesis  "), "Slow Genesis");

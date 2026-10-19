@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { applyRating, newCard, isHighWeak, isWeak, weaknessScore } = await jiti.import("/workspace/src/lib/srs.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { applyRating, newCard, isHighWeak, isWeak, weaknessScore } = await jiti.import(new URL("../src/lib/srs.ts", import.meta.url).pathname);
 
 test("a Tell-me reveal is weaker than a miss", () => {
   const now = Date.now();

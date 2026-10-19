@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { readLineInComfort, shouldFollowScroll } = await jiti.import("/workspace/src/lib/read-follow.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { readLineInComfort, shouldFollowScroll } = await jiti.import(new URL("../src/lib/read-follow.ts", import.meta.url).pathname);
 
 test("a line in the middle third does not pull the page", () => {
   assert.equal(readLineInComfort(300, 360, 56, 700), true);

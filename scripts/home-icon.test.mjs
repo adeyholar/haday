@@ -29,7 +29,7 @@ test("a saved shortcut is HaDay, with the parchment he, and not the template ico
   assert.match(svg, /#F3EEE4/);
   assert.match(svg, /#603619/);
   assert.doesNotMatch(svg, /Times New Roman/);
-  const head = readFileSync("/workspace/src/routes/__root.tsx", "utf8");
+  const head = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url).pathname, "utf8");
   assert.match(head, /\/manifest\.webmanifest/);
   assert.match(head, /\/apple-touch-icon\.png/);
   assert.match(head, /content: "HaDay"/);

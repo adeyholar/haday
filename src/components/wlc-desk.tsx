@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
 
-/** Same query as the page-scroll block in styles.css (phones, short or touch tablet screens). */
-export const WLC_PAGE_SCROLL_QUERY =
-  "(max-width: 639px), (max-height: 560px), (pointer: coarse) and (max-height: 820px)";
+/** The chapter page scrolls. Wide screens keep the word card beside the text. */
+export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
+const WLC_SIDE_CARD_QUERY = "(min-width: 1024px)";
 
 function pageScrolls(): boolean {
+  return true;
+}
+
+function sideCard(): boolean {
   return typeof window !== "undefined" && typeof window.matchMedia === "function"
-    ? window.matchMedia(WLC_PAGE_SCROLL_QUERY).matches
+    ? window.matchMedia(WLC_SIDE_CARD_QUERY).matches
     : false;
 }
 
@@ -144,7 +148,17 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
   );
 }
 
-export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone: SheetTone; size: SheetSize }) {
+export function WlcReading({
+  chapter,
+  tone,
+  size,
+  showNote,
+}: {
+  chapter: WlcChapter;
+  tone: SheetTone;
+  size: SheetSize;
+  showNote: boolean;
+}) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
@@ -154,7 +168,6 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
 
   useEffect(() => {
     setPicked(null);
-    frame.current?.scrollTo({ top: 0 });
     if (pageScrolls()) window.scrollTo({ top: 0 });
   }, [chapter.book, chapter.chapter]);
 
@@ -166,7 +179,7 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
       setCardHeight(0);
       return;
     }
-    const sync = () => setCardHeight(pageScrolls() ? el.getBoundingClientRect().height : 0);
+    const sync = () => setCardHeight(sideCard() ? 0 : el.getBoundingClientRect().height);
     sync();
     const watch = new ResizeObserver(sync);
     watch.observe(el);
@@ -188,7 +201,7 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
       style={cardHeight ? ({ "--wlc-card-h": `${Math.ceil(cardHeight)}px` } as CSSProperties) : undefined}
     >
       {picked ? (
-        <div ref={card} className="wlc-card mb-2 max-h-[42%] shrink-0 overflow-y-auto">
+        <div ref={card} className="wlc-card">
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
       ) : null}
@@ -198,11 +211,13 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
         aria-label="Chapter manuscript"
         className={`manuscript-sheet manuscript-${size} ${tone === "dim" ? "manuscript-dim" : "manuscript-light"}`}
       >
-        <p className="manuscript-note">
-          {system}
-          {chapter.dataset_version ? ` · Leningrad ${chapter.dataset_version}` : ""}. Accents and meteg stay on the word.
-          A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the qere.
-        </p>
+        {showNote ? (
+          <p className="manuscript-note">
+            {system}
+            {chapter.dataset_version ? ` · Leningrad ${chapter.dataset_version}` : ""}. Accents and meteg stay on the word.
+            A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the qere.
+          </p>
+        ) : null}
         <div className="ms-verses">
           {chapter.verses.map((verse) => (
             <div key={verse.ref} className="ms-verse flex items-start" dir="rtl">

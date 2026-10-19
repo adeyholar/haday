@@ -4,8 +4,8 @@ import { join } from "node:path";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { GRAMMAR_PATH, SCRIPTURE_PATH } = await jiti.import("/workspace/src/lib/path-names.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { GRAMMAR_PATH, SCRIPTURE_PATH } = await jiti.import(new URL("../src/lib/path-names.ts", import.meta.url).pathname);
 
 function files(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -25,7 +25,7 @@ test("the doors are named for the method, and the old names stay out of view", (
   assert.equal(SCRIPTURE_PATH.title, "Scripture Path");
   assert.match(GRAMMAR_PATH.hebrew, /ד/);
   assert.match(SCRIPTURE_PATH.hebrew, /מ/);
-  const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(doors, /GRAMMAR_PATH\.title/);
   assert.match(doors, /SCRIPTURE_PATH\.title/);
   assert.match(doors, /href="\/bbh"/);
@@ -33,7 +33,7 @@ test("the doors are named for the method, and the old names stay out of view", (
 
   const brand = /\bBBH\b|\bIIBS\b/;
   const leaks = [];
-  for (const path of files("/workspace/src")) {
+  for (const path of files(new URL("../src", import.meta.url).pathname)) {
     const raw = stripComments(readFileSync(path, "utf8"));
     const strings = raw.match(/`(?:\\[\s\S]|[^`])*`|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g) ?? [];
     for (const item of strings) {

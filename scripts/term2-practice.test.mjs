@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const game = await jiti.import("/workspace/src/lib/term2-game.ts");
-const exams = await jiti.import("/workspace/src/lib/term2-exams.ts");
-const cards = await jiti.import("/workspace/src/lib/card-ids.ts");
-const path = await jiti.import("/workspace/src/lib/path.ts");
-const core = await jiti.import("/workspace/src/lib/game.ts");
-const vocab = await jiti.import("/workspace/src/lib/vocab-s2.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const game = await jiti.import(new URL("../src/lib/term2-game.ts", import.meta.url).pathname);
+const exams = await jiti.import(new URL("../src/lib/term2-exams.ts", import.meta.url).pathname);
+const cards = await jiti.import(new URL("../src/lib/card-ids.ts", import.meta.url).pathname);
+const path = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
+const core = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
+const vocab = await jiti.import(new URL("../src/lib/vocab-s2.ts", import.meta.url).pathname);
 
 const pass = { stars: 3, score: 90, firstTryRate: 0.9 };
 const miss = { stars: 1, score: 89, firstTryRate: 0.89 };

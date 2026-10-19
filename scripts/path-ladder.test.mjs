@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { blockedDestination, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readTerm, secondTermBlock, shouldShowPathChooser, termForAccount, termRevisionNow } = await jiti.import("/workspace/src/lib/path.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { blockedDestination, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readTerm, secondTermBlock, shouldShowPathChooser, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
 test("only Level A is open until an exam is passed", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -63,9 +63,9 @@ test("a signed-in student opens their study from home", () => {
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: false, path: "iibs" }), false);
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: true, path: "bbh" }), true);
   assert.equal(shouldShowPathChooser({ signedIn: false, resolved: false, admin: false, path: null }), true);
-  const shell = readFileSync("/workspace/src/components/signed-in-shell.tsx", "utf8");
+  const shell = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
   assert.match(shell, /pathname === "\/" && studentHome/);
-  const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(doors, /shouldShowPathChooser/);
 });
 
@@ -88,10 +88,10 @@ test("each semester is its own room, and the hall is not a room", () => {
   publishTerm(2);
   assert.equal(noteServerTerm(1, seen), 2);
   publishTerm(1);
-  const shell = readFileSync("/workspace/src/components/signed-in-shell.tsx", "utf8");
+  const shell = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
   assert.match(shell, /markTermHall/);
-  const home = readFileSync("/workspace/src/routes/bbh.tsx", "utf8");
+  const home = readFileSync(new URL("../src/routes/bbh.tsx", import.meta.url).pathname, "utf8");
   assert.match(home, /SemesterHall/);
-  const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(doors, /markTermHall/);
 });

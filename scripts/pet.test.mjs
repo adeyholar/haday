@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { firstNameOf, petQueue } = await jiti.import("/workspace/src/lib/pet.ts");
-const { VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { firstNameOf, petQueue } = await jiti.import(new URL("../src/lib/pet.ts", import.meta.url).pathname);
+const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
 
 test("first name for greeting", () => {
   assert.equal(firstNameOf("Crown Ha’Day"), "Crown");

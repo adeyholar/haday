@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { itemsForWeek, bbhVocab } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { VOCAB_S2, itemsForTerm2Week, isTerm2Week, TERM2_WEEKS, weekForTerm2Chapter } = await jiti.import("/workspace/src/lib/vocab-s2.ts");
-const { TERM2_LESSONS } = await jiti.import("/workspace/src/lib/term2-lessons.ts");
-const { secondTermBlock } = await jiti.import("/workspace/src/lib/path.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { itemsForWeek, bbhVocab } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
+const { VOCAB_S2, itemsForTerm2Week, isTerm2Week, TERM2_WEEKS, weekForTerm2Chapter } = await jiti.import(new URL("../src/lib/vocab-s2.ts", import.meta.url).pathname);
+const { TERM2_LESSONS } = await jiti.import(new URL("../src/lib/term2-lessons.ts", import.meta.url).pathname);
+const { secondTermBlock } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
 test("semester 2 words stay off the first-term list", () => {
   assert.equal(VOCAB_S2.length, 206);

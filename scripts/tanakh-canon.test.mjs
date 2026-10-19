@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   TANAKH_BOOKS,
   TANAKH_CHAPTERS,
@@ -20,8 +20,8 @@ const {
   prevChapter,
   isLegacyGenesisParam,
   parseChapter,
-} = await jiti.import("/workspace/src/lib/tanakh-canon.ts");
-const { versesFromDump, estimateTiming, progressId, audioFor } = await jiti.import("/workspace/src/lib/reading.ts");
+} = await jiti.import(new URL("../src/lib/tanakh-canon.ts", import.meta.url).pathname);
+const { versesFromDump, estimateTiming, progressId, audioFor } = await jiti.import(new URL("../src/lib/reading.ts", import.meta.url).pathname);
 
 test("catalog is the Hebrew Tanakh: 39 books, 929 chapters", () => {
   assert.equal(TANAKH_BOOKS.length, 39);
