@@ -67,6 +67,7 @@ export const Route = createRootRoute({
       },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "alternate", type: "application/rss+xml", title: "HaDay Teachings", href: "/teachings/rss.xml" },
     ],
   }),
   component: RootDocument,

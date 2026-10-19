@@ -35,7 +35,10 @@ function MethodPage() {
         </Link>{" "}
         is a prophetic teacher with an itinerant ministry, leads Fathers' Faith International Ministries, and
         created HaDay HebRabbAi Mentor to help readers meet God in the Hebrew text. Published {METHOD_DATE}. This
-        page is free to read. The lessons stay behind sign-in.
+        page is free to read. The lessons stay behind sign-in.{" "}
+        <Link to="/teachings" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Teachings
+        </Link>
       </p>
       <p className="mt-4 max-w-prose leading-relaxed text-muted">
         This is how to memorize Biblical Hebrew vocabulary so the words stay. Learn the most frequent words, hear

@@ -7,6 +7,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { clearDoor, homeForAccount, markTermHall, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
+import { loadTeachingsIndex } from "@/lib/teachings";
 import { CLASS_SITE } from "@/lib/class-site";
 import { SEO_DESCRIPTION, SEO_TITLE, SITE_JSON_LD, shareMeta } from "@/lib/seo";
 
@@ -15,10 +16,26 @@ export const Route = createFileRoute("/")({
     meta: shareMeta(SEO_TITLE, SEO_DESCRIPTION, "/"),
     links: [{ rel: "canonical", href: `${CLASS_SITE}/` }],
   }),
+  loader: async () => {
+    try {
+      const posts = await loadTeachingsIndex();
+      return {
+        teachings: posts.slice(0, 3).map((post) => ({
+          slug: post.slug,
+          title: post.title,
+          summary: post.summary,
+          published: post.published,
+        })),
+      };
+    } catch {
+      return { teachings: [] as { slug: string; title: string; summary: string; published: string }[] };
+    }
+  },
   component: DoorsPage,
 });
 
 function DoorsPage() {
+  const { teachings } = Route.useLoaderData();
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user } = useCurrentUserState();
   const signedIn = sessionUser != null || user != null;
@@ -185,6 +202,21 @@ function DoorsPage() {
           New to Hebrew vocab? Read the method.
         </Link>
       </p>
+      {teachings.length > 0 ? (
+        <Panel className="mx-auto mt-4 max-w-prose">
+          <h2 className="font-display text-2xl font-semibold text-ink">Latest teachings</h2>
+          <ul className="mt-3 space-y-3">
+            {teachings.map((post) => (
+              <li key={post.slug}>
+                <Link to="/teachings/$slug" params={{ slug: post.slug }} className="font-semibold text-primary underline-offset-4 hover:underline">
+                  {post.title}
+                </Link>
+                <p className="text-sm text-muted">{post.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
       <PublicFooter />
     </>
   );
