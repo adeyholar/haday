@@ -128,7 +128,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
   },
   play: {
     title: "Play",
-    line: "Scored work. A stage clears at 90% on the first answer. Semester 1 exams stay in Semester 1.",
+    line: "Semester 2 game. This term’s words, and every verb form. A stage clears at 90% on the first answer.",
     cards: [
       { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. Recognize, gloss, then spell." },
       { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Root, stem, conjugation. Ten builds." },
