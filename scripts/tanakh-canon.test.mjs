@@ -114,7 +114,10 @@ test("Genesis waveform alignment covers all 50 chapters", () => {
     assert.equal(meta.verses.length, rows.length, `Gen ${ch} verses`);
     assert.equal(meta.words.length, rows.length, `Gen ${ch} words`);
     assert.equal(meta.words[0].length, rows[0].words.length);
-    assert.ok(Number.isFinite(meta.verses[0]) && meta.verses[0] >= 0, `Gen ${ch} first stamp ${meta.verses[0]}`);
+    // Genesis 2's first stamp is the spoken heading (0.54s). Only that chapter is skipped.
+    // https://github.com/adeyholar/haday/issues/155
+    if (ch === 2) continue;
+    assert.ok(Number.isFinite(meta.verses[0]) && meta.verses[0] >= 1.5, `Gen ${ch} first stamp ${meta.verses[0]}`);
     assert.ok(meta.duration > 20);
   }
 });
