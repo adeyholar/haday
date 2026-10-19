@@ -1,5 +1,5 @@
 import { CLASS_SITE } from "@/lib/class-site";
-import { AUTHOR, FFIM } from "@/lib/author";
+import { FFIM, PERSON_JSON_LD } from "@/lib/author";
 
 export const METHOD_PATH = "/how-to-memorize-biblical-hebrew-vocabulary";
 export const METHOD_URL = `${CLASS_SITE}${METHOD_PATH}`;
@@ -72,15 +72,7 @@ export const METHOD_JSON_LD = {
       datePublished: METHOD_DATE,
       dateModified: "2026-10-19",
       image: `${CLASS_SITE}/og.jpg`,
-      author: {
-        "@type": "Person",
-        "@id": AUTHOR.id,
-        name: AUTHOR.name,
-        alternateName: AUTHOR.alternateName,
-        jobTitle: AUTHOR.jobTitle,
-        url: AUTHOR.url,
-        image: AUTHOR.image,
-      },
+      author: PERSON_JSON_LD,
       publisher: {
         "@type": "Organization",
         "@id": FFIM.id,

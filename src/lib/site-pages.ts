@@ -20,7 +20,7 @@ export const STATIC_PAGES: SitePage[] = [
     title: "How to Memorize Biblical Hebrew Vocabulary",
     summary:
       "Learn the most frequent words first, hear each word before its meaning, and read real verses early.",
-    lastmod: "2026-10-17",
+    lastmod: "2026-10-19",
   },
   {
     path: "/legal",
@@ -75,10 +75,10 @@ export const LLMS_INTRO =
   "Learn to read the Hebrew Bible in its original language, for beginners, students and believers who want to understand Scripture more deeply.";
 
 export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
-  const teachings = pages.filter((page) => page.path === "/teachings" || page.path.startsWith("/teachings/"));
-  const rest = pages.filter((page) => !teachings.includes(page));
+  const posts = pages.filter((page) => page.path.startsWith("/teachings/"));
+  const rest = pages.filter((page) => !page.path.startsWith("/teachings/"));
   const lines = rest.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
-  const teachingLines = teachings.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const teachingLines = posts.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
   return [
     "# HaDay HebRabbAi Mentor",
     "",
@@ -86,9 +86,7 @@ export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
     "",
     "Public pages:",
     ...lines,
-    "",
-    "Teachings:",
-    ...teachingLines,
+    ...(posts.length ? ["", "Teachings:", ...teachingLines] : []),
     "",
     "The class study, games, listen pages, and lexicon require sign-in. Textbook pages and answer keys are not published here.",
     "",

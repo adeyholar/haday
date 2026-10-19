@@ -109,9 +109,8 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
   assert.match(method, /FAQPage/);
   assert.match(method, /BreadcrumbList/);
   assert.match(sitemap, /how-to-memorize-biblical-hebrew-vocabulary/);
-  assert.match(sitemap, /<lastmod>2026-10-17<\/lastmod>/);
-  assert.match(method, /"@type": "Person"/);
-  assert.match(method, /AUTHOR\.name/);
+  assert.match(sitemap, /<lastmod>2026-10-19<\/lastmod>/);
+  assert.match(method, /PERSON_JSON_LD/);
   const author = readFileSync(new URL("../src/lib/author.ts", import.meta.url).pathname, "utf8");
   assert.match(author, /Adeola Adegbolagun/);
   assert.match(page, /to="\/about"/);
@@ -137,7 +136,15 @@ test("the sitemap and llms.txt come from the public page list", () => {
   assert.equal(xml.match(/<lastmod>/g)?.length, STATIC_PAGES.length);
   const lines = llmsTxt().split("\n");
   assert.equal(lines[2], LLMS_INTRO);
-  assert.match(llmsTxt(), /Teachings:/);
+  assert.equal(llmsTxt().split("\n").includes("Teachings:"), false);
+  assert.equal(
+    llmsTxt([
+      { path: "/teachings/aleph", title: "Aleph", summary: "A reading.", lastmod: "2026-10-19" },
+    ])
+      .split("\n")
+      .includes("Teachings:"),
+    true,
+  );
   const robots = readFileSync(new URL("../public/robots.txt", import.meta.url), "utf8");
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Sitemap: https:\/\/hebrewmentor\.haday\.app\/sitemap\.xml/);

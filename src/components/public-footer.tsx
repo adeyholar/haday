@@ -7,22 +7,24 @@ import { homeForAccount } from "@/lib/path";
 /** Legal and Credits on every public page, plus a way back to the front door. */
 export function PublicFooter() {
   return (
-    <footer className="mx-auto mt-8 flex w-full max-w-2xl flex-wrap justify-center gap-x-5 gap-y-2 px-5 pb-10 text-sm text-muted">
-      <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
-        HaDay
-      </Link>
-      <Link to="/about" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-        About
-      </Link>
-      <Link to="/teachings" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-        Teachings
-      </Link>
-      <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
-        Legal
-      </Link>
-      <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
-        Credits
-      </Link>
+    <footer className="mt-8 w-full pb-8">
+      <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5 rounded-[var(--radius-xl)] bg-card/90 px-4 shadow-[var(--shadow-border)]">
+        <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          HaDay
+        </Link>
+        <Link to="/about" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          About
+        </Link>
+        <Link to="/teachings" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          Teachings
+        </Link>
+        <Link to="/legal" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          Legal
+        </Link>
+        <Link to="/credits" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          Credits
+        </Link>
+      </nav>
     </footer>
   );
 }
