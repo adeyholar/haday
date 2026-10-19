@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
+import { relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const repo = fileURLToPath(new URL("..", import.meta.url));
 const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect, robotsNoindex, SEO_TITLE } = await jiti.import(
   new URL("../src/lib/seo.ts", import.meta.url).pathname,
 );
@@ -61,7 +64,7 @@ test("the doors page states the product in the first render", () => {
 test("the memorization guide is public, cited, and in the sitemap", () => {
   const page = readFileSync(new URL("../src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx", import.meta.url).pathname, "utf8");
   const method = readFileSync(new URL("../src/lib/vocab-method.ts", import.meta.url).pathname, "utf8");
-  const sitemap = readFileSync("/workspace/public/sitemap.xml", "utf8");
+  const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
   assert.match(page, /how to memorize Biblical Hebrew vocabulary/i);
   assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks/);
   assert.match(page, /twenty-eight/);
@@ -80,7 +83,7 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
 });
 
 test("the retired Vercel page points at the class site", () => {
-  const page = readFileSync("/workspace/vercel-gone/index.html", "utf8");
+  const page = readFileSync(new URL("../vercel-gone/index.html", import.meta.url), "utf8");
   assert.match(page, /https:\/\/hebrewmentor\.haday\.app/);
   assert.equal(page.includes("hadayhebbraimentor.jcdisn.com"), false);
 });
@@ -93,10 +96,10 @@ test("the old host remains only on the redirect constant", () => {
       const path = `${dir}/${name}`;
       if (statSync(path).isDirectory()) walk(path);
       else if (readFileSync(path, "utf8").toLowerCase().includes("hadayhebbraimentor.jcdisn.com")) {
-        hits.push(path.replace("/workspace/", ""));
+        hits.push(relative(repo, path));
       }
     }
   };
-  for (const root of ["src", "server", "public"]) walk(`/workspace/${root}`);
+  for (const root of ["src", "server", "public"]) walk(new URL(`../${root}`, import.meta.url).pathname);
   assert.deepEqual(hits.filter((path) => !allow.has(path)), []);
 });

@@ -21,6 +21,6 @@ test("art src only for trial ids, and files exist", () => {
   assert.equal(vocabArtSrc("elohim"), "/vocab-art/zion-light.jpg");
   assert.equal(vocabArtSrc("el-god"), "/vocab-art/zion-light.jpg");
   for (const id of VOCAB_ART_IDS) {
-    assert.ok(existsSync(`/workspace/public/vocab-art/${id}.jpg`), id);
+    assert.ok(existsSync(new URL(`../public/vocab-art/${id}.jpg`, import.meta.url)), id);
   }
 });

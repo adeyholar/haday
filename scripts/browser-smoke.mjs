@@ -18,6 +18,7 @@ import {
   normalizeBodyText,
   normalizedBodyTextHash,
   parseSmokeArgs,
+  repoRoot,
 } from "./browser-smoke-verdict.mjs";
 
 const args = parseSmokeArgs(process.argv.slice(2), process.env);
@@ -27,10 +28,10 @@ if (args.error) {
 }
 
 const url = checkedUrl(args.url);
-const outPng = checkedOutputPath(args.outPng, ["/workspace"]);
+const outPng = checkedOutputPath(args.outPng, [repoRoot]);
 const derived = derivedPaths(outPng);
-const mobilePng = checkedOutputPath(derived.mobilePng, ["/workspace"]);
-const outJson = checkedOutputPath(derived.verdictJson, ["/workspace"], "verdict JSON");
+const mobilePng = checkedOutputPath(derived.mobilePng, [repoRoot]);
+const outJson = checkedOutputPath(derived.verdictJson, [repoRoot], "verdict JSON");
 
 const MAX_BASELINE_BYTES = 1024 * 1024;
 const baselineRequested = Boolean(args.baseline);
@@ -38,7 +39,7 @@ let baselinePath = null;
 let baselineResolveError = null;
 if (baselineRequested) {
   try {
-    baselinePath = checkedOutputPath(realpathSync(args.baseline), ["/workspace"], "baseline");
+    baselinePath = checkedOutputPath(realpathSync(args.baseline), [repoRoot], "baseline");
   } catch (err) {
     baselineResolveError = err?.code ?? "unresolvable path";
   }
