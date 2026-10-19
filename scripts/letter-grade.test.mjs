@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { verifyLetterInk, enrollLetterInk } = await jiti.import("/workspace/src/lib/letter-shape.ts");
-const { strokeModels, clipPaths } = await jiti.import("/workspace/src/lib/letter-strokes.ts");
-const { staveRegion } = await jiti.import("/workspace/src/lib/letter-models.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { verifyLetterInk, enrollLetterInk } = await jiti.import(new URL("../src/lib/letter-shape.ts", import.meta.url).pathname);
+const { strokeModels, clipPaths } = await jiti.import(new URL("../src/lib/letter-strokes.ts", import.meta.url).pathname);
+const { staveRegion } = await jiti.import(new URL("../src/lib/letter-models.ts", import.meta.url).pathname);
 
 const H = 208;
 const TOP = H * 0.24;

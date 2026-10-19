@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { lettersOnly } = await jiti.import("/workspace/src/lib/hebrew.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { lettersOnly } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
 const { lemmaForSurface, isInflected, tanakhForms, lemmaIdOf, tanakhVerseFor, verseTokenFor } = await jiti.import(
-  "/workspace/src/lib/tanakh-pool.ts",
+  new URL("../src/lib/tanakh-pool.ts", import.meta.url).pathname,
 );
 
 function storedAs(he, lemmaId) {

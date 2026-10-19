@@ -366,7 +366,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-4 pb-28 pt-6 sm:pb-24">{children}</main>
+      <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--nav-h)+0.75rem)] pt-6">{children}</main>
 
       <nav className={`fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] transition-transform ${hideBars ? "shell-hide-bottom" : ""}`}>
         <ul className={`mx-auto grid max-w-3xl ${tabRoom === "home-only" ? "grid-cols-1" : "grid-cols-5"}`}>

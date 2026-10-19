@@ -2,19 +2,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { CONSONANTS } = await jiti.import("/workspace/src/lib/alphabet.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { CONSONANTS } = await jiti.import(new URL("../src/lib/alphabet.ts", import.meta.url).pathname);
 const {
   BERESHIT_WORD,
   alefBetWalk,
   bereshitSteps,
   letterIdForGlyph,
   splitConsonantGlyphs,
-} = await jiti.import("/workspace/src/lib/alef-notice.ts");
-const { LESSONS, lessonById, lessonsFor } = await jiti.import("/workspace/src/lib/ladder.ts");
-const { isBookId } = await jiti.import("/workspace/src/lib/tanakh-canon.ts");
-const { PSALM_119_STANZAS, acrosticLetters } = await jiti.import("/workspace/src/lib/psalm-119-acrostic.ts");
-const { letterNameSrc, LETTER_SAY_EN } = await jiti.import("/workspace/src/lib/letter-clips.ts");
+} = await jiti.import(new URL("../src/lib/alef-notice.ts", import.meta.url).pathname);
+const { LESSONS, lessonById, lessonsFor } = await jiti.import(new URL("../src/lib/ladder.ts", import.meta.url).pathname);
+const { isBookId } = await jiti.import(new URL("../src/lib/tanakh-canon.ts", import.meta.url).pathname);
+const { PSALM_119_STANZAS, acrosticLetters } = await jiti.import(new URL("../src/lib/psalm-119-acrostic.ts", import.meta.url).pathname);
+const { letterNameSrc, LETTER_SAY_EN } = await jiti.import(new URL("../src/lib/letter-clips.ts", import.meta.url).pathname);
 
 test("Genesis 1:1 first word splits into six letters ending in tav", () => {
   const parts = splitConsonantGlyphs(BERESHIT_WORD);

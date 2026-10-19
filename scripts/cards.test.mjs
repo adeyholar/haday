@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { itemsForSelection, itemsForWeek } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { verseFor } = await jiti.import("/workspace/src/lib/verses.ts");
-const { tanakhVerseFor } = await jiti.import("/workspace/src/lib/tanakh-pool.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { itemsForSelection, itemsForWeek } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
+const { verseFor } = await jiti.import(new URL("../src/lib/verses.ts", import.meta.url).pathname);
+const { tanakhVerseFor } = await jiti.import(new URL("../src/lib/tanakh-pool.ts", import.meta.url).pathname);
 
 test("cards mix is the full week/chapter union", () => {
   const week3 = itemsForWeek(3);

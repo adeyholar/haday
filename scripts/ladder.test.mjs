@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   BRAND_BLOCK,
   LESSONS,
@@ -25,8 +25,8 @@ const {
   visitLadder,
   lessonGates,
   lessonGateLine,
-} = await jiti.import("/workspace/src/lib/ladder.ts");
-const { defaultGame, hydrateGame } = await jiti.import("/workspace/src/lib/game.ts");
+} = await jiti.import(new URL("../src/lib/ladder.ts", import.meta.url).pathname);
+const { defaultGame, hydrateGame } = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
 
 test("five stations, creative names, Realm on top", () => {
   assert.deepEqual(

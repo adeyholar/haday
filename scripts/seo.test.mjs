@@ -3,9 +3,9 @@ import test from "node:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect, robotsNoindex, SEO_TITLE } = await jiti.import(
-  "/workspace/src/lib/seo.ts",
+  new URL("../src/lib/seo.ts", import.meta.url).pathname,
 );
 
 test("only the doors, privacy, and credits are indexable", () => {
@@ -43,7 +43,7 @@ test("sign-in pages and the old Vercel host are noindex", () => {
 });
 
 test("the doors page states the product in the first render", () => {
-  const page = readFileSync("/workspace/src/routes/index.tsx", "utf8");
+  const page = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(page, /Biblical Hebrew Vocabulary Trainer/);
   assert.match(page, /Choose your Study Path/);
   assert.match(page, /New to Hebrew vocab\? Read the method/);
@@ -53,14 +53,14 @@ test("the doors page states the product in the first render", () => {
   assert.match(page, /vocabulary trainer for first-year students/);
   assert.equal(page.includes("Opening the two studies"), false);
   assert.match(SEO_TITLE, /HaDay HebRabbAi Mentor/);
-  const site = readFileSync("/workspace/src/lib/og/site.json", "utf8");
+  const site = readFileSync(new URL("../src/lib/og/site.json", import.meta.url).pathname, "utf8");
   assert.match(site, /HaDay HebRabbAi Mentor/);
   assert.equal(site.includes('"title": "HaDay"'), false);
 });
 
 test("the memorization guide is public, cited, and in the sitemap", () => {
-  const page = readFileSync("/workspace/src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx", "utf8");
-  const method = readFileSync("/workspace/src/lib/vocab-method.ts", "utf8");
+  const page = readFileSync(new URL("../src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx", import.meta.url).pathname, "utf8");
+  const method = readFileSync(new URL("../src/lib/vocab-method.ts", import.meta.url).pathname, "utf8");
   const sitemap = readFileSync("/workspace/public/sitemap.xml", "utf8");
   assert.match(page, /how to memorize Biblical Hebrew vocabulary/i);
   assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks/);

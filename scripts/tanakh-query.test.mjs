@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { parseTanakhQuery, runTanakhQuery, stemLetters, hatufWhy, markFormInVerse, kindLabel } = await jiti.import(
-  "/workspace/src/lib/tanakh-query.ts",
+  new URL("../src/lib/tanakh-query.ts", import.meta.url).pathname,
 );
 
 test("parse qamets qatan with a count and Torah scope", () => {
@@ -88,7 +88,7 @@ test("stem letters drop the article", () => {
 
 test("finder ask swaps the count", async () => {
   const { finderAsk, parseFinderSearch, queryIndexPaths } = await jiti.import(
-    "/workspace/src/lib/finder-search.ts",
+    new URL("../src/lib/finder-search.ts", import.meta.url).pathname,
   );
   assert.equal(finderAsk("give me 10 qal perfect", 20), "give me 20 qal perfect");
   assert.equal(finderAsk("construct", 10), "give me 10 construct");

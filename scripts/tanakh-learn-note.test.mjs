@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { learnVerseExplain, classVocabInText, learnUnitVerses } = await jiti.import("/workspace/src/lib/tanakh-learn-note.ts");
-const { learnNugget } = await jiti.import("/workspace/src/lib/tanakh-learn-nugget.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { learnVerseExplain, classVocabInText, learnUnitVerses } = await jiti.import(new URL("../src/lib/tanakh-learn-note.ts", import.meta.url).pathname);
+const { learnNugget } = await jiti.import(new URL("../src/lib/tanakh-learn-nugget.ts", import.meta.url).pathname);
 
 test("article verse names citation lemma יָם not הַיָּם", () => {
   const e = learnVerseExplain(

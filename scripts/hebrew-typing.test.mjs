@@ -3,18 +3,18 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { applyTypeKey, accuracyPct, passedBatch, TYPE_PASS, nextExpected, missCueFor, missCueLabel, strengthFromMisses, CUE_TRY_AGAIN, CUE_NOT_YET } = await jiti.import(
-  "/workspace/src/lib/hebrew-typing/engine.ts",
+  new URL("../src/lib/hebrew-typing/engine.ts", import.meta.url).pathname,
 );
-const { mapPhysicalKey, QWERTY_TO_HE, fingerFor, TIRO_SHIFT, latinForGlyph, HOME_FINGER_LATIN } = await jiti.import("/workspace/src/lib/hebrew-typing/layout.ts");
-const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import("/workspace/src/lib/hebrew-typing/bank.ts");
-const { typingRank, emptyTyping, applyMark, hydrateTyping } = await jiti.import("/workspace/src/lib/hebrew-typing/ranks.ts");
+const { mapPhysicalKey, QWERTY_TO_HE, fingerFor, TIRO_SHIFT, latinForGlyph, HOME_FINGER_LATIN } = await jiti.import(new URL("../src/lib/hebrew-typing/layout.ts", import.meta.url).pathname);
+const { GAME_WORDS, gameRound, poolForSelection, weightedPick } = await jiti.import(new URL("../src/lib/hebrew-typing/bank.ts", import.meta.url).pathname);
+const { typingRank, emptyTyping, applyMark, hydrateTyping } = await jiti.import(new URL("../src/lib/hebrew-typing/ranks.ts", import.meta.url).pathname);
 const { STUDY_TYPE_RUNGS, HOME_ROW, HOME_LEFT, studyRungTargets, clampStudyRung, migrateOldStudyRung, drillLines, studyRungBlind } = await jiti.import(
-  "/workspace/src/lib/hebrew-typing/study-rungs.ts",
+  new URL("../src/lib/hebrew-typing/study-rungs.ts", import.meta.url).pathname,
 );
-const { lessonById } = await jiti.import("/workspace/src/lib/ladder.ts");
-const { stripNiqqud } = await jiti.import("/workspace/src/lib/hebrew.ts");
+const { lessonById } = await jiti.import(new URL("../src/lib/ladder.ts", import.meta.url).pathname);
+const { stripNiqqud } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
 
 test("Israeli qwerty map hits alef on T", () => {
   assert.equal(QWERTY_TO_HE.t, "א");
@@ -139,7 +139,7 @@ test("weak words are marked and spaced; self-quiz uses week/chapter vocab", () =
 });
 
 test("Type session has no crowd or voice SFX", () => {
-  const src = readFileSync("/workspace/src/components/type-session.tsx", "utf8");
+  const src = readFileSync(new URL("../src/components/type-session.tsx", import.meta.url).pathname, "utf8");
   assert.equal(src.includes("playFeedback"), false);
   assert.equal(src.includes("playAww"), false);
   assert.equal(src.includes("playGrade"), false);

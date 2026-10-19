@@ -3,8 +3,8 @@ import test from "node:test";
 import { existsSync } from "node:fs";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { VOCAB_ART_IDS, vocabArtSrc } = await jiti.import("/workspace/src/lib/vocab-art.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { VOCAB_ART_IDS, vocabArtSrc } = await jiti.import(new URL("../src/lib/vocab-art.ts", import.meta.url).pathname);
 
 test("trial plates cover picturable Ch. 3–5 nouns", () => {
   assert.ok(VOCAB_ART_IDS.includes("bat"));

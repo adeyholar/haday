@@ -10,6 +10,7 @@ const chapterCache = new Map<string, WlcChapter>();
 
 const SHEET_KEY = "haday.wlc.sheet";
 const SIZE_KEY = "haday.wlc.size";
+const NOTE_KEY = "haday.wlc.note";
 
 const SIZES: { id: SheetSize; label: string }[] = [
   { id: "tight", label: "Tight" },
@@ -29,10 +30,13 @@ export const Route = createFileRoute("/iibs/wlc/$book/$ch")({
 
 function readSheet(): SheetTone {
   try {
-    return window.localStorage.getItem(SHEET_KEY) === "dim" ? "dim" : "light";
+    const saved = window.localStorage.getItem(SHEET_KEY);
+    if (saved === "dim" || saved === "light") return saved;
   } catch {
-    return "light";
+    /* fall through to the device */
   }
+  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dim";
+  return "light";
 }
 
 function readSize(): SheetSize {
@@ -83,10 +87,20 @@ function WlcChapterPage() {
   const [error, setError] = useState("");
   const [tone, setTone] = useState<SheetTone>("light");
   const [size, setSize] = useState<SheetSize>("page");
+  const [aaOpen, setAaOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
 
   useEffect(() => {
     setTone(readSheet());
     setSize(readSize());
+    try {
+      if (window.localStorage.getItem(NOTE_KEY) !== "seen") {
+        setNoteOpen(true);
+        window.localStorage.setItem(NOTE_KEY, "seen");
+      }
+    } catch {
+      /* the note can still be opened from the button */
+    }
   }, []);
 
   useEffect(() => {
@@ -145,69 +159,85 @@ function WlcChapterPage() {
 
   return (
     <div className="wlc-stage">
-      <div className="shrink-0">
-        <ScriptureTabs active="lab" />
-      </div>
-      <div className="relative mb-3 flex shrink-0 flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Reading Lab</p>
-          <h1 className="font-display text-3xl font-bold leading-none text-ink">
-            {meta.en} {chapterNo}
-          </h1>
-          <p className="he-word text-xl text-muted" dir="rtl" lang="he">
-            {meta.he}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-2 max-sm:w-full max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-between [@media(max-height:560px)]:flex-row [@media(max-height:560px)]:items-center">
-          <Link to="/iibs/wlc" className="inline-flex min-h-11 min-w-11 items-center justify-end font-semibold text-primary max-sm:absolute max-sm:top-0 max-sm:right-0">
-            Books
+      <div className="wlc-toolbar -mx-4 mb-2 overflow-x-auto px-2 py-0.5">
+        <div className="flex w-max min-w-full items-center gap-1">
+          <ScriptureTabs active="lab" compact />
+          <Link to="/iibs/wlc" aria-label="Books" className="inline-flex h-11 shrink-0 items-center px-1 text-sm font-semibold text-primary">
+            ‹ Books
           </Link>
+          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
+            {meta.en} {chapterNo}{" "}
+            <span className="he-word font-normal text-muted" dir="rtl" lang="he">
+              {meta.he}
+            </span>
+          </h1>
+          <label className="sr-only" htmlFor="wlc-chapter">
+            Chapter
+          </label>
+          <select
+            id="wlc-chapter"
+            className="h-11 shrink-0 rounded-[var(--radius-md)] bg-surface px-2 text-base font-semibold text-ink"
+            value={String(chapterNo)}
+            onChange={(event) => go(Number(event.target.value))}
+          >
+            {Array.from({ length: meta.chapters }, (_, index) => (
+              <option key={index + 1} value={String(index + 1)}>
+                {index + 1}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            aria-label="Previous chapter"
+            disabled={!prev}
+            onClick={() => prev && go(prev)}
+            className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            aria-label="Next chapter"
+            disabled={!next}
+            onClick={() => next && go(next)}
+            className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
+          >
+            ›
+          </button>
+          <button
+            type="button"
+            aria-label="Type size and lamp"
+            aria-expanded={aaOpen}
+            onClick={() => setAaOpen((open) => !open)}
+            className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center px-2 text-sm font-semibold text-ink"
+          >
+            Aa
+          </button>
+          <button
+            type="button"
+            aria-label="About this text"
+            aria-expanded={noteOpen}
+            onClick={() => setNoteOpen((open) => !open)}
+            className="inline-flex size-11 shrink-0 items-center justify-center text-sm font-semibold text-ink"
+          >
+            ⓘ
+          </button>
+        </div>
+      </div>
+      {aaOpen ? (
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           <SheetSizeControl size={size} onChange={chooseSize} />
           <SheetLamp tone={tone} onChange={choose} />
         </div>
-      </div>
-      <div className="mb-3 grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
-        {prev ? (
-          <button
-            type="button"
-            onClick={() => go(prev)}
-            className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] bg-card px-3 font-semibold text-ink shadow-[var(--shadow-border)]"
-          >
-            Prev
-          </button>
-        ) : (
-          <span />
-        )}
-        <label className="sr-only" htmlFor="wlc-chapter">
-          Chapter
-        </label>
-        <select
-          id="wlc-chapter"
-          className="min-h-11 rounded-[var(--radius-md)] bg-surface px-3 text-base font-semibold text-ink shadow-[var(--shadow-border)]"
-          value={String(chapterNo)}
-          onChange={(event) => go(Number(event.target.value))}
-        >
-          {Array.from({ length: meta.chapters }, (_, index) => (
-            <option key={index + 1} value={String(index + 1)}>
-              {index + 1}
-            </option>
-          ))}
-        </select>
-        {next ? (
-          <button
-            type="button"
-            onClick={() => go(next)}
-            className="flex min-h-11 items-center justify-center rounded-[var(--radius-md)] bg-ink px-3 font-semibold text-parchment"
-          >
-            Next
-          </button>
-        ) : (
-          <span />
-        )}
-      </div>
+      ) : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
       {!chapter && !error ? <p className="text-sm text-muted">Opening the chapter.</p> : null}
-      {chapter ? <WlcReading chapter={chapter} tone={tone} size={size} /> : null}
+      {chapter ? <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} /> : null}
+      {next ? (
+        <button type="button" onClick={() => go(next)} className="mt-4 min-h-11 font-semibold text-primary">
+          Next chapter ›
+        </button>
+      ) : null}
     </div>
   );
 }

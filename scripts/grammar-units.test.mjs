@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { GRAMMAR_TRACKS } = await jiti.import("/workspace/src/lib/grammar-tracks.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { GRAMMAR_TRACKS } = await jiti.import(new URL("../src/lib/grammar-tracks.ts", import.meta.url).pathname);
 const { GRAMMAR_QUIZ_LEN, buildGrammarQuiz, buildGrammarMixQuiz, grammarMixPool, grammarQuizPool, isGrammarTrackId } = await jiti.import(
-  "/workspace/src/lib/grammar.ts",
+  new URL("../src/lib/grammar.ts", import.meta.url).pathname,
 );
-const { VOCAB } = await jiti.import("/workspace/src/lib/vocab.ts");
+const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
 const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
-  "/workspace/src/lib/game.ts",
+  new URL("../src/lib/game.ts", import.meta.url).pathname,
 );
 
 const VOCAB_IDS = new Set(VOCAB.map((v) => v.id));

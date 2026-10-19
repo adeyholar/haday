@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { areaOf, tallySavedPractice } = await jiti.import("/workspace/src/lib/use-report.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { areaOf, tallySavedPractice } = await jiti.import(new URL("../src/lib/use-report.ts", import.meta.url).pathname);
 
 test("pages land in the area a student would name", () => {
   assert.equal(areaOf("/game/week7")?.id, "week7");

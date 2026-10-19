@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createJiti } from "jiti";
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   parseReadSearch,
   parseFromSearch,
@@ -16,9 +16,9 @@ const {
   verseWindow,
   versesInChapter,
   isFullChapter,
-} = await jiti.import("/workspace/src/lib/passage.ts");
+} = await jiti.import(new URL("../src/lib/passage.ts", import.meta.url).pathname);
 const { sliceVerses, audioWindow, verseStartFrom, verseEndFrom, chapterAudio, readingVerses } = await jiti.import(
-  "/workspace/src/lib/reading.ts",
+  new URL("../src/lib/reading.ts", import.meta.url).pathname,
 );
 
 test("Genesis 2 has 25 verses and 7–10 is a legal window", () => {

@@ -18,17 +18,17 @@ if (typeof globalThis.localStorage === "undefined") {
   };
 }
 
-const jiti = createJiti(import.meta.url, { alias: { "@": "/workspace/src" } });
-const { twinsOf } = await jiti.import("/workspace/src/lib/confusion.ts");
-const { observeBkt, pKnow, pickByBkt } = await jiti.import("/workspace/src/lib/bkt.ts");
+const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
+const { twinsOf } = await jiti.import(new URL("../src/lib/confusion.ts", import.meta.url).pathname);
+const { observeBkt, pKnow, pickByBkt } = await jiti.import(new URL("../src/lib/bkt.ts", import.meta.url).pathname);
 const { tanakhForms, tanakhFormsForChapter, weekPlayPool, lemmaIdOf } = await jiti.import(
-  "/workspace/src/lib/tanakh-pool.ts",
+  new URL("../src/lib/tanakh-pool.ts", import.meta.url).pathname,
 );
 const { chapterPlayPool, chapterPool, applyStageResult, defaultGame, isChapterUnlocked, isStageUnlocked, GAME_STAGE_PASS } =
-  await jiti.import("/workspace/src/lib/game.ts");
-const { lettersOnly } = await jiti.import("/workspace/src/lib/hebrew.ts");
-const { itemsForWeek } = await jiti.import("/workspace/src/lib/vocab.ts");
-const { nudgeDue, hydrateCard } = await jiti.import("/workspace/src/lib/srs.ts");
+  await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
+const { lettersOnly } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
+const { itemsForWeek } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
+const { nudgeDue, hydrateCard } = await jiti.import(new URL("../src/lib/srs.ts", import.meta.url).pathname);
 
 test("confusion pairs queue he/het, dalet/resh, kaf/bet, qamets/pathach, shin/sin", () => {
   assert.ok(twinsOf("alef:letter:he").includes("alef:letter:het"));
