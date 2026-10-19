@@ -19,16 +19,25 @@ function StudyUnitPage() {
       <div className="mb-4">
         <StudyMenu />
       </div>
-      {track.id === "verbs" && n === 3 ? (
+      {track.id === "verbs" ? (
         <p className="mb-4 text-sm">
-          <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
-            Verb Paradigm Quest
+          <Link to="/game/verbal-system" className="font-semibold text-primary">
+            Verbal System
           </Link>
-          <span className="text-muted"> · build the Qal perfect, ending and accent included. </span>
-          <Link to="/game/qal-perfect" className="font-semibold text-primary">
-            Qal Perfect Builder
-          </Link>
-          <span className="text-muted"> · all nine forms from the vowels and the ending.</span>
+          <span className="text-muted"> · root, stem, and conjugation. Ten builds, nine right clears the round.</span>
+          {n === 3 ? (
+            <>
+              {" "}
+              <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
+                Verb Paradigm Quest
+              </Link>
+              <span className="text-muted"> · build the Qal perfect, ending and accent included. </span>
+              <Link to="/game/qal-perfect" className="font-semibold text-primary">
+                Qal Perfect Builder
+              </Link>
+              <span className="text-muted"> · all nine forms from the vowels and the ending.</span>
+            </>
+          ) : null}
         </p>
       ) : null}
       <GrammarPlay key={`${track.id}-${n}-prep`} track={track} unitId={n} mode="prepare" />

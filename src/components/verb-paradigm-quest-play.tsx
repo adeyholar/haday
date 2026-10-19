@@ -13,6 +13,7 @@ import {
   QATAL,
   gradeVerb,
   firstAnswer,
+  placeChosenMark,
   qalPerfect,
   questPercent,
   recordVerbQuest,
@@ -35,7 +36,7 @@ function Pointed({ form, pgn, className }: { form: string; pgn: Pgn; className?:
   const parts = splitClusters(form);
   const cut = redFrom(pgn, parts.length);
   return (
-    <span className={cn("he-word", className)} dir="rtl" lang="he">
+    <span className={cn("he-taam", className)} dir="rtl" lang="he">
       {parts.map((part, i) => (
         <span key={`${part}-${i}`} className={i >= cut ? "text-ocean" : undefined}>
           {part}
@@ -71,6 +72,13 @@ export function VerbQuestHome() {
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Verb Paradigm Quest</h1>
         <p className="mt-3 text-sm text-muted">
           Only the root letters are on the screen. You add the vowels. The app does not write them on the root for you.
+        </p>
+        <p className="mt-2 text-sm text-muted">
+          Every stem, not only the Qal perfect, is in the{" "}
+          <Link to="/game/verbal-system" className="font-semibold text-primary">
+            Verbal System
+          </Link>
+          .
         </p>
         <ul className="mt-4 grid gap-2">
           <li>
@@ -341,6 +349,16 @@ function VerbQuestSitting({
             extraMarks
             hideVowelLetters
             markBackspace
+            onSpecialMark={(mark) => {
+              const placed = placeChosenMark(built, card.form, mark);
+              if (placed.status === "wait") {
+                setLines(["Type that letter first. Then the accent or the meteg lands on the letter this form requires."]);
+                return true;
+              }
+              if (placed.status === "skip") return false;
+              setBuilt(placed.text);
+              return true;
+            }}
           />
           {revealed ? (
             <p className="mt-3 text-center">

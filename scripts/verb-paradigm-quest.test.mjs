@@ -116,6 +116,20 @@ test("a wrong vowel is not hidden behind the accent note", () => {
   assert.equal(graded.lines[0].startsWith("Almost"), false);
 });
 
+test("a tapped accent or meteg lands on the letter that form requires", () => {
+  const forms = Object.fromEntries(quest.qalPerfect(quest.QATAL).map((row) => [row.pgn, row.form]));
+  const bare2 = forms["2ms"].replaceAll(O, "");
+  const accent = quest.placeChosenMark(bare2, forms["2ms"], O);
+  assert.equal(accent.status, "placed");
+  assert.equal(accent.text, forms["2ms"]);
+  const bare3 = forms["3fs"].replaceAll(M, "");
+  const meteg = quest.placeChosenMark(bare3, forms["3fs"], M);
+  assert.equal(meteg.status, "placed");
+  assert.equal(meteg.text, forms["3fs"]);
+  assert.equal(quest.placeChosenMark("", forms["2ms"], O).status, "wait");
+  assert.equal(quest.placeChosenMark(forms["3ms"], forms["3ms"], O).status, "skip");
+});
+
 test("the first check is the grade", () => {
   assert.equal(quest.firstAnswer(null, true, false), true);
   assert.equal(quest.firstAnswer(null, false, false), false);

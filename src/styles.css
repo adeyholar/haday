@@ -263,10 +263,18 @@
 .manuscript-dim .ms-picked {
   background: rgba(232, 210, 170, 0.16);
 }
+.manuscript-sheet .he-verse > .ms-word,
+.manuscript-sheet .he-taam,
+.manuscript-sheet .ms-word-face {
+  font-family: "Ezra SIL", "Frank Ruhl Libre", serif;
+  font-weight: 400;
+  line-height: 2.6;
+}
 .manuscript-sheet .ms-stress {
   text-decoration: underline;
   text-decoration-thickness: 2px;
-  text-underline-offset: 0.35em;
+  text-underline-offset: 0.72em;
+  text-decoration-skip-ink: none;
 }
 .manuscript-light .ms-stress {
   text-decoration-color: #8a4b2a;

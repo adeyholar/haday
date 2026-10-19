@@ -54,6 +54,7 @@ export type NavHref =
   | "/game/lessons"
   | "/game/lessons/$track"
   | "/game/verb-paradigm-quest"
+  | "/game/verbal-system"
   | "/game/qal-perfect"
   | "/ask"
   | "/ideas"

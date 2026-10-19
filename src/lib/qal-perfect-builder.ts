@@ -1,4 +1,6 @@
-/** Assemble a strong or assimilating Qal perfect. Accent and meteg are not part of this drill. */
+/** Assemble a strong or assimilating Qal perfect. Accent and meteg are required on the forms that take them. */
+
+import { withTone } from "@/lib/verbal-marks";
 
 const DAG = "\u05BC";
 const SHIN = "\u05C1";
@@ -118,11 +120,19 @@ export type RowChoice = {
   v2: VowelId | "";
   end: EndId | "";
   merge: boolean;
+  /** "yes" adds the mark this person requires. "no" leaves it off. */
+  tone: "" | "yes" | "no";
 };
+
+export function needsTone(k: PgnKey): "accent" | "meteg" | "none" {
+  if (k === "2ms" || k === "1cs" || k === "1cp") return "accent";
+  if (k === "3fs" || k === "3cp") return "meteg";
+  return "none";
+}
 
 export function blankChoices(): Record<PgnKey, RowChoice> {
   const out = {} as Record<PgnKey, RowChoice>;
-  for (const form of FORMS) out[form.k] = { v1: "", v2: "", end: "", merge: false };
+  for (const form of FORMS) out[form.k] = { v1: "", v2: "", end: "", merge: false, tone: "" };
   return out;
 }
 
@@ -137,26 +147,31 @@ export function expectsMerge(root: BuilderRoot, k: PgnKey): boolean {
 }
 
 /** The pointed word for this choice. Null when Merge is checked on a form that cannot merge. */
-export function buildForm(root: BuilderRoot, choice: RowChoice): string | null {
+export function buildForm(root: BuilderRoot, choice: RowChoice, person: PgnKey = "3ms"): string | null {
   const [a, b, c] = [...root.c];
   const head = letter(a, choice.v1 ? VOWELS[choice.v1] : "", BGDKPT.has(a)) + letter(b, choice.v2 ? VOWELS[choice.v2] : "", false);
   const ending = choice.end ? ENDINGS[choice.end] : undefined;
-  if (!ending) return head + letter(c, "", false);
-  if (choice.merge) {
-    if (ending.mt !== undefined && c === "ת") return head + letter(c, ending.m ?? "", true) + ending.mt;
-    if (ending.nm && c === "נ") return head + c + DAG + "ו" + DAG;
-    return null;
-  }
-  if (choice.end === "none") return head + letter(FINAL[c] || c, "", false);
-  return head + letter(c, ending.c3v, false) + ending.tail;
+  let word: string | null;
+  if (!ending) word = head + letter(c, "", false);
+  else if (choice.merge) {
+    if (ending.mt !== undefined && c === "ת") word = head + letter(c, ending.m ?? "", true) + ending.mt;
+    else if (ending.nm && c === "נ") word = head + c + DAG + "ו" + DAG;
+    else word = null;
+  } else if (choice.end === "none") word = head + letter(FINAL[c] || c, "", false);
+  else word = head + letter(c, ending.c3v, false) + ending.tail;
+  if (word == null) return null;
+  const tone = needsTone(person);
+  return choice.tone === "yes" && tone !== "none" ? withTone(word, tone) : word;
 }
 
 export function rootDisplay(root: BuilderRoot): string {
   return [...root.c].map((c, i) => letter(i === 2 ? FINAL[c] || c : c, "", false)).join(" · ");
 }
 
-export function filled(choice: RowChoice): boolean {
-  return Boolean(choice.v1 && choice.v2 && choice.end);
+export function filled(choice: RowChoice, person: PgnKey): boolean {
+  if (!choice.v1 || !choice.v2 || !choice.end) return false;
+  if (needsTone(person) !== "none" && !choice.tone) return false;
+  return true;
 }
 
 export type RowGrade = {
@@ -178,7 +193,10 @@ export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): 
     if (merge && !choice.merge) diffs.push("The last root letter and the ending’s letter are the same here. Write it once with a dagesh.");
     if (!merge && choice.merge) diffs.push("Nothing merges in this form. Write the root letter and the ending separately.");
   }
-  const answer = buildForm(root, { v1: form.v1, v2: form.v2, end: form.end, merge }) ?? "";
+  const tone = needsTone(form.k);
+  if (tone === "accent" && choice.tone !== "yes") diffs.push("This form needs the accent on the second letter.");
+  if (tone === "meteg" && choice.tone !== "yes") diffs.push("This form needs the meteg under the first letter.");
+  const answer = buildForm(root, { v1: form.v1, v2: form.v2, end: form.end, merge, tone: "yes" }, form.k) ?? "";
   return { ok: diffs.length === 0, answer, diffs, note: form.note };
 }
 

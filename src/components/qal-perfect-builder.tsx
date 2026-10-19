@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -16,6 +15,7 @@ import {
   emptyStats,
   filled,
   gradeRow,
+  needsTone,
   rootDisplay,
   rootsFor,
   type BuilderRoot,
@@ -98,7 +98,11 @@ export function QalPerfectBuilder() {
     setSel((prev) => ({ ...prev, [k]: { ...prev[k], merge } }));
   }
 
-  const done = FORMS.filter((form) => filled(sel[form.k])).length;
+  function setTone(k: PgnKey, tone: "" | "yes" | "no") {
+    setSel((prev) => ({ ...prev, [k]: { ...prev[k], tone } }));
+  }
+
+  const done = FORMS.filter((form) => filled(sel[form.k], form.k)).length;
   const byK = Object.fromEntries(FORMS.map((form) => [form.k, form])) as Record<PgnKey, (typeof FORMS)[number]>;
 
   function grade() {
@@ -135,14 +139,7 @@ export function QalPerfectBuilder() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Perfect Builder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Build all nine forms of the root. For each row pick the vowel under the first root letter, the vowel under the second, and the ending. The word assembles as you choose. Submit when every row is filled.
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          Accent and meteg are practiced in{" "}
-          <Link to="/game/verb-paradigm-quest" className="font-semibold text-primary">
-            Verb Paradigm Quest
-          </Link>
-          .
+          Build all nine forms of the root. For each row pick the vowel under the first root letter, the vowel under the second, and the ending. On 2ms, 1cs, and 1cp add the accent on the second letter. On 3fs and 3cp add the meteg under the first. The word assembles as you choose.
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] bg-card shadow-[var(--shadow-border)]" role="radiogroup" aria-label="Root set">
@@ -212,6 +209,8 @@ export function QalPerfectBuilder() {
           <li>Consonant endings (2ms, 2fs, 1cs, 1cp): both vowels stay, and the last root letter closes with a sheva before the ending.</li>
           <li>Vowel endings (3fs, 3cp): the second vowel drops to sheva. The first qamets stays.</li>
           <li>Heavy endings (2mp, 2fp): the first vowel drops to sheva. The patah stays.</li>
+          <li>2ms, 1cs, and 1cp: add the accent on the second letter. The stress has moved off the end.</li>
+          <li>3fs and 3cp: add the meteg under the first letter. It keeps that qamets long before the sheva.</li>
           <li>Assimilating roots: when the ending’s letter matches the last root letter (ת+ת, נ+נ), write it once with a dagesh.</li>
         </ul>
       </details>
@@ -220,7 +219,8 @@ export function QalPerfectBuilder() {
         {order.map((k) => {
           const form = byK[k];
           const choice = sel[k];
-          const preview = buildForm(root, choice);
+          const tone = needsTone(k);
+          const preview = buildForm(root, choice, k);
           const row = results[k];
           return (
             <div
@@ -235,7 +235,7 @@ export function QalPerfectBuilder() {
                 <p className="font-mono text-base font-medium text-ink">{k}</p>
                 <p className="text-xs leading-tight text-muted">{form.long}</p>
               </div>
-              <p className="he-word text-center font-hebrew text-4xl leading-tight text-ink" dir="rtl" lang="he">
+              <p className="he-taam text-center text-4xl leading-[2.2] text-ink" dir="rtl" lang="he">
                 {preview === null ? "—" : preview || " "}
               </p>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -252,6 +252,9 @@ export function QalPerfectBuilder() {
                   onChange={(value) => setField(k, "v2", value)}
                 />
                 <EndSelect label={`Ending, ${k}`} value={choice.end} onChange={(value) => setField(k, "end", value)} />
+                {tone !== "none" ? (
+                  <ToneSelect kind={tone} person={k} value={choice.tone} onChange={(value) => setTone(k, value)} />
+                ) : null}
                 {root.assim ? (
                   <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted sm:col-span-3">
                     <input type="checkbox" checked={choice.merge} onChange={(event) => setMerge(k, event.target.checked)} />
@@ -266,7 +269,7 @@ export function QalPerfectBuilder() {
                     <>
                       <p className="mt-1 flex flex-wrap items-baseline gap-2 text-sm">
                         <span>Answer:</span>
-                        <span className="he-word font-hebrew text-3xl text-ink" dir="rtl" lang="he">
+                        <span className="he-taam text-3xl leading-[2.2] text-ink" dir="rtl" lang="he">
                           {row.answer}
                         </span>
                       </p>
@@ -352,6 +355,36 @@ function VowelSelect({
           {VOWELS[opt.id]} {opt.name}
         </option>
       ))}
+    </select>
+  );
+}
+
+function ToneSelect({
+  kind,
+  person,
+  value,
+  onChange,
+}: {
+  kind: "accent" | "meteg";
+  person: string;
+  value: "" | "yes" | "no";
+  onChange: (value: "" | "yes" | "no") => void;
+}) {
+  const yes = kind === "accent" ? "Accent on the second letter" : "Meteg under the first letter";
+  const no = kind === "accent" ? "No accent" : "No meteg";
+  const glyph = kind === "accent" ? "\u25CC\u05AB" : "\u25CC\u05BD";
+  return (
+    <select
+      aria-label={`${yes}, ${person}`}
+      value={value}
+      onChange={(event) => onChange(event.target.value as "" | "yes" | "no")}
+      className="he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-3"
+    >
+      <option value="">Accent or meteg…</option>
+      <option value="yes">
+        {glyph} {yes}
+      </option>
+      <option value="no">{no}</option>
     </select>
   );
 }

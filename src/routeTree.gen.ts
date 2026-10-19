@@ -51,6 +51,7 @@ import { Route as GameQalPerfectRouteImport } from './routes/game/qal-perfect'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameVerbParadigmQuestRouteImport } from './routes/game/verb-paradigm-quest'
+import { Route as GameVerbalSystemRouteImport } from './routes/game/verbal-system'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
@@ -309,6 +310,11 @@ const GameTypeRoute = GameTypeRouteImport.update({
 const GameVerbParadigmQuestRoute = GameVerbParadigmQuestRouteImport.update({
   id: '/game/verb-paradigm-quest',
   path: '/game/verb-paradigm-quest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameVerbalSystemRoute = GameVerbalSystemRouteImport.update({
+  id: '/game/verbal-system',
+  path: '/game/verbal-system',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameWeek7Route = GameWeek7RouteImport.update({
@@ -595,6 +601,7 @@ export interface FileRoutesByFullPath {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
+  '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -685,6 +692,7 @@ export interface FileRoutesByTo {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
+  '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -778,6 +786,7 @@ export interface FileRoutesById {
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
+  '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -872,6 +881,7 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
+    | '/game/verbal-system'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -962,6 +972,7 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
+    | '/game/verbal-system'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -1054,6 +1065,7 @@ export interface FileRouteTypes {
     | '/game/road'
     | '/game/type'
     | '/game/verb-paradigm-quest'
+    | '/game/verbal-system'
     | '/game/week7'
     | '/iibs/$level'
     | '/iibs/road'
@@ -1144,6 +1156,7 @@ export interface RootRouteChildren {
   GameRoadRoute: typeof GameRoadRoute
   GameTypeRoute: typeof GameTypeRoute
   GameVerbParadigmQuestRoute: typeof GameVerbParadigmQuestRoute
+  GameVerbalSystemRoute: typeof GameVerbalSystemRoute
   GameWeek7Route: typeof GameWeek7Route
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
@@ -1474,6 +1487,13 @@ declare module '@tanstack/react-router' {
       path: '/game/verb-paradigm-quest'
       fullPath: '/game/verb-paradigm-quest'
       preLoaderRoute: typeof GameVerbParadigmQuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/verbal-system': {
+      id: '/game/verbal-system'
+      path: '/game/verbal-system'
+      fullPath: '/game/verbal-system'
+      preLoaderRoute: typeof GameVerbalSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/week7': {
@@ -1927,6 +1947,7 @@ const rootRouteChildren: RootRouteChildren = {
   GameRoadRoute: GameRoadRoute,
   GameTypeRoute: GameTypeRoute,
   GameVerbParadigmQuestRoute: GameVerbParadigmQuestRoute,
+  GameVerbalSystemRoute: GameVerbalSystemRoute,
   GameWeek7Route: GameWeek7Route,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,

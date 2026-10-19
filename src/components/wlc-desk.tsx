@@ -21,9 +21,9 @@ function WordFace({
       dir="rtl"
       aria-pressed={picked}
       onClick={() => onPick(word)}
-      className={`ms-word inline-flex min-h-11 items-end px-0.5 ${picked ? "ms-picked" : ""}`}
+      className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""}`}
     >
-      <span className="he-taam text-[1.85rem] sm:text-4xl" lang="he">
+      <span className="he-taam ms-word-face text-[1.85rem] sm:text-4xl" lang="he">
         {clusters.map((cluster, index) => (
           <span key={`${word.id}-${index}`} className={index === stressAt ? "ms-stress" : undefined}>
             {cluster.letter}
@@ -43,6 +43,14 @@ function WordFace({
       ) : null}
     </button>
   );
+}
+
+function metegLine(word: WlcWord): string {
+  const rows = word.meteg ?? [];
+  if (!rows.length) return "—";
+  return rows
+    .map((row) => (row.function === "silluq" ? "silluq, the verse pause" : `meteg on letter ${row.letter_index + 1}`))
+    .join(", ");
 }
 
 function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
@@ -82,6 +90,10 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
           <dd>{word.main_accent || "—"}</dd>
         </div>
         <div>
+          <dt className="text-muted">Meteg</dt>
+          <dd>{metegLine(word)}</dd>
+        </div>
+        <div>
           <dt className="text-muted">Stress</dt>
           <dd>{stress ? `${stress.syll_from_end} from the end` : "—"}</dd>
         </div>
@@ -100,6 +112,11 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
           <dd className="break-all">{word.morph || "—"}</dd>
         </div>
       </dl>
+      {word.review ? (
+        <p className="mt-3 text-sm text-primary">
+          Signed correction. The marks in this frame are the corrected Leningrad reading.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -128,7 +145,9 @@ export function WlcReading({ chapter, tone }: { chapter: WlcChapter; tone: Sheet
         className={`manuscript-sheet ${tone === "dim" ? "manuscript-dim" : "manuscript-light"}`}
       >
         <p className="manuscript-note">
-          {system}. The line marks the stressed letter. A word in parentheses is the qere. Tap a word for the pause path.
+          {system}
+          {chapter.dataset_version ? ` · Leningrad ${chapter.dataset_version}` : ""}. Accents and meteg stay on the word.
+          A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the qere.
         </p>
         <div className="space-y-4">
           {chapter.verses.map((verse) => (
