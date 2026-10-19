@@ -40,6 +40,7 @@ export type NavHref =
   | "/finder/word"
   | "/legal"
   | "/credits"
+  | "/how-to-memorize-biblical-hebrew-vocabulary"
   | "/about"
   | "/teachings"
   | "/admin/teachings"

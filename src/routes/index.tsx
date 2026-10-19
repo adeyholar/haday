@@ -64,14 +64,12 @@ function DoorsPage() {
             }
           }
           const home = homeForAccount(next);
-          if (home) {
-            rememberDoor(next.path!);
+          if (home && next.path) {
+            rememberDoor(next.path);
             if (home === "/bbh") markTermHall();
-            window.location.replace(home);
-            return;
           }
           if (!cancelled) {
-            clearDoor();
+            if (!home) clearDoor();
             setVisitor(false);
             setGate(next);
           }
@@ -119,6 +117,7 @@ function DoorsPage() {
     }
   }
 
+  const placedHome = gate && !gate.admin ? homeForAccount(gate) : null;
   const choosing = visitor || !gate?.path;
   const canBbh = Boolean(gate?.admin || gate?.path === "bbh");
   const canIibs = Boolean(gate?.admin || gate?.path === "iibs");
@@ -129,8 +128,12 @@ function DoorsPage() {
     path: gate?.path ?? null,
   });
 
-  if (!showChooser) {
-    return <Panel className="text-center"><p className="text-sm text-muted">{error || "Opening your study."}</p></Panel>;
+  if (!showChooser && !placedHome) {
+    return (
+      <Panel className="text-center">
+        <p className="text-sm text-muted">{error || "Opening your study."}</p>
+      </Panel>
+    );
   }
 
   return (
@@ -149,6 +152,13 @@ function DoorsPage() {
         <h2 className="mt-4 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
+      {placedHome ? (
+        <Panel className="mt-4 text-center">
+          <Link to={placedHome} className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+            Continue to your study
+          </Link>
+        </Panel>
+      ) : (
       <div className="grid gap-3 sm:grid-cols-2">
         <Door
           kind="bbh"
@@ -179,6 +189,7 @@ function DoorsPage() {
           action="Start the Scripture Path"
         />
       </div>
+      )}
       <Panel className="mt-6">
         <h2 className="font-display text-2xl font-semibold text-ink">From the letters to the living Word</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-muted">

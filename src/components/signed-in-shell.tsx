@@ -29,7 +29,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { blockedDestination, currentDoor, homeForAccount, markTermHall, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
+import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
 import { enterTermWeek } from "@/lib/term-week";
 import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
@@ -120,6 +120,8 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
     items.push({ to: "/admin/use", label: "What the class uses", hint: "Visits and practice", icon: BarChart3 });
     if (!iibsSide) items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
+  items.push({ to: "/", label: "Home page", hint: "The front door", icon: House });
+  items.push({ to: "/how-to-memorize-biblical-hebrew-vocabulary", label: "Vocabulary method", hint: "How to learn the words", icon: Library });
   items.push({ to: "/teachings", label: "Teachings", hint: "Public readings", icon: BookOpen });
   items.push({ to: "/about", label: "About", hint: "The teacher", icon: User });
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
@@ -318,10 +320,6 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   const onIibs = pathname === "/iibs" || pathname.startsWith("/iibs/");
   const iibsOnly = onIibs || (pathGate?.path === "iibs" && !pathGate.admin);
   const studentHome = pathGate ? homeForAccount(pathGate) : null;
-  if (pathname === "/" && studentHome) {
-    if (studentHome === "/bbh") markTermHall();
-    return <Navigate to={studentHome} replace />;
-  }
   const blocked =
     pathGate?.admin && doorReady
       ? ownerDoorBlock(pathname, currentDoor())
