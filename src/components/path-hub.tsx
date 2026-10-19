@@ -29,6 +29,7 @@ type Card = {
     | "/game/verbal-system"
     | "/game/verb-paradigm-quest"
     | "/game/qal-perfect"
+    | "/game/lessons/$track"
     | "/game/road"
     | "/game/week7"
     | "/game/final"
@@ -42,7 +43,7 @@ type Card = {
     | "/study/term2/game"
     | "/study/term2/listen"
     | "/study/term2/listen/road";
-  params?: { chapter: string };
+  params?: { chapter: string } | { track: string };
   title: string;
   line: string;
 };
@@ -127,10 +128,18 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
   },
   play: {
     title: "Play",
-    line: "The chapter path clears at 90%.",
+    line: "Scored work. A stage clears at 90% on the first answer. Semester 1 exams stay in Semester 1.",
     cards: [
-      { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. 90%." },
-      { to: "/study/term2", title: "Chapter exam", line: "Open the exam from the lesson when it is time." },
+      { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. Recognize, gloss, then spell." },
+      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Root, stem, conjugation. Ten builds." },
+      { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
+      { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
+      {
+        to: "/game/lessons/$track",
+        params: { track: "verbs" },
+        title: "Verb Lab · Stems",
+        line: "Qal through the derived stems. 90% opens the next unit.",
+      },
     ],
   },
   listen: {

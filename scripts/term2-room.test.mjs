@@ -31,6 +31,18 @@ test("semester 2 words stay off the first-term list", () => {
   assert.equal(itemsForTerm2Week(weekForTerm2Chapter(24)).filter((item) => item.hebrew.includes("לָא")).length, 1);
   assert.equal(secondTermBlock("/drill", 2), null);
   assert.equal(secondTermBlock("/game", 2), "/bbh");
+  assert.equal(secondTermBlock("/game/week7", 2), "/bbh");
+  assert.equal(secondTermBlock("/game/road", 2), "/bbh");
+  assert.equal(secondTermBlock("/game/final", 2), "/bbh");
+  assert.equal(secondTermBlock("/game/final-vocab", 2), "/bbh");
+  assert.equal(secondTermBlock("/challenge", 2), "/bbh");
+  assert.equal(secondTermBlock("/game/verbal-system", 2), null);
+  assert.equal(secondTermBlock("/game/verb-paradigm-quest", 2), null);
+  assert.equal(secondTermBlock("/game/qal-perfect", 2), null);
+  assert.equal(secondTermBlock("/game/lessons/verbs", 2), null);
+  assert.equal(secondTermBlock("/game/lessons/verbs/3", 2), null);
+  assert.equal(secondTermBlock("/game/lessons/prep", 2), "/bbh");
+  assert.equal(secondTermBlock("/lessons/verbs", 2), null);
   assert.equal(TERM2_LESSONS.length, 16);
   assert.equal(TERM2_LESSONS[0].chapter, 20);
   assert.equal(TERM2_LESSONS[15].chapter, 35);
