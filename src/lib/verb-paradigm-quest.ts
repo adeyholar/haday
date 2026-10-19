@@ -391,6 +391,23 @@ export function placeRequiredMark(current: string, target: string): string {
   return canonicalize(out.join(""));
 }
 
+/** Where a tapped accent or meteg goes.
+ * placed: it is on the letter this form requires.
+ * wait: that letter is not typed yet.
+ * skip: this form does not take that mark, so the key may still append it.
+ */
+export function placeChosenMark(current: string, target: string, mark: string): { status: "placed"; text: string } | { status: "wait" } | { status: "skip" } {
+  if (mark !== OLE && mark !== METEG) return { status: "skip" };
+  const want = splitClusters(canonicalize(target));
+  const have = splitClusters(canonicalize(current));
+  const index = want.findIndex((cluster) => marksOf(cluster).includes(mark));
+  if (index < 0) return { status: "skip" };
+  if (!have[index]) return { status: "wait" };
+  if (marksOf(have[index]).includes(mark)) return { status: "placed", text: canonicalize(current) };
+  const out = have.map((cluster, i) => (i === index ? cluster + mark : cluster));
+  return { status: "placed", text: canonicalize(out.join("")) };
+}
+
 /** One step closer. A helped build is not a clean answer. */
 export function stepToward(current: string, target: string): string {
   const want = splitClusters(target);

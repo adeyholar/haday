@@ -31,6 +31,8 @@ export type WlcWord = {
   accents: WlcAccent[];
   meteg: { letter_index: number; function: string }[];
   silluq_inferred?: boolean;
+  /** Set when the signed review replaced the OSHB marks on `surface`. */
+  review?: string;
 };
 
 export type WlcVerse = {

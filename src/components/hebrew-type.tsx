@@ -76,6 +76,7 @@ function PadKey({
   lit,
   quiet,
   shake,
+  taam,
   onClick,
 }: {
   glyph: string;
@@ -84,6 +85,7 @@ function PadKey({
   lit?: boolean;
   quiet?: boolean;
   shake?: boolean;
+  taam?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -99,7 +101,7 @@ function PadKey({
         shake && "ring-2 ring-danger",
       )}
     >
-      <span className="he-word text-3xl leading-none">{glyph}</span>
+      <span className={cn(taam ? "he-taam text-3xl leading-none" : "he-word text-3xl leading-none")}>{glyph}</span>
     </button>
   );
 }
@@ -236,7 +238,8 @@ export function HebrewType({
         autoComplete="off"
         spellCheck={false}
         className={cn(
-          "h-14 w-full rounded-[var(--radius-md)] border border-border bg-parchment px-4 text-center font-hebrew text-3xl text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "w-full rounded-[var(--radius-md)] border border-border bg-parchment px-4 text-center text-3xl text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          extraMarks ? "he-taam min-h-20 py-2 leading-[2.4]" : "h-14 font-hebrew",
           paint && live === "exact" && "ring-2 ring-good",
           paint && live === "off" && value && "ring-2 ring-danger",
         )}
@@ -304,8 +307,8 @@ export function HebrewType({
         ))}
         {extraMarks ? (
           <>
-            <PadKey glyph="◌֫" name="Accent" disabled={disabled} {...keyFace("\u05AB")} onClick={() => add("\u05AB")} />
-            <PadKey glyph="◌ֽ" name="Meteg" disabled={disabled} {...keyFace("\u05BD")} onClick={() => add("\u05BD")} />
+            <PadKey taam glyph="◌֫" name="Accent" disabled={disabled} {...keyFace("\u05AB")} onClick={() => add("\u05AB")} />
+            <PadKey taam glyph="◌ֽ" name="Meteg" disabled={disabled} {...keyFace("\u05BD")} onClick={() => add("\u05BD")} />
           </>
         ) : null}
       </PadSection>

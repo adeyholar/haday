@@ -6,6 +6,7 @@ import {
   Blocks,
   CircleHelp,
   CircleAlert,
+  Columns3,
   Compass,
   Crown,
   FileText,
@@ -65,7 +66,8 @@ const STUDY: NavItem[] = [
 ];
 
 const GAME: NavItem[] = [
-  { to: "/game/qal-perfect", label: "Qal Perfect Builder", hint: "Nine forms, vowels and ending", icon: Blocks },
+  { to: "/game/verbal-system", label: "Verbal System", hint: "Root, stem, conjugation. Ten builds, 90%", icon: Columns3 },
+  { to: "/game/qal-perfect", label: "Qal Perfect Builder", hint: "Nine forms, with accent and meteg", icon: Blocks },
   { to: "/game/verb-paradigm-quest", label: "Verb Paradigm Quest", hint: "Only the root. You add the vowels", icon: PenLine },
   { to: "/game/road", label: "Road exam · Week 7", hint: "Say A B C D", icon: Mic },
   { to: "/game/final", label: "Road exam · Week 15", hint: "All the words, on the road", icon: Mic },
