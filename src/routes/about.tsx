@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { PublicFooter } from "@/components/public-footer";
+import { ContactLink, PublicFooter } from "@/components/public-footer";
 import { AUTHOR, ABOUT_DESCRIPTION, FFIM, PERSON_JSON_LD } from "@/lib/author";
-import { CLASS_SITE } from "@/lib/class-site";
+import { CLASS_SITE, CONTACT_EMAIL } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
 
 const TITLE = "About | HaDay HebRabbAi Mentor";
@@ -23,6 +23,11 @@ const ABOUT_JSON_LD = {
       name: FFIM.name,
       alternateName: FFIM.alternateName,
       founder: { "@id": AUTHOR.id },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: CONTACT_EMAIL,
+      },
     },
     {
       "@type": "WebApplication",
@@ -94,6 +99,12 @@ function AboutPage() {
           <a href="/login?path=iibs" className="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">
             Start the Scripture Path
           </a>
+        </p>
+      </Panel>
+      <Panel className="mt-4">
+        <h2 className="font-display text-2xl font-semibold text-ink">Contact</h2>
+        <p className="mt-3">
+          <ContactLink />
         </p>
       </Panel>
       <PublicFooter />
