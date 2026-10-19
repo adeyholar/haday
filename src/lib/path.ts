@@ -117,6 +117,15 @@ const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits", "
 /** Study tools that read the open week, plus Semester 2’s own game, exams, and listen under /study/term2. Semester 1 Game, Listen, and Keep stay blocked. */
 const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/hub"];
 
+/** Verb games belong to both semesters. Semester 1 exams and the first-term word path do not. */
+const TERM2_VERBS = [
+  "/game/verbal-system",
+  "/game/verb-paradigm-quest",
+  "/game/qal-perfect",
+  "/game/lessons/verbs",
+  "/lessons/verbs",
+];
+
 /** A semester room is closed while the other is open, and while they are still choosing. */
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {
   if (term !== 2 && !hall) return null;
@@ -124,6 +133,9 @@ export function secondTermBlock(pathname: string, term: GrammarTerm, hall = fals
   if (pathname.startsWith("/admin") || pathname.startsWith("/iibs")) return null;
   if (SECOND_ROOM.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
   if (term === 2 && !hall && TERM2_STUDY.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+    return null;
+  }
+  if (term === 2 && !hall && TERM2_VERBS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
     return null;
   }
   return "/bbh";
