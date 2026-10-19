@@ -115,7 +115,7 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
 const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"];
 
 /** Study tools that read the open week, plus Semester 2’s own game, exams, and listen under /study/term2. Semester 1 Game, Listen, and Keep stay blocked. */
-const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2"];
+const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/hub"];
 
 /** A semester room is closed while the other is open, and while they are still choosing. */
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false): "/bbh" | null {

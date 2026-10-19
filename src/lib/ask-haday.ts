@@ -74,7 +74,7 @@ export const askHaday = createServerFn({ method: "POST" })
     const claudeKey = process.env.ANTHROPIC_API_KEY?.trim();
     const grokKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY;
     if (!claudeKey && !grokKey) {
-      return { ok: false, error: "HaDay Hebraic AI is not connected on this site yet. Ask in class, or try again later." };
+      return { ok: false, error: "HaDay is not connected on this site yet. Ask in class, or try again later." };
     }
     const question = (data.question || "").trim().slice(0, 800);
     if (question.length < 2) return { ok: false, error: "Type a question from the lesson." };
@@ -177,7 +177,7 @@ async function askGate(userId: string): Promise<string | null> {
       select bucket, cents from ask_meter where bucket = ${monthKey(now)}
     `;
     if ((Number(rows[0]?.cents) || 0) >= STOP_AT_CENTS) {
-      return "HaDay Hebraic AI has used this month’s help. Ask in class until next month.";
+      return "HaDay has used this month’s help. Ask in class until next month.";
     }
     if (owner) return null;
     if (!(await takeSlot(dayKey(userId, now), ASKS_PER_DAY))) {
@@ -189,7 +189,7 @@ async function askGate(userId: string): Promise<string | null> {
     return null;
   } catch (err) {
     console.error("[ask] gate", err);
-    return "HaDay Hebraic AI is not available right now. Ask in class, or try again later.";
+    return "HaDay is not available right now. Ask in class, or try again later.";
   }
 }
 
@@ -272,8 +272,8 @@ async function claudeRefusal(res: Response): Promise<string> {
   } catch {
     detail = "";
   }
-  if (detail) return `Could not reach HaDay Hebraic AI (${res.status}: ${detail}).`;
-  return `Could not reach HaDay Hebraic AI (${res.status}). Try again in a moment.`;
+  if (detail) return `Could not reach HaDay (${res.status}: ${detail}).`;
+  return `Could not reach HaDay (${res.status}). Try again in a moment.`;
 }
 
 async function callGrok(
@@ -300,7 +300,7 @@ async function callGrok(
       ],
     }),
   });
-  if (!res.ok) return { ok: false, error: `Could not reach HaDay Hebraic AI (${res.status}). Try again in a moment.` };
+  if (!res.ok) return { ok: false, error: `Could not reach HaDay (${res.status}). Try again in a moment.` };
   const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   const text = (body.choices?.[0]?.message?.content ?? "").trim();
   if (!text) return { ok: false, error: "No answer came back. Try a shorter question." };

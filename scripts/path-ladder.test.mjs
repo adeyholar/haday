@@ -63,7 +63,7 @@ test("a signed-in student opens their study from home", () => {
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: false, path: "iibs" }), false);
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: true, path: "bbh" }), true);
   assert.equal(shouldShowPathChooser({ signedIn: false, resolved: false, admin: false, path: null }), true);
-  const shell = readFileSync("/workspace/src/components/app-shell.tsx", "utf8");
+  const shell = readFileSync("/workspace/src/components/signed-in-shell.tsx", "utf8");
   assert.match(shell, /pathname === "\/" && studentHome/);
   const doors = readFileSync("/workspace/src/routes/index.tsx", "utf8");
   assert.match(doors, /shouldShowPathChooser/);
@@ -88,7 +88,7 @@ test("each semester is its own room, and the hall is not a room", () => {
   publishTerm(2);
   assert.equal(noteServerTerm(1, seen), 2);
   publishTerm(1);
-  const shell = readFileSync("/workspace/src/components/app-shell.tsx", "utf8");
+  const shell = readFileSync("/workspace/src/components/signed-in-shell.tsx", "utf8");
   assert.match(shell, /markTermHall/);
   const home = readFileSync("/workspace/src/routes/bbh.tsx", "utf8");
   assert.match(home, /SemesterHall/);

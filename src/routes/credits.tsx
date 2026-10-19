@@ -3,8 +3,15 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { Panel } from "@/components/panel";
 import { PublicFooter, PublicReturn } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { shareMeta } from "@/lib/seo";
 
-export const Route = createFileRoute("/credits")({ component: CreditsPage });
+const TITLE = "Credits | HaDay";
+const DESCRIPTION = "The readers, texts, and open works behind HaDay HebRabbAi Mentor.";
+
+export const Route = createFileRoute("/credits")({
+  head: () => ({ meta: shareMeta(TITLE, DESCRIPTION, "/credits"), links: [{ rel: "canonical", href: "https://hebrewmentor.haday.app/credits" }] }),
+  component: CreditsPage,
+});
 
 function CreditsPage() {
   const { user } = useCurrentUserState();

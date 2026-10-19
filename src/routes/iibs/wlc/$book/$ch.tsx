@@ -6,6 +6,8 @@ import { bookMeta, isBookId, parseChapter } from "@/lib/tanakh-canon";
 import { loadWlcChapter } from "@/lib/wlc-server";
 import type { WlcChapter } from "@/lib/wlc";
 
+const chapterCache = new Map<string, WlcChapter>();
+
 const SHEET_KEY = "haday.wlc.sheet";
 const SIZE_KEY = "haday.wlc.size";
 
@@ -89,11 +91,18 @@ function WlcChapterPage() {
 
   useEffect(() => {
     if (!meta || chapterNo == null) return;
+    const key = `${meta.id}:${chapterNo}`;
+    const cached = chapterCache.get(key);
+    if (cached) {
+      setChapter(cached);
+      return;
+    }
     let cancelled = false;
     setChapter(null);
     setError("");
     loadWlcChapter({ data: { book: meta.id, chapter: chapterNo } })
       .then((next) => {
+        chapterCache.set(`${next.book}:${next.chapter}`, next);
         if (!cancelled) setChapter(next);
       })
       .catch((err) => {

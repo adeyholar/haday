@@ -47,7 +47,9 @@ test("the doors page states the product in the first render", () => {
   assert.match(page, /Biblical Hebrew Vocabulary Trainer/);
   assert.match(page, /Choose your Study Path/);
   assert.match(page, /New to Hebrew vocab\? Read the method/);
-  assert.match(page, /Choose wisely/);
+  assert.match(page, /Start the Grammar Path/);
+  assert.match(page, /Start the Scripture Path/);
+  assert.equal(page.includes("Choose wisely"), false);
   assert.match(page, /vocabulary trainer for first-year students/);
   assert.equal(page.includes("Opening the two studies"), false);
   assert.match(SEO_TITLE, /HaDay HebRabbAi Mentor/);

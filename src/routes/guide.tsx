@@ -53,7 +53,7 @@ function GuidePage() {
             lemmas — so new chapters do not bury the old ones. The Study menu groups Stations, Drill, Write, Quiz, Match, Lex,
             Alef-bet, Zakhor, Grammar lessons, and Guide.
             recorded Hebrew chapter audio (not a computer voice) and a grade at 90%. Alive Pet speaks class words in the
-            owner’s recorded voice when a take exists, with your weak lemmas first. Ask HaDay Hebraic AI to clarify the
+            owner’s recorded voice when a take exists, with your weak lemmas first. Ask HaDay to clarify the
             lesson. Suggest a feature puts class ideas in the inventory for review — what makes sense gets planned and
             built.
           </li>

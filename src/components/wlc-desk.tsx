@@ -58,6 +58,16 @@ function WordFace({
   );
 }
 
+function stressLabel(word: WlcWord): string {
+  const stress = word.stress;
+  if (!stress) return "—";
+  const place = `${stress.syll_from_end} from the end`;
+  if (stress.source === "postpositive-single") return `${place}. One pashta, so the stress is final.`;
+  if (stress.source === "doubled") return `${place}. Doubled accent.`;
+  if (stress.source) return `${place}. ${stress.source}`;
+  return place;
+}
+
 function metegLine(word: WlcWord): string {
   const rows = word.meteg ?? [];
   if (!rows.length) return "—";
@@ -68,7 +78,6 @@ function metegLine(word: WlcWord): string {
 
 function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
   const qere = word.qere ?? [];
-  const stress = word.stress;
   return (
     <div className="rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
       <div className="flex items-start justify-between gap-3">
@@ -108,7 +117,7 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
         </div>
         <div>
           <dt className="text-muted">Stress</dt>
-          <dd>{stress ? `${stress.syll_from_end} from the end` : "—"}</dd>
+          <dd>{stressLabel(word)}</dd>
         </div>
         <div>
           <dt className="text-muted">Pause path</dt>
@@ -125,6 +134,7 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
           <dd className="break-all">{word.morph || "—"}</dd>
         </div>
       </dl>
+      {word.morph_note ? <p className="mt-3 text-sm text-muted">{word.morph_note}</p> : null}
       {word.review ? (
         <p className="mt-3 text-sm text-primary">
           Signed correction. The marks in this frame are the corrected Leningrad reading.

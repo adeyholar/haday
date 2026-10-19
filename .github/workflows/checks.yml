@@ -1,0 +1,21 @@
+name: Check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: node --test scripts/*.test.mjs
+      # Full `npm run lint` still fails on older files (hooks and Hebrew regex).
+      # The gate covers the shell and the new hubs, which this change owns.
+      - run: npx eslint src/components/app-shell.tsx src/components/signed-in-shell.tsx src/components/path-hub.tsx src/components/room-link.tsx src/routes/hub src/routes/iibs/learn.tsx src/routes/index.tsx src/lib/seo.ts src/lib/finder-deal.ts server/middleware/security-headers.ts --max-warnings 0

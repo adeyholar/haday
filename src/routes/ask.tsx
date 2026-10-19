@@ -34,7 +34,7 @@ function AskPage() {
     <>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Lesson help</p>
-        <h1 className="mt-1 font-display text-4xl font-bold text-ink">Ask HaDay Hebraic AI</h1>
+        <h1 className="mt-1 font-display text-4xl font-bold text-ink">Ask HaDay</h1>
         <p className="mt-3 text-muted">
           Questions from class: letters, syllables, nouns, vocabulary, and the Genesis 1–5 reading. Ask to clarify the
           lesson — not for a shortcut past the work.
@@ -55,7 +55,7 @@ function AskPage() {
             }`}
           >
             <p className="text-xs font-semibold uppercase tracking-wide opacity-70">
-              {t.role === "user" ? "You" : "HaDay Hebraic AI"}
+              {t.role === "user" ? "You" : "HaDay"}
             </p>
             <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{t.text}</p>
           </div>

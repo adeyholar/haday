@@ -122,7 +122,7 @@ function WeakPoolPage() {
               {resume ? ` · word ${at + 1} is next` : ""}
             </p>
           ) : (
-            <p className="mt-3 text-muted">No weak words yet. A miss, or being told the answer, puts a word here.</p>
+            <p className="mt-3 text-muted">Words you miss will gather here.</p>
           )}
           {extra > 0 ? (
             <p className="mt-1 text-sm text-muted">

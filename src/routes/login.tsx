@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react-router";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -23,6 +23,15 @@ function Login() {
     }
   }, [href]);
   const [mode, setMode] = useState<Mode>("up");
+  useEffect(() => {
+    try {
+      const path = new URLSearchParams(window.location.search).get("path");
+      if (path === "bbh" || path === "iibs") stashPathIntent(path);
+      if (window.localStorage.getItem("haday.seen-account") === "1") setMode("in");
+    } catch {
+      /* keep Create account */
+    }
+  }, []);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -346,6 +355,9 @@ function Login() {
                   Continue with {provider.label}
                 </Button>
               ))}
+              {mode === "up" && !placed ? (
+                <p className="text-sm text-muted">Answer the question above to use Google or X.</p>
+              ) : null}
             </div>
             )}
 
