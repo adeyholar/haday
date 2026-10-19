@@ -12,13 +12,11 @@ import {
   METHOD_TITLE,
   METHOD_URL,
 } from "@/lib/vocab-method";
+import { shareMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/how-to-memorize-biblical-hebrew-vocabulary")({
   head: () => ({
-    meta: [
-      { title: METHOD_TITLE },
-      { name: "description", content: METHOD_DESCRIPTION },
-    ],
+    meta: shareMeta(METHOD_TITLE, METHOD_DESCRIPTION, "/how-to-memorize-biblical-hebrew-vocabulary", { type: "article" }),
     links: [{ rel: "canonical", href: METHOD_URL }],
   }),
   component: MethodPage,

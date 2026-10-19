@@ -7,7 +7,7 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const repo = fileURLToPath(new URL("..", import.meta.url));
-const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect, robotsNoindex, SEO_TITLE } = await jiti.import(
+const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect, robotsNoindex, SEO_TITLE, SEO_DESCRIPTION, shareMeta } = await jiti.import(
   new URL("../src/lib/seo.ts", import.meta.url).pathname,
 );
 
@@ -47,18 +47,41 @@ test("sign-in pages and the old Vercel host are noindex", () => {
 
 test("the doors page states the product in the first render", () => {
   const page = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
-  assert.match(page, /Biblical Hebrew Vocabulary Trainer/);
+  const seo = readFileSync(new URL("../src/lib/seo.ts", import.meta.url).pathname, "utf8");
+  assert.match(page, /Learn to Read the Bible in Hebrew/);
   assert.match(page, /Choose your Study Path/);
+  assert.match(page, /From the letters to the living Word/);
+  assert.match(page, /Reading the Hebrew alphabet and vowel points/);
+  assert.match(page, /Vocabulary, with audio for every word/);
+  assert.match(page, /Grammar: forms, roots, and how words are built/);
+  assert.match(page, /Reading real verses, Levels A to E, then the Reading Lab/);
   assert.match(page, /New to Hebrew vocab\? Read the method/);
   assert.match(page, /Start the Grammar Path/);
   assert.match(page, /Start the Scripture Path/);
   assert.equal(page.includes("Choose wisely"), false);
-  assert.match(page, /vocabulary trainer for first-year students/);
-  assert.equal(page.includes("Opening the two studies"), false);
-  assert.match(SEO_TITLE, /HaDay HebRabbAi Mentor/);
+  assert.equal(page.toLowerCase().includes("first-year"), false);
+  assert.equal(seo.toLowerCase().includes("first-year"), false);
+  assert.equal(SEO_TITLE, "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor");
+  assert.equal(
+    SEO_DESCRIPTION,
+    "Learn to read the Hebrew Bible in its original language. Hear each word, build vocabulary and grammar, and read real verses step by step, so you understand the text more deeply and draw closer to God.",
+  );
+  const home = shareMeta(SEO_TITLE, SEO_DESCRIPTION, "/");
+  const guide = shareMeta("Guide", "How to study", "/how-to-memorize-biblical-hebrew-vocabulary", { type: "article" });
+  assert.equal(home.find((tag) => tag.property === "og:image")?.content, "https://hebrewmentor.haday.app/og.jpg");
+  assert.equal(guide.find((tag) => tag.property === "og:type")?.content, "article");
+  assert.ok(guide.some((tag) => tag.name === "twitter:image"));
   const site = readFileSync(new URL("../src/lib/og/site.json", import.meta.url).pathname, "utf8");
-  assert.match(site, /HaDay HebRabbAi Mentor/);
-  assert.equal(site.includes('"title": "HaDay"'), false);
+  assert.match(site, /Learn to Read Biblical Hebrew/);
+  assert.equal(site.toLowerCase().includes("first-year"), false);
+  for (const file of [
+    "../src/routes/index.tsx",
+    "../src/routes/legal.tsx",
+    "../src/routes/credits.tsx",
+    "../src/routes/how-to-memorize-biblical-hebrew-vocabulary.tsx",
+  ]) {
+    assert.match(readFileSync(new URL(file, import.meta.url).pathname, "utf8"), /rel: "canonical"/);
+  }
 });
 
 test("the memorization guide is public, cited, and in the sitemap", () => {
