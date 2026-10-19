@@ -101,7 +101,7 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
   const method = readFileSync(new URL("../src/lib/vocab-method.ts", import.meta.url).pathname, "utf8");
   const sitemap = sitemapXml();
   assert.match(page, /how to memorize Biblical Hebrew vocabulary/i);
-  assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A First-Year Method That Sticks/);
+  assert.match(method, /How to Memorize Biblical Hebrew Vocabulary: A Method That Sticks/);
   assert.match(page, /twenty-eight/);
   assert.match(page, /686/);
   assert.match(page, /47 or more times/);
@@ -117,12 +117,14 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
   assert.match(page, /to="\/about"/);
   const about = readFileSync(new URL("../src/routes/about.tsx", import.meta.url).pathname, "utf8");
   assert.match(about, /About HaDay HebRabbAi Mentor/);
-  assert.match(about, /AboutPage/);
+  assert.match(about, /Why HaDay exists/);
+  assert.match(author, /Fathers' Faith International Ministries/);
+  assert.equal(page.toLowerCase().includes("first-year"), false);
   assert.match(sitemapXml(), /\/about</);
   const title = "How to Memorize Biblical Hebrew Vocabulary | HaDay";
   assert.ok(title.length <= 60);
   const meta =
-    "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for first-year Hebrew students.";
+    "Learn the most frequent words first, hear each word before its meaning, and read real verses early. A simple method for Hebrew students.";
   assert.ok(meta.length <= 155);
 });
 

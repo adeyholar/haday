@@ -37,7 +37,7 @@ export const STATIC_PAGES: SitePage[] = [
   {
     path: "/about",
     title: "About HaDay HebRabbAi Mentor",
-    summary: "Adeola Adegbolagun teaches Biblical Hebrew with HaDay HebRabbAi Mentor.",
+    summary: "Adeola Adegbolagun leads Fathers' Faith International Ministries and created HaDay HebRabbAi Mentor.",
     lastmod: "2026-10-19",
   },
 ];

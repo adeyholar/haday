@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
-import { AUTHOR, PERSON_JSON_LD } from "@/lib/author";
+import { AUTHOR, FFIM, PERSON_JSON_LD } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
 
@@ -16,6 +17,21 @@ const ABOUT_JSON_LD = {
       mainEntity: { "@id": AUTHOR.id },
     },
     PERSON_JSON_LD,
+    {
+      "@type": "Organization",
+      "@id": FFIM.id,
+      name: FFIM.name,
+      alternateName: FFIM.alternateName,
+      founder: { "@id": AUTHOR.id },
+    },
+    {
+      "@type": "WebApplication",
+      name: "HaDay HebRabbAi Mentor",
+      url: `${CLASS_SITE}/`,
+      applicationCategory: "EducationalApplication",
+      publisher: { "@id": FFIM.id },
+      provider: { "@id": FFIM.id },
+    },
     {
       "@type": "BreadcrumbList",
       itemListElement: [
@@ -38,28 +54,48 @@ function AboutPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ABOUT_JSON_LD) }} />
-      <h1 className="font-display text-4xl font-bold tracking-tight text-ink">About HaDay HebRabbAi Mentor</h1>
-      <img
-        src="/about/adeola.jpg"
-        alt={AUTHOR.name}
-        width={400}
-        height={400}
-        className="mt-6 h-40 w-40 rounded-[var(--radius-md)] object-cover"
-      />
-      <p className="mt-4 font-display text-2xl font-semibold text-ink">{AUTHOR.name}</p>
-      <p className="mt-3 max-w-prose leading-relaxed text-muted">{AUTHOR.longBio}</p>
-      <p className="mt-3 max-w-prose leading-relaxed text-muted">{AUTHOR.mission}</p>
-      <p className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-        <Link to="/bbh" className="text-primary underline-offset-4 hover:underline">
-          Grammar Path
-        </Link>
-        <Link to="/iibs" className="text-primary underline-offset-4 hover:underline">
-          Scripture Path
-        </Link>
-        <a href="/teachings" className="text-primary underline-offset-4 hover:underline">
-          Teachings
-        </a>
-      </p>
+      <Panel>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-ink">About HaDay HebRabbAi Mentor</h1>
+        <p className="mt-3 max-w-prose leading-relaxed text-muted">{AUTHOR.shortBio}</p>
+      </Panel>
+      <Panel className="mt-4">
+        <h2 className="font-display text-2xl font-semibold text-ink">Why HaDay exists</h2>
+        <p className="mt-3 max-w-prose leading-relaxed text-muted">{AUTHOR.mission}</p>
+      </Panel>
+      <Panel className="mt-4">
+        <img
+          src="/about/adeola.jpg"
+          alt="Adeola Adegbolagun"
+          width={800}
+          height={800}
+          className="h-40 w-40 rounded-full object-cover"
+        />
+        <p className="mt-4 font-display text-2xl font-semibold text-ink">{AUTHOR.name}</p>
+        <p className="mt-3 max-w-prose leading-relaxed text-muted">{AUTHOR.longBio}</p>
+      </Panel>
+      <Panel className="mt-4">
+        <h2 className="font-display text-2xl font-semibold text-ink">What you'll learn</h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-muted">
+          <li>Reading the Hebrew alphabet and vowel points</li>
+          <li>Vocabulary, with audio for every word</li>
+          <li>Grammar: forms, roots, and how words are built</li>
+          <li>Reading real verses, Levels A to E, then the Reading Lab</li>
+          <li>The Grammar Path and the Scripture Path</li>
+        </ul>
+        <p className="mt-4 text-sm font-semibold">
+          <a href="/teachings" className="text-primary underline-offset-4 hover:underline">
+            Teachings
+          </a>
+        </p>
+        <p className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+          <a href="/login?path=bbh" className="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">
+            Start the Grammar Path
+          </a>
+          <a href="/login?path=iibs" className="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">
+            Start the Scripture Path
+          </a>
+        </p>
+      </Panel>
       <PublicFooter />
     </main>
   );
