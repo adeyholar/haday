@@ -102,8 +102,11 @@ function AboutPage() {
         </p>
       </Panel>
       <Panel className="mt-4">
-        <h2 className="font-display text-2xl font-semibold text-ink">Contact</h2>
-        <p className="mt-3">
+        <h2 id="contact" className="font-display text-2xl font-semibold text-ink">
+          Contact
+        </h2>
+        <p className="mt-3 text-muted">Questions or enquiries? Email us.</p>
+        <p className="mt-2">
           <ContactLink />
         </p>
       </Panel>
