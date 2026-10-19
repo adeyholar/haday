@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { verseLabel, wlcClusters, type WlcChapter, type WlcWord } from "@/lib/wlc";
+import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
 
 export type SheetTone = "light" | "dim";
 export type SheetSize = "tight" | "small" | "page" | "large";
@@ -22,7 +22,9 @@ function WordFace({
       dir="rtl"
       aria-pressed={picked}
       onClick={() => onPick(word)}
-      className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""}`}
+      className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""} ${
+        joinsNext(word) ? "ms-joins" : ""
+      }`}
     >
       <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (
@@ -157,11 +159,17 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
                 {verseLabel(verse.ref)}
               </span>
               <p className="he-verse min-w-0 flex-1">
-                {verse.words
-                  .filter((word) => word.kq_role !== "qere")
-                  .map((word) => (
-                    <WordFace key={word.id} word={word} picked={picked?.id === word.id} onPick={setPicked} />
-                  ))}
+                {wlcMaqafChains(verse.words.filter((word) => word.kq_role !== "qere")).map((chain) =>
+                  chain.length === 1 ? (
+                    <WordFace key={chain[0].id} word={chain[0]} picked={picked?.id === chain[0].id} onPick={setPicked} />
+                  ) : (
+                    <span key={chain[0].id} className="ms-chain" dir="rtl">
+                      {chain.map((word) => (
+                        <WordFace key={word.id} word={word} picked={picked?.id === word.id} onPick={setPicked} />
+                      ))}
+                    </span>
+                  ),
+                )}
               </p>
             </div>
           ))}
