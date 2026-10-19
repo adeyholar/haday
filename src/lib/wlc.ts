@@ -61,6 +61,29 @@ export function wlcClusters(surface: string): WlcCluster[] {
   return out;
 }
 
+export const MAQAF = "\u05be";
+
+/** True when the word's maqaf joins it to the next word (no space, no break). */
+export function joinsNext(word: Pick<WlcWord, "surface" | "trailer">): boolean {
+  return word.trailer.includes(MAQAF) || (!word.trailer && word.surface.endsWith(MAQAF));
+}
+
+/**
+ * Group a verse's words into maqaf chains. A word whose trailer is a maqaf is
+ * bound to the word after it, so the whole chain renders as one unit with no
+ * gap and never breaks across lines. Every other word is a chain of one.
+ */
+export function wlcMaqafChains<T extends Pick<WlcWord, "surface" | "trailer">>(words: T[]): T[][] {
+  const out: T[][] = [];
+  let open = false;
+  for (const word of words) {
+    if (open && out.length) out[out.length - 1].push(word);
+    else out.push([word]);
+    open = joinsNext(word);
+  }
+  return out;
+}
+
 export function verseLabel(ref: string): string {
   const parts = ref.split(".");
   return parts[parts.length - 1] || ref;
