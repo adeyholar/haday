@@ -19,7 +19,7 @@ export function NavTip({
       <span
         role="tooltip"
         className={cn(
-          "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-sm)] bg-ink px-2 py-1 text-xs font-semibold text-parchment opacity-0 shadow-lg transition-opacity delay-75 group-hover:opacity-100 group-focus-within:opacity-100",
+          "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-sm)] bg-ink px-2 py-1 text-xs font-semibold text-parchment opacity-0 shadow-lg transition-opacity delay-75 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:hidden",
           side === "bottom" ? "top-full mt-1.5" : "bottom-full mb-1.5",
         )}
       >

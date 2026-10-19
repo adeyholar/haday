@@ -17,6 +17,11 @@ const SIZES: { id: SheetSize; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/iibs/wlc/$book/$ch")({
+  // Ezra SIL carries the accents; fetch it with the page so the text does not
+  // first paint in the fallback face (slow phones saw the swap).
+  head: () => ({
+    links: [{ rel: "preload", href: "/fonts/EzraSIL.woff", as: "font", type: "font/woff", crossOrigin: "anonymous" }],
+  }),
   component: WlcChapterPage,
 });
 
@@ -134,7 +139,7 @@ function WlcChapterPage() {
       <div className="shrink-0">
         <ScriptureTabs active="lab" />
       </div>
-      <div className="mb-3 flex shrink-0 flex-wrap items-start justify-between gap-3">
+      <div className="relative mb-3 flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Reading Lab</p>
           <h1 className="font-display text-3xl font-bold leading-none text-ink">
@@ -144,8 +149,8 @@ function WlcChapterPage() {
             {meta.he}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <Link to="/iibs/wlc" className="inline-flex min-h-11 items-center font-semibold text-primary">
+        <div className="flex shrink-0 flex-col items-end gap-2 max-sm:w-full max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-between [@media(max-height:560px)]:flex-row [@media(max-height:560px)]:items-center">
+          <Link to="/iibs/wlc" className="inline-flex min-h-11 min-w-11 items-center justify-end font-semibold text-primary max-sm:absolute max-sm:top-0 max-sm:right-0">
             Books
           </Link>
           <SheetSizeControl size={size} onChange={chooseSize} />

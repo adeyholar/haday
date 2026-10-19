@@ -1,5 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
+
+/** Same query as the page-scroll block in styles.css (phones, short or touch tablet screens). */
+export const WLC_PAGE_SCROLL_QUERY =
+  "(max-width: 639px), (max-height: 560px), (pointer: coarse) and (max-height: 820px)";
+
+function pageScrolls(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia(WLC_PAGE_SCROLL_QUERY).matches
+    : false;
+}
 
 export type SheetTone = "light" | "dim";
 export type SheetSize = "tight" | "small" | "page" | "large";
@@ -129,15 +139,46 @@ export function WlcReading({ chapter, tone, size }: { chapter: WlcChapter; tone:
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
 
+  const card = useRef<HTMLDivElement>(null);
+  const [cardHeight, setCardHeight] = useState(0);
+
   useEffect(() => {
     setPicked(null);
     frame.current?.scrollTo({ top: 0 });
+    if (pageScrolls()) window.scrollTo({ top: 0 });
   }, [chapter.book, chapter.chapter]);
 
+  // Phones and short screens: the card is a bottom sheet over the page. Keep the
+  // picked word in sight above it, and leave room under the last verse.
+  useEffect(() => {
+    const el = card.current;
+    if (!picked || !el || typeof ResizeObserver === "undefined") {
+      setCardHeight(0);
+      return;
+    }
+    const sync = () => setCardHeight(pageScrolls() ? el.getBoundingClientRect().height : 0);
+    sync();
+    const watch = new ResizeObserver(sync);
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, [picked]);
+
+  useEffect(() => {
+    if (!picked || !cardHeight) return;
+    const word = frame.current?.querySelector<HTMLElement>(".ms-picked");
+    if (!word) return;
+    const rect = word.getBoundingClientRect();
+    const room = window.innerHeight - cardHeight - 12;
+    if (rect.bottom > room) window.scrollBy({ top: rect.bottom - room, behavior: "smooth" });
+  }, [picked, cardHeight]);
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div
+      className="wlc-reading flex min-h-0 flex-1 flex-col"
+      style={cardHeight ? ({ "--wlc-card-h": `${Math.ceil(cardHeight)}px` } as CSSProperties) : undefined}
+    >
       {picked ? (
-        <div className="mb-2 max-h-[42%] shrink-0 overflow-y-auto">
+        <div ref={card} className="wlc-card mb-2 max-h-[42%] shrink-0 overflow-y-auto">
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
       ) : null}
