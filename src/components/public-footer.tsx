@@ -25,7 +25,9 @@ export function PublicFooter() {
         <Link to="/credits" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
           Credits
         </Link>
-        <ContactLink />
+        <Link to="/about" hash="contact" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          Contact
+        </Link>
       </nav>
     </footer>
   );
@@ -35,7 +37,8 @@ export function PublicFooter() {
 export function ContactLink({ className }: { className?: string }) {
   const [href, setHref] = useState<string | undefined>();
   useEffect(() => {
-    setHref(`mailto:${CONTACT_EMAIL}`);
+    const [user, domain] = CONTACT_EMAIL.split("@");
+    if (user && domain) setHref(`mailto:${user}@${domain}`);
   }, []);
   return (
     <a
