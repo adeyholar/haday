@@ -110,6 +110,15 @@ test("the memorization guide is public, cited, and in the sitemap", () => {
   assert.match(method, /BreadcrumbList/);
   assert.match(sitemap, /how-to-memorize-biblical-hebrew-vocabulary/);
   assert.match(sitemap, /<lastmod>2026-10-17<\/lastmod>/);
+  assert.match(method, /"@type": "Person"/);
+  assert.match(method, /AUTHOR\.name/);
+  const author = readFileSync(new URL("../src/lib/author.ts", import.meta.url).pathname, "utf8");
+  assert.match(author, /Adeola Adegbolagun/);
+  assert.match(page, /to="\/about"/);
+  const about = readFileSync(new URL("../src/routes/about.tsx", import.meta.url).pathname, "utf8");
+  assert.match(about, /About HaDay HebRabbAi Mentor/);
+  assert.match(about, /AboutPage/);
+  assert.match(sitemapXml(), /\/about</);
   const title = "How to Memorize Biblical Hebrew Vocabulary | HaDay";
   assert.ok(title.length <= 60);
   const meta =

@@ -1,4 +1,5 @@
 import { CLASS_SITE } from "@/lib/class-site";
+import { AUTHOR } from "@/lib/author";
 
 export const METHOD_PATH = "/how-to-memorize-biblical-hebrew-vocabulary";
 export const METHOD_URL = `${CLASS_SITE}${METHOD_PATH}`;
@@ -69,10 +70,14 @@ export const METHOD_JSON_LD = {
       headline: METHOD_H1,
       description: METHOD_DESCRIPTION,
       datePublished: METHOD_DATE,
-      dateModified: METHOD_DATE,
+      dateModified: "2026-10-19",
       image: `${CLASS_SITE}/og.jpg`,
-      author: { "@type": "Organization", name: "HaDay HebRabbAi Mentor" },
-      publisher: { "@type": "Organization", name: "HaDay" },
+      author: { "@type": "Person", "@id": AUTHOR.id, name: AUTHOR.name, url: AUTHOR.url },
+      publisher: {
+        "@type": "Organization",
+        name: "HaDay",
+        logo: { "@type": "ImageObject", url: `${CLASS_SITE}/og.jpg` },
+      },
       mainEntityOfPage: METHOD_URL,
     },
     {

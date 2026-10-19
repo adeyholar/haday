@@ -15,6 +15,7 @@ import {
   ScrollText,
   Lightbulb,
   Trophy,
+  User,
   Users,
 } from "lucide-react";
 import { snapshotOf, useStudy } from "@/lib/store";
@@ -33,6 +34,7 @@ import { scoreboard } from "@/lib/rewards";
 import { HonorBadge, CrownBadge } from "@/components/honor-badge";
 import { VisitorBeacon } from "@/components/visitor-beacon";
 import { NavTip } from "@/components/nav-tip";
+import { isPublicReadingPath } from "@/lib/seo";
 import { NavMenu, type NavItem } from "@/components/nav-menu";
 
 type ShellTab = {
@@ -116,6 +118,7 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
     items.push({ to: "/admin/use", label: "What the class uses", hint: "Visits and practice", icon: BarChart3 });
     if (!iibsSide) items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
+  items.push({ to: "/about", label: "About", hint: "The teacher", icon: User });
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });
   if (!iibsSide) items.push({ to: "/guide", label: "Guide", hint: "How to use HaDay", icon: CircleHelp });
@@ -126,10 +129,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user, isPending } = useCurrentUserState();
-  const openReading =
-    pathname === "/legal" ||
-    pathname === "/credits" ||
-    pathname === "/how-to-memorize-biblical-hebrew-vocabulary";
+  const openReading = isPublicReadingPath(pathname);
   const isPublic =
     pathname === "/login" ||
     pathname === "/reset-password" ||

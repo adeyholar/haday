@@ -40,6 +40,7 @@ export type NavHref =
   | "/finder/word"
   | "/legal"
   | "/credits"
+  | "/about"
   | "/game"
   | "/game/road"
   | "/game/final"

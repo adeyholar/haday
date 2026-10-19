@@ -30,8 +30,11 @@ function MethodPage() {
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · first-year method</p>
       <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">{METHOD_H1}</h1>
       <p className="mt-3 text-sm text-muted">
-        Written by the HaDay team for first-year students. Published {METHOD_DATE}. This page is free to read. The
-        lessons stay behind sign-in.
+        Written by{" "}
+        <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Adeola Adegbolagun
+        </Link>
+        . Published {METHOD_DATE}. This page is free to read. The lessons stay behind sign-in.
       </p>
       <p className="mt-4 max-w-prose leading-relaxed text-muted">
         This is how to memorize Biblical Hebrew vocabulary so the words stay. Learn the most frequent words, hear

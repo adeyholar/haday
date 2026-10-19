@@ -32,6 +32,16 @@ export function isIndexablePath(pathname: string): boolean {
   return path.startsWith("/teachings/");
 }
 
+export function isPublicReadingPath(pathname: string): boolean {
+  const path = requestPath(pathname);
+  return (
+    path === "/about" ||
+    path === "/legal" ||
+    path === "/credits" ||
+    path === "/how-to-memorize-biblical-hebrew-vocabulary"
+  );
+}
+
 export function canonicalUrl(pathname: string): string {
   const path = requestPath(pathname);
   return path === "/" ? `${CLASS_SITE}/` : `${CLASS_SITE}${path}`;
@@ -60,6 +70,7 @@ export function retiredHostRedirect(host: string, pathname: string, method: stri
 /** noindex for sign-in pages, the study, admin, and the retired Vercel host. */
 export function robotsNoindex(host: string, pathname: string): boolean {
   if (isRetiredVercelHost(hostName(host))) return true;
+  if (isPublicReadingPath(pathname)) return false;
   return !isIndexablePath(pathname);
 }
 

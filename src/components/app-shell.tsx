@@ -1,8 +1,10 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { useRouteContext, useRouterState } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
+import { PublicHeader } from "@/components/public-header";
 import { VisitorBeacon } from "@/components/visitor-beacon";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { isPublicReadingPath } from "@/lib/seo";
 
 const SignedInShell = lazy(() => import("./signed-in-shell").then((mod) => ({ default: mod.SignedInShell })));
 
@@ -10,10 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user } = useCurrentUserState();
-  const openReading =
-    pathname === "/legal" ||
-    pathname === "/credits" ||
-    pathname === "/how-to-memorize-biblical-hebrew-vocabulary";
+  const openReading = isPublicReadingPath(pathname);
   const isPublic =
     pathname === "/login" ||
     pathname === "/reset-password" ||
@@ -33,6 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-dvh text-fg">
         <VisitorBeacon />
+        <PublicHeader />
         {children}
       </div>
     );
@@ -42,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-dvh text-fg">
         <VisitorBeacon />
+        <PublicHeader />
         <main className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6">{children}</main>
       </div>
     );
