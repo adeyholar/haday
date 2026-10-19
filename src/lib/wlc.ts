@@ -25,6 +25,8 @@ export type WlcWord = {
   morph: string;
   main_accent: string | null;
   stress: WlcStress | null;
+  /** Where a joined or split word got its analysis. Present from dataset 1.2.0. */
+  morph_note?: string;
   rhythm_path: string | null;
   qere: WlcWord[];
   kq_role: string | null;

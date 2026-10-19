@@ -3,8 +3,15 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { Panel } from "@/components/panel";
 import { PublicFooter, PublicReturn } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { shareMeta } from "@/lib/seo";
 
-export const Route = createFileRoute("/legal")({ component: LegalPage });
+const TITLE = "Privacy and disclaimer | HaDay";
+const DESCRIPTION = "How HaDay uses your account, and what this Biblical Hebrew class site is not. We do not sell your information.";
+
+export const Route = createFileRoute("/legal")({
+  head: () => ({ meta: shareMeta(TITLE, DESCRIPTION, "/legal"), links: [{ rel: "canonical", href: "https://hebrewmentor.haday.app/legal" }] }),
+  component: LegalPage,
+});
 
 const CONTACT = "adengongo@gmail.com";
 const EFFECTIVE = "6 September 2026";

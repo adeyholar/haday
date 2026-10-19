@@ -32,7 +32,7 @@ function DoorsPage() {
       let lastError = "";
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          let next = await getMyPath();
+          const next = await getMyPath();
           if (!next.path) {
             const intent = readPathIntent();
             if (intent) {
@@ -120,39 +120,15 @@ function DoorsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }} />
       <Panel className="mb-4 text-center">
         <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
-        <img
-          src="/doors/ancient-smile.jpg"
-          alt=""
-          width={128}
-          height={128}
-          className="mx-auto mt-4 size-28 rounded-full object-cover shadow-[var(--shadow-border)] sm:size-32"
-        />
-        <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+        <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
           Biblical Hebrew Vocabulary Trainer
         </h1>
         <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
-        <p className="mt-2 font-display text-2xl font-semibold text-primary">Choose wisely.</p>
-        <p className="mx-auto mt-3 max-w-prose text-muted">
+        <p className="mx-auto mt-2 max-w-prose text-muted">
           HaDay HebRabbAi Mentor is a Biblical Hebrew vocabulary trainer for first-year students. Hear a word, then
           its meaning, and practice until it stays.
         </p>
-        <p className="mx-auto mt-3 max-w-prose text-muted">
-          One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
-          stay inside the signed-in study.
-        </p>
-        <p className="mx-auto mt-3 max-w-prose text-sm text-muted">
-          {choosing
-            ? "Pick one. It stays with this account. The other door stays locked."
-            : gate?.admin
-              ? "Open one study. To open the other, come back to these two squares first."
-              : "Your account opens one door. The other stays locked."}
-        </p>
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
-        <p className="mx-auto mt-3 max-w-prose text-sm">
-          <Link to="/how-to-memorize-biblical-hebrew-vocabulary" className="font-semibold text-primary underline-offset-4 hover:underline">
-            New to Hebrew vocab? Read the method.
-          </Link>
-        </p>
       </Panel>
       <div className="grid gap-3 sm:grid-cols-2">
         <Door
@@ -166,6 +142,8 @@ function DoorsPage() {
           busy={busy}
           onChoose={() => void choose("bbh")}
           href="/bbh"
+          loginHref={!signedIn ? "/login?path=bbh" : undefined}
+          action="Start the Grammar Path"
         />
         <Door
           kind="iibs"
@@ -178,8 +156,24 @@ function DoorsPage() {
           busy={busy}
           onChoose={() => void choose("iibs")}
           href="/iibs"
+          loginHref={!signedIn ? "/login?path=iibs" : undefined}
+          action="Start the Scripture Path"
         />
       </div>
+      <p className="mx-auto mt-4 max-w-prose text-sm text-muted">
+        One door is the class vocabulary and games. The other is a leveled reading ladder. Lessons and answer keys
+        stay inside the signed-in study.{" "}
+        {choosing
+          ? "Pick one. It stays with this account. The other door stays locked."
+          : gate?.admin
+            ? "Open one study. To open the other, come back to these two squares first."
+            : "Your account opens one door. The other stays locked."}
+      </p>
+      <p className="mx-auto mt-3 max-w-prose text-sm">
+        <Link to="/how-to-memorize-biblical-hebrew-vocabulary" className="font-semibold text-primary underline-offset-4 hover:underline">
+          New to Hebrew vocab? Read the method.
+        </Link>
+      </p>
       <PublicFooter />
     </>
   );
@@ -196,6 +190,8 @@ function Door({
   busy,
   onChoose,
   href,
+  loginHref,
+  action,
 }: {
   kind: StudyPath;
   title: string;
@@ -207,33 +203,36 @@ function Door({
   busy: boolean;
   onChoose: () => void;
   href: "/bbh" | "/iibs";
+  loginHref?: string;
+  action: string;
 }) {
-  const modern = kind === "bbh";
-  const className = `flex aspect-square flex-col items-center justify-center rounded-[var(--radius-xl)] p-5 text-center shadow-[var(--shadow-border)] ${
-    modern ? "bg-ink text-parchment" : "bg-parchment text-ink ring-1 ring-ink/20"
-  } ${open ? "" : "opacity-70"}`;
+  const className = `flex flex-col items-center justify-center rounded-[var(--radius-xl)] bg-card p-5 text-center text-ink shadow-[var(--shadow-border)] ring-1 ring-ink/15 ${
+    open ? "" : "opacity-70"
+  }`;
   const body = (
     <>
       <img
-        src={modern ? "/doors/bbh-modern.jpg" : "/doors/iibs-ancient.jpg"}
+        src={kind === "bbh" ? "/doors/bbh-modern.jpg" : "/doors/iibs-ancient.jpg"}
         alt=""
-        className={
-          modern
-            ? "size-36 rounded-[var(--radius-lg)] bg-white object-contain sm:size-44"
-            : "size-36 rounded-full object-cover sm:size-44"
-        }
+        width={352}
+        height={352}
+        className="size-28 rounded-[var(--radius-lg)] object-cover sm:size-32"
       />
-      <p className="mt-4 font-display text-3xl font-bold leading-tight">{title}</p>
+      <p className="mt-3 font-display text-3xl font-bold leading-tight">{title}</p>
       <p className="he-word text-2xl" dir="rtl" lang="he">
         {hebrew}
       </p>
-      <p className={`mt-2 max-w-[16rem] text-sm ${modern ? "text-parchment/80" : "text-ink/80"}`}>{open ? line : lockedLine}</p>
-      {!open ? (
+      <p className="mt-2 max-w-[16rem] text-sm text-ink/80">{open ? line : lockedLine}</p>
+      {open ? (
+        <span className="mt-3 inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-ink px-4 text-sm font-semibold text-parchment">
+          {action}
+        </span>
+      ) : (
         <p className="mt-3 inline-flex items-center justify-center gap-1 text-sm font-semibold">
           <Lock className="size-4" />
           Locked
         </p>
-      ) : null}
+      )}
     </>
   );
   if (!open) {
@@ -241,6 +240,13 @@ function Door({
       <div className={className} aria-disabled="true">
         {body}
       </div>
+    );
+  }
+  if (loginHref) {
+    return (
+      <a href={loginHref} className={className}>
+        {body}
+      </a>
     );
   }
   if (choosing) {

@@ -53,8 +53,13 @@ import { Route as GameTypeRouteImport } from './routes/game/type'
 import { Route as GameVerbParadigmQuestRouteImport } from './routes/game/verb-paradigm-quest'
 import { Route as GameVerbalSystemRouteImport } from './routes/game/verbal-system'
 import { Route as GameWeek7RouteImport } from './routes/game/week7'
+import { Route as HubLearnRouteImport } from './routes/hub/learn'
+import { Route as HubListenRouteImport } from './routes/hub/listen'
+import { Route as HubPlayRouteImport } from './routes/hub/play'
+import { Route as HubPracticeRouteImport } from './routes/hub/practice'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
+import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
@@ -322,6 +327,26 @@ const GameWeek7Route = GameWeek7RouteImport.update({
   path: '/game/week7',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HubLearnRoute = HubLearnRouteImport.update({
+  id: '/hub/learn',
+  path: '/hub/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubListenRoute = HubListenRouteImport.update({
+  id: '/hub/listen',
+  path: '/hub/listen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubPlayRoute = HubPlayRouteImport.update({
+  id: '/hub/play',
+  path: '/hub/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubPracticeRoute = HubPracticeRouteImport.update({
+  id: '/hub/practice',
+  path: '/hub/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IibsIndexRoute = IibsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -330,6 +355,11 @@ const IibsIndexRoute = IibsIndexRouteImport.update({
 const IibsLevelRoute = IibsLevelRouteImport.update({
   id: '/$level',
   path: '/$level',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsLearnRoute = IibsLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => IibsRoute,
 } as any)
 const IibsRoadRoute = IibsRoadRouteImport.update({
@@ -603,7 +633,12 @@ export interface FileRoutesByFullPath {
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
+  '/hub/learn': typeof HubLearnRoute
+  '/hub/listen': typeof HubListenRoute
+  '/hub/play': typeof HubPlayRoute
+  '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
@@ -694,7 +729,12 @@ export interface FileRoutesByTo {
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
+  '/hub/learn': typeof HubLearnRoute
+  '/hub/listen': typeof HubListenRoute
+  '/hub/play': typeof HubPlayRoute
+  '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
@@ -788,7 +828,12 @@ export interface FileRoutesById {
   '/game/verb-paradigm-quest': typeof GameVerbParadigmQuestRoute
   '/game/verbal-system': typeof GameVerbalSystemRoute
   '/game/week7': typeof GameWeek7Route
+  '/hub/learn': typeof HubLearnRoute
+  '/hub/listen': typeof HubListenRoute
+  '/hub/play': typeof HubPlayRoute
+  '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
@@ -883,7 +928,12 @@ export interface FileRouteTypes {
     | '/game/verb-paradigm-quest'
     | '/game/verbal-system'
     | '/game/week7'
+    | '/hub/learn'
+    | '/hub/listen'
+    | '/hub/play'
+    | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/learn'
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
@@ -974,7 +1024,12 @@ export interface FileRouteTypes {
     | '/game/verb-paradigm-quest'
     | '/game/verbal-system'
     | '/game/week7'
+    | '/hub/learn'
+    | '/hub/listen'
+    | '/hub/play'
+    | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/learn'
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
@@ -1067,7 +1122,12 @@ export interface FileRouteTypes {
     | '/game/verb-paradigm-quest'
     | '/game/verbal-system'
     | '/game/week7'
+    | '/hub/learn'
+    | '/hub/listen'
+    | '/hub/play'
+    | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/learn'
     | '/iibs/road'
     | '/listen/pet'
     | '/listen/road'
@@ -1158,6 +1218,10 @@ export interface RootRouteChildren {
   GameVerbParadigmQuestRoute: typeof GameVerbParadigmQuestRoute
   GameVerbalSystemRoute: typeof GameVerbalSystemRoute
   GameWeek7Route: typeof GameWeek7Route
+  HubLearnRoute: typeof HubLearnRoute
+  HubListenRoute: typeof HubListenRoute
+  HubPlayRoute: typeof HubPlayRoute
+  HubPracticeRoute: typeof HubPracticeRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
@@ -1503,6 +1567,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameWeek7RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hub/learn': {
+      id: '/hub/learn'
+      path: '/hub/learn'
+      fullPath: '/hub/learn'
+      preLoaderRoute: typeof HubLearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub/listen': {
+      id: '/hub/listen'
+      path: '/hub/listen'
+      fullPath: '/hub/listen'
+      preLoaderRoute: typeof HubListenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub/play': {
+      id: '/hub/play'
+      path: '/hub/play'
+      fullPath: '/hub/play'
+      preLoaderRoute: typeof HubPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub/practice': {
+      id: '/hub/practice'
+      path: '/hub/practice'
+      fullPath: '/hub/practice'
+      preLoaderRoute: typeof HubPracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/iibs/': {
       id: '/iibs/'
       path: '/'
@@ -1515,6 +1607,13 @@ declare module '@tanstack/react-router' {
       path: '/$level'
       fullPath: '/iibs/$level'
       preLoaderRoute: typeof IibsLevelRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/learn': {
+      id: '/iibs/learn'
+      path: '/learn'
+      fullPath: '/iibs/learn'
+      preLoaderRoute: typeof IibsLearnRouteImport
       parentRoute: typeof IibsRoute
     }
     '/iibs/road': {
@@ -1863,6 +1962,7 @@ const IibsStudyLevelRouteWithChildren = IibsStudyLevelRoute._addFileChildren(
 
 interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
+  IibsLearnRoute: typeof IibsLearnRoute
   IibsRoadRoute: typeof IibsRoadRoute
   IibsIndexRoute: typeof IibsIndexRoute
   IibsStudyLevelRoute: typeof IibsStudyLevelRouteWithChildren
@@ -1875,6 +1975,7 @@ interface IibsRouteChildren {
 
 const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
+  IibsLearnRoute: IibsLearnRoute,
   IibsRoadRoute: IibsRoadRoute,
   IibsIndexRoute: IibsIndexRoute,
   IibsStudyLevelRoute: IibsStudyLevelRouteWithChildren,
@@ -1949,6 +2050,10 @@ const rootRouteChildren: RootRouteChildren = {
   GameVerbParadigmQuestRoute: GameVerbParadigmQuestRoute,
   GameVerbalSystemRoute: GameVerbalSystemRoute,
   GameWeek7Route: GameWeek7Route,
+  HubLearnRoute: HubLearnRoute,
+  HubListenRoute: HubListenRoute,
+  HubPlayRoute: HubPlayRoute,
+  HubPracticeRoute: HubPracticeRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   LessonsIndexRoute: LessonsIndexRoute,

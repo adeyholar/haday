@@ -42,6 +42,7 @@ function Home() {
   const weakList = allWeak.slice(0, 8);
   const lastKeepDay = useStudy((s) => s.lastKeepDay);
   const keepStreak = useStudy((s) => s.keepStreak);
+  const sessions = useStudy((s) => s.sessions);
   const keep = keepStats(cards, game);
   const keepDone = keepDoneToday(lastKeepDay);
   const firstName = user?.displayName?.split(" ")[0];
@@ -115,30 +116,45 @@ function Home() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
+        {sessions === 0 ? (
+          <div className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)] sm:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Start here</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
+              <li>Learn the alef-bet.</li>
+              <li>Open your first lesson.</li>
+              <li>Run your first drill.</li>
+            </ol>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link to="/alphabet" className="inline-flex min-h-11 items-center font-semibold text-primary">Alef-bet</Link>
+              <Link to="/hub/learn" className="inline-flex min-h-11 items-center font-semibold text-primary">First lesson</Link>
+              <Link to="/hub/practice" className="inline-flex min-h-11 items-center font-semibold text-primary">First drill</Link>
+            </div>
+          </div>
+        ) : null}
         <Link
-          to="/game"
+          to="/hub/play"
           className="rounded-[var(--radius-xl)] bg-primary p-5 text-primary-foreground shadow-[var(--shadow-border)]"
         >
           <Compass className="size-6" />
-          <p className="mt-3 font-display text-3xl font-bold">Game mode</p>
-          <p className="mt-1 text-sm text-primary-foreground/80">Vocabulary path, letters and forms, Grammar topics (including Verbs & binyan), or Ultimate. Pick from the Game menu.</p>
+          <p className="mt-3 font-display text-3xl font-bold">Play</p>
+          <p className="mt-1 text-sm text-primary-foreground/80">Chapter path, letters and forms, Verb Lab. A stage clears at 90%.</p>
         </Link>
         <Link
-          to="/study"
+          to="/hub/learn"
           className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
         >
           <Library className="size-6 text-primary" />
-          <p className="mt-3 font-display text-3xl font-bold">Stations</p>
-          <p className="mt-1 text-sm text-muted">Start with the letters. End reading and hearing the Word.</p>
+          <p className="mt-3 font-display text-3xl font-bold">Learn</p>
+          <p className="mt-1 text-sm text-muted">Stations, rules, and the alef-bet.</p>
         </Link>
-        <a
-          href="#study-mode"
+        <Link
+          to="/hub/practice"
           className="rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
         >
           <Library className="size-6 text-primary" />
-          <p className="mt-3 font-display text-3xl font-bold">Study mode</p>
-          <p className="mt-1 text-sm text-muted">Drill, write, quiz, match, lex, and alef — as they are.</p>
-        </a>
+          <p className="mt-3 font-display text-3xl font-bold">Practice</p>
+          <p className="mt-1 text-sm text-muted">Drill, write, quiz, and the words you miss.</p>
+        </Link>
       </div>
 
       <div className="mt-3 flex flex-col gap-2">
@@ -148,7 +164,7 @@ function Home() {
       </div>
 
       <Link
-        to="/listen"
+        to="/hub/listen"
         className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
       >
         <Headphones className="mt-0.5 size-6 shrink-0 text-primary" />
