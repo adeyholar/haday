@@ -193,8 +193,21 @@ export function rootDisplay(root: BuilderRoot): string {
 }
 
 export function filled(choice: RowChoice): boolean {
-  if (!choice.v1 || !choice.v2 || !choice.v3 || !choice.end || !choice.tone) return false;
-  return true;
+  return openFields(choice).length === 0;
+}
+
+const FIELD_LABEL = {
+  v1: "1st vowel",
+  v2: "2nd vowel",
+  v3: "3rd vowel",
+  end: "ending",
+  tone: "accent or meteg",
+} as const;
+
+/** A blank menu is not a choice. These are the menus still on the placeholder. */
+export function openFields(choice: RowChoice): string[] {
+  const keys = ["v1", "v2", "v3", "end", "tone"] as const;
+  return keys.filter((key) => !choice[key]).map((key) => FIELD_LABEL[key]);
 }
 
 export type RowGrade = {
