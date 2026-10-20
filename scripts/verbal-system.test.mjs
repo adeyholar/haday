@@ -61,4 +61,6 @@ test("a round is ten builds and 90% clears it", () => {
   const cell = pattern.cells[0];
   assert.equal(vs.gradeCell(pattern, cell, cell.answer).ok, true);
   assert.equal(vs.gradeCell(pattern, cell, {}).ok, false);
+  assert.ok(pattern.slots.some((item) => item.id === "v3"));
+  assert.equal(pattern.cells.every((row) => row.answer.v3), true);
 });

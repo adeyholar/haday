@@ -89,7 +89,7 @@ export function VerbQuestHome() {
             >
               <span className="font-semibold">Qal Perfect Builder</span>
               <span className="mt-1 block text-sm text-primary-foreground/80">
-                All nine forms of one root. You choose both vowels and the ending.
+                All nine forms of one root. You choose the vowel under each root letter, and the ending.
               </span>
             </button>
           </li>

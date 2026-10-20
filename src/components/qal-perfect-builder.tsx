@@ -87,7 +87,7 @@ export function QalPerfectBuilder() {
     setStats(loadStats());
   }, []);
 
-  function setField(k: PgnKey, field: "v1" | "v2" | "end", value: string) {
+  function setField(k: PgnKey, field: "v1" | "v2" | "v3" | "end", value: string) {
     setSel((prev) => ({
       ...prev,
       [k]: { ...prev[k], [field]: value },
@@ -139,7 +139,7 @@ export function QalPerfectBuilder() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Perfect Builder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Build all nine forms of the root. For each row pick the vowel under the first root letter, the vowel under the second, and the ending. On 2ms, 1cs, and 1cp add the accent on the second letter. On 3fs and 3cp add the meteg under the first. The word assembles as you choose.
+          Build all nine forms of the root. For each row pick the vowel under the first root letter, the vowel under the second, and the vowel under the third. Then pick the ending. On 2ms, 1cs, and 1cp add the accent on the second letter. On 3fs and 3cp add the meteg under the first. The word assembles as you choose.
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] bg-card shadow-[var(--shadow-border)]" role="radiogroup" aria-label="Root set">
@@ -202,19 +202,6 @@ export function QalPerfectBuilder() {
         </p>
       </Panel>
 
-      <details className="rounded-[var(--radius-lg)] bg-card px-4 py-3 shadow-[var(--shadow-border)]">
-        <summary className="cursor-pointer font-semibold text-ink">Pattern reminder (open after you try)</summary>
-        <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-muted">
-          <li>3ms is the base: qamets under the first letter, patah under the second, no ending.</li>
-          <li>Consonant endings (2ms, 2fs, 1cs, 1cp): both vowels stay, and the last root letter closes with a sheva before the ending.</li>
-          <li>Vowel endings (3fs, 3cp): the second vowel drops to sheva. The first qamets stays.</li>
-          <li>Heavy endings (2mp, 2fp): the first vowel drops to sheva. The patah stays.</li>
-          <li>2ms, 1cs, and 1cp: add the accent on the second letter. The stress has moved off the end.</li>
-          <li>3fs and 3cp: add the meteg under the first letter. It keeps that qamets long before the sheva.</li>
-          <li>Assimilating roots: when the ending’s letter matches the last root letter (ת+ת, נ+נ), write it once with a dagesh.</li>
-        </ul>
-      </details>
-
       <div className="grid gap-2">
         {order.map((k) => {
           const form = byK[k];
@@ -238,7 +225,7 @@ export function QalPerfectBuilder() {
               <p className="he-taam text-center text-4xl leading-[2.2] text-ink" dir="rtl" lang="he">
                 {preview === null ? "—" : preview || " "}
               </p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <VowelSelect
                   label={`Vowel under first root letter, ${k}`}
                   placeholder="1st vowel…"
@@ -251,12 +238,19 @@ export function QalPerfectBuilder() {
                   value={choice.v2}
                   onChange={(value) => setField(k, "v2", value)}
                 />
+                <VowelSelect
+                  label={`Vowel under third root letter, ${k}`}
+                  placeholder="3rd vowel…"
+                  value={choice.v3}
+                  allowNone
+                  onChange={(value) => setField(k, "v3", value)}
+                />
                 <EndSelect label={`Ending, ${k}`} value={choice.end} onChange={(value) => setField(k, "end", value)} />
                 {tone !== "none" ? (
                   <ToneSelect kind={tone} person={k} value={choice.tone} onChange={(value) => setTone(k, value)} />
                 ) : null}
                 {root.assim ? (
-                  <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted sm:col-span-3">
+                  <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted sm:col-span-2">
                     <input type="checkbox" checked={choice.merge} onChange={(event) => setMerge(k, event.target.checked)} />
                     Merge final root letter with ending
                   </label>
@@ -334,11 +328,13 @@ function VowelSelect({
   label,
   placeholder,
   value,
+  allowNone,
   onChange,
 }: {
   label: string;
   placeholder: string;
-  value: VowelId | "";
+  value: VowelId | "none" | "";
+  allowNone?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
@@ -349,6 +345,7 @@ function VowelSelect({
       className="min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 font-hebrew text-base text-ink"
     >
       <option value="">{placeholder}</option>
+      {allowNone ? <option value="none">{CIRCLE} no vowel</option> : null}
       {VOWEL_OPTS.map((opt) => (
         <option key={opt.id} value={opt.id}>
           {CIRCLE}
@@ -378,7 +375,7 @@ function ToneSelect({
       aria-label={`${yes}, ${person}`}
       value={value}
       onChange={(event) => onChange(event.target.value as "" | "yes" | "no")}
-      className="he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-3"
+      className="he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-2"
     >
       <option value="">Accent or meteg…</option>
       <option value="yes">
@@ -408,7 +405,7 @@ function EndSelect({
       <option value="">Ending…</option>
       {END_ORDER.map((id) => {
         const ending = ENDINGS[id];
-        const shown = id === "none" ? `${CIRCLE}  no ending` : `${CIRCLE}${ending.c3v}${ending.tail}  ${ending.name}`;
+        const shown = id === "none" ? "no ending" : `${ending.tail}  ${ending.name}`;
         return (
           <option key={id} value={id}>
             {shown}
