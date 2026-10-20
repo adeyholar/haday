@@ -15,6 +15,7 @@ import {
   emptyStats,
   filled,
   gradeRow,
+  openFields,
   rootDisplay,
   rootsFor,
   type BuilderRoot,
@@ -102,6 +103,7 @@ export function QalPerfectBuilder() {
   }
 
   const done = FORMS.filter((form) => filled(sel[form.k])).length;
+  const openRows = order.filter((k) => openFields(sel[k]).length > 0);
   const byK = Object.fromEntries(FORMS.map((form) => [form.k, form])) as Record<PgnKey, (typeof FORMS)[number]>;
 
   function grade() {
@@ -207,13 +209,16 @@ export function QalPerfectBuilder() {
           const choice = sel[k];
           const preview = buildForm(root, choice, k);
           const row = results[k];
+          const open = openFields(choice);
           return (
             <div
+              id={`qal-row-${k}`}
               key={k}
               className={cn(
                 "grid grid-cols-1 items-center gap-3 rounded-[var(--radius-lg)] bg-card p-3 shadow-[var(--shadow-border)] sm:grid-cols-[4.6rem_7.5rem_minmax(0,1fr)]",
                 row?.ok && "bg-good/15",
                 row && !row.ok && "bg-danger/10",
+                !row && done > 0 && open.length > 0 && "ring-2 ring-danger",
               )}
             >
               <div>
@@ -252,6 +257,9 @@ export function QalPerfectBuilder() {
                   </label>
                 ) : null}
               </div>
+              {done > 0 && open.length && !row ? (
+                <p className="text-sm font-semibold text-danger sm:col-span-3">Still needed: {open.join(", ")}.</p>
+              ) : null}
               {row ? (
                 <div className="border-t border-dashed border-border pt-2 sm:col-span-3">
                   <p className={cn("font-semibold", row.ok ? "text-good" : "text-danger")}>{row.ok ? "✓ Correct" : "✗ Not yet"}</p>
@@ -281,6 +289,9 @@ export function QalPerfectBuilder() {
       <Panel className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-muted">Rows filled: {done} of 9</p>
+          {done > 0 && openRows.length ? (
+            <p className="text-sm font-semibold text-danger">Still open: {openRows.join(", ")}. A blank menu is not a choice.</p>
+          ) : null}
           {score !== null ? (
             <p className="text-2xl font-bold tabular-nums text-ink">
               {score} / 9{score === 9 ? " — all nine" : ""}
@@ -305,7 +316,17 @@ export function QalPerfectBuilder() {
           <Button type="button" variant="outline" onClick={() => deal(level, root, shuffleRows)}>
             Skip to next root
           </Button>
-          <Button type="button" disabled={done < 9} onClick={grade}>
+          <Button
+            type="button"
+            onClick={() => {
+              const first = openRows[0];
+              if (first) {
+                document.getElementById(`qal-row-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+              }
+              grade();
+            }}
+          >
             {graded ? "Grade again" : "Submit for grading"}
           </Button>
         </div>
