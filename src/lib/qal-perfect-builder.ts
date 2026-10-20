@@ -56,7 +56,7 @@ type Ending = {
 
 export const ENDINGS: Record<EndId, Ending> = {
   none: { name: "no ending", c3v: "", tail: "" },
-  qh: { name: "qamets + he", c3v: VOWELS.q, tail: "ה" },
+  qh: { name: "he", c3v: VOWELS.q, tail: "ה" },
   u: { name: "shureq", c3v: "", tail: `ו${DAG}` },
   ta: { name: "tav + qamets", c3v: VOWELS.sh, tail: `ת${DAG}${VOWELS.q}`, m: VOWELS.q, mt: "" },
   tf: { name: "tav + sheva", c3v: VOWELS.sh, tail: `ת${DAG}${VOWELS.sh}`, m: VOWELS.sh, mt: "" },
@@ -118,6 +118,8 @@ export type LevelFilter = "1" | "2" | "all";
 export type RowChoice = {
   v1: VowelId | "";
   v2: VowelId | "";
+  /** Vowel under the third root letter. "none" means that letter has no vowel. */
+  v3: VowelId | "none" | "";
   end: EndId | "";
   merge: boolean;
   /** "yes" adds the mark this person requires. "no" leaves it off. */
@@ -132,12 +134,33 @@ export function needsTone(k: PgnKey): "accent" | "meteg" | "none" {
 
 export function blankChoices(): Record<PgnKey, RowChoice> {
   const out = {} as Record<PgnKey, RowChoice>;
-  for (const form of FORMS) out[form.k] = { v1: "", v2: "", end: "", merge: false, tone: "" };
+  for (const form of FORMS) out[form.k] = { v1: "", v2: "", v3: "", end: "", merge: false, tone: "" };
   return out;
 }
 
 function letter(c: string, vowel: string, dag: boolean) {
   return c + (c === "ש" ? SHIN : "") + (dag ? DAG : "") + (vowel || "");
+}
+
+function vowelId(mark: string): VowelId | "none" {
+  if (!mark) return "none";
+  const found = (Object.keys(VOWELS) as VowelId[]).find((id) => VOWELS[id] === mark);
+  return found ?? "none";
+}
+
+/** The vowel written under the third root letter. A merged letter keeps the vowel of the ending. */
+export function expectedThird(root: BuilderRoot, form: FormSpec): VowelId | "none" {
+  if (expectsMerge(root, form.k)) {
+    const ending = ENDINGS[form.end];
+    if (ending.nm) return "none";
+    return vowelId(ending.m ?? "");
+  }
+  return vowelId(ENDINGS[form.end].c3v);
+}
+
+function thirdMark(choice: RowChoice): string {
+  if (!choice.v3 || choice.v3 === "none") return "";
+  return VOWELS[choice.v3];
 }
 
 export function expectsMerge(root: BuilderRoot, k: PgnKey): boolean {
@@ -150,15 +173,16 @@ export function expectsMerge(root: BuilderRoot, k: PgnKey): boolean {
 export function buildForm(root: BuilderRoot, choice: RowChoice, person: PgnKey = "3ms"): string | null {
   const [a, b, c] = [...root.c];
   const head = letter(a, choice.v1 ? VOWELS[choice.v1] : "", BGDKPT.has(a)) + letter(b, choice.v2 ? VOWELS[choice.v2] : "", false);
+  const third = thirdMark(choice);
   const ending = choice.end ? ENDINGS[choice.end] : undefined;
   let word: string | null;
-  if (!ending) word = head + letter(c, "", false);
+  if (!ending) word = head + letter(c, third, false);
   else if (choice.merge) {
-    if (ending.mt !== undefined && c === "ת") word = head + letter(c, ending.m ?? "", true) + ending.mt;
-    else if (ending.nm && c === "נ") word = head + c + DAG + "ו" + DAG;
+    if (ending.mt !== undefined && c === "ת") word = head + letter(c, third, true) + ending.mt;
+    else if (ending.nm && c === "נ") word = head + letter(c, third, true) + "ו" + DAG;
     else word = null;
-  } else if (choice.end === "none") word = head + letter(FINAL[c] || c, "", false);
-  else word = head + letter(c, ending.c3v, false) + ending.tail;
+  } else if (choice.end === "none") word = head + letter(FINAL[c] || c, third, false);
+  else word = head + letter(c, third, false) + ending.tail;
   if (word == null) return null;
   const tone = needsTone(person);
   return choice.tone === "yes" && tone !== "none" ? withTone(word, tone) : word;
@@ -169,7 +193,7 @@ export function rootDisplay(root: BuilderRoot): string {
 }
 
 export function filled(choice: RowChoice, person: PgnKey): boolean {
-  if (!choice.v1 || !choice.v2 || !choice.end) return false;
+  if (!choice.v1 || !choice.v2 || !choice.v3 || !choice.end) return false;
   if (needsTone(person) !== "none" && !choice.tone) return false;
   return true;
 }
@@ -186,6 +210,11 @@ export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): 
   const diffs: string[] = [];
   if (choice.v1 !== form.v1) diffs.push(`1st vowel: needed ${VNAME[form.v1]}, you chose ${choice.v1 ? VNAME[choice.v1] : "nothing"}.`);
   if (choice.v2 !== form.v2) diffs.push(`2nd vowel: needed ${VNAME[form.v2]}, you chose ${choice.v2 ? VNAME[choice.v2] : "nothing"}.`);
+  const need3 = expectedThird(root, form);
+  if (choice.v3 !== need3) {
+    const named = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
+    diffs.push(`3rd vowel: needed ${named(need3)}, you chose ${named(choice.v3)}.`);
+  }
   if (choice.end !== form.end) {
     diffs.push(`Ending: needed ${ENDINGS[form.end].name}, you chose ${choice.end ? ENDINGS[choice.end].name : "nothing"}.`);
   }
@@ -196,7 +225,7 @@ export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): 
   const tone = needsTone(form.k);
   if (tone === "accent" && choice.tone !== "yes") diffs.push("This form needs the accent on the second letter.");
   if (tone === "meteg" && choice.tone !== "yes") diffs.push("This form needs the meteg under the first letter.");
-  const answer = buildForm(root, { v1: form.v1, v2: form.v2, end: form.end, merge, tone: "yes" }, form.k) ?? "";
+  const answer = buildForm(root, { v1: form.v1, v2: form.v2, v3: expectedThird(root, form), end: form.end, merge, tone: "yes" }, form.k) ?? "";
   return { ok: diffs.length === 0, answer, diffs, note: form.note };
 }
 

@@ -174,6 +174,7 @@ function vow(id: string, label: string, markOn = ""): Opt {
 }
 
 const VOWEL_BOOK: Record<string, Opt> = {
+  none: vow("none", "no vowel"),
   qamets: vow("qamets", "qamets"),
   patah: vow("patah", "patah"),
   shewa: vow("shewa", "shewa"),
@@ -274,26 +275,27 @@ function endTail(end: string | undefined): { c3: string; tail: string; final: bo
 function renderQalPf(root: VerbRoot, picks: Record<string, string>): string {
   const v1 = vowelChar(picks.v1);
   const v2 = vowelChar(picks.v2);
+  const v3 = vowelChar(picks.v3);
   const tone = picks.tone === "accent" || picks.tone === "meteg" ? picks.tone : "none";
   const finish = (body: string) => withTone(body, tone);
   const A = M(root, 0, v1, lene(root.letters[0], false));
   const B = M(root, 1, v2, false);
   if (picks.merge === "yes" && root.assim === "t" && medial(root.letters[2]) === "ת") {
-    const moved: Record<string, { v: string; tail: string }> = {
-      ta: { v: V.qamets, tail: "" },
-      tf: { v: V.shewa, tail: "" },
-      ti: { v: V.hireq, tail: "י" },
-      tem: { v: V.segol, tail: "ם" },
-      ten: { v: V.segol, tail: "ן" },
+    const moved: Record<string, { tail: string }> = {
+      ta: { tail: "" },
+      tf: { tail: "" },
+      ti: { tail: "י" },
+      tem: { tail: "ם" },
+      ten: { tail: "ן" },
     };
     const on = moved[picks.end ?? ""];
-    if (on) return finish(A + B + M(root, 2, on.v, true) + on.tail);
+    if (on) return finish(A + B + M(root, 2, v3, true) + on.tail);
   }
   if (picks.merge === "yes" && root.assim === "n" && picks.end === "nu") {
-    return finish(A + B + M(root, 2, "", true) + SHUREQ);
+    return finish(A + B + M(root, 2, v3, true) + SHUREQ);
   }
   const end = endTail(picks.end);
-  return finish(A + B + M(root, 2, end.c3, false, end.final) + end.tail);
+  return finish(A + B + M(root, 2, v3, false, end.final) + end.tail);
 }
 
 const QAL_PF: Seed[] = [
@@ -308,6 +310,22 @@ const QAL_PF: Seed[] = [
   ["1cp", "1st common plural", "qamets", "patah", "nu", "Nun and shureq. The accent sits on the second letter."],
 ].map(([id, label, v1, v2, end, note]) => ({ id, label, note, answer: { v1, v2, end } }));
 
+function thirdOf(end: string, merged: boolean): string {
+  if (merged && end === "nu") return "none";
+  if (merged) {
+    if (end === "ta") return "qamets";
+    if (end === "tf") return "shewa";
+    if (end === "ti") return "hireq";
+    if (end === "tem" || end === "ten") return "segol";
+  }
+  if (end === "ah") return "qamets";
+  if (end === "iy") return "hireq";
+  if (!end || end === "none" || end === "u") return "none";
+  return "shewa";
+}
+
+const QAL_PF_END: Opt[] = PF_END.map((opt) => (opt.id === "ah" ? { id: "ah", label: "he", mark: "ה" } : opt));
+
 function qalPerfect(root: VerbRoot): Engine {
   const heavy = HATEF_LETTER.has(medial(root.letters[0])) ? "hatef" : "shewa";
   const reduced = HATEF_LETTER.has(medial(root.letters[1])) ? "hatef" : "shewa";
@@ -318,14 +336,17 @@ function qalPerfect(root: VerbRoot): Engine {
     if (root.assim === "t") answer.merge = ["ta", "tf", "ti", "tem", "ten"].includes(answer.end) ? "yes" : "no";
     if (root.assim === "n") answer.merge = answer.end === "nu" ? "yes" : "no";
     answer.tone = QAL_TONE[cell.id] ?? "none";
+    answer.v3 = thirdOf(answer.end, answer.merge === "yes");
     return { ...cell, answer };
   });
   const v1ids = heavy === "hatef" ? ["qamets", "hatef", "shewa", "patah"] : ["qamets", "shewa", "patah", "hireq"];
   const v2ids = reduced === "hatef" ? ["patah", "hatef", "shewa", "qamets"] : ["patah", "shewa", "qamets", "hireq"];
+  const v3 = vowels(["none", "shewa", "hatef", "patah", "qamets", "segol", "tsere", "hireq", "holem", "qibbuts"]);
   const slots = [
     slot("v1", "Vowel under the first root letter", vowels(v1ids)),
     slot("v2", "Vowel under the second root letter", vowels(v2ids)),
-    slot("end", "Ending", PF_END),
+    slot("v3", "Vowel under the third root letter", v3),
+    slot("end", "Ending", QAL_PF_END),
   ];
   if (root.assim) slots.push(slot("merge", "Same letter in the root and the ending", MERGE));
   slots.push(slot("tone", "Accent or meteg", TONE));
@@ -333,9 +354,7 @@ function qalPerfect(root: VerbRoot): Engine {
     slots,
     cells,
     render: renderQalPf,
-    blurb: root.assim
-      ? "Qal perfect. Where the ending repeats the last root letter, write that letter once with a dagesh. 2ms, 1cs, and 1cp take the accent on the second letter. 3fs and 3cp take the meteg under the first."
-      : "Qal perfect. A vowel ending reduces the second vowel. A heavy ending reduces the first. 2ms, 1cs, and 1cp take the accent on the second letter. 3fs and 3cp take the meteg under the first.",
+    blurb: "Qal perfect. You choose the vowel under each root letter, the ending, and the accent or the meteg.",
   };
 }
 
