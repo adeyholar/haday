@@ -210,38 +210,58 @@ export function openFields(choice: RowChoice): string[] {
   return keys.filter((key) => !choice[key]).map((key) => FIELD_LABEL[key]);
 }
 
+export type ChoiceField = "v1" | "v2" | "v3" | "end" | "tone" | "merge";
+
 export type RowGrade = {
   ok: boolean;
   answer: string;
   diffs: string[];
   note: string;
+  /** Menus that are blank or wrong. The row paints these. */
+  misses: ChoiceField[];
 };
 
 export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): RowGrade {
   const merge = expectsMerge(root, form.k);
   const diffs: string[] = [];
-  if (choice.v1 !== form.v1) diffs.push(`1st vowel: needed ${VNAME[form.v1]}, you chose ${choice.v1 ? VNAME[choice.v1] : "nothing"}.`);
-  if (choice.v2 !== form.v2) diffs.push(`2nd vowel: needed ${VNAME[form.v2]}, you chose ${choice.v2 ? VNAME[choice.v2] : "nothing"}.`);
+  const misses: ChoiceField[] = [];
+  if (choice.v1 !== form.v1) {
+    misses.push("v1");
+    diffs.push(`1st vowel: needed ${VNAME[form.v1]}, you chose ${choice.v1 ? VNAME[choice.v1] : "nothing"}.`);
+  }
+  if (choice.v2 !== form.v2) {
+    misses.push("v2");
+    diffs.push(`2nd vowel: needed ${VNAME[form.v2]}, you chose ${choice.v2 ? VNAME[choice.v2] : "nothing"}.`);
+  }
   const need3 = expectedThird(root, form);
   if (choice.v3 !== need3) {
+    misses.push("v3");
     const named = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
     diffs.push(`3rd vowel: needed ${named(need3)}, you chose ${named(choice.v3)}.`);
   }
   if (choice.end !== form.end) {
+    misses.push("end");
     diffs.push(`Ending: needed ${ENDINGS[form.end].name}, you chose ${choice.end ? ENDINGS[choice.end].name : "nothing"}.`);
   }
   if (root.assim) {
-    if (merge && !choice.merge) diffs.push("The last root letter and the ending’s letter are the same here. Write it once with a dagesh.");
-    if (!merge && choice.merge) diffs.push("Nothing merges in this form. Write the root letter and the ending separately.");
+    if (merge && !choice.merge) {
+      misses.push("merge");
+      diffs.push("The last root letter and the ending’s letter are the same here. Write it once with a dagesh.");
+    }
+    if (!merge && choice.merge) {
+      misses.push("merge");
+      diffs.push("Nothing merges in this form. Write the root letter and the ending separately.");
+    }
   }
   const tone = needsTone(form.k);
   if (choice.tone !== tone) {
+    misses.push("tone");
     const named = (id: RowChoice["tone"]) =>
       id === "accent" ? "accent on the second letter" : id === "meteg" ? "meteg under the first letter" : id === "none" ? "no accent and no meteg" : "nothing";
     diffs.push(`Accent or meteg: needed ${named(tone)}, you chose ${named(choice.tone)}.`);
   }
   const answer = buildForm(root, { v1: form.v1, v2: form.v2, v3: expectedThird(root, form), end: form.end, merge, tone }, form.k) ?? "";
-  return { ok: diffs.length === 0, answer, diffs, note: form.note };
+  return { ok: diffs.length === 0, answer, diffs, note: form.note, misses };
 }
 
 export function rootsFor(level: LevelFilter): BuilderRoot[] {

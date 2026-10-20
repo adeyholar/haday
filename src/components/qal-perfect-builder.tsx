@@ -118,6 +118,8 @@ export function QalPerfectBuilder() {
     setResults(next);
     setScore(points);
     setGraded(true);
+    const first = order.find((k) => !next[k]?.ok);
+    if (first) document.getElementById(`qal-row-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     if (!counted) {
       const saved = {
         n: stats.n + 1,
@@ -210,6 +212,7 @@ export function QalPerfectBuilder() {
           const preview = buildForm(root, choice, k);
           const row = results[k];
           const open = openFields(choice);
+          const bad = new Set(row && !row.ok ? row.misses : []);
           return (
             <div
               id={`qal-row-${k}`}
@@ -233,12 +236,14 @@ export function QalPerfectBuilder() {
                   label={`Vowel under first root letter, ${k}`}
                   placeholder="1st vowel…"
                   value={choice.v1}
+                  bad={bad.has("v1")}
                   onChange={(value) => setField(k, "v1", value)}
                 />
                 <VowelSelect
                   label={`Vowel under second root letter, ${k}`}
                   placeholder="2nd vowel…"
                   value={choice.v2}
+                  bad={bad.has("v2")}
                   onChange={(value) => setField(k, "v2", value)}
                 />
                 <VowelSelect
@@ -246,12 +251,18 @@ export function QalPerfectBuilder() {
                   placeholder="3rd vowel…"
                   value={choice.v3}
                   allowNone
+                  bad={bad.has("v3")}
                   onChange={(value) => setField(k, "v3", value)}
                 />
-                <EndSelect label={`Ending, ${k}`} value={choice.end} onChange={(value) => setField(k, "end", value)} />
-                <ToneSelect person={k} value={choice.tone} onChange={(value) => setTone(k, value)} />
+                <EndSelect label={`Ending, ${k}`} value={choice.end} bad={bad.has("end")} onChange={(value) => setField(k, "end", value)} />
+                <ToneSelect person={k} value={choice.tone} bad={bad.has("tone")} onChange={(value) => setTone(k, value)} />
                 {root.assim ? (
-                  <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted sm:col-span-2">
+                  <label
+                    className={cn(
+                      "inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] px-1 text-sm text-muted sm:col-span-2",
+                      bad.has("merge") && "ring-2 ring-danger",
+                    )}
+                  >
                     <input type="checkbox" checked={choice.merge} onChange={(event) => setMerge(k, event.target.checked)} />
                     Merge final root letter with ending
                   </label>
@@ -316,17 +327,7 @@ export function QalPerfectBuilder() {
           <Button type="button" variant="outline" onClick={() => deal(level, root, shuffleRows)}>
             Skip to next root
           </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              const first = openRows[0];
-              if (first) {
-                document.getElementById(`qal-row-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                return;
-              }
-              grade();
-            }}
-          >
+          <Button type="button" onClick={grade}>
             {graded ? "Grade again" : "Submit for grading"}
           </Button>
         </div>
@@ -346,20 +347,26 @@ function VowelSelect({
   placeholder,
   value,
   allowNone,
+  bad,
   onChange,
 }: {
   label: string;
   placeholder: string;
   value: VowelId | "none" | "";
   allowNone?: boolean;
+  bad?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <select
       aria-label={label}
+      aria-invalid={bad || undefined}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 font-hebrew text-base text-ink"
+      className={cn(
+        "min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 font-hebrew text-base text-ink",
+        bad && "ring-2 ring-danger",
+      )}
     >
       <option value="">{placeholder}</option>
       {allowNone ? <option value="none">{CIRCLE} no vowel</option> : null}
@@ -376,18 +383,24 @@ function VowelSelect({
 function ToneSelect({
   person,
   value,
+  bad,
   onChange,
 }: {
   person: string;
   value: RowChoice["tone"];
+  bad?: boolean;
   onChange: (value: RowChoice["tone"]) => void;
 }) {
   return (
     <select
       aria-label={`Accent or meteg, ${person}`}
+      aria-invalid={bad || undefined}
       value={value}
       onChange={(event) => onChange(event.target.value as RowChoice["tone"])}
-      className="he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-2"
+      className={cn(
+        "he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-2",
+        bad && "ring-2 ring-danger",
+      )}
     >
       <option value="">Accent or meteg…</option>
       <option value="none">No accent and no meteg</option>
@@ -400,18 +413,24 @@ function ToneSelect({
 function EndSelect({
   label,
   value,
+  bad,
   onChange,
 }: {
   label: string;
   value: EndId | "";
+  bad?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <select
       aria-label={label}
+      aria-invalid={bad || undefined}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 font-hebrew text-base text-ink"
+      className={cn(
+        "min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 font-hebrew text-base text-ink",
+        bad && "ring-2 ring-danger",
+      )}
     >
       <option value="">Ending…</option>
       {END_ORDER.map((id) => {
