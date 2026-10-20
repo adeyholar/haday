@@ -122,8 +122,8 @@ export type RowChoice = {
   v3: VowelId | "none" | "";
   end: EndId | "";
   merge: boolean;
-  /** "yes" adds the mark this person requires. "no" leaves it off. */
-  tone: "" | "yes" | "no";
+  /** The student names the mark. Every row offers accent, meteg, and neither. */
+  tone: "" | "none" | "accent" | "meteg";
 };
 
 export function needsTone(k: PgnKey): "accent" | "meteg" | "none" {
@@ -170,7 +170,7 @@ export function expectsMerge(root: BuilderRoot, k: PgnKey): boolean {
 }
 
 /** The pointed word for this choice. Null when Merge is checked on a form that cannot merge. */
-export function buildForm(root: BuilderRoot, choice: RowChoice, person: PgnKey = "3ms"): string | null {
+export function buildForm(root: BuilderRoot, choice: RowChoice, _person: PgnKey = "3ms"): string | null {
   const [a, b, c] = [...root.c];
   const head = letter(a, choice.v1 ? VOWELS[choice.v1] : "", BGDKPT.has(a)) + letter(b, choice.v2 ? VOWELS[choice.v2] : "", false);
   const third = thirdMark(choice);
@@ -184,17 +184,16 @@ export function buildForm(root: BuilderRoot, choice: RowChoice, person: PgnKey =
   } else if (choice.end === "none") word = head + letter(FINAL[c] || c, third, false);
   else word = head + letter(c, third, false) + ending.tail;
   if (word == null) return null;
-  const tone = needsTone(person);
-  return choice.tone === "yes" && tone !== "none" ? withTone(word, tone) : word;
+  if (choice.tone === "accent" || choice.tone === "meteg") return withTone(word, choice.tone);
+  return word;
 }
 
 export function rootDisplay(root: BuilderRoot): string {
   return [...root.c].map((c, i) => letter(i === 2 ? FINAL[c] || c : c, "", false)).join(" · ");
 }
 
-export function filled(choice: RowChoice, person: PgnKey): boolean {
-  if (!choice.v1 || !choice.v2 || !choice.v3 || !choice.end) return false;
-  if (needsTone(person) !== "none" && !choice.tone) return false;
+export function filled(choice: RowChoice): boolean {
+  if (!choice.v1 || !choice.v2 || !choice.v3 || !choice.end || !choice.tone) return false;
   return true;
 }
 
@@ -223,9 +222,12 @@ export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): 
     if (!merge && choice.merge) diffs.push("Nothing merges in this form. Write the root letter and the ending separately.");
   }
   const tone = needsTone(form.k);
-  if (tone === "accent" && choice.tone !== "yes") diffs.push("This form needs the accent on the second letter.");
-  if (tone === "meteg" && choice.tone !== "yes") diffs.push("This form needs the meteg under the first letter.");
-  const answer = buildForm(root, { v1: form.v1, v2: form.v2, v3: expectedThird(root, form), end: form.end, merge, tone: "yes" }, form.k) ?? "";
+  if (choice.tone !== tone) {
+    const named = (id: RowChoice["tone"]) =>
+      id === "accent" ? "accent on the second letter" : id === "meteg" ? "meteg under the first letter" : id === "none" ? "no accent and no meteg" : "nothing";
+    diffs.push(`Accent or meteg: needed ${named(tone)}, you chose ${named(choice.tone)}.`);
+  }
+  const answer = buildForm(root, { v1: form.v1, v2: form.v2, v3: expectedThird(root, form), end: form.end, merge, tone }, form.k) ?? "";
   return { ok: diffs.length === 0, answer, diffs, note: form.note };
 }
 

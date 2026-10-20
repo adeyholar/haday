@@ -15,7 +15,6 @@ import {
   emptyStats,
   filled,
   gradeRow,
-  needsTone,
   rootDisplay,
   rootsFor,
   type BuilderRoot,
@@ -98,11 +97,11 @@ export function QalPerfectBuilder() {
     setSel((prev) => ({ ...prev, [k]: { ...prev[k], merge } }));
   }
 
-  function setTone(k: PgnKey, tone: "" | "yes" | "no") {
+  function setTone(k: PgnKey, tone: RowChoice["tone"]) {
     setSel((prev) => ({ ...prev, [k]: { ...prev[k], tone } }));
   }
 
-  const done = FORMS.filter((form) => filled(sel[form.k], form.k)).length;
+  const done = FORMS.filter((form) => filled(sel[form.k])).length;
   const byK = Object.fromEntries(FORMS.map((form) => [form.k, form])) as Record<PgnKey, (typeof FORMS)[number]>;
 
   function grade() {
@@ -139,7 +138,7 @@ export function QalPerfectBuilder() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Perfect Builder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Build all nine forms of the root. For each row pick the vowel under the first root letter, the vowel under the second, and the vowel under the third. Then pick the ending. On 2ms, 1cs, and 1cp add the accent on the second letter. On 3fs and 3cp add the meteg under the first. The word assembles as you choose.
+          Build all nine forms of the root. For each row pick the vowel under each root letter, the ending, and the accent or the meteg. No accent and no meteg is a real choice. The word assembles as you choose.
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] bg-card shadow-[var(--shadow-border)]" role="radiogroup" aria-label="Root set">
@@ -206,7 +205,6 @@ export function QalPerfectBuilder() {
         {order.map((k) => {
           const form = byK[k];
           const choice = sel[k];
-          const tone = needsTone(k);
           const preview = buildForm(root, choice, k);
           const row = results[k];
           return (
@@ -246,9 +244,7 @@ export function QalPerfectBuilder() {
                   onChange={(value) => setField(k, "v3", value)}
                 />
                 <EndSelect label={`Ending, ${k}`} value={choice.end} onChange={(value) => setField(k, "end", value)} />
-                {tone !== "none" ? (
-                  <ToneSelect kind={tone} person={k} value={choice.tone} onChange={(value) => setTone(k, value)} />
-                ) : null}
+                <ToneSelect person={k} value={choice.tone} onChange={(value) => setTone(k, value)} />
                 {root.assim ? (
                   <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted sm:col-span-2">
                     <input type="checkbox" checked={choice.merge} onChange={(event) => setMerge(k, event.target.checked)} />
@@ -357,31 +353,25 @@ function VowelSelect({
 }
 
 function ToneSelect({
-  kind,
   person,
   value,
   onChange,
 }: {
-  kind: "accent" | "meteg";
   person: string;
-  value: "" | "yes" | "no";
-  onChange: (value: "" | "yes" | "no") => void;
+  value: RowChoice["tone"];
+  onChange: (value: RowChoice["tone"]) => void;
 }) {
-  const yes = kind === "accent" ? "Accent on the second letter" : "Meteg under the first letter";
-  const no = kind === "accent" ? "No accent" : "No meteg";
-  const glyph = kind === "accent" ? "\u25CC\u05AB" : "\u25CC\u05BD";
   return (
     <select
-      aria-label={`${yes}, ${person}`}
+      aria-label={`Accent or meteg, ${person}`}
       value={value}
-      onChange={(event) => onChange(event.target.value as "" | "yes" | "no")}
+      onChange={(event) => onChange(event.target.value as RowChoice["tone"])}
       className="he-taam min-h-11 w-full rounded-[var(--radius-sm)] border border-border bg-parchment px-2 text-base text-ink sm:col-span-2"
     >
       <option value="">Accent or meteg…</option>
-      <option value="yes">
-        {glyph} {yes}
-      </option>
-      <option value="no">{no}</option>
+      <option value="none">No accent and no meteg</option>
+      <option value="accent">{"\u25CC\u05AB"} Accent on the second letter</option>
+      <option value="meteg">{"\u25CC\u05BD"} Meteg under the first letter</option>
     </select>
   );
 }
