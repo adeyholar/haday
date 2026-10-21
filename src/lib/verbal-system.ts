@@ -776,11 +776,15 @@ function pielImpf(root: VerbRoot, passive: boolean, wayy: boolean): Engine {
     ["2fs", "2nd fem. sing.", wayy ? "wts" : "ts", true],
     ["1cs", "1st common sing.", wayy ? "wah" : "ah", false],
     ["3mp", "3rd masc. plural", wayy ? "wys" : "ys", true],
-    ["3fp", "3rd fem. plural", wayy ? "wts" : "ts", false],
     ["2mp", "2nd masc. plural", wayy ? "wts" : "ts", true],
-    ["2fp", "2nd fem. plural", wayy ? "wts" : "ts", false],
     ["1cp", "1st common plural", wayy ? "wns" : "ns", false],
-  ].filter((row) => !passive || (row[0] !== "3fp" && row[0] !== "2fp"));
+  ];
+  if (!passive) {
+    people.push(
+      ["3fp", "3rd fem. plural", wayy ? "wts" : "ts", false],
+      ["2fp", "2nd fem. plural", wayy ? "wts" : "ts", false],
+    );
+  }
   return {
     slots: [
       slot("pre", "Prefix", person(wayy ? "wayy-piel" : "piel")),
