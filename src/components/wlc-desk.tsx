@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
+import type { FollowSpot } from "@/lib/wlc-follow";
 
 /** The chapter page scrolls. Wide screens keep the word card beside the text. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -21,10 +22,12 @@ export type SheetSize = "tight" | "small" | "page" | "large";
 function WordFace({
   word,
   picked,
+  spoken,
   onPick,
 }: {
   word: WlcWord;
   picked: boolean;
+  spoken: boolean;
   onPick: (word: WlcWord) => void;
 }) {
   const clusters = wlcClusters(word.surface);
@@ -37,8 +40,8 @@ function WordFace({
       aria-pressed={picked}
       onClick={() => onPick(word)}
       className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""} ${
-        joinsNext(word) ? "ms-joins" : ""
-      }`}
+        spoken ? "ms-spoken" : ""
+      } ${joinsNext(word) ? "ms-joins" : ""}`}
     >
       <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (
@@ -153,11 +156,13 @@ export function WlcReading({
   tone,
   size,
   showNote,
+  spot,
 }: {
   chapter: WlcChapter;
   tone: SheetTone;
   size: SheetSize;
   showNote: boolean;
+  spot: FollowSpot | null;
 }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
   const frame = useRef<HTMLDivElement>(null);
@@ -195,6 +200,12 @@ export function WlcReading({
     if (rect.bottom > room) window.scrollBy({ top: rect.bottom - room, behavior: "smooth" });
   }, [picked, cardHeight]);
 
+  useEffect(() => {
+    if (!spot) return;
+    const el = frame.current?.querySelector<HTMLElement>(spot.word == null ? ".ms-spoken-verse" : ".ms-spoken");
+    el?.scrollIntoView({ block: "center", inline: "nearest" });
+  }, [spot]);
+
   return (
     <div
       className="wlc-reading flex min-h-0 flex-1 flex-col"
@@ -219,26 +230,46 @@ export function WlcReading({
           </p>
         ) : null}
         <div className="ms-verses">
-          {chapter.verses.map((verse) => (
-            <div key={verse.ref} className="ms-verse flex items-start" dir="rtl">
+          {chapter.verses.map((verse, verseIndex) => {
+            const shown = verse.words.filter((word) => word.kq_role !== "qere");
+            const spokenId = spot?.verse === verseIndex && spot.word != null ? shown[spot.word]?.id : undefined;
+            return (
+            <div
+              key={verse.ref}
+              className={`ms-verse flex items-start ${spot?.verse === verseIndex && spot.word == null ? "ms-spoken-verse" : ""}`}
+              dir="rtl"
+            >
               <span className="ms-verse-no mt-3 w-8 shrink-0 text-sm font-semibold" dir="ltr">
                 {verseLabel(verse.ref)}
               </span>
               <p className="he-verse min-w-0 flex-1">
-                {wlcMaqafChains(verse.words.filter((word) => word.kq_role !== "qere")).map((chain) =>
+                {wlcMaqafChains(shown).map((chain) =>
                   chain.length === 1 ? (
-                    <WordFace key={chain[0].id} word={chain[0]} picked={picked?.id === chain[0].id} onPick={setPicked} />
+                    <WordFace
+                      key={chain[0].id}
+                      word={chain[0]}
+                      picked={picked?.id === chain[0].id}
+                      spoken={spokenId === chain[0].id}
+                      onPick={setPicked}
+                    />
                   ) : (
                     <span key={chain[0].id} className="ms-chain" dir="rtl">
                       {chain.map((word) => (
-                        <WordFace key={word.id} word={word} picked={picked?.id === word.id} onPick={setPicked} />
+                        <WordFace
+                          key={word.id}
+                          word={word}
+                          picked={picked?.id === word.id}
+                          spoken={spokenId === word.id}
+                          onPick={setPicked}
+                        />
                       ))}
                     </span>
                   ),
                 )}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

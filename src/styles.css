@@ -380,6 +380,12 @@ html {
 .manuscript-dim .ms-picked {
   background: rgba(232, 210, 170, 0.16);
 }
+.manuscript-sheet .ms-spoken {
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+.manuscript-sheet .ms-spoken-verse {
+  background: color-mix(in oklab, currentColor 6%, transparent);
+}
 .manuscript-sheet .he-verse > .ms-word,
 .manuscript-sheet .he-taam,
 .manuscript-sheet .ms-word-face {
