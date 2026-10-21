@@ -51,6 +51,7 @@ import { Route as FinderWordRouteImport } from './routes/finder/word'
 import { Route as GameIndexRouteImport } from './routes/game/index'
 import { Route as GameFinalRouteImport } from './routes/game/final'
 import { Route as GameFinalVocabRouteImport } from './routes/game/final-vocab'
+import { Route as GameQalImperfectRouteImport } from './routes/game/qal-imperfect'
 import { Route as GameQalPerfectRouteImport } from './routes/game/qal-perfect'
 import { Route as GameRoadRouteImport } from './routes/game/road'
 import { Route as GameTypeRouteImport } from './routes/game/type'
@@ -323,6 +324,11 @@ const GameFinalRoute = GameFinalRouteImport.update({
 const GameFinalVocabRoute = GameFinalVocabRouteImport.update({
   id: '/game/final-vocab',
   path: '/game/final-vocab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameQalImperfectRoute = GameQalImperfectRouteImport.update({
+  id: '/game/qal-imperfect',
+  path: '/game/qal-imperfect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameQalPerfectRoute = GameQalPerfectRouteImport.update({
@@ -679,6 +685,7 @@ export interface FileRoutesByFullPath {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-imperfect': typeof GameQalImperfectRoute
   '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
@@ -783,6 +790,7 @@ export interface FileRoutesByTo {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-imperfect': typeof GameQalImperfectRoute
   '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
@@ -890,6 +898,7 @@ export interface FileRoutesById {
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
   '/game/final-vocab': typeof GameFinalVocabRoute
+  '/game/qal-imperfect': typeof GameQalImperfectRoute
   '/game/qal-perfect': typeof GameQalPerfectRoute
   '/game/road': typeof GameRoadRoute
   '/game/type': typeof GameTypeRoute
@@ -998,6 +1007,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-imperfect'
     | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
@@ -1102,6 +1112,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-imperfect'
     | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
@@ -1208,6 +1219,7 @@ export interface FileRouteTypes {
     | '/finder/word'
     | '/game/final'
     | '/game/final-vocab'
+    | '/game/qal-imperfect'
     | '/game/qal-perfect'
     | '/game/road'
     | '/game/type'
@@ -1311,6 +1323,7 @@ export interface RootRouteChildren {
   FinderWordRoute: typeof FinderWordRoute
   GameFinalRoute: typeof GameFinalRoute
   GameFinalVocabRoute: typeof GameFinalVocabRoute
+  GameQalImperfectRoute: typeof GameQalImperfectRoute
   GameQalPerfectRoute: typeof GameQalPerfectRoute
   GameRoadRoute: typeof GameRoadRoute
   GameTypeRoute: typeof GameTypeRoute
@@ -1653,6 +1666,13 @@ declare module '@tanstack/react-router' {
       path: '/game/final-vocab'
       fullPath: '/game/final-vocab'
       preLoaderRoute: typeof GameFinalVocabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/qal-imperfect': {
+      id: '/game/qal-imperfect'
+      path: '/game/qal-imperfect'
+      fullPath: '/game/qal-imperfect'
+      preLoaderRoute: typeof GameQalImperfectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/game/qal-perfect': {
@@ -2209,6 +2229,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinderWordRoute: FinderWordRoute,
   GameFinalRoute: GameFinalRoute,
   GameFinalVocabRoute: GameFinalVocabRoute,
+  GameQalImperfectRoute: GameQalImperfectRoute,
   GameQalPerfectRoute: GameQalPerfectRoute,
   GameRoadRoute: GameRoadRoute,
   GameTypeRoute: GameTypeRoute,

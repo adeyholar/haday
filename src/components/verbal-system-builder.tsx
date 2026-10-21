@@ -4,6 +4,7 @@ import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { passageForRoot } from "@/lib/verbal-passages";
+import { paradigmVerse } from "@/lib/verbal-paradigm-verses";
 import { markQueryInVerse } from "@/lib/tanakh-word";
 import {
   CLASS_LABEL,
@@ -86,7 +87,15 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
   const conjIds = root ? conjsFor(root.id, stem) : [];
   const pattern = root ? openPattern(root.id, stem, conj) : null;
   const cell = deck[at];
-  const passage = root ? passageForRoot(root.id) : null;
+  const specific = root ? paradigmVerse(root.id, stem, conj) : null;
+  const passage = specific
+    ? { ref: specific.ref, where: specific.where, he: specific.he, en: specific.en, query: root?.letters.join("") ?? "" }
+    : root
+      ? passageForRoot(root.id)
+      : null;
+  const passageName = specific
+    ? `${STEMS.find((item) => item.id === stem)?.en ?? stem} ${CONJS.find((item) => item.id === conj)?.en ?? conj}`
+    : "";
 
   useEffect(() => {
     setBoard(loadBoard());
@@ -204,6 +213,10 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
             The nine-row Qal perfect drill is still in{" "}
             <Link to="/game/qal-perfect" className="font-semibold text-primary">
               Qal Perfect Builder
+            </Link>
+            . The ten-row Qal imperfect drill is in{" "}
+            <Link to="/game/qal-imperfect" className="font-semibold text-primary">
+              Qal Imperfect Builder
             </Link>
             .
           </p>
@@ -421,7 +434,9 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
           </p>
           {passed && passage ? (
             <div className="mt-4 border-t border-border pt-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{passage.where}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                {passageName ? `${passageName} · ${passage.where}` : passage.where}
+              </p>
               <p className="he-taam mt-2 text-2xl leading-[2.2] text-ink" dir="rtl" lang="he">
                 {marked.map((part, index) => (
                   <span key={`${part.word}-${index}`} className={part.hit ? "text-primary" : undefined}>

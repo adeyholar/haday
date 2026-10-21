@@ -35,7 +35,11 @@ function StudyUnitPage() {
               <Link to="/game/qal-perfect" className="font-semibold text-primary">
                 Qal Perfect Builder
               </Link>
-              <span className="text-muted"> · all nine forms from the vowels and the ending.</span>
+              <span className="text-muted"> · all nine forms from the vowels and the ending. </span>
+              <Link to="/game/qal-imperfect" className="font-semibold text-primary">
+                Qal Imperfect Builder
+              </Link>
+              <span className="text-muted"> · ten forms, prefix and ending, until the four roots are known.</span>
             </>
           ) : null}
         </p>
