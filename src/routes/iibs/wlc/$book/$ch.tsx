@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { WlcReading, type SheetSize, type SheetTone } from "@/components/wlc-desk";
+import { WlcPlayer } from "@/components/wlc-player";
 import { ScriptureTabs } from "@/components/iibs-door";
 import { bookMeta, isBookId, parseChapter } from "@/lib/tanakh-canon";
 import { loadWlcChapter } from "@/lib/wlc-server";
+import type { FollowSpot } from "@/lib/wlc-follow";
 import type { WlcChapter } from "@/lib/wlc";
 
 const chapterCache = new Map<string, WlcChapter>();
@@ -89,6 +91,7 @@ function WlcChapterPage() {
   const [size, setSize] = useState<SheetSize>("page");
   const [aaOpen, setAaOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [spot, setSpot] = useState<FollowSpot | null>(null);
 
   useEffect(() => {
     setTone(readSheet());
@@ -231,8 +234,9 @@ function WlcChapterPage() {
         </div>
       ) : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
+      <WlcPlayer book={meta.id} chapter={chapterNo} verses={chapter?.verses ?? []} onSpot={setSpot} />
       {!chapter && !error ? <p className="text-sm text-muted">Opening the chapter.</p> : null}
-      {chapter ? <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} /> : null}
+      {chapter ? <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} spot={spot} /> : null}
       {next ? (
         <button type="button" onClick={() => go(next)} className="mt-4 min-h-11 font-semibold text-primary">
           Next chapter ›
