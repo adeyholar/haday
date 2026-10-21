@@ -116,8 +116,8 @@ export const ROOTS: BuilderRoot[] = [
 export type LevelFilter = "1" | "2" | "all";
 
 export type RowChoice = {
-  v1: VowelId | "";
-  v2: VowelId | "";
+  v1: VowelId | "none" | "";
+  v2: VowelId | "none" | "";
   /** Vowel under the third root letter. "none" means that letter has no vowel. */
   v3: VowelId | "none" | "";
   end: EndId | "";
@@ -169,10 +169,15 @@ export function expectsMerge(root: BuilderRoot, k: PgnKey): boolean {
   return false;
 }
 
+function vowelMark(id: VowelId | "none" | ""): string {
+  if (!id || id === "none") return "";
+  return VOWELS[id];
+}
+
 /** The pointed word for this choice. Null when Merge is checked on a form that cannot merge. */
 export function buildForm(root: BuilderRoot, choice: RowChoice, _person: PgnKey = "3ms"): string | null {
   const [a, b, c] = [...root.c];
-  const head = letter(a, choice.v1 ? VOWELS[choice.v1] : "", BGDKPT.has(a)) + letter(b, choice.v2 ? VOWELS[choice.v2] : "", false);
+  const head = letter(a, vowelMark(choice.v1), BGDKPT.has(a)) + letter(b, vowelMark(choice.v2), false);
   const third = thirdMark(choice);
   const ending = choice.end ? ENDINGS[choice.end] : undefined;
   let word: string | null;
@@ -225,19 +230,19 @@ export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): 
   const merge = expectsMerge(root, form.k);
   const diffs: string[] = [];
   const misses: ChoiceField[] = [];
+  const vowName = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
   if (choice.v1 !== form.v1) {
     misses.push("v1");
-    diffs.push(`1st vowel: needed ${VNAME[form.v1]}, you chose ${choice.v1 ? VNAME[choice.v1] : "nothing"}.`);
+    diffs.push(`1st vowel: needed ${vowName(form.v1)}, you chose ${vowName(choice.v1)}.`);
   }
   if (choice.v2 !== form.v2) {
     misses.push("v2");
-    diffs.push(`2nd vowel: needed ${VNAME[form.v2]}, you chose ${choice.v2 ? VNAME[choice.v2] : "nothing"}.`);
+    diffs.push(`2nd vowel: needed ${vowName(form.v2)}, you chose ${vowName(choice.v2)}.`);
   }
   const need3 = expectedThird(root, form);
   if (choice.v3 !== need3) {
     misses.push("v3");
-    const named = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
-    diffs.push(`3rd vowel: needed ${named(need3)}, you chose ${named(choice.v3)}.`);
+    diffs.push(`3rd vowel: needed ${vowName(need3)}, you chose ${vowName(choice.v3)}.`);
   }
   if (choice.end !== form.end) {
     misses.push("end");

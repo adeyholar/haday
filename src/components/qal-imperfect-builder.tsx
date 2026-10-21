@@ -138,7 +138,7 @@ export function QalImperfectBuilder() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal imperfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Imperfect Builder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          The perfect hangs an ending on the root. The imperfect puts a prefix on every form, and half of the forms add an ending as well. Those prefixes and endings are the ones the derived stems use. Build all ten. Vowels, the prefix, the ending, and the accent all count.
+          The imperfect is the prefix conjugation. A prefix may be there, and an ending may be there. No prefix, no vowel, no ending, and no meteg are real choices. Build all ten. A blank menu is not a choice.
         </p>
         <p className="mt-2 max-w-prose text-sm text-muted">
           Four class roots need {KNOWN_PASSES} cleared rounds each: remember, write, keep, gather. {ROOTS.length - 4} more roots are strong verbs the Tanakh uses in this same pattern. Each of those needs one cleared round. A miss brings that root back. The reference stays on the root. The verse opens when the round clears.
@@ -223,7 +223,7 @@ export function QalImperfectBuilder() {
                 <PrefixSelect value={choice.pre} bad={bad.has("pre")} onChange={(value) => setField(k, "pre", value)} person={k} />
                 <VowelSelect label={`Vowel under first root letter, ${k}`} placeholder="1st vowel…" value={choice.v1} bad={bad.has("v1")} onChange={(value) => setField(k, "v1", value)} />
                 <VowelSelect label={`Vowel under second root letter, ${k}`} placeholder="2nd vowel…" value={choice.v2} bad={bad.has("v2")} onChange={(value) => setField(k, "v2", value)} />
-                <VowelSelect label={`Vowel under third root letter, ${k}`} placeholder="3rd vowel…" value={choice.v3} allowNone bad={bad.has("v3")} onChange={(value) => setField(k, "v3", value)} />
+                <VowelSelect label={`Vowel under third root letter, ${k}`} placeholder="3rd vowel…" value={choice.v3} bad={bad.has("v3")} onChange={(value) => setField(k, "v3", value)} />
                 <EndSelect label={`Ending, ${k}`} value={choice.end} bad={bad.has("end")} onChange={(value) => setField(k, "end", value)} />
                 <ToneSelect person={k} value={choice.tone} bad={bad.has("tone")} onChange={(value) => setTone(k, value)} />
               </div>
@@ -346,21 +346,19 @@ function VowelSelect({
   label,
   placeholder,
   value,
-  allowNone,
   bad,
   onChange,
 }: {
   label: string;
   placeholder: string;
   value: VowelId | "none" | "";
-  allowNone?: boolean;
   bad?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <select aria-label={label} aria-invalid={bad || undefined} value={value} onChange={(event) => onChange(event.target.value)} className={cn(fieldClass(bad), "font-hebrew")}>
       <option value="">{placeholder}</option>
-      {allowNone ? <option value="none">{CIRCLE} no vowel</option> : null}
+      <option value="none">{CIRCLE} no vowel</option>
       {VOWEL_OPTS.map((opt) => (
         <option key={opt.id} value={opt.id}>
           {CIRCLE}
@@ -378,13 +376,14 @@ function PrefixSelect({
   onChange,
 }: {
   person: string;
-  value: PrefixId | "";
+  value: PrefixId | "none" | "";
   bad?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <select aria-label={`Prefix, ${person}`} aria-invalid={bad || undefined} value={value} onChange={(event) => onChange(event.target.value)} className={cn(fieldClass(bad), "font-hebrew sm:col-span-2")}>
       <option value="">Prefix…</option>
+      <option value="none">no prefix</option>
       {PREFIX_ORDER.map((id) => (
         <option key={id} value={id}>
           {PREFIX[id]}

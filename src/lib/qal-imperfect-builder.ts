@@ -139,9 +139,9 @@ export const ROOTS: BuilderRoot[] = IMPERFECT_PASSAGES.map((row) => {
 });
 
 export type RowChoice = {
-  pre: PrefixId | "";
-  v1: VowelId | "";
-  v2: VowelId | "";
+  pre: PrefixId | "none" | "";
+  v1: VowelId | "none" | "";
+  v2: VowelId | "none" | "";
   v3: VowelId | "none" | "";
   end: EndId | "";
   tone: "" | "none" | "accent" | "meteg";
@@ -192,12 +192,17 @@ function metegPrefix(word: string): string {
   return parts.join("");
 }
 
+function vowelMark(id: VowelId | "none" | ""): string {
+  if (!id || id === "none") return "";
+  return VOWELS[id];
+}
+
 export function buildForm(root: BuilderRoot, choice: RowChoice): string {
   const [a, b, c] = [...root.c].map(medial);
-  const pre = choice.pre ? PREFIX[choice.pre] : "";
-  const v1 = choice.v1 ? VOWELS[choice.v1] : "";
-  const v2 = choice.v2 ? VOWELS[choice.v2] : "";
-  const v3 = choice.v3 && choice.v3 !== "none" ? VOWELS[choice.v3] : "";
+  const pre = choice.pre && choice.pre !== "none" ? PREFIX[choice.pre] : "";
+  const v1 = vowelMark(choice.v1);
+  const v2 = vowelMark(choice.v2);
+  const v3 = vowelMark(choice.v3);
   const secondDag = Boolean(choice.v1 === "sh" && BGDKPT.has(b));
   const ending = choice.end ? ENDINGS[choice.end] : undefined;
   const final = !ending || ending.tail === "";
@@ -251,22 +256,23 @@ export type RowGrade = {
 export function gradeRow(root: BuilderRoot, form: FormSpec, choice: RowChoice): RowGrade {
   const diffs: string[] = [];
   const misses: ChoiceField[] = [];
+  const preName = (id: RowChoice["pre"]) => (id === "none" ? "no prefix" : id ? PNAME[id] : "nothing");
+  const vowName = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
   if (choice.pre !== form.pre) {
     misses.push("pre");
-    diffs.push(`Prefix: needed ${PNAME[form.pre]}, you chose ${choice.pre ? PNAME[choice.pre] : "nothing"}.`);
+    diffs.push(`Prefix: needed ${preName(form.pre)}, you chose ${preName(choice.pre)}.`);
   }
   if (choice.v1 !== form.v1) {
     misses.push("v1");
-    diffs.push(`1st vowel: needed ${VNAME[form.v1]}, you chose ${choice.v1 ? VNAME[choice.v1] : "nothing"}.`);
+    diffs.push(`1st vowel: needed ${vowName(form.v1)}, you chose ${vowName(choice.v1)}.`);
   }
   if (choice.v2 !== form.v2) {
     misses.push("v2");
-    diffs.push(`2nd vowel: needed ${VNAME[form.v2]}, you chose ${choice.v2 ? VNAME[choice.v2] : "nothing"}.`);
+    diffs.push(`2nd vowel: needed ${vowName(form.v2)}, you chose ${vowName(choice.v2)}.`);
   }
   if (choice.v3 !== form.v3) {
     misses.push("v3");
-    const named = (id: VowelId | "none" | "") => (id === "none" ? "no vowel" : id ? VNAME[id] : "nothing");
-    diffs.push(`3rd vowel: needed ${named(form.v3)}, you chose ${named(choice.v3)}.`);
+    diffs.push(`3rd vowel: needed ${vowName(form.v3)}, you chose ${vowName(choice.v3)}.`);
   }
   if (choice.end !== form.end) {
     misses.push("end");

@@ -71,3 +71,15 @@ test("a root is known only after three cleared rounds, and a miss brings it back
   assert.equal(q.setKnown(stats), false);
   assert.equal(q.knownCount(stats), 1);
 });
+
+test("no prefix and no vowel are choices, and a blank menu is still open", () => {
+  const verb = q.ROOTS[0];
+  const form = q.FORMS[0];
+  const chosen = { ...q.expectedChoice(form), pre: "none", v1: "none" };
+  const row = q.gradeRow(verb, form, chosen);
+  assert.equal(row.ok, false);
+  assert.deepEqual(row.misses, ["pre", "v1"]);
+  assert.equal(q.buildForm(verb, chosen).startsWith("י"), false);
+  assert.equal(q.filled({ pre: "none", v1: "none", v2: "ho", v3: "none", end: "none", tone: "none" }), true);
+  assert.equal(q.filled({ pre: "", v1: "sh", v2: "ho", v3: "none", end: "none", tone: "none" }), false);
+});
