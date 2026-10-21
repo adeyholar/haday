@@ -146,7 +146,7 @@ export function QalPerfectBuilder() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Perfect Builder</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Build all nine forms of the root. For each row pick the vowel under each root letter, the ending, and the accent or the meteg. No accent and no meteg is a real choice. The word assembles as you choose.
+          Build all nine forms of the root. For each row pick the vowel under each root letter, the ending, and the accent or the meteg. No vowel, no accent, and no meteg are real choices. The word assembles as you choose.
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] bg-card shadow-[var(--shadow-border)]" role="radiogroup" aria-label="Root set">
@@ -255,7 +255,6 @@ export function QalPerfectBuilder() {
                   label={`Vowel under third root letter, ${k}`}
                   placeholder="3rd vowel…"
                   value={choice.v3}
-                  allowNone
                   bad={bad.has("v3")}
                   onChange={(value) => setField(k, "v3", value)}
                 />
@@ -378,14 +377,12 @@ function VowelSelect({
   label,
   placeholder,
   value,
-  allowNone,
   bad,
   onChange,
 }: {
   label: string;
   placeholder: string;
   value: VowelId | "none" | "";
-  allowNone?: boolean;
   bad?: boolean;
   onChange: (value: string) => void;
 }) {
@@ -401,7 +398,7 @@ function VowelSelect({
       )}
     >
       <option value="">{placeholder}</option>
-      {allowNone ? <option value="none">{CIRCLE} no vowel</option> : null}
+      <option value="none">{CIRCLE} no vowel</option>
       {VOWEL_OPTS.map((opt) => (
         <option key={opt.id} value={opt.id}>
           {CIRCLE}
