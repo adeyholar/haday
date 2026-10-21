@@ -65,6 +65,7 @@ import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
+import { Route as IibsVerbalSystemRouteImport } from './routes/iibs/verbal-system'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -394,6 +395,11 @@ const IibsRoadRoute = IibsRoadRouteImport.update({
   path: '/road',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsVerbalSystemRoute = IibsVerbalSystemRouteImport.update({
+  id: '/verbal-system',
+  path: '/verbal-system',
+  getParentRoute: () => IibsRoute,
+} as any)
 const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/lessons/',
   path: '/lessons/',
@@ -686,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -789,6 +796,7 @@ export interface FileRoutesByTo {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -895,6 +903,7 @@ export interface FileRoutesById {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -1002,6 +1011,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/learn'
     | '/iibs/road'
+    | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1105,6 +1115,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/learn'
     | '/iibs/road'
+    | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1210,6 +1221,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/learn'
     | '/iibs/road'
+    | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1741,6 +1753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsRoadRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/verbal-system': {
+      id: '/iibs/verbal-system'
+      path: '/verbal-system'
+      fullPath: '/iibs/verbal-system'
+      preLoaderRoute: typeof IibsVerbalSystemRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/lessons/': {
       id: '/lessons/'
       path: '/lessons'
@@ -2105,6 +2124,7 @@ interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
   IibsLearnRoute: typeof IibsLearnRoute
   IibsRoadRoute: typeof IibsRoadRoute
+  IibsVerbalSystemRoute: typeof IibsVerbalSystemRoute
   IibsIndexRoute: typeof IibsIndexRoute
   IibsStudyLevelRoute: typeof IibsStudyLevelRouteWithChildren
   IibsVocabLevelRoute: typeof IibsVocabLevelRoute
@@ -2118,6 +2138,7 @@ const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
   IibsLearnRoute: IibsLearnRoute,
   IibsRoadRoute: IibsRoadRoute,
+  IibsVerbalSystemRoute: IibsVerbalSystemRoute,
   IibsIndexRoute: IibsIndexRoute,
   IibsStudyLevelRoute: IibsStudyLevelRouteWithChildren,
   IibsVocabLevelRoute: IibsVocabLevelRoute,

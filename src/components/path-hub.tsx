@@ -84,7 +84,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/game/syllables", title: "Syllables", line: "Open, closed, and shewa." },
       { to: "/game/nouns", title: "Nouns", line: "Gender and number." },
       { to: "/game/article", title: "Article and vav", line: "The, and." },
-      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Root, stem, conjugation. Ten builds." },
+      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
       { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
       { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
       { to: "/game/road", title: "Exam prep · Week 7 road", line: "Say A, B, C, or D." },
@@ -131,7 +131,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
     line: "Semester 2 game. This term’s words, and every verb form. A stage clears at 90% on the first answer.",
     cards: [
       { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. Recognize, gloss, then spell." },
-      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Root, stem, conjugation. Ten builds." },
+      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
       { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
       { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
       {

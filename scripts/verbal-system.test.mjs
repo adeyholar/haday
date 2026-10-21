@@ -64,3 +64,19 @@ test("a round is ten builds and 90% clears it", () => {
   assert.ok(pattern.slots.some((item) => item.id === "v3"));
   assert.equal(pattern.cells.every((row) => row.answer.v3), true);
 });
+
+test("the student chooses a pool and a consonant, then passes every form", () => {
+  assert.deepEqual(
+    vs.consonantsInPool("bi").map((row) => row.letter),
+    ["ו", "י"],
+  );
+  assert.ok(vs.rootsForConsonant("other", "נ").some((root) => root.id === "nafal"));
+  assert.ok(vs.rootsForConsonant("tri", "ש").some((root) => root.id === "shamar"));
+  assert.equal(vs.rootsForConsonant("tri", "ש").some((root) => root.id === "nafal"), false);
+  const pattern = vs.openPattern("shamar", "qal", "perfect");
+  assert.equal(pattern.cells.length, 9);
+  assert.equal(vs.passDeck(pattern.cells, () => 0).length, 9);
+  assert.equal(vs.passedAll(9, 9), true);
+  assert.equal(vs.passedAll(8, 9), false);
+});
+
