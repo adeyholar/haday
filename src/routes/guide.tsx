@@ -36,7 +36,7 @@ function GuidePage() {
             </Link>
             <span className="text-ink"> — </span>
             one path through chapters 1–19. Stages unlock in order. Use Continue. Game shows the citation lemma from the
-            class book. The Game menu lists Vocabulary. On that page, choose the chapter path or Custom mix. It also lists Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar, and Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
+            class book. The Game menu lists Vocabulary. On that page, choose the chapter path or Custom mix. It also lists Aleph-bet mastery, Ocean letters, Syllables, Nouns, Article & vav, Grammar, and Semester 1 Ultimate Challenge. Prepare grammar in Study → Grammar lessons first.
           </li>
           <li>
             <Link to="/" hash="study-mode" className="inline-flex items-center gap-1.5 font-semibold text-primary">
@@ -48,7 +48,7 @@ function GuidePage() {
             Grammar lessons (Study) prepare the topic with notes and verses; Game grammar is the closed-book exam (90%).
             Stations (Study → Stations) is the path: Alef-bet Station to the Realm of the Word — text first, rule last.
             Closed-book Exam is from memory; misses lead the next Write and Quiz rounds.
-            Ultimate Challenge is optional: the whole Ch. 2–19 list in one sitting, graded at the end.
+            Semester 1 Ultimate Challenge is optional: the whole Ch. 2–19 list in one sitting, graded at the end.
             Zakhor (Daily keep) is the short daily mix of words you have already met — due, weak, and older mastered
             lemmas — so new chapters do not bury the old ones. The Study menu groups Stations, Drill, Write, Quiz, Match, Lex,
             Alef-bet, Zakhor, Grammar lessons, and Guide.
