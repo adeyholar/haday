@@ -28,6 +28,8 @@ export type ConjId =
   | "perfect"
   | "imperfect"
   | "wayyiqtol"
+  | "jussive"
+  | "cohortative"
   | "imperative"
   | "inf-const"
   | "inf-abs"
@@ -181,6 +183,8 @@ export const CONJS: { id: ConjId; en: string }[] = [
   { id: "perfect", en: "Perfect" },
   { id: "imperfect", en: "Imperfect" },
   { id: "wayyiqtol", en: "Wayyiqtol" },
+  { id: "jussive", en: "Jussive" },
+  { id: "cohortative", en: "Cohortative" },
   { id: "imperative", en: "Imperative" },
   { id: "inf-const", en: "Infinitive construct" },
   { id: "inf-abs", en: "Infinitive absolute" },
@@ -585,14 +589,38 @@ function qalWayy(root: VerbRoot, theme: "holem" | "patah", family: "strong" | "i
   const map: Record<string, string> = family === "igutt"
     ? { ya: "wya", ta: "wta", ee: "wee", na: "wna" }
     : { yi: "wyi", ti: "wti", ee: "wee", ni: "wni" };
-  const cells = base.cells
-    .filter((cell) => !["3fp", "2fp"].includes(cell.id))
-    .map((cell) => ({ ...cell, answer: { ...cell.answer, pre: map[cell.answer.pre] ?? cell.answer.pre } }));
+  const cells = base.cells.map((cell) => ({ ...cell, answer: { ...cell.answer, pre: map[cell.answer.pre] ?? cell.answer.pre } }));
   return {
     ...base,
     cells,
     slots: [slot("pre", "Prefix", person(family === "igutt" ? "wayy-patah" : "wayy-hireq")), ...base.slots.slice(1)],
-    blurb: "Wayyiqtol. Vav with patah, and dagesh in the prefix, unless the prefix is alef.",
+    blurb: "Wayyiqtol. Vav with patah, and dagesh in the prefix, unless the prefix is alef. The feminine plural ending is the same one the imperfect uses.",
+  };
+}
+
+function qalJussive(root: VerbRoot, theme: "holem" | "patah", family: "strong" | "igutt"): Engine {
+  const base = qalImpf(root, theme, family);
+  return {
+    ...base,
+    cells: base.cells.filter((cell) => cell.id !== "1cs" && cell.id !== "1cp"),
+    blurb: "Jussive. The Tanakh uses the second and third persons. In a strong root the shape matches the imperfect.",
+  };
+}
+
+function qalCohort(root: VerbRoot): Engine {
+  return {
+    slots: [
+      slot("pre", "Prefix", person("hireq")),
+      slot("v1", "Vowel under the first root letter", vowels(["shewa", "hatef", "patah"])),
+      slot("v2", "Vowel under the second root letter", vowels(["shewa", "holem", "patah"])),
+      slot("end", "Ending", [PF_END.find((opt) => opt.id === "ah")!]),
+    ],
+    cells: [
+      seed("1cs", "1st common sing.", "Alef with segol, then qamets he. The theme vowel reduces.", { pre: "ee", v1: "shewa", v2: "shewa", end: "ah" }),
+      seed("1cp", "1st common plural", "Nun with hireq, then the same qamets he.", { pre: "ni", v1: "shewa", v2: "shewa", end: "ah" }),
+    ],
+    render: (r, picks) => renderPrefixed(r, picks, false),
+    blurb: "Cohortative. Only the first person. The Tanakh adds qamets he.",
   };
 }
 
@@ -652,7 +680,11 @@ function qalPtc(root: VerbRoot): Engine {
     ["fs", "fem. sing. active", "active-fs"],
     ["mp", "masc. plural active", "active-mp"],
     ["fp", "fem. plural active", "active-fp"],
+    ["mpc", "masc. plural construct", "active-mpc"],
     ["pass", "masc. sing. passive", "passive"],
+    ["pass-fs", "fem. sing. passive", "passive-fs"],
+    ["pass-mp", "masc. plural passive", "passive-mp"],
+    ["pass-fp", "fem. plural passive", "passive-fp"],
   ];
   return {
     slots: [slot("shape", "Participle shape", [
@@ -660,7 +692,11 @@ function qalPtc(root: VerbRoot): Engine {
       { id: "active-fs", label: "holem, segol, tav", mark: CIRC + V.holem + " " + CIRC + V.segol + "ת" },
       { id: "active-mp", label: "holem, then ים", mark: CIRC + V.holem + "ִים" },
       { id: "active-fp", label: "holem, then וֹת", mark: CIRC + V.holem + "וֹת" },
+      { id: "active-mpc", label: "holem, then tsere yod", mark: CIRC + V.holem + "ֵי" },
       { id: "passive", label: "qamets, shureq", mark: CIRC + V.qamets + " " + SHUREQ },
+      { id: "passive-fs", label: "shureq, qamets he", mark: SHUREQ + CIRC + V.qamets + "ה" },
+      { id: "passive-mp", label: "shureq, then ים", mark: SHUREQ + "ִים" },
+      { id: "passive-fp", label: "shureq, then וֹת", mark: SHUREQ + "וֹת" },
     ])],
     cells: rows.map(([id, label, shape]) => seed(id, label, "Holem after the first letter is the active participle. Qamets and shureq is passive.", { shape })),
     render: (r, picks) => {
@@ -668,7 +704,11 @@ function qalPtc(root: VerbRoot): Engine {
       if (picks.shape === "active-fs") return M(r, 0, V.holem, dag) + M(r, 1, V.segol) + M(r, 2, "") + "ת";
       if (picks.shape === "active-mp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.hireq) + "ים";
       if (picks.shape === "active-fp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, "") + HOLAM_VAV + "ת";
+      if (picks.shape === "active-mpc") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.tsere) + "י";
       if (picks.shape === "passive") return M(r, 0, V.qamets, dag) + M(r, 1, "") + SHUREQ + M(r, 2, "", false, true);
+      if (picks.shape === "passive-fs") return M(r, 0, V.shewa, dag) + M(r, 1, "") + SHUREQ + M(r, 2, V.qamets) + "ה";
+      if (picks.shape === "passive-mp") return M(r, 0, V.shewa, dag) + M(r, 1, "") + SHUREQ + M(r, 2, V.hireq) + "ים";
+      if (picks.shape === "passive-fp") return M(r, 0, V.shewa, dag) + M(r, 1, "") + SHUREQ + M(r, 2, "") + HOLAM_VAV + "ת";
       return M(r, 0, V.holem, dag) + M(r, 1, V.tsere) + M(r, 2, "", false, true);
     },
     blurb: "Qal participle. Active: holem after the first letter. Passive: qamets and shureq.",
@@ -736,9 +776,11 @@ function pielImpf(root: VerbRoot, passive: boolean, wayy: boolean): Engine {
     ["2fs", "2nd fem. sing.", wayy ? "wts" : "ts", true],
     ["1cs", "1st common sing.", wayy ? "wah" : "ah", false],
     ["3mp", "3rd masc. plural", wayy ? "wys" : "ys", true],
+    ["3fp", "3rd fem. plural", wayy ? "wts" : "ts", false],
     ["2mp", "2nd masc. plural", wayy ? "wts" : "ts", true],
+    ["2fp", "2nd fem. plural", wayy ? "wts" : "ts", false],
     ["1cp", "1st common plural", wayy ? "wns" : "ns", false],
-  ];
+  ].filter((row) => !passive || (row[0] !== "3fp" && row[0] !== "2fp"));
   return {
     slots: [
       slot("pre", "Prefix", person(wayy ? "wayy-piel" : "piel")),
@@ -747,7 +789,7 @@ function pielImpf(root: VerbRoot, passive: boolean, wayy: boolean): Engine {
       slot("end", "Ending", IMPF_END),
     ],
     cells: people.map(([id, label, pre, reduced]) => seed(id, label, "Shewa under the prefix. The middle letter stays doubled.", {
-      pre, v1, v2: reduced ? "shewa" : passive ? "patah" : "tsere", end: id === "2fs" ? "iy" : reduced ? "u" : "none",
+      pre, v1, v2: id.endsWith("fp") ? "tsere" : reduced ? "shewa" : passive ? "patah" : "tsere", end: id.endsWith("fp") ? "nah" : id === "2fs" ? "iy" : reduced ? "u" : "none",
     })),
     render: renderPielImpf,
     blurb: wayy
@@ -848,6 +890,9 @@ function hiphilImpf(root: VerbRoot, guttural: boolean, wayy: boolean): Engine {
     ["2fs", "2nd fem. sing.", wayy ? "wta" : "ta"],
     ["1cs", "1st common sing.", wayy ? "waa" : "aa"],
     ["3mp", "3rd masc. plural", wayy ? "wya" : "ya"],
+    ["3fp", "3rd fem. plural", wayy ? "wta" : "ta"],
+    ["2mp", "2nd masc. plural", wayy ? "wta" : "ta"],
+    ["2fp", "2nd fem. plural", wayy ? "wta" : "ta"],
     ["1cp", "1st common plural", wayy ? "wna" : "na"],
   ];
   const pres: Opt[] = wayy
@@ -879,8 +924,8 @@ function hiphilImpf(root: VerbRoot, guttural: boolean, wayy: boolean): Engine {
       slot("end", "Ending", IMPF_END),
     ],
     cells: people.map(([id, label, pre]) => {
-      const reducedEnding = id === "2fs" ? "iy" : id === "3mp" ? "u" : "none";
-      const stemV = short && reducedEnding === "none" ? "tsere" : "iy";
+      const reducedEnding = id === "2fs" ? "iy" : id.endsWith("mp") ? "u" : id.endsWith("fp") ? "nah" : "none";
+      const stemV = reducedEnding === "nah" || (short && reducedEnding === "none") ? "tsere" : "iy";
       const answer: Record<string, string> = { pre, stem: stemV, end: reducedEnding };
       if (guttural) answer.c1 = "hatef";
       return seed(id, label, short ? "The singular wayyiqtol shortens hireq-yod to tsere." : "Patah on the prefix. The he of the perfect is gone.", answer);
@@ -1056,6 +1101,7 @@ function hithPerfect(root: VerbRoot): Engine {
     ["3ms", "3rd masc. sing.", "tsere", "none"],
     ["3fs", "3rd fem. sing.", "shewa", "ah"],
     ["2ms", "2nd masc. sing.", "patah", "ta"],
+    ["2fs", "2nd fem. sing.", "patah", "tf"],
     ["1cs", "1st common sing.", "patah", "ti"],
     ["3cp", "3rd common plural", "shewa", "u"],
     ["1cp", "1st common plural", "patah", "nu"],
@@ -1076,9 +1122,14 @@ function hithPerfect(root: VerbRoot): Engine {
 function hithImpf(root: VerbRoot): Engine {
   const people: [string, string, string][] = [
     ["3ms", "3rd masc. sing.", "yi"],
+    ["3fs", "3rd fem. sing.", "ti"],
     ["2ms", "2nd masc. sing.", "ti"],
+    ["2fs", "2nd fem. sing.", "ti"],
     ["1cs", "1st common sing.", "ee"],
     ["3mp", "3rd masc. plural", "yi"],
+    ["3fp", "3rd fem. plural", "ti"],
+    ["2mp", "2nd masc. plural", "ti"],
+    ["2fp", "2nd fem. plural", "ti"],
     ["1cp", "1st common plural", "ni"],
   ];
   return {
@@ -1088,7 +1139,7 @@ function hithImpf(root: VerbRoot): Engine {
       slot("end", "Ending", IMPF_END),
     ],
     cells: people.map(([id, label, pre]) => seed(id, label, "Yod or tav with hireq, then tav shewa.", {
-      pre, v2: id === "3mp" ? "shewa" : "tsere", end: id === "3mp" ? "u" : "none",
+      pre, v2: id.endsWith("mp") || id === "2fs" ? "shewa" : "tsere", end: id === "2fs" ? "iy" : id.endsWith("mp") ? "u" : id.endsWith("fp") ? "nah" : "none",
     })),
     render: (r, picks) => renderHith(r, { ...picks, v1: "patah" }, (PRE_MARK[picks.pre ?? ""] ?? "") + mark("ת", V.shewa)),
     blurb: "Hithpael imperfect. The tav of הִתְ stays after the person prefix.",
@@ -1212,16 +1263,19 @@ function niphalImpf(root: VerbRoot, wayy: boolean): Engine {
     ["2fs", "2nd fem. sing.", wayy ? "wti" : "ti", true],
     ["1cs", "1st common sing.", wayy ? "wee" : "ee", false],
     ["3mp", "3rd masc. plural", wayy ? "wyi" : "yi", true],
+    ["3fp", "3rd fem. plural", wayy ? "wti" : "ti", false],
+    ["2mp", "2nd masc. plural", wayy ? "wti" : "ti", true],
+    ["2fp", "2nd fem. plural", wayy ? "wti" : "ti", false],
     ["1cp", "1st common plural", wayy ? "wni" : "ni", false],
   ];
   return {
     slots: [
       slot("pre", "Prefix", person(wayy ? "wayy-hireq" : "hireq")),
-      slot("v2", "Vowel under the second root letter", vowels(["tsere", "shewa", "qamets"])),
+      slot("v2", "Vowel under the second root letter", vowels(["tsere", "shewa", "qamets", "patah"])),
       slot("end", "Ending", IMPF_END),
     ],
     cells: people.map(([id, label, pre, reduced]) => seed(id, label, "Dagesh in the first root letter is the nun that assimilated.", {
-      pre, v2: reduced ? "shewa" : "tsere", end: id === "2fs" ? "iy" : reduced ? "u" : "none",
+      pre, v2: id.endsWith("fp") ? "patah" : reduced ? "shewa" : "tsere", end: id === "2fs" ? "iy" : id.endsWith("fp") ? "nah" : reduced ? "u" : "none",
     })),
     render: (r, picks) => {
       const pre = PRE_MARK[picks.pre ?? ""] ?? "";
@@ -1310,6 +1364,8 @@ function buildEngine(root: VerbRoot, stem: StemId, conj: ConjId): Engine | null 
     if (conj === "perfect") return qalPerfect(root);
     if (conj === "imperfect" && root.cls !== "I-nun" && root.cls !== "I-yod" && root.cls !== "I-aleph") return qalImpf(root, theme, root.cls === "I-gutt" ? "igutt" : "strong");
     if (conj === "wayyiqtol" && root.cls !== "I-nun" && root.cls !== "I-yod" && root.cls !== "I-aleph") return qalWayy(root, theme, qalFamily === "igutt" && root.cls === "I-gutt" ? "igutt" : "strong");
+    if (conj === "jussive" && (root.cls === "strong" || root.cls === "III-gutt")) return qalJussive(root, theme, "strong");
+    if (conj === "cohortative" && root.cls === "strong") return qalCohort(root);
     if (conj === "imperative" && root.cls !== "I-aleph") return qalImpv(root, theme);
     if (conj === "inf-const" && root.cls !== "III-gutt") return qalInfc(root);
     if (conj === "inf-abs") return qalInfa(root);
