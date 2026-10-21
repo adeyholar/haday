@@ -91,7 +91,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/game/week7", title: "Exam prep · Week 7 mock", line: "Grammar, then the word list." },
       { to: "/game/final", title: "Exam prep · Week 15 road", line: "All the words, on the road." },
       { to: "/game/final-vocab", title: "Exam prep · Final vocab", line: "The Week 15 word list." },
-      { to: "/challenge", title: "Ultimate Challenge", line: "The whole list, one sitting." },
+      { to: "/challenge", title: "Semester 1 Ultimate Challenge", line: "The whole list, one sitting." },
     ],
   },
   listen: {

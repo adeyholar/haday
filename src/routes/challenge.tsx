@@ -77,7 +77,7 @@ function ChallengePage() {
           <GameMenu />
         </div>
         <Panel className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Ultimate Challenge</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Semester 1 Ultimate Challenge</p>
           <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">{report.pct}%</h1>
           <p className="mt-2 text-muted">
             {report.hits} / {report.total} lemmas. Graded after the last card.
@@ -132,7 +132,7 @@ function ChallengePage() {
         </div>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Optional</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Ultimate Challenge</h1>
+        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Semester 1 Ultimate Challenge</h1>
         <p className="mt-3 max-w-prose text-muted">
           One sitting. All {n} class words (Ch. 2–19). Hebrew on the card; type the English gloss. No marks until
           you finish.
@@ -178,7 +178,7 @@ function ChallengePage() {
         <GameMenu />
       </div>
       <Panel className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Ultimate Challenge</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Semester 1 Ultimate Challenge</p>
         <div className="mt-1 flex items-baseline justify-between gap-3">
           <h1 className="font-display text-2xl font-bold text-ink">From memory</h1>
           <span className="text-sm tabular-nums text-muted">

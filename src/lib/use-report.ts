@@ -36,7 +36,7 @@ export function areaOf(path: string): { id: string; label: string } | null {
     { id: "tanakh", label: "Tanakh", hit: p.startsWith("/listen/read") || p.startsWith("/finder") },
     { id: "listen", label: "Listen", hit: p.startsWith("/listen") },
     { id: "keep", label: "Zakhor", hit: p.startsWith("/keep") },
-    { id: "challenge", label: "Ultimate Challenge", hit: p.startsWith("/challenge") },
+    { id: "challenge", label: "Semester 1 Ultimate Challenge", hit: p.startsWith("/challenge") },
     { id: "ask", label: "Ask HaDay", hit: p.startsWith("/ask") },
     { id: "home", label: "Home", hit: p === "/" },
     { id: "sign-in", label: "Sign in", hit: p.startsWith("/login") || p.startsWith("/reset-password") },
@@ -80,7 +80,7 @@ export function areaLabel(id: string): string {
     tanakh: "Tanakh",
     listen: "Listen",
     keep: "Zakhor",
-    challenge: "Ultimate Challenge",
+    challenge: "Semester 1 Ultimate Challenge",
     ask: "Ask HaDay",
     "sign-in": "Sign in",
     other: "Other pages",
@@ -200,7 +200,7 @@ function personBuckets(cards: unknown, game: unknown): Map<string, { label: stri
   bump("balloons", "Ocean letters", Number(balloons?.attempts) || 0);
   const typing = snap.typing as { gameRounds?: number; batchesPassed?: number } | undefined;
   bump("typing", "Typing", (Number(typing?.gameRounds) || 0) + (Number(typing?.batchesPassed) || 0));
-  bump("challenge", "Ultimate Challenge", Number(snap.ultimateAttempts) || 0);
+  bump("challenge", "Semester 1 Ultimate Challenge", Number(snap.ultimateAttempts) || 0);
   return own;
 }
 

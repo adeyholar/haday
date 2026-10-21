@@ -48,7 +48,7 @@ function GameMapPage() {
         <p className="mt-2 text-sm text-muted">Hebrew is spoken. Glance at A–D and say the letter.</p>
         <p className="mt-3 text-sm">
           <Link to="/challenge" className="font-semibold text-primary">
-            Ultimate Challenge
+            Semester 1 Ultimate Challenge
           </Link>
           <span className="text-muted"> — optional full-list exam, graded when you finish.</span>
         </p>

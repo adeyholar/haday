@@ -228,7 +228,7 @@ function Home() {
       >
         <Crown className="mt-0.5 size-6 shrink-0 text-primary" />
         <span>
-          <span className="block font-display text-2xl font-bold">Ultimate Challenge</span>
+          <span className="block font-display text-2xl font-bold">Semester 1 Ultimate Challenge</span>
           <span className="mt-1 block text-sm text-muted">
             Optional. The whole class list, one sitting, graded at the end. 90% Full Scroll · 100% Crown of the Text.
           </span>
