@@ -78,5 +78,16 @@ test("the student chooses a pool and a consonant, then passes every form", () =>
   assert.equal(vs.passDeck(pattern.cells, () => 0).length, 9);
   assert.equal(vs.passedAll(9, 9), true);
   assert.equal(vs.passedAll(8, 9), false);
+  const wayy = vs.openPattern("shamar", "qal", "wayyiqtol");
+  assert.ok(wayy.cells.some((row) => row.id === "3fp"));
+  assert.ok(wayy.cells.some((row) => row.id === "2fp"));
+  const jussive = vs.openPattern("shamar", "qal", "jussive");
+  assert.equal(jussive.cells.some((row) => row.id === "1cs"), false);
+  assert.equal(jussive.cells.length, 8);
+  const cohort = vs.openPattern("shamar", "qal", "cohortative");
+  assert.equal(cohort.cells.length, 2);
+  assert.ok(cohort.cells.every((row) => row.form.includes("ה")));
+  assert.ok(vs.openPattern("katav", "hiphil", "imperfect").cells.some((row) => row.id === "3fp"));
+  assert.ok(vs.openPattern("shamar", "hithpael", "perfect").cells.some((row) => row.id === "2fs"));
 });
 
