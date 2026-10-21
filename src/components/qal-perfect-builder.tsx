@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -27,6 +28,8 @@ import {
   type RowGrade,
   type VowelId,
 } from "@/lib/qal-perfect-builder";
+import { perfectVerse } from "@/lib/verbal-paradigm-verses";
+import { markQueryInVerse } from "@/lib/tanakh-word";
 
 const CIRCLE = "\u25CC";
 
@@ -105,6 +108,7 @@ export function QalPerfectBuilder() {
   const done = FORMS.filter((form) => filled(sel[form.k])).length;
   const openRows = order.filter((k) => openFields(sel[k]).length > 0);
   const byK = Object.fromEntries(FORMS.map((form) => [form.k, form])) as Record<PgnKey, (typeof FORMS)[number]>;
+  const verse = perfectVerse(root.c);
 
   function grade() {
     if (!root) return;
@@ -202,6 +206,7 @@ export function QalPerfectBuilder() {
           <span className="mt-1 block text-sm text-muted">
             {root.assim ? "Assimilating root: watch where letters merge." : "Strong root: no weak letters."}
           </span>
+          {verse ? <span className="mt-1 block text-sm text-muted">Qal perfect in {verse.where}</span> : null}
         </p>
       </Panel>
 
@@ -333,12 +338,39 @@ export function QalPerfectBuilder() {
         </div>
       </Panel>
 
+      {score !== null && score >= 8 && verse ? <OpenedVerse verse={verse} letters={root.c} /> : null}
+
       <p className="text-sm tabular-nums text-muted">
         {stats.n
           ? `Roots graded: ${stats.n} · Average: ${(stats.sum / stats.n).toFixed(1)} / 9 · Perfect rounds: ${stats.perfect}`
           : "Your first graded root will show up here."}
       </p>
     </div>
+  );
+}
+
+function OpenedVerse({ verse, letters }: { verse: { ref: string; where: string; he: string; en: string }; letters: string }) {
+  const marked = markQueryInVerse(verse.he, letters);
+  const [book, ch] = verse.ref.split(".");
+  return (
+    <Panel>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Qal perfect · {verse.where}</p>
+      <p className="he-taam mt-2 text-2xl leading-[2.2] text-ink" dir="rtl" lang="he">
+        {marked.map((part, index) => (
+          <span key={`${part.word}-${index}`} className={part.hit ? "text-primary" : undefined}>
+            {part.word}{" "}
+          </span>
+        ))}
+      </p>
+      <p className="mt-2 text-sm text-muted">{verse.en}</p>
+      {book && ch ? (
+        <p className="mt-3">
+          <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">
+            Read it in the text
+          </Link>
+        </p>
+      ) : null}
+    </Panel>
   );
 }
 

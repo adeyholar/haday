@@ -124,6 +124,7 @@ const TERM2_VERBS = [
   "/game/verbal-system",
   "/game/verb-paradigm-quest",
   "/game/qal-perfect",
+  "/game/qal-imperfect",
   "/game/lessons/verbs",
   "/lessons/verbs",
 ];

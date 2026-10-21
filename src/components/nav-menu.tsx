@@ -60,6 +60,7 @@ export type NavHref =
   | "/game/verb-paradigm-quest"
   | "/game/verbal-system"
   | "/game/qal-perfect"
+  | "/game/qal-imperfect"
   | "/ask"
   | "/ideas"
   | "/iibs"

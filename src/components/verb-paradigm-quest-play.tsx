@@ -6,6 +6,8 @@ import { QalPerfectBuilder } from "@/components/qal-perfect-builder";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord } from "@/lib/listen";
+import { markQueryInVerse } from "@/lib/tanakh-word";
+import { perfectVerse } from "@/lib/verbal-paradigm-verses";
 import { useStudy } from "@/lib/store";
 import { shuffle } from "@/lib/vocab";
 import {
@@ -93,6 +95,17 @@ export function VerbQuestHome() {
               </span>
             </button>
           </li>
+          <li>
+            <Link
+              to="/game/qal-imperfect"
+              className="block w-full rounded-[var(--radius-md)] bg-card px-4 py-3 text-left text-ink shadow-[var(--shadow-border)]"
+            >
+              <span className="font-semibold">Qal Imperfect Builder</span>
+              <span className="mt-1 block text-sm text-muted">
+                Ten forms. The prefix is on every row. The class roots, then the same pattern in the Tanakh.
+              </span>
+            </Link>
+          </li>
           {LEVELS.map((row) => {
             const open = row.id <= quest.unlocked;
             return (
@@ -124,6 +137,33 @@ export function VerbQuestHome() {
       onExit={() => setLevel(0)}
       onAgain={() => setRootAt((n) => n + 1)}
     />
+  );
+}
+
+function QuestVerse({ letters }: { letters: string }) {
+  const verse = perfectVerse(letters);
+  if (!verse) return null;
+  const marked = markQueryInVerse(verse.he, letters);
+  const [book, ch] = verse.ref.split(".");
+  return (
+    <div className="mt-4 border-t border-border pt-4 text-start">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Qal perfect · {verse.where}</p>
+      <p className="he-taam mt-2 text-2xl leading-[2.2] text-ink" dir="rtl" lang="he">
+        {marked.map((part, index) => (
+          <span key={`${part.word}-${index}`} className={part.hit ? "text-primary" : undefined}>
+            {part.word}{" "}
+          </span>
+        ))}
+      </p>
+      <p className="mt-2 text-sm text-muted">{verse.en}</p>
+      {book && ch ? (
+        <p className="mt-3">
+          <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">
+            Read it in the text
+          </Link>
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -255,6 +295,7 @@ function VerbQuestSitting({
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{LEVELS[level - 1]?.name}</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-ink">{cleared ? "Paradigm sealed" : "Not yet"}</h1>
         <p className="mt-2 text-sm text-muted">{donePct}% clean. 90% opens the next. A miss comes back once, and that card counts.</p>
+        {cleared ? <QuestVerse letters={root.letters.join("")} /> : null}
         <div className="mt-4">
           <Board forms={forms} filled={Object.fromEntries(PGN_ORDER.map((id) => [id, true]))} active={null} />
         </div>
