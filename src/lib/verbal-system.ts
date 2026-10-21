@@ -95,6 +95,78 @@ export const CLASS_LABEL: Record<RootClass, string> = {
   geminate: "Geminate",
 };
 
+export type RootPool = "tri" | "bi" | "geminate" | "other";
+
+export const POOLS: { id: RootPool; en: string; line: string }[] = [
+  { id: "tri", en: "Three consonants", line: "A strong root. Three letters, and none of them is weak." },
+  { id: "bi", en: "Two consonants", line: "Hollow. The middle letter hides, so the word shows two." },
+  { id: "geminate", en: "Geminate", line: "The last two letters are the same letter." },
+  { id: "other", en: "Other consonants", line: "A guttural, nun, yod, he, or aleph changes the build." },
+];
+
+export function poolOf(root: VerbRoot): RootPool {
+  if (root.cls === "hollow") return "bi";
+  if (root.cls === "geminate") return "geminate";
+  if (root.cls === "strong") return "tri";
+  return "other";
+}
+
+export function rootsInPool(pool: RootPool): VerbRoot[] {
+  return ROOTS.filter((root) => poolOf(root) === pool);
+}
+
+const LETTER_NAME: Record<string, string> = {
+  א: "aleph",
+  ב: "bet",
+  ג: "gimel",
+  ד: "dalet",
+  ה: "he",
+  ו: "vav",
+  ז: "zayin",
+  ח: "het",
+  ט: "tet",
+  י: "yod",
+  כ: "kaf",
+  ל: "lamed",
+  מ: "mem",
+  נ: "nun",
+  ס: "samekh",
+  ע: "ayin",
+  פ: "pe",
+  צ: "tsade",
+  ק: "qof",
+  ר: "resh",
+  ש: "shin",
+  ת: "tav",
+};
+
+const LETTER_ORDER = "אבגדהוזחטיכלמנסעפצקרשת";
+
+/** The consonant a student is practicing. Strong roots are chosen by any of their three letters. */
+export function practiceLetter(root: VerbRoot): string {
+  if (root.cls === "hollow" || root.cls === "geminate" || root.cls === "II-gutt") return root.letters[1];
+  if (root.cls === "III-gutt" || root.cls === "III-aleph" || root.cls === "III-he") return root.letters[2];
+  if (root.cls === "assim") return root.assim === "n" ? "נ" : "ת";
+  return root.letters[0];
+}
+
+export function consonantsInPool(pool: RootPool): { letter: string; en: string }[] {
+  const seen = new Set<string>();
+  for (const root of rootsInPool(pool)) {
+    if (pool === "tri") root.letters.forEach((letter) => seen.add(letter));
+    else seen.add(practiceLetter(root));
+  }
+  return [...seen]
+    .sort((a, b) => LETTER_ORDER.indexOf(a) - LETTER_ORDER.indexOf(b))
+    .map((letter) => ({ letter, en: LETTER_NAME[letter] ?? letter }));
+}
+
+export function rootsForConsonant(pool: RootPool, letter: string): VerbRoot[] {
+  return rootsInPool(pool).filter((root) =>
+    pool === "tri" ? root.letters.includes(letter) : practiceLetter(root) === letter,
+  );
+}
+
 export const STEMS: { id: StemId; en: string; he: string }[] = [
   { id: "qal", en: "Qal", he: "קַל" },
   { id: "niphal", en: "Niphal", he: "נִפְעַל" },
@@ -2168,6 +2240,21 @@ export function dealRound<T>(cells: T[], rng: () => number = Math.random): T[] {
     out.push(item);
   }
   return out;
+}
+
+export function passDeck<T>(cells: T[], rng: () => number = Math.random): T[] {
+  const next = cells.slice();
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const hold = next[i];
+    next[i] = next[j];
+    next[j] = hold;
+  }
+  return next;
+}
+
+export function passedAll(correct: number, total: number): boolean {
+  return total > 0 && correct === total;
 }
 
 export function cleared(correct: number): boolean {
