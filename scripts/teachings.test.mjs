@@ -65,5 +65,6 @@ test("the feed is xml and leaves drafts out", () => {
   assert.match(xml, /<rss /);
   assert.match(xml, /<item>/);
   assert.equal(xml.includes("hidden"), false);
-  assert.match(xml, /atom:link/);
+  assert.match(xml, /https:\/\/hebrewmentor\.haday\.app\/blogs\/aleph/);
+  assert.equal(xml.includes("/teachings/"), false);
 });

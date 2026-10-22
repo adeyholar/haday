@@ -8,7 +8,7 @@ const { GRAMMAR_QUIZ_LEN, buildGrammarQuiz, buildGrammarMixQuiz, grammarMixPool,
   new URL("../src/lib/grammar.ts", import.meta.url).pathname,
 );
 const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
-const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
+const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, grammarUnitOpen, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
   new URL("../src/lib/game.ts", import.meta.url).pathname,
 );
 
@@ -89,6 +89,16 @@ test("verbs: 90% opens unit 2; unit 17 is the last gate", () => {
   assert.equal(isGrammarUnitUnlocked(g, "verbs", 17), true);
   g = applyGrammarResult(g, "verbs", 17, { stars: 3, score: 90, firstTryRate: 1 });
   assert.equal(g.lessons.verbs.unlockedUnit, 17);
+});
+
+test("semester 2 opens every verb stem exam and leaves other topics gated", () => {
+  const g = defaultGame();
+  assert.equal(grammarUnitOpen(g, "verbs", 1, 2), true);
+  assert.equal(grammarUnitOpen(g, "verbs", 8, 2), true);
+  assert.equal(grammarUnitOpen(g, "verbs", 15, 2), true);
+  assert.equal(grammarUnitOpen(g, "verbs", 17, 2), true);
+  assert.equal(grammarUnitOpen(g, "verbs", 2, 1), false);
+  assert.equal(grammarUnitOpen(g, "prep", 2, 2), false);
 });
 
 test("prepositions teach inseparable fusion and min; numbers distinguish cardinal and ordinal", () => {

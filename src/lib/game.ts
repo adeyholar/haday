@@ -831,6 +831,19 @@ export function isGrammarUnitUnlocked(game: GameSnapshot, trackId: GrammarTrackI
   return n <= (lessonProgress(game, trackId).unlockedUnit || 1);
 }
 
+/** Semester 2 already covered every stem, so those exams are open. Other topics stay gated. */
+export function grammarUnitOpen(
+  game: GameSnapshot,
+  trackId: GrammarTrackId,
+  unit: number,
+  term: 1 | 2 = 1,
+): boolean {
+  const cap = grammarTrackCap(trackId);
+  const n = Math.min(cap, Math.max(1, Math.round(unit) || 1));
+  if (term === 2 && trackId === "verbs" && n >= 1 && n <= cap) return true;
+  return isGrammarUnitUnlocked(game, trackId, unit);
+}
+
 export function applyGrammarResult(
   game: GameSnapshot,
   trackId: GrammarTrackId,

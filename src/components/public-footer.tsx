@@ -16,8 +16,8 @@ export function PublicFooter() {
         <Link to="/about" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
           About
         </Link>
-        <Link to="/teachings" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Teachings
+        <Link to="/blogs" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          Blogs
         </Link>
         <Link to="/legal" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
           Legal

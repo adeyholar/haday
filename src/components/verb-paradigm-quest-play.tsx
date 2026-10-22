@@ -15,6 +15,7 @@ import {
   QATAL,
   gradeVerb,
   firstAnswer,
+  METEG,
   placeChosenMark,
   qalPerfect,
   questPercent,
@@ -48,7 +49,7 @@ function Pointed({ form, pgn, className }: { form: string; pgn: Pgn; className?:
   );
 }
 
-export function VerbQuestHome() {
+export function VerbQuestHome({ scripture = false }: { scripture?: boolean }) {
   const quest = useStudy((s) => s.game.verbParadigmQuest);
   const [level, setLevel] = useState(0);
   const [builder, setBuilder] = useState(false);
@@ -70,14 +71,16 @@ export function VerbQuestHome() {
   if (!level) {
     return (
       <Panel>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          {scripture ? "Scripture Path · Qal perfect" : "Grammar · Qal perfect"}
+        </p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Verb Paradigm Quest</h1>
         <p className="mt-3 text-sm text-muted">
           Only the root letters are on the screen. You add the vowels. The app does not write them on the root for you.
         </p>
         <p className="mt-2 text-sm text-muted">
           Every stem, not only the Qal perfect, is in the{" "}
-          <Link to="/game/verbal-system" className="font-semibold text-primary">
+          <Link to={scripture ? "/iibs/verbal-system" : "/game/verbal-system"} className="font-semibold text-primary">
             Verbal System
           </Link>
           .
@@ -97,7 +100,7 @@ export function VerbQuestHome() {
           </li>
           <li>
             <Link
-              to="/game/qal-imperfect"
+              to={scripture ? "/iibs/qal-imperfect" : "/game/qal-imperfect"}
               className="block w-full rounded-[var(--radius-md)] bg-card px-4 py-3 text-left text-ink shadow-[var(--shadow-border)]"
             >
               <span className="font-semibold">Qal Imperfect Builder</span>
@@ -136,6 +139,7 @@ export function VerbQuestHome() {
       root={root}
       onExit={() => setLevel(0)}
       onAgain={() => setRootAt((n) => n + 1)}
+      scripture={scripture}
     />
   );
 }
@@ -172,11 +176,13 @@ function VerbQuestSitting({
   root,
   onExit,
   onAgain,
+  scripture = false,
 }: {
   level: number;
   root: VerbRoot;
   onExit: () => void;
   onAgain: () => void;
+  scripture?: boolean;
 }) {
   const save = useStudy((s) => s.saveVerbQuest);
   const forms = useMemo(() => qalPerfect(root), [root]);
@@ -186,7 +192,25 @@ function VerbQuestSitting({
   const [log, setLog] = useState<boolean[]>([]);
   const [deal, setDeal] = useState(0);
   const [filled, setFilled] = useState<Partial<Record<Pgn, boolean>>>({});
-  const [built, setBuilt] = useState("");
+  const builtRef = useRef("");
+  const pendingRef = useRef("");
+  const cardRef = useRef<VerbForm | null>(null);
+  const [built, setBuiltState] = useState("");
+  function setBuilt(next: string): string {
+    let text = next;
+    const current = cardRef.current;
+    if (!text) pendingRef.current = "";
+    else if (pendingRef.current && current) {
+      const placed = placeChosenMark(text, current.form, pendingRef.current);
+      if (placed.status === "placed") {
+        text = placed.text;
+        pendingRef.current = "";
+      }
+    }
+    builtRef.current = text;
+    setBuiltState(text);
+    return text;
+  }
   const [choice, setChoice] = useState<Pgn | null>(null);
   const [lines, setLines] = useState<string[]>([]);
   const [nudge, setNudge] = useState(false);
@@ -204,6 +228,7 @@ function VerbQuestSitting({
   }, []);
   const pgn = queue[0];
   const card = pgn ? byPgn[pgn] : null;
+  cardRef.current = card;
 
   useEffect(() => {
     setQueue(shuffle([...PGN_ORDER]));
@@ -266,7 +291,7 @@ function VerbQuestSitting({
 
   function checkBuild() {
     if (!card) return;
-    const graded = gradeVerb(built, card.form, card.pgn, root.letters[1]);
+    const graded = gradeVerb(builtRef.current, card.form, card.pgn, root.letters[1]);
     const clean = firstAnswer(firstClean, graded.correct, helped);
     if (firstClean === null) setFirstClean(clean);
     if (graded.correct) {
@@ -391,16 +416,28 @@ function VerbQuestSitting({
             hideVowelLetters
             markBackspace
             onSpecialMark={(mark) => {
-              const placed = placeChosenMark(built, card.form, mark);
+              const placed = placeChosenMark(builtRef.current, card.form, mark);
               if (placed.status === "wait") {
-                setLines(["Type that letter first. Then the accent or the meteg lands on the letter this form requires."]);
+                pendingRef.current = mark;
+                setLines([
+                  mark === METEG
+                    ? "Meteg is waiting. Type the first letter and it will sit beside the qamets."
+                    : "Accent is waiting. Type the letter it belongs on.",
+                ]);
                 return true;
               }
               if (placed.status === "skip") return false;
-              setBuilt(placed.text);
-              return true;
+              pendingRef.current = "";
+              return placed.text;
             }}
           />
+          {building && (card.pgn === "3fs" || card.pgn === "3cp") ? (
+            <p className="mt-2 text-center text-sm text-muted">
+              {built.includes(METEG)
+                ? "Meteg is on the word."
+                : "The second stroke beside the qamets is a meteg. Qamets alone does not count. Tap Meteg."}
+            </p>
+          ) : null}
           {revealed ? (
             <p className="mt-3 text-center">
               <Pointed form={card.form} pgn={card.pgn} className="text-4xl" />
@@ -422,9 +459,15 @@ function VerbQuestSitting({
       ) : null}
 
       <p className="mt-6 text-center text-sm">
-        <Link to="/lessons/$track/$unit" params={{ track: "verbs", unit: "3" }} className="font-medium text-primary">
-          Perfect endings lesson
-        </Link>
+        {scripture ? (
+          <Link to="/iibs/verbal-system" className="font-medium text-primary">
+            Verbal System
+          </Link>
+        ) : (
+          <Link to="/lessons/$track/$unit" params={{ track: "verbs", unit: "3" }} className="font-medium text-primary">
+            Perfect endings lesson
+          </Link>
+        )}
       </p>
     </div>
   );
@@ -457,12 +500,12 @@ function Board({
         <li
           key={row.pgn}
           className={cn(
-            "min-h-16 rounded-[var(--radius-md)] bg-card px-1 py-2 text-center shadow-[var(--shadow-border)]",
+            "min-h-28 overflow-visible rounded-[var(--radius-md)] bg-card px-1 py-3 text-center shadow-[var(--shadow-border)]",
             active === row.pgn && "ring-2 ring-primary",
           )}
         >
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">{row.pgn}</p>
-          {filled[row.pgn] ? <Pointed form={row.form} pgn={row.pgn} className="text-xl" /> : <p className="mt-2 text-sm text-muted">·</p>}
+          {filled[row.pgn] ? <Pointed form={row.form} pgn={row.pgn} className="he-form" /> : <p className="mt-2 text-sm text-muted">·</p>}
         </li>
       ))}
     </ol>

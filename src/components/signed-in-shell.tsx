@@ -115,14 +115,14 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
     items.push({ to: "/rewards", label: "Rewards", hint: "Ranks and badges", icon: Trophy });
   }
   if (admin) {
-    items.push({ to: "/admin/teachings", label: "Teachings desk", hint: "Write a public reading", icon: BookOpen });
+    items.push({ to: "/admin/blogs", label: "Blogs desk", hint: "Write a public post", icon: BookOpen });
     items.push({ to: "/admin", label: "Class roster", hint: "Visitors and learners", icon: Users });
     items.push({ to: "/admin/use", label: "What the class uses", hint: "Visits and practice", icon: BarChart3 });
     if (!iibsSide) items.push({ to: "/admin/voice", label: "Voice bank", hint: "Record class words", icon: Mic });
   }
   items.push({ to: "/", label: "Home page", hint: "The front door", icon: House });
   items.push({ to: "/how-to-memorize-biblical-hebrew-vocabulary", label: "Vocabulary method", hint: "How to learn the words", icon: Library });
-  items.push({ to: "/teachings", label: "Teachings", hint: "Public readings", icon: BookOpen });
+  items.push({ to: "/blogs", label: "Blogs", hint: "Public posts", icon: BookOpen });
   items.push({ to: "/about", label: "About", hint: "The teacher", icon: User });
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });

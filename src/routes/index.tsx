@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
     try {
       const posts = await loadTeachingsIndex();
       return {
-        teachings: posts.slice(0, 3).map((post) => ({
+        blogs: posts.slice(0, 3).map((post) => ({
           slug: post.slug,
           title: post.title,
           summary: post.summary,
@@ -28,14 +28,14 @@ export const Route = createFileRoute("/")({
         })),
       };
     } catch {
-      return { teachings: [] as { slug: string; title: string; summary: string; published: string }[] };
+      return { blogs: [] as { slug: string; title: string; summary: string; published: string }[] };
     }
   },
   component: DoorsPage,
 });
 
 function DoorsPage() {
-  const { teachings } = Route.useLoaderData();
+  const { blogs } = Route.useLoaderData();
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user } = useCurrentUserState();
   const signedIn = sessionUser != null || user != null;
@@ -213,13 +213,13 @@ function DoorsPage() {
           </Link>
         </p>
       </Panel>
-      {teachings.length > 0 ? (
+      {blogs.length > 0 ? (
         <Panel className="mt-4">
-          <h2 className="font-display text-2xl font-semibold text-ink">Latest teachings</h2>
+          <h2 className="font-display text-2xl font-semibold text-ink">Latest blogs</h2>
           <ul className="mt-3 space-y-3">
-            {teachings.map((post) => (
+            {blogs.map((post) => (
               <li key={post.slug}>
-                <Link to="/teachings/$slug" params={{ slug: post.slug }} className="font-semibold text-primary underline-offset-4 hover:underline">
+                <Link to="/blogs/$slug" params={{ slug: post.slug }} className="font-semibold text-primary underline-offset-4 hover:underline">
                   {post.title}
                 </Link>
                 <p className="text-sm text-muted">{post.summary}</p>

@@ -48,15 +48,15 @@ export function validateTeaching(input: {
   published?: string;
 }): { ok: true; value: Omit<Teaching, "updated"> } | { ok: false; error: string } {
   const title = cleanLine(input.title ?? "", 140);
-  if (title.length < 4) return { ok: false, error: "Give the teaching a title." };
+  if (title.length < 4) return { ok: false, error: "Give the blog a title." };
   const summary = cleanLine(input.summary ?? "", 155);
   if (summary.length < 12) return { ok: false, error: "Add a summary of at least a sentence." };
   if ((input.summary ?? "").trim().length > 155) return { ok: false, error: "Keep the summary to 155 characters." };
   const slug = slugify(input.slug?.trim() || title);
   if (!slug) return { ok: false, error: "The address needs letters or numbers." };
   const body = (input.body ?? "").replace(/\r\n/g, "\n").trim();
-  if (body.length < 20) return { ok: false, error: "Write the teaching before saving." };
-  if (body.length > 20000) return { ok: false, error: "This teaching is too long to save." };
+  if (body.length < 20) return { ok: false, error: "Write the post before saving." };
+  if (body.length > 20000) return { ok: false, error: "This post is too long to save." };
   if (input.path !== "grammar" && input.path !== "scripture") {
     return { ok: false, error: "Choose the Grammar Path or the Scripture Path." };
   }
@@ -174,7 +174,7 @@ export function teachingsRss(posts: Teaching[], site: string): string {
   const items = posts
     .filter((post) => isPublicTeaching(post))
     .map((post) => {
-      const link = `${site}/teachings/${post.slug}`;
+      const link = `${site}/blogs/${post.slug}`;
       const pub = new Date(`${post.published}T12:00:00.000Z`).toUTCString();
       return [
         "    <item>",
@@ -192,10 +192,10 @@ export function teachingsRss(posts: Teaching[], site: string): string {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     "  <channel>",
-    "    <title>HaDay Teachings</title>",
-    `    <link>${site}/teachings</link>`,
-    "    <description>Readings from HaDay HebRabbAi Mentor.</description>",
-    `    <atom:link href="${site}/teachings/rss.xml" rel="self" type="application/rss+xml"/>`,
+    "    <title>HaDay Blogs</title>",
+    `    <link>${site}/blogs</link>`,
+    "    <description>Posts from HaDay HebRabbAi Mentor.</description>",
+    `    <atom:link href="${site}/blogs/rss.xml" rel="self" type="application/rss+xml"/>`,
     items,
     "  </channel>",
     "</rss>",

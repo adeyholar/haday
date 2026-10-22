@@ -5,7 +5,8 @@ import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { grammarUnitRecord, isGrammarUnitUnlocked } from "@/lib/game";
+import { grammarUnitRecord, grammarUnitOpen } from "@/lib/game";
+import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/game/lessons/$track/")({ component: GrammarTrackMapPage });
@@ -41,6 +42,7 @@ function GrammarTrackMapPage() {
   const { track: raw } = Route.useParams();
   const track = grammarTrack(raw);
   const game = useStudy((s) => s.game);
+  const term = useOpenTerm();
 
   if (!track) return <Navigate to="/game/article" />;
 
@@ -66,17 +68,29 @@ function GrammarTrackMapPage() {
           ))}
         </div>
         <p className="mt-3 text-sm text-muted">
-          Exam path: 12 questions, closed book. 90% held unlocks the next exam. Prepare in{" "}
-          <Link to="/lessons/$track" params={{ track: track.id }} className="font-semibold text-primary">
-            Study
-          </Link>{" "}
-          first — notes, Tanakh verses, and pairing practice.
+          {term === 2 && track.id === "verbs"
+            ? "Semester 2. Every stem is open. 90% still clears a unit. It does not lock the next one."
+            : "Exam path: 12 questions, closed book. 90% held unlocks the next exam. Prepare in "}
+          {term === 2 && track.id === "verbs" ? null : (
+            <>
+              <Link to="/lessons/$track" params={{ track: track.id }} className="font-semibold text-primary">
+                Study
+              </Link>{" "}
+              first — notes, Tanakh verses, and pairing practice.
+            </>
+          )}
         </p>
         <p className="mt-2 text-sm">
-          <Link to="/game/lessons" className="font-semibold text-primary">
-            All grammar topics
-          </Link>
-          {prev ? (
+          {term === 2 && track.id === "verbs" ? (
+            <Link to="/hub/play" className="font-semibold text-primary">
+              Play
+            </Link>
+          ) : (
+            <Link to="/game/lessons" className="font-semibold text-primary">
+              All grammar topics
+            </Link>
+          )}
+          {term === 2 && track.id === "verbs" ? null : prev ? (
             <>
               <span className="text-muted"> · </span>
               <Link
@@ -112,8 +126,8 @@ function GrammarTrackMapPage() {
       <ol className="grid grid-cols-1 gap-2">
         {track.units.map((u) => {
           const rec = grammarUnitRecord(game, track.id, u.id);
-          const unlocked = isGrammarUnitUnlocked(game, track.id, u.id);
-          const current = unlocked && !rec.cleared;
+          const unlocked = grammarUnitOpen(game, track.id, u.id, term);
+          const current = term === 2 && track.id === "verbs" ? false : unlocked && !rec.cleared;
           const inner = (
             <>
               <div className="flex items-baseline justify-between gap-2">

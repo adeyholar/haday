@@ -20,9 +20,11 @@ test("only the doors, privacy, and credits are indexable", () => {
   assert.equal(isIndexablePath("/credits"), true);
   assert.equal(isIndexablePath("/how-to-memorize-biblical-hebrew-vocabulary"), true);
   assert.equal(isIndexablePath("/about"), true);
-  assert.equal(isIndexablePath("/teachings"), true);
-  assert.equal(isIndexablePath("/teachings/a-post"), true);
-  assert.equal(isIndexablePath("/teachings/rss.xml"), true);
+  assert.equal(isIndexablePath("/blogs"), true);
+  assert.equal(isIndexablePath("/blogs/a-post"), true);
+  assert.equal(isIndexablePath("/blogs/rss.xml"), true);
+  assert.equal(isIndexablePath("/teachings"), false);
+  assert.equal(isIndexablePath("/teachings/a-post"), false);
   assert.equal(isIndexablePath("/sitemap.xml"), true);
   assert.equal(isIndexablePath("/llms.txt"), true);
   assert.equal(isIndexablePath("/ads.txt"), true);
@@ -136,13 +138,13 @@ test("the sitemap and llms.txt come from the public page list", () => {
   assert.equal(xml.match(/<lastmod>/g)?.length, STATIC_PAGES.length);
   const lines = llmsTxt().split("\n");
   assert.equal(lines[2], LLMS_INTRO);
-  assert.equal(llmsTxt().split("\n").includes("Teachings:"), false);
+  assert.equal(llmsTxt().split("\n").includes("Blogs:"), false);
   assert.equal(
     llmsTxt([
-      { path: "/teachings/aleph", title: "Aleph", summary: "A reading.", lastmod: "2026-10-19" },
+      { path: "/blogs/aleph", title: "Aleph", summary: "A reading.", lastmod: "2026-10-19" },
     ])
       .split("\n")
-      .includes("Teachings:"),
+      .includes("Blogs:"),
     true,
   );
   const robots = readFileSync(new URL("../public/robots.txt", import.meta.url), "utf8");

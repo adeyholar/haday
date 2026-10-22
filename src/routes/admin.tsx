@@ -127,11 +127,11 @@ function AdminPage() {
           {mailer?.configured
             ? "Email reset sends the hour-long link to that classmate. Copy stays as a backup if nothing arrives."
             : "This host is not sending mail yet. Email reset still creates a link you can copy until a mailer key is on Azure or Vercel."}{" "}
-          <Link to="/admin/teachings" className="font-semibold text-primary">
-            Teachings desk
+          <Link to="/admin/blogs" className="font-semibold text-primary">
+            Blogs desk
           </Link>
           {" — "}
-          write a public reading without a code change.{" "}
+          write a public post without a code change.{" "}
           <Link to="/admin/use" className="font-semibold text-primary">
             What the class uses
           </Link>

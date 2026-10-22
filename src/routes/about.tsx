@@ -88,8 +88,8 @@ function AboutPage() {
           <li>The Grammar Path and the Scripture Path</li>
         </ul>
         <p className="mt-4 text-sm font-semibold">
-          <a href="/teachings" className="text-primary underline-offset-4 hover:underline">
-            Teachings
+          <a href="/blogs" className="text-primary underline-offset-4 hover:underline">
+            Blogs
           </a>
         </p>
         <p className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">

@@ -16,8 +16,8 @@ export function requestPath(pathname: string): string {
 
 const INDEX_EXTRAS = new Set([
   "/about",
-  "/teachings",
-  "/teachings/rss.xml",
+  "/blogs",
+  "/blogs/rss.xml",
   "/robots.txt",
   "/sitemap.xml",
   "/llms.txt",
@@ -29,7 +29,7 @@ export function isIndexablePath(pathname: string): boolean {
   const path = requestPath(pathname);
   if (allPublicPages().some((page) => page.path === path)) return true;
   if (INDEX_EXTRAS.has(path)) return true;
-  return path.startsWith("/teachings/");
+  return path.startsWith("/blogs/");
 }
 
 export function isPublicReadingPath(pathname: string): boolean {
@@ -39,6 +39,8 @@ export function isPublicReadingPath(pathname: string): boolean {
     path === "/legal" ||
     path === "/credits" ||
     path === "/how-to-memorize-biblical-hebrew-vocabulary" ||
+    path === "/blogs" ||
+    path.startsWith("/blogs/") ||
     path === "/teachings" ||
     path.startsWith("/teachings/")
   );

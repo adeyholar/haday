@@ -101,11 +101,11 @@ export async function getTeaching(slug: string): Promise<Teaching | null> {
 export async function sitemapPages(): Promise<SitePage[]> {
   const posts = await listPublishedTeachings().catch(() => []);
   const newest = posts[0]?.updated || "2026-10-19";
-  const pages = allPublicPages().map((page) => (page.path === "/teachings" ? { ...page, lastmod: newest } : page));
+  const pages = allPublicPages().map((page) => (page.path === "/blogs" ? { ...page, lastmod: newest } : page));
   return [
     ...pages,
     ...posts.map((post) => ({
-      path: `/teachings/${post.slug}`,
+      path: `/blogs/${post.slug}`,
       title: post.title,
       summary: post.summary,
       lastmod: post.updated || post.published,
@@ -187,7 +187,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
       await sql.query("delete from teachings where slug = $1", [previous]);
     }
     const saved = await getTeaching(post.slug);
-    if (!saved) return { ok: false, error: "Could not save the teaching." };
+    if (!saved) return { ok: false, error: "Could not save the post." };
     return { ok: true, teaching: saved };
   });
 
@@ -197,7 +197,7 @@ export const deleteTeaching = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true } | { ok: false; error: string }> => {
     await assertAdmin(context.userId);
     const slug = (data.slug ?? "").trim();
-    if (!slug) return { ok: false, error: "Choose a teaching to remove." };
+    if (!slug) return { ok: false, error: "Choose a post to remove." };
     await ensureTeachingsTable();
     const sql = await getSql();
     await sql.query("delete from teachings where slug = $1", [slug]);
