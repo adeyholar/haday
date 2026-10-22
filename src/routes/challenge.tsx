@@ -9,6 +9,7 @@ import { useStudy } from "@/lib/store";
 import { AppErrorComponent } from "@/lib/error-component";
 import { cn } from "@/lib/cn";
 import { DontKnowButton } from "@/components/dont-know-button";
+import { MarkedAnswer } from "@/components/marked-answer";
 
 export const Route = createFileRoute("/challenge")({
   component: ChallengePage,
@@ -29,7 +30,7 @@ function ChallengePage() {
   }, [run]);
 
   const [typed, setTyped] = useState("");
-  const [report, setReport] = useState<{ pct: number; hits: number; total: number; misses: VocabItem[] } | null>(null);
+  const [report, setReport] = useState<{ pct: number; hits: number; total: number; misses: { item: VocabItem; given: string }[] } | null>(null);
 
   useEffect(() => {
     if (run) setTyped(run.answers[run.i] ?? "");
@@ -49,13 +50,14 @@ function ChallengePage() {
     const nextI = run.i + 1;
     if (nextI >= run.ids.length) {
       const map = new Map(bbhVocab().map((item) => [item.id, item]));
-      const misses: VocabItem[] = [];
+      const misses: { item: VocabItem; given: string }[] = [];
       let hits = 0;
       run.ids.forEach((id, idx) => {
         const item = map.get(id);
         if (!item) return;
-        if (glossMatches(item, answers[idx] ?? "")) hits += 1;
-        else misses.push(item);
+        const given = (answers[idx] ?? "").trim();
+        if (glossMatches(item, given)) hits += 1;
+        else misses.push({ item, given });
       });
       const total = run.ids.length;
       const pct = total ? Math.round((hits / total) * 100) : 0;
@@ -101,10 +103,10 @@ function ChallengePage() {
           <Panel>
             <h2 className="font-display text-xl font-bold text-ink">Missed</h2>
             <ul className="mt-3 divide-y divide-border">
-              {report.misses.slice(0, 40).map((item) => (
-                <li key={item.id} className="flex items-baseline justify-between gap-3 py-2">
-                  <span className="he-word text-xl">{item.hebrew}</span>
-                  <span className="text-sm text-muted">{item.gloss}</span>
+              {report.misses.slice(0, 40).map(({ item, given }) => (
+                <li key={item.id} className="py-2">
+                  <p className="he-word text-xl">{item.hebrew}</p>
+                  <MarkedAnswer ok={false} given={given || "—"} answer={item.gloss} />
                 </li>
               ))}
             </ul>

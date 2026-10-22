@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Panel } from "@/components/panel";
 import {
   startWeek7Run,
@@ -197,18 +198,7 @@ function Card({
       {mark ? (
         <div className="mt-5">
           <GradeBanner ok={mark.ok} label={mark.ok ? "Correct" : "Not quite"} />
-          <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-            {mark.ok ? "Your answer" : "You wrote"}
-          </p>
-          <p className={`mt-1 text-center text-xl font-semibold ${mark.ok ? "text-good" : "text-danger"}`}>
-            {mark.given}
-          </p>
-          {!mark.ok ? (
-            <>
-              <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted">Answer</p>
-              <p className="mt-1 text-center text-xl font-semibold text-good">{show}</p>
-            </>
-          ) : null}
+          <MarkedAnswer ok={mark.ok} given={mark.given} answer={show} />
           <Button className="mt-5 w-full" size="lg" onClick={onNext}>
             Continue
           </Button>

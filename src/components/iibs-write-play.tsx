@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { HebrewType } from "@/components/hebrew-type";
 import { IIBS_LESSON_PASS, iibsGlossHit, type IibsStageId } from "@/lib/iibs-game";
 import { liveMatchAny } from "@/lib/hebrew";
@@ -161,19 +162,13 @@ export function IibsWritePlay({
       {scored ? (
         <div className="mt-4">
           <GradeBanner ok label="Correct" />
+          <MarkedAnswer ok given={typed} answer={stage === "gloss" ? word.gloss : word.hebrew} />
         </div>
       ) : null}
       {missed ? (
         <div className="mt-4">
           <GradeBanner ok={false} label="Not quite" />
-          <p className="mt-3 text-center text-good">
-            {stage === "gloss" ? word.gloss : null}
-            {stage !== "gloss" ? (
-              <span className="he-word text-3xl" dir="rtl" lang="he">
-                {word.hebrew}
-              </span>
-            ) : null}
-          </p>
+          <MarkedAnswer ok={false} given={typed} answer={stage === "gloss" ? word.gloss : word.hebrew} />
         </div>
       ) : null}
       {missed ? (

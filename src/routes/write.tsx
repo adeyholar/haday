@@ -8,7 +8,7 @@ import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { WRITE_LETTERS } from "@/lib/alphabet";
-import { dageshCoach, isSingleLetterLemma, lettersOnly, matchHandwriting, type HandMatch } from "@/lib/hebrew";
+import { dageshCoach, isSingleLetterLemma, matchHandwriting, type HandMatch } from "@/lib/hebrew";
 import { checkGlyphInk } from "@/lib/check-glyph";
 import { writingHint } from "@/lib/letter-models";
 import { saveHandSample } from "@/lib/hand-style";
@@ -18,6 +18,7 @@ import { itemsForWeek, POS_LABEL, shuffle, type VocabItem } from "@/lib/vocab";
 import { takeWriteCheck, writeChecksLeft, WRITE_DAILY_LIMIT } from "@/lib/write-cap";
 import { cn } from "@/lib/cn";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { playGrade } from "@/lib/sfx";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { spliceLater } from "@/lib/quiz-draw";
@@ -593,15 +594,7 @@ function ResultPanel({
         <p className="mt-2 text-center text-sm font-medium text-danger">One retry left</p>
       )}
       {!hideAnswer && (
-        <p className="mt-1 text-sm text-muted">
-          Target <span className="he-word text-lg text-fg">{item.hebrew}</span>
-          {result.read && lettersOnly(result.read) !== lettersOnly(item.hebrew) ? (
-            <>
-              {" "}
-              · that looks like <span className="he-word text-lg text-fg">{result.read}</span>
-            </>
-          ) : null}
-        </p>
+        <MarkedAnswer ok={ok} given={result.read} answer={item.hebrew} />
       )}
       {!hideAnswer && result.match === "wrong" && isSingleLetterLemma(item.hebrew) && (
         <p className="mt-2 text-sm text-ink">{writingHint(item.hebrew)}</p>

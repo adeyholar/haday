@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
@@ -153,6 +154,9 @@ export function SelfQuizPlay({
 
       {tries >= 1 && !revealed ? <AttemptBanner className="mt-3" kind="retry" /> : null}
       {revealed ? <AttemptBanner className="mt-3" kind={mark === "weak" ? "fail" : "strong"} /> : null}
+      {revealed && item ? (
+        <MarkedAnswer ok={mark !== "weak"} given={mode === "choice" ? picked : typed} answer={item.gloss} />
+      ) : null}
 
       {mode === "choice" ? (
         <>

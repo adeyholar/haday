@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { WeekSelect } from "@/components/week-select";
 import { FocusToggle } from "@/components/focus-toggle";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Panel } from "@/components/panel";
 import { type VocabItem } from "@/lib/vocab";
 import { pickEloDeck } from "@/lib/elo";
@@ -220,6 +221,11 @@ function MatchPage() {
         {pickSel && (
           <div className="mt-3">
             <GradeBanner ok={ok} />
+            <MarkedAnswer
+              ok={ok}
+              given={pickChoices.find((choice) => choice.id === pickSel)?.hebrew}
+              answer={item?.hebrew ?? ""}
+            />
             {gaveUp && (
               <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
             )}

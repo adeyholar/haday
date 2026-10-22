@@ -230,6 +230,10 @@ function GuidePage() {
 
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">Study toolbox</h2>
+        <p className="mt-2 text-sm text-muted">
+          When a card is marked Correct or Not quite, the answer is on the card. A miss also shows what you wrote.
+          Try again, before that mark, still does not tell you.
+        </p>
         <dl className="mt-3 space-y-3 text-sm">
           <Tool name="Drill" to="/drill" body="Every word is a study card first. Type a guess and Check grades it Correct or Not quite. Show meaning, with an empty box, still asks I knew it or Not yet. The same words are then asked every way, in groups of five. When the answer is Hebrew, Show me lights the next letter, the same way as the game. It does not print the word. A word you build with that help comes back once and is not scored correct. Leave and come back: Continue where you stopped, or Start over. A miss says Not quite and comes back in the group. Study cards are not part of the score." />
           <Tool name="Write" to="/write" body="Type or hand-write the Hebrew. Memorize mode hides the lemma first. After a miss you can save that scribble as your handwriting." />

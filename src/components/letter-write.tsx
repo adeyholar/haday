@@ -9,6 +9,7 @@ import { HebrewFormChoices, ProduceModeChips, TYPE_PRODUCE_OPTIONS } from "@/com
 import { hebrewFormChoices, type FormMcKind } from "@/lib/hebrew-form-mc";
 import { playFeedback } from "@/lib/try-again";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 
 type Kind = "letter" | "vowel";
 type WriteLevel = "copy" | "stave";
@@ -343,6 +344,7 @@ export function LetterWrite() {
             onPick={pickLetterForm}
           />
           {mcRevealed ? <AttemptBanner className="mt-3" kind={mcPicked === glyph ? "strong" : "fail"} /> : null}
+          {mcRevealed ? <MarkedAnswer ok={mcPicked === glyph} given={mcPicked} answer={glyph} /> : null}
         </>
       ) : (
         <GlyphInk

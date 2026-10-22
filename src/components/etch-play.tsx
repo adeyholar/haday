@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
 import { cn } from "@/lib/cn";
@@ -418,6 +419,7 @@ export function EtchPlay({
       {study && revealed && graded && (
         <div className="mt-4">
           <GradeBanner ok={picked === item.id} label={picked === item.id ? "Correct" : "Not quite"} />
+          <MarkedAnswer ok={picked === item.id} given={typed} answer={item.gloss} />
           <Button className="mt-3 w-full" onClick={() => finish(picked === item.id ? "good" : "again")}>
             Next
           </Button>
@@ -726,6 +728,25 @@ export function EtchPlay({
       {graded && !study && (
         <div className="mt-4">
           <GradeBanner ok={ok} label={ok ? "Correct" : "Not quite"} />
+          <MarkedAnswer
+            ok={ok}
+            given={
+              choices.find((choice) => choice.id === picked)
+                ? task.kind === "contrast" && task.cue === "he"
+                  ? choices.find((choice) => choice.id === picked)?.gloss
+                  : choices.find((choice) => choice.id === picked)?.hebrew
+                : typed
+            }
+            answer={
+              task.kind === "contrast" && task.cue === "he"
+                ? item.gloss
+                : task.cue === "en" || task.cue === "picture" || task.cue === "audio" || task.cue === "spell" || task.kind === "verse"
+                  ? (task.verse?.hit || item.hebrew)
+                  : task.kind === "contrast"
+                    ? item.hebrew
+                    : item.gloss
+            }
+          />
           {task.kind !== "meet" && task.kind !== "study" && (
             <p className="mt-2 text-center">
               <span className="he-word text-3xl">{item.hebrew}</span>

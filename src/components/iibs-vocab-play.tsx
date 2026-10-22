@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { IIBS_LESSON_PASS } from "@/lib/iibs-game";
 import { playFeedback } from "@/lib/try-again";
 import type { IibsVocabWord } from "@/lib/iibs-vocab";
@@ -163,6 +164,7 @@ export function IibsVocabPlay({
       {picked ? (
         <div className="mt-4">
           <GradeBanner ok={picked === word.gloss} label={picked === word.gloss ? "Correct" : "Not quite"} />
+          <MarkedAnswer ok={picked === word.gloss} given={picked} answer={word.gloss} />
         </div>
       ) : null}
       {picked && picked !== word.gloss ? (

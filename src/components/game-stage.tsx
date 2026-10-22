@@ -11,6 +11,7 @@ import { DontKnowButton } from "@/components/dont-know-button";
 import { NewBadges } from "@/components/rewards-bar";
 import { playFeedback } from "@/lib/try-again";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
 import { speakLine } from "@/lib/listen";
@@ -593,6 +594,7 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
           {picked && (
             <>
               <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
+              <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
               {picked !== item.gloss && (
                 <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}
@@ -657,7 +659,7 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={typedOk ? "strong" : "fail"} />
-              <p className="mt-2 text-center text-sm text-muted">Class gloss: {item.gloss}</p>
+              <MarkedAnswer ok={typedOk} given={typed} answer={item.gloss} />
               {!typedOk && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}
@@ -729,11 +731,7 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={typedOk ? "strong" : "fail"} />
-              {!typedOk && (
-                <p className="mt-2 text-center text-sm text-muted">
-                  Answer: <span className="he-word text-xl text-ink">{item.hebrew}</span>
-                </p>
-              )}
+              <MarkedAnswer ok={typedOk} given={typed} answer={item.hebrew} />
               {typedOk && spell.alts.some((a) => a !== item.hebrew) && (
                 <p className="mt-2 text-center text-sm text-muted">
                   Lemma <span className="he-word text-lg text-ink">{item.hebrew}</span>
