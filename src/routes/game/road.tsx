@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord, stopSpeech, unlockSpeech } from "@/lib/listen";
@@ -425,6 +426,12 @@ export function RoadExam({
           {task.item.hebrew}
         </p>
       </Panel>
+      {phase === "feedback" && note === "Correct" ? (
+        <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
+          <GradeBanner ok label="Correct" />
+          <MarkedAnswer ok answer={task.choices.find((choice) => choice.correct)?.letter ?? ""} />
+        </div>
+      ) : null}
       {retrySign ? (
         <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
           <GradeBanner ok={false} label="Retry" />
@@ -434,7 +441,11 @@ export function RoadExam({
       {secondMiss ? (
         <div className="mb-3 rounded-[var(--radius-xl)] bg-card px-4 py-6 text-center shadow-[var(--shadow-border)]">
           <GradeBanner ok={false} label="Not quite" />
-          <p className="mt-3 text-base font-medium text-ink">{note}</p>
+          <MarkedAnswer
+            ok={false}
+            given={picked}
+            answer={task.choices.find((choice) => choice.correct)?.letter ?? ""}
+          />
         </div>
       ) : null}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">

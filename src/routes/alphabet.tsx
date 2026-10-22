@@ -20,6 +20,7 @@ import { pickByBkt } from "@/lib/bkt";
 import { shuffle } from "@/lib/vocab";
 import { cn } from "@/lib/cn";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { GlyphInk } from "@/components/glyph-ink";
 import { LetterWrite } from "@/components/letter-write";
 import { HandTrain } from "@/components/hand-train";
@@ -473,6 +474,11 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
       {picked && (
         <>
           <AttemptBanner className="mt-4" kind={picked === prompt.id ? "strong" : "fail"} />
+          <MarkedAnswer
+            ok={picked === prompt.id}
+            given={options.find((option) => option.id === picked) ? optionLabel(options.find((option) => option.id === picked)!) : undefined}
+            answer={optionLabel(prompt)}
+          />
           {gaveUp && (
             <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
           )}

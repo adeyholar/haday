@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { passageForRoot } from "@/lib/verbal-passages";
@@ -425,14 +426,9 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
               <p className={cn("font-semibold", verdict.ok ? "text-good" : "text-danger")}>
                 {verdict.ok ? "Correct" : "Not yet"}
               </p>
+              <MarkedAnswer ok={verdict.ok} given={shown} answer={cell.form} />
               {!verdict.ok ? (
                 <>
-                  <p className="mt-2 flex flex-wrap items-baseline gap-2 text-sm">
-                    <span>Answer</span>
-                    <span className="he-taam text-4xl leading-[2.2] text-ink" dir="rtl" lang="he">
-                      {cell.form}
-                    </span>
-                  </p>
                   <ul className="mt-2 list-disc space-y-1 ps-5 text-sm">
                     {verdict.lines.map((line) => (
                       <li key={line}>{line}</li>

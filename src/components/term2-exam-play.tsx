@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { MixHe } from "@/components/grammar-play";
 import { Panel } from "@/components/panel";
@@ -193,6 +194,7 @@ export function Term2ExamPlay({ chapter }: { chapter: number }) {
       {picked ? (
         <div className="mt-3">
           <AttemptBanner kind={ok ? "strong" : "fail"} />
+          <MarkedAnswer ok={ok} given={picked} answer={q.answer} />
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>

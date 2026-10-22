@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
@@ -264,6 +265,7 @@ function WeakPoolPage() {
       {picked ? (
         <>
           <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
+          <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
           {gaveUp ? <p className="mt-2 text-center text-sm text-muted">It stays in the next pool.</p> : null}
         </>
       ) : null}

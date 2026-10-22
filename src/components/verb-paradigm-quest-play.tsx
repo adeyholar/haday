@@ -4,6 +4,7 @@ import { HebrewType } from "@/components/hebrew-type";
 import { Panel } from "@/components/panel";
 import { QalPerfectBuilder } from "@/components/qal-perfect-builder";
 import { Button } from "@/components/ui/button";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { cn } from "@/lib/cn";
 import { speakHebrewWord } from "@/lib/listen";
 import { markQueryInVerse } from "@/lib/tanakh-word";
@@ -396,6 +397,7 @@ function VerbQuestSitting({
             ))}
           </ul>
           {lines.length ? <Feedback lines={lines} nudge={false} /> : null}
+          {choice ? <MarkedAnswer ok={choice === card.pgn} given={choice} answer={`${card.pgn} · ${card.gloss}`} /> : null}
           {choice && choice !== card.pgn ? (
             <Button className="mt-3 w-full" onClick={() => finishCard(card, false)}>
               Next
@@ -439,9 +441,13 @@ function VerbQuestSitting({
             </p>
           ) : null}
           {revealed ? (
-            <p className="mt-3 text-center">
-              <Pointed form={card.form} pgn={card.pgn} className="text-4xl" />
-            </p>
+            <div className="mt-3">
+              <MarkedAnswer ok={false} given={built} answer="" />
+              <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.16em] text-muted">Answer</p>
+              <p className="mt-1 text-center">
+                <Pointed form={card.form} pgn={card.pgn} className="text-4xl" />
+              </p>
+            </div>
           ) : null}
           {lines.length ? <Feedback lines={lines} nudge={nudge && !helped} /> : null}
           <div className="mt-3">

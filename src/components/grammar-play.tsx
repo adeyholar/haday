@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { Panel } from "@/components/panel";
 import { TanakhLearnVerse } from "@/components/tanakh-learn-verse";
@@ -470,6 +471,7 @@ export function GrammarPlay({
       {picked && (
         <div className="mt-3">
           <AttemptBanner kind={ok ? "strong" : "fail"} />
+          <MarkedAnswer ok={ok} given={picked} answer={q.answer} />
           <p className="mt-2 text-sm text-muted">
             <MixHe text={q.why} />
           </p>

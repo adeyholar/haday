@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Panel } from "@/components/panel";
 import { playFeedback } from "@/lib/try-again";
 import {
@@ -288,15 +289,7 @@ export function AlefBetPlay({ level }: { level: AlefBetLevel }) {
         {grade != null ? (
           <div className="mt-4">
             <AttemptBanner kind={grade ? "strong" : gaveUp || tries >= 1 ? "fail" : "retry"} />
-            {gaveUp ? (
-              <p className="mt-3 text-lg font-semibold text-ink">
-                {q.kind === "name-of" || q.kind === "number-of" ? (
-                  shownAnswer(q)
-                ) : (
-                  <span className="he-word text-5xl">{shownAnswer(q)}</span>
-                )}
-              </p>
-            ) : null}
+            {grade || gaveUp || tries >= 1 ? <MarkedAnswer ok={Boolean(grade)} answer={shownAnswer(q)} /> : null}
             {gaveUp ? (
               <p className="mt-2 text-sm text-muted">Back in the pool — you will see it again.</p>
             ) : null}

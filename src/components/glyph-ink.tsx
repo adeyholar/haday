@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { InkPad, type InkPadHandle } from "@/components/ink-pad";
 import { GradeBanner } from "@/components/grade-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { checkGlyphInk } from "@/lib/check-glyph";
 import { playGrade } from "@/lib/sfx";
 import { writeChecksLeft } from "@/lib/write-cap";
@@ -148,13 +149,8 @@ export function GlyphInk({ expected, mode, ghost, trace = false, allowSample = t
       {result && result.match !== "empty" && (
         <div className="mt-3">
           <GradeBanner ok={ok} />
-          <p className="mt-2 text-center text-sm text-muted">
-            {result.note
-              ? result.note
-              : ok
-                ? `Read as ${result.read || expected}`
-                : `Not that ${mode}. Target: ${expected}${result.read && result.read !== expected ? ` · that looks like ${result.read}` : ""}`}
-          </p>
+          <MarkedAnswer ok={ok} given={result.read} answer={expected} />
+          {result.note ? <p className="mt-2 text-center text-sm text-muted">{result.note}</p> : null}
           {result.match === "wrong" && mode === "letter" && (
             <div className="mt-3">
               <Button type="button" variant="outline" className="w-full" onClick={saveHand}>

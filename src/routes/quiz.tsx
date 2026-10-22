@@ -14,6 +14,7 @@ import { GradeBanner } from "@/components/grade-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { playFeedback } from "@/lib/try-again";
 import { AttemptBanner } from "@/components/attempt-banner";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { VocabArt } from "@/components/vocab-art";
 import { isTerm2Week } from "@/lib/vocab-s2";
 
@@ -268,6 +269,7 @@ function QuizPage() {
         {picked && (
           <>
             <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
+            <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
             {gaveUp && (
               <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
             )}
@@ -338,9 +340,7 @@ function QuizPage() {
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={glossMatches(item, typed) ? "strong" : "fail"} />
-              {revealed && !glossMatches(item, typed) ? (
-                <p className="mt-2 text-center font-display text-lg font-semibold text-ink">{item.gloss}</p>
-              ) : null}
+              <MarkedAnswer ok={glossMatches(item, typed)} given={typed} answer={item.gloss} />
               {gaveUp && (
                 <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
               )}

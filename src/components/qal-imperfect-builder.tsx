@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { MarkedAnswer } from "@/components/marked-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import {
@@ -233,14 +234,9 @@ export function QalImperfectBuilder() {
               {row ? (
                 <div className="border-t border-dashed border-border pt-2 sm:col-span-3">
                   <p className={cn("font-semibold", row.ok ? "text-good" : "text-danger")}>{row.ok ? "Correct" : "Not yet"}</p>
+                  <MarkedAnswer ok={row.ok} given={preview} answer={row.answer} />
                   {!row.ok ? (
                     <>
-                      <p className="mt-1 flex flex-wrap items-baseline gap-2 text-sm">
-                        <span>Answer:</span>
-                        <span className="he-taam text-3xl leading-[2.2] text-ink" dir="rtl" lang="he">
-                          {row.answer}
-                        </span>
-                      </p>
                       <ul className="mt-1 list-disc space-y-1 ps-5 text-sm">
                         {row.diffs.map((line) => (
                           <li key={line}>{line}</li>
