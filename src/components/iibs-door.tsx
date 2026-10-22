@@ -103,6 +103,15 @@ export function LevelHall({
         })}
       </div>
       <Link
+        to="/iibs/verb-paradigm-quest"
+        className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <span className="font-display text-2xl font-bold">Build from the root</span>
+        <span className="mt-1 block text-sm text-muted">
+          Qal perfect. Only the three letters. You add the vowels, the accent, and the meteg.
+        </span>
+      </Link>
+      <Link
         to="/iibs/verbal-system"
         className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
       >
@@ -184,6 +193,14 @@ export function LevelRoom({
             <Headphones className="size-5 text-primary" />
             <span className="mt-2 font-display text-xl font-bold">Listen</span>
             <span className="text-sm text-muted">This level, on the road</span>
+          </Link>
+          <Link
+            to="/iibs/verb-paradigm-quest"
+            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+          >
+            <ScrollText className="size-5 text-primary" />
+            <span className="mt-2 font-display text-xl font-bold">Build from the root</span>
+            <span className="text-sm text-muted">Qal perfect. Vowels, accent, and meteg.</span>
           </Link>
           <Link
             to="/iibs/verbal-system"

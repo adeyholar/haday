@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useRef } from "react";
 import { cn } from "@/lib/cn";
 import { liveMatchAny, normalizeHebrewFull, pointingHint } from "@/lib/hebrew";
 import { GradeBanner } from "@/components/grade-banner";
@@ -95,13 +96,22 @@ function PadKey({
       aria-label={name}
       onClick={onClick}
       className={cn(
-        "flex min-h-12 items-center justify-center rounded-[var(--radius-sm)] bg-card px-1 shadow-[var(--shadow-border)] disabled:opacity-40",
+        "flex items-center justify-center rounded-[var(--radius-sm)] bg-card px-1 shadow-[var(--shadow-border)] disabled:opacity-40",
+        taam ? "min-h-20 py-1" : "min-h-12",
         quiet && "opacity-40",
         lit && "ring-2 ring-primary",
         shake && "ring-2 ring-danger",
       )}
     >
-      <span className={cn(taam ? "he-taam text-3xl leading-none" : "he-word text-3xl leading-none")}>{glyph}</span>
+      <span className={cn("flex flex-col items-center", taam ? "he-taam justify-center" : "he-word")}>
+        <span
+          className={taam ? "text-3xl" : "text-3xl leading-none"}
+          style={taam ? { lineHeight: 2.1, display: "block" } : undefined}
+        >
+          {glyph}
+        </span>
+        {taam ? <span className="font-sans text-[10px] font-semibold uppercase tracking-wide text-muted">{name}</span> : null}
+      </span>
     </button>
   );
 }
@@ -143,7 +153,7 @@ function PadSection({
 
 type Props = {
   value: string;
-  onChange: (next: string) => void;
+  onChange: (next: string) => void | string;
   target: string;
   alts?: string[];
   disabled?: boolean;
@@ -159,8 +169,8 @@ type Props = {
   hideVowelLetters?: boolean;
   /** Backspace removes one mark, not the whole letter. */
   markBackspace?: boolean;
-  /** When it returns true, the accent or meteg is placed by the parent. */
-  onSpecialMark?: (insert: string) => boolean;
+  /** When it returns true, the accent or meteg is placed by the parent. A string is the word after that placement. */
+  onSpecialMark?: (insert: string) => boolean | string;
 };
 
 export function HebrewType({
@@ -179,6 +189,8 @@ export function HebrewType({
   onSpecialMark,
 }: Props) {
   const live = liveMatchAny(target, value, alts, strict);
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const extra = live === "off" ? pointingHint(target, value) : null;
   const offLabel = extra === "Use the final form" ? extra : "Try again";
   const hint = strict
@@ -201,6 +213,7 @@ export function HebrewType({
 
   function add(chunk: string) {
     if (disabled) return;
+    const current = valueRef.current;
     if (guide) {
       const want = guide.expected;
       const same = want != null && samePiece(chunk, want);
@@ -209,8 +222,18 @@ export function HebrewType({
         return;
       }
     }
-    if ((chunk === "\u05AB" || chunk === "\u05BD") && onSpecialMark?.(chunk)) return;
-    onChange(value + chunk);
+    if (chunk === "\u05AB" || chunk === "\u05BD") {
+      const placed = onSpecialMark?.(chunk);
+      if (placed === true) return;
+      if (typeof placed === "string") {
+        const stored = onChange(placed);
+        valueRef.current = typeof stored === "string" ? stored : placed;
+        return;
+      }
+    }
+    const next = current + chunk;
+    const stored = onChange(next);
+    valueRef.current = typeof stored === "string" ? stored : next;
   }
 
   function keyFace(insert: string) {
@@ -263,7 +286,12 @@ export function HebrewType({
         <button
           type="button"
           disabled={disabled || !value}
-          onClick={() => onChange(markBackspace ? dropLastMark(value) : dropLastGrapheme(value))}
+          onClick={() => {
+            const current = valueRef.current;
+            const next = markBackspace ? dropLastMark(current) : dropLastGrapheme(current);
+            const stored = onChange(next);
+            valueRef.current = typeof stored === "string" ? stored : next;
+          }}
           className={cn(
             "min-h-11 rounded-[var(--radius-sm)] bg-card text-sm font-medium text-ink shadow-[var(--shadow-border)] disabled:opacity-40",
             guide && guide.expected == null && "ring-2 ring-primary",
@@ -288,7 +316,10 @@ export function HebrewType({
         <button
           type="button"
           disabled={disabled || !value}
-          onClick={() => onChange("")}
+          onClick={() => {
+            valueRef.current = "";
+            onChange("");
+          }}
           className="min-h-11 rounded-[var(--radius-sm)] bg-card text-sm font-medium text-ink shadow-[var(--shadow-border)] disabled:opacity-40"
         >
           Clear
@@ -307,8 +338,8 @@ export function HebrewType({
         ))}
         {extraMarks ? (
           <>
-            <PadKey taam glyph="◌֫" name="Accent" disabled={disabled} {...keyFace("\u05AB")} onClick={() => add("\u05AB")} />
-            <PadKey taam glyph="◌ֽ" name="Meteg" disabled={disabled} {...keyFace("\u05BD")} onClick={() => add("\u05BD")} />
+            <PadKey taam glyph="ק֫" name="Accent" disabled={disabled} {...keyFace("\u05AB")} onClick={() => add("\u05AB")} />
+            <PadKey taam glyph="קָֽ" name="Meteg" disabled={disabled} {...keyFace("\u05BD")} onClick={() => add("\u05BD")} />
           </>
         ) : null}
       </PadSection>

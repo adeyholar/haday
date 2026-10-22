@@ -41,9 +41,9 @@ export const STATIC_PAGES: SitePage[] = [
     lastmod: "2026-10-19",
   },
   {
-    path: "/teachings",
-    title: "Teachings",
-    summary: "Short readings from HaDay HebRabbAi Mentor that send you back to the Hebrew text.",
+    path: "/blogs",
+    title: "Blogs",
+    summary: "Posts from HaDay HebRabbAi Mentor. Lessons, notes, and other writing.",
     lastmod: "2026-10-19",
   },
 ];
@@ -75,10 +75,10 @@ export const LLMS_INTRO =
   "Learn to read the Hebrew Bible in its original language, for beginners, students and believers who want to understand Scripture more deeply.";
 
 export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
-  const posts = pages.filter((page) => page.path.startsWith("/teachings/"));
-  const rest = pages.filter((page) => !page.path.startsWith("/teachings/"));
+  const posts = pages.filter((page) => page.path.startsWith("/blogs/"));
+  const rest = pages.filter((page) => !page.path.startsWith("/blogs/"));
   const lines = rest.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
-  const teachingLines = posts.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const blogLines = posts.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
   return [
     "# HaDay HebRabbAi Mentor",
     "",
@@ -86,7 +86,7 @@ export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
     "",
     "Public pages:",
     ...lines,
-    ...(posts.length ? ["", "Teachings:", ...teachingLines] : []),
+    ...(posts.length ? ["", "Blogs:", ...blogLines] : []),
     "",
     "The class study, games, listen pages, and lexicon require sign-in. Textbook pages and answer keys are not published here.",
     "",

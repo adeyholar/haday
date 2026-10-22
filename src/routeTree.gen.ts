@@ -40,11 +40,15 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TypeRouteImport } from './routes/type'
 import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
+import { Route as AdminBlogsRouteImport } from './routes/admin.blogs'
 import { Route as AdminQueryRouteImport } from './routes/admin.query'
 import { Route as AdminTeachingsRouteImport } from './routes/admin.teachings'
 import { Route as AdminUseRouteImport } from './routes/admin.use'
 import { Route as AdminVoiceRouteImport } from './routes/admin.voice'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as BlogsIndexRouteImport } from './routes/blogs/index'
+import { Route as BlogsSlugRouteImport } from './routes/blogs/$slug'
+import { Route as BlogsRssDotxmlRouteImport } from './routes/blogs/rss[.]xml'
 import { Route as FinderIndexRouteImport } from './routes/finder/index'
 import { Route as FinderDeckRouteImport } from './routes/finder/deck'
 import { Route as FinderWordRouteImport } from './routes/finder/word'
@@ -65,7 +69,9 @@ import { Route as HubPracticeRouteImport } from './routes/hub/practice'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
+import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfect'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
+import { Route as IibsVerbParadigmQuestRouteImport } from './routes/iibs/verb-paradigm-quest'
 import { Route as IibsVerbalSystemRouteImport } from './routes/iibs/verbal-system'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
@@ -271,6 +277,11 @@ const WriteRoute = WriteRouteImport.update({
   path: '/write',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBlogsRoute = AdminBlogsRouteImport.update({
+  id: '/blogs',
+  path: '/blogs',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminQueryRoute = AdminQueryRouteImport.update({
   id: '/query',
   path: '/query',
@@ -294,6 +305,21 @@ const AdminVoiceRoute = AdminVoiceRouteImport.update({
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogsIndexRoute = BlogsIndexRouteImport.update({
+  id: '/blogs/',
+  path: '/blogs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogsSlugRoute = BlogsSlugRouteImport.update({
+  id: '/blogs/$slug',
+  path: '/blogs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogsRssDotxmlRoute = BlogsRssDotxmlRouteImport.update({
+  id: '/blogs/rss.xml',
+  path: '/blogs/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinderIndexRoute = FinderIndexRouteImport.update({
@@ -396,9 +422,19 @@ const IibsLearnRoute = IibsLearnRouteImport.update({
   path: '/learn',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsQalImperfectRoute = IibsQalImperfectRouteImport.update({
+  id: '/qal-imperfect',
+  path: '/qal-imperfect',
+  getParentRoute: () => IibsRoute,
+} as any)
 const IibsRoadRoute = IibsRoadRouteImport.update({
   id: '/road',
   path: '/road',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsVerbParadigmQuestRoute = IibsVerbParadigmQuestRouteImport.update({
+  id: '/verb-paradigm-quest',
+  path: '/verb-paradigm-quest',
   getParentRoute: () => IibsRoute,
 } as any)
 const IibsVerbalSystemRoute = IibsVerbalSystemRouteImport.update({
@@ -676,11 +712,14 @@ export interface FileRoutesByFullPath {
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/blogs/rss.xml': typeof BlogsRssDotxmlRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
@@ -698,12 +737,15 @@ export interface FileRoutesByFullPath {
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
   '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
+  '/blogs/': typeof BlogsIndexRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
@@ -781,11 +823,14 @@ export interface FileRoutesByTo {
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/blogs/rss.xml': typeof BlogsRssDotxmlRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
@@ -803,12 +848,15 @@ export interface FileRoutesByTo {
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
   '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
+  '/blogs': typeof BlogsIndexRoute
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
   '/iibs': typeof IibsIndexRoute
@@ -889,11 +937,14 @@ export interface FileRoutesById {
   '/type': typeof TypeRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/query': typeof AdminQueryRoute
   '/admin/teachings': typeof AdminTeachingsRoute
   '/admin/use': typeof AdminUseRoute
   '/admin/voice': typeof AdminVoiceRoute
   '/api/health': typeof ApiHealthRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
+  '/blogs/rss.xml': typeof BlogsRssDotxmlRoute
   '/finder/deck': typeof FinderDeckRoute
   '/finder/word': typeof FinderWordRoute
   '/game/final': typeof GameFinalRoute
@@ -911,12 +962,15 @@ export interface FileRoutesById {
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
   '/teachings/rss.xml': typeof TeachingsRssDotxmlRoute
+  '/blogs/': typeof BlogsIndexRoute
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
@@ -998,11 +1052,14 @@ export interface FileRouteTypes {
     | '/type'
     | '/weak'
     | '/write'
+    | '/admin/blogs'
     | '/admin/query'
     | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/blogs/rss.xml'
     | '/finder/deck'
     | '/finder/word'
     | '/game/final'
@@ -1020,12 +1077,15 @@ export interface FileRouteTypes {
     | '/hub/practice'
     | '/iibs/$level'
     | '/iibs/learn'
+    | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
     | '/teachings/rss.xml'
+    | '/blogs/'
     | '/finder/'
     | '/game/'
     | '/iibs/'
@@ -1103,11 +1163,14 @@ export interface FileRouteTypes {
     | '/type'
     | '/weak'
     | '/write'
+    | '/admin/blogs'
     | '/admin/query'
     | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/blogs/rss.xml'
     | '/finder/deck'
     | '/finder/word'
     | '/game/final'
@@ -1125,12 +1188,15 @@ export interface FileRouteTypes {
     | '/hub/practice'
     | '/iibs/$level'
     | '/iibs/learn'
+    | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
     | '/teachings/rss.xml'
+    | '/blogs'
     | '/finder'
     | '/game'
     | '/iibs'
@@ -1210,11 +1276,14 @@ export interface FileRouteTypes {
     | '/type'
     | '/weak'
     | '/write'
+    | '/admin/blogs'
     | '/admin/query'
     | '/admin/teachings'
     | '/admin/use'
     | '/admin/voice'
     | '/api/health'
+    | '/blogs/$slug'
+    | '/blogs/rss.xml'
     | '/finder/deck'
     | '/finder/word'
     | '/game/final'
@@ -1232,12 +1301,15 @@ export interface FileRouteTypes {
     | '/hub/practice'
     | '/iibs/$level'
     | '/iibs/learn'
+    | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
     | '/teachings/rss.xml'
+    | '/blogs/'
     | '/finder/'
     | '/game/'
     | '/iibs/'
@@ -1319,6 +1391,8 @@ export interface RootRouteChildren {
   WeakRoute: typeof WeakRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  BlogsSlugRoute: typeof BlogsSlugRoute
+  BlogsRssDotxmlRoute: typeof BlogsRssDotxmlRoute
   FinderDeckRoute: typeof FinderDeckRoute
   FinderWordRoute: typeof FinderWordRoute
   GameFinalRoute: typeof GameFinalRoute
@@ -1336,6 +1410,7 @@ export interface RootRouteChildren {
   HubPracticeRoute: typeof HubPracticeRoute
   TeachingsSlugRoute: typeof TeachingsSlugRoute
   TeachingsRssDotxmlRoute: typeof TeachingsRssDotxmlRoute
+  BlogsIndexRoute: typeof BlogsIndexRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
@@ -1591,6 +1666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WriteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/blogs': {
+      id: '/admin/blogs'
+      path: '/blogs'
+      fullPath: '/admin/blogs'
+      preLoaderRoute: typeof AdminBlogsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/query': {
       id: '/admin/query'
       path: '/query'
@@ -1624,6 +1706,27 @@ declare module '@tanstack/react-router' {
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blogs/': {
+      id: '/blogs/'
+      path: '/blogs'
+      fullPath: '/blogs/'
+      preLoaderRoute: typeof BlogsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blogs/$slug': {
+      id: '/blogs/$slug'
+      path: '/blogs/$slug'
+      fullPath: '/blogs/$slug'
+      preLoaderRoute: typeof BlogsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blogs/rss.xml': {
+      id: '/blogs/rss.xml'
+      path: '/blogs/rss.xml'
+      fullPath: '/blogs/rss.xml'
+      preLoaderRoute: typeof BlogsRssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/finder/': {
@@ -1766,11 +1869,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsLearnRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/qal-imperfect': {
+      id: '/iibs/qal-imperfect'
+      path: '/qal-imperfect'
+      fullPath: '/iibs/qal-imperfect'
+      preLoaderRoute: typeof IibsQalImperfectRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/iibs/road': {
       id: '/iibs/road'
       path: '/road'
       fullPath: '/iibs/road'
       preLoaderRoute: typeof IibsRoadRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/verb-paradigm-quest': {
+      id: '/iibs/verb-paradigm-quest'
+      path: '/verb-paradigm-quest'
+      fullPath: '/iibs/verb-paradigm-quest'
+      preLoaderRoute: typeof IibsVerbParadigmQuestRouteImport
       parentRoute: typeof IibsRoute
     }
     '/iibs/verbal-system': {
@@ -2113,6 +2230,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminBlogsRoute: typeof AdminBlogsRoute
   AdminQueryRoute: typeof AdminQueryRoute
   AdminTeachingsRoute: typeof AdminTeachingsRoute
   AdminUseRoute: typeof AdminUseRoute
@@ -2120,6 +2238,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBlogsRoute: AdminBlogsRoute,
   AdminQueryRoute: AdminQueryRoute,
   AdminTeachingsRoute: AdminTeachingsRoute,
   AdminUseRoute: AdminUseRoute,
@@ -2143,7 +2262,9 @@ const IibsStudyLevelRouteWithChildren = IibsStudyLevelRoute._addFileChildren(
 interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
   IibsLearnRoute: typeof IibsLearnRoute
+  IibsQalImperfectRoute: typeof IibsQalImperfectRoute
   IibsRoadRoute: typeof IibsRoadRoute
+  IibsVerbParadigmQuestRoute: typeof IibsVerbParadigmQuestRoute
   IibsVerbalSystemRoute: typeof IibsVerbalSystemRoute
   IibsIndexRoute: typeof IibsIndexRoute
   IibsStudyLevelRoute: typeof IibsStudyLevelRouteWithChildren
@@ -2157,7 +2278,9 @@ interface IibsRouteChildren {
 const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
   IibsLearnRoute: IibsLearnRoute,
+  IibsQalImperfectRoute: IibsQalImperfectRoute,
   IibsRoadRoute: IibsRoadRoute,
+  IibsVerbParadigmQuestRoute: IibsVerbParadigmQuestRoute,
   IibsVerbalSystemRoute: IibsVerbalSystemRoute,
   IibsIndexRoute: IibsIndexRoute,
   IibsStudyLevelRoute: IibsStudyLevelRouteWithChildren,
@@ -2225,6 +2348,8 @@ const rootRouteChildren: RootRouteChildren = {
   WeakRoute: WeakRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,
+  BlogsSlugRoute: BlogsSlugRoute,
+  BlogsRssDotxmlRoute: BlogsRssDotxmlRoute,
   FinderDeckRoute: FinderDeckRoute,
   FinderWordRoute: FinderWordRoute,
   GameFinalRoute: GameFinalRoute,
@@ -2242,6 +2367,7 @@ const rootRouteChildren: RootRouteChildren = {
   HubPracticeRoute: HubPracticeRoute,
   TeachingsSlugRoute: TeachingsSlugRoute,
   TeachingsRssDotxmlRoute: TeachingsRssDotxmlRoute,
+  BlogsIndexRoute: BlogsIndexRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
   LessonsIndexRoute: LessonsIndexRoute,

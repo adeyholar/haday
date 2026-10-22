@@ -313,7 +313,7 @@ function accentLines(pgn: Pgn, expected: string[], got: string[], r2: string): {
   if (wantsMeteg && metegAt !== 0) {
     lines.push(
       metegAt === -1
-        ? "Almost! You forgot the little meteg under the first letter. It shows the qamets stays long before the shewa."
+        ? "Almost! Qamets is not the meteg. The meteg is the second short stroke beside it, under the first letter. Tap the Meteg key."
         : "Almost! The meteg goes under the first letter, next to its qamets.",
     );
   }
@@ -357,11 +357,12 @@ export function gradeVerb(answer: string, expected: string, pgn: Pgn, r2 = "ט")
   }
   const wantsOle = pgn === "2ms" || pgn === "1cs" || pgn === "1cp";
   const wantsMeteg = pgn === "3fs" || pgn === "3cp";
-  if (wantsOle && !have.includes(OLE)) {
+  const sameLetters = exp.length === got.length && exp.every((cluster, i) => baseOf(cluster) === baseOf(got[i] ?? ""));
+  if (sameLetters && wantsOle && !have.includes(OLE)) {
     lines.push(`Almost! You forgot the accent over ${baseOf(r2)}.`);
   }
-  if (wantsMeteg && !have.includes(METEG)) {
-    lines.push("Almost! You forgot the meteg under the first letter.");
+  if (sameLetters && wantsMeteg && !have.includes(METEG)) {
+    lines.push("Almost! The meteg is its own key, not part of the qamets. Tap Meteg under the first letter.");
   }
   if (!lines.length) lines.push("Every mark has to match. One missing dot makes it a different word.");
   return { correct: false, nudge: null, lines: lines.slice(0, 3) };

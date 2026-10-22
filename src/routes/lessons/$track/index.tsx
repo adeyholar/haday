@@ -4,7 +4,8 @@ import { MixHe } from "@/components/grammar-play";
 import { Panel } from "@/components/panel";
 import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { grammarUnitRecord, isGrammarUnitUnlocked } from "@/lib/game";
+import { grammarUnitRecord, grammarUnitOpen } from "@/lib/game";
+import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/lessons/$track/")({ component: StudyTrackPage });
@@ -13,6 +14,7 @@ function StudyTrackPage() {
   const { track: raw } = Route.useParams();
   const track = grammarTrack(raw);
   const game = useStudy((s) => s.game);
+  const term = useOpenTerm();
 
   if (!track) return <Navigate to="/lessons" />;
 
@@ -39,14 +41,20 @@ function StudyTrackPage() {
           All units open for study. Pairing is practice. The exam lives in Game.
         </p>
         <p className="mt-2 text-sm">
-          <Link to="/lessons" className="font-semibold text-primary">
-            All lessons
-          </Link>
+          {term === 2 && track.id === "verbs" ? (
+            <Link to="/hub/play" className="font-semibold text-primary">
+              Play
+            </Link>
+          ) : (
+            <Link to="/lessons" className="font-semibold text-primary">
+              All lessons
+            </Link>
+          )}
           <span className="text-muted"> · </span>
           <Link to="/game/lessons/$track" params={{ track: track.id }} className="font-semibold text-primary">
             Exams
           </Link>
-          {prev ? (
+          {term === 2 && track.id === "verbs" ? null : prev ? (
             <>
               <span className="text-muted"> · </span>
               <Link to="/lessons/$track" params={{ track: prev.id }} className="font-semibold text-primary">
@@ -67,7 +75,7 @@ function StudyTrackPage() {
       <ol className="grid grid-cols-1 gap-2">
         {track.units.map((u) => {
           const rec = grammarUnitRecord(game, track.id, u.id);
-          const examOpen = isGrammarUnitUnlocked(game, track.id, u.id);
+          const examOpen = grammarUnitOpen(game, track.id, u.id, term);
           return (
             <li key={u.id}>
               <Link

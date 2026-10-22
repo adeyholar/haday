@@ -116,6 +116,24 @@ test("a wrong vowel is not hidden behind the accent note", () => {
   assert.equal(graded.lines[0].startsWith("Almost"), false);
 });
 
+test("an unfinished 3fs is not accused of a missing meteg", () => {
+  const form = quest.qalPerfect(quest.QATAL).find((row) => row.pgn === "3fs").form;
+  const short = quest.gradeVerb("ק", form, "3fs");
+  assert.equal(short.correct, false);
+  assert.equal(short.lines[0], "That is not the full form yet.");
+  assert.equal(short.lines.some((line) => /meteg/i.test(line)), false);
+  const withMeteg = quest.gradeVerb("ק" + Q + M, form, "3fs");
+  assert.equal(withMeteg.lines.some((line) => /forgot the meteg|Tap Meteg/i.test(line)), false);
+  const bare = form.replaceAll(M, "");
+  const missing = quest.gradeVerb(bare, form, "3fs");
+  assert.equal(missing.nudge, "meteg");
+  assert.equal(missing.lines.some((line) => /Qamets is not the meteg/.test(line)), true);
+  const placed = quest.placeChosenMark("ק" + Q, form, M);
+  assert.equal(placed.status, "placed");
+  const kept = placed.text + "ט" + S + "ל" + Q + "ה";
+  assert.equal(quest.gradeVerb(kept, form, "3fs").correct, true);
+});
+
 test("a tapped accent or meteg lands on the letter that form requires", () => {
   const forms = Object.fromEntries(quest.qalPerfect(quest.QATAL).map((row) => [row.pgn, row.form]));
   const bare2 = forms["2ms"].replaceAll(O, "");

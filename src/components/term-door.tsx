@@ -18,6 +18,7 @@ import {
 import { statsFor, useStudy } from "@/lib/store";
 import { enterTermWeek } from "@/lib/term-week";
 import { TERM2_LESSONS } from "@/lib/term2-lessons";
+import { VERB_STEM_MENU } from "@/lib/verb-stem-menu";
 import { itemsForWeek, studySetMeta } from "@/lib/vocab";
 import { term2Vocab, weekForTerm2Chapter } from "@/lib/vocab-s2";
 import { weakPool } from "@/lib/weak-pool";
@@ -199,6 +200,49 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
           ) : null}
         </div>
       </div>
+
+      <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
+        <h2 className="font-display text-xl font-bold text-ink">Verb stems</h2>
+        <p className="mt-1 text-sm text-muted">
+          Qal through Hithpael. Same labs as Play. Semester 1 exams stay in Semester 1.
+        </p>
+        <ul className="mt-3 grid gap-2">
+          <li>
+            <Link to="/game/qal-perfect" className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]">
+              <span className="font-display text-xl font-bold text-ink">Qal perfect</span>
+              <span className="mt-1 block text-sm text-muted">Nine forms, with the accent and the meteg.</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/game/qal-imperfect" className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]">
+              <span className="font-display text-xl font-bold text-ink">Qal imperfect</span>
+              <span className="mt-1 block text-sm text-muted">Ten forms. Class roots, then the Tanakh.</span>
+            </Link>
+          </li>
+          {VERB_STEM_MENU.map((stem) => (
+            <li key={stem.id}>
+              <Link
+                to="/game/verbal-system"
+                hash={stem.id}
+                className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]"
+              >
+                <span className="font-display text-xl font-bold text-ink">{stem.title.replace("Verb Lab · ", "")}</span>
+                <span className="mt-1 block text-sm text-muted">{stem.line}</span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link
+              to="/game/lessons/$track"
+              params={{ track: "verbs" }}
+              className="block rounded-[var(--radius-lg)] bg-surface p-4 shadow-[var(--shadow-border)]"
+            >
+              <span className="font-display text-xl font-bold text-ink">Stem exams</span>
+              <span className="mt-1 block text-sm text-muted">Every unit is open. 90% clears it.</span>
+            </Link>
+          </li>
+        </ul>
+      </section>
 
       <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">
         <h2 className="font-display text-xl font-bold text-ink">Lessons</h2>

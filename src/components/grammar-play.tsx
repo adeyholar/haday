@@ -18,7 +18,8 @@ import {
   type GrammarTrack,
 } from "@/lib/grammar";
 import { useStudy } from "@/lib/store";
-import { GAME_STAGE_PASS, isGrammarUnitUnlocked } from "@/lib/game";
+import { GAME_STAGE_PASS, grammarUnitOpen } from "@/lib/game";
+import { useOpenTerm } from "@/lib/use-open-term";
 import { derangeAgainst, shuffleList } from "@/lib/quiz-draw";
 
 type PlayQ = GrammarQuiz & { key: string; retry?: boolean };
@@ -61,7 +62,8 @@ export function GrammarPlay({
   const complete = useStudy((s) => s.completeGrammarUnit);
   const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
   const game = useStudy((s) => s.game);
-  const examOpen = isGrammarUnitUnlocked(game, track.id, unitId);
+  const term = useOpenTerm();
+  const examOpen = grammarUnitOpen(game, track.id, unitId, term);
   const unitMax = grammarUnitMax(track);
   const seededExam = useMemo(
     () => (mode === "exam" ? examItems(track, unitId) : []),

@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { getMyPath } from "@/lib/learner-path";
-import { termForAccount } from "@/lib/path";
+import { useOpenTerm } from "@/lib/use-open-term";
+import { VERB_STEM_MENU } from "@/lib/verb-stem-menu";
 
 type HubKind = "learn" | "practice" | "play" | "listen";
 
@@ -47,6 +46,7 @@ type Card = {
   params?: { chapter: string } | { track: string };
   title: string;
   line: string;
+  hash?: string;
 };
 
 const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
@@ -137,11 +137,17 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
       { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
       { to: "/game/qal-imperfect", title: "Verb Lab · Qal imperfect", line: "Ten forms. Class roots, then the Tanakh." },
+      ...VERB_STEM_MENU.map((stem) => ({
+        to: "/game/verbal-system" as const,
+        hash: stem.id,
+        title: stem.title,
+        line: stem.line,
+      })),
       {
         to: "/game/lessons/$track",
         params: { track: "verbs" },
-        title: "Verb Lab · Stems",
-        line: "Qal through the derived stems. 90% opens the next unit.",
+        title: "Verb Lab · Stem exams",
+        line: "Qal through Hithpael. Every unit is open in this room. 90% clears it.",
       },
     ],
   },
@@ -156,18 +162,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
 };
 
 export function PathHub({ kind }: { kind: HubKind }) {
-  const [term, setTerm] = useState<1 | 2>(1);
-  useEffect(() => {
-    let cancel = false;
-    getMyPath()
-      .then((gate) => {
-        if (!cancel) setTerm(termForAccount(gate) === 2 ? 2 : 1);
-      })
-      .catch(() => {});
-    return () => {
-      cancel = true;
-    };
-  }, []);
+  const term = useOpenTerm();
   const room = (term === 2 ? TERM2 : TERM1)[kind];
   return (
     <>
@@ -180,6 +175,7 @@ export function PathHub({ kind }: { kind: HubKind }) {
             <Link
               to={card.to}
               params={card.params}
+              hash={card.hash}
               className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
             >
               <span className="block font-display text-2xl font-bold">{card.title}</span>

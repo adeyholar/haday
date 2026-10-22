@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
 
-/** Visitor bar. Teachings is added when the posts exist. */
+/** Visitor bar. Blogs is the public writing. */
 export function PublicHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card">
@@ -10,8 +10,8 @@ export function PublicHeader() {
           <BrandLockup linked />
         </div>
         <nav aria-label="Public" className="flex shrink-0 items-center gap-3 text-sm font-semibold">
-          <Link to="/teachings" className="text-ink underline-offset-4 hover:underline">
-            Teachings
+          <Link to="/blogs" className="text-ink underline-offset-4 hover:underline">
+            Blogs
           </Link>
           <Link to="/about" className="text-ink underline-offset-4 hover:underline">
             About

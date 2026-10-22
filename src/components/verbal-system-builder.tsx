@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -65,11 +65,18 @@ function saveBoard(board: Board) {
   }
 }
 
+function stemFromHash(hash: string): StemId | null {
+  const id = hash.replace(/^#/, "");
+  return STEMS.some((item) => item.id === id) ? (id as StemId) : null;
+}
+
 export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean }) {
+  const hash = useRouterState({ select: (s) => s.location.hash });
+  const opened = stemFromHash(hash);
   const [pool, setPool] = useState<RootPool>("tri");
   const [letter, setLetter] = useState("ש");
   const [rootId, setRootId] = useState("shamar");
-  const [stem, setStem] = useState<StemId>("qal");
+  const [stem, setStem] = useState<StemId>(opened ?? "qal");
   const [conj, setConj] = useState<ConjId>("perfect");
   const [phase, setPhase] = useState<Phase>("choose");
   const [deck, setDeck] = useState<Cell[]>([]);
@@ -100,6 +107,22 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
   useEffect(() => {
     setBoard(loadBoard());
   }, []);
+
+  useEffect(() => {
+    const next = stemFromHash(hash);
+    if (!next) return;
+    setPool("tri");
+    setLetter("ש");
+    setRootId("shamar");
+    setStem(next);
+    setConj(conjsFor("shamar", next).includes("perfect") ? "perfect" : (conjsFor("shamar", next)[0] ?? "perfect"));
+    setPhase("choose");
+    setDeck([]);
+    setAt(0);
+    setPicks({});
+    setVerdict(null);
+    setCorrect(0);
+  }, [hash]);
 
   function abandon() {
     setPhase("choose");
@@ -208,7 +231,19 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
           {" "}
           Pass every form of the stem and the conjugation. A Tanakh verse opens only when they are all right.
         </p>
-        {scripture ? null : (
+        {scripture ? (
+          <p className="mt-2 text-sm text-muted">
+            Build the Qal perfect from the three root letters in{" "}
+            <Link to="/iibs/verb-paradigm-quest" className="font-semibold text-primary">
+              Build from the root
+            </Link>
+            . The ten-row Qal imperfect drill is in{" "}
+            <Link to="/iibs/qal-imperfect" className="font-semibold text-primary">
+              Qal Imperfect Builder
+            </Link>
+            .
+          </p>
+        ) : (
           <p className="mt-2 text-sm text-muted">
             The nine-row Qal perfect drill is still in{" "}
             <Link to="/game/qal-perfect" className="font-semibold text-primary">
