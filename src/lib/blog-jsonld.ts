@@ -1,6 +1,6 @@
 import { AUTHOR, FFIM } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
-import { postHeadline, postPath, postShareImage, TEACHING_SECTIONS, type BlogFilter, type Teaching } from "@/lib/teaching-text";
+import { postPath, postShareImage, TEACHING_SECTIONS, type BlogFilter, type Teaching } from "@/lib/teaching-text";
 
 const PUBLISHER_LOGO = "https://images.haday.app/brand/ffim-publisher-logo.png";
 
@@ -20,7 +20,7 @@ export function postJsonLd(post: Teaching) {
     "@graph": [
       {
         "@type": guide ? "TechArticle" : "BlogPosting",
-        headline: postHeadline(post),
+        headline: post.title,
         description: post.summary,
         datePublished: post.published,
         dateModified: post.updated || post.published,
@@ -28,7 +28,7 @@ export function postJsonLd(post: Teaching) {
         inLanguage: "en",
         url,
         mainEntityOfPage: url,
-        author: { "@type": "Person", name: "Brother Ade", url: AUTHOR.url },
+        author: { "@id": AUTHOR.id, "@type": "Person", name: "Adeola Adegbolagun", alternateName: "Brother Ade", url: AUTHOR.url },
         publisher: {
           "@type": "Organization",
           "@id": FFIM.id,

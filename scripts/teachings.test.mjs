@@ -64,6 +64,7 @@ test("a post keeps its section address, its draft, and its search title", () => 
   assert.equal(postHeadline({ ...live, searchTitle: "Short title" }), "Short title");
   const head = postHead({ ...live, searchTitle: "Short title", summary: "A short reading about the first letter and why it matters." });
   assert.equal(head.meta.some((item) => "title" in item && item.title === "Short title"), true);
+  assert.equal(head.meta.some((item) => item.property === "og:title" && item.content === "Short title"), true);
   assert.equal(head.meta.some((item) => item.name === "description" && item.content === live.summary), true);
   assert.equal(head.links[0].href.endsWith("/blogs/aleph"), true);
   assert.equal(teachingLastmod(live), "2026-10-19");
@@ -74,8 +75,11 @@ test("a post keeps its section address, its draft, and its search title", () => 
   const table = renderTeaching("| A | B |\n| --- | --- |\n| a | b |");
   assert.match(table, /<div class="table-wrap" style="overflow-x:auto">/);
   const ld = postJsonLd({ ...live, searchTitle: "Short title" });
-  assert.equal(ld["@graph"][0].headline, "Short title");
-  assert.equal(ld["@graph"][0].author.name, "Brother Ade");
+  assert.equal(ld["@graph"][0].headline, live.title);
+  assert.equal(ld["@graph"][0].author["@type"], "Person");
+  assert.equal(ld["@graph"][0].author.name, "Adeola Adegbolagun");
+  assert.equal(ld["@graph"][0].author.alternateName, "Brother Ade");
+  assert.equal(ld["@graph"][0].author.url, ld["@graph"][0].author["@id"].replace(/#adeola$/, ""));
   assert.equal(ld["@graph"][0].description, live.summary);
 });
 

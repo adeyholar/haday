@@ -182,7 +182,7 @@ function BlogDesk() {
   async function uploadPictures(files: File[]) {
     const slug = slugify(form.slug || form.title);
     if (!slug) {
-      setError("Save the post once before adding pictures.");
+      setError("Add a title first, then add pictures.");
       return;
     }
     if (!form.slug) setForm((current) => ({ ...current, slug }));
