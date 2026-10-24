@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
-import { brotliDecompressSync, gunzipSync } from "node:zlib";
+import { brotliDecompressSync, gzipSync, gunzipSync } from "node:zlib";
 import { createJiti } from "jiti";
 import { fileURLToPath } from "node:url";
 
@@ -34,10 +34,12 @@ test("a post has one share title through the real middleware order", async () =>
   assert.ok(files.indexOf("00.security-headers.ts") < files.indexOf("grok-pwa.ts"));
   const security = asFn(await jiti.import(join(dir, "00.security-headers.ts")));
   const grok = asFn(await jiti.import(join(dir, "grok-pwa.ts")));
+  const { TEACHING_SECTIONS } = await jiti.import(join(root, "src/lib/teaching-text.ts"));
   const title = "Two paths into Biblical Hebrew";
   const summary = "A short summary of the two paths.";
   const padding = "Hebrew ".repeat(80);
-  for (const path of ["/blogs/aleph", "/learning-hebrabbai/two-paths-into-biblical-hebrew"]) {
+  for (const section of Object.values(TEACHING_SECTIONS)) {
+    const path = `${section.path}/two-paths-into-biblical-hebrew`;
     const html = `<!doctype html><html><head><title>${title}</title><meta property="og:title" content="${title}"><meta property="og:description" content="${summary}"><meta property="og:url" content="https://hebrewmentor.haday.app${path}"><meta property="og:type" content="article"><meta name="twitter:title" content="${title}"><meta name="twitter:description" content="${summary}"></head><body>${padding}</body></html>`;
     const handler = () =>
       new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } });
@@ -69,4 +71,29 @@ test("a post has one share title through the real middleware order", async () =>
     assert.equal(plainHtml.split('property="og:title"').length - 1, 1);
     assert.match(plainHtml, /property="og:title" content="Two paths into Biblical Hebrew"/);
   }
+  for (const path of ["/sitemap.xml", "/llms.txt"]) {
+    const event = {
+      url: new URL(`https://hebrewmentor.haday.app${path}`),
+      req: { method: "GET", headers: new Headers({ host: "hebrewmentor.haday.app" }) },
+    };
+    const result = await security(event, () => new Response("ok", { headers: { "content-type": "text/plain" } }));
+    assert.equal(result.headers.get("cache-control"), "public, s-maxage=300, stale-while-revalidate=300");
+  }
+});
+
+test("an encoded page is left unchanged", async () => {
+  const grok = asFn(await jiti.import(join(root, "server/middleware/grok-pwa.ts")));
+  const html = `<!doctype html><html><head><title>Plain</title></head><body>${"Hebrew ".repeat(40)}</body></html>`;
+  const event = {
+    url: new URL("https://hebrewmentor.haday.app/study"),
+    req: { method: "GET", headers: new Headers({ accept: "text/html", host: "hebrewmentor.haday.app" }) },
+  };
+  const result = await grok(event, () =>
+    new Response(gzipSync(Buffer.from(html)), {
+      headers: { "content-type": "text/html; charset=utf-8", "content-encoding": "gzip" },
+    }),
+  );
+  assert.equal(result.headers.get("content-encoding"), "gzip");
+  assert.equal(result.headers.get("cache-control"), null);
+  assert.equal(gunzipSync(Buffer.from(await result.arrayBuffer())).toString("utf8"), html);
 });

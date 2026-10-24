@@ -48,3 +48,20 @@ test("security headers middleware sets framing and sniff protection", () => {
   assert.match(src, /nosniff/);
   assert.match(src, /Strict-Transport-Security/);
 });
+
+test("blog cache uses the one section list", async () => {
+  const security = readFileSync(new URL("../server/middleware/00.security-headers.ts", import.meta.url), "utf8");
+  const grok = readFileSync(new URL("../server/middleware/grok-pwa.ts", import.meta.url), "utf8");
+  const { TEACHING_SECTIONS, keepsBlogCache } = await jiti.import(join(root, "src/lib/teaching-text.ts"));
+  assert.match(security, /keepsBlogCache/);
+  assert.match(grok, /keepsBlogCache/);
+  assert.doesNotMatch(security, /function keepsBlogCache/);
+  assert.doesNotMatch(grok, /function keepsBlogCache/);
+  for (const section of Object.values(TEACHING_SECTIONS)) {
+    assert.equal(security.includes(`"${section.path}"`), false);
+    assert.equal(grok.includes(`"${section.path}"`), false);
+    assert.equal(keepsBlogCache(section.path), true);
+  }
+  assert.match(security, /\/sitemap\.xml/);
+  assert.match(security, /\/llms\.txt/);
+});

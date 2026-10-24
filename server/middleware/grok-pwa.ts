@@ -11,7 +11,8 @@
  * - Other HTML documents → stream-inject missing PWA + OG head tags at `</head>`.
  *   A tag the page already wrote stays. A site default is added only when that
  *   tag is missing. This runs inside the security middleware, on plain HTML,
- *   so the page is compressed once. Blog paths keep the cache header.
+ *   so the page is compressed once. A response that already has
+ *   content-encoding is left as it is. Blog paths keep the cache header.
  *   OG identity is baked via `virtual:grok-og-identity` at `vite build`
  *   (this function cannot read `src/lib/og/site.json` or `public/og.jpg`).
  *   This must be a middleware transforming `next()`: h3 discards the `response`
@@ -19,7 +20,7 @@
  */
 import installPageTemplate from "../../scripts/install-page.html?raw";
 import { grokOgIdentity } from "virtual:grok-og-identity";
-import { TEACHING_SECTIONS } from "../../src/lib/teaching-text";
+import { keepsBlogCache } from "../../src/lib/teaching-text";
 import {
   acceptsHtml,
   createHeadInjector,
@@ -37,12 +38,6 @@ interface GrokPwaEvent {
 function requestHost(event: GrokPwaEvent): string {
   return (
     event.req.headers.get("x-forwarded-host") ?? event.req.headers.get("host") ?? event.url.host
-  );
-}
-
-function keepsBlogCache(path: string): boolean {
-  return Object.values(TEACHING_SECTIONS).some(
-    (section) => path === section.path || path.startsWith(`${section.path}/`),
   );
 }
 
@@ -126,6 +121,7 @@ export default async function grokPwaMiddleware(
   if (
     result instanceof Response &&
     result.body &&
+    !result.headers.has("content-encoding") &&
     String(result.headers.get("content-type") ?? "").includes("text/html")
   ) {
     return injectHeadStreaming(result, requestHost(event), path);

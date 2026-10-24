@@ -23,6 +23,8 @@ const {
   retiredTeachingTarget,
   teachingLastmod,
   validateTeaching,
+  keepsBlogCache,
+  TEACHING_SECTIONS,
 } = await jiti.import(new URL("../src/lib/teaching-text.ts", import.meta.url).pathname);
 const { refuseBlogImage } = await jiti.import(new URL("../src/lib/blog-images.ts", import.meta.url).pathname);
 const { blogCrumbs, blogIndexJsonLd, postJsonLd } = await jiti.import(new URL("../src/lib/blog-jsonld.ts", import.meta.url).pathname);
@@ -313,4 +315,15 @@ test("a picture upload is refused when the file is wrong", () => {
   assert.equal(typeof refuseBlogImage({ slug: "aleph", type: "image/gif", bytes: 100 }), "string");
   assert.equal(typeof refuseBlogImage({ slug: "aleph", type: "image/png", bytes: 2 * 1024 * 1024 + 1 }), "string");
   assert.equal(refuseBlogImage({ slug: "aleph", type: "image/webp", bytes: 100 }), null);
+});
+
+test("blog cache follows the section list, not the sitemap", () => {
+  for (const section of Object.values(TEACHING_SECTIONS)) {
+    assert.equal(keepsBlogCache(section.path), true);
+    assert.equal(keepsBlogCache(`${section.path}/a-post`), true);
+    assert.equal(keepsBlogCache(`${section.path}-other`), false);
+  }
+  assert.equal(keepsBlogCache("/sitemap.xml"), false);
+  assert.equal(keepsBlogCache("/llms.txt"), false);
+  assert.equal(keepsBlogCache("/study"), false);
 });
