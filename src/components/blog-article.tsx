@@ -4,37 +4,37 @@ import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
 import { AUTHOR } from "@/lib/author";
 import { postJsonLd } from "@/lib/blog-jsonld";
-import { blogDate, renderTeaching, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
+import { blogDate, pathsCtaHtml, renderTeaching, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
 
 export function BlogArticle({ post, related }: { post: Teaching; related: Teaching[] }) {
   const section = TEACHING_SECTIONS[post.section];
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd(post)) }} />
-      <p className="text-sm text-muted">
-        <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
-          Home
-        </Link>
-        {" / "}
-        <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
-          Blog
-        </Link>
-        {" / "}
-        {post.section === "teachings" ? (
-          <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
-            {section.label}
-          </Link>
-        ) : (
-          <Link to="/learning-hebrabbai" className="font-semibold text-primary underline-offset-4 hover:underline">
-            {section.label}
-          </Link>
-        )}
-        {" / "}
-        <span>{post.title}</span>
-      </p>
       <article className="mt-4">
         <Panel>
-          <h1 className="font-display text-4xl font-bold tracking-tight text-ink">{post.title}</h1>
+          <p className="text-sm text-muted">
+            <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Home
+            </Link>
+            {" / "}
+            <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Blog
+            </Link>
+            {" / "}
+            {post.section === "teachings" ? (
+              <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+                {section.label}
+              </Link>
+            ) : (
+              <Link to="/learning-hebrabbai" className="font-semibold text-primary underline-offset-4 hover:underline">
+                {section.label}
+              </Link>
+            )}
+            {" / "}
+            <span>{post.title}</span>
+          </p>
+          <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink">{post.title}</h1>
           <p className="mt-3 text-sm text-muted">
             <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
               Brother Ade
@@ -58,7 +58,11 @@ export function BlogArticle({ post, related }: { post: Teaching; related: Teachi
             Read it in Hebrew with HaDay HebRabbAi Mentor
           </Link>
         </Panel>
-      ) : null}
+      ) : (
+        <Panel className="mt-4">
+          <div dangerouslySetInnerHTML={{ __html: pathsCtaHtml() }} />
+        </Panel>
+      )}
       <Panel className="mt-4">
         <img src="/about/adeola-128.jpg" alt="Brother Ade" width={128} height={128} className="h-16 w-16 rounded-full object-cover" />
         <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">{AUTHOR.shortBio}</p>

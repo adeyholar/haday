@@ -238,6 +238,10 @@ export function isPublicTeaching(post: Pick<Teaching, "draft" | "published">, no
   return day <= today;
 }
 
+export function pathsCtaHtml(): string {
+  return `<p class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold"><a href="/login?path=bbh" class="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">Start the Grammar Path</a><a href="/login?path=iibs" class="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">Start the Scripture Path</a></p>`;
+}
+
 export function teachingCta(path: TeachingPath, signedIn: boolean): string {
   if (path === "scripture") return signedIn ? "/iibs" : "/login?path=iibs";
   return signedIn ? "/bbh" : "/login?path=bbh";
@@ -284,12 +288,12 @@ function inline(value: string): string {
   });
   text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
-  text = text.replace(/[\u0590-\u05FF]+/g, (word) => `<span dir="rtl" lang="he" style="unicode-bidi:isolate">${word}</span>`);
+  text = text.replace(/[\u0590-\u05FF]+/g, (word) => `<span dir="rtl" lang="he" class="he-inline">${word}</span>`);
   return text;
 }
 
 const SHORTCODE =
-  /\[verse ref="([^"]{1,40})"\]([\s\S]*?)\[\/verse\]|\[image url="(https:\/\/images\.haday\.app\/[^"\s]+)" alt="([^"]{1,180})"(?: caption="([^"]*)")?(?: width="(\d{1,5})")?(?: height="(\d{1,5})")?\]|\[video id="([A-Za-z0-9_-]{11})"\]|\[hebrabbai-cta\]/g;
+  /\[verse ref="([^"]{1,40})"\]([\s\S]*?)\[\/verse\]|\[image url="(https:\/\/images\.haday\.app\/[^"\s]+)" alt="([^"]{1,180})"(?: caption="([^"]*)")?(?: width="(\d{1,5})")?(?: height="(\d{1,5})")?\]|\[video id="([A-Za-z0-9_-]{11})"\]|\[paths-cta\]|\[hebrabbai-cta\]/g;
 
 function splitCells(line: string): string[] {
   let body = line.trim();
@@ -377,6 +381,17 @@ export function insertPostPiece(body: string, start: number, end: number, piece:
   return `${before}${lead}${piece}${tail}${after}`;
 }
 
+function compareCards(header: string[], rows: string[][]): string {
+  const cards = [1, 2].map((column) => {
+    const title = inline(header[column] ?? "");
+    const lines = rows
+      .map((row) => `<p><span class="table-card-label">${inline(row[0] ?? "")}</span> <span class="table-card-value">${inline(row[column] ?? "")}</span></p>`)
+      .join("");
+    return `<div class="table-card"><p class="table-card-title">${title}</p>${lines}</div>`;
+  });
+  return `<div class="table-cards">${cards.join("")}</div>`;
+}
+
 function tableHtml(lines: string[]): string | null {
   const aligns = columnAligns(lines[1] ?? "");
   if (!aligns || aligns.length > 8 || lines.length - 2 > 100) return null;
@@ -391,15 +406,26 @@ function tableHtml(lines: string[]): string | null {
     .join("");
   const body = lines
     .slice(2)
-    .map((line) => `<tr>${fit(line).map((cell, index) => `<td${style(aligns[index] ?? "")}>${inline(cell)}</td>`).join("")}</tr>`)
+    .map((line) => {
+      const cells = fit(line);
+      const row = cells
+        .map((cell, index) => {
+          const tag = index === 0 ? "th" : "td";
+          const scope = index === 0 ? ' scope="row"' : "";
+          return `<${tag}${scope}${style(aligns[index] ?? "")}>${inline(cell)}</${tag}>`;
+        })
+        .join("");
+      return `<tr>${row}</tr>`;
+    })
     .join("");
-  return `<div class="table-wrap" style="overflow-x:auto"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  return `<div class="${aligns.length === 3 ? "table-wrap compare-3" : "table-wrap"}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${aligns.length === 3 ? compareCards(fit(lines[0] ?? ""), lines.slice(2).map(fit)) : ""}</div>`;
 }
 
 function markdownBlocks(markdown: string): string {
   const blocks = markdown.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
   return blocks
     .map((block) => {
+      if (!block.trim()) return "";
       const lines = block.split("\n");
       const heading = /^(#{1,3})\s+(.+)$/.exec(lines[0] ?? "");
       if (lines.length === 1 && heading) {
@@ -442,6 +468,7 @@ function shortcodeHtml(match: RegExpExecArray): string {
     const src = `https://www.youtube-nocookie.com/embed/${id}`;
     return `<p><button type="button" class="min-h-11 font-semibold text-primary underline" onclick="this.outerHTML='<iframe src="${src}" title="Video" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0"></iframe>'">Play the video</button></p>`;
   }
+  if (match[0] === "[paths-cta]") return pathsCtaHtml();
   return `<p><a class="inline-flex min-h-11 items-center font-semibold text-primary underline" href="/login">Open HaDay HebRabbAi Mentor</a></p>`;
 }
 
