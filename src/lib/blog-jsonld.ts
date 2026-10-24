@@ -1,6 +1,6 @@
 import { AUTHOR, FFIM } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
-import { postPath, TEACHING_SECTIONS, type BlogFilter, type Teaching } from "@/lib/teaching-text";
+import { postPath, postShareImage, TEACHING_SECTIONS, type BlogFilter, type Teaching } from "@/lib/teaching-text";
 
 const PUBLISHER_LOGO = "https://images.haday.app/brand/ffim-publisher-logo.png";
 
@@ -24,11 +24,11 @@ export function postJsonLd(post: Teaching) {
         description: post.summary,
         datePublished: post.published,
         dateModified: post.updated || post.published,
-        image: post.image || `${CLASS_SITE}/og.jpg`,
+        image: postShareImage(post.image),
         inLanguage: "en",
         url,
         mainEntityOfPage: url,
-        author: { "@id": AUTHOR.id, name: AUTHOR.name, url: AUTHOR.url },
+        author: { "@id": AUTHOR.id, "@type": "Person", name: "Adeola Adegbolagun", alternateName: "Brother Ade", url: AUTHOR.url },
         publisher: {
           "@type": "Organization",
           "@id": FFIM.id,

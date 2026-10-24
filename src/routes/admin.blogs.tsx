@@ -13,6 +13,7 @@ const EMPTY = {
   title: "",
   slug: "",
   summary: "",
+  searchTitle: "",
   body: "",
   path: "grammar" as TeachingPath,
   section: "" as "" | TeachingSection,
@@ -111,6 +112,7 @@ function BlogDesk() {
       title: post.title,
       slug: post.slug,
       summary: post.summary,
+      searchTitle: post.searchTitle,
       body: post.body,
       path: post.path,
       section: post.section,
@@ -180,9 +182,10 @@ function BlogDesk() {
   async function uploadPictures(files: File[]) {
     const slug = slugify(form.slug || form.title);
     if (!slug) {
-      setError("Give the post an address before adding a picture.");
+      setError("Add a title first, then add pictures.");
       return;
     }
+    if (!form.slug) setForm((current) => ({ ...current, slug }));
     setUploading(true);
     setError(null);
     let draft = form.body;
@@ -280,6 +283,14 @@ function BlogDesk() {
                 slug: current.previousSlug ? current.slug : slugify(title),
               }));
             }}
+            className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
+          />
+        </label>
+        <label className="mt-3 block text-sm font-semibold text-ink">
+          Search title ({form.searchTitle.trim().length}/60)
+          <input
+            value={form.searchTitle}
+            onChange={(event) => setForm({ ...form, searchTitle: event.target.value })}
             className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
           />
         </label>

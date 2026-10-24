@@ -9,7 +9,7 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card">
       <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 px-3">
-        <div className="min-w-0 overflow-hidden">
+        <div className="min-w-0 shrink">
           <BrandLockup linked />
         </div>
         <nav aria-label="Public" className="flex shrink-0 items-center gap-3 text-sm font-semibold">
