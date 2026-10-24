@@ -6,12 +6,15 @@ import { reassignBlogComments } from "@/lib/blog-comments";
 import { allPublicPages, type SitePage } from "@/lib/site-pages";
 import {
   isPublicTeaching,
+  postPath,
   relatedTeachings,
+  teachingSection,
   validateTeaching,
   type Teaching,
+  type TeachingSection,
 } from "@/lib/teaching-text";
 
-export type { Teaching, TeachingPath } from "@/lib/teaching-text";
+export type { Teaching, TeachingPath, TeachingSection } from "@/lib/teaching-text";
 
 type Row = {
   slug: string;
@@ -19,15 +22,23 @@ type Row = {
   summary: string;
   body: string;
   path: string;
+  section: string;
   tags: string;
   related: string;
   image: string;
+  image_alt: string;
   draft: boolean;
   published_at: string | Date;
   updated_at: string | Date;
 };
 
 let tableReady: Promise<void> | null = null;
+let slimCache: { at: number; rows: Teaching[] } | null = null;
+const SLIM_MS = 5 * 60 * 1000;
+
+function clearTeachingCache() {
+  slimCache = null;
+}
 
 async function ensureTeachingsTable() {
   tableReady ??= (async () => {
@@ -48,7 +59,18 @@ async function ensureTeachingsTable() {
         created_at timestamptz not null default now()
       )
     `);
+    await sql.query("alter table teachings add column if not exists section text");
+    await sql.query("update teachings set section = 'teachings' where section is null or section = ''");
+    await sql.query("alter table teachings alter column section set default 'teachings'");
+    await sql.query("alter table teachings alter column section set not null");
+    await sql.query("alter table teachings alter column section drop default");
+    await sql.query("alter table teachings drop constraint if exists teachings_section_check");
+    await sql.query(
+      "alter table teachings add constraint teachings_section_check check (section in ('teachings', 'learning-hebrabbai'))",
+    );
+    await sql.query("alter table teachings add column if not exists image_alt text not null default ''");
     await sql.query("create index if not exists teachings_public on teachings (draft, published_at desc)");
+    await sql.query("create index if not exists teachings_section_public on teachings (section, draft, published_at desc)");
   })().catch((err) => {
     tableReady = null;
     throw err;
@@ -63,22 +85,26 @@ function day(value: string | Date): string {
 }
 
 function mapRow(row: Row): Teaching {
+  const section = teachingSection(row.section) ?? "teachings";
   return {
     slug: row.slug,
     title: row.title,
     summary: row.summary,
     body: row.body,
     path: row.path === "scripture" ? "scripture" : "grammar",
+    section,
     tags: row.tags ? row.tags.split(",").filter(Boolean) : [],
     related: row.related ? row.related.split(",").filter(Boolean) : [],
     image: row.image,
+    imageAlt: row.image_alt ?? "",
     draft: row.draft,
     published: day(row.published_at),
     updated: day(row.updated_at),
   };
 }
 
-const SELECT = `slug, title, summary, body, path, tags, related, image, draft, published_at, updated_at`;
+const SELECT = `slug, title, summary, body, path, section, tags, related, image, image_alt, draft, published_at, updated_at`;
+const SLIM = `slug, title, summary, '' as body, path, section, tags, related, image, image_alt, draft, published_at, updated_at`;
 
 export async function listTeachings(): Promise<Teaching[]> {
   await ensureTeachingsTable();
@@ -87,9 +113,22 @@ export async function listTeachings(): Promise<Teaching[]> {
   return rows.map(mapRow);
 }
 
-export async function listPublishedTeachings(now = new Date()): Promise<Teaching[]> {
-  const rows = await listTeachings();
-  return rows.filter((post) => isPublicTeaching(post, now));
+async function publishedSlim(): Promise<Teaching[]> {
+  const now = Date.now();
+  if (slimCache && now - slimCache.at < SLIM_MS) return slimCache.rows;
+  await ensureTeachingsTable();
+  const sql = await getSql();
+  const rows = await sql.query<Row>(
+    `select ${SLIM} from teachings where draft = false and published_at <= now() order by published_at desc limit 200`,
+  );
+  const mapped = rows.map(mapRow).filter((post) => isPublicTeaching(post));
+  slimCache = { at: now, rows: mapped };
+  return mapped;
+}
+
+export async function listPublishedTeachings(section?: TeachingSection): Promise<Teaching[]> {
+  const rows = await publishedSlim();
+  return section ? rows.filter((post) => post.section === section) : rows;
 }
 
 export async function getTeaching(slug: string): Promise<Teaching | null> {
@@ -99,14 +138,31 @@ export async function getTeaching(slug: string): Promise<Teaching | null> {
   return rows[0] ? mapRow(rows[0]) : null;
 }
 
+async function getPublicTeaching(slug: string): Promise<Teaching | null> {
+  if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null;
+  await ensureTeachingsTable();
+  const sql = await getSql();
+  const rows = await sql.query<Row>(
+    `select ${SELECT} from teachings where slug = $1 and draft = false and published_at <= now()`,
+    [slug],
+  );
+  const post = rows[0] ? mapRow(rows[0]) : null;
+  return post && isPublicTeaching(post) ? post : null;
+}
+
 export async function sitemapPages(): Promise<SitePage[]> {
   const posts = await listPublishedTeachings().catch(() => []);
-  const newest = posts[0]?.updated || "2026-10-19";
-  const pages = allPublicPages().map((page) => (page.path === "/blogs" ? { ...page, lastmod: newest } : page));
+  const newestTeachings = posts.find((post) => post.section === "teachings")?.updated || "2026-10-19";
+  const newestGuides = posts.find((post) => post.section === "learning-hebrabbai")?.updated || "2026-10-24";
+  const pages = allPublicPages().map((page) => {
+    if (page.path === "/blogs") return { ...page, lastmod: newestTeachings };
+    if (page.path === "/learning-hebrabbai") return { ...page, lastmod: newestGuides };
+    return page;
+  });
   return [
     ...pages,
     ...posts.map((post) => ({
-      path: `/blogs/${post.slug}`,
+      path: postPath(post.section, post.slug),
       title: post.title,
       summary: post.summary,
       lastmod: post.updated || post.published,
@@ -114,14 +170,21 @@ export async function sitemapPages(): Promise<SitePage[]> {
   ];
 }
 
-export const loadTeachingsIndex = createServerFn({ method: "GET" }).handler(async () => listPublishedTeachings());
+export const loadTeachingsIndex = createServerFn({ method: "GET" })
+  .validator((section: string) => section)
+  .handler(async ({ data }) => {
+    const section = teachingSection(data);
+    if (!section) return [];
+    return listPublishedTeachings(section);
+  });
 
 export const loadTeachingPage = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)
   .handler(async ({ data }) => {
-    const posts = await listPublishedTeachings();
-    const post = posts.find((item) => item.slug === data) ?? null;
-    return { post, related: post ? relatedTeachings(post, posts, 2) : [] };
+    const post = await getPublicTeaching(data);
+    if (!post) return { post: null, related: [] as Teaching[] };
+    const cousins = await listPublishedTeachings(post.section);
+    return { post, related: relatedTeachings(post, cousins, 2) };
   });
 
 export const listTeachingDesk = createServerFn({ method: "GET" })
@@ -140,9 +203,11 @@ export const saveTeaching = createServerFn({ method: "POST" })
       summary?: string;
       body?: string;
       path?: string;
+      section?: string;
       tags?: string;
       related?: string;
       image?: string;
+      imageAlt?: string;
       draft?: boolean;
       published?: string;
     }) => input,
@@ -157,16 +222,18 @@ export const saveTeaching = createServerFn({ method: "POST" })
     const sql = await getSql();
     const stamp = `${post.published}T12:00:00.000Z`;
     await sql.query(
-      `insert into teachings (slug, title, summary, body, path, tags, related, image, draft, published_at, updated_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now())
+      `insert into teachings (slug, title, summary, body, path, section, tags, related, image, image_alt, draft, published_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
        on conflict (slug) do update set
          title = excluded.title,
          summary = excluded.summary,
          body = excluded.body,
          path = excluded.path,
+         section = excluded.section,
          tags = excluded.tags,
          related = excluded.related,
          image = excluded.image,
+         image_alt = excluded.image_alt,
          draft = excluded.draft,
          published_at = excluded.published_at,
          updated_at = now()`,
@@ -176,9 +243,11 @@ export const saveTeaching = createServerFn({ method: "POST" })
         post.summary,
         post.body,
         post.path,
+        post.section,
         post.tags.join(","),
         post.related.join(","),
         post.image,
+        post.imageAlt,
         post.draft,
         stamp,
       ],
@@ -188,6 +257,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
       await reassignBlogComments(previous, post.slug);
       await sql.query("delete from teachings where slug = $1", [previous]);
     }
+    clearTeachingCache();
     const saved = await getTeaching(post.slug);
     if (!saved) return { ok: false, error: "Could not save the post." };
     return { ok: true, teaching: saved };
@@ -203,5 +273,6 @@ export const deleteTeaching = createServerFn({ method: "POST" })
     await ensureTeachingsTable();
     const sql = await getSql();
     await sql.query("delete from teachings where slug = $1", [slug]);
+    clearTeachingCache();
     return { ok: true };
   });

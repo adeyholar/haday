@@ -18,6 +18,8 @@ const INDEX_EXTRAS = new Set([
   "/about",
   "/blogs",
   "/blogs/rss.xml",
+  "/learning-hebrabbai",
+  "/learning-hebrabbai/rss.xml",
   "/robots.txt",
   "/sitemap.xml",
   "/llms.txt",
@@ -29,7 +31,7 @@ export function isIndexablePath(pathname: string): boolean {
   const path = requestPath(pathname);
   if (allPublicPages().some((page) => page.path === path)) return true;
   if (INDEX_EXTRAS.has(path)) return true;
-  return path.startsWith("/blogs/");
+  return path.startsWith("/blogs/") || path.startsWith("/learning-hebrabbai/");
 }
 
 export function isPublicReadingPath(pathname: string): boolean {
@@ -41,6 +43,8 @@ export function isPublicReadingPath(pathname: string): boolean {
     path === "/how-to-memorize-biblical-hebrew-vocabulary" ||
     path === "/blogs" ||
     path.startsWith("/blogs/") ||
+    path === "/learning-hebrabbai" ||
+    path.startsWith("/learning-hebrabbai/") ||
     path === "/teachings" ||
     path.startsWith("/teachings/")
   );

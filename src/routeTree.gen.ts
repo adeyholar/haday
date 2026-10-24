@@ -73,6 +73,9 @@ import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfec
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
 import { Route as IibsVerbParadigmQuestRouteImport } from './routes/iibs/verb-paradigm-quest'
 import { Route as IibsVerbalSystemRouteImport } from './routes/iibs/verbal-system'
+import { Route as LearningHebrabbaiIndexRouteImport } from './routes/learning-hebrabbai/index'
+import { Route as LearningHebrabbaiSlugRouteImport } from './routes/learning-hebrabbai/$slug'
+import { Route as LearningHebrabbaiRssDotxmlRouteImport } from './routes/learning-hebrabbai/rss[.]xml'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
@@ -442,6 +445,22 @@ const IibsVerbalSystemRoute = IibsVerbalSystemRouteImport.update({
   path: '/verbal-system',
   getParentRoute: () => IibsRoute,
 } as any)
+const LearningHebrabbaiIndexRoute = LearningHebrabbaiIndexRouteImport.update({
+  id: '/learning-hebrabbai/',
+  path: '/learning-hebrabbai/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearningHebrabbaiSlugRoute = LearningHebrabbaiSlugRouteImport.update({
+  id: '/learning-hebrabbai/$slug',
+  path: '/learning-hebrabbai/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearningHebrabbaiRssDotxmlRoute =
+  LearningHebrabbaiRssDotxmlRouteImport.update({
+    id: '/learning-hebrabbai/rss.xml',
+    path: '/learning-hebrabbai/rss.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LessonsIndexRoute = LessonsIndexRouteImport.update({
   id: '/lessons/',
   path: '/lessons/',
@@ -741,6 +760,8 @@ export interface FileRoutesByFullPath {
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
+  '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
+  '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -749,6 +770,7 @@ export interface FileRoutesByFullPath {
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
+  '/learning-hebrabbai/': typeof LearningHebrabbaiIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
@@ -852,6 +874,8 @@ export interface FileRoutesByTo {
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
+  '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
+  '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -860,6 +884,7 @@ export interface FileRoutesByTo {
   '/finder': typeof FinderIndexRoute
   '/game': typeof GameIndexRoute
   '/iibs': typeof IibsIndexRoute
+  '/learning-hebrabbai': typeof LearningHebrabbaiIndexRoute
   '/lessons': typeof LessonsIndexRoute
   '/listen': typeof ListenIndexRoute
   '/study': typeof StudyIndexRoute
@@ -966,6 +991,8 @@ export interface FileRoutesById {
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
+  '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
+  '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -974,6 +1001,7 @@ export interface FileRoutesById {
   '/finder/': typeof FinderIndexRoute
   '/game/': typeof GameIndexRoute
   '/iibs/': typeof IibsIndexRoute
+  '/learning-hebrabbai/': typeof LearningHebrabbaiIndexRoute
   '/lessons/': typeof LessonsIndexRoute
   '/listen/': typeof ListenIndexRoute
   '/study/': typeof StudyIndexRoute
@@ -1081,6 +1109,8 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
+    | '/learning-hebrabbai/$slug'
+    | '/learning-hebrabbai/rss.xml'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1089,6 +1119,7 @@ export interface FileRouteTypes {
     | '/finder/'
     | '/game/'
     | '/iibs/'
+    | '/learning-hebrabbai/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
@@ -1192,6 +1223,8 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
+    | '/learning-hebrabbai/$slug'
+    | '/learning-hebrabbai/rss.xml'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1200,6 +1233,7 @@ export interface FileRouteTypes {
     | '/finder'
     | '/game'
     | '/iibs'
+    | '/learning-hebrabbai'
     | '/lessons'
     | '/listen'
     | '/study'
@@ -1305,6 +1339,8 @@ export interface FileRouteTypes {
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
+    | '/learning-hebrabbai/$slug'
+    | '/learning-hebrabbai/rss.xml'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1313,6 +1349,7 @@ export interface FileRouteTypes {
     | '/finder/'
     | '/game/'
     | '/iibs/'
+    | '/learning-hebrabbai/'
     | '/lessons/'
     | '/listen/'
     | '/study/'
@@ -1408,11 +1445,14 @@ export interface RootRouteChildren {
   HubListenRoute: typeof HubListenRoute
   HubPlayRoute: typeof HubPlayRoute
   HubPracticeRoute: typeof HubPracticeRoute
+  LearningHebrabbaiSlugRoute: typeof LearningHebrabbaiSlugRoute
+  LearningHebrabbaiRssDotxmlRoute: typeof LearningHebrabbaiRssDotxmlRoute
   TeachingsSlugRoute: typeof TeachingsSlugRoute
   TeachingsRssDotxmlRoute: typeof TeachingsRssDotxmlRoute
   BlogsIndexRoute: typeof BlogsIndexRoute
   FinderIndexRoute: typeof FinderIndexRoute
   GameIndexRoute: typeof GameIndexRoute
+  LearningHebrabbaiIndexRoute: typeof LearningHebrabbaiIndexRoute
   LessonsIndexRoute: typeof LessonsIndexRoute
   StudyIndexRoute: typeof StudyIndexRoute
   TeachingsIndexRoute: typeof TeachingsIndexRoute
@@ -1897,6 +1937,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsVerbalSystemRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/learning-hebrabbai/': {
+      id: '/learning-hebrabbai/'
+      path: '/learning-hebrabbai'
+      fullPath: '/learning-hebrabbai/'
+      preLoaderRoute: typeof LearningHebrabbaiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learning-hebrabbai/$slug': {
+      id: '/learning-hebrabbai/$slug'
+      path: '/learning-hebrabbai/$slug'
+      fullPath: '/learning-hebrabbai/$slug'
+      preLoaderRoute: typeof LearningHebrabbaiSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learning-hebrabbai/rss.xml': {
+      id: '/learning-hebrabbai/rss.xml'
+      path: '/learning-hebrabbai/rss.xml'
+      fullPath: '/learning-hebrabbai/rss.xml'
+      preLoaderRoute: typeof LearningHebrabbaiRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lessons/': {
       id: '/lessons/'
       path: '/lessons'
@@ -2365,11 +2426,14 @@ const rootRouteChildren: RootRouteChildren = {
   HubListenRoute: HubListenRoute,
   HubPlayRoute: HubPlayRoute,
   HubPracticeRoute: HubPracticeRoute,
+  LearningHebrabbaiSlugRoute: LearningHebrabbaiSlugRoute,
+  LearningHebrabbaiRssDotxmlRoute: LearningHebrabbaiRssDotxmlRoute,
   TeachingsSlugRoute: TeachingsSlugRoute,
   TeachingsRssDotxmlRoute: TeachingsRssDotxmlRoute,
   BlogsIndexRoute: BlogsIndexRoute,
   FinderIndexRoute: FinderIndexRoute,
   GameIndexRoute: GameIndexRoute,
+  LearningHebrabbaiIndexRoute: LearningHebrabbaiIndexRoute,
   LessonsIndexRoute: LessonsIndexRoute,
   StudyIndexRoute: StudyIndexRoute,
   TeachingsIndexRoute: TeachingsIndexRoute,

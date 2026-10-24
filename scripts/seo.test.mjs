@@ -22,7 +22,9 @@ test("only the doors, privacy, and credits are indexable", () => {
   assert.equal(isIndexablePath("/about"), true);
   assert.equal(isIndexablePath("/blogs"), true);
   assert.equal(isIndexablePath("/blogs/a-post"), true);
-  assert.equal(isIndexablePath("/blogs/rss.xml"), true);
+  assert.equal(isIndexablePath("/learning-hebrabbai"), true);
+  assert.equal(isIndexablePath("/learning-hebrabbai/a-guide"), true);
+  assert.equal(isIndexablePath("/learning-hebrabbai/rss.xml"), true);
   assert.equal(isIndexablePath("/teachings"), false);
   assert.equal(isIndexablePath("/teachings/a-post"), false);
   assert.equal(isIndexablePath("/sitemap.xml"), true);
@@ -144,7 +146,7 @@ test("the sitemap and llms.txt come from the public page list", () => {
       { path: "/blogs/aleph", title: "Aleph", summary: "A reading.", lastmod: "2026-10-19" },
     ])
       .split("\n")
-      .includes("Blogs:"),
+      .includes("Teachings:"),
     true,
   );
   const robots = readFileSync(new URL("../public/robots.txt", import.meta.url), "utf8");

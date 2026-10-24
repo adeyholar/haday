@@ -122,7 +122,8 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
   }
   items.push({ to: "/", label: "Home page", hint: "The front door", icon: House });
   items.push({ to: "/how-to-memorize-biblical-hebrew-vocabulary", label: "Vocabulary method", hint: "How to learn the words", icon: Library });
-  items.push({ to: "/blogs", label: "Blogs", hint: "Public posts", icon: BookOpen });
+  items.push({ to: "/blogs", label: "Teachings", hint: "Scripture writing", icon: BookOpen });
+  items.push({ to: "/learning-hebrabbai", label: "Learning HebRabbAi", hint: "Guides for the app", icon: BookOpen });
   items.push({ to: "/about", label: "About", hint: "The teacher", icon: User });
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });

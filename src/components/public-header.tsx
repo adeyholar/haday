@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
 
-/** Visitor bar. Blogs is the public writing. */
+/** Visitor bar. Teachings and Learning HebRabbAi are the public writing. */
 export function PublicHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card">
@@ -11,7 +11,10 @@ export function PublicHeader() {
         </div>
         <nav aria-label="Public" className="flex shrink-0 items-center gap-3 text-sm font-semibold">
           <Link to="/blogs" className="text-ink underline-offset-4 hover:underline">
-            Blogs
+            Teachings
+          </Link>
+          <Link to="/learning-hebrabbai" className="text-ink underline-offset-4 hover:underline">
+            Learning
           </Link>
           <Link to="/about" className="text-ink underline-offset-4 hover:underline">
             About

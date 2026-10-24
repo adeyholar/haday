@@ -43,6 +43,7 @@ export type NavHref =
   | "/how-to-memorize-biblical-hebrew-vocabulary"
   | "/about"
   | "/blogs"
+  | "/learning-hebrabbai"
   | "/admin/blogs"
   | "/game"
   | "/game/road"

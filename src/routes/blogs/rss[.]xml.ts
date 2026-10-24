@@ -7,8 +7,8 @@ export const Route = createFileRoute("/blogs/rss.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const posts = await loadTeachingsIndex().catch(() => []);
-        return new Response(teachingsRss(posts, CLASS_SITE), {
+        const posts = await loadTeachingsIndex({ data: "teachings" }).catch(() => []);
+        return new Response(teachingsRss(posts, CLASS_SITE, "teachings"), {
           headers: { "content-type": "application/rss+xml; charset=utf-8" },
         });
       },

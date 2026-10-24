@@ -1,14 +1,45 @@
 export type TeachingPath = "grammar" | "scripture";
 
+export type TeachingSection = "teachings" | "learning-hebrabbai";
+
+export const TEACHING_SECTIONS: Record<
+  TeachingSection,
+  { label: string; path: "/blogs" | "/learning-hebrabbai"; intro: string; feed: string }
+> = {
+  teachings: {
+    label: "Teachings",
+    path: "/blogs",
+    intro: "Writing on Scripture from HaDay HebRabbAi Mentor.",
+    feed: "HaDay Teachings",
+  },
+  "learning-hebrabbai": {
+    label: "Learning HebRabbAi",
+    path: "/learning-hebrabbai",
+    intro: "Guides for using HaDay HebRabbAi Mentor.",
+    feed: "Learning HebRabbAi",
+  },
+};
+
+export function teachingSection(value: string | undefined): TeachingSection | null {
+  if (value === "teachings" || value === "learning-hebrabbai") return value;
+  return null;
+}
+
+export function postPath(section: TeachingSection, slug: string): string {
+  return `${TEACHING_SECTIONS[section].path}/${slug}`;
+}
+
 export type Teaching = {
   slug: string;
   title: string;
   summary: string;
   body: string;
   path: TeachingPath;
+  section: TeachingSection;
   tags: string[];
   related: string[];
   image: string;
+  imageAlt: string;
   draft: boolean;
   published: string;
   updated: string;
@@ -35,15 +66,28 @@ function cleanLine(value: string, max: number): string {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
+const IMAGE_HOST = "images.haday.app";
+
+export function isBlogImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === IMAGE_HOST && url.pathname.length > 1;
+  } catch {
+    return false;
+  }
+}
+
 export function validateTeaching(input: {
   slug?: string;
   title?: string;
   summary?: string;
   body?: string;
   path?: string;
+  section?: string;
   tags?: string;
   related?: string;
   image?: string;
+  imageAlt?: string;
   draft?: boolean;
   published?: string;
 }): { ok: true; value: Omit<Teaching, "updated"> } | { ok: false; error: string } {
@@ -54,6 +98,8 @@ export function validateTeaching(input: {
   if ((input.summary ?? "").trim().length > 155) return { ok: false, error: "Keep the summary to 155 characters." };
   const slug = slugify(input.slug?.trim() || title);
   if (!slug) return { ok: false, error: "The address needs letters or numbers." };
+  const section = teachingSection(input.section);
+  if (!section) return { ok: false, error: "Choose Teachings or Learning HebRabbAi." };
   const body = (input.body ?? "").replace(/\r\n/g, "\n").trim();
   if (body.length < 20) return { ok: false, error: "Write the post before saving." };
   if (body.length > 20000) return { ok: false, error: "This post is too long to save." };
@@ -63,8 +109,16 @@ export function validateTeaching(input: {
   const published = (input.published ?? "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(published)) return { ok: false, error: "Set the date." };
   const image = (input.image ?? "").trim();
-  if (image && !image.startsWith("/") && !image.startsWith("https://")) {
-    return { ok: false, error: "The picture address must start with / or https://." };
+  const imageAlt = cleanLine(input.imageAlt ?? "", 180);
+  if (image && !isBlogImageUrl(image)) {
+    return { ok: false, error: "The picture must be an https://images.haday.app address." };
+  }
+  if (image && !imageAlt) return { ok: false, error: "Add alt text for the picture." };
+  const imageTags = body.match(/\[image[^\]]*\]/g) ?? [];
+  const goodImages =
+    body.match(/\[image url="https:\/\/images\.haday\.app\/[^"\s]+" alt="[^"]+"[^\]]*\]/g) ?? [];
+  if (imageTags.length !== goodImages.length) {
+    return { ok: false, error: "Each picture in the post needs an images.haday.app address and alt text." };
   }
   return {
     ok: true,
@@ -74,9 +128,11 @@ export function validateTeaching(input: {
       summary,
       body,
       path: input.path,
+      section,
       tags: splitList(input.tags ?? ""),
       related: splitList(input.related ?? "").filter((item) => item !== slug),
       image,
+      imageAlt,
       draft: input.draft !== false,
       published,
     },
@@ -96,7 +152,7 @@ export function teachingCta(path: TeachingPath, signedIn: boolean): string {
 }
 
 export function relatedTeachings(post: Teaching, all: Teaching[], count = 2): Teaching[] {
-  const live = all.filter((item) => item.slug !== post.slug && isPublicTeaching(item));
+  const live = all.filter((item) => item.slug !== post.slug && item.section === post.section && isPublicTeaching(item));
   const picked: Teaching[] = [];
   const used = new Set<string>();
   const take = (item: Teaching | undefined) => {
@@ -140,7 +196,10 @@ function inline(value: string): string {
   return text;
 }
 
-export function renderTeaching(markdown: string): string {
+const SHORTCODE =
+  /\[verse ref="([^"]{1,40})"\]([\s\S]*?)\[\/verse\]|\[image url="(https:\/\/images\.haday\.app\/[^"\s]+)" alt="([^"]{1,180})"(?: caption="([^"]*)")?(?: width="(\d{1,5})")?(?: height="(\d{1,5})")?\]|\[video id="([A-Za-z0-9_-]{11})"\]|\[hebrabbai-cta\]/g;
+
+function markdownBlocks(markdown: string): string {
   const blocks = markdown.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
   return blocks
     .map((block) => {
@@ -166,15 +225,48 @@ export function renderTeaching(markdown: string): string {
     .join("");
 }
 
+function shortcodeHtml(match: RegExpExecArray): string {
+  if (match[1] != null) {
+    return `<figure class="my-4"><blockquote dir="rtl" lang="he" class="he-word text-2xl leading-relaxed">${inline(match[2] ?? "")}</blockquote><figcaption class="mt-1 text-sm text-muted">${escapeHtml(match[1])}</figcaption></figure>`;
+  }
+  if (match[3]) {
+    const width = match[6] ? ` width="${escapeHtml(match[6])}"` : "";
+    const height = match[7] ? ` height="${escapeHtml(match[7])}"` : "";
+    const caption = match[5]?.trim() ? `<figcaption class="mt-1 text-sm text-muted">${escapeHtml(match[5])}</figcaption>` : "";
+    return `<figure class="my-4"><img src="${escapeHtml(match[3])}" alt="${escapeHtml(match[4] ?? "")}" loading="lazy"${width}${height}>${caption}</figure>`;
+  }
+  if (match[8]) {
+    const id = escapeHtml(match[8]);
+    const src = `https://www.youtube-nocookie.com/embed/${id}`;
+    return `<p><button type="button" class="min-h-11 font-semibold text-primary underline" onclick="this.outerHTML='<iframe src="${src}" title="Video" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0"></iframe>'">Play the video</button></p>`;
+  }
+  return `<p><a class="inline-flex min-h-11 items-center font-semibold text-primary underline" href="/login">Open HaDay HebRabbAi Mentor</a></p>`;
+}
+
+export function renderTeaching(markdown: string): string {
+  const source = markdown.replace(/\r\n/g, "\n").trim();
+  let html = "";
+  let last = 0;
+  for (const match of source.matchAll(SHORTCODE)) {
+    const index = match.index ?? 0;
+    html += markdownBlocks(source.slice(last, index));
+    html += shortcodeHtml(match);
+    last = index + match[0].length;
+  }
+  html += markdownBlocks(source.slice(last));
+  return html;
+}
+
 function escapeXml(value: string): string {
   return value.replace(/&/g, "\u0026amp;").replace(/</g, "\u0026lt;").replace(/>/g, "\u0026gt;");
 }
 
-export function teachingsRss(posts: Teaching[], site: string): string {
+export function teachingsRss(posts: Teaching[], site: string, section: TeachingSection = "teachings"): string {
+  const meta = TEACHING_SECTIONS[section];
   const items = posts
-    .filter((post) => isPublicTeaching(post))
+    .filter((post) => post.section === section && isPublicTeaching(post))
     .map((post) => {
-      const link = `${site}/blogs/${post.slug}`;
+      const link = `${site}${postPath(section, post.slug)}`;
       const pub = new Date(`${post.published}T12:00:00.000Z`).toUTCString();
       return [
         "    <item>",
@@ -192,10 +284,10 @@ export function teachingsRss(posts: Teaching[], site: string): string {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     "  <channel>",
-    "    <title>HaDay Blogs</title>",
-    `    <link>${site}/blogs</link>`,
-    "    <description>Posts from HaDay HebRabbAi Mentor.</description>",
-    `    <atom:link href="${site}/blogs/rss.xml" rel="self" type="application/rss+xml"/>`,
+    `    <title>${escapeXml(meta.feed)}</title>`,
+    `    <link>${site}${meta.path}</link>`,
+    `    <description>${escapeXml(meta.intro)}</description>`,
+    `    <atom:link href="${site}${meta.path}/rss.xml" rel="self" type="application/rss+xml"/>`,
     items,
     "  </channel>",
     "</rss>",

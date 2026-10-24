@@ -27,6 +27,22 @@ function publicCache(path: string): string | null {
   return null;
 }
 
+function blogCachePath(path: string): boolean {
+  return (
+    path === "/blogs" ||
+    path.startsWith("/blogs/") ||
+    path === "/learning-hebrabbai" ||
+    path.startsWith("/learning-hebrabbai/") ||
+    path === "/sitemap.xml" ||
+    path === "/llms.txt"
+  );
+}
+
+function hasSessionCookie(event: HeaderEvent): boolean {
+  const cookie = event.req?.headers?.get?.("cookie") || "";
+  return cookie.includes("session_token=");
+}
+
 function compressible(type: string): boolean {
   return /text\/|javascript|json|xml|svg|\+json/i.test(type);
 }
@@ -81,6 +97,13 @@ export default async function securityHeaders(
   }
   if (robotsNoindex(host, path)) headers.set("X-Robots-Tag", "noindex, nofollow");
   else if (!headers.has("Link")) headers.set("Link", `<${canonicalUrl(path)}>; rel="canonical"`);
+  if (path.startsWith("/admin") || path.startsWith("/api/")) headers.set("cache-control", "no-store");
+  else if (blogCachePath(path)) {
+    headers.set(
+      "cache-control",
+      hasSessionCookie(event) ? "no-store" : "public, s-maxage=300, stale-while-revalidate=300",
+    );
+  }
   const cache = publicCache(path);
   if (cache && !headers.has("cache-control")) headers.set("cache-control", cache);
   const shaped = new Response(result.body, { status: result.status, statusText: result.statusText, headers });
