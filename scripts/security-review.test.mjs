@@ -43,7 +43,7 @@ test("a made-up chapter key is not stored", () => {
 });
 
 test("security headers middleware sets framing and sniff protection", () => {
-  const src = readFileSync(new URL("../server/middleware/security-headers.ts", import.meta.url), "utf8");
+  const src = readFileSync(new URL("../server/middleware/00.security-headers.ts", import.meta.url), "utf8");
   assert.match(src, /frame-ancestors 'none'/);
   assert.match(src, /nosniff/);
   assert.match(src, /Strict-Transport-Security/);

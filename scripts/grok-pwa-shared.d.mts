@@ -66,7 +66,6 @@ export declare function grokOgHeadTags(ctx?: {
   documentTitle?: string;
   cwd?: string;
 }): string[];
-export declare function stripShareMetaTags(html: string): string;
 export declare function normalizeHeadContext(ctx?: GrokHeadContext): {
   appName: string;
   projectId: string;
@@ -77,12 +76,6 @@ export declare function normalizeHeadContext(ctx?: GrokHeadContext): {
   site: OgSite;
 };
 export declare function injectGrokPwaHead(html: string, ctx?: GrokHeadContext): string;
-export declare function finishHtmlResponse(
-  body: Uint8Array | string,
-  encoding: string,
-  ctx?: GrokHeadContext,
-  headers?: Headers,
-): { body: Uint8Array; headers: Headers } | null;
 export declare function createHeadInjector(ctx?: GrokHeadContext): {
   push(chunk: Uint8Array | string): Uint8Array[];
   flush(): Uint8Array[];

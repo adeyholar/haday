@@ -8,10 +8,10 @@
  *   static output on Vercel and not readable from the function).
  * - `/__grok/manifest.webmanifest` → per-app-named manifest (kept out of
  *   public/ so this dynamic response is the only one).
- * - Other HTML documents → fill missing PWA + OG head tags at `</head>`.
- *   A tag the page already wrote (og: and twitter:) stays. A site default is
- *   added only when that tag is missing. Encoded and plain documents get the
- *   same head. Blog cache headers are left as the inner response set them.
+ * - Other HTML documents → stream-inject missing PWA + OG head tags at `</head>`.
+ *   A tag the page already wrote stays. A site default is added only when that
+ *   tag is missing. This runs inside the security middleware, on plain HTML,
+ *   so the page is compressed once. Blog paths keep the cache header.
  *   OG identity is baked via `virtual:grok-og-identity` at `vite build`
  *   (this function cannot read `src/lib/og/site.json` or `public/og.jpg`).
  *   This must be a middleware transforming `next()`: h3 discards the `response`
@@ -19,9 +19,10 @@
  */
 import installPageTemplate from "../../scripts/install-page.html?raw";
 import { grokOgIdentity } from "virtual:grok-og-identity";
+import { TEACHING_SECTIONS } from "../../src/lib/teaching-text";
 import {
   acceptsHtml,
-  finishHtmlResponse,
+  createHeadInjector,
   isDocumentPath,
   isInstallQuery,
   renderInstallPageHtml,
@@ -40,36 +41,33 @@ function requestHost(event: GrokPwaEvent): string {
 }
 
 function keepsBlogCache(path: string): boolean {
-  return (
-    path === "/blogs" ||
-    path.startsWith("/blogs/") ||
-    path === "/learning-hebrabbai" ||
-    path.startsWith("/learning-hebrabbai/")
+  return Object.values(TEACHING_SECTIONS).some(
+    (section) => path === section.path || path.startsWith(`${section.path}/`),
   );
 }
 
-async function injectDocument(response: Response, host: string, path: string): Promise<Response> {
-  const encoding = response.headers.get("content-encoding") ?? "";
-  const raw = Buffer.from(await response.arrayBuffer());
-  const finished = finishHtmlResponse(
-    raw,
-    encoding,
-    { host, site: grokOgIdentity.site },
-    response.headers,
+function injectHeadStreaming(response: Response, host: string, path: string): Response {
+  const injector = createHeadInjector({
+    host,
+    site: grokOgIdentity.site,
+  });
+  const transformed = response.body!.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        for (const out of injector.push(chunk)) controller.enqueue(out);
+      },
+      flush(controller) {
+        for (const out of injector.flush()) controller.enqueue(out);
+      },
+    }),
   );
-  if (!finished) {
-    return new Response(raw, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-  }
-  const headers = finished.headers;
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
   if (!keepsBlogCache(path)) {
     headers.set("cache-control", "no-store, no-cache, must-revalidate");
     headers.set("pragma", "no-cache");
   }
-  return new Response(Buffer.from(finished.body), {
+  return new Response(transformed, {
     status: response.status,
     statusText: response.statusText,
     headers,
@@ -130,7 +128,7 @@ export default async function grokPwaMiddleware(
     result.body &&
     String(result.headers.get("content-type") ?? "").includes("text/html")
   ) {
-    return injectDocument(result, requestHost(event), path);
+    return injectHeadStreaming(result, requestHost(event), path);
   }
   return result;
 }

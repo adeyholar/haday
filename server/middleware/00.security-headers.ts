@@ -1,7 +1,7 @@
 import { brotliCompressSync, gzipSync, constants as zlibConstants } from "node:zlib";
 import { canonicalUrl, retiredHostRedirect, robotsNoindex, shouldRedirectAzure } from "../../src/lib/seo";
 
-/** Security headers for every response. CSP only blocks framing, so the app's own scripts still run. */
+/** Security headers for every response. The 00. name keeps this outside the head injector, so the injector edits plain HTML and this file compresses it once. CSP only blocks framing, so the app's own scripts still run. */
 const HEADERS: Record<string, string> = {
   "Content-Security-Policy": "frame-ancestors 'none'",
   "Strict-Transport-Security": "max-age=15552000; includeSubDomains",
