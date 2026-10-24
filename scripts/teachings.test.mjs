@@ -56,6 +56,41 @@ test("the call to action follows the path", () => {
   assert.equal(teachingCta("scripture", true), "/iibs");
 });
 
+test("a table keeps alignment, escapes a cell, and marks Hebrew", () => {
+  const html = renderTeaching(`| Left | Center | Right |
+| :--- | :---: | ---: |
+| a \\| b | <script>alert(1)</script> | בְּרֵאשִׁית |`);
+  assert.match(html, /<div class="table-wrap"/);
+  assert.match(html, /<th scope="col" style="text-align:left">Left<\/th>/);
+  assert.match(html, /<th scope="col" style="text-align:center">Center<\/th>/);
+  assert.match(html, /<th scope="col" style="text-align:right">Right<\/th>/);
+  assert.match(html, /a \| b/);
+  assert.equal(html.includes("<script>"), false);
+  assert.equal(html.includes("alert(1)"), true);
+  assert.match(html, /<td style="text-align:right"><span dir="rtl" lang="he">/);
+});
+
+test("a pipe line without a separator stays a paragraph", () => {
+  const html = renderTeaching("| not | a | table |\n\nThis line is still a paragraph of the post.");
+  assert.equal(html.includes("<table>"), false);
+  assert.match(html, /<p>/);
+});
+
+test("a table with nine columns is rejected", () => {
+  const cells = Array.from({ length: 9 }, (_, index) => `c${index}`).join(" | ");
+  const rule = Array.from({ length: 9 }, () => "---").join(" | ");
+  const result = validateTeaching({
+    title: "The letter aleph",
+    summary: "A short reading about the first letter.",
+    body: `Aleph is silent, and the verse still begins with it.\n\n| ${cells} |\n| ${rule} |\n| ${cells} |`,
+    path: "grammar",
+    section: "teachings",
+    published: "2026-10-19",
+  });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.match(result.error, /8 columns/);
+});
+
 test("the teaching body escapes html and marks Hebrew", () => {
   const html = renderTeaching("A word <script>alert(1)</script> and **שלום** in the line.");
   assert.equal(html.includes("<script>"), false);
