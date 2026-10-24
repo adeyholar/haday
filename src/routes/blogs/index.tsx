@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BlogIndex } from "@/components/blog-index";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
-import { BLOG_HOME, blogFilter, postsForBlog } from "@/lib/teaching-text";
+import { BLOG_HOME, blogFilter, blogPageTitle, postsForBlog, TEACHING_SECTIONS } from "@/lib/teaching-text";
 import { loadTeachingsIndex } from "@/lib/teachings";
 
 export const Route = createFileRoute("/blogs/")({
@@ -20,13 +20,21 @@ export const Route = createFileRoute("/blogs/")({
       return { posts: [], filter };
     }
   },
-  head: () => ({
-    meta: shareMeta(BLOG_HOME.title, BLOG_HOME.intro, BLOG_HOME.path),
-    links: [
-      { rel: "canonical", href: `${CLASS_SITE}${BLOG_HOME.path}` },
-      { rel: "alternate", type: "application/rss+xml", title: "HaDay Teachings", href: "/blogs/rss.xml" },
-    ],
-  }),
+  head: ({ match }) => {
+    const filter = blogFilter(match.search.section);
+    const title = blogPageTitle(filter);
+    const intro = filter === "all" ? BLOG_HOME.intro : TEACHING_SECTIONS.teachings.intro;
+    const meta = shareMeta(title, intro, BLOG_HOME.path);
+    if (filter === "teachings") meta.push({ name: "robots", content: "noindex,follow" });
+    return {
+      meta,
+      links: [
+        { rel: "canonical", href: `${CLASS_SITE}${BLOG_HOME.path}` },
+        { rel: "alternate", type: "application/rss+xml", title: "HaDay Teachings", href: "/blogs/rss.xml" },
+        { rel: "alternate", type: "application/rss+xml", title: "HaDay Learning HebRabbAi", href: "/learning-hebrabbai/rss.xml" },
+      ],
+    };
+  },
   component: BlogHome,
 });
 

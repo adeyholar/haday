@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
@@ -10,6 +9,7 @@ const {
   BLOG_TABS,
   BLOG_HOME,
   blogDate,
+  blogPageTitle,
   relatedTeachings,
   renderTeaching,
   slugify,
@@ -19,6 +19,8 @@ const {
   validateTeaching,
 } = await jiti.import(new URL("../src/lib/teaching-text.ts", import.meta.url).pathname);
 const { refuseBlogImage } = await jiti.import(new URL("../src/lib/blog-images.ts", import.meta.url).pathname);
+const { blogCrumbs, blogIndexJsonLd, postJsonLd } = await jiti.import(new URL("../src/lib/blog-jsonld.ts", import.meta.url).pathname);
+const { PUBLIC_NAV, FOOTER_NAV, STUDY_MENU_BLOG } = await jiti.import(new URL("../src/lib/public-nav.ts", import.meta.url).pathname);
 
 const live = {
   slug: "aleph",
@@ -50,18 +52,24 @@ test("the blog home lists both sections and the tabs point at the filters", () =
   assert.equal(postsForBlog([older, guide], "learning-hebrabbai").length, 1);
   assert.equal(blogDate("2026-10-24"), "October 24, 2026");
   assert.deepEqual(BLOG_TABS.map((tab) => tab.href), ["/blogs", "/blogs?section=teachings", "/learning-hebrabbai"]);
-  const header = readFileSync(new URL("../src/components/public-header.tsx", import.meta.url).pathname, "utf8");
-  const footer = readFileSync(new URL("../src/components/public-footer.tsx", import.meta.url).pathname, "utf8");
-  const menu = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
-  const home = readFileSync(new URL("../src/routes/blogs/index.tsx", import.meta.url).pathname, "utf8");
-  assert.match(header, />\s*Blog\s*</);
-  assert.equal(header.includes(">Teachings<"), false);
-  assert.match(footer, />\s*Blog\s*</);
-  assert.equal(footer.includes(">Teachings<"), false);
-  assert.match(menu, /label: "Blog"/);
-  assert.equal(menu.includes('label: "Teachings"'), false);
-  assert.match(home, /data: filter === "all" \? "all" : filter/);
   assert.equal(BLOG_HOME.title, "Blog | HaDay HebRabbAi Mentor");
+  assert.equal(blogPageTitle("all"), "Blog | HaDay HebRabbAi Mentor");
+  assert.equal(blogPageTitle("teachings"), "Teachings | HaDay HebRabbAi Mentor");
+  assert.equal(blogPageTitle("learning-hebrabbai"), "Learning HebRabbAi | HaDay HebRabbAi Mentor");
+  const teachingCrumb = blogCrumbs("teachings").map((item) => item.item).join(" ");
+  assert.equal(teachingCrumb.includes("section=teachings"), false);
+  assert.equal(teachingCrumb.includes("https://hebrewmentor.haday.app/blogs"), true);
+  const tabLd = JSON.stringify(blogIndexJsonLd("teachings", [live]));
+  assert.equal(tabLd.includes("section=teachings"), false);
+  assert.equal(tabLd.includes("https://hebrewmentor.haday.app/blogs"), true);
+  const postLd = JSON.stringify(postJsonLd(live));
+  assert.equal(postLd.includes("section=teachings"), false);
+  assert.equal(PUBLIC_NAV.find((item) => item.to === "/blogs").label, "Blog");
+  assert.equal(PUBLIC_NAV.some((item) => item.label === "Teachings"), false);
+  assert.equal(FOOTER_NAV.find((item) => item.to === "/blogs").label, "Blog");
+  assert.equal(FOOTER_NAV.some((item) => item.label === "Teachings"), false);
+  assert.equal(STUDY_MENU_BLOG.to, "/blogs");
+  assert.equal(STUDY_MENU_BLOG.label, "Blog");
 });
 
 test("slugs stay unique and related links resolve", () => {

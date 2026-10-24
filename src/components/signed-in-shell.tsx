@@ -28,6 +28,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
 import { getAdminStatus } from "@/lib/admin";
+import { STUDY_MENU_BLOG } from "@/lib/public-nav";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { blockedDestination, currentDoor, homeForAccount, ownerDoorBlock, secondTermBlock, subscribeHall, subscribeTerm, termForAccount, termHallOpen, termRevisionNow, noteServerTerm } from "@/lib/path";
 import { enterTermWeek } from "@/lib/term-week";
@@ -122,7 +123,7 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
   }
   items.push({ to: "/", label: "Home page", hint: "The front door", icon: House });
   items.push({ to: "/how-to-memorize-biblical-hebrew-vocabulary", label: "Vocabulary method", hint: "How to learn the words", icon: Library });
-  items.push({ to: "/blogs", label: "Blog", hint: "Teachings and guides", icon: BookOpen });
+  items.push({ ...STUDY_MENU_BLOG, icon: BookOpen });
   items.push({ to: "/about", label: "About", hint: "The teacher", icon: User });
   items.push({ to: "/legal", label: "Privacy", hint: "How we use your data", icon: FileText });
   items.push({ to: "/credits", label: "Credits", hint: "Audio, text, open works", icon: ScrollText });

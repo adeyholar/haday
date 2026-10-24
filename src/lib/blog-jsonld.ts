@@ -9,8 +9,7 @@ export function blogCrumbs(filter: BlogFilter) {
   const blog = { "@type": "ListItem", position: 2, name: "Blog", item: `${CLASS_SITE}/blogs` };
   if (filter === "all") return [home, blog];
   const section = TEACHING_SECTIONS[filter];
-  const item = filter === "teachings" ? `${CLASS_SITE}/blogs?section=teachings` : `${CLASS_SITE}${section.path}`;
-  return [...[home, blog], { "@type": "ListItem", position: 3, name: section.label, item }];
+  return [...[home, blog], { "@type": "ListItem", position: 3, name: section.label, item: `${CLASS_SITE}${section.path}` }];
 }
 
 export function postJsonLd(post: Teaching) {
@@ -54,12 +53,7 @@ export function blogIndexJsonLd(
   posts: Pick<Teaching, "slug" | "title" | "published" | "section">[],
 ) {
   const name = filter === "all" ? "Blog" : TEACHING_SECTIONS[filter].label;
-  const url =
-    filter === "learning-hebrabbai"
-      ? `${CLASS_SITE}/learning-hebrabbai`
-      : filter === "teachings"
-        ? `${CLASS_SITE}/blogs?section=teachings`
-        : `${CLASS_SITE}/blogs`;
+  const url = filter === "learning-hebrabbai" ? `${CLASS_SITE}/learning-hebrabbai` : `${CLASS_SITE}/blogs`;
   return {
     "@context": "https://schema.org",
     "@graph": [
