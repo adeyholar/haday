@@ -1,3 +1,6 @@
+import { CLASS_SITE } from "@/lib/class-site";
+import { shareMeta, SITE_OG_IMAGE } from "@/lib/seo";
+
 export type TeachingPath = "grammar" | "scripture";
 
 export type TeachingSection = "teachings" | "learning-hebrabbai";
@@ -53,6 +56,40 @@ export function blogPageTitle(filter: BlogFilter): string {
   return `${TEACHING_SECTIONS[filter].label} | HaDay HebRabbAi Mentor`;
 }
 
+export function postHeadline(post: { title: string; searchTitle?: string }): string {
+  const search = (post.searchTitle ?? "").trim();
+  return search || post.title;
+}
+
+export function postShareImage(image: string): string {
+  return image.trim() || SITE_OG_IMAGE;
+}
+
+export function postHead(post: Teaching) {
+  const path = postPath(post.section, post.slug);
+  const headline = postHeadline(post);
+  return {
+    meta: [
+      ...shareMeta(headline, post.summary, path, { type: "article" as const, image: postShareImage(post.image) }),
+      { property: "article:published_time", content: post.published },
+      { property: "article:modified_time", content: post.updated || post.published },
+    ],
+    links: [{ rel: "canonical", href: `${CLASS_SITE}${path}` }],
+  };
+}
+
+export function retiredTeachingTarget(pathname: string): string {
+  const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (path === "/teachings/rss.xml") return "/blogs/rss.xml";
+  const slug = /^\/teachings\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(path);
+  if (slug) return `/blogs/${slug[1]}`;
+  return "/blogs";
+}
+
+export function teachingLastmod(post: { updated?: string; published: string }): string {
+  return post.updated || post.published;
+}
+
 export function blogDate(iso: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   if (!match) return iso;
@@ -86,6 +123,7 @@ export type Teaching = {
   related: string[];
   image: string;
   imageAlt: string;
+  searchTitle: string;
   draft: boolean;
   published: string;
   updated: string;
@@ -134,6 +172,7 @@ export function validateTeaching(input: {
   related?: string;
   image?: string;
   imageAlt?: string;
+  searchTitle?: string;
   draft?: boolean;
   published?: string;
 }): { ok: true; value: Omit<Teaching, "updated"> } | { ok: false; error: string } {
@@ -160,6 +199,10 @@ export function validateTeaching(input: {
     return { ok: false, error: "The picture must be an https://images.haday.app address." };
   }
   if (image && !imageAlt) return { ok: false, error: "Add alt text for the picture." };
+  const searchTitle = cleanLine(input.searchTitle ?? "", 60);
+  if ((input.searchTitle ?? "").trim().length > 60) {
+    return { ok: false, error: "Keep the search title to 60 characters." };
+  }
   const imageTags = body.match(/\[image[^\]]*\]/g) ?? [];
   const goodImages =
     body.match(/\[image url="https:\/\/images\.haday\.app\/[^"\s]+" alt="[^"]+"[^\]]*\]/g) ?? [];
@@ -181,6 +224,7 @@ export function validateTeaching(input: {
       related: splitList(input.related ?? "").filter((item) => item !== slug),
       image,
       imageAlt,
+      searchTitle,
       draft: input.draft !== false,
       published,
     },
@@ -240,7 +284,7 @@ function inline(value: string): string {
   });
   text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
-  text = text.replace(/[\u0590-\u05FF]+/g, (word) => `<span dir="rtl" lang="he">${word}</span>`);
+  text = text.replace(/[\u0590-\u05FF]+/g, (word) => `<span dir="rtl" lang="he" style="unicode-bidi:isolate">${word}</span>`);
   return text;
 }
 

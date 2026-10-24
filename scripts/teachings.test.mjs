@@ -16,6 +16,11 @@ const {
   teachingCta,
   teachingsRss,
   insertPostPiece,
+  postHeadline,
+  postHead,
+  postPath,
+  retiredTeachingTarget,
+  teachingLastmod,
   validateTeaching,
 } = await jiti.import(new URL("../src/lib/teaching-text.ts", import.meta.url).pathname);
 const { refuseBlogImage } = await jiti.import(new URL("../src/lib/blog-images.ts", import.meta.url).pathname);
@@ -32,11 +37,47 @@ const live = {
   related: ["bet"],
   image: "",
   imageAlt: "",
+  searchTitle: "",
   section: "teachings",
   draft: false,
   published: "2026-10-19",
   updated: "2026-10-19",
 };
+
+test("a post keeps its section address, its draft, and its search title", () => {
+  assert.equal(postPath("teachings", "aleph"), "/blogs/aleph");
+  assert.equal(postPath("learning-hebrabbai", "aleph"), "/learning-hebrabbai/aleph");
+  assert.equal(retiredTeachingTarget("/teachings"), "/blogs");
+  assert.equal(retiredTeachingTarget("/teachings/aleph"), "/blogs/aleph");
+  assert.equal(retiredTeachingTarget("/teachings/rss.xml"), "/blogs/rss.xml");
+  const fields = { ...live, tags: "letters", related: "bet", draft: undefined };
+  const draft = validateTeaching(fields);
+  assert.equal(draft.ok, true);
+  if (draft.ok) assert.equal(draft.value.draft, true);
+  const published = validateTeaching({ ...fields, draft: false });
+  assert.equal(published.ok && published.value.draft, false);
+  const longSummary = validateTeaching({ ...fields, summary: "x".repeat(156) });
+  assert.equal(longSummary.ok, false);
+  const longSearch = validateTeaching({ ...fields, searchTitle: "x".repeat(61) });
+  assert.equal(longSearch.ok, false);
+  assert.equal(postHeadline(live), live.title);
+  assert.equal(postHeadline({ ...live, searchTitle: "Short title" }), "Short title");
+  const head = postHead({ ...live, searchTitle: "Short title", summary: "A short reading about the first letter and why it matters." });
+  assert.equal(head.meta.some((item) => "title" in item && item.title === "Short title"), true);
+  assert.equal(head.meta.some((item) => item.name === "description" && item.content === live.summary), true);
+  assert.equal(head.links[0].href.endsWith("/blogs/aleph"), true);
+  assert.equal(teachingLastmod(live), "2026-10-19");
+  const html = renderTeaching("# A heading\n\n## A smaller heading\n\nThe letter aleph still begins the verse.");
+  assert.match(html, /<h2>/);
+  assert.match(html, /<h3>/);
+  assert.equal(html.includes("<h1>"), false);
+  const table = renderTeaching("| A | B |\n| --- | --- |\n| a | b |");
+  assert.match(table, /<div class="table-wrap" style="overflow-x:auto">/);
+  const ld = postJsonLd({ ...live, searchTitle: "Short title" });
+  assert.equal(ld["@graph"][0].headline, "Short title");
+  assert.equal(ld["@graph"][0].author.name, "Brother Ade");
+  assert.equal(ld["@graph"][0].description, live.summary);
+});
 
 test("a teaching without a title is rejected", () => {
   const result = validateTeaching({ ...live, title: "No", body: live.body });
@@ -117,7 +158,7 @@ test("a table keeps alignment, escapes a cell, and marks Hebrew", () => {
   assert.match(html, /a \| b/);
   assert.equal(html.includes("<script>"), false);
   assert.equal(html.includes("alert(1)"), true);
-  assert.match(html, /<td style="text-align:right"><span dir="rtl" lang="he">/);
+  assert.match(html, /<td style="text-align:right"><span dir="rtl" lang="he"/);
 });
 
 test("a pipe line without a separator stays a paragraph", () => {

@@ -4,7 +4,7 @@ import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
 import { AUTHOR } from "@/lib/author";
 import { postJsonLd } from "@/lib/blog-jsonld";
-import { renderTeaching, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
+import { blogDate, renderTeaching, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
 
 export function BlogArticle({ post, related }: { post: Teaching; related: Teaching[] }) {
   const section = TEACHING_SECTIONS[post.section];
@@ -32,32 +32,35 @@ export function BlogArticle({ post, related }: { post: Teaching; related: Teachi
         {" / "}
         <span>{post.title}</span>
       </p>
-      <Panel className="mt-4">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-ink">{post.title}</h1>
-        <p className="mt-3 text-sm text-muted">
-          <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Brother Ade
-          </Link>
-          . Published {post.published}
-          {post.updated !== post.published ? `. Updated ${post.updated}` : ""}.
-        </p>
-        {post.image ? (
-          <img src={post.image} alt={post.imageAlt} width={1200} height={675} loading="lazy" className="mt-4 w-full rounded-[var(--radius-md)]" />
-        ) : null}
-        <div
-          className="blog-body mt-4 max-w-prose space-y-3 leading-relaxed text-ink"
-          dangerouslySetInnerHTML={{ __html: renderTeaching(post.body) }}
-        />
-      </Panel>
+      <article className="mt-4">
+        <Panel>
+          <h1 className="font-display text-4xl font-bold tracking-tight text-ink">{post.title}</h1>
+          <p className="mt-3 text-sm text-muted">
+            <Link to="/about" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Brother Ade
+            </Link>
+            . Published <time dateTime={post.published}>{blogDate(post.published)}</time>
+            {post.updated !== post.published ? <>. Updated <time dateTime={post.updated}>{blogDate(post.updated)}</time></> : null}
+            .
+          </p>
+          {post.image ? (
+            <img src={post.image} alt={post.imageAlt} width={1200} height={675} loading="lazy" className="mt-4 w-full rounded-[var(--radius-md)]" />
+          ) : null}
+          <div
+            className="blog-body mt-4 max-w-prose leading-relaxed text-ink"
+            dangerouslySetInnerHTML={{ __html: renderTeaching(post.body) }}
+          />
+        </Panel>
+      </article>
       {post.section === "teachings" ? (
         <Panel className="mt-4">
           <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-            Read it in Hebrew with HebRabbAi
+            Read it in Hebrew with HaDay HebRabbAi Mentor
           </Link>
         </Panel>
       ) : null}
       <Panel className="mt-4">
-        <img src="/about/adeola.jpg" alt={AUTHOR.name} width={800} height={800} className="h-16 w-16 rounded-full object-cover" />
+        <img src="/about/adeola-128.jpg" alt="Brother Ade" width={128} height={128} className="h-16 w-16 rounded-full object-cover" />
         <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">{AUTHOR.shortBio}</p>
       </Panel>
       <BlogComments slug={post.slug} initial={[]} />

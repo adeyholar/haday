@@ -1,8 +1,6 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { BlogArticle } from "@/components/blog-article";
-import { CLASS_SITE } from "@/lib/class-site";
-import { shareMeta } from "@/lib/seo";
-import { postPath } from "@/lib/teaching-text";
+import { postHead, postPath } from "@/lib/teaching-text";
 import { loadTeachingPage } from "@/lib/teachings";
 
 export const Route = createFileRoute("/blogs/$slug")({
@@ -17,15 +15,7 @@ export const Route = createFileRoute("/blogs/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData?.post) return {};
     const post = loaderData.post;
-    const path = postPath(post.section, post.slug);
-    return {
-      meta: [
-        ...shareMeta(post.title, post.summary, path, { type: "article", image: post.image || undefined }),
-        { property: "article:published_time", content: post.published },
-        { property: "article:modified_time", content: post.updated },
-      ],
-      links: [{ rel: "canonical", href: `${CLASS_SITE}${path}` }],
-    };
+    return postHead(post);
   },
   component: TeachingsPost,
 });

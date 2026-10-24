@@ -8,6 +8,7 @@ import {
   isPublicTeaching,
   postPath,
   relatedTeachings,
+  teachingLastmod,
   teachingSection,
   validateTeaching,
   type Teaching,
@@ -27,6 +28,7 @@ type Row = {
   related: string;
   image: string;
   image_alt: string;
+  search_title: string;
   draft: boolean;
   published_at: string | Date;
   updated_at: string | Date;
@@ -69,6 +71,7 @@ async function ensureTeachingsTable() {
       "alter table teachings add constraint teachings_section_check check (section in ('teachings', 'learning-hebrabbai'))",
     );
     await sql.query("alter table teachings add column if not exists image_alt text not null default ''");
+    await sql.query("alter table teachings add column if not exists search_title text not null default ''");
     await sql.query("create index if not exists teachings_public on teachings (draft, published_at desc)");
     await sql.query("create index if not exists teachings_section_public on teachings (section, draft, published_at desc)");
   })().catch((err) => {
@@ -97,14 +100,15 @@ function mapRow(row: Row): Teaching {
     related: row.related ? row.related.split(",").filter(Boolean) : [],
     image: row.image,
     imageAlt: row.image_alt ?? "",
+    searchTitle: row.search_title ?? "",
     draft: row.draft,
     published: day(row.published_at),
     updated: day(row.updated_at),
   };
 }
 
-const SELECT = `slug, title, summary, body, path, section, tags, related, image, image_alt, draft, published_at, updated_at`;
-const SLIM = `slug, title, summary, '' as body, path, section, tags, related, image, image_alt, draft, published_at, updated_at`;
+const SELECT = `slug, title, summary, body, path, section, tags, related, image, image_alt, search_title, draft, published_at, updated_at`;
+const SLIM = `slug, title, summary, '' as body, path, section, tags, related, image, image_alt, search_title, draft, published_at, updated_at`;
 
 export async function listTeachings(): Promise<Teaching[]> {
   await ensureTeachingsTable();
@@ -165,7 +169,7 @@ export async function sitemapPages(): Promise<SitePage[]> {
       path: postPath(post.section, post.slug),
       title: post.title,
       summary: post.summary,
-      lastmod: post.updated || post.published,
+      lastmod: teachingLastmod(post),
     })),
   ];
 }
@@ -209,6 +213,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
       related?: string;
       image?: string;
       imageAlt?: string;
+      searchTitle?: string;
       draft?: boolean;
       published?: string;
     }) => input,
@@ -223,8 +228,8 @@ export const saveTeaching = createServerFn({ method: "POST" })
     const sql = await getSql();
     const stamp = `${post.published}T12:00:00.000Z`;
     await sql.query(
-      `insert into teachings (slug, title, summary, body, path, section, tags, related, image, image_alt, draft, published_at, updated_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
+      `insert into teachings (slug, title, summary, body, path, section, tags, related, image, image_alt, search_title, draft, published_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
        on conflict (slug) do update set
          title = excluded.title,
          summary = excluded.summary,
@@ -235,6 +240,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
          related = excluded.related,
          image = excluded.image,
          image_alt = excluded.image_alt,
+         search_title = excluded.search_title,
          draft = excluded.draft,
          published_at = excluded.published_at,
          updated_at = now()`,
@@ -249,6 +255,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
         post.related.join(","),
         post.image,
         post.imageAlt,
+        post.searchTitle,
         post.draft,
         stamp,
       ],
