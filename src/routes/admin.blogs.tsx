@@ -203,17 +203,6 @@ function BlogDesk() {
           </select>
         </label>
         <label className="mt-3 block text-sm font-semibold text-ink">
-          Path
-          <select
-            value={form.path}
-            onChange={(event) => setForm({ ...form, path: event.target.value === "scripture" ? "scripture" : "grammar" })}
-            className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
-          >
-            <option value="grammar">Grammar Path</option>
-            <option value="scripture">Scripture Path</option>
-          </select>
-        </label>
-        <label className="mt-3 block text-sm font-semibold text-ink">
           Picture address
           <input
             value={form.image}
