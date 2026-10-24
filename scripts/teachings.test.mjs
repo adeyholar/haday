@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
@@ -16,6 +18,7 @@ const {
   teachingCta,
   teachingsRss,
   insertPostPiece,
+  pathsCtaHtml,
   postHeadline,
   postHead,
   postPath,
@@ -43,6 +46,31 @@ const live = {
   published: "2026-10-19",
   updated: "2026-10-19",
 };
+
+test("path buttons, row headings, and phone cards", () => {
+  const buttons = pathsCtaHtml();
+  assert.match(buttons, /href="\/login\?path=bbh"/);
+  assert.match(buttons, /href="\/login\?path=iibs"/);
+  assert.match(buttons, /Start the Grammar Path/);
+  assert.match(buttons, /Start the Scripture Path/);
+  assert.equal(renderTeaching("[paths-cta]").includes("signed"), false);
+  assert.equal(renderTeaching("[paths-cta]"), buttons);
+  const three = renderTeaching("| Topic | Grammar | Scripture |\n| --- | --- | --- |\n| Letters | Aleph | Verse |");
+  assert.match(three, /<th scope="row">Letters<\/th>/);
+  assert.match(three, /class="table-cards"/);
+  assert.match(three, /class="table-card"/);
+  assert.match(three, /Grammar/);
+  assert.match(three, /table-card-label">Letters/);
+  assert.match(three, /table-card-value">Verse/);
+  const four = renderTeaching("| A | B | C | D |\n| --- | --- | --- | --- |\n| 1 | 2 | 3 | 4 |");
+  assert.match(four, /style="overflow-x:auto"/);
+  assert.equal(four.includes("table-cards"), false);
+  const css = readFileSync(fileURLToPath(new URL("../src/styles.css", import.meta.url)), "utf8");
+  assert.match(css, /\.blog-body blockquote,\s*\.blog-body \.table-wrap \{ margin-top: 0\.75rem; \}/);
+  assert.match(css, /\.he-inline \{\s*unicode-bidi: isolate;\s*\}/);
+  assert.match(renderTeaching("> A quoted line in the post."), /<blockquote>/);
+  assert.match(renderTeaching("The word בראשית sits here in the sentence."), /class="he-inline"/);
+});
 
 test("a post keeps its section address, its draft, and its search title", () => {
   assert.equal(postPath("teachings", "aleph"), "/blogs/aleph");
@@ -155,7 +183,7 @@ test("a table keeps alignment, escapes a cell, and marks Hebrew", () => {
   const html = renderTeaching(`| Left | Center | Right |
 | :--- | :---: | ---: |
 | a \\| b | <script>alert(1)</script> | בְּרֵאשִׁית |`);
-  assert.match(html, /<div class="table-wrap"/);
+  assert.match(html, /class="table-wrap/);
   assert.match(html, /<th scope="col" style="text-align:left">Left<\/th>/);
   assert.match(html, /<th scope="col" style="text-align:center">Center<\/th>/);
   assert.match(html, /<th scope="col" style="text-align:right">Right<\/th>/);
