@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
 import { deleteTeaching, listTeachingDesk, saveTeaching } from "@/lib/teachings";
-import { slugify, type Teaching, type TeachingPath } from "@/lib/teaching-text";
+import { slugify, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
 
 export const Route = createFileRoute("/admin/blogs")({ component: BlogDesk });
 
@@ -14,9 +14,11 @@ const EMPTY = {
   summary: "",
   body: "",
   path: "grammar" as TeachingPath,
+  section: "" as "" | TeachingSection,
   tags: "",
   related: "",
   image: "",
+  imageAlt: "",
   draft: true,
   published: new Date().toISOString().slice(0, 10),
 };
@@ -61,9 +63,11 @@ function BlogDesk() {
       summary: post.summary,
       body: post.body,
       path: post.path,
+      section: post.section,
       tags: post.tags.join(", "),
       related: post.related.join(", "),
       image: post.image,
+      imageAlt: post.imageAlt,
       draft: post.draft,
       published: post.published,
     });
@@ -79,7 +83,13 @@ function BlogDesk() {
         setError(result.error);
         return;
       }
-      setNote(result.teaching.draft ? "Saved as a draft. It is not on the public page." : "Published. It is on the blogs page.");
+      setNote(
+        result.teaching.draft
+          ? "Saved as a draft. It is not on the public page."
+          : result.teaching.section === "teachings"
+            ? "Published. It is on the Teachings page."
+            : "Published. It is on the Learning HebRabbAi page.",
+      );
       setForm({ ...form, previousSlug: result.teaching.slug, slug: result.teaching.slug });
       await reload();
     } catch (err) {
@@ -133,8 +143,7 @@ function BlogDesk() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Blogs</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Write here. A draft stays private. Uncheck “Keep this as a draft” and save to put it on the public blogs page.
-          A post does not have to be a lesson. No code change is required.
+          Write here. Choose a section before you save. A draft stays private. A picture address must be on images.haday.app, and it needs alt text. Upload from this desk comes later.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/admin" className="font-semibold text-primary">
@@ -177,6 +186,23 @@ function BlogDesk() {
           />
         </label>
         <label className="mt-3 block text-sm font-semibold text-ink">
+          Section
+          <select
+            value={form.section}
+            onChange={(event) =>
+              setForm({
+                ...form,
+                section: event.target.value === "learning-hebrabbai" ? "learning-hebrabbai" : event.target.value === "teachings" ? "teachings" : "",
+              })
+            }
+            className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
+          >
+            <option value="">Choose a section</option>
+            <option value="teachings">Teachings</option>
+            <option value="learning-hebrabbai">Learning HebRabbAi</option>
+          </select>
+        </label>
+        <label className="mt-3 block text-sm font-semibold text-ink">
           Path
           <select
             value={form.path}
@@ -186,6 +212,23 @@ function BlogDesk() {
             <option value="grammar">Grammar Path</option>
             <option value="scripture">Scripture Path</option>
           </select>
+        </label>
+        <label className="mt-3 block text-sm font-semibold text-ink">
+          Picture address
+          <input
+            value={form.image}
+            onChange={(event) => setForm({ ...form, image: event.target.value })}
+            placeholder="https://images.haday.app/..."
+            className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
+          />
+        </label>
+        <label className="mt-3 block text-sm font-semibold text-ink">
+          Picture alt text
+          <input
+            value={form.imageAlt}
+            onChange={(event) => setForm({ ...form, imageAlt: event.target.value })}
+            className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
+          />
         </label>
         <label className="mt-3 block text-sm font-semibold text-ink">
           Date
@@ -222,6 +265,20 @@ function BlogDesk() {
           />
         </label>
         <p className="mt-2 text-xs text-muted">Use blank lines between paragraphs. **bold**, *italic*, and # headings work. Hebrew is set right to left.</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[verse ref="Gen 1:1"]בְּרֵאשִׁית[/verse]`.trim() })}>
+            Insert verse
+          </button>
+          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[image url="https://images.haday.app/slug/file.webp" alt="Describe the picture"]`.trim() })}>
+            Insert picture
+          </button>
+          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[video id=""]`.trim() })}>
+            Insert video
+          </button>
+          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[hebrabbai-cta]`.trim() })}>
+            Insert app link
+          </button>
+        </div>
         <label className="mt-3 flex items-center gap-2 text-sm font-semibold text-ink">
           <input
             type="checkbox"

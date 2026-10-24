@@ -42,9 +42,15 @@ export const STATIC_PAGES: SitePage[] = [
   },
   {
     path: "/blogs",
-    title: "Blogs",
-    summary: "Posts from HaDay HebRabbAi Mentor. Lessons, notes, and other writing.",
-    lastmod: "2026-10-19",
+    title: "Teachings",
+    summary: "Writing on Scripture from HaDay HebRabbAi Mentor.",
+    lastmod: "2026-10-24",
+  },
+  {
+    path: "/learning-hebrabbai",
+    title: "Learning HebRabbAi",
+    summary: "Guides for using HaDay HebRabbAi Mentor.",
+    lastmod: "2026-10-24",
   },
 ];
 
@@ -75,10 +81,12 @@ export const LLMS_INTRO =
   "Learn to read the Hebrew Bible in its original language, for beginners, students and believers who want to understand Scripture more deeply.";
 
 export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
-  const posts = pages.filter((page) => page.path.startsWith("/blogs/"));
-  const rest = pages.filter((page) => !page.path.startsWith("/blogs/"));
+  const teachings = pages.filter((page) => page.path.startsWith("/blogs/"));
+  const guides = pages.filter((page) => page.path.startsWith("/learning-hebrabbai/"));
+  const rest = pages.filter((page) => !page.path.startsWith("/blogs/") && !page.path.startsWith("/learning-hebrabbai/"));
   const lines = rest.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
-  const blogLines = posts.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const teachingLines = teachings.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
+  const guideLines = guides.map((page) => `- ${page.title}: ${pageUrl(page.path)}`);
   return [
     "# HaDay HebRabbAi Mentor",
     "",
@@ -86,7 +94,8 @@ export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
     "",
     "Public pages:",
     ...lines,
-    ...(posts.length ? ["", "Blogs:", ...blogLines] : []),
+    ...(teachings.length ? ["", "Teachings:", ...teachingLines] : []),
+    ...(guides.length ? ["", "Learning HebRabbAi:", ...guideLines] : []),
     "",
     "The class study, games, listen pages, and lexicon require sign-in. Textbook pages and answer keys are not published here.",
     "",

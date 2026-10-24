@@ -6,7 +6,7 @@ import { blogCommentName, cleanBlogComment } from "@/lib/blog-comment-text";
 import { getSql } from "@/lib/db";
 import { CLASS_SITE } from "@/lib/class-site";
 import { sendBlogCommentMail } from "@/lib/mail";
-import { isPublicTeaching } from "@/lib/teaching-text";
+import { isPublicTeaching, postPath, teachingSection } from "@/lib/teaching-text";
 
 export type BlogComment = {
   id: string;
@@ -71,16 +71,17 @@ function mapRow(row: Row, userId: string | null, owner: boolean): BlogComment {
   };
 }
 
-async function publicPost(slug: string): Promise<{ title: string } | null> {
+async function publicPost(slug: string): Promise<{ title: string; section: "teachings" | "learning-hebrabbai" } | null> {
   const sql = await getSql();
-  const rows = await sql.query<{ draft: boolean; published_at: string | Date; title: string }>(
-    "select draft, published_at, title from teachings where slug = $1",
+  const rows = await sql.query<{ draft: boolean; published_at: string | Date; title: string; section: string }>(
+    "select draft, published_at, title, section from teachings where slug = $1",
     [slug],
   );
   const row = rows[0];
   if (!row) return null;
+  const section = teachingSection(row.section) ?? "teachings";
   const open = isPublicTeaching({ draft: row.draft, published: day(row.published_at) });
-  return open ? { title: row.title } : null;
+  return open ? { title: row.title, section } : null;
 }
 
 export async function listBlogComments(slug: string, userId: string | null, email: string | null): Promise<BlogComment[]> {
@@ -139,12 +140,14 @@ export const addBlogComment = createServerFn({ method: "POST" })
       [randomUUID(), slug, context.userId, author, checked.body],
     );
     const email = named[0]?.email ?? null;
-    await sendBlogCommentMail({
+    void sendBlogCommentMail({
       postTitle: post.title,
-      postUrl: `${CLASS_SITE}/blogs/${slug}`,
+      postUrl: `${CLASS_SITE}${postPath(post.section, slug)}`,
       author,
       accountEmail: email,
       body: checked.body,
+    }).catch((err) => {
+      console.error("[mail] blog comment was saved, but the assistant inbox was not mailed", err);
     });
     return { ok: true, comments: await listBlogComments(slug, context.userId, email) };
   });

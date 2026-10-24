@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
   }),
   loader: async () => {
     try {
-      const posts = await loadTeachingsIndex();
+      const posts = await loadTeachingsIndex({ data: "teachings" });
       return {
         blogs: posts.slice(0, 3).map((post) => ({
           slug: post.slug,
@@ -215,7 +215,7 @@ function DoorsPage() {
       </Panel>
       {blogs.length > 0 ? (
         <Panel className="mt-4">
-          <h2 className="font-display text-2xl font-semibold text-ink">Latest blogs</h2>
+          <h2 className="font-display text-2xl font-semibold text-ink">Latest teachings</h2>
           <ul className="mt-3 space-y-3">
             {blogs.map((post) => (
               <li key={post.slug}>

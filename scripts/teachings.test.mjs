@@ -22,6 +22,8 @@ const live = {
   tags: ["letters"],
   related: ["bet"],
   image: "",
+  imageAlt: "",
+  section: "teachings",
   draft: false,
   published: "2026-10-19",
   updated: "2026-10-19",
@@ -58,6 +60,50 @@ test("the teaching body escapes html and marks Hebrew", () => {
   assert.equal(html.includes("<script>"), false);
   assert.match(html, /dir="rtl" lang="he"/);
   assert.match(html, /<strong>/);
+});
+
+test("a post without a section is rejected", () => {
+  const result = validateTeaching({
+    title: "The letter aleph",
+    summary: "A short reading about the first letter.",
+    body: "Aleph is silent, and the verse still begins with it.",
+    path: "grammar",
+    published: "2026-10-19",
+    section: "blog",
+  });
+  assert.equal(result.ok, false);
+});
+
+test("a picture without alt text is rejected", () => {
+  const result = validateTeaching({
+    title: "The letter aleph",
+    summary: "A short reading about the first letter.",
+    body: "Aleph is silent, and the verse still begins with it.",
+    path: "grammar",
+    published: "2026-10-19",
+    section: "teachings",
+    image: "https://images.haday.app/aleph/mark.webp",
+  });
+  assert.equal(result.ok, false);
+});
+
+test("related posts stay in the same section", () => {
+  const guide = { ...live, slug: "two-paths", section: "learning-hebrabbai", tags: ["letters"], related: [] };
+  const related = relatedTeachings(live, [live, { ...live, slug: "bet", title: "The letter bet", related: [], tags: ["letters"] }, guide], 2);
+  assert.equal(related.some((post) => post.section === "learning-hebrabbai"), false);
+});
+
+test("a verse box stays right to left and html stays escaped", () => {
+  const html = renderTeaching('[verse ref="Gen 1:1"]בְּרֵאשִׁית <script>[/verse]');
+  assert.match(html, /dir="rtl" lang="he"/);
+  assert.equal(html.includes("<script>"), false);
+  assert.match(html, /Gen 1:1/);
+});
+
+test("a guide feed uses the guide address", () => {
+  const xml = teachingsRss([{ ...live, section: "learning-hebrabbai" }], "https://hebrewmentor.haday.app", "learning-hebrabbai");
+  assert.match(xml, /\/learning-hebrabbai\/aleph/);
+  assert.equal(xml.includes("/blogs/aleph"), false);
 });
 
 test("the feed is xml and leaves drafts out", () => {

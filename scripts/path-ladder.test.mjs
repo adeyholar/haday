@@ -30,7 +30,7 @@ test("a student cannot walk into the other door", () => {
   assert.equal(blockedDestination("/game", { path: "iibs", admin: true }), null);
   assert.equal(blockedDestination("/bbh", { path: null, admin: false }), "/");
   assert.equal(blockedDestination("/", { path: null, admin: false }), null);
-  for (const page of ["/about", "/blogs", "/blogs/aleph", "/teachings", "/teachings/aleph", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"]) {
+  for (const page of ["/about", "/blogs", "/blogs/aleph", "/learning-hebrabbai", "/learning-hebrabbai/two-paths", "/teachings", "/teachings/aleph", "/legal", "/credits", "/how-to-memorize-biblical-hebrew-vocabulary"]) {
     assert.equal(blockedDestination(page, { path: "iibs", admin: false }), null);
     assert.equal(blockedDestination(page, { path: "bbh", admin: false }), null);
     assert.equal(blockedDestination(page, { path: null, admin: false }), null);
