@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   isPublicTeaching,
+  postsForBlog,
+  BLOG_TABS,
+  BLOG_HOME,
+  blogDate,
   relatedTeachings,
   renderTeaching,
   slugify,
@@ -34,6 +39,29 @@ const live = {
 test("a teaching without a title is rejected", () => {
   const result = validateTeaching({ ...live, title: "No", body: live.body });
   assert.equal(result.ok, false);
+});
+
+test("the blog home lists both sections and the tabs point at the filters", () => {
+  const guide = { ...live, slug: "two-paths", title: "Two paths", section: "learning-hebrabbai", published: "2026-10-24" };
+  const older = { ...live, published: "2026-10-01" };
+  const posts = postsForBlog([older, guide], "all");
+  assert.deepEqual(posts.map((post) => post.slug), ["two-paths", "aleph"]);
+  assert.equal(postsForBlog([older, guide], "teachings").every((post) => post.section === "teachings"), true);
+  assert.equal(postsForBlog([older, guide], "learning-hebrabbai").length, 1);
+  assert.equal(blogDate("2026-10-24"), "October 24, 2026");
+  assert.deepEqual(BLOG_TABS.map((tab) => tab.href), ["/blogs", "/blogs?section=teachings", "/learning-hebrabbai"]);
+  const header = readFileSync(new URL("../src/components/public-header.tsx", import.meta.url).pathname, "utf8");
+  const footer = readFileSync(new URL("../src/components/public-footer.tsx", import.meta.url).pathname, "utf8");
+  const menu = readFileSync(new URL("../src/components/signed-in-shell.tsx", import.meta.url).pathname, "utf8");
+  const home = readFileSync(new URL("../src/routes/blogs/index.tsx", import.meta.url).pathname, "utf8");
+  assert.match(header, />\s*Blog\s*</);
+  assert.equal(header.includes(">Teachings<"), false);
+  assert.match(footer, />\s*Blog\s*</);
+  assert.equal(footer.includes(">Teachings<"), false);
+  assert.match(menu, /label: "Blog"/);
+  assert.equal(menu.includes('label: "Teachings"'), false);
+  assert.match(home, /data: filter === "all" \? "all" : filter/);
+  assert.equal(BLOG_HOME.title, "Blog | HaDay HebRabbAi Mentor");
 });
 
 test("slugs stay unique and related links resolve", () => {

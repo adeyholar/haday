@@ -173,6 +173,7 @@ export async function sitemapPages(): Promise<SitePage[]> {
 export const loadTeachingsIndex = createServerFn({ method: "GET" })
   .validator((section: string) => section)
   .handler(async ({ data }) => {
+    if (data === "all") return listPublishedTeachings();
     const section = teachingSection(data);
     if (!section) return [];
     return listPublishedTeachings(section);

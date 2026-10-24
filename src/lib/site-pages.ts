@@ -42,8 +42,8 @@ export const STATIC_PAGES: SitePage[] = [
   },
   {
     path: "/blogs",
-    title: "Teachings",
-    summary: "Writing on Scripture from HaDay HebRabbAi Mentor.",
+    title: "Blog",
+    summary: "Teachings and Learning HebRabbAi, the public writing of HaDay HebRabbAi Mentor.",
     lastmod: "2026-10-24",
   },
   {
@@ -94,6 +94,9 @@ export function llmsTxt(pages: SitePage[] = allPublicPages()): string {
     "",
     "Public pages:",
     ...lines,
+    ...(teachings.length || guides.length
+      ? ["", "Blog:", "The blog has two sections: Teachings and Learning HebRabbAi."]
+      : []),
     ...(teachings.length ? ["", "Teachings:", ...teachingLines] : []),
     ...(guides.length ? ["", "Learning HebRabbAi:", ...guideLines] : []),
     "",

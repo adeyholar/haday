@@ -29,6 +29,47 @@ export function postPath(section: TeachingSection, slug: string): string {
   return `${TEACHING_SECTIONS[section].path}/${slug}`;
 }
 
+export const BLOG_HOME = {
+  label: "Blog",
+  title: "Blog | HaDay HebRabbAi Mentor",
+  path: "/blogs",
+  intro: "Teachings on Scripture, and guides for HaDay HebRabbAi Mentor.",
+} as const;
+
+export type BlogFilter = "all" | TeachingSection;
+
+export const BLOG_TABS: { id: BlogFilter; label: string; href: string }[] = [
+  { id: "all", label: "All", href: "/blogs" },
+  { id: "teachings", label: "Teachings", href: "/blogs?section=teachings" },
+  { id: "learning-hebrabbai", label: "Learning HebRabbAi", href: "/learning-hebrabbai" },
+];
+
+export function blogFilter(value: unknown): BlogFilter {
+  return value === "teachings" || value === "learning-hebrabbai" ? value : "all";
+}
+
+export function blogDate(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!match) return iso;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))));
+}
+
+export function postsForBlog<T extends { section: TeachingSection; published: string; title: string }>(
+  posts: T[],
+  filter: BlogFilter,
+): T[] {
+  const chosen = filter === "all" ? posts : posts.filter((post) => post.section === filter);
+  return [...chosen].sort((a, b) => {
+    if (a.published !== b.published) return a.published < b.published ? 1 : -1;
+    return a.title.localeCompare(b.title);
+  });
+}
+
 export type Teaching = {
   slug: string;
   title: string;

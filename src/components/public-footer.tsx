@@ -17,10 +17,7 @@ export function PublicFooter() {
           About
         </Link>
         <Link to="/blogs" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Teachings
-        </Link>
-        <Link to="/learning-hebrabbai" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Learning
+          Blog
         </Link>
         <Link to="/legal" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
           Legal

@@ -1,15 +1,16 @@
 import { AUTHOR, FFIM } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
-import { postPath, TEACHING_SECTIONS, type Teaching, type TeachingSection } from "@/lib/teaching-text";
+import { postPath, TEACHING_SECTIONS, type BlogFilter, type Teaching } from "@/lib/teaching-text";
 
 const PUBLISHER_LOGO = "https://images.haday.app/brand/ffim-publisher-logo.png";
 
-export function sectionCrumb(section: TeachingSection) {
-  const meta = TEACHING_SECTIONS[section];
-  return [
-    { "@type": "ListItem", position: 1, name: "Home", item: `${CLASS_SITE}/` },
-    { "@type": "ListItem", position: 2, name: meta.label, item: `${CLASS_SITE}${meta.path}` },
-  ];
+export function blogCrumbs(filter: BlogFilter) {
+  const home = { "@type": "ListItem", position: 1, name: "Home", item: `${CLASS_SITE}/` };
+  const blog = { "@type": "ListItem", position: 2, name: "Blog", item: `${CLASS_SITE}/blogs` };
+  if (filter === "all") return [home, blog];
+  const section = TEACHING_SECTIONS[filter];
+  const item = filter === "teachings" ? `${CLASS_SITE}/blogs?section=teachings` : `${CLASS_SITE}${section.path}`;
+  return [...[home, blog], { "@type": "ListItem", position: 3, name: section.label, item }];
 }
 
 export function postJsonLd(post: Teaching) {
@@ -40,32 +41,40 @@ export function postJsonLd(post: Teaching) {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          ...sectionCrumb(post.section),
-          { "@type": "ListItem", position: 3, name: post.title, item: url },
+          ...blogCrumbs(post.section),
+          { "@type": "ListItem", position: 4, name: post.title, item: url },
         ],
       },
     ],
   };
 }
 
-export function sectionJsonLd(section: TeachingSection, posts: Pick<Teaching, "slug" | "title" | "published" | "section">[]) {
-  const meta = TEACHING_SECTIONS[section];
-  const url = `${CLASS_SITE}${meta.path}`;
+export function blogIndexJsonLd(
+  filter: BlogFilter,
+  posts: Pick<Teaching, "slug" | "title" | "published" | "section">[],
+) {
+  const name = filter === "all" ? "Blog" : TEACHING_SECTIONS[filter].label;
+  const url =
+    filter === "learning-hebrabbai"
+      ? `${CLASS_SITE}/learning-hebrabbai`
+      : filter === "teachings"
+        ? `${CLASS_SITE}/blogs?section=teachings`
+        : `${CLASS_SITE}/blogs`;
   return {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "Blog",
-        name: meta.feed,
+        name,
         url,
         blogPost: posts.map((post) => ({
-          "@type": section === "learning-hebrabbai" ? "TechArticle" : "BlogPosting",
+          "@type": post.section === "learning-hebrabbai" ? "TechArticle" : "BlogPosting",
           headline: post.title,
-          url: `${CLASS_SITE}${postPath(section, post.slug)}`,
+          url: `${CLASS_SITE}${postPath(post.section, post.slug)}`,
           datePublished: post.published,
         })),
       },
-      { "@type": "BreadcrumbList", itemListElement: sectionCrumb(section) },
+      { "@type": "BreadcrumbList", itemListElement: blogCrumbs(filter) },
     ],
   };
 }

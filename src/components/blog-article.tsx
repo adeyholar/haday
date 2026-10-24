@@ -12,13 +12,20 @@ export function BlogArticle({ post, related }: { post: Teaching; related: Teachi
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd(post)) }} />
       <p className="text-sm text-muted">
-        <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <a href="/" className="font-semibold text-primary underline-offset-4 hover:underline">
           Home
-        </Link>
+        </a>
         {" / "}
-        <Link to={post.section === "teachings" ? "/blogs" : "/learning-hebrabbai"} className="font-semibold text-primary underline-offset-4 hover:underline">
+        <a href="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Blog
+        </a>
+        {" / "}
+        <a
+          href={post.section === "teachings" ? "/blogs?section=teachings" : "/learning-hebrabbai"}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
           {section.label}
-        </Link>
+        </a>
         {" / "}
         <span>{post.title}</span>
       </p>

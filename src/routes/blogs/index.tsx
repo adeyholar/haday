@@ -2,32 +2,35 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BlogIndex } from "@/components/blog-index";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
-import { TEACHING_SECTIONS } from "@/lib/teaching-text";
+import { BLOG_HOME, blogFilter, postsForBlog } from "@/lib/teaching-text";
 import { loadTeachingsIndex } from "@/lib/teachings";
 
-const meta = TEACHING_SECTIONS.teachings;
-const TITLE = `${meta.label} | HaDay HebRabbAi Mentor`;
-
 export const Route = createFileRoute("/blogs/")({
-  loader: async () => {
+  validateSearch: (search: Record<string, unknown>): { section?: "teachings" } => {
+    if (search.section === "teachings") return { section: "teachings" };
+    return {};
+  },
+  loaderDeps: ({ search }) => ({ section: search.section }),
+  loader: async ({ deps }) => {
+    const filter = blogFilter(deps.section);
     try {
-      const posts = await loadTeachingsIndex({ data: "teachings" });
-      return { posts };
+      const posts = await loadTeachingsIndex({ data: filter === "all" ? "all" : filter });
+      return { posts: postsForBlog(posts, filter), filter };
     } catch {
-      return { posts: [] };
+      return { posts: [], filter };
     }
   },
   head: () => ({
-    meta: shareMeta(TITLE, meta.intro, meta.path),
+    meta: shareMeta(BLOG_HOME.title, BLOG_HOME.intro, BLOG_HOME.path),
     links: [
-      { rel: "canonical", href: `${CLASS_SITE}${meta.path}` },
-      { rel: "alternate", type: "application/rss+xml", title: meta.feed, href: `${meta.path}/rss.xml` },
+      { rel: "canonical", href: `${CLASS_SITE}${BLOG_HOME.path}` },
+      { rel: "alternate", type: "application/rss+xml", title: "HaDay Teachings", href: "/blogs/rss.xml" },
     ],
   }),
-  component: TeachingsIndex,
+  component: BlogHome,
 });
 
-function TeachingsIndex() {
-  const { posts } = Route.useLoaderData();
-  return <BlogIndex section="teachings" posts={posts} />;
+function BlogHome() {
+  const { posts, filter } = Route.useLoaderData();
+  return <BlogIndex filter={filter} posts={posts} />;
 }
