@@ -4,11 +4,10 @@ import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
 import { AUTHOR } from "@/lib/author";
 import { postJsonLd } from "@/lib/blog-jsonld";
-import { renderTeaching, teachingCta, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
+import { renderTeaching, TEACHING_SECTIONS, type Teaching } from "@/lib/teaching-text";
 
 export function BlogArticle({ post, related }: { post: Teaching; related: Teaching[] }) {
   const section = TEACHING_SECTIONS[post.section];
-  const href = teachingCta(post.path, false);
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postJsonLd(post)) }} />
@@ -42,9 +41,9 @@ export function BlogArticle({ post, related }: { post: Teaching; related: Teachi
       </Panel>
       {post.section === "teachings" ? (
         <Panel className="mt-4">
-          <a href={href} className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+          <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
             Read it in Hebrew with HebRabbAi
-          </a>
+          </Link>
         </Panel>
       ) : null}
       <Panel className="mt-4">
