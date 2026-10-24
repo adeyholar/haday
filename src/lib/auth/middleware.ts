@@ -45,3 +45,17 @@ export const authMiddleware = createMiddleware({ type: "function" })
     const userId = await requireUserId(context.bearerToken);
     return next({ context: { userId } });
   });
+
+/** Same bearer forwarding as `authMiddleware`, but a signed-out caller is allowed. */
+export const optionalAuthMiddleware = createMiddleware({ type: "function" })
+  .client(async ({ next }) => {
+    const { getBearerToken } = await import("./client");
+    return next({ sendContext: { bearerToken: getBearerToken() ?? undefined } });
+  })
+  .server(async ({ next, context }) => {
+    const { assertSameSiteRequest } = await import("./isolation.server");
+    const { getSessionUser } = await import("./verify.server");
+    assertSameSiteRequest();
+    const user = await getSessionUser(context.bearerToken);
+    return next({ context: { userId: user?.id ?? null, email: user?.email ?? null } });
+  });

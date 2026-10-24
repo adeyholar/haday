@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { assertAdmin } from "@/lib/admin";
 import { getSql } from "@/lib/db";
+import { reassignBlogComments } from "@/lib/blog-comments";
 import { allPublicPages, type SitePage } from "@/lib/site-pages";
 import {
   isPublicTeaching,
@@ -184,6 +185,7 @@ export const saveTeaching = createServerFn({ method: "POST" })
     );
     const previous = (data.previousSlug ?? "").trim();
     if (previous && previous !== post.slug) {
+      await reassignBlogComments(previous, post.slug);
       await sql.query("delete from teachings where slug = $1", [previous]);
     }
     const saved = await getTeaching(post.slug);

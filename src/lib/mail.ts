@@ -269,6 +269,36 @@ async function sendAnyMail(opts: { to: string; subject: string; text: string; ht
   return { sent: false, via: "none" };
 }
 
+/** Every blog comment is copied here. The address is not taken from the request. */
+export const BLOG_COMMENT_INBOX = "HaDay.assistant@mail.grokbot.com";
+
+export async function sendBlogCommentMail(opts: {
+  postTitle: string;
+  postUrl: string;
+  author: string;
+  accountEmail: string | null;
+  body: string;
+}): Promise<{ sent: boolean; via: MailerVia }> {
+  const title = opts.postTitle.replace(/\s+/g, " ").trim().slice(0, 140) || "a blog post";
+  const who = opts.accountEmail ? `${opts.author} (${opts.accountEmail})` : opts.author;
+  const subject = `Blog comment: ${title}`.slice(0, 180);
+  const text = [
+    `A comment was posted on “${title}”.`,
+    opts.postUrl,
+    "",
+    `From ${who}`,
+    "",
+    opts.body,
+  ].join("\n");
+  const html = `<p>A comment was posted on “${escapeHtml(title)}”.</p>
+<p><a href="${escapeHtml(opts.postUrl)}">${escapeHtml(opts.postUrl)}</a></p>
+<p>From ${escapeHtml(who)}</p>
+<p style="white-space:pre-wrap">${escapeHtml(opts.body)}</p>`;
+  const result = await sendAnyMail({ to: BLOG_COMMENT_INBOX, subject, text, html });
+  if (!result.sent) console.info("[mail] blog comment was saved on the post, but the assistant inbox was not mailed.");
+  return result;
+}
+
 async function sendResend(opts: {
   apiKey: string;
   from: string;

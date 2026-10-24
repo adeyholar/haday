@@ -1,17 +1,22 @@
 import { createFileRoute, Link, notFound, useRouteContext } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { BlogComments } from "@/components/blog-comments";
 import { PublicFooter } from "@/components/public-footer";
 import { AUTHOR } from "@/lib/author";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
 import { teachingCta, renderTeaching } from "@/lib/teaching-text";
 import { loadTeachingPage } from "@/lib/teachings";
+import { listBlogComments } from "@/lib/blog-comments";
 
 export const Route = createFileRoute("/blogs/$slug")({
   loader: async ({ params }) => {
     const page = await loadTeachingPage({ data: params.slug });
     if (!page.post) throw notFound();
-    return { post: page.post, related: page.related };
+    const { getSessionUser } = await import("@/lib/auth/verify.server");
+    const user = await getSessionUser();
+    const comments = await listBlogComments(params.slug, user?.id ?? null, user?.email ?? null).catch(() => []);
+    return { post: page.post, related: page.related, comments };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return {};
@@ -31,7 +36,7 @@ export const Route = createFileRoute("/blogs/$slug")({
 });
 
 function TeachingPage() {
-  const { post, related } = Route.useLoaderData();
+  const { post, related, comments } = Route.useLoaderData();
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const href = teachingCta(post.path, sessionUser != null);
   const json = {
@@ -99,6 +104,7 @@ function TeachingPage() {
         <img src="/about/adeola.jpg" alt={AUTHOR.name} width={800} height={800} className="h-16 w-16 rounded-full object-cover" />
         <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">{AUTHOR.shortBio}</p>
       </Panel>
+      <BlogComments slug={post.slug} initial={comments} />
       {related.length > 0 ? (
         <Panel className="mt-4">
           <h2 className="font-display text-2xl font-semibold text-ink">Related</h2>
