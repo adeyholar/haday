@@ -11,7 +11,7 @@
  * - Other HTML documents → fill missing PWA + OG head tags at `</head>`.
  *   A tag the page already wrote (og: and twitter:) stays. A site default is
  *   added only when that tag is missing. Encoded and plain documents get the
- *   same head. Cache-Control is left as the inner response set it.
+ *   same head. Blog cache headers are left as the inner response set them.
  *   OG identity is baked via `virtual:grok-og-identity` at `vite build`
  *   (this function cannot read `src/lib/og/site.json` or `public/og.jpg`).
  *   This must be a middleware transforming `next()`: h3 discards the `response`
@@ -39,20 +39,40 @@ function requestHost(event: GrokPwaEvent): string {
   );
 }
 
-async function injectDocument(response: Response, host: string): Promise<Response> {
+function keepsBlogCache(path: string): boolean {
+  return (
+    path === "/blogs" ||
+    path.startsWith("/blogs/") ||
+    path === "/learning-hebrabbai" ||
+    path.startsWith("/learning-hebrabbai/")
+  );
+}
+
+async function injectDocument(response: Response, host: string, path: string): Promise<Response> {
   const encoding = response.headers.get("content-encoding") ?? "";
-  return response.arrayBuffer().then((raw) => {
-    const finished = finishHtmlResponse(Buffer.from(raw), encoding, {
-      host,
-      site: grokOgIdentity.site,
-    }, response.headers);
-    const body = finished ? Buffer.from(finished.body) : Buffer.from(raw);
-    const headers = finished ? finished.headers : response.headers;
-    return new Response(body, {
+  const raw = Buffer.from(await response.arrayBuffer());
+  const finished = finishHtmlResponse(
+    raw,
+    encoding,
+    { host, site: grokOgIdentity.site },
+    response.headers,
+  );
+  if (!finished) {
+    return new Response(raw, {
       status: response.status,
       statusText: response.statusText,
-      headers,
+      headers: response.headers,
     });
+  }
+  const headers = finished.headers;
+  if (!keepsBlogCache(path)) {
+    headers.set("cache-control", "no-store, no-cache, must-revalidate");
+    headers.set("pragma", "no-cache");
+  }
+  return new Response(Buffer.from(finished.body), {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
   });
 }
 
@@ -67,12 +87,21 @@ export default async function grokPwaMiddleware(
   const urlWithQuery = path + event.url.search;
 
   if (path === "/__grok/manifest.webmanifest" || path === "/__grok/manifest.json") {
-    return new Response(renderWebManifest(requestHost(event)), {
-      headers: {
-        "content-type": "application/manifest+json; charset=utf-8",
-        "cache-control": "no-cache",
+    return new Response(
+      renderWebManifest(requestHost(event), {
+        name: "HaDay HebRabbAi Mentor",
+        shortName: "HaDay",
+        icon: "/apple-touch-icon.png",
+        background: "#F3EEE4",
+        theme: "#F3EEE4",
+      }),
+      {
+        headers: {
+          "content-type": "application/manifest+json; charset=utf-8",
+          "cache-control": "no-cache",
+        },
       },
-    });
+    );
   }
 
   if (
@@ -83,6 +112,7 @@ export default async function grokPwaMiddleware(
     const html = renderInstallPageHtml(installPageTemplate, {
       host: requestHost(event),
       url: urlWithQuery,
+      name: "HaDay",
     });
     return new Response(html, {
       headers: {
@@ -100,7 +130,7 @@ export default async function grokPwaMiddleware(
     result.body &&
     String(result.headers.get("content-type") ?? "").includes("text/html")
   ) {
-    return injectDocument(result, requestHost(event));
+    return injectDocument(result, requestHost(event), path);
   }
   return result;
 }
