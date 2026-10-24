@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
+import { presignBlogImage } from "@/lib/blog-images";
 import { deleteTeaching, listTeachingDesk, saveTeaching } from "@/lib/teachings";
 import { slugify, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
 
@@ -23,6 +24,52 @@ const EMPTY = {
   published: new Date().toISOString().slice(0, 10),
 };
 
+function pictureFiles(data: DataTransfer | null): File[] {
+  if (!data) return [];
+  const fromItems = [...data.items]
+    .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => Boolean(file));
+  if (fromItems.length) return fromItems;
+  return [...data.files].filter((file) => file.type.startsWith("image/"));
+}
+
+function toWebp(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      const scale = image.width > 1600 ? 1600 / image.width : 1;
+      const width = Math.max(1, Math.round(image.width * scale));
+      const height = Math.max(1, Math.round(image.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error("This browser cannot prepare the picture."));
+        return;
+      }
+      ctx.drawImage(image, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(url);
+          if (!blob) reject(new Error("This browser cannot make a WebP picture."));
+          else resolve({ blob, width, height });
+        },
+        "image/webp",
+        0.82,
+      );
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("That file is not a picture."));
+    };
+    image.src = url;
+  });
+}
+
 function BlogDesk() {
   const [admin, setAdmin] = useState<boolean | null>(null);
   const [posts, setPosts] = useState<Teaching[]>([]);
@@ -30,6 +77,9 @@ function BlogDesk() {
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function reload() {
     setPosts(await listTeachingDesk());
@@ -120,6 +170,64 @@ function BlogDesk() {
     }
   }
 
+  async function uploadPictures(files: File[]) {
+    const slug = slugify(form.slug || form.title);
+    if (!slug) {
+      setError("Give the post an address before adding a picture.");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    let draft = form.body;
+    let cursor = bodyRef.current?.selectionStart ?? draft.length;
+    try {
+      for (const file of files) {
+        if (file.type !== "image/webp" && file.type !== "image/jpeg" && file.type !== "image/png") {
+          setError("Use a WebP, JPEG, or PNG picture.");
+          return;
+        }
+        const alt = window.prompt("Describe this picture")?.trim() ?? "";
+        if (!alt) {
+          setError("Add alt text for the picture.");
+          return;
+        }
+        const made = await toWebp(file);
+        if (made.blob.size > 2 * 1024 * 1024) {
+          setError("Keep the picture under 2 MB.");
+          return;
+        }
+        const signed = await presignBlogImage({
+          data: { slug, type: "image/webp", bytes: made.blob.size },
+        });
+        if (!signed.ok) {
+          setError(signed.error);
+          return;
+        }
+        const sent = await fetch(signed.putUrl, {
+          method: "PUT",
+          body: made.blob,
+          headers: { "content-type": "image/webp" },
+        });
+        if (!sent.ok) {
+          setError("The picture did not upload.");
+          return;
+        }
+        const safeAlt = alt.replace(/"/g, "");
+        const tag = `[image url="${signed.url}" alt="${safeAlt}" width="${made.width}" height="${made.height}"]`;
+        const before = draft.slice(0, cursor);
+        const gap = before.length > 0 && !before.endsWith("\n\n") ? "\n\n" : "";
+        const piece = `${gap}${tag}`;
+        draft = `${before}${piece}${draft.slice(cursor)}`;
+        cursor = before.length + piece.length;
+        setForm((current) => ({ ...current, body: draft }));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The picture did not upload.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   if (admin === false) {
     return (
       <Panel>
@@ -143,7 +251,7 @@ function BlogDesk() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Blogs</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Write here. Choose a section before you save. A draft stays private. A picture address must be on images.haday.app, and it needs alt text. Upload from this desk comes later.
+          Write here. Choose a section before you save. A draft stays private. Paste, drop, or choose a picture. It is resized, saved on images.haday.app, and needs alt text.
         </p>
         <p className="mt-2 text-sm">
           <Link to="/admin" className="font-semibold text-primary">
@@ -247,20 +355,46 @@ function BlogDesk() {
         <label className="mt-3 block text-sm font-semibold text-ink">
           Post
           <textarea
+            ref={bodyRef}
             value={form.body}
             onChange={(event) => setForm({ ...form, body: event.target.value })}
+            onPaste={(event) => {
+              const images = pictureFiles(event.clipboardData);
+              if (images.length === 0) return;
+              event.preventDefault();
+              void uploadPictures(images);
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              const images = pictureFiles(event.dataTransfer);
+              if (images.length === 0) return;
+              event.preventDefault();
+              void uploadPictures(images);
+            }}
             rows={14}
             className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-card px-3 py-2 font-normal"
           />
         </label>
+        {uploading ? <p className="mt-2 text-sm text-muted">Uploading…</p> : null}
         <p className="mt-2 text-xs text-muted">Use blank lines between paragraphs. **bold**, *italic*, and # headings work. Hebrew is set right to left.</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[verse ref="Gen 1:1"]בְּרֵאשִׁית[/verse]`.trim() })}>
             Insert verse
           </button>
-          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[image url="https://images.haday.app/slug/file.webp" alt="Describe the picture"]`.trim() })}>
-            Insert picture
+          <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => fileRef.current?.click()}>
+            Add picture
           </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/webp,image/jpeg,image/png"
+            className="hidden"
+            onChange={(event) => {
+              const images = event.target.files ? [...event.target.files] : [];
+              event.target.value = "";
+              if (images.length) void uploadPictures(images);
+            }}
+          />
           <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[video id=""]`.trim() })}>
             Insert video
           </button>

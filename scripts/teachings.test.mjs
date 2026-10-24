@@ -12,6 +12,7 @@ const {
   teachingsRss,
   validateTeaching,
 } = await jiti.import(new URL("../src/lib/teaching-text.ts", import.meta.url).pathname);
+const { refuseBlogImage } = await jiti.import(new URL("../src/lib/blog-images.ts", import.meta.url).pathname);
 
 const live = {
   slug: "aleph",
@@ -113,4 +114,25 @@ test("the feed is xml and leaves drafts out", () => {
   assert.equal(xml.includes("hidden"), false);
   assert.match(xml, /https:\/\/hebrewmentor\.haday\.app\/blogs\/aleph/);
   assert.equal(xml.includes("/teachings/"), false);
+});
+
+test("an uploaded picture tag is a valid post", () => {
+  const tag =
+    '[image url="https://images.haday.app/aleph/20261024-ab12cd34.webp" alt="The letter aleph" width="800" height="400"]';
+  const result = validateTeaching({
+    title: "The letter aleph",
+    summary: "A short reading about the first letter.",
+    body: `Aleph is silent, and the verse still begins with it.\n\n${tag}`,
+    path: "grammar",
+    section: "teachings",
+    published: "2026-10-19",
+  });
+  assert.equal(result.ok, true);
+});
+
+test("a picture upload is refused when the file is wrong", () => {
+  assert.equal(typeof refuseBlogImage({ slug: "", type: "image/webp", bytes: 100 }), "string");
+  assert.equal(typeof refuseBlogImage({ slug: "aleph", type: "image/gif", bytes: 100 }), "string");
+  assert.equal(typeof refuseBlogImage({ slug: "aleph", type: "image/png", bytes: 2 * 1024 * 1024 + 1 }), "string");
+  assert.equal(refuseBlogImage({ slug: "aleph", type: "image/webp", bytes: 100 }), null);
 });
