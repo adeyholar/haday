@@ -11,15 +11,13 @@ export declare function acceptsHtml(accept: string | null | undefined): boolean;
 export declare function stripInstallParams(url: string | null | undefined): string;
 export declare function renderInstallPageHtml(
   template: string,
-  context?: { host?: string | null; url?: string | null; name?: string | null },
+  context?: { host?: string | null; url?: string | null },
 ): string;
-export declare function renderWebManifest(
-  hostHeader: string | null | undefined,
-  options?: { name?: string; shortName?: string; icon?: string; background?: string; theme?: string },
-): string;
+export declare function renderWebManifest(hostHeader: string | null | undefined): string;
 export declare function grokPwaHeadTags(appName?: string): Array<[string, string]>;
 export declare const GROK_EXTENSIONS_SCRIPT_SRC: string;
 export declare function readGrokProjectId(): string;
+export declare function readGrokExtensionsEnabled(): boolean;
 export declare function readXCreator(): string;
 export declare function readXCreatorId(): string;
 export declare function grokXCreatorHeadTags(creator?: string, creatorId?: string): string[];
@@ -77,6 +75,12 @@ export declare function normalizeHeadContext(ctx?: GrokHeadContext): {
   site: OgSite;
 };
 export declare function injectGrokPwaHead(html: string, ctx?: GrokHeadContext): string;
+export declare function finishHtmlResponse(
+  body: Uint8Array | string,
+  encoding: string,
+  ctx?: GrokHeadContext,
+  headers?: Headers,
+): { body: Uint8Array; headers: Headers } | null;
 export declare function createHeadInjector(ctx?: GrokHeadContext): {
   push(chunk: Uint8Array | string): Uint8Array[];
   flush(): Uint8Array[];

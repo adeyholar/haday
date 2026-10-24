@@ -3,10 +3,12 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from "node:zlib";
 import test from "node:test";
 import {
   appNameFromHost,
   createHeadInjector,
+  finishHtmlResponse,
   grokXCreatorHeadTags,
   injectGrokPwaHead,
   isDocumentPath,
@@ -109,17 +111,86 @@ test("does not duplicate x:creator tags", () => {
   assert.equal(twice.split('property="x:creator:id"').length - 1, 1);
 });
 
-test("platform chrome overwrites share-card metas and always sets og:title", () => {
+test("platform chrome keeps share tags the page already set", () => {
   const html =
     '<html><head><title>Hello World</title><meta property="og:title" content="Old"><meta name="twitter:card" content="summary"></head></html>';
   const out = inject(html, { appName: "Wild Race" });
-  assert.match(out, /name="twitter:card" content="summary_large_image"/);
-  assert.match(out, /property="og:title" content="Hello World"/);
-  assert.doesNotMatch(out, /content="Old"/);
-  assert.doesNotMatch(out, /content="summary"/);
+  assert.match(out, /name="twitter:card" content="summary"/);
+  assert.match(out, /property="og:title" content="Old"/);
+  assert.doesNotMatch(out, /content="summary_large_image"/);
   assert.equal(out.split('name="twitter:card"').length - 1, 1);
   assert.equal(out.split('property="og:title"').length - 1, 1);
-  assert.doesNotMatch(out, /property="og:image"/);
+});
+
+test("a post page keeps one share title, the post's own", () => {
+  const site = {
+    title: "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor",
+    description: "Hear each word.",
+    card: "custom",
+    image: "/og.jpg",
+  };
+  const title = "Two paths into Biblical Hebrew";
+  const summary = "A short summary of the two paths.";
+  const page = (path) =>
+    `<html><head><title>${title}</title><meta property="og:title" content="${title}"><meta property="og:description" content="${summary}"><meta property="og:url" content="https://hebrewmentor.haday.app${path}"><meta property="og:type" content="article"><meta property="og:image" content="https://hebrewmentor.haday.app/og.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${title}"><meta name="twitter:description" content="${summary}"></head><body></body></html>`;
+  const out = inject(page("/learning-hebrabbai/two-paths-into-biblical-hebrew"), {
+    site,
+    host: "hebrewmentor.haday.app",
+    cwd: isolatedOg,
+  });
+  assert.equal(out.split('property="og:title"').length - 1, 1);
+  assert.match(out, /property="og:title" content="Two paths into Biblical Hebrew"/);
+  assert.equal(out.split('property="og:description"').length - 1, 1);
+  assert.match(out, /property="og:description" content="A short summary of the two paths."/);
+  assert.match(out, /property="og:url" content="https:\/\/hebrewmentor\.haday\.app\/learning-hebrabbai\/two-paths-into-biblical-hebrew"/);
+  assert.match(out, /property="og:type" content="article"/);
+  assert.match(out, /name="twitter:title" content="Two paths into Biblical Hebrew"/);
+  assert.match(out, /name="twitter:description" content="A short summary of the two paths."/);
+  assert.doesNotMatch(out, /property="og:title" content="Learn to Read Biblical Hebrew/);
+});
+
+test("a page with no share tags still gets the site defaults", () => {
+  const out = inject("<html><head><title>Home</title></head></html>", {
+    cwd: isolatedOg,
+    site: {
+      title: "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor",
+      description: "Hear each word.",
+    },
+  });
+  assert.match(out, /property="og:title" content="Learn to Read Biblical Hebrew \| HaDay HebRabbAi Mentor"/);
+  assert.match(out, /property="og:description" content="Hear each word."/);
+  assert.match(out, /name="twitter:card" content="summary_large_image"/);
+});
+
+test("plain and compressed blog heads match and keep the blog cache", () => {
+  const site = {
+    title: "Learn to Read Biblical Hebrew | HaDay HebRabbAi Mentor",
+    description: "Hear each word.",
+    card: "custom",
+    image: "/og.jpg",
+  };
+  const cache = "public, s-maxage=300, stale-while-revalidate=300";
+  const ctx = { site, host: "hebrewmentor.haday.app", cwd: isolatedOg };
+  for (const path of ["/blogs/aleph", "/learning-hebrabbai/two-paths-into-biblical-hebrew"]) {
+    const html = `<html><head><title>Two paths into Biblical Hebrew</title><meta property="og:title" content="Two paths into Biblical Hebrew"><meta property="og:description" content="A short summary of the two paths."><meta property="og:url" content="https://hebrewmentor.haday.app${path}"><meta property="og:type" content="article"><meta name="twitter:title" content="Two paths into Biblical Hebrew"><meta name="twitter:description" content="A short summary of the two paths."></head><body></body></html>`;
+    const headers = new Headers({
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": cache,
+      "content-length": "12",
+    });
+    const plain = finishHtmlResponse(Buffer.from(html), "", ctx, headers);
+    const gzip = finishHtmlResponse(gzipSync(Buffer.from(html)), "gzip", ctx, headers);
+    const br = finishHtmlResponse(brotliCompressSync(Buffer.from(html)), "br", ctx, headers);
+    const plainHtml = Buffer.from(plain.body).toString("utf8");
+    assert.equal(gunzipSync(gzip.body).toString("utf8"), plainHtml);
+    assert.equal(brotliDecompressSync(br.body).toString("utf8"), plainHtml);
+    assert.equal(plain.headers.get("cache-control"), cache);
+    assert.equal(gzip.headers.get("cache-control"), cache);
+    assert.equal(plainHtml.includes("no-store"), false);
+    assert.equal(plainHtml.split('property="og:title"').length - 1, 1);
+    assert.match(plainHtml, /property="og:title" content="Two paths into Biblical Hebrew"/);
+    assert.match(plainHtml, new RegExp(`property="og:url" content="https://hebrewmentor\\.haday\\.app${path}"`));
+  }
 });
 
 test("does not duplicate twitter:card or og:title", () => {

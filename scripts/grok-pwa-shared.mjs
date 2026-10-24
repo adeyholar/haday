@@ -5,6 +5,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from "node:zlib";
 
 export const DEFAULT_APP_NAME = "Grok App";
 export const OG_SERVICE_URL_DEFAULT = "https://og.grok.me";
@@ -151,30 +152,27 @@ export function stripInstallParams(url) {
   return rest ? `${path}?${rest}` : path;
 }
 
-export function renderInstallPageHtml(template, { host, url, name } = {}) {
-  const appName = name || appNameFromHost(host);
+export function renderInstallPageHtml(template, { host, url } = {}) {
   return String(template)
-    .replaceAll("{{APP_NAME}}", escapeHtml(appName))
+    .replaceAll("{{APP_NAME}}", escapeHtml(appNameFromHost(host)))
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
-export function renderWebManifest(hostHeader, options = {}) {
-  const name = options.name || appNameFromHost(hostHeader);
-  const shortName = options.shortName || name;
-  const icon = options.icon || "/__grok/icon-180.png";
+export function renderWebManifest(hostHeader) {
+  const name = appNameFromHost(hostHeader);
   return JSON.stringify(
     {
       name,
-      short_name: shortName,
+      short_name: name,
       id: "/",
       start_url: "/",
       scope: "/",
       display: "standalone",
-      background_color: options.background || "#000000",
-      theme_color: options.theme || "#000000",
+      background_color: "#000000",
+      theme_color: "#000000",
       icons: [
         {
-          src: icon,
+          src: "/__grok/icon-180.png",
           sizes: "180x180",
           type: "image/png",
         },
@@ -210,6 +208,11 @@ export function readGrokProjectId() {
   return String(fromProcess ?? "").trim();
 }
 
+export function readGrokExtensionsEnabled() {
+  const fromProcess = typeof process !== "undefined" ? process.env?.VITE_GROK_EXTENSIONS : "";
+  return String(fromProcess ?? "").trim() !== "0";
+}
+
 export function readXCreator() {
   const fromProcess = typeof process !== "undefined" ? process.env?.X_CREATOR : "";
   return String(fromProcess ?? "").trim();
@@ -237,6 +240,7 @@ export function grokExtensionsHeadTags(projectId = readGrokProjectId()) {
   if (projectId) {
     tags.push(`<meta name="grok-project-id" content="${id}">`);
   }
+  if (!readGrokExtensionsEnabled()) return tags;
   tags.push(
     `<script src="${GROK_EXTENSIONS_SCRIPT_SRC}"${
       projectId ? ` data-project-id="${id}"` : ""
@@ -378,13 +382,32 @@ export function grokOgHeadTags({
   return tags;
 }
 
+function stripGrokExtensionsScript(html) {
+  return String(html).replace(
+    /<script\b[^>]*\bsrc\s*=\s*["'][^"']*\/grok-app-builder\/extensions\.js[^"']*["'][^>]*>\s*<\/script>/gi,
+    "",
+  );
+}
+
+function metaKey(tag) {
+  const match = /\b(?:property|name)\s*=\s*["']([^"']+)["']/i.exec(tag);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function presentMetaKeys(html) {
+  const keys = new Set();
+  for (const tag of String(html).match(/<meta\b[^>]*>/gi) ?? []) {
+    const key = metaKey(tag);
+    if (key) keys.add(key);
+  }
+  return keys;
+}
+
 export function stripShareMetaTags(html) {
   return String(html).replace(/<meta\b[^>]*>/gi, (tag) => {
-    const attrs = [...tag.matchAll(/\b(?:property|name)\s*=\s*["']([^"']+)["']/gi)];
-    for (const match of attrs) {
-      if (SHARE_META_KEYS.has(String(match[1]).toLowerCase())) return "";
-    }
-    return tag;
+    const key = metaKey(tag);
+    if (!key || key.startsWith("og:") || key.startsWith("twitter:")) return tag;
+    return SHARE_META_KEYS.has(key) ? "" : tag;
   });
 }
 
@@ -436,21 +459,22 @@ export function injectGrokPwaHead(html, ctx = {}) {
     documentTitle,
   );
   let next = stripShareMetaTags(html);
+  if (!readGrokExtensionsEnabled()) next = stripGrokExtensionsScript(next);
+  const present = presentMetaKeys(next);
+  const shareTags = grokOgHeadTags({ host, appName, site, documentTitle, cwd }).filter(
+    (tag) => !present.has(metaKey(tag)),
+  );
+  if (shareTags.length > 0) next = insertAfterHeadOpen(next, shareTags.join(""));
 
   const missing = grokPwaHeadTags(appName)
     .filter(([key]) => {
-      if (key === "manifest") return !/rel=["']manifest["']/.test(next);
-      if (key === "apple-touch-icon") return !/rel=["']apple-touch-icon["']/.test(next);
+      if (key === "manifest") return !next.includes('href="/__grok/manifest.webmanifest"');
+      if (key === "apple-touch-icon") return !next.includes('href="/__grok/icon-180.png"');
       return !next.includes(`name="${key}"`);
     })
     .map(([, tag]) => tag);
 
-  next = insertAfterHeadOpen(
-    next,
-    grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""),
-  );
-
-  if (!next.includes("/grok-app-builder/extensions.js")) {
+  if (readGrokExtensionsEnabled() && !next.includes("/grok-app-builder/extensions.js")) {
     missing.push(...grokExtensionsHeadTags(projectId));
   } else if (projectId && !next.includes('name="grok-project-id"')) {
     missing.push(`<meta name="grok-project-id" content="${escapeHtml(projectId)}">`);
@@ -475,6 +499,27 @@ export function injectGrokPwaHead(html, ctx = {}) {
   return insertBeforeHeadClose(next, missing.join(""));
 }
 
+/** Decode, keep the page head, and encode again. Headers other than length stay. */
+export function finishHtmlResponse(body, encoding, ctx = {}, headers = new Headers()) {
+  let decoded;
+  try {
+    const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body);
+    if (!encoding) decoded = bytes;
+    else if (encoding === "gzip") decoded = gunzipSync(bytes);
+    else if (encoding === "br") decoded = brotliDecompressSync(bytes);
+    else return null;
+  } catch {
+    return null;
+  }
+  const html = injectGrokPwaHead(decoded.toString("utf8"), ctx);
+  const plain = Buffer.from(html, "utf8");
+  const nextBody =
+    encoding === "gzip" ? gzipSync(plain) : encoding === "br" ? brotliCompressSync(plain) : plain;
+  const nextHeaders = new Headers(headers);
+  nextHeaders.delete("content-length");
+  return { body: nextBody, headers: nextHeaders };
+}
+
 function findHeadClose(buf) {
   const at = buf.toString("latin1").search(/<\/head>/i);
   return at;
@@ -482,8 +527,8 @@ function findHeadClose(buf) {
 
 /**
  * Streaming head injector: buffers only until `</head>` (ASCII marker; never
- * appears inside a UTF-8 continuation byte), overwrites share-card metas,
- * then passes later chunks through so streaming SSR keeps streaming.
+ * appears inside a UTF-8 continuation byte), fills share-card metas the page
+ * left out, then passes later chunks through so streaming SSR keeps streaming.
  */
 export function createHeadInjector(ctx = {}) {
   const normalized = normalizeHeadContext(ctx);

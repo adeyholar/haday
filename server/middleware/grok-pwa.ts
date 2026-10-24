@@ -8,7 +8,10 @@
  *   static output on Vercel and not readable from the function).
  * - `/__grok/manifest.webmanifest` → per-app-named manifest (kept out of
  *   public/ so this dynamic response is the only one).
- * - Other HTML documents → stream-inject PWA + OG head tags at `</head>`.
+ * - Other HTML documents → fill missing PWA + OG head tags at `</head>`.
+ *   A tag the page already wrote (og: and twitter:) stays. A site default is
+ *   added only when that tag is missing. Encoded and plain documents get the
+ *   same head. Cache-Control is left as the inner response set it.
  *   OG identity is baked via `virtual:grok-og-identity` at `vite build`
  *   (this function cannot read `src/lib/og/site.json` or `public/og.jpg`).
  *   This must be a middleware transforming `next()`: h3 discards the `response`
@@ -18,7 +21,7 @@ import installPageTemplate from "../../scripts/install-page.html?raw";
 import { grokOgIdentity } from "virtual:grok-og-identity";
 import {
   acceptsHtml,
-  createHeadInjector,
+  finishHtmlResponse,
   isDocumentPath,
   isInstallQuery,
   renderInstallPageHtml,
@@ -36,29 +39,20 @@ function requestHost(event: GrokPwaEvent): string {
   );
 }
 
-function injectHeadStreaming(response: Response, host: string): Response {
-  const injector = createHeadInjector({
-    host,
-    site: grokOgIdentity.site,
-  });
-  const transformed = response.body!.pipeThrough(
-    new TransformStream<Uint8Array, Uint8Array>({
-      transform(chunk, controller) {
-        for (const out of injector.push(chunk)) controller.enqueue(out);
-      },
-      flush(controller) {
-        for (const out of injector.flush()) controller.enqueue(out);
-      },
-    }),
-  );
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-  headers.set("cache-control", "no-store, no-cache, must-revalidate");
-  headers.set("pragma", "no-cache");
-  return new Response(transformed, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
+async function injectDocument(response: Response, host: string): Promise<Response> {
+  const encoding = response.headers.get("content-encoding") ?? "";
+  return response.arrayBuffer().then((raw) => {
+    const finished = finishHtmlResponse(Buffer.from(raw), encoding, {
+      host,
+      site: grokOgIdentity.site,
+    }, response.headers);
+    const body = finished ? Buffer.from(finished.body) : Buffer.from(raw);
+    const headers = finished ? finished.headers : response.headers;
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   });
 }
 
@@ -73,21 +67,12 @@ export default async function grokPwaMiddleware(
   const urlWithQuery = path + event.url.search;
 
   if (path === "/__grok/manifest.webmanifest" || path === "/__grok/manifest.json") {
-    return new Response(
-      renderWebManifest(requestHost(event), {
-        name: "HaDay HebRabbAi Mentor",
-        shortName: "HaDay",
-        icon: "/apple-touch-icon.png",
-        background: "#F3EEE4",
-        theme: "#F3EEE4",
-      }),
-      {
-        headers: {
-          "content-type": "application/manifest+json; charset=utf-8",
-          "cache-control": "no-cache",
-        },
+    return new Response(renderWebManifest(requestHost(event)), {
+      headers: {
+        "content-type": "application/manifest+json; charset=utf-8",
+        "cache-control": "no-cache",
       },
-    );
+    });
   }
 
   if (
@@ -98,7 +83,6 @@ export default async function grokPwaMiddleware(
     const html = renderInstallPageHtml(installPageTemplate, {
       host: requestHost(event),
       url: urlWithQuery,
-      name: "HaDay",
     });
     return new Response(html, {
       headers: {
@@ -114,10 +98,9 @@ export default async function grokPwaMiddleware(
   if (
     result instanceof Response &&
     result.body &&
-    String(result.headers.get("content-type") ?? "").includes("text/html") &&
-    !result.headers.get("content-encoding")
+    String(result.headers.get("content-type") ?? "").includes("text/html")
   ) {
-    return injectHeadStreaming(result, requestHost(event));
+    return injectDocument(result, requestHost(event));
   }
   return result;
 }
