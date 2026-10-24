@@ -10,6 +10,7 @@ const {
   slugify,
   teachingCta,
   teachingsRss,
+  insertPostPiece,
   validateTeaching,
 } = await jiti.import(new URL("../src/lib/teaching-text.ts", import.meta.url).pathname);
 const { refuseBlogImage } = await jiti.import(new URL("../src/lib/blog-images.ts", import.meta.url).pathname);
@@ -56,6 +57,19 @@ test("the call to action follows the path", () => {
   assert.equal(teachingCta("scripture", true), "/iibs");
 });
 
+test("a table inserted in the middle stays its own block", () => {
+  const body = "The first paragraph stays.\n\nThe second paragraph stays.";
+  const at = body.indexOf("The second");
+  const table = "| Column 1 | Column 2 |\n| --- | --- |\n| a | b |";
+  const next = insertPostPiece(body, at, at, table);
+  assert.match(next, /stays\.\n\n\| Column 1/);
+  assert.match(next, /\n\nThe second paragraph stays\.$/);
+  const html = renderTeaching(next);
+  assert.match(html, /<table>/);
+  assert.match(html, /The first paragraph stays\./);
+  assert.match(html, /The second paragraph stays\./);
+});
+
 test("a table keeps alignment, escapes a cell, and marks Hebrew", () => {
   const html = renderTeaching(`| Left | Center | Right |
 | :--- | :---: | ---: |
@@ -74,6 +88,28 @@ test("a pipe line without a separator stays a paragraph", () => {
   const html = renderTeaching("| not | a | table |\n\nThis line is still a paragraph of the post.");
   assert.equal(html.includes("<table>"), false);
   assert.match(html, /<p>/);
+});
+
+test("a table may have 100 body rows", () => {
+  const row = "| a | b |";
+  const hundred = ["| A | B |", "| --- | --- |", ...Array.from({ length: 100 }, () => row)].join("\n");
+  const fields = {
+    title: "The letter aleph",
+    summary: "A short reading about the first letter.",
+    path: "grammar",
+    section: "teachings",
+    published: "2026-10-19",
+  };
+  const ok = validateTeaching({
+    ...fields,
+    body: `Aleph is silent, and the verse still begins with it.\n\n${hundred}`,
+  });
+  assert.equal(ok.ok, true);
+  const over = validateTeaching({
+    ...fields,
+    body: `Aleph is silent, and the verse still begins with it.\n\n${hundred}\n${row}`,
+  });
+  assert.equal(over.ok, false);
 });
 
 test("a table with nine columns is rejected", () => {

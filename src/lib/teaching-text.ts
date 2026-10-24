@@ -255,7 +255,7 @@ export function teachingTableError(body: string): string | null {
     if (!lines) continue;
     const columns = Math.max(...lines.map((line) => splitCells(line).length));
     if (columns > 8) return "A table can have at most 8 columns.";
-    if (lines.length - 1 > 100) return "A table can have at most 100 rows.";
+    if (lines.length - 2 > 100) return "A table can have at most 100 rows.";
   }
   return null;
 }
@@ -269,7 +269,7 @@ export function spreadsheetToTable(text: string): { table: string } | { error: s
   const width = Math.max(...cells.map((row) => row.length));
   if (width < 2) return null;
   if (width > 8) return { error: "A table can have at most 8 columns." };
-  if (rows.length > 100) return { error: "A table can have at most 100 rows." };
+  if (rows.length - 1 > 100) return { error: "A table can have at most 100 rows." };
   const line = (row: string[]) => {
     const copy = [...row];
     while (copy.length < width) copy.push("");
@@ -279,9 +279,17 @@ export function spreadsheetToTable(text: string): { table: string } | { error: s
   return { table: [line(cells[0] ?? []), rule, ...cells.slice(1).map(line)].join("\n") };
 }
 
+export function insertPostPiece(body: string, start: number, end: number, piece: string): string {
+  const before = body.slice(0, start);
+  const after = body.slice(end);
+  const lead = before.length > 0 && !before.endsWith("\n\n") ? "\n\n" : "";
+  const tail = after.length > 0 && !after.startsWith("\n\n") ? "\n\n" : "";
+  return `${before}${lead}${piece}${tail}${after}`;
+}
+
 function tableHtml(lines: string[]): string | null {
   const aligns = columnAligns(lines[1] ?? "");
-  if (!aligns || aligns.length > 8 || lines.length - 1 > 100) return null;
+  if (!aligns || aligns.length > 8 || lines.length - 2 > 100) return null;
   const fit = (line: string) => {
     const cells = splitCells(line).slice(0, aligns.length);
     while (cells.length < aligns.length) cells.push("");

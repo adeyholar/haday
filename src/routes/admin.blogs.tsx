@@ -4,7 +4,7 @@ import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
 import { presignBlogImage } from "@/lib/blog-images";
 import { deleteTeaching, listTeachingDesk, saveTeaching } from "@/lib/teachings";
-import { slugify, spreadsheetToTable, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
+import { insertPostPiece, slugify, spreadsheetToTable, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
 
 export const Route = createFileRoute("/admin/blogs")({ component: BlogDesk });
 
@@ -174,9 +174,7 @@ function BlogDesk() {
     const box = bodyRef.current;
     const start = box?.selectionStart ?? form.body.length;
     const end = box?.selectionEnd ?? start;
-    const before = form.body.slice(0, start);
-    const gap = before.length > 0 && !before.endsWith("\n\n") ? "\n\n" : "";
-    setForm({ ...form, body: `${before}${gap}${piece}${form.body.slice(end)}` });
+    setForm({ ...form, body: insertPostPiece(form.body, start, end, piece) });
   }
 
   async function uploadPictures(files: File[]) {
@@ -418,7 +416,7 @@ function BlogDesk() {
             type="button"
             className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold"
             onClick={() =>
-              placeInPost(`|  |  |  |
+              placeInPost(`| Column 1 | Column 2 | Column 3 |
 | --- | --- | --- |
 |  |  |  |
 |  |  |  |`)
