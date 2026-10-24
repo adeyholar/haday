@@ -5,28 +5,11 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import siteDefaults from "../src/lib/og/site.json" with { type: "json" };
 
-export const DEFAULT_APP_NAME = "Grok App";
+export const DEFAULT_APP_NAME = String(siteDefaults.title);
 export const OG_SERVICE_URL_DEFAULT = "https://og.grok.me";
 export const OG_SITE_REL_PATH = "src/lib/og/site.json";
-
-const SHARE_META_KEYS = new Set([
-  "og:title",
-  "og:description",
-  "og:image",
-  "og:image:width",
-  "og:image:height",
-  "og:type",
-  "og:url",
-  "og:site_name",
-  "twitter:card",
-  "twitter:title",
-  "twitter:image",
-  "twitter:description",
-  "x:game:image",
-  "x:game:image:width",
-  "x:game:image:height",
-]);
 
 export function escapeHtml(value) {
   return String(value)
@@ -45,13 +28,6 @@ function unescapeHtml(value) {
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
     .replaceAll("&amp;", "&");
-}
-
-/** 6-digit hex for the og.grok.me placeholder, or "" if site.color is missing/invalid. */
-function placeholderCardColor(site = {}) {
-  const raw = String(site.color ?? "").trim();
-  const hex = raw.startsWith("#") ? raw.slice(1) : raw;
-  return /^[0-9a-fA-F]{6}$/.test(hex) ? hex : "";
 }
 
 /**
@@ -323,7 +299,7 @@ export function siteHasCustomCard(site = {}) {
 /**
  * Preview: public/og.jpg|png on disk.
  * Vercel: the bake (`card=custom` / `image`) because the function cannot stat public/.
- * Otherwise empty — caller emits the og.grok.me placeholder.
+ * Otherwise empty. The head injector falls back to /og.jpg.
  */
 export function resolveOgCardAsset(site = {}, cwd = process.cwd()) {
   return ogCardPublicPath(cwd) || (detectCustomOgCard(cwd, site) ? String(site.image ?? "").trim() || "/og.jpg" : "");
@@ -338,54 +314,37 @@ function applyCustomCardFromFs(site, cwd) {
 
 export function grokOgHeadTags({
   host = "",
-  appName = DEFAULT_APP_NAME,
   site = {},
-  documentTitle = "",
-  cwd = process.cwd(),
 } = {}) {
-  const title = resolveOgTitle(site, appName, host, documentTitle);
+  const title = String(site.title ?? "").trim() || String(siteDefaults.title);
+  const description = String(site.description ?? "").trim() || String(siteDefaults.description);
+  const asset = String(site.image ?? "").trim() || "/og.jpg";
+  const path = asset.startsWith("/") ? asset : `/${asset}`;
   const publicHost = resolvePublicHost(host);
-  const tags = [
+  const image = publicHost ? `https://${publicHost}${path}` : path;
+  return [
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta property="og:title" content="${escapeHtml(title)}">`,
+    `<meta property="og:description" content="${escapeHtml(description)}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:image" content="${escapeHtml(image)}">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
   ];
-  const description = String(site.description ?? "").trim();
-  if (description) {
-    tags.push(`<meta property="og:description" content="${escapeHtml(description)}">`);
-  }
-  if (String(site.type ?? "").toLowerCase() === "x:game") {
-    tags.push(`<meta property="og:type" content="x:game">`);
-  }
-  if (publicHost) {
-    const asset = resolveOgCardAsset(site, cwd);
-    const custom = Boolean(asset);
-    let image = custom
-      ? `https://${publicHost}${asset.startsWith("/") ? asset : `/${asset}`}`
-      : `${ogServiceUrl()}/v1/card.png?host=${encodeURIComponent(publicHost)}&title=${encodeURIComponent(title)}`;
-    const color = !custom ? placeholderCardColor(site) : "";
-    if (color) image += `&color=${encodeURIComponent(color)}`;
-    tags.push(`<meta property="og:image" content="${escapeHtml(image)}">`);
-    tags.push(`<meta property="og:image:width" content="1200">`);
-    tags.push(`<meta property="og:image:height" content="630">`);
-    const banner = String(site.banner ?? "").trim();
-    if (banner) {
-      const bannerUrl = `https://${publicHost}${banner.startsWith("/") ? banner : `/${banner}`}`;
-      tags.push(`<meta property="x:game:image" content="${escapeHtml(bannerUrl)}">`);
-      tags.push(`<meta property="x:game:image:width" content="1200">`);
-      tags.push(`<meta property="x:game:image:height" content="264">`);
-    }
-  }
-  return tags;
 }
 
-export function stripShareMetaTags(html) {
-  return String(html).replace(/<meta\b[^>]*>/gi, (tag) => {
-    const attrs = [...tag.matchAll(/\b(?:property|name)\s*=\s*["']([^"']+)["']/gi)];
-    for (const match of attrs) {
-      if (SHARE_META_KEYS.has(String(match[1]).toLowerCase())) return "";
-    }
-    return tag;
-  });
+function metaKey(tag) {
+  const match = /\b(?:property|name)\s*=\s*["']([^"']+)["']/i.exec(tag);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function presentMetaKeys(html) {
+  const keys = new Set();
+  for (const tag of String(html).match(/<meta\b[^>]*>/gi) ?? []) {
+    const key = metaKey(tag);
+    if (key) keys.add(key);
+  }
+  return keys;
 }
 
 function insertAfterHeadOpen(html, snippet) {
@@ -407,8 +366,7 @@ export function normalizeHeadContext(ctx = {}) {
   const cwd = ctx.cwd ?? process.cwd();
   // Middleware passes a baked `site`. Still consult the workspace so a
   // public/og.jpg generated after that snapshot (or missed by a wrong cwd)
-  // wins over the og.grok.me placeholder. Vercel has no public/ to read, so
-  // a correct bake is unchanged.
+  // is the card. Vercel has no public/ to read, so a correct bake is unchanged.
   const site = applyCustomCardFromFs(
     ctx.site !== undefined ? ctx.site : snapshotOgIdentity(cwd).site,
     cwd,
@@ -435,7 +393,10 @@ export function injectGrokPwaHead(html, ctx = {}) {
     host,
     documentTitle,
   );
-  let next = stripShareMetaTags(html);
+  let next = html;
+  const present = presentMetaKeys(next);
+  const shareTags = grokOgHeadTags({ host, site }).filter((tag) => !present.has(metaKey(tag)));
+  if (shareTags.length > 0) next = insertAfterHeadOpen(next, shareTags.join(""));
 
   const missing = grokPwaHeadTags(appName)
     .filter(([key]) => {
@@ -444,11 +405,6 @@ export function injectGrokPwaHead(html, ctx = {}) {
       return !next.includes(`name="${key}"`);
     })
     .map(([, tag]) => tag);
-
-  next = insertAfterHeadOpen(
-    next,
-    grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""),
-  );
 
   if (!next.includes("/grok-app-builder/extensions.js")) {
     missing.push(...grokExtensionsHeadTags(projectId));
@@ -482,8 +438,8 @@ function findHeadClose(buf) {
 
 /**
  * Streaming head injector: buffers only until `</head>` (ASCII marker; never
- * appears inside a UTF-8 continuation byte), overwrites share-card metas,
- * then passes later chunks through so streaming SSR keeps streaming.
+ * appears inside a UTF-8 continuation byte), fills share-card metas the page
+ * left out, then passes later chunks through so streaming SSR keeps streaming.
  */
 export function createHeadInjector(ctx = {}) {
   const normalized = normalizeHeadContext(ctx);

@@ -23,6 +23,13 @@ export const TEACHING_SECTIONS: Record<
   },
 };
 
+/** True for a section home and its posts. Sitemap and llms.txt are not included. */
+export function keepsBlogCache(path: string): boolean {
+  return Object.values(TEACHING_SECTIONS).some(
+    (section) => path === section.path || path.startsWith(`${section.path}/`),
+  );
+}
+
 export function teachingSection(value: string | undefined): TeachingSection | null {
   if (value === "teachings" || value === "learning-hebrabbai") return value;
   return null;

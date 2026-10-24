@@ -8,7 +8,11 @@
  *   static output on Vercel and not readable from the function).
  * - `/__grok/manifest.webmanifest` → per-app-named manifest (kept out of
  *   public/ so this dynamic response is the only one).
- * - Other HTML documents → stream-inject PWA + OG head tags at `</head>`.
+ * - Other HTML documents → stream-inject missing PWA + OG head tags at `</head>`.
+ *   A tag the page already wrote stays. A site default is added only when that
+ *   tag is missing. This runs inside the security middleware, on plain HTML,
+ *   so the page is compressed once. A response that already has
+ *   content-encoding is left as it is. Blog paths keep the cache header.
  *   OG identity is baked via `virtual:grok-og-identity` at `vite build`
  *   (this function cannot read `src/lib/og/site.json` or `public/og.jpg`).
  *   This must be a middleware transforming `next()`: h3 discards the `response`
@@ -16,6 +20,7 @@
  */
 import installPageTemplate from "../../scripts/install-page.html?raw";
 import { grokOgIdentity } from "virtual:grok-og-identity";
+import { keepsBlogCache } from "../../src/lib/teaching-text";
 import {
   acceptsHtml,
   createHeadInjector,
@@ -36,7 +41,7 @@ function requestHost(event: GrokPwaEvent): string {
   );
 }
 
-function injectHeadStreaming(response: Response, host: string): Response {
+function injectHeadStreaming(response: Response, host: string, path: string): Response {
   const injector = createHeadInjector({
     host,
     site: grokOgIdentity.site,
@@ -53,8 +58,10 @@ function injectHeadStreaming(response: Response, host: string): Response {
   );
   const headers = new Headers(response.headers);
   headers.delete("content-length");
-  headers.set("cache-control", "no-store, no-cache, must-revalidate");
-  headers.set("pragma", "no-cache");
+  if (!keepsBlogCache(path)) {
+    headers.set("cache-control", "no-store, no-cache, must-revalidate");
+    headers.set("pragma", "no-cache");
+  }
   return new Response(transformed, {
     status: response.status,
     statusText: response.statusText,
@@ -114,10 +121,10 @@ export default async function grokPwaMiddleware(
   if (
     result instanceof Response &&
     result.body &&
-    String(result.headers.get("content-type") ?? "").includes("text/html") &&
-    !result.headers.get("content-encoding")
+    !result.headers.has("content-encoding") &&
+    String(result.headers.get("content-type") ?? "").includes("text/html")
   ) {
-    return injectHeadStreaming(result, requestHost(event));
+    return injectHeadStreaming(result, requestHost(event), path);
   }
   return result;
 }

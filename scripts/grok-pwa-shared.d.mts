@@ -66,7 +66,6 @@ export declare function grokOgHeadTags(ctx?: {
   documentTitle?: string;
   cwd?: string;
 }): string[];
-export declare function stripShareMetaTags(html: string): string;
 export declare function normalizeHeadContext(ctx?: GrokHeadContext): {
   appName: string;
   projectId: string;
