@@ -120,6 +120,8 @@ export function validateTeaching(input: {
   if (imageTags.length !== goodImages.length) {
     return { ok: false, error: "Each picture in the post needs an images.haday.app address and alt text." };
   }
+  const tableError = teachingTableError(body);
+  if (tableError) return { ok: false, error: tableError };
   return {
     ok: true,
     value: {
@@ -199,6 +201,111 @@ function inline(value: string): string {
 const SHORTCODE =
   /\[verse ref="([^"]{1,40})"\]([\s\S]*?)\[\/verse\]|\[image url="(https:\/\/images\.haday\.app\/[^"\s]+)" alt="([^"]{1,180})"(?: caption="([^"]*)")?(?: width="(\d{1,5})")?(?: height="(\d{1,5})")?\]|\[video id="([A-Za-z0-9_-]{11})"\]|\[hebrabbai-cta\]/g;
 
+function splitCells(line: string): string[] {
+  let body = line.trim();
+  if (body.startsWith("|")) body = body.slice(1);
+  if (body.endsWith("|") && !body.endsWith("\\|")) body = body.slice(0, -1);
+  const cells: string[] = [];
+  let current = "";
+  for (let i = 0; i < body.length; i += 1) {
+    if (body[i] === "\\" && body[i + 1] === "|") {
+      current += "|";
+      i += 1;
+      continue;
+    }
+    if (body[i] === "|") {
+      cells.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += body[i];
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+function columnAligns(line: string): Array<"left" | "center" | "right" | ""> | null {
+  if (!line.trim().startsWith("|")) return null;
+  const cells = splitCells(line);
+  if (cells.length === 0) return null;
+  const aligns: Array<"left" | "center" | "right" | ""> = [];
+  for (const cell of cells) {
+    const token = cell.replace(/\s/g, "");
+    const mark = /^(:)?-{3,}(:)?$/.exec(token);
+    if (!mark) return null;
+    if (mark[1] && mark[2]) aligns.push("center");
+    else if (mark[2]) aligns.push("right");
+    else if (mark[1]) aligns.push("left");
+    else aligns.push("");
+  }
+  return aligns;
+}
+
+function pipeLines(block: string): string[] | null {
+  const lines = block.split("\n");
+  if (lines.length < 2 || !lines.every((line) => line.trim().startsWith("|"))) return null;
+  if (!columnAligns(lines[1] ?? "")) return null;
+  return lines;
+}
+
+export function teachingTableError(body: string): string | null {
+  const blocks = body.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
+  for (const block of blocks) {
+    const lines = pipeLines(block);
+    if (!lines) continue;
+    const columns = Math.max(...lines.map((line) => splitCells(line).length));
+    if (columns > 8) return "A table can have at most 8 columns.";
+    if (lines.length - 2 > 100) return "A table can have at most 100 rows.";
+  }
+  return null;
+}
+
+export function spreadsheetToTable(text: string): { table: string } | { error: string } | null {
+  const rows = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  while (rows.length > 0 && rows[rows.length - 1] === "") rows.pop();
+  while (rows.length > 0 && rows[0] === "") rows.shift();
+  if (rows.length < 2 || !rows.every((row) => row.includes("\t"))) return null;
+  const cells = rows.map((row) => row.split("\t").map((cell) => cell.replace(/\|/g, "\\|").trim()));
+  const width = Math.max(...cells.map((row) => row.length));
+  if (width < 2) return null;
+  if (width > 8) return { error: "A table can have at most 8 columns." };
+  if (rows.length - 1 > 100) return { error: "A table can have at most 100 rows." };
+  const line = (row: string[]) => {
+    const copy = [...row];
+    while (copy.length < width) copy.push("");
+    return `| ${copy.join(" | ")} |`;
+  };
+  const rule = `| ${Array.from({ length: width }, () => "---").join(" | ")} |`;
+  return { table: [line(cells[0] ?? []), rule, ...cells.slice(1).map(line)].join("\n") };
+}
+
+export function insertPostPiece(body: string, start: number, end: number, piece: string): string {
+  const before = body.slice(0, start);
+  const after = body.slice(end);
+  const lead = before.length > 0 && !before.endsWith("\n\n") ? "\n\n" : "";
+  const tail = after.length > 0 && !after.startsWith("\n\n") ? "\n\n" : "";
+  return `${before}${lead}${piece}${tail}${after}`;
+}
+
+function tableHtml(lines: string[]): string | null {
+  const aligns = columnAligns(lines[1] ?? "");
+  if (!aligns || aligns.length > 8 || lines.length - 2 > 100) return null;
+  const fit = (line: string) => {
+    const cells = splitCells(line).slice(0, aligns.length);
+    while (cells.length < aligns.length) cells.push("");
+    return cells;
+  };
+  const style = (align: "" | "left" | "center" | "right") => (align ? ` style="text-align:${align}"` : "");
+  const head = fit(lines[0] ?? "")
+    .map((cell, index) => `<th scope="col"${style(aligns[index] ?? "")}>${inline(cell)}</th>`)
+    .join("");
+  const body = lines
+    .slice(2)
+    .map((line) => `<tr>${fit(line).map((cell, index) => `<td${style(aligns[index] ?? "")}>${inline(cell)}</td>`).join("")}</tr>`)
+    .join("");
+  return `<div class="table-wrap" style="overflow-x:auto"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
 function markdownBlocks(markdown: string): string {
   const blocks = markdown.replace(/\r\n/g, "\n").trim().split(/\n{2,}/);
   return blocks
@@ -219,6 +326,11 @@ function markdownBlocks(markdown: string): string {
       }
       if (lines.every((line) => line.startsWith(">"))) {
         return `<blockquote>${inline(lines.map((line) => line.replace(/^>\s?/, "")).join(" "))}</blockquote>`;
+      }
+      const table = pipeLines(block);
+      if (table) {
+        const html = tableHtml(table);
+        if (html) return html;
       }
       return `<p>${inline(lines.join(" "))}</p>`;
     })

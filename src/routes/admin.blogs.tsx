@@ -4,7 +4,7 @@ import { Panel } from "@/components/panel";
 import { getAdminStatus } from "@/lib/admin";
 import { presignBlogImage } from "@/lib/blog-images";
 import { deleteTeaching, listTeachingDesk, saveTeaching } from "@/lib/teachings";
-import { slugify, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
+import { insertPostPiece, slugify, spreadsheetToTable, type Teaching, type TeachingPath, type TeachingSection } from "@/lib/teaching-text";
 
 export const Route = createFileRoute("/admin/blogs")({ component: BlogDesk });
 
@@ -168,6 +168,13 @@ function BlogDesk() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function placeInPost(piece: string) {
+    const box = bodyRef.current;
+    const start = box?.selectionStart ?? form.body.length;
+    const end = box?.selectionEnd ?? start;
+    setForm({ ...form, body: insertPostPiece(form.body, start, end, piece) });
   }
 
   async function uploadPictures(files: File[]) {
@@ -360,9 +367,19 @@ function BlogDesk() {
             onChange={(event) => setForm({ ...form, body: event.target.value })}
             onPaste={(event) => {
               const images = pictureFiles(event.clipboardData);
-              if (images.length === 0) return;
+              if (images.length > 0) {
+                event.preventDefault();
+                void uploadPictures(images);
+                return;
+              }
+              const sheet = spreadsheetToTable(event.clipboardData.getData("text/plain"));
+              if (!sheet) return;
               event.preventDefault();
-              void uploadPictures(images);
+              if ("error" in sheet) {
+                setError(sheet.error);
+                return;
+              }
+              placeInPost(sheet.table);
             }}
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
@@ -376,7 +393,7 @@ function BlogDesk() {
           />
         </label>
         {uploading ? <p className="mt-2 text-sm text-muted">Uploading…</p> : null}
-        <p className="mt-2 text-xs text-muted">Use blank lines between paragraphs. **bold**, *italic*, and # headings work. Hebrew is set right to left.</p>
+        <p className="mt-2 text-xs text-muted">Use blank lines between paragraphs. **bold**, *italic*, and # headings work. Hebrew is set right to left. A table is a header row, then | --- |, then the cells. A spreadsheet paste becomes a table.</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[verse ref="Gen 1:1"]בְּרֵאשִׁית[/verse]`.trim() })}>
             Insert verse
@@ -395,6 +412,18 @@ function BlogDesk() {
               if (images.length) void uploadPictures(images);
             }}
           />
+          <button
+            type="button"
+            className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold"
+            onClick={() =>
+              placeInPost(`| Column 1 | Column 2 | Column 3 |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |`)
+            }
+          >
+            Table
+          </button>
           <button type="button" className="min-h-11 rounded-[var(--radius-md)] border border-border px-3 text-sm font-semibold" onClick={() => setForm({ ...form, body: `${form.body}\n\n[video id=""]`.trim() })}>
             Insert video
           </button>
