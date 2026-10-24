@@ -387,7 +387,7 @@ function compareCards(header: string[], rows: string[][]): string {
     const lines = rows
       .map((row) => `<p><span class="table-card-label">${inline(row[0] ?? "")}</span> <span class="table-card-value">${inline(row[column] ?? "")}</span></p>`)
       .join("");
-    return `<article class="table-card"><p class="table-card-title">${title}</p>${lines}</article>`;
+    return `<div class="table-card"><p class="table-card-title">${title}</p>${lines}</div>`;
   });
   return `<div class="table-cards">${cards.join("")}</div>`;
 }
@@ -418,7 +418,7 @@ function tableHtml(lines: string[]): string | null {
       return `<tr>${row}</tr>`;
     })
     .join("");
-  return `<div class="${aligns.length === 3 ? "table-wrap compare-3" : "table-wrap"}" style="overflow-x:auto"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${aligns.length === 3 ? compareCards(fit(lines[0] ?? ""), lines.slice(2).map(fit)) : ""}</div>`;
+  return `<div class="${aligns.length === 3 ? "table-wrap compare-3" : "table-wrap"}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>${aligns.length === 3 ? compareCards(fit(lines[0] ?? ""), lines.slice(2).map(fit)) : ""}</div>`;
 }
 
 function markdownBlocks(markdown: string): string {

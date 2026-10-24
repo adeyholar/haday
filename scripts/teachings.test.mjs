@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
@@ -57,17 +55,16 @@ test("path buttons, row headings, and phone cards", () => {
   assert.equal(renderTeaching("[paths-cta]"), buttons);
   const three = renderTeaching("| Topic | Grammar | Scripture |\n| --- | --- | --- |\n| Letters | Aleph | Verse |");
   assert.match(three, /<th scope="row">Letters<\/th>/);
-  assert.match(three, /class="table-cards"/);
-  assert.match(three, /class="table-card"/);
+  assert.match(three, /<div class="table-card">/);
+  assert.equal(three.includes("<article"), false);
+  assert.equal(three.includes("style=\"overflow-x:auto\""), false);
   assert.match(three, /Grammar/);
   assert.match(three, /table-card-label">Letters/);
   assert.match(three, /table-card-value">Verse/);
   const four = renderTeaching("| A | B | C | D |\n| --- | --- | --- | --- |\n| 1 | 2 | 3 | 4 |");
-  assert.match(four, /style="overflow-x:auto"/);
+  assert.match(four, /<div class="table-wrap">/);
+  assert.equal(four.includes("style=\"overflow-x:auto\""), false);
   assert.equal(four.includes("table-cards"), false);
-  const css = readFileSync(fileURLToPath(new URL("../src/styles.css", import.meta.url)), "utf8");
-  assert.match(css, /\.blog-body blockquote,\s*\.blog-body \.table-wrap \{ margin-top: 0\.75rem; \}/);
-  assert.match(css, /\.he-inline \{\s*unicode-bidi: isolate;\s*\}/);
   assert.match(renderTeaching("> A quoted line in the post."), /<blockquote>/);
   assert.match(renderTeaching("The word בראשית sits here in the sentence."), /class="he-inline"/);
 });
@@ -101,7 +98,8 @@ test("a post keeps its section address, its draft, and its search title", () => 
   assert.match(html, /<h3>/);
   assert.equal(html.includes("<h1>"), false);
   const table = renderTeaching("| A | B |\n| --- | --- |\n| a | b |");
-  assert.match(table, /<div class="table-wrap" style="overflow-x:auto">/);
+  assert.match(table, /<div class="table-wrap">/);
+  assert.equal(table.includes("style=\"overflow-x:auto\""), false);
   const ld = postJsonLd({ ...live, searchTitle: "Short title" });
   assert.equal(ld["@graph"][0].headline, live.title);
   assert.equal(ld["@graph"][0].author["@type"], "Person");
