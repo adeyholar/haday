@@ -89,7 +89,7 @@ function AboutPage() {
         </ul>
         <p className="mt-4 text-sm font-semibold">
           <a href="/blogs" className="text-primary underline-offset-4 hover:underline">
-            Teachings
+            Blog
           </a>
         </p>
         <p className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">

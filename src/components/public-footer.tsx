@@ -4,33 +4,25 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getMyPath } from "@/lib/learner-path";
 import { homeForAccount } from "@/lib/path";
 import { CONTACT_EMAIL } from "@/lib/class-site";
+import { FOOTER_NAV } from "@/lib/public-nav";
+
+export { FOOTER_NAV };
 
 /** Legal and Credits on every public page, plus a way back to the front door. */
 export function PublicFooter() {
   return (
     <footer className="mt-8 w-full pb-8">
       <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5 rounded-[var(--radius-xl)] bg-card/90 px-4 shadow-[var(--shadow-border)]">
-        <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          HaDay
-        </Link>
-        <Link to="/about" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          About
-        </Link>
-        <Link to="/blogs" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Teachings
-        </Link>
-        <Link to="/learning-hebrabbai" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Learning
-        </Link>
-        <Link to="/legal" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Legal
-        </Link>
-        <Link to="/credits" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Credits
-        </Link>
-        <Link to="/about" hash="contact" className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
-          Contact
-        </Link>
+        {FOOTER_NAV.map((item) => (
+          <Link
+            key={item.label}
+            to={item.to}
+            hash={"hash" in item ? item.hash : undefined}
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </footer>
   );

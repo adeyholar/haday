@@ -13,6 +13,7 @@ const { isIndexablePath, canonicalUrl, shouldRedirectAzure, retiredHostRedirect,
 const { STATIC_PAGES, sitemapXml, llmsTxt, LLMS_INTRO } = await jiti.import(
   new URL("../src/lib/site-pages.ts", import.meta.url).pathname,
 );
+const { FOOTER_NAV } = await jiti.import(new URL("../src/lib/public-nav.ts", import.meta.url).pathname);
 
 test("only the doors, privacy, and credits are indexable", () => {
   assert.equal(isIndexablePath("/"), true);
@@ -157,8 +158,7 @@ test("the sitemap and llms.txt come from the public page list", () => {
   const footerBlock = footer.slice(footer.indexOf("export function PublicFooter"), footer.indexOf("export function ContactLink"));
   assert.equal(footerBlock.includes("mail.grokbot.com"), false);
   assert.equal(footerBlock.includes("CONTACT_EMAIL"), false);
-  assert.match(footerBlock, /hash="contact"/);
-  assert.match(footerBlock, />\s*Contact\s*</);
+  assert.equal(FOOTER_NAV.some((item) => item.label === "Contact" && item.hash === "contact"), true);
   const about = readFileSync(new URL("../src/routes/about.tsx", import.meta.url).pathname, "utf8");
   assert.match(about, /id="contact"/);
   assert.match(about, /Questions or enquiries\? Email us\./);

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BlogIndex } from "@/components/blog-index";
 import { CLASS_SITE } from "@/lib/class-site";
 import { shareMeta } from "@/lib/seo";
-import { TEACHING_SECTIONS } from "@/lib/teaching-text";
+import { postsForBlog, TEACHING_SECTIONS } from "@/lib/teaching-text";
 import { loadTeachingsIndex } from "@/lib/teachings";
 
 const meta = TEACHING_SECTIONS["learning-hebrabbai"];
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/learning-hebrabbai/")({
   loader: async () => {
     try {
       const posts = await loadTeachingsIndex({ data: "learning-hebrabbai" });
-      return { posts };
+      return { posts: postsForBlog(posts, "learning-hebrabbai") };
     } catch {
       return { posts: [] };
     }
@@ -29,5 +29,5 @@ export const Route = createFileRoute("/learning-hebrabbai/")({
 
 function GuidesIndex() {
   const { posts } = Route.useLoaderData();
-  return <BlogIndex section="learning-hebrabbai" posts={posts} />;
+  return <BlogIndex filter="learning-hebrabbai" posts={posts} />;
 }

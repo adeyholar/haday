@@ -16,9 +16,19 @@ export function BlogArticle({ post, related }: { post: Teaching; related: Teachi
           Home
         </Link>
         {" / "}
-        <Link to={post.section === "teachings" ? "/blogs" : "/learning-hebrabbai"} className="font-semibold text-primary underline-offset-4 hover:underline">
-          {section.label}
+        <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Blog
         </Link>
+        {" / "}
+        {post.section === "teachings" ? (
+          <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+            {section.label}
+          </Link>
+        ) : (
+          <Link to="/learning-hebrabbai" className="font-semibold text-primary underline-offset-4 hover:underline">
+            {section.label}
+          </Link>
+        )}
         {" / "}
         <span>{post.title}</span>
       </p>
