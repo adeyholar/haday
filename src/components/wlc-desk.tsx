@@ -171,6 +171,7 @@ export function WlcReading({
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
   const follow = useFollowScroll(spot ? String(spot.verse) : "");
+  const { resume, showBack, targetRef } = follow;
 
   const card = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState(0);
@@ -205,9 +206,8 @@ export function WlcReading({
   }, [picked, cardHeight]);
 
   useEffect(() => {
-    if (!resumeTick) return;
-    follow.resume();
-  }, [resumeTick, follow]);
+    if (resumeTick) resume();
+  }, [resumeTick, resume]);
 
   return (
     <div
@@ -219,8 +219,8 @@ export function WlcReading({
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
       ) : null}
-      {follow.showBack ? (
-        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={follow.resume}>
+      {showBack ? (
+        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resume}>
           Back to the reader
         </button>
       ) : null}
@@ -245,7 +245,7 @@ export function WlcReading({
             <div
               key={verse.ref}
               ref={(node) => {
-                if (spot?.verse === verseIndex) follow.targetRef.current = node;
+                if (spot?.verse === verseIndex) targetRef.current = node;
               }}
               className={`read-line ms-verse flex items-start ${spot?.verse === verseIndex && spot.word == null ? "ms-spoken-verse" : ""}`}
               dir="rtl"

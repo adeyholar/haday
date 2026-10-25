@@ -116,3 +116,90 @@ test(
     }
   },
 );
+
+test(
+  "Genesis 1 phone: a hand scroll stays put, Back returns, and the last verse and word card clear the dock",
+  { skip: !base && "set WLC_E2E_BASE to run against the app" },
+  async () => {
+    const { chromium } = await import("playwright");
+    const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
+    try {
+      for (const viewport of [
+        { width: 390, height: 844, label: "portrait" },
+        { width: 844, height: 390, label: "landscape" },
+      ]) {
+        const ctx = await browser.newContext({
+          viewport: { width: viewport.width, height: viewport.height },
+          isMobile: viewport.height > viewport.width,
+          hasTouch: true,
+          storageState: process.env.WLC_E2E_STATE || undefined,
+        });
+        const page = await ctx.newPage();
+        await page.goto(`${base}/iibs/wlc/Gen/1`, { waitUntil: "networkidle" });
+        await page.waitForSelector(".ms-word", { timeout: 20000 });
+        const play = page.getByRole("button", { name: "Play" });
+        await play.click();
+        await page.waitForFunction(() => {
+          const audio = document.querySelector("audio");
+          return Boolean(audio && !audio.paused && audio.currentTime > 0.2);
+        });
+        await page.evaluate(() => {
+          const audio = document.querySelector("audio");
+          if (audio) audio.currentTime = 40;
+        });
+        await page.waitForTimeout(600);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(1500);
+        const stayed = await page.evaluate(() => window.scrollY);
+        assert.ok(stayed < 8, `${viewport.label}: a hand scroll did not stay put (${stayed})`);
+        const dock = await page.locator(".read-dock").boundingBox();
+        assert.ok(dock && dock.y >= 0 && dock.y + dock.height <= viewport.height + 1, `${viewport.label}: dock left the screen`);
+
+        const back = page.getByRole("button", { name: "Back to the reader" });
+        await back.waitFor({ timeout: 4000 });
+        await back.click();
+        await page.waitForTimeout(900);
+        const spoken = page.locator(".ms-spoken, .ms-spoken-verse").first();
+        if (await spoken.count()) {
+          const line = await spoken.boundingBox();
+          const dockBox = await page.locator(".read-dock").boundingBox();
+          assert.ok(
+            line && dockBox && line.y + line.height <= dockBox.y + 2,
+            `${viewport.label}: the verse came back under the dock`,
+          );
+        }
+        const before = await page.evaluate(() => window.scrollY);
+        await page.waitForTimeout(900);
+        const after = await page.evaluate(() => window.scrollY);
+        assert.ok(Math.abs(after - before) < 80, `${viewport.label}: follow fought the page (${before} to ${after})`);
+
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await page.waitForTimeout(250);
+        const last = await page.evaluate(() => {
+          const verses = [...document.querySelectorAll(".ms-verse")];
+          const verse = verses[verses.length - 1]?.getBoundingClientRect();
+          const bar = document.querySelector(".read-dock")?.getBoundingClientRect();
+          return { verseBottom: verse?.bottom ?? -1, dockTop: bar?.top ?? -1 };
+        });
+        assert.ok(
+          last.verseBottom <= last.dockTop + 2,
+          `${viewport.label}: last verse ${last.verseBottom} sits under dock ${last.dockTop}`,
+        );
+
+        await page.locator(".ms-word").first().click();
+        const card = page.locator(".wlc-card");
+        await card.waitFor({ timeout: 5000 });
+        const cardBox = await card.boundingBox();
+        const dockNow = await page.locator(".read-dock").boundingBox();
+        assert.ok(
+          cardBox && dockNow && cardBox.y + cardBox.height <= dockNow.y + 2,
+          `${viewport.label}: word card overlaps the dock`,
+        );
+        await ctx.close();
+      }
+    } finally {
+      await browser.close();
+    }
+  },
+);
+

@@ -1151,6 +1151,16 @@ function FollowCard({
   const wordEl = useRef<HTMLButtonElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const follow = useFollowScroll(verse.ref);
+  const playingRef = useRef(playing);
+  const resumeRef = useRef(follow.resume);
+  const onToggleRef = useRef(onToggle);
+  const onNudgeRef = useRef(onNudge);
+  const hideTransportRef = useRef(hideTransport);
+  playingRef.current = playing;
+  resumeRef.current = follow.resume;
+  onToggleRef.current = onToggle;
+  onNudgeRef.current = onNudge;
+  hideTransportRef.current = hideTransport;
   useDockHeight(dockRef, !hideTransport);
   const [more, setMore] = useState(false);
   const list = verses.length ? verses : [verse];
@@ -1164,26 +1174,26 @@ function FollowCard({
         target instanceof HTMLElement &&
         (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable);
       if (field) return;
-      if (!hideTransport && event.key === "ArrowLeft") {
+      if (!hideTransportRef.current && event.key === "ArrowLeft") {
         event.preventDefault();
-        onNudge(-5);
+        onNudgeRef.current(-5);
         return;
       }
-      if (!hideTransport && event.key === "ArrowRight") {
+      if (!hideTransportRef.current && event.key === "ArrowRight") {
         event.preventDefault();
-        onNudge(5);
+        onNudgeRef.current(5);
         return;
       }
       if (event.key === " " && event.target instanceof HTMLElement && event.target.tagName === "BUTTON") return;
       if (event.key === " " && !event.repeat && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
         event.preventDefault();
-        if (!playing) follow.resume();
-        onToggle();
+        if (!playingRef.current) resumeRef.current();
+        onToggleRef.current();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [hideTransport, onNudge, onToggle, follow, playing]);
+  }, []);
   function cycleRate() {
     const at = READ_RATES.findIndex((row) => row.value === rate);
     const next = READ_RATES[(at + 1) % READ_RATES.length] ?? READ_RATES[0];

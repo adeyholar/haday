@@ -235,7 +235,7 @@
     scroll-margin-top: var(--read-header);
     scroll-margin-bottom: calc(var(--dock-h) + var(--nav-h) + 0.5rem);
   }
-  body:has(.read-dock) {
+  html:has(.read-dock) {
     --nav-h: env(safe-area-inset-bottom);
     --read-header: 0.5rem;
   }

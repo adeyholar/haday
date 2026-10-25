@@ -1,5 +1,14 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { readLineInComfort, scrollWasOurs, shouldFollowScroll } from "@/lib/read-follow";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import {
+  armOwnScroll,
+  clearOwnScroll,
+  hearOwnScroll,
+  ownScrollLive,
+  readLineInComfort,
+  shouldAutoFollow,
+  shouldFollowScroll,
+  type OwnScroll,
+} from "@/lib/read-follow";
 
 /** Publish the fixed player height so the page and the word card stay above it. */
 export function useDockHeight(dockRef: RefObject<HTMLElement | null>, active = true) {
@@ -7,10 +16,12 @@ export function useDockHeight(dockRef: RefObject<HTMLElement | null>, active = t
     const el = active ? dockRef.current : null;
     if (!el || typeof ResizeObserver === "undefined") {
       document.documentElement.style.removeProperty("--dock-h");
+      invalidateReadingBand();
       return;
     }
     const apply = () => {
       document.documentElement.style.setProperty("--dock-h", `${Math.ceil(el.getBoundingClientRect().height)}px`);
+      invalidateReadingBand();
     };
     apply();
     const watch = new ResizeObserver(apply);
@@ -18,8 +29,27 @@ export function useDockHeight(dockRef: RefObject<HTMLElement | null>, active = t
     return () => {
       watch.disconnect();
       document.documentElement.style.removeProperty("--dock-h");
+      invalidateReadingBand();
     };
   }, [dockRef, active]);
+}
+
+type Band = { header: number; dock: number; nav: number };
+let band: Band | null = null;
+let bandBound = false;
+
+export function invalidateReadingBand() {
+  band = null;
+}
+
+function bindReadingBand() {
+  if (bandBound || typeof window === "undefined") return;
+  bandBound = true;
+  const drop = () => {
+    band = null;
+  };
+  window.addEventListener("resize", drop);
+  window.addEventListener("orientationchange", drop);
 }
 
 function pxVar(name: string, fallback: number): number {
@@ -37,9 +67,15 @@ function pxVar(name: string, fallback: number): number {
 }
 
 function readingFrame(): { top: number; bottom: number } {
-  const header = pxVar("--read-header", 56);
-  const dock = pxVar("--dock-h", 0);
-  const nav = pxVar("--nav-h", 56);
+  bindReadingBand();
+  if (!band) {
+    band = {
+      header: pxVar("--read-header", 56),
+      dock: pxVar("--dock-h", 0),
+      nav: pxVar("--nav-h", 56),
+    };
+  }
+  const { header, dock, nav } = band;
   return { top: header, bottom: Math.max(header + 1, window.innerHeight - dock - nav) };
 }
 
@@ -54,7 +90,7 @@ function reducedMotion(): boolean {
 export function useFollowScroll(lineKey: string) {
   const targetRef = useRef<HTMLElement | null>(null);
   const following = useRef(true);
-  const armedAt = useRef(0);
+  const arm = useRef<OwnScroll>(clearOwnScroll());
   const seen = useRef("");
   const [paused, setPaused] = useState(false);
   const [onScreen, setOnScreen] = useState(true);
@@ -62,12 +98,13 @@ export function useFollowScroll(lineKey: string) {
   const scrollToTarget = useCallback((force: boolean) => {
     const node = targetRef.current;
     if (!node) return;
-    if (!force && scrollWasOurs(armedAt.current, performance.now())) return;
+    const now = performance.now();
+    if (!force && ownScrollLive(arm.current, now)) return;
     const frame = readingFrame();
     const rect = node.getBoundingClientRect();
     const comfortable = readLineInComfort(rect.top, rect.bottom, frame.top, frame.bottom);
     if (!force && !shouldFollowScroll(true, comfortable)) return;
-    armedAt.current = performance.now();
+    arm.current = armOwnScroll(performance.now());
     node.scrollIntoView({
       block: "center",
       inline: "nearest",
@@ -89,10 +126,12 @@ export function useFollowScroll(lineKey: string) {
   }, [scrollToTarget]);
 
   useEffect(() => {
-    if (!lineKey || lineKey === seen.current) return;
+    if (!shouldAutoFollow(following.current, lineKey, seen.current)) {
+      if (lineKey) seen.current = lineKey;
+      return;
+    }
     const first = seen.current === "";
     seen.current = lineKey;
-    if (!following.current) return;
     if (first) {
       const node = targetRef.current;
       if (!node) return;
@@ -106,11 +145,13 @@ export function useFollowScroll(lineKey: string) {
 
   useEffect(() => {
     let ready = false;
-    const arm = window.setTimeout(() => {
+    const armTimer = window.setTimeout(() => {
       ready = true;
     }, 400);
     const onScroll = () => {
-      if (!ready || scrollWasOurs(armedAt.current, performance.now())) return;
+      const heard = hearOwnScroll(arm.current, performance.now());
+      arm.current = heard.arm;
+      if (heard.ours || !ready) return;
       pause();
     };
     const onPointerLeave = (event: Event) => {
@@ -123,16 +164,16 @@ export function useFollowScroll(lineKey: string) {
         pause();
       }
     };
+    const onScrollEnd = () => {
+      arm.current = clearOwnScroll();
+    };
     window.addEventListener("wheel", onPointerLeave, { passive: true });
     window.addEventListener("touchmove", onPointerLeave, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("keydown", onKey);
-    const onScrollEnd = () => {
-      armedAt.current = 0;
-    };
     window.addEventListener("scrollend", onScrollEnd);
     return () => {
-      window.clearTimeout(arm);
+      window.clearTimeout(armTimer);
       window.removeEventListener("wheel", onPointerLeave);
       window.removeEventListener("touchmove", onPointerLeave);
       window.removeEventListener("scroll", onScroll);
@@ -157,10 +198,13 @@ export function useFollowScroll(lineKey: string) {
     return () => watch.disconnect();
   }, [lineKey, paused]);
 
-  return {
-    targetRef,
-    paused,
-    showBack: paused && !onScreen,
-    resume,
-  };
+  return useMemo(
+    () => ({
+      targetRef,
+      paused,
+      showBack: paused && !onScreen,
+      resume,
+    }),
+    [paused, onScreen, resume],
+  );
 }
