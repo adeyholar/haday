@@ -17,29 +17,25 @@ function playControl() {
   return src.slice(start, end);
 }
 
-test("Play is the first segment of the reading-speed pill", () => {
+test("Play is a round control and the speed is one chip", () => {
   const group = playControl();
-  const playAt = group.indexOf('aria-label={playing ? "Pause" : "Play"}');
-  const speedsAt = group.indexOf("READ_RATES.map");
-  assert.ok(playAt > 0 && playAt < speedsAt, "Play sits before Slow");
-  assert.match(group.slice(0, speedsAt), /<Play /);
-  assert.match(group.slice(0, speedsAt), /<Pause /);
-  assert.match(group.slice(0, speedsAt), /playing \? "Pause" : "Play"/);
-  assert.match(group.slice(0, speedsAt), /playing \? "bg-primary text-primary-foreground" : "text-ink"/);
-  assert.match(group.slice(0, speedsAt), /rounded-\[var\(--radius-sm\)\]/);
-  assert.match(group.slice(speedsAt), /rounded-\[var\(--radius-sm\)\]/);
-  assert.match(group.slice(0, speedsAt), /min-h-11/);
-  assert.match(group.slice(0, speedsAt), /px-2\.5/);
-  assert.match(group.slice(0, speedsAt), /w-px/);
-  assert.doesNotMatch(group.slice(0, speedsAt), /aria-pressed/);
-  assert.match(group.slice(speedsAt), /aria-pressed=\{rate === row\.value\}/);
+  assert.match(group, /aria-label=\{playing \? "Pause" : "Play"\}/);
+  assert.match(group, /rounded-full/);
+  assert.match(group, /size-11/);
+  assert.match(group, /playing \? "bg-primary text-primary-foreground" : "bg-ink text-parchment"/);
+  assert.match(group, /Reading speed,/);
+  assert.match(group, /nextReadRate/);
+  assert.doesNotMatch(group, /READ_RATES\.map/);
+  assert.doesNotMatch(src, /Previous chapter|Next chapter/);
+  assert.match(src, /aria-label="Previous verse"/);
+  assert.match(src, /aria-label="Next verse"/);
+  assert.match(src, /aria-label="Seek recording"/);
   assert.match(src, /onPlay=\{\(\) => setPlaying\(true\)\}/);
   assert.match(src, /onPause=\{\(\) => setPlaying\(false\)\}/);
   assert.match(src, /onEnded=\{\(\) => \{/);
   assert.match(src, /The recording did not load\./);
   assert.match(src, /className="read-dock"/);
-  assert.match(src, /Verse \{verseNo\} of/);
-  assert.match(src, /event\.key !== " "/);
+  assert.match(src, /event\.key === " "/);
   assert.match(src, /useDockHeight/);
 });
 
@@ -65,14 +61,10 @@ test(
       await play.waitFor({ timeout: 10000 });
 
       const box = await play.boundingBox();
-      assert.ok(box && box.height >= 44, `Play tap target is ${box?.height ?? 0}px`);
-      for (const label of ["Slow", "Recorded", "Faster"]) {
-        const speed = await page.getByRole("button", { name: label }).boundingBox();
-        assert.ok(speed && speed.height >= 44, `${label} tap target is ${speed?.height ?? 0}px`);
-      }
-      const playRight = box.x + box.width;
-      const slow = await page.getByRole("button", { name: "Slow" }).boundingBox();
-      assert.ok(slow && slow.x >= playRight - 1, "Play is left of Slow");
+      assert.ok(box && box.height >= 44 && Math.abs(box.height - box.width) < 2, `Play is ${box?.width}×${box?.height}`);
+      const look = await play.evaluate((el) => el.className);
+      assert.match(look, /rounded-full/);
+      assert.match(look, /bg-ink/);
 
       await play.click();
       const pause = page.getByRole("button", { name: "Pause" });
@@ -83,10 +75,15 @@ test(
       });
       const playingLook = await pause.evaluate((el) => el.className);
       assert.match(playingLook, /bg-primary/);
-      assert.match(playingLook, /text-primary-foreground/);
+      assert.match(playingLook, /rounded-full/);
       assert.doesNotMatch(playingLook, /bg-ink/);
 
-      await page.getByRole("button", { name: "Faster" }).click();
+      const speed = page.getByRole("button", { name: /Reading speed/ });
+      for (let step = 0; step < 3; step += 1) {
+        const rate = await page.evaluate(() => document.querySelector("audio")?.playbackRate ?? 0);
+        if (Math.abs(rate - 1.25) < 0.01) break;
+        await speed.click();
+      }
       await page.waitForFunction(() => {
         const audio = document.querySelector("audio");
         return Boolean(audio && !audio.paused && Math.abs(audio.playbackRate - 1.25) < 0.01);
