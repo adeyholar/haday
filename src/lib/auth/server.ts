@@ -39,7 +39,7 @@ import { resolveDatabaseUrl, pgPoolOptions } from "../database-url";
 import { ensureDbReady, getPglite } from "../db";
 import { emailAndPasswordEnabled, emailAndPassword, emailVerification, authHooks } from "./email-password";
 import { missingGoogleSignInWarning, readGoogleCredentials } from "./google";
-import { missingXSignInWarning, readXCredentials, mapXProfile } from "./x";
+import { missingXSignInWarning, readXCredentials, mapXProfile, X_SCOPES } from "./x";
 import { xCallbackAfter, xGetUserInfo } from "./x.server";
 import { pgliteDialect } from "./pglite-dialect";
 import { PREVIEW_ALLOWED_HOSTS } from "./preview";
@@ -200,6 +200,8 @@ export const auth = betterAuth({
     encryptOAuthTokens: true,
     accountLinking: {
       enabled: true,
+      // explicit Link only; also applies to any future Link Google button
+      allowDifferentEmails: true,
     },
   },
 
@@ -213,6 +215,8 @@ export const auth = betterAuth({
                   clientSecret: googleClientSecret as string,
                   // Always show Google's account chooser. Shared class computers
                   // should not silently reuse the last Google session.
+                  // Google sets emailVerified from email_verified. This block leaves
+                  // that claim alone, so a new Google user arrives verified.
                   prompt: "select_account" as const,
                 },
               }
@@ -223,7 +227,7 @@ export const auth = betterAuth({
                   clientId: xClientId as string,
                   clientSecret: xClientSecret as string,
                   disableDefaultScope: true,
-                  scope: ["users.read", "tweet.read", "offline.access", "users.email"],
+                  scope: [...X_SCOPES],
                   mapProfileToUser: (profile: Parameters<typeof mapXProfile>[0]) => mapXProfile(profile),
                   getUserInfo: (token: { accessToken?: string | null }) =>
                     xGetUserInfo(xClientId as string, xClientSecret as string, token),
@@ -241,9 +245,12 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled
-    ? { emailAndPassword, emailVerification, hooks: { before: authHooks.before, after: xCallbackAfter } }
-    : {}),
+  // The X callback rewrite runs even when email/password is off.
+  ...(emailAndPasswordEnabled ? { emailAndPassword, emailVerification } : {}),
+  hooks: {
+    before: emailAndPasswordEnabled ? authHooks.before : undefined,
+    after: xCallbackAfter,
+  },
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a

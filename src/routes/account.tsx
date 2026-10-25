@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth/client";
-import { getGoogleSignInOffered } from "@/lib/auth/google-status";
+import { getSocialSignInOffered } from "@/lib/auth/google-status";
 import { socialSignInErrorMessage } from "@/lib/auth/google";
-import { X_PROVIDER_ID, canUnlinkSignIn } from "@/lib/auth/x";
+import { X_PROVIDER_ID, accountLinkErrorMessage, canUnlinkSignIn } from "@/lib/auth/x";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
@@ -23,11 +23,21 @@ function AccountPage() {
   const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(linkError ? socialSignInErrorMessage(linkError) ?? "Could not link X." : null);
+  const [error, setError] = useState<string | null>(
+    linkError ? accountLinkErrorMessage(linkError) ?? socialSignInErrorMessage(linkError) ?? "Could not link X." : null,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("error_description")) return;
+    url.searchParams.delete("error_description");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
 
   useEffect(() => {
     let cancel = false;
-    Promise.all([getGoogleSignInOffered(), authClient.listAccounts()])
+    Promise.all([getSocialSignInOffered(), authClient.listAccounts()])
       .then(([status, listed]) => {
         if (cancel) return;
         setXOn(status.x === true);
@@ -107,7 +117,9 @@ function AccountPage() {
                 Unlink X
               </Button>
               {!allowUnlink ? (
-                <p className="mt-2 text-sm text-muted">X is your only way in. Add email or Google before unlinking.</p>
+                <p className="mt-2 text-sm text-muted">
+                  X is your only way in. Add email or Google before unlinking. To add a password, use Forgot password on the sign-in page.
+                </p>
               ) : null}
             </div>
           ) : (

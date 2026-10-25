@@ -33,7 +33,7 @@ export function xCallbackUrl(origin = "https://hebrewmentor.haday.app"): string 
   return `${base}/api/auth/callback/twitter`;
 }
 
-export const X_SCOPES = ["users.read", "tweet.read", "offline.access", "users.email"] as const;
+export const X_SCOPES = ["users.read", "tweet.read", "users.email"] as const;
 
 export type XCredentials = {
   clientId: string | null;
@@ -98,11 +98,12 @@ export function mapXProfile(profile: XProfile): { email: string | null; emailVer
 /**
  * Better Auth 1.6.30 allows linkSocial only when this claim is set or the
  * provider is on its trusted list. X is not on that list (that would attach
- * X during sign-in). The claim is set only for an explicit link, and that
- * path does not store it on the HaDay user. mapXProfile stays false.
+ * X during sign-in). The claim is set for an explicit link, including when
+ * X shared no email or a different one. That path does not store the claim
+ * on the HaDay user. mapXProfile stays false.
  */
 export function xCallbackEmailVerified(input: { email: string | null; linking: boolean }): boolean {
-  return input.linking === true && Boolean(input.email);
+  return input.linking === true;
 }
 
 /** Rewrite a Twitter callback error redirect. Other errors are left alone. No address is added. */
@@ -114,10 +115,19 @@ export function rewriteXCallbackLocation(location: string): string | null {
     return null;
   }
   const error = url.searchParams.get("error");
-  if (error === "email_not_found") url.searchParams.set("error", X_NO_EMAIL);
-  else if (error === "account_not_linked") url.searchParams.set("error", X_LINK_REQUIRED);
-  else return null;
-  url.searchParams.delete("error_description");
+  let changed = false;
+  if (error === "email_not_found") {
+    url.searchParams.set("error", X_NO_EMAIL);
+    changed = true;
+  } else if (error === "account_not_linked") {
+    url.searchParams.set("error", X_LINK_REQUIRED);
+    changed = true;
+  }
+  if (url.searchParams.has("error_description")) {
+    url.searchParams.delete("error_description");
+    changed = true;
+  }
+  if (!changed) return null;
   if (location.startsWith("http://") || location.startsWith("https://")) return url.toString();
   return `${url.pathname}${url.search}`;
 }
@@ -125,4 +135,15 @@ export function rewriteXCallbackLocation(location: string): string | null {
 /** Unlink is refused when it would remove the last way in. */
 export function canUnlinkSignIn(accounts: { providerId: string }[], providerId: string): boolean {
   return accounts.some((account) => account.providerId !== providerId);
+}
+
+/** Plain sentences for link errors on Account. Never the raw code. */
+export function accountLinkErrorMessage(code: string): string | null {
+  const normalized = code.trim().toLowerCase().replace(/_/g, " ").replace(/'/g, "");
+  if (normalized.includes("already linked")) {
+    return "That X account is already linked to another HaDay account.";
+  }
+  if (normalized === "unable to link account") return "We couldn't link X. Please try again.";
+  if (normalized.includes("doesnt match")) return "Your X email is different from your HaDay email.";
+  return null;
 }

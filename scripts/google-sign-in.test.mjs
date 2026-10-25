@@ -73,7 +73,7 @@ test("the login page offers Google only when it is configured", () => {
   assert.match(login, /GOOGLE_PRIVACY_BEFORE/);
   assert.match(login, /to="\/legal"/);
   assert.match(login, /GoogleSignInButton/);
-  assert.match(login, /getGoogleSignInOffered/);
+  assert.match(login, /getSocialSignInOffered/);
   assert.doesNotMatch(login, /grok-x|GROK_PROVIDERS|genericOAuth/);
   assert.match(login, /\n\s*or\n/);
 });

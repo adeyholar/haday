@@ -19,6 +19,7 @@ import { Route as BbhRouteImport } from './routes/bbh'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as CardsRouteImport } from './routes/cards'
 import { Route as ChallengeRouteImport } from './routes/challenge'
+import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DrillRouteImport } from './routes/drill'
 import { Route as GuideRouteImport } from './routes/guide'
@@ -173,6 +174,11 @@ const CardsRoute = CardsRouteImport.update({
 const ChallengeRoute = ChallengeRouteImport.update({
   id: '/challenge',
   path: '/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreditsRoute = CreditsRouteImport.update({
@@ -716,6 +722,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -833,6 +840,7 @@ export interface FileRoutesByTo {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -949,6 +957,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -1068,6 +1077,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1185,6 +1195,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1300,6 +1311,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1418,6 +1430,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   CardsRoute: typeof CardsRoute
   ChallengeRoute: typeof ChallengeRoute
+  ConfirmEmailRoute: typeof ConfirmEmailRoute
   CreditsRoute: typeof CreditsRoute
   DrillRoute: typeof DrillRoute
   GuideRoute: typeof GuideRoute
@@ -1570,6 +1583,13 @@ declare module '@tanstack/react-router' {
       path: '/challenge'
       fullPath: '/challenge'
       preLoaderRoute: typeof ChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm-email': {
+      id: '/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof ConfirmEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/credits': {
@@ -2406,6 +2426,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   CardsRoute: CardsRoute,
   ChallengeRoute: ChallengeRoute,
+  ConfirmEmailRoute: ConfirmEmailRoute,
   CreditsRoute: CreditsRoute,
   DrillRoute: DrillRoute,
   GuideRoute: GuideRoute,

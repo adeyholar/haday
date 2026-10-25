@@ -67,7 +67,7 @@ function LegalPage() {
           with advertisers. We do not use it for unrelated marketing.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Hosting is on Azure. Google sign-in (name, email, profile picture) is used only if you tap Continue with Google. X sign-in (name, username, profile picture, and email if shared) is used only if you tap Continue with X. X never gives us your password.
+          Hosting is on Azure. Google sign-in (name, email, profile picture) is used only if you tap Continue with Google. X sign-in (name, username, profile picture, and email if shared) is used only if you tap Continue with X. X never gives us your password. We do not read or post to your X timeline.
           Outbound mail uses Gmail (or another mailer the owner configures).
         </p>
       </Panel>

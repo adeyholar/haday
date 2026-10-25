@@ -42,7 +42,7 @@ export class UnauthorizedError extends Error {
   }
 }
 
-export type VerifiedUser = { id: string; email: string | null };
+export type VerifiedUser = { id: string; email: string | null; emailVerified: boolean };
 
 /**
  * Resolve the signed-in user from the current request, or `null` when auth isn't
@@ -68,10 +68,22 @@ export async function getSessionUser(
     }
     const session = await auth.api.getSession({ headers });
     if (!session?.user) return null;
-    return { id: session.user.id, email: session.user.email ?? null };
+    return {
+      id: session.user.id,
+      email: session.user.email ?? null,
+      emailVerified: session.user.emailVerified !== false,
+    };
   } catch (err) {
     console.error("[auth] getSessionUser failed", err);
     return null;
+  }
+}
+
+export class EmailUnconfirmedError extends Error {
+  readonly status = 403;
+  constructor() {
+    super("Confirm your email to continue.");
+    this.name = "EmailUnconfirmedError";
   }
 }
 
@@ -79,14 +91,15 @@ export async function getSessionUser(
  * Resolve the current user id for a server function, or throw when unauthorized.
  * Prefer `authMiddleware` (`./middleware`), which calls this for you.
  * - Auth enabled -> the verified session user id; throws
- *   `UnauthorizedError` when signed out. Works in the sandbox preview too (real
+ *   `UnauthorizedError` when signed out, and `EmailUnconfirmedError` when the
+ *   email is not confirmed. Works in the sandbox preview too (real
  *   sign-in via the baked preview client).
  * - Auth disabled (`VITE_AUTH_ENABLED=false`) + `DATABASE_URL` set -> throw (fail
  *   closed): one shared dev user on a real database would let every visitor
  *   read/write everyone's rows.
  * - Auth disabled + no database -> the shared dev user id.
  */
-export async function requireUserId(bearerToken?: string): Promise<string> {
+export async function requireSignedInId(bearerToken?: string): Promise<string> {
   if (!authConfigured) {
     if (databaseConfigured) {
       throw new Error(
@@ -98,5 +111,13 @@ export async function requireUserId(bearerToken?: string): Promise<string> {
   }
   const user = await getSessionUser(bearerToken);
   if (!user) throw new UnauthorizedError();
+  return user.id;
+}
+
+export async function requireUserId(bearerToken?: string): Promise<string> {
+  if (!authConfigured) return requireSignedInId(bearerToken);
+  const user = await getSessionUser(bearerToken);
+  if (!user) throw new UnauthorizedError();
+  if (user.emailVerified === false) throw new EmailUnconfirmedError();
   return user.id;
 }

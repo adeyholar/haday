@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertAdmin } from "@/lib/admin";
-import { authMiddleware } from "@/lib/auth/middleware";
+import { authMiddleware, signedInMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import { isIibsLevel, isStudyPath, grammarTerm, termForAccount, type GrammarTerm, type IibsLevelId, type StudyPath } from "@/lib/path";
 import { PATH_CHOICE } from "@/lib/path-names";
@@ -63,7 +63,7 @@ async function readAdmin(userId: string): Promise<boolean> {
 }
 
 export const getMyPath = createServerFn({ method: "GET" })
-  .middleware([authMiddleware])
+  .middleware([signedInMiddleware])
   .handler(async ({ context }): Promise<MyPath> => {
     await ensureLearnerPath();
     const sql = await getSql();

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react-router";
 import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { getGoogleSignInOffered } from "@/lib/auth/google-status";
+import { getSocialSignInOffered } from "@/lib/auth/google-status";
 import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, loginSocialOffer, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
 import { X_PRIVACY_BEFORE, X_PRIVACY_LINK, X_PROVIDER_ID, showXPrivacyNotice } from "@/lib/auth/x";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
@@ -50,7 +50,7 @@ function GoToStudy() {
 }
 
 function Login() {
-  const { user, isPending } = useCurrentUserState();
+  const { user, isPending, emailVerified } = useCurrentUserState();
   const href = useRouterState({ select: (s) => s.location.href });
   const linkError = useMemo(() => {
     try {
@@ -92,7 +92,7 @@ function Login() {
   const [xOffered, setXOffered] = useState(false);
   useEffect(() => {
     let cancel = false;
-    getGoogleSignInOffered()
+    getSocialSignInOffered()
       .then((result) => {
         if (cancel) return;
         setGoogleOffered(result.google === true);
@@ -120,6 +120,8 @@ function Login() {
     );
   }
 
+  if (user && emailVerified === false) return <Navigate to="/confirm-email" search={{ next: "" }} replace />;
+
   if (user) return <GoToStudy />;
 
   async function onGoogle() {
@@ -141,7 +143,7 @@ function Login() {
     if (remember) stashPathIntent(remember);
     setBusy(true);
     try {
-      await signIn(X_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
+      await signIn(X_PROVIDER_ID, { callbackURL: "/confirm-email", errorCallbackURL: "/login" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
       setBusy(false);

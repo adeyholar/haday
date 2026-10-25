@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts, isRedirect, redirect } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppShell } from "@/components/app-shell";
@@ -8,6 +8,7 @@ import { ScrollBackdrop } from "@/components/scroll-backdrop";
 import { MovedSignpost } from "@/components/moved-signpost";
 import { AppErrorComponent } from "@/lib/error-component";
 import { isRetiredVercelHost } from "@/lib/class-site";
+import { emailConfirmRedirect } from "@/lib/auth/confirm-hold";
 import { SEO_DESCRIPTION, SEO_TITLE, shareMeta } from "@/lib/seo";
 import appCss from "../styles.css?url";
 
@@ -23,7 +24,10 @@ const loadRootContext = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const { getSessionUser } = await import("@/lib/auth/verify.server");
     const u = await getSessionUser();
-    return { sessionUser: u ? { id: u.id, email: u.email } : null, retiredHost: false as const };
+    return {
+      sessionUser: u ? { id: u.id, email: u.email, emailVerified: u.emailVerified } : null,
+      retiredHost: false as const,
+    };
   } catch (err) {
     console.error("[session]", err);
     return { sessionUser: null, retiredHost: false as const };
@@ -33,13 +37,19 @@ const loadRootContext = createServerFn({ method: "GET" }).handler(async () => {
 let clientRoot: { at: number; value: Awaited<ReturnType<typeof loadRootContext>> } | null = null;
 
 export const Route = createRootRoute({
-  beforeLoad: async () => {
-    if (typeof window !== "undefined" && clientRoot && Date.now() - clientRoot.at < 60_000) return clientRoot.value;
+  beforeLoad: async ({ location }) => {
+    const hold = (value: Awaited<ReturnType<typeof loadRootContext>>) => {
+      const target = emailConfirmRedirect(location.pathname, value.sessionUser?.emailVerified);
+      if (target) throw redirect({ href: target });
+      return value;
+    };
+    if (typeof window !== "undefined" && clientRoot && Date.now() - clientRoot.at < 60_000) return hold(clientRoot.value);
     try {
       const value = await loadRootContext();
       if (typeof window !== "undefined") clientRoot = { at: Date.now(), value };
-      return value;
+      return hold(value);
     } catch (err) {
+      if (isRedirect(err)) throw err;
       console.error("[root beforeLoad]", err);
       return { sessionUser: null, retiredHost: false };
     }

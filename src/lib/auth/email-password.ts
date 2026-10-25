@@ -12,6 +12,7 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { sendPasswordResetMail, sendVerificationMail } from "../mail";
 import { inspectMailbox } from "../mailbox";
 import { pruneOlderResetTokens, resetClientIp, resetSendBlocked } from "../reset-guard";
+import { noteVerificationSend, verificationResendBlocked } from "./confirm-hold";
 
 export const emailAndPasswordEnabled = true;
 
@@ -46,6 +47,11 @@ export async function sendVerificationEmail(
   data: { user: ResetUser; url: string; token: string },
 ): Promise<void> {
   try {
+    if (verificationResendBlocked(data.user.email)) {
+      console.info("[auth] verification mail skipped (rate limit)");
+      return;
+    }
+    noteVerificationSend(data.user.email);
     await sendVerificationMail({
       email: data.user.email,
       name: data.user.name ?? "",
