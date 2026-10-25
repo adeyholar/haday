@@ -268,9 +268,6 @@ html {
   padding: 0.75rem 0.85rem calc(1.25rem + var(--wlc-card-h, 0px));
   outline: none;
 }
-.wlc-card-hint {
-  display: none;
-}
 .wlc-card {
   position: fixed;
   inset-inline: 0;
@@ -293,54 +290,37 @@ html {
   .wlc-stage.wlc-sized .manuscript-sheet {
     transition: opacity 180ms ease;
   }
+  /* The text column is 48rem, centred. The 2rem is main's own side padding. */
   body:has(.wlc-stage) main {
-    max-width: min(100%, calc(48rem + 22rem + 0.75rem + 2rem));
+    max-width: calc(48rem + 2rem);
   }
   body:has(.wlc-stage) .read-dock-row {
-    width: min(100%, calc(48rem + 22rem + 0.75rem + 2rem));
+    width: min(100%, calc(48rem + 2rem));
   }
   body:has(.wlc-stage) .read-dock-sheet {
     width: min(100%, 48rem);
   }
-  .wlc-stage .wlc-reading {
-    display: grid;
-    grid-template-columns: minmax(min(48rem, calc(100% - 12.5rem - 0.75rem)), 48rem) minmax(12.5rem, 22rem);
-    align-items: start;
-    gap: 0.75rem;
-  }
   .wlc-stage .wlc-reading .manuscript-sheet {
-    grid-column: 1;
-    grid-row: 1;
     min-width: 0;
-  }
-  .wlc-stage .wlc-card-hint {
-    display: block;
-    grid-column: 2;
-    grid-row: 1;
-    margin: 0;
-    padding: 0.25rem;
-    font-size: 0.95rem;
-    line-height: 1.45;
-    color: var(--color-muted);
-  }
-  .wlc-reading:has(.wlc-card) .wlc-card-hint {
-    display: none;
   }
   .wlc-card {
-    position: sticky;
-    top: calc(3.5rem + 3.25rem);
+    inset-inline: auto;
+    right: auto;
     bottom: auto;
-    z-index: 10;
-    grid-column: 2;
-    grid-row: 1;
-    min-width: 0;
-    max-height: calc(100dvh - var(--nav-h) - 8rem);
+    z-index: 22;
+    width: auto;
+    max-height: none;
     margin: 0;
     padding: 0;
     overflow-y: auto;
   }
+  .wlc-card:not([data-place]) {
+    visibility: hidden;
+  }
   .wlc-card > div {
-    box-shadow: var(--shadow-border);
+    box-shadow:
+      var(--shadow-border),
+      0 18px 40px -18px rgba(28, 24, 20, 0.45);
   }
   .manuscript-sheet {
     padding-bottom: 1.25rem;
@@ -348,16 +328,13 @@ html {
 }
 @media (min-width: 1024px) {
   body:has(.wlc-wide) main {
-    max-width: min(100%, calc(56rem + 22rem + 0.75rem + 2rem));
+    max-width: calc(56rem + 2rem);
   }
   body:has(.wlc-wide) .read-dock-row {
-    width: min(100%, calc(56rem + 22rem + 0.75rem + 2rem));
+    width: min(100%, calc(56rem + 2rem));
   }
   body:has(.wlc-wide) .read-dock-sheet {
     width: min(100%, 56rem);
-  }
-  .wlc-wide .wlc-reading {
-    grid-template-columns: minmax(min(56rem, calc(100% - 16rem - 0.75rem)), 56rem) minmax(16rem, 22rem);
   }
 }
 @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
