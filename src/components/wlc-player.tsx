@@ -1,66 +1,121 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
-import { chapterFromAlign, fetchBookAlign, READ_RATES } from "@/lib/reading";
+import { chapterFromAlign, fetchBookAlign } from "@/lib/reading";
 import { chapterAudioSrc, type BookId } from "@/lib/tanakh-canon";
 import { followSpot, type FollowSpot } from "@/lib/wlc-follow";
+import { rateFromStorage, readRateLabel, nextReadRate, WLC_RATE_KEY } from "@/lib/wlc-prefs";
 import { useDockHeight } from "@/lib/use-follow-scroll";
 import type { WlcVerse } from "@/lib/wlc";
+
+const NUDGE_SEC = 5;
+const METADATA_WAIT_MS = 5000;
+
+function clockLabel(seconds: number): string {
+  const whole = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+  const minutes = Math.floor(whole / 60);
+  const remain = whole % 60;
+  return `${minutes}:${String(remain).padStart(2, "0")}`;
+}
+
+function waitForMetadata(el: HTMLAudioElement): Promise<"ok" | "error" | "timeout"> {
+  if (el.readyState >= 1) return Promise.resolve("ok");
+  return new Promise((resolve) => {
+    const finish = (result: "ok" | "error" | "timeout") => {
+      window.clearTimeout(timer);
+      el.removeEventListener("loadedmetadata", onReady);
+      el.removeEventListener("canplay", onReady);
+      el.removeEventListener("error", onError);
+      resolve(result);
+    };
+    const onReady = () => finish("ok");
+    const onError = () => finish("error");
+    const timer = window.setTimeout(() => finish("timeout"), METADATA_WAIT_MS);
+    el.addEventListener("loadedmetadata", onReady);
+    el.addEventListener("canplay", onReady);
+    el.addEventListener("error", onError);
+  });
+}
 
 export function WlcPlayer({
   book,
   chapter,
   verses,
   onSpot,
-  onPrevChapter,
-  onNextChapter,
-  canPrev = false,
-  canNext = false,
   onEngage,
 }: {
   book: BookId;
   chapter: number;
   verses: WlcVerse[];
   onSpot: (spot: FollowSpot | null) => void;
-  onPrevChapter?: () => void;
-  onNextChapter?: () => void;
-  canPrev?: boolean;
-  canNext?: boolean;
   /** Play was pressed. The page uses this to follow the line again. */
   onEngage?: () => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const versesRef = useRef(verses);
   const startsRef = useRef<{ verses: number[]; words?: number[][] }>({ verses: [] });
+  const srcRef = useRef("");
+  const pendingSeek = useRef<number | null>(null);
+  const loadGen = useRef(0);
   const spotRef = useRef<string>("");
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
+  const rateRef = useRef(1);
   const [missing, setMissing] = useState(false);
   const [verseNo, setVerseNo] = useState(1);
+  const [now, setNow] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [hasStarts, setHasStarts] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
   const verseNoRef = useRef(1);
+  const onEngageRef = useRef(onEngage);
+  onEngageRef.current = onEngage;
 
   useEffect(() => {
     versesRef.current = verses;
   }, [verses]);
 
   useEffect(() => {
+    try {
+      const saved = rateFromStorage(window.localStorage.getItem(WLC_RATE_KEY));
+      rateRef.current = saved;
+      setRate(saved);
+      if (audioRef.current) audioRef.current.playbackRate = saved;
+    } catch {
+      /* the recorded speed still plays */
+    }
+  }, []);
+
+  useEffect(() => {
     const el = audioRef.current;
     let cancelled = false;
+    loadGen.current += 1;
+    pendingSeek.current = null;
+    srcRef.current = "";
     setPlaying(false);
     setMissing(false);
+    setNow(0);
+    setDuration(0);
+    setHasStarts(false);
     verseNoRef.current = 1;
     setVerseNo(1);
     spotRef.current = "";
     onSpot(null);
     if (el) {
       el.pause();
-      el.src = chapterAudioSrc(book, chapter);
+      el.removeAttribute("src");
+      el.load();
     }
     void fetchBookAlign(book).then((align) => {
       if (cancelled) return;
       const timed = chapterFromAlign(book, chapter, align);
-      startsRef.current = { verses: timed.verses ?? [], words: timed.words };
-      if (el && timed.src) el.src = timed.src;
+      const verseStarts = timed.verses ?? [];
+      startsRef.current = { verses: verseStarts, words: timed.words };
+      setHasStarts(verseStarts.length > 0);
+      srcRef.current = timed.src || chapterAudioSrc(book, chapter);
+      if (el) {
+        attachSrc(el);
+        el.playbackRate = rateRef.current;
+      }
       if (!timed.aligned) setMissing(true);
     });
     return () => {
@@ -83,101 +138,286 @@ export function WlcPlayer({
     onSpot(spot);
   }
 
-  async function toggle() {
+  function rememberRate(next: number) {
+    rateRef.current = next;
+    setRate(next);
+    if (audioRef.current) audioRef.current.playbackRate = next;
+    try {
+      window.localStorage.setItem(WLC_RATE_KEY, String(next));
+    } catch {
+      /* this visit still uses the speed */
+    }
+  }
+
+  function markMissing() {
+    setPlaying(false);
+    setMissing(true);
+  }
+
+  function attachSrc(el: HTMLAudioElement) {
+    if (el.getAttribute("src")) return;
+    const src = srcRef.current || chapterAudioSrc(book, chapter);
+    if (!src) return;
+    el.src = src;
+  }
+
+  function seekTo(el: HTMLAudioElement, time: number): boolean {
+    if (!(time > 0)) return true;
+    if (el.readyState < 1 || !Number.isFinite(el.duration) || el.duration <= 0) {
+      pendingSeek.current = time;
+      return true;
+    }
+    const next = Math.max(0, Math.min(time, el.duration));
+    try {
+      el.currentTime = next;
+    } catch {
+      markMissing();
+      return false;
+    }
+    if (el.currentTime === 0) {
+      markMissing();
+      return false;
+    }
+    pendingSeek.current = null;
+    setNow(el.currentTime);
+    paint(el.currentTime);
+    return true;
+  }
+
+  function applyPending(el: HTMLAudioElement) {
+    const time = pendingSeek.current;
+    if (time == null || !(time > 0) || el.readyState < 1) return;
+    if (!Number.isFinite(el.duration) || el.duration <= 0) return;
+    pendingSeek.current = null;
+    if (!seekTo(el, time)) el.pause();
+  }
+
+  function gesturePlay(time: number) {
     const el = audioRef.current;
-    if (!el) return;
+    if (!el) {
+      markMissing();
+      return;
+    }
+    attachSrc(el);
+    if (!el.getAttribute("src")) {
+      el.load();
+      markMissing();
+      return;
+    }
+    el.playbackRate = rateRef.current;
+    if (time > 0 && !seekTo(el, time)) return;
+    const played = el.play();
+    const generation = loadGen.current;
+    setPlaying(true);
+    setMissing(false);
+    onEngageRef.current?.();
+    if (el.readyState < 1) {
+      void waitForMetadata(el).then((result) => {
+        if (generation !== loadGen.current || audioRef.current !== el) return;
+        if (result !== "ok") {
+          pendingSeek.current = null;
+          el.pause();
+          markMissing();
+          return;
+        }
+        applyPending(el);
+        if (pendingSeek.current != null) {
+          pendingSeek.current = null;
+          el.pause();
+          markMissing();
+        }
+      });
+    }
+    void played.catch((error: unknown) => {
+      const name = error && typeof error === "object" && "name" in error ? error.name : "";
+      if (name === "AbortError") return;
+      markMissing();
+    });
+  }
+
+  function toggle() {
+    const el = audioRef.current;
+    if (!el) {
+      markMissing();
+      return;
+    }
     if (!el.paused) {
       el.pause();
+      pendingSeek.current = null;
       setPlaying(false);
       return;
     }
-    try {
-      el.playbackRate = rate;
-      await el.play();
-      setPlaying(true);
-      setMissing(false);
-      onEngage?.();
-    } catch {
-      setPlaying(false);
-      setMissing(true);
-    }
+    gesturePlay(el.currentTime || 0);
+  }
+
+  function jumpVerse(index: number) {
+    const starts = startsRef.current.verses;
+    if (!starts.length) return;
+    const next = Math.min(starts.length - 1, Math.max(0, index));
+    const at = starts[next];
+    if (typeof at !== "number" || !Number.isFinite(at)) return;
+    verseNoRef.current = next + 1;
+    setVerseNo(next + 1);
+    onEngageRef.current?.();
+    gesturePlay(at);
+  }
+
+  function stepVerse(delta: number) {
+    const count = Math.max(versesRef.current.length, startsRef.current.verses.length, 1);
+    const current = Math.min(count - 1, Math.max(0, verseNoRef.current - 1));
+    const next = Math.min(count - 1, Math.max(0, current + delta));
+    if (next === current && delta !== 0) return;
+    jumpVerse(next);
+  }
+
+  function nudge(seconds: number) {
+    const el = audioRef.current;
+    if (!el) return;
+    const cap = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : el.currentTime + seconds;
+    const next = Math.max(0, Math.min(el.currentTime + seconds, cap));
+    el.currentTime = next;
+    setNow(next);
+    paint(next);
   }
 
   useDockHeight(dockRef);
 
   const toggleRef = useRef(toggle);
+  const nudgeRef = useRef(nudge);
   toggleRef.current = toggle;
+  nudgeRef.current = nudge;
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== " " || event.repeat) return;
+      if (event.repeat) return;
       if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
       const target = event.target;
       if (target instanceof HTMLElement) {
         const tag = target.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON" || target.isContentEditable) return;
       }
-      event.preventDefault();
-      void toggleRef.current();
+      if (event.key === " ") {
+        event.preventDefault();
+        void toggleRef.current();
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        nudgeRef.current(-NUDGE_SEC);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        nudgeRef.current(NUDGE_SEC);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const total = Math.max(1, verses.length);
+  const rateLabel = readRateLabel(rate);
+  const atStart = verseNo <= 1;
+  const atEnd = verseNo >= total;
+  const heard = clockLabel(now);
+  const lengthLabel = clockLabel(duration);
+
   return (
     <div className="read-dock" ref={dockRef}>
-      <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-1 px-2 py-0.5" role="group" aria-label="Play and reading speed">
-        <button
-          type="button"
-          className="inline-flex size-11 shrink-0 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
-          aria-label="Previous chapter"
-          disabled={!canPrev}
-          onClick={onPrevChapter}
-        >
-          ‹
-        </button>
-        <button
-          type="button"
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-sm)] px-2.5 text-sm font-semibold ${playing ? "bg-primary text-primary-foreground" : "text-ink"}`}
-          aria-label={playing ? "Pause" : "Play"}
-          onClick={() => void toggle()}
-        >
-          {playing ? <Pause className="size-4" aria-hidden="true" /> : <Play className="size-4" aria-hidden="true" />}
-          {playing ? "Pause" : "Play"}
-        </button>
-        <span className="mx-0.5 h-6 w-px shrink-0 bg-border" aria-hidden="true" />
-        {READ_RATES.map((row) => (
-          <button
-            key={row.value}
-            type="button"
-            className={`min-h-11 rounded-[var(--radius-sm)] px-2.5 text-sm font-semibold ${rate === row.value ? "bg-ink text-parchment" : "text-muted"}`}
-            aria-pressed={rate === row.value}
-            onClick={() => {
-              setRate(row.value);
-              if (audioRef.current) audioRef.current.playbackRate = row.value;
-            }}
-          >
-            {row.label}
-          </button>
-        ))}
-        <span className="px-1 text-xs font-semibold tabular-nums text-muted">
-          Verse {verseNo} of {Math.max(1, verses.length)}
-        </span>
-        <button
-          type="button"
-          className="inline-flex size-11 shrink-0 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
-          aria-label="Next chapter"
-          disabled={!canNext}
-          onClick={onNextChapter}
-        >
-          ›
-        </button>
+      <div className="read-dock-row">
+        <div className="read-dock-sheet">
+          <div className="flex items-center gap-2">
+            <input
+              className="audio-seek min-w-0 flex-1"
+              type="range"
+              min={0}
+              max={duration || 1}
+              step={0.1}
+              value={Math.min(now, duration || now)}
+              disabled={!(duration > 0)}
+              aria-label="Seek recording"
+              aria-valuetext={`${heard} of ${lengthLabel}`}
+              onChange={(event) => {
+                const time = Number(event.target.value);
+                const el = audioRef.current;
+                if (!el || !(duration > 0)) return;
+                el.currentTime = time;
+                setNow(time);
+                paint(time);
+              }}
+            />
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-muted" aria-hidden="true">
+              {heard} / {lengthLabel}
+            </span>
+          </div>
+          <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-1 py-0.5" role="group" aria-label="Play and reading speed">
+            <button
+              type="button"
+              className="inline-flex size-11 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
+              aria-label="Previous verse"
+              disabled={!hasStarts || atStart}
+              onClick={() => stepVerse(-1)}
+            >
+              ‹
+            </button>
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_2.75rem_minmax(0,1fr)] items-center gap-1">
+              <button
+                type="button"
+                className={`col-start-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full ${playing ? "bg-primary text-primary-foreground" : "bg-ink text-parchment"}`}
+                aria-label={playing ? "Pause" : "Play"}
+                onClick={() => void toggle()}
+              >
+                {playing ? <Pause className="size-5" aria-hidden="true" /> : <Play className="size-5" aria-hidden="true" />}
+              </button>
+              <button
+                type="button"
+                className="col-start-1 row-start-1 inline-flex h-11 min-w-11 justify-self-end items-center justify-center rounded-[var(--radius-sm)] px-2 text-sm font-semibold tabular-nums text-ink"
+                aria-label={`Reading speed, ${rateLabel}`}
+                onClick={() => rememberRate(nextReadRate(rate))}
+              >
+                {rateLabel}
+              </button>
+              <label className="sr-only" htmlFor="wlc-verse">
+                Verse
+              </label>
+              <select
+                id="wlc-verse"
+                className="col-start-3 row-start-1 h-11 w-full max-w-16 justify-self-start rounded-[var(--radius-sm)] bg-surface px-1 text-sm font-semibold text-ink"
+                value={String(Math.min(verseNo, total))}
+                aria-label={`Verse ${verseNo} of ${total}`}
+                disabled={!hasStarts}
+                onChange={(event) => jumpVerse(Number(event.target.value) - 1)}
+              >
+                {Array.from({ length: total }, (_, index) => (
+                  <option key={index + 1} value={String(index + 1)}>
+                    {index + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              className="inline-flex size-11 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
+              aria-label="Next verse"
+              disabled={!hasStarts || atEnd}
+              onClick={() => stepVerse(1)}
+            >
+              ›
+            </button>
+          </div>
+        </div>
       </div>
       {missing ? <span className="px-3 pb-1 text-sm text-muted">The recording did not load.</span> : null}
       <audio
         ref={audioRef}
-        preload="none"
-        onTimeUpdate={(event) => paint(event.currentTarget.currentTime)}
+        preload="metadata"
+        onLoadedMetadata={(event) => {
+          setDuration(event.currentTarget.duration || 0);
+          applyPending(event.currentTarget);
+        }}
+        onCanPlay={(event) => applyPending(event.currentTarget)}
+        onTimeUpdate={(event) => {
+          setNow(event.currentTarget.currentTime);
+          paint(event.currentTarget.currentTime);
+        }}
         onEnded={() => {
           setPlaying(false);
           spotRef.current = "";

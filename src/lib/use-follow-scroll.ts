@@ -102,8 +102,12 @@ export function useFollowScroll(lineKey: string) {
     if (!force && ownScrollLive(arm.current, now)) return;
     const frame = readingFrame();
     const rect = node.getBoundingClientRect();
+    const visible = rect.bottom > frame.top && rect.top < frame.bottom;
     const comfortable = readLineInComfort(rect.top, rect.bottom, frame.top, frame.bottom);
     if (!force && !shouldFollowScroll(true, comfortable)) return;
+    // A line already on the page must not start a scroll. That arm would swallow
+    // the next verse, and the page would stay put.
+    if (force && visible) return;
     arm.current = armOwnScroll(performance.now());
     node.scrollIntoView({
       block: "center",
