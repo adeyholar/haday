@@ -31,4 +31,7 @@ test("Hebrew Strong's chunks cover the book once, and a card loads one range", (
   assert.match(strongs, /\/lexicon\/strongs-hebrew\/\$\{name\}\.json/);
   assert.match(strongs, /\/lexicon\/strongs-greek\.json/);
   assert.doesNotMatch(strongs, /\/lexicon\/strongs-hebrew\.json/);
+  const split = readFileSync(new URL("../scripts/split-strongs-hebrew.mjs", import.meta.url), "utf8");
+  assert.match(split, /unlinkSync/);
+  assert.doesNotMatch(split, /writeFileSync\([^)]*,\s*""\)/);
 });

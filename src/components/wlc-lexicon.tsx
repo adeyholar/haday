@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import { explainMorph } from "@/lib/morph-parse";
-import { parseOshbLemma, prefixLabel } from "@/lib/oshb-lemma";
+import { OSHB_PREFIX_MARK, parseOshbLemma, prefixLabel } from "@/lib/oshb-lemma";
 import { lookupStrong, type StrongEntry } from "@/lib/strongs";
 
 function strongLabel(strong: string, aug: string | null): string {
@@ -86,7 +86,12 @@ export function WlcLexicon({ lemma, morph }: { lemma: string; morph: string }) {
                   ·
                 </span>
               ) : null}
-              <span className="rounded-full bg-surface px-2 py-1">{prefixLabel(prefix)}</span>
+              <span className="rounded-full bg-surface px-2 py-1">
+                <span className="he-word" lang="he">
+                  {OSHB_PREFIX_MARK[prefix]}
+                </span>{" "}
+                {prefixLabel(prefix)}
+              </span>
             </span>
           ))}
         </p>
@@ -98,7 +103,9 @@ export function WlcLexicon({ lemma, morph }: { lemma: string; morph: string }) {
         </>
       ) : null}
       {parsed.parts.length ? (
-        parsed.parts.map((part) => <StrongBlock key={strongLabel(part.strong, part.aug)} id={part.strong} aug={part.aug} />)
+        parsed.parts.map((part, index) => (
+          <StrongBlock key={`${strongLabel(part.strong, part.aug)}-${index}`} id={part.strong} aug={part.aug} />
+        ))
       ) : (
         <p className="mt-2 text-sm text-muted">No Strong's number on this word.</p>
       )}

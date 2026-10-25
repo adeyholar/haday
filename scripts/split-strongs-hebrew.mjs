@@ -1,5 +1,5 @@
 /** Split public/lexicon/strongs-hebrew.json into 500-entry ranges. Run when that file changes. */
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,11 +10,6 @@ const chunk = 500;
 const max = 8674;
 
 const book = JSON.parse(readFileSync(source, "utf8"));
-mkdirSync(outDir, { recursive: true });
-for (const name of readdirSync(outDir)) {
-  if (name.endsWith(".json")) writeFileSync(join(outDir, name), "");
-}
-
 const buckets = new Map();
 for (const [id, row] of Object.entries(book)) {
   const n = Number(id.slice(1));
@@ -26,5 +21,9 @@ for (const [id, row] of Object.entries(book)) {
   buckets.get(name)[id] = row;
 }
 
+mkdirSync(outDir, { recursive: true });
+for (const name of readdirSync(outDir)) {
+  if (name.endsWith(".json") && !buckets.has(name)) unlinkSync(join(outDir, name));
+}
 for (const [name, rows] of buckets) writeFileSync(join(outDir, name), JSON.stringify(rows));
 console.log(`wrote ${buckets.size} chunks, ${Object.keys(book).length} entries`);

@@ -29,6 +29,8 @@ test("the Reading Lab lexicon sits under the existing word card rows", () => {
   assert.match(lexicon, /data-bdb-slot/);
   assert.match(lexicon, /explainMorph/);
   assert.match(lexicon, /aria-label="Prefixes"/);
+  assert.match(lexicon, /OSHB_PREFIX_MARK\[prefix\]/);
+  assert.match(lexicon, /\$\{strongLabel\(part\.strong, part\.aug\)\}-\$\{index\}/);
   assert.doesNotMatch(lexicon, /https?:\/\//);
   assert.doesNotMatch(lexicon, /<a[\s>]/);
   assert.match(desk, /event\.key !== "Escape"/);
