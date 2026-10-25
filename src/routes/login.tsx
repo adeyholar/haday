@@ -8,7 +8,7 @@ import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
-import { homeForAccount, markTermHall, pathForHeard, rememberDoor, stashPathIntent, type HeardSource, type StudyPath } from "@/lib/path";
+import { markTermHall, pathForHeard, rememberDoor, signInLanding, stashPathIntent, type HeardSource, type StudyPath } from "@/lib/path";
 import { getMyPath } from "@/lib/learner-path";
 import { GRAMMAR_PATH, HEARD_NEED, HEARD_PROMPT, PATH_CHOICE, PATH_CHOICE_STAYS, SCRIPTURE_PATH } from "@/lib/path-names";
 
@@ -23,7 +23,7 @@ function GoToStudy() {
     getMyPath()
       .then((gate) => {
         if (cancel) return;
-        const home = homeForAccount(gate);
+        const home = signInLanding(gate);
         if (home && gate.path) {
           rememberDoor(gate.path);
           if (home === "/bbh") markTermHall();
@@ -213,7 +213,7 @@ function Login() {
       }
       await authClient.getSession();
       const gate = await getMyPath();
-      const home = homeForAccount(gate);
+      const home = signInLanding(gate);
       if (home && gate.path) {
         rememberDoor(gate.path);
         if (home === "/bbh") markTermHall();

@@ -11,6 +11,7 @@ const root = new URL("..", import.meta.url);
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const {
   GOOGLE_BUTTON_LABEL,
+  GOOGLE_LINK_REFUSAL,
   X_SIGN_IN_OFFERED,
   googleCallbackUrl,
   readGoogleCredentials,
@@ -49,11 +50,13 @@ test("the login page offers Google only when it is configured, and never X", () 
   assert.match(button, /#FBBC05/);
   assert.match(button, /#EA4335/);
   assert.match(button, /#747775/);
-  assert.match(button, /#1f1f1f/);
+  assert.match(button, /min-h-11/);
+  assert.doesNotMatch(button, /min-h-10/);
   assert.doesNotMatch(button, /Continue with X|Sign in with X|grok-x|twitter/);
 
   const login = read("src/routes/login.tsx");
   assert.match(login, /googleOffered/);
+  assert.match(login, /signInLanding/);
   assert.match(login, /GoogleSignInButton/);
   assert.match(login, /getGoogleSignInOffered/);
   assert.doesNotMatch(login, /Continue with X|grok-x|GROK_PROVIDERS|genericOAuth/);
@@ -81,8 +84,12 @@ test("Google links an existing account only when Google verified the email", () 
   assert.equal(googleMayLinkExistingAccount({ googleEmailVerified: true, localEmailVerified: false }), false);
   assert.equal(googleMayLinkExistingAccount({ googleEmailVerified: false, localEmailVerified: false }), false);
   assert.equal(googleMayLinkExistingAccount({ googleEmailVerified: true, localEmailVerified: true }), true);
-  assert.match(socialSignInErrorMessage("account_not_linked"), /did not confirm this email/);
-  assert.match(socialSignInErrorMessage("unable_to_link_account"), /did not confirm this email/);
+  assert.equal(socialSignInErrorMessage("account_not_linked"), GOOGLE_LINK_REFUSAL);
+  assert.equal(socialSignInErrorMessage("unable_to_link_account"), GOOGLE_LINK_REFUSAL);
+  assert.equal(
+    GOOGLE_LINK_REFUSAL,
+    "This email already has a HaDay account. Sign in with your email and password, or confirm the email we sent you, then Continue with Google will work.",
+  );
   assert.equal(socialSignInErrorMessage("token_expired"), null);
 });
 

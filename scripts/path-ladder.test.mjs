@@ -4,7 +4,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
-const { blockedDestination, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readTerm, secondTermBlock, shouldShowPathChooser, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
+const { blockedDestination, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
 test("only Level A is open until an exam is passed", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -68,6 +68,10 @@ test("a signed-in student opens their study from home", () => {
   assert.equal(homeForAccount({ path: null, admin: false }), null);
   assert.equal(homeForAccount({ path: "bbh", admin: true }), null);
   assert.equal(homeForAccount({ path: "iibs", admin: true }), null);
+  assert.equal(signInLanding({ path: null, admin: false }), "/");
+  assert.equal(signInLanding({ path: "bbh", admin: false }), "/bbh");
+  assert.equal(signInLanding({ path: "iibs", admin: false }), "/iibs");
+  assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: false, path: null }), true);
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: false, admin: false, path: "bbh" }), false);
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: false, path: "iibs" }), false);
   assert.equal(shouldShowPathChooser({ signedIn: true, resolved: true, admin: true, path: "bbh" }), true);

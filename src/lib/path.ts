@@ -44,6 +44,11 @@ export function homeForAccount(gate: { path: StudyPath | null; admin: boolean })
   return gate.path === "iibs" ? "/iibs" : "/bbh";
 }
 
+/** After sign-in, an account with no path opens the path choice screen. */
+export function signInLanding(gate: { path: StudyPath | null; admin: boolean }): "/" | "/bbh" | "/iibs" {
+  return homeForAccount(gate) ?? "/";
+}
+
 /** The path chooser is for a visitor, the owner, or an account that has no path yet. A placed student never sees it, including while their path is still loading. */
 export function shouldShowPathChooser(input: {
   signedIn: boolean;

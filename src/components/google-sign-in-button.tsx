@@ -17,7 +17,7 @@ export function GoogleSignInButton({
       type="button"
       onClick={onClick}
       aria-busy={busy || undefined}
-      className="flex min-h-10 w-full items-center justify-center gap-3 rounded border border-[#747775] bg-white px-3 text-sm font-medium text-[#1f1f1f]"
+      className="flex min-h-11 w-full items-center justify-center gap-3 rounded border border-[#747775] bg-white px-3 text-sm font-medium text-[#1f1f1f]"
       style={{ fontFamily: 'Roboto, "Segoe UI", Arial, sans-serif' }}
     >
       <GoogleG />

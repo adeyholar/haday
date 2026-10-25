@@ -70,7 +70,7 @@ export function googleMayLinkExistingAccount(input: {
 }
 
 export const GOOGLE_LINK_REFUSAL =
-  "Google did not confirm this email, so it was not added to your existing HaDay account. Sign in with email, or use a Google account that has verified the address.";
+  "This email already has a HaDay account. Sign in with your email and password, or confirm the email we sent you, then Continue with Google will work.";
 
 /** Friendly copy for Better Auth's link refusal. Other codes return null. */
 export function socialSignInErrorMessage(code: string): string | null {
