@@ -8,6 +8,7 @@ import { useDockHeight } from "@/lib/use-follow-scroll";
 import type { WlcVerse } from "@/lib/wlc";
 
 const NUDGE_SEC = 5;
+const METADATA_WAIT_MS = 5000;
 
 function clockLabel(seconds: number): string {
   const whole = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
@@ -16,16 +17,22 @@ function clockLabel(seconds: number): string {
   return `${minutes}:${String(remain).padStart(2, "0")}`;
 }
 
-function waitForMetadata(el: HTMLAudioElement): Promise<void> {
-  if (el.readyState >= 1) return Promise.resolve();
+function waitForMetadata(el: HTMLAudioElement): Promise<"ok" | "error" | "timeout"> {
+  if (el.readyState >= 1) return Promise.resolve("ok");
   return new Promise((resolve) => {
-    const done = () => {
-      el.removeEventListener("loadedmetadata", done);
-      el.removeEventListener("error", done);
-      resolve();
+    const finish = (result: "ok" | "error" | "timeout") => {
+      window.clearTimeout(timer);
+      el.removeEventListener("loadedmetadata", onReady);
+      el.removeEventListener("canplay", onReady);
+      el.removeEventListener("error", onError);
+      resolve(result);
     };
-    el.addEventListener("loadedmetadata", done);
-    el.addEventListener("error", done);
+    const onReady = () => finish("ok");
+    const onError = () => finish("error");
+    const timer = window.setTimeout(() => finish("timeout"), METADATA_WAIT_MS);
+    el.addEventListener("loadedmetadata", onReady);
+    el.addEventListener("canplay", onReady);
+    el.addEventListener("error", onError);
   });
 }
 
@@ -46,6 +53,9 @@ export function WlcPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const versesRef = useRef(verses);
   const startsRef = useRef<{ verses: number[]; words?: number[][] }>({ verses: [] });
+  const srcRef = useRef("");
+  const pendingSeek = useRef<number | null>(null);
+  const loadGen = useRef(0);
   const spotRef = useRef<string>("");
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
@@ -78,6 +88,9 @@ export function WlcPlayer({
   useEffect(() => {
     const el = audioRef.current;
     let cancelled = false;
+    loadGen.current += 1;
+    pendingSeek.current = null;
+    srcRef.current = "";
     setPlaying(false);
     setMissing(false);
     setNow(0);
@@ -89,8 +102,8 @@ export function WlcPlayer({
     onSpot(null);
     if (el) {
       el.pause();
-      el.playbackRate = rateRef.current;
-      el.src = chapterAudioSrc(book, chapter);
+      el.removeAttribute("src");
+      el.load();
     }
     void fetchBookAlign(book).then((align) => {
       if (cancelled) return;
@@ -98,8 +111,11 @@ export function WlcPlayer({
       const verseStarts = timed.verses ?? [];
       startsRef.current = { verses: verseStarts, words: timed.words };
       setHasStarts(verseStarts.length > 0);
-      if (el && timed.src) el.src = timed.src;
-      if (el) el.playbackRate = rateRef.current;
+      srcRef.current = timed.src || chapterAudioSrc(book, chapter);
+      if (el) {
+        attachSrc(el);
+        el.playbackRate = rateRef.current;
+      }
       if (!timed.aligned) setMissing(true);
     });
     return () => {
@@ -133,50 +149,105 @@ export function WlcPlayer({
     }
   }
 
-  async function playFrom(time: number) {
-    const el = audioRef.current;
-    if (!el) return;
-    if (el.readyState < 1) await waitForMetadata(el);
-    if (audioRef.current !== el || el.readyState < 1) return;
-    const known = Number.isFinite(el.duration) && el.duration > 0;
-    if (!known) {
-      setPlaying(false);
-      setMissing(true);
-      return;
+  function markMissing() {
+    setPlaying(false);
+    setMissing(true);
+  }
+
+  function attachSrc(el: HTMLAudioElement) {
+    if (el.getAttribute("src")) return;
+    const src = srcRef.current || chapterAudioSrc(book, chapter);
+    if (!src) return;
+    el.src = src;
+  }
+
+  function seekTo(el: HTMLAudioElement, time: number): boolean {
+    if (!(time > 0)) return true;
+    if (el.readyState < 1 || !Number.isFinite(el.duration) || el.duration <= 0) {
+      pendingSeek.current = time;
+      return true;
     }
     const next = Math.max(0, Math.min(time, el.duration));
     try {
       el.currentTime = next;
     } catch {
-      setPlaying(false);
-      setMissing(true);
-      return;
+      markMissing();
+      return false;
     }
-    if (time > 0 && el.currentTime === 0) return;
+    if (el.currentTime === 0) {
+      markMissing();
+      return false;
+    }
+    pendingSeek.current = null;
     setNow(el.currentTime);
     paint(el.currentTime);
-    if (!el.paused) return;
-    try {
-      el.playbackRate = rateRef.current;
-      await el.play();
-      setPlaying(true);
-      setMissing(false);
-      onEngageRef.current?.();
-    } catch {
-      setPlaying(false);
-      setMissing(true);
-    }
+    return true;
   }
 
-  async function toggle() {
+  function applyPending(el: HTMLAudioElement) {
+    const time = pendingSeek.current;
+    if (time == null || !(time > 0) || el.readyState < 1) return;
+    if (!Number.isFinite(el.duration) || el.duration <= 0) return;
+    pendingSeek.current = null;
+    if (!seekTo(el, time)) el.pause();
+  }
+
+  function gesturePlay(time: number) {
     const el = audioRef.current;
-    if (!el) return;
+    if (!el) {
+      markMissing();
+      return;
+    }
+    attachSrc(el);
+    if (!el.getAttribute("src")) {
+      el.load();
+      markMissing();
+      return;
+    }
+    el.playbackRate = rateRef.current;
+    if (time > 0 && !seekTo(el, time)) return;
+    const played = el.play();
+    const generation = loadGen.current;
+    setPlaying(true);
+    setMissing(false);
+    onEngageRef.current?.();
+    if (el.readyState < 1) {
+      void waitForMetadata(el).then((result) => {
+        if (generation !== loadGen.current || audioRef.current !== el) return;
+        if (result !== "ok") {
+          pendingSeek.current = null;
+          el.pause();
+          markMissing();
+          return;
+        }
+        applyPending(el);
+        if (pendingSeek.current != null) {
+          pendingSeek.current = null;
+          el.pause();
+          markMissing();
+        }
+      });
+    }
+    void played.catch((error: unknown) => {
+      const name = error && typeof error === "object" && "name" in error ? error.name : "";
+      if (name === "AbortError") return;
+      markMissing();
+    });
+  }
+
+  function toggle() {
+    const el = audioRef.current;
+    if (!el) {
+      markMissing();
+      return;
+    }
     if (!el.paused) {
       el.pause();
+      pendingSeek.current = null;
       setPlaying(false);
       return;
     }
-    await playFrom(el.currentTime || 0);
+    gesturePlay(el.currentTime || 0);
   }
 
   function jumpVerse(index: number) {
@@ -188,7 +259,7 @@ export function WlcPlayer({
     verseNoRef.current = next + 1;
     setVerseNo(next + 1);
     onEngageRef.current?.();
-    void playFrom(at);
+    gesturePlay(at);
   }
 
   function stepVerse(delta: number) {
@@ -338,7 +409,11 @@ export function WlcPlayer({
       <audio
         ref={audioRef}
         preload="metadata"
-        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+        onLoadedMetadata={(event) => {
+          setDuration(event.currentTarget.duration || 0);
+          applyPending(event.currentTarget);
+        }}
+        onCanPlay={(event) => applyPending(event.currentTarget)}
         onTimeUpdate={(event) => {
           setNow(event.currentTarget.currentTime);
           paint(event.currentTarget.currentTime);

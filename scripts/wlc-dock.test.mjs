@@ -67,6 +67,36 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
+test("the first play stays in the tap, and the sheet hides only on a wide screen", () => {
+  const player = readFileSync(new URL("../src/components/wlc-player.tsx", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+  const gesture = player.slice(player.indexOf("function gesturePlay"), player.indexOf("function toggle"));
+  const playAt = gesture.indexOf("el.play()");
+  assert.ok(playAt > 0, "the tap calls play()");
+  assert.equal(/\bawait\b/.test(gesture.slice(0, playAt)), false, "no await before play()");
+  const toggle = player.slice(player.indexOf("function toggle("), player.indexOf("function jumpVerse"));
+  assert.match(toggle, /gesturePlay\(/);
+  assert.equal(/\bawait\b/.test(toggle), false, "toggle does not await");
+  assert.match(player, /pendingSeek\.current = time/);
+  assert.match(player, /function applyPending/);
+  assert.match(player, /onLoadedMetadata=\{[\s\S]*?applyPending\(event\.currentTarget\)/);
+  assert.match(player, /onCanPlay=\{\(event\) => applyPending\(event\.currentTarget\)\}/);
+  assert.match(player, /const METADATA_WAIT_MS = 5000/);
+  assert.match(player, /setTimeout\(\(\) => finish\("timeout"\), METADATA_WAIT_MS\)/);
+  assert.match(player, /removeEventListener\("loadedmetadata", onReady\)/);
+  assert.match(player, /removeEventListener\("canplay", onReady\)/);
+  assert.match(player, /removeEventListener\("error", onError\)/);
+  assert.deepEqual(player.match(/\.src\s*=/g), [".src ="]);
+  const chapterLoad = player.slice(player.indexOf("void fetchBookAlign"), player.indexOf("function paint"));
+  assert.match(chapterLoad, /srcRef\.current = timed\.src \|\| chapterAudioSrc\(book, chapter\)/);
+  assert.match(chapterLoad, /attachSrc\(el\)/);
+  assert.equal(/\bel\.src\s*=/.test(chapterLoad), false, "the chapter load does not assign src early");
+  const wideAt = css.indexOf("@media (min-width: 1024px)");
+  assert.ok(wideAt > 0);
+  assert.equal(/wlc-stage:not\(\.wlc-sized\)/.test(css.slice(0, wideAt)), false);
+  assert.match(css.slice(wideAt), /\.wlc-stage:not\(\.wlc-sized\) \.manuscript-sheet \{[^}]*opacity:\s*0/);
+});
+
 const base = process.env.WLC_E2E_BASE;
 
 function near(actual, expected, slack, message) {

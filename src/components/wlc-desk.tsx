@@ -218,7 +218,9 @@ export function WlcReading({
         <div ref={card} className="wlc-card">
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
-      ) : null}
+      ) : (
+        <p className="wlc-card-hint">Tap a word to see its form and meaning.</p>
+      )}
       {showBack ? (
         <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resume}>
           Back to the reader

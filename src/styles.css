@@ -268,16 +268,8 @@ html {
   padding: 0.75rem 0.85rem calc(1.25rem + var(--wlc-card-h, 0px));
   outline: none;
 }
-.wlc-stage:not(.wlc-sized) .manuscript-sheet {
-  opacity: 0;
-}
-.wlc-stage.wlc-sized .manuscript-sheet {
-  transition: opacity 180ms ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .wlc-stage.wlc-sized .manuscript-sheet {
-    transition: none;
-  }
+.wlc-card-hint {
+  display: none;
 }
 .wlc-card {
   position: fixed;
@@ -295,6 +287,12 @@ html {
     0 -12px 32px -12px rgba(28, 24, 20, 0.35);
 }
 @media (min-width: 1024px) {
+  .wlc-stage:not(.wlc-sized) .manuscript-sheet {
+    opacity: 0;
+  }
+  .wlc-stage.wlc-sized .manuscript-sheet {
+    transition: opacity 180ms ease;
+  }
   body:has(.wlc-stage) main {
     max-width: min(100%, calc(48rem + 22rem + 0.75rem + 2rem));
   }
@@ -314,6 +312,19 @@ html {
     grid-column: 1;
     grid-row: 1;
     min-width: 0;
+  }
+  .wlc-stage .wlc-card-hint {
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    padding: 0.25rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .wlc-reading:has(.wlc-card) .wlc-card-hint {
+    display: none;
   }
   .wlc-card {
     position: sticky;
@@ -347,6 +358,11 @@ html {
   }
   .wlc-wide .wlc-reading {
     grid-template-columns: minmax(min(56rem, calc(100% - 16rem - 0.75rem)), 56rem) minmax(16rem, 22rem);
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .wlc-stage.wlc-sized .manuscript-sheet {
+    transition: none;
   }
 }
 /* Touch screens: keep every word a 44px target, even at Tight. */
