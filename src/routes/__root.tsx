@@ -8,7 +8,7 @@ import { ScrollBackdrop } from "@/components/scroll-backdrop";
 import { MovedSignpost } from "@/components/moved-signpost";
 import { AppErrorComponent } from "@/lib/error-component";
 import { isRetiredVercelHost } from "@/lib/class-site";
-import { emailConfirmRedirect } from "@/lib/auth/confirm-hold";
+import { emailConfirmRedirect, freshRootSession, storeRootSession } from "@/lib/auth/confirm-hold";
 import { SEO_DESCRIPTION, SEO_TITLE, shareMeta } from "@/lib/seo";
 import appCss from "../styles.css?url";
 
@@ -34,8 +34,6 @@ const loadRootContext = createServerFn({ method: "GET" }).handler(async () => {
   }
 });
 
-let clientRoot: { at: number; value: Awaited<ReturnType<typeof loadRootContext>> } | null = null;
-
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
     const hold = (value: Awaited<ReturnType<typeof loadRootContext>>) => {
@@ -43,10 +41,13 @@ export const Route = createRootRoute({
       if (target) throw redirect({ href: target });
       return value;
     };
-    if (typeof window !== "undefined" && clientRoot && Date.now() - clientRoot.at < 60_000) return hold(clientRoot.value);
+    if (typeof window !== "undefined") {
+      const cached = freshRootSession<Awaited<ReturnType<typeof loadRootContext>>>();
+      if (cached) return hold(cached);
+    }
     try {
       const value = await loadRootContext();
-      if (typeof window !== "undefined") clientRoot = { at: Date.now(), value };
+      if (typeof window !== "undefined") storeRootSession(value);
       return hold(value);
     } catch (err) {
       if (isRedirect(err)) throw err;

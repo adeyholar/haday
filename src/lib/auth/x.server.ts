@@ -6,6 +6,7 @@ import { createAuthMiddleware } from "better-auth/api";
 import { getOAuthState } from "better-auth/api";
 import { twitter } from "better-auth/social-providers";
 import { X_PROVIDER_ID, mapXProfile, rewriteXCallbackLocation, xCallbackEmailVerified } from "./x";
+import { verificationSendResponse } from "./confirm-hold";
 
 type XToken = { accessToken?: string | null | undefined };
 
@@ -41,12 +42,14 @@ export async function xGetUserInfo(clientId: string, clientSecret: string, token
 export const xCallbackAfter = createAuthMiddleware(async (ctx) => {
   const id = typeof ctx.params?.id === "string" ? ctx.params.id : "";
   const path = ctx.path ?? "";
-  if (id !== X_PROVIDER_ID && !path.endsWith("/callback/twitter")) return;
-  const headers = ctx.context.responseHeaders;
-  if (!headers) return;
-  const location = headers.get("location");
-  if (!location) return;
-  const next = rewriteXCallbackLocation(location);
-  if (!next) return;
-  headers.set("location", next);
+  if (id === X_PROVIDER_ID || path.endsWith("/callback/twitter")) {
+    const headers = ctx.context.responseHeaders;
+    const location = headers?.get("location");
+    if (location) {
+      const next = rewriteXCallbackLocation(location);
+      if (next && headers) headers.set("location", next);
+    }
+  }
+  const email = typeof ctx.body?.email === "string" ? ctx.body.email : "";
+  return verificationSendResponse(path, email);
 });

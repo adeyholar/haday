@@ -32,8 +32,7 @@ const {
   emailConfirmRedirect,
   isEmailConfirmExempt,
   maskEmail,
-  noteVerificationSend,
-  verificationResendBlocked,
+  claimVerificationSend,
 } = await jiti.import(new URL("../src/lib/auth/confirm-hold.ts", import.meta.url).pathname);
 const { loginSocialOffer, socialSignInErrorMessage, isLegacyBrokerProvider } = await jiti.import(
   new URL("../src/lib/auth/google.ts", import.meta.url).pathname,
@@ -498,9 +497,9 @@ test("an X callback through the handler refuses a missing or taken email, and li
   assert.equal(isEmailConfirmExempt("/login"), true);
   assert.equal(isEmailConfirmExempt("/bbh"), false);
   assert.equal(maskEmail("reader@example.com"), "r***@example.com");
-  noteVerificationSend("hold@example.com", 1_000);
-  assert.equal(verificationResendBlocked("hold@example.com", 1_500), true);
-  assert.equal(verificationResendBlocked("hold@example.com", 62_000), false);
+  assert.equal(claimVerificationSend("hold@example.com", 1_000), "sent");
+  assert.equal(claimVerificationSend("hold@example.com", 1_500), "rate_limited");
+  assert.equal(claimVerificationSend("hold@example.com", 62_000), "sent");
 
   const googleProvider = readFileSync(
     new URL("../node_modules/@better-auth/core/src/social-providers/google.ts", import.meta.url),
@@ -517,7 +516,7 @@ test("an X callback through the handler refuses a missing or taken email, and li
   assert.match(read("src/routes/confirm-email.tsx"), /Resend email/);
   assert.match(read("src/routes/confirm-email.tsx"), />\s*Sign out\s*</);
   assert.match(read("src/lib/auth/email-password.ts"), /requireEmailVerification:\s*true/);
-  assert.match(read("src/lib/auth/email-password.ts"), /verificationResendBlocked/);
+  assert.match(read("src/lib/auth/email-password.ts"), /claimVerificationSend/);
 
   const noMail = makeXAuth();
   const noJar = cookieJar();

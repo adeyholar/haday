@@ -5,6 +5,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getSocialSignInOffered } from "@/lib/auth/google-status";
 import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, loginSocialOffer, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
 import { X_PRIVACY_BEFORE, X_PRIVACY_LINK, X_PROVIDER_ID, showXPrivacyNotice } from "@/lib/auth/x";
+import { loginVerificationNote, verificationSendResult } from "@/lib/auth/confirm-hold";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { XSignInButton } from "@/components/x-sign-in-button";
 import { Button } from "@/components/ui/button";
@@ -87,7 +88,7 @@ function Login() {
   const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
-  const [resent, setResent] = useState(false);
+  const [resendNote, setResendNote] = useState<string | null>(null);
   const [googleOffered, setGoogleOffered] = useState(false);
   const [xOffered, setXOffered] = useState(false);
   useEffect(() => {
@@ -171,14 +172,14 @@ function Login() {
   async function resendVerify() {
     setError(null);
     setBusy(true);
-    setResent(false);
+    setResendNote(null);
     try {
-      const { error: sendError } = await authClient.sendVerificationEmail({
+      const { data, error: sendError } = await authClient.sendVerificationEmail({
         email: email.trim(),
         callbackURL: "/login",
       });
       if (sendError) throw new Error(sendError.message || "Could not send the confirmation email.");
-      setResent(true);
+      setResendNote(loginVerificationNote(verificationSendResult(data)));
       setBusy(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the confirmation email.");
@@ -260,9 +261,7 @@ function Login() {
               Check the inbox for <span className="font-semibold text-ink">{email.trim() || "that address"}</span>.
               Open the confirmation link in the next 24 hours to finish the account. Check spam too.
             </p>
-            {resent ? (
-              <p className="text-sm text-muted">Another confirmation email is on the way.</p>
-            ) : null}
+            {resendNote ? <p className="text-sm text-muted">{resendNote}</p> : null}
             {error && <p className="text-sm text-danger">{error}</p>}
             <Button type="button" className="w-full" disabled={busy || !email.trim()} onClick={() => void resendVerify()}>
               {busy ? "Sending…" : "Send the email again"}
@@ -273,7 +272,7 @@ function Login() {
               onClick={() => {
                 setAwaitingVerify(false);
                 setError(null);
-                setResent(false);
+                setResendNote(null);
                 setMode("in");
               }}
             >
