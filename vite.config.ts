@@ -241,6 +241,23 @@ export default defineConfig(({ command, isPreview }) => {
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
             serverDir: "./server",
+            // Pre-build .br and .gz for public/. Nitro serves those files
+            // before server middleware, so a per-request compress never runs.
+            compressPublicAssets: { gzip: true, brotli: true },
+            routeRules: {
+              "/lexicon/**": {
+                headers: {
+                  "cache-control": "public, max-age=86400",
+                  "x-content-type-options": "nosniff",
+                },
+              },
+              "/tanakh/**": {
+                headers: {
+                  "cache-control": "public, max-age=86400",
+                  "x-content-type-options": "nosniff",
+                },
+              },
+            },
             // Vite 8.2 / Rolldown splits the SSR service into ssr.mjs + ssr2.mjs
             // and re-exports an undeclared `ssr_exports` — every page then 500s
             // with {"error":true,"status":500,"unhandled":true} while `vite build`

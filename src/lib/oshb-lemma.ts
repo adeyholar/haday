@@ -8,19 +8,19 @@ export const OSHB_PREFIX: Record<string, string> = {
   k: "like",
   l: "to",
   m: "from",
-  s: "which",
+  s: "that",
 };
 
-/** The prefix as a student sees it on the chip, beside the English name. */
+/** The consonant only. The vowel changes on the word (וַ, הָ, בַּ, מֵ), so a fixed vowel would contradict it. */
 export const OSHB_PREFIX_MARK: Record<string, string> = {
-  b: "בְּ",
-  c: "וְ",
-  d: "הַ",
-  i: "הֲ",
-  k: "כְּ",
-  l: "לְ",
-  m: "מִ",
-  s: "שֶׁ",
+  b: "ב",
+  c: "ו",
+  d: "ה",
+  i: "ה",
+  k: "כ",
+  l: "ל",
+  m: "מ",
+  s: "ש",
 };
 
 export type OshbPart = { strong: string; aug: string | null };

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
@@ -7,7 +7,8 @@ const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", impor
 const { strongHebrewChunk } = await jiti.import(new URL("../src/lib/strongs.ts", import.meta.url).pathname);
 
 test("Hebrew Strong's chunks cover the book once, and a card loads one range", () => {
-  const book = JSON.parse(readFileSync(new URL("../public/lexicon/strongs-hebrew.json", import.meta.url), "utf8"));
+  const monolith = new URL("../public/lexicon/strongs-hebrew.json", import.meta.url);
+  assert.equal(existsSync(monolith), false);
   const dir = new URL("../public/lexicon/strongs-hebrew/", import.meta.url);
   const files = readdirSync(dir).filter((name) => name.endsWith(".json"));
   const seen = new Map();
@@ -15,12 +16,13 @@ test("Hebrew Strong's chunks cover the book once, and a card loads one range", (
     const chunk = JSON.parse(readFileSync(new URL(name, dir), "utf8"));
     for (const [id, row] of Object.entries(chunk)) {
       assert.equal(seen.has(id), false, id);
-      assert.deepEqual(row, book[id]);
+      assert.equal(typeof row.w, "string");
       assert.equal(`${strongHebrewChunk(id)}.json`, name);
       seen.set(id, name);
     }
   }
-  assert.equal(seen.size, Object.keys(book).length);
+  assert.equal(seen.size, 8674);
+  assert.equal(seen.get("H7225"), "H7001-H7500.json");
   assert.equal(strongHebrewChunk("H7225"), "H7001-H7500");
   assert.equal(strongHebrewChunk("H1"), "H0001-H0500");
   assert.equal(strongHebrewChunk("H8674"), "H8501-H8674");
@@ -32,6 +34,16 @@ test("Hebrew Strong's chunks cover the book once, and a card loads one range", (
   assert.match(strongs, /\/lexicon\/strongs-greek\.json/);
   assert.doesNotMatch(strongs, /\/lexicon\/strongs-hebrew\.json/);
   const split = readFileSync(new URL("../scripts/split-strongs-hebrew.mjs", import.meta.url), "utf8");
+  assert.match(split, /adeyholar\/strongs/);
+  assert.match(split, /strongs-hebrew-dictionary\.js/);
   assert.match(split, /unlinkSync/);
+  assert.doesNotMatch(split, /public\/lexicon\/strongs-hebrew\.json/);
   assert.doesNotMatch(split, /writeFileSync\([^)]*,\s*""\)/);
+
+  const vite = readFileSync(new URL("../vite.config.ts", import.meta.url), "utf8");
+  assert.match(vite, /compressPublicAssets:\s*\{\s*gzip:\s*true,\s*brotli:\s*true\s*\}/);
+  assert.match(vite, /\/lexicon\/\*\*/);
+  assert.match(vite, /\/tanakh\/\*\*/);
+  assert.match(vite, /max-age=86400/);
+  assert.match(vite, /nosniff/);
 });
