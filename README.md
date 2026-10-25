@@ -99,6 +99,8 @@ Deployment Center → GitHub → **adeyholar/haday** → `main`.
 | `PUBLIC_APP_URL` | Same as `BETTER_AUTH_URL` |
 | `BETTER_AUTH_SECRET` | Long random string |
 | `VITE_AUTH_ENABLED` | `true` |
+| `GOOGLE_CLIENT_ID` | Google OAuth client id. Both this and the secret must be set or the Google button stays off. |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret. Names only here — put the values in Azure application settings, never in git. |
 | `WEBSITES_PORT` | `8080` |
 | `HADAY_ADMIN_EMAILS` | Owner emails, comma-separated (Class roster). Also hardcoded for Crown. |
 | `ANTHROPIC_API_KEY` | Claude API key for Ask HaDay. Stays on the server. About $140 a month; the app stops near the end of that credit. |

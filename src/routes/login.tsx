@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react-router";
-import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
+import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { getGoogleSignInOffered } from "@/lib/auth/google-status";
+import { GOOGLE_PROVIDER_ID, socialSignInErrorMessage } from "@/lib/auth/google";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
@@ -83,6 +86,20 @@ function Login() {
   const [resetSent, setResetSent] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
   const [resent, setResent] = useState(false);
+  const [googleOffered, setGoogleOffered] = useState(false);
+  useEffect(() => {
+    let cancel = false;
+    getGoogleSignInOffered()
+      .then((result) => {
+        if (!cancel) setGoogleOffered(result.offered === true);
+      })
+      .catch(() => {
+        if (!cancel) setGoogleOffered(false);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, []);
 
   if (isPending) {
     return (
@@ -96,7 +113,7 @@ function Login() {
 
   if (user) return <GoToStudy />;
 
-  async function onOauth(providerId: string) {
+  async function onGoogle() {
     setError(null);
     if (mode === "up") {
       if (!placed) {
@@ -107,7 +124,7 @@ function Login() {
     }
     setBusy(true);
     try {
-      await signIn(providerId, { callbackURL: "/login" });
+      await signIn(GOOGLE_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
       setBusy(false);
@@ -379,30 +396,19 @@ function Login() {
               </fieldset>
             )}
 
-            {mode !== "reset" && (
+            {mode !== "reset" && googleOffered && (
             <div className="mt-4 grid gap-2">
-              {GROK_PROVIDERS.map((provider) => (
-                <Button
-                  key={provider.providerId}
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled={busy || (mode === "up" && !placed)}
-                  onClick={() => void onOauth(provider.providerId)}
-                >
-                  Continue with {provider.label}
-                </Button>
-              ))}
+              <GoogleSignInButton busy={busy} onClick={() => void onGoogle()} />
               {mode === "up" && !placed ? (
-                <p className="text-sm text-muted">Answer the question above to use Google or X.</p>
+                <p className="text-sm text-muted">Answer the question above to use Google.</p>
               ) : null}
             </div>
             )}
 
-            {mode !== "reset" && (
+            {mode !== "reset" && googleOffered && (
             <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-subtle">
               <span className="h-px flex-1 bg-border" />
-              or email
+              or
               <span className="h-px flex-1 bg-border" />
             </div>
             )}
@@ -555,6 +561,8 @@ function Login() {
 }
 
 function verifyErrorMessage(code: string): string {
+  const linked = socialSignInErrorMessage(code);
+  if (linked) return linked;
   const upper = code.toUpperCase();
   if (upper.includes("EXPIRED") || upper.includes("TOKEN")) {
     return "That confirmation link is missing or expired. Sign in and we will send a new one.";

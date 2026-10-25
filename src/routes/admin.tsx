@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
-import { getAdminStatus, getMailerStatus, issuePasswordReset, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type PendingReset, type RosterPerson } from "@/lib/admin";
+import { getAdminStatus, getMailerStatus, issuePasswordReset, listLegacyBrokerAccounts, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type LegacyBrokerAccount, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { setLearnerPath } from "@/lib/learner-path";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
@@ -41,6 +41,7 @@ function AdminPage() {
   const [visits, setVisits] = useState<VisitStats | null>(null);
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [mailer, setMailer] = useState<{ configured: boolean } | null>(null);
+  const [legacy, setLegacy] = useState<{ count: number; accounts: LegacyBrokerAccount[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,12 +52,13 @@ function AdminPage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const [rowsR, trafficR, inboxR, pendingR, mailerR] = await Promise.allSettled([
+        const [rowsR, trafficR, inboxR, pendingR, mailerR, legacyR] = await Promise.allSettled([
           listRoster(),
           listVisits(),
           listIdeaInbox(),
           listPendingResets(),
           getMailerStatus(),
+          listLegacyBrokerAccounts(),
         ]);
         if (cancelled) return;
         if (rowsR.status === "fulfilled") setPeople(rowsR.value);
@@ -66,6 +68,7 @@ function AdminPage() {
         else setIdeas([]);
         if (pendingR.status === "fulfilled") setResets(pendingR.value);
         if (mailerR.status === "fulfilled") setMailer(mailerR.value);
+        if (legacyR.status === "fulfilled") setLegacy(legacyR.value);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Could not load roster.");
@@ -149,6 +152,27 @@ function AdminPage() {
           deal a grammar flashcard deck from the whole text.
         </p>
       </Panel>
+
+      {legacy && (
+        <Panel className="mb-4">
+          <h2 className="font-display text-2xl font-bold text-ink">Old Grok sign-ins</h2>
+          <p className="mt-2 text-sm text-muted">
+            {legacy.count} account {legacy.count === 1 ? "row" : "rows"} with provider grok-google or grok-x.
+            Sign-in no longer uses those. Owner only.
+          </p>
+          {legacy.count > 0 && (
+            <ul className="mt-3 grid gap-2">
+              {legacy.accounts.map((row) => (
+                <li key={`${row.providerId}-${row.userId}`} className="text-sm text-ink">
+                  <span className="font-semibold">{row.name}</span>
+                  <span className="text-muted"> · {row.email}</span>
+                  <span className="text-muted"> · {row.providerId}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      )}
 
       <ResetInbox resets={resets} mailerOn={Boolean(mailer?.configured)} onChange={setResets} />
 

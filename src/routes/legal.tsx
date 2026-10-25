@@ -43,7 +43,7 @@ function LegalPage() {
       <Panel className="mb-3">
         <h2 className="font-display text-2xl font-bold text-ink">What we collect</h2>
         <ul className="mt-3 list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted">
-          <li>Name, email, and how you signed in (email and password, Google, or X).</li>
+          <li>Name, email, and how you signed in (email and password, or Google sign-in: name, email, profile picture).</li>
           <li>Study progress: week, streak, drills, quizzes, handwriting samples, feature ideas you send.</li>
           <li>Sign-in sessions so you stay signed in on this device.</li>
           <li>Approximate country from the network address on Azure, for the course owner’s roster only.</li>
@@ -53,7 +53,7 @@ function LegalPage() {
           </li>
         </ul>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Password hashes stay on our database. We never store your Google or X password. Mail we send
+          Password hashes stay on our database. Google sign-in does not give us your Google password. Mail we send
           (confirm the address, reset a password) goes through the class mailbox.
         </p>
       </Panel>
@@ -67,7 +67,7 @@ function LegalPage() {
           with advertisers. We do not use it for unrelated marketing.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Hosting is on Azure. Sign-in with Google or X uses those companies only if you tap that button.
+          Hosting is on Azure. Google sign-in (name, email, profile picture) is used only if you tap Continue with Google.
           Outbound mail uses Gmail (or another mailer the owner configures).
         </p>
       </Panel>

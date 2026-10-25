@@ -5,9 +5,10 @@
  * in a top-level popup (first-party cookies). This handler is the ENTIRE popup
  * document — no React shell:
  *
- *   Phase 1 (`?providerId=…`): start OAuth server-side and 302 straight to the
- *     broker / upstream login page. The popup never paints the app.
- *   Phase 2 (`?done=1`): after the broker round-trip, emit a tiny HTML page that
+ *   Phase 1 (no `done`): start Google sign-in server-side and 302 straight to
+ *     accounts.google.com. The popup never paints the app. If Google is not
+ *     configured, this returns a plain message and does not call any broker.
+ *   Phase 2 (`?done=1`): after Google returns, emit a tiny HTML page that
  *     posts the session token to the opener and closes. No SPA hydrate, no
  *     server-fn round-trip.
  *
@@ -16,7 +17,7 @@
  * React route here paints the full app shell in the popup. The opener lives in
  * `client.ts` (`signIn` → `openSignInPopup`).
  */
-import { auth, SESSION_TOKEN_COOKIE } from "./server";
+import { auth, googleSignInConfigured, SESSION_TOKEN_COOKIE } from "./server";
 
 /** Message shape the popup posts to the opener (must match `client.ts`). */
 type PopupMessage = {
@@ -51,22 +52,22 @@ export async function handleAuthPopupRequest(request: Request): Promise<Response
     });
   }
 
-  const providerId = url.searchParams.get("providerId")?.trim();
-  if (!providerId) {
-    return new Response("Missing providerId", {
-      status: 400,
-      headers: { "content-type": "text/plain; charset=utf-8" },
+  if (!googleSignInConfigured) {
+    return new Response("Google sign-in is not configured on this host.", {
+      status: 404,
+      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
     });
   }
 
   // Stay first-party for the callback so the session cookie lands in THIS popup.
   const back = `${url.origin}/auth/popup?done=1`;
   try {
-    const apiRes = await auth.api.signInWithOAuth2({
+    const apiRes = await auth.api.signInSocial({
       body: {
-        providerId,
+        provider: "google",
         callbackURL: back,
         errorCallbackURL: `${back}&error=1`,
+        disableRedirect: true,
       },
       // Forward the preview host so Better Auth derives the correct baseURL /
       // redirect_uri for the dynamic `*.grok-sandbox.com` origin.
@@ -83,9 +84,7 @@ export async function handleAuthPopupRequest(request: Request): Promise<Response
       });
     }
 
-    const body = (await apiRes.json().catch(() => null)) as {
-      url?: string;
-    } | null;
+    const body = (await apiRes.json().catch(() => null)) as { url?: string } | null;
     const location = body?.url;
     if (!location) {
       return completionResponse({
@@ -95,8 +94,8 @@ export async function handleAuthPopupRequest(request: Request): Promise<Response
       });
     }
 
-    // 302 to the broker (which headlessly forwards to Google/X). Forward any
-    // Set-Cookie (OAuth state / PKCE) so the callback can complete in this popup.
+    // 302 to Google. Forward Set-Cookie (OAuth state / PKCE) so the callback
+    // can finish in this popup.
     const headers = new Headers({ location, "cache-control": "no-store" });
     for (const cookie of apiRes.headers.getSetCookie()) {
       headers.append("set-cookie", cookie);
