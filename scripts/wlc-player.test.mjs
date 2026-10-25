@@ -11,7 +11,7 @@ import test from "node:test";
 const src = readFileSync(new URL("../src/components/wlc-player.tsx", import.meta.url), "utf8");
 
 function playControl() {
-  const start = src.indexOf('aria-label="Reading speed"');
+  const start = src.indexOf('aria-label="Play and reading speed"');
   const end = src.indexOf("The recording did not load.");
   assert.ok(start > 0 && end > start);
   return src.slice(start, end);
@@ -25,7 +25,9 @@ test("Play is the first segment of the reading-speed pill", () => {
   assert.match(group.slice(0, speedsAt), /<Play /);
   assert.match(group.slice(0, speedsAt), /<Pause /);
   assert.match(group.slice(0, speedsAt), /playing \? "Pause" : "Play"/);
-  assert.match(group.slice(0, speedsAt), /playing \? "bg-ink text-parchment" : "text-ink"/);
+  assert.match(group.slice(0, speedsAt), /playing \? "bg-primary text-primary-foreground" : "text-ink"/);
+  assert.match(group.slice(0, speedsAt), /rounded-\[var\(--radius-sm\)\]/);
+  assert.match(group.slice(speedsAt), /rounded-\[var\(--radius-sm\)\]/);
   assert.match(group.slice(0, speedsAt), /min-h-11/);
   assert.match(group.slice(0, speedsAt), /px-2\.5/);
   assert.match(group.slice(0, speedsAt), /w-px/);
@@ -76,8 +78,9 @@ test(
         return Boolean(audio && !audio.paused && audio.currentTime > 0);
       });
       const playingLook = await pause.evaluate((el) => el.className);
-      assert.match(playingLook, /bg-ink/);
-      assert.match(playingLook, /text-parchment/);
+      assert.match(playingLook, /bg-primary/);
+      assert.match(playingLook, /text-primary-foreground/);
+      assert.doesNotMatch(playingLook, /bg-ink/);
 
       await page.getByRole("button", { name: "Faster" }).click();
       await page.waitForFunction(() => {
@@ -90,7 +93,7 @@ test(
       await play.waitFor({ timeout: 8000 });
       await page.waitForFunction(() => document.querySelector("audio")?.paused === true);
       const stoppedLook = await play.evaluate((el) => el.className);
-      assert.doesNotMatch(stoppedLook, /bg-ink/);
+      assert.doesNotMatch(stoppedLook, /bg-primary/);
 
       await play.click();
       await pause.waitFor({ timeout: 8000 });
