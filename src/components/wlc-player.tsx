@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Pause, Play } from "lucide-react";
 import { chapterFromAlign, fetchBookAlign, READ_RATES } from "@/lib/reading";
 import { chapterAudioSrc, type BookId } from "@/lib/tanakh-canon";
 import { followSpot, type FollowSpot } from "@/lib/wlc-follow";
@@ -81,11 +82,18 @@ export function WlcPlayer({
   }
 
   return (
-    <div className="mt-1 flex items-center gap-2">
-      <button type="button" className="min-h-11 shrink-0 px-1 text-sm font-semibold text-ink" onClick={() => void toggle()}>
-        {playing ? "Pause" : "Play"}
-      </button>
-      <div className="flex rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)]" role="group" aria-label="Reading speed">
+    <div className="mt-1 flex flex-wrap items-center gap-2">
+      <div className="flex items-center rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)]" role="group" aria-label="Reading speed">
+        <button
+          type="button"
+          className={`inline-flex min-h-11 items-center gap-1.5 px-2.5 text-sm font-semibold ${playing ? "bg-ink text-parchment" : "text-ink"}`}
+          aria-label={playing ? "Pause" : "Play"}
+          onClick={() => void toggle()}
+        >
+          {playing ? <Pause className="size-4" aria-hidden="true" /> : <Play className="size-4" aria-hidden="true" />}
+          {playing ? "Pause" : "Play"}
+        </button>
+        <span className="mx-0.5 w-px self-stretch bg-border" aria-hidden="true" />
         {READ_RATES.map((row) => (
           <button
             key={row.value}
