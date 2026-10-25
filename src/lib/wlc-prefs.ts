@@ -34,3 +34,14 @@ export function defaultSheetSize(saved: string | null, wideScreen: boolean): Wlc
 export function defaultSheetWidth(saved: string | null): WlcSheetWidth {
   return saved === "wide" ? "wide" : "normal";
 }
+
+/** Wide can grow the column. Between a phone and 48rem, Normal already fills the screen. */
+export function wideHasRoom(viewportWidth: number, rootFontPx = 16): boolean {
+  if (viewportWidth < 640) return true;
+  return viewportWidth > 48 * rootFontPx;
+}
+
+/** Scroll delta that puts the same verse top back where it was. */
+export function verseAnchorScroll(beforeTop: number, afterTop: number): number {
+  return afterTop - beforeTop;
+}

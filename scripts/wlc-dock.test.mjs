@@ -6,6 +6,26 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const prefs = await jiti.import(new URL("../src/lib/wlc-prefs.ts", import.meta.url).pathname);
 
+function stripMinWidth1024(css) {
+  let out = css;
+  const re = /@media\s*\(min-width:\s*1024px\)[^{]*\{/g;
+  let match = re.exec(out);
+  while (match) {
+    const start = match.index;
+    let depth = 1;
+    let i = start + match[0].length;
+    while (i < out.length && depth > 0) {
+      if (out[i] === "{") depth += 1;
+      else if (out[i] === "}") depth -= 1;
+      i += 1;
+    }
+    out = out.slice(0, start) + out.slice(i);
+    re.lastIndex = start;
+    match = re.exec(out);
+  }
+  return out;
+}
+
 test("the speed chip cycles 0.7, 1, and 1.25", () => {
   assert.equal(prefs.nextReadRate(0.7), 1);
   assert.equal(prefs.nextReadRate(1), 1.25);
@@ -24,6 +44,14 @@ test("a saved type size wins over the wide-screen default", () => {
   assert.equal(prefs.defaultSheetSize(null, false), "page");
   assert.equal(prefs.defaultSheetWidth("wide"), "wide");
   assert.equal(prefs.defaultSheetWidth(null), "normal");
+  assert.equal(prefs.wideHasRoom(390), true);
+  assert.equal(prefs.wideHasRoom(639), true);
+  assert.equal(prefs.wideHasRoom(700), false);
+  assert.equal(prefs.wideHasRoom(768), false);
+  assert.equal(prefs.wideHasRoom(820), true);
+  assert.equal(prefs.wideHasRoom(1280), true);
+  assert.equal(prefs.verseAnchorScroll(120, 168), 48);
+  assert.equal(prefs.verseAnchorScroll(200, 200), 0);
 });
 
 test("the dock steps verses, not chapters, and the bars use variables", () => {
@@ -65,6 +93,21 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.doesNotMatch(wide, /body:has\(\.wlc-stage\):has\(\.wlc-card\)/);
   assert.match(wide, /body:has\(\.wlc-wide\) main/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  const belowDesktop = stripMinWidth1024(css);
+  assert.match(belowDesktop, /\.wlc-wide/, "wide rules exist outside the 1024px query");
+  assert.match(belowDesktop, /max-width:\s*639px[\s\S]*padding-inline:\s*0\.5rem/);
+  assert.doesNotMatch(belowDesktop, /wlc-wide[\s\S]{0,400}padding-inline:\s*0\.35rem/);
+  assert.match(belowDesktop, /max-width:\s*1023px[\s\S]*body:has\(\.wlc-wide\) main[\s\S]*max-width:\s*100%/);
+  assert.match(css, /@media \(min-width: 1024px\) \{[\s\S]*?56rem/);
+  assert.match(page, /wlc-aa mb-2 flex flex-col/);
+  assert.match(page, /Same as Normal here/);
+  assert.match(page, /verseAnchorScroll/);
+  assert.match(page, /getBoundingClientRect\(\)\.top/);
+  assert.match(page, /flex shrink-0 items-center/);
+  assert.match(page, /sm:hidden/);
+  assert.match(page, /min-w-\[4\.75rem\]/);
+  assert.match(page, /\{meta\.id\} \{chapterNo\}/);
+  assert.match(page, /hidden min-w-0 flex-1 truncate/);
 });
 
 test("the first play stays in the tap, and the sheet hides only on a wide screen", () => {

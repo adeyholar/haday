@@ -365,6 +365,27 @@ html {
     transition: none;
   }
 }
+/* Wide below a desktop window. The 1024px block above is unchanged. */
+@media (max-width: 639px) {
+  body:has(.wlc-wide) main {
+    padding-inline: 0.5rem;
+  }
+  body:has(.wlc-wide) .wlc-toolbar {
+    margin-inline: -0.5rem;
+  }
+  .wlc-stage.wlc-wide .read-dock-row {
+    width: 100%;
+    padding-inline: 0.5rem;
+  }
+}
+@media (min-width: calc(48rem + 1px)) and (max-width: 1023px) {
+  body:has(.wlc-wide) main {
+    max-width: 100%;
+  }
+  body:has(.wlc-wide) .read-dock-row {
+    width: 100%;
+  }
+}
 /* Touch screens: keep every word a 44px target, even at Tight. */
 @media (pointer: coarse) {
   .wlc-stage .manuscript-tight .ms-word {
@@ -374,6 +395,9 @@ html {
 @media (max-width: 639px) {
   .wlc-stage .manuscript-sheet:not(.manuscript-tight) {
     padding-inline: 0.85rem;
+  }
+  .wlc-stage.wlc-wide .manuscript-sheet {
+    padding-inline: 0.5rem;
   }
   .wlc-stage .manuscript-sheet:not(.manuscript-tight) .manuscript-note {
     font-size: 0.9rem;
