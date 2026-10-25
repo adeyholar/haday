@@ -1,3 +1,5 @@
+import type { StudyPath } from "@/lib/path";
+
 /**
  * Direct Google sign-in (Better Auth's built-in provider).
  *
@@ -8,6 +10,7 @@
  * TODO: X sign-in is hidden. Do not add an X button or an X provider until a
  * direct provider is wired here. Do not send classmates through the old broker.
  */
+
 export const GOOGLE_PROVIDER_ID = "google" as const;
 
 /** X stays off. See the TODO above. */
@@ -78,6 +81,15 @@ export function socialSignInErrorMessage(code: string): string | null {
   if (normalized.includes("account not linked") || normalized.includes("unable to link")) {
     return GOOGLE_LINK_REFUSAL;
   }
+  return null;
+}
+
+/** Continue with Google never waits for the heard-about answers. A path already picked is remembered. */
+export function googlePathToRemember(
+  mode: "up" | "in" | "reset",
+  placed: StudyPath | null,
+): StudyPath | null {
+  if (mode === "up" && (placed === "bbh" || placed === "iibs")) return placed;
   return null;
 }
 
