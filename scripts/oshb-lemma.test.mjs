@@ -61,11 +61,16 @@ test("an OSHB lemma splits into prefixes and Strong's parts", () => {
   assert.equal(prefixLabel("k"), "like");
   assert.equal(prefixLabel("l"), "to");
   assert.equal(prefixLabel("m"), "from");
-  assert.equal(prefixLabel("s"), "which");
+  assert.equal(prefixLabel("s"), "that");
 
-  assert.equal(prefixChip("c"), "וְ and");
-  assert.equal(prefixChip("d"), "הַ the");
-  assert.equal(prefixChip("m"), "מִ from");
+  assert.equal(prefixChip("c"), "ו and");
+  assert.equal(prefixChip("d"), "ה the");
+  assert.equal(prefixChip("m"), "מ from");
+  assert.equal(prefixChip("i"), "ה question");
+  assert.equal(prefixChip("b"), "ב in");
+  assert.equal(prefixChip("l"), "ל to");
+  assert.equal(prefixChip("k"), "כ like");
+  assert.equal(prefixChip("s"), "ש that");
 
   assert.ok(lemmas("Gen", 1, "Gen.1.1").includes("b/7225"));
   assert.ok(lemmas("Gen", 1, "Gen.1.1").includes("1254 a"));

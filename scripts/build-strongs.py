@@ -16,7 +16,6 @@ ROOT = Path(__file__).resolve().parents[1]
 LEX = ROOT / "public" / "lexicon"
 TAGS = ROOT / "public" / "tanakh" / "strongs"
 BOOKS = ROOT / "public" / "tanakh" / "books"
-HEB_URL = "https://raw.githubusercontent.com/adeyholar/strongs/master/hebrew/strongs-hebrew-dictionary.js"
 GRK_URL = "https://raw.githubusercontent.com/adeyholar/strongs/master/greek/strongs-greek-dictionary.js"
 WLC = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{}.xml"
 
@@ -136,16 +135,14 @@ def main() -> None:
     LEX.mkdir(parents=True, exist_ok=True)
     TAGS.mkdir(parents=True, exist_ok=True)
     print("dictionaries")
-    heb_path = LEX / "strongs-hebrew.json"
     grk_path = LEX / "strongs-greek.json"
-    if heb_path.exists() and grk_path.exists():
-        print("lexicon files already present")
+    if grk_path.exists():
+        print("greek lexicon already present")
     else:
-        heb = compact(js_object(get(HEB_URL)), "H")
         grk = compact(js_object(get(GRK_URL)), "G")
-        heb_path.write_text(json.dumps(heb, ensure_ascii=False, separators=(",", ":")))
         grk_path.write_text(json.dumps(grk, ensure_ascii=False, separators=(",", ":")))
-        print(f"hebrew {len(heb)} greek {len(grk)}")
+        print(f"greek {len(grk)}")
+    print("hebrew chunks: node scripts/split-strongs-hebrew.mjs")
 
     matched = 0
     missed = 0
