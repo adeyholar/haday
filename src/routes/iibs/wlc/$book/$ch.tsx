@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { WlcReading, type SheetSize, type SheetTone } from "@/components/wlc-desk";
 import { WlcPlayer } from "@/components/wlc-player";
 import { ScriptureTabs } from "@/components/iibs-door";
 import { bookMeta, isBookId, parseChapter } from "@/lib/tanakh-canon";
-import { defaultSheetSize, defaultSheetWidth, WLC_SIZE_KEY, WLC_WIDTH_KEY, type WlcSheetWidth } from "@/lib/wlc-prefs";
+import { defaultSheetSize, defaultSheetWidth, verseAnchorScroll, wideHasRoom, WLC_SIZE_KEY, WLC_WIDTH_KEY, type WlcSheetWidth } from "@/lib/wlc-prefs";
 import { loadWlcChapter } from "@/lib/wlc-server";
 import type { FollowSpot } from "@/lib/wlc-follow";
 import type { WlcChapter } from "@/lib/wlc";
@@ -61,9 +61,9 @@ function readWidth(): WlcSheetWidth {
 
 function SheetSizeControl({ size, onChange }: { size: SheetSize; onChange: (size: SheetSize) => void }) {
   const face = (on: boolean) =>
-    `min-h-11 px-2.5 text-sm font-semibold ${on ? "bg-ink text-parchment" : "text-muted"}`;
+    `min-h-11 flex-1 px-2 text-sm font-semibold sm:flex-none sm:px-2.5 ${on ? "bg-ink text-parchment" : "text-muted"}`;
   return (
-    <div className="flex rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)]" role="group" aria-label="Type size in the frame">
+    <div className="flex w-full rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)] sm:w-auto" role="group" aria-label="Type size in the frame">
       {SIZES.map((row) => (
         <button key={row.id} type="button" className={face(size === row.id)} aria-pressed={size === row.id} onClick={() => onChange(row.id)}>
           {row.label}
@@ -75,9 +75,9 @@ function SheetSizeControl({ size, onChange }: { size: SheetSize; onChange: (size
 
 function SheetLamp({ tone, onChange }: { tone: SheetTone; onChange: (tone: SheetTone) => void }) {
   const face = (on: boolean) =>
-    `min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold ${on ? "bg-ink text-parchment" : "text-muted"}`;
+    `min-h-11 flex-1 rounded-[var(--radius-md)] px-3 text-sm font-semibold sm:flex-none ${on ? "bg-ink text-parchment" : "text-muted"}`;
   return (
-    <div className="flex rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)]" role="group" aria-label="Manuscript sheet">
+    <div className="flex w-full rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)] sm:w-auto" role="group" aria-label="Manuscript sheet">
       <button type="button" className={face(tone === "light")} aria-pressed={tone === "light"} onClick={() => onChange("light")}>
         Light
       </button>
@@ -86,6 +86,34 @@ function SheetLamp({ tone, onChange }: { tone: SheetTone; onChange: (tone: Sheet
       </button>
     </div>
   );
+}
+
+function readVerseAnchor(): { el: HTMLElement; top: number } | null {
+  const verses = document.querySelectorAll<HTMLElement>(".wlc-reading .ms-verse");
+  const bar = document.querySelector(".wlc-toolbar")?.getBoundingClientRect().bottom ?? 0;
+  for (const el of verses) {
+    const rect = el.getBoundingClientRect();
+    if (rect.bottom > bar + 1 && rect.top < window.innerHeight) return { el, top: rect.top };
+  }
+  return null;
+}
+
+function settleVerseAnchor(anchor: { el: HTMLElement; top: number } | null) {
+  if (!anchor) return;
+  const place = () => {
+    const delta = verseAnchorScroll(anchor.top, anchor.el.getBoundingClientRect().top);
+    if (Math.abs(delta) > 1) window.scrollBy(0, delta);
+  };
+  const sheet = document.querySelector(".manuscript-sheet");
+  if (sheet) {
+    const watch = new ResizeObserver(() => {
+      watch.disconnect();
+      place();
+    });
+    watch.observe(sheet);
+    window.setTimeout(() => watch.disconnect(), 400);
+  }
+  requestAnimationFrame(() => requestAnimationFrame(place));
 }
 
 function WlcChapterPage() {
@@ -98,6 +126,10 @@ function WlcChapterPage() {
   const [tone, setTone] = useState<SheetTone>("light");
   const [size, setSize] = useState<SheetSize>("page");
   const [width, setWidth] = useState<WlcSheetWidth>("normal");
+  const [wideRoom, setWideRoom] = useState(true);
+  const wideRoomRef = useRef(true);
+  const widthRef = useRef<WlcSheetWidth>("normal");
+  widthRef.current = width;
   const [sized, setSized] = useState(false);
   const [aaOpen, setAaOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
@@ -109,6 +141,20 @@ function WlcChapterPage() {
     setSize(readSize());
     setWidth(readWidth());
     setSized(true);
+    const applyRoom = () => {
+      const next = wideHasRoom(window.innerWidth, parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+      if (next !== wideRoomRef.current && widthRef.current === "wide") {
+        const anchor = readVerseAnchor();
+        wideRoomRef.current = next;
+        setWideRoom(next);
+        settleVerseAnchor(anchor);
+        return;
+      }
+      wideRoomRef.current = next;
+      setWideRoom(next);
+    };
+    applyRoom();
+    window.addEventListener("resize", applyRoom);
     try {
       if (window.localStorage.getItem(NOTE_KEY) !== "seen") {
         setNoteOpen(true);
@@ -117,6 +163,7 @@ function WlcChapterPage() {
     } catch {
       /* the note can still be opened from the button */
     }
+    return () => window.removeEventListener("resize", applyRoom);
   }, []);
 
   useEffect(() => {
@@ -165,13 +212,17 @@ function WlcChapterPage() {
     }
   };
   const chooseWidth = (nextWidth: WlcSheetWidth) => {
+    if (nextWidth === "wide" && !wideRoom) return;
+    const anchor = readVerseAnchor();
     setWidth(nextWidth);
     try {
       window.localStorage.setItem(WLC_WIDTH_KEY, nextWidth);
     } catch {
       /* this visit still uses the width */
     }
+    settleVerseAnchor(anchor);
   };
+  const shownWide = width === "wide" && wideRoom;
   const choose = (nextTone: SheetTone) => {
     setTone(nextTone);
     try {
@@ -182,52 +233,59 @@ function WlcChapterPage() {
   };
 
   return (
-    <div className={`${width === "wide" ? "wlc-stage wlc-wide" : "wlc-stage"}${sized ? " wlc-sized" : ""}`}>
-      <div className="wlc-toolbar -mx-4 mb-2 overflow-x-auto px-2 py-0.5">
-        <div className="flex w-max min-w-full items-center gap-1">
-          <ScriptureTabs active="lab" compact />
-          <Link to="/iibs/wlc" aria-label="Books" className="inline-flex h-11 shrink-0 items-center px-1 text-sm font-semibold text-primary">
-            ‹ Books
-          </Link>
-          <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
-            {meta.en} {chapterNo}{" "}
-            <span className="he-word font-normal text-muted" dir="rtl" lang="he">
-              {meta.he}
-            </span>
-          </h1>
-          <label className="sr-only" htmlFor="wlc-chapter">
-            Chapter
-          </label>
-          <select
-            id="wlc-chapter"
-            className="h-11 shrink-0 rounded-[var(--radius-md)] bg-surface px-2 text-base font-semibold text-ink"
-            value={String(chapterNo)}
-            onChange={(event) => go(Number(event.target.value))}
-          >
-            {Array.from({ length: meta.chapters }, (_, index) => (
-              <option key={index + 1} value={String(index + 1)}>
-                {index + 1}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            aria-label="Previous chapter"
-            disabled={!prev}
-            onClick={() => prev && go(prev)}
-            className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="Next chapter"
-            disabled={!next}
-            onClick={() => next && go(next)}
-            className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
-          >
-            ›
-          </button>
+    <div className={`${shownWide ? "wlc-stage wlc-wide" : "wlc-stage"}${sized ? " wlc-sized" : ""}`}>
+      <div className="wlc-toolbar -mx-4 mb-2 flex items-center px-2 py-0.5">
+        <h1 className="inline-flex h-11 min-w-[4.75rem] shrink-0 items-center px-1 text-sm font-semibold text-ink sm:hidden">
+          {meta.id} {chapterNo}
+        </h1>
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+          <div className="flex w-max min-w-full items-center gap-1">
+            <ScriptureTabs active="lab" compact />
+            <Link to="/iibs/wlc" aria-label="Books" className="inline-flex h-11 shrink-0 items-center px-1 text-sm font-semibold text-primary">
+              ‹ Books
+            </Link>
+            <h1 className="hidden min-w-0 flex-1 truncate text-sm font-semibold text-ink sm:block">
+              {meta.en} {chapterNo}{" "}
+              <span className="he-word font-normal text-muted" dir="rtl" lang="he">
+                {meta.he}
+              </span>
+            </h1>
+            <label className="sr-only" htmlFor="wlc-chapter">
+              Chapter
+            </label>
+            <select
+              id="wlc-chapter"
+              className="h-11 shrink-0 rounded-[var(--radius-md)] bg-surface px-2 text-base font-semibold text-ink"
+              value={String(chapterNo)}
+              onChange={(event) => go(Number(event.target.value))}
+            >
+              {Array.from({ length: meta.chapters }, (_, index) => (
+                <option key={index + 1} value={String(index + 1)}>
+                  {index + 1}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              aria-label="Previous chapter"
+              disabled={!prev}
+              onClick={() => prev && go(prev)}
+              className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              aria-label="Next chapter"
+              disabled={!next}
+              onClick={() => next && go(next)}
+              className="inline-flex size-11 shrink-0 items-center justify-center font-semibold text-ink disabled:text-muted"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center">
           <button
             type="button"
             aria-label="Type size and lamp"
@@ -249,10 +307,10 @@ function WlcChapterPage() {
         </div>
       </div>
       {aaOpen ? (
-        <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="wlc-aa mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <SheetSizeControl size={size} onChange={chooseSize} />
           <SheetLamp tone={tone} onChange={choose} />
-          <div className="flex rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)]" role="group" aria-label="Column width">
+          <div className="flex w-full rounded-[var(--radius-md)] bg-card p-0.5 shadow-[var(--shadow-border)] sm:w-auto" role="group" aria-label="Column width">
             {(
               [
                 ["normal", "Normal"],
@@ -262,14 +320,16 @@ function WlcChapterPage() {
               <button
                 key={id}
                 type="button"
-                className={`min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold ${width === id ? "bg-ink text-parchment" : "text-muted"}`}
-                aria-pressed={width === id}
+                disabled={id === "wide" && !wideRoom}
+                className={`min-h-11 flex-1 rounded-[var(--radius-md)] px-3 text-sm font-semibold sm:flex-none ${shownWide === (id === "wide") ? "bg-ink text-parchment" : "text-muted"} disabled:text-muted`}
+                aria-pressed={id === "wide" ? shownWide : !shownWide}
                 onClick={() => chooseWidth(id)}
               >
                 {label}
               </button>
             ))}
           </div>
+          {wideRoom ? null : <p className="text-sm text-muted">Same as Normal here.</p>}
         </div>
       ) : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
