@@ -4,7 +4,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
-const { blockedDestination, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
+const { blockedDestination, claimPathIntent, clearPathIntent, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readPathIntent, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, stashPathIntent, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
 test("only Level A is open until an exam is passed", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -81,6 +81,42 @@ test("a signed-in student opens their study from home", () => {
   const doors = readFileSync(new URL("../src/routes/index.tsx", import.meta.url).pathname, "utf8");
   assert.match(doors, /shouldShowPathChooser/);
   assert.match(doors, /Continue to your study/);
+  assert.match(doors, /claimPathIntent\(\)/);
+  assert.match(doors, /clearPathIntent\(\)/);
+  assert.match(doors, /if \(next\.path\)/);
+  const learner = readFileSync(new URL("../src/lib/learner-path.ts", import.meta.url).pathname, "utf8");
+  assert.match(learner, /if \(isStudyPath\(existing\[0\]\?\.path\)\) return \{ ok: true, path: existing\[0\].path \}/);
+});
+
+test("a remembered path is used once, then dropped", () => {
+  const session = new Map();
+  const local = new Map();
+  const box = (store) => ({
+    getItem: (key) => (store.has(key) ? store.get(key) : null),
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: (key) => store.delete(key),
+  });
+  const previous = globalThis.window;
+  globalThis.window = { sessionStorage: box(session), localStorage: box(local) };
+  try {
+    stashPathIntent("bbh");
+    assert.equal(session.get("haday-path-intent"), "bbh");
+    assert.equal(local.has("haday-path-intent"), false);
+    assert.equal(readPathIntent(), "bbh");
+    assert.equal(claimPathIntent(), "bbh");
+    assert.equal(readPathIntent(), null);
+    assert.equal(session.has("haday-path-intent"), false);
+
+    local.set("haday-path-intent", "iibs");
+    assert.equal(readPathIntent(), "iibs");
+    clearPathIntent();
+    assert.equal(local.has("haday-path-intent"), false);
+    assert.equal(readPathIntent(), null);
+    assert.equal(claimPathIntent(), null);
+  } finally {
+    if (previous === undefined) delete globalThis.window;
+    else globalThis.window = previous;
+  }
 });
 
 test("each semester is its own room, and the hall is not a room", () => {

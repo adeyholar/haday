@@ -10,13 +10,21 @@ import type { StudyPath } from "@/lib/path";
  * TODO: X sign-in is hidden. Do not add an X button or an X provider until a
  * direct provider is wired here. Do not send classmates through the old broker.
  */
-
 export const GOOGLE_PROVIDER_ID = "google" as const;
 
 /** X stays off. See the TODO above. */
 export const X_SIGN_IN_OFFERED = false;
 
 export const GOOGLE_BUTTON_LABEL = "Continue with Google";
+
+/** Shown under the button on Create account only. No checkbox. */
+export const GOOGLE_PRIVACY_BEFORE = "By continuing with Google, you agree to the";
+export const GOOGLE_PRIVACY_LINK = "Privacy policy and disclaimer";
+export const GOOGLE_PRIVACY_NOTICE = `${GOOGLE_PRIVACY_BEFORE} ${GOOGLE_PRIVACY_LINK}.`;
+
+export function showGooglePrivacyNotice(mode: "up" | "in" | "reset"): boolean {
+  return mode === "up";
+}
 
 /** Better Auth callback for the built-in Google provider. */
 export function googleCallbackUrl(origin = "https://hebrewmentor.haday.app"): string {

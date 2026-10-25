@@ -18,6 +18,8 @@ const {
   missingGoogleSignInWarning,
   googleMayLinkExistingAccount,
   googlePathToRemember,
+  showGooglePrivacyNotice,
+  GOOGLE_PRIVACY_NOTICE,
   socialSignInErrorMessage,
   loginSocialOffer,
   isLegacyBrokerProvider,
@@ -58,6 +60,16 @@ test("the login page offers Google only when it is configured, and never X", () 
   const login = read("src/routes/login.tsx");
   assert.match(login, /googleOffered/);
   assert.match(login, /signInLanding/);
+  assert.equal(showGooglePrivacyNotice("up"), true);
+  assert.equal(showGooglePrivacyNotice("in"), false);
+  assert.equal(showGooglePrivacyNotice("reset"), false);
+  assert.equal(
+    GOOGLE_PRIVACY_NOTICE,
+    "By continuing with Google, you agree to the Privacy policy and disclaimer.",
+  );
+  assert.match(login, /showGooglePrivacyNotice\(mode\)/);
+  assert.match(login, /GOOGLE_PRIVACY_BEFORE/);
+  assert.match(login, /to="\/legal"/);
   assert.match(login, /GoogleSignInButton/);
   assert.match(login, /getGoogleSignInOffered/);
   assert.doesNotMatch(login, /Continue with X|grok-x|GROK_PROVIDERS|genericOAuth/);
