@@ -79,8 +79,7 @@ function signupEmailFromBody(body: unknown): string {
 }
 
 /**
- * Mailbox check on email/password sign-up only. OAuth (Google / X, including
- * X's synthetic emails) must not run this — those identities are proven upstream.
+ * Mailbox check on email/password sign-up only. Google sign-in must not run this.
  */
 export const authHooks = {
   before: createAuthMiddleware(async (ctx) => {

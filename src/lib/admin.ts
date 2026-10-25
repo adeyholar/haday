@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { ADMIN_EMAILS, grantsOwner, isOwnerEmail, ownerAllowList } from "@/lib/admin-access";
+import { isLegacyBrokerProvider } from "@/lib/auth/google";
 import { sendPasswordResetMail, mailerConfigured, mailerVia } from "@/lib/mail";
 
 export { ADMIN_EMAILS };
@@ -59,6 +60,42 @@ export const getAdminStatus = createServerFn({ method: "GET" })
     } catch {
       return { admin: false };
     }
+  });
+
+export type LegacyBrokerAccount = {
+  providerId: string;
+  userId: string;
+  name: string;
+  email: string;
+};
+
+/** Owner-only. Rows left from the old Grok broker (grok-google, grok-x). */
+export const listLegacyBrokerAccounts = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<{ count: number; accounts: LegacyBrokerAccount[] }> => {
+    await assertAdmin(context.userId);
+    const sql = await getSql();
+    const rows = await sql<{
+      provider_id: string;
+      user_id: string;
+      name: string;
+      email: string;
+    }>`
+      select a."providerId" as provider_id, a."userId" as user_id, u.name, u.email
+      from account a
+      join "user" u on u.id = a."userId"
+      where a."providerId" in ('grok-google', 'grok-x')
+      order by u."createdAt" asc
+    `;
+    const accounts = rows
+      .filter((row) => isLegacyBrokerProvider(row.provider_id))
+      .map((row) => ({
+        providerId: row.provider_id,
+        userId: row.user_id,
+        name: row.name,
+        email: row.email,
+      }));
+    return { count: accounts.length, accounts };
   });
 
 export const listRoster = createServerFn({ method: "GET" })
@@ -207,7 +244,7 @@ export const issuePasswordReset = createServerFn({ method: "POST" })
       return {
         ok: false,
         reason:
-          "This classmate signs in with Google or X, not a password. Ask them to use that button — there is no password to reset.",
+          "This classmate signs in with Google, not a password. Ask them to use Continue with Google — there is no password to reset.",
       };
     }
 
