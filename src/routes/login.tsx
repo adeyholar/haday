@@ -3,7 +3,7 @@ import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react
 import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getGoogleSignInOffered } from "@/lib/auth/google-status";
-import { GOOGLE_PROVIDER_ID, googlePathToRemember, socialSignInErrorMessage } from "@/lib/auth/google";
+import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
@@ -394,6 +394,15 @@ function Login() {
             {mode !== "reset" && googleOffered && (
             <div className="mt-4">
               <GoogleSignInButton busy={busy} onClick={() => void onGoogle()} />
+              {showGooglePrivacyNotice(mode) ? (
+                <p className="mt-2 text-center text-xs leading-snug text-muted">
+                  {GOOGLE_PRIVACY_BEFORE}{" "}
+                  <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
+                    {GOOGLE_PRIVACY_LINK}
+                  </Link>
+                  .
+                </p>
+              ) : null}
             </div>
             )}
 

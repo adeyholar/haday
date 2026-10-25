@@ -5,8 +5,8 @@ import { Panel } from "@/components/panel";
 import { PublicFooter } from "@/components/public-footer";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { choosePath, getMyPath, type MyPath } from "@/lib/learner-path";
-import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
-import { clearDoor, homeForAccount, markTermHall, readPathIntent, rememberDoor, shouldShowPathChooser, stashPathIntent, type StudyPath } from "@/lib/path";
+import { GRAMMAR_PATH, HEARD_PROMPT, SCRIPTURE_PATH } from "@/lib/path-names";
+import { clearDoor, clearPathIntent, claimPathIntent, homeForAccount, markTermHall, rememberDoor, shouldShowPathChooser, stashPathIntent, type HeardSource, type StudyPath } from "@/lib/path";
 import { loadTeachingsIndex } from "@/lib/teachings";
 import { CLASS_SITE } from "@/lib/class-site";
 import { SEO_DESCRIPTION, SEO_TITLE, SITE_JSON_LD, shareMeta } from "@/lib/seo";
@@ -43,6 +43,7 @@ function DoorsPage() {
   const [error, setError] = useState("");
   const [visitor, setVisitor] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [heard, setHeard] = useState<HeardSource | "">("");
 
   useEffect(() => {
     let cancelled = false;
@@ -51,8 +52,10 @@ function DoorsPage() {
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           const next = await getMyPath();
-          if (!next.path) {
-            const intent = readPathIntent();
+          if (next.path) {
+            clearPathIntent();
+          } else {
+            const intent = claimPathIntent();
             if (intent) {
               const chosen = await choosePath({ data: { path: intent } });
               if (chosen.ok) {
@@ -110,6 +113,7 @@ function DoorsPage() {
       }
       rememberDoor(result.path);
       if (result.path === "bbh") markTermHall();
+      clearPathIntent();
       window.location.assign(result.path === "iibs" ? "/iibs" : "/bbh");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save that choice.");
@@ -127,6 +131,8 @@ function DoorsPage() {
     admin: Boolean(gate?.admin),
     path: gate?.path ?? null,
   });
+  const askHeard = Boolean(signedIn && gate && !gate.admin && !gate.path);
+  const suggested: StudyPath | "" = heard === "college" ? "bbh" : heard === "iibs" ? "iibs" : "";
 
   if (!showChooser && !placedHome) {
     return (
@@ -159,6 +165,37 @@ function DoorsPage() {
           </Link>
         </Panel>
       ) : (
+      <>
+      {askHeard ? (
+        <fieldset className="mb-3 grid gap-2">
+          <legend className="mb-1 text-sm font-medium text-muted">{HEARD_PROMPT} Optional.</legend>
+          {(
+            [
+              ["college", "College or school", "Suggests the Grammar Path."],
+              ["iibs", "An online Bible school", "Suggests the Scripture Path."],
+              ["other", "Internet or a friend", "Choose either door."],
+            ] as const
+          ).map(([id, label, note]) => (
+            <button
+              key={id}
+              type="button"
+              className={`min-h-11 rounded-[var(--radius-md)] px-3 py-2 text-left shadow-[var(--shadow-border)] ${heard === id ? "bg-ink text-parchment" : "bg-card text-ink"}`}
+              onClick={() => setHeard(id)}
+            >
+              <span className="block text-sm font-semibold">{label}</span>
+              <span className={`mt-0.5 block text-xs ${heard === id ? "text-parchment/80" : "text-muted"}`}>{note}</span>
+            </button>
+          ))}
+          {suggested ? (
+            <p className="text-sm text-ink">
+              That suggests the {suggested === "iibs" ? SCRIPTURE_PATH.title : GRAMMAR_PATH.title}. The door you open is
+              the one saved on this account, the same as email sign-up.
+            </p>
+          ) : (
+            <p className="text-sm text-muted">You can skip this and open a door.</p>
+          )}
+        </fieldset>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <Door
           kind="bbh"
@@ -189,6 +226,7 @@ function DoorsPage() {
           action="Start the Scripture Path"
         />
       </div>
+      </>
       )}
       <Panel className="mt-6">
         <h2 className="font-display text-2xl font-semibold text-ink">From the letters to the living Word</h2>

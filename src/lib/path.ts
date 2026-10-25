@@ -186,15 +186,36 @@ const SHARED = ["/login", "/reset-password", "/ask", "/ideas"];
 export const PATH_INTENT = "haday-path-intent";
 export const OPEN_DOOR = "haday-open-door";
 
+function intentStores(): Storage[] {
+  if (typeof window === "undefined") return [];
+  return [window.sessionStorage, window.localStorage];
+}
+
+/** Remember a path until this browser session claims it. A leftover in local storage is dropped. */
 export function stashPathIntent(path: StudyPath) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(PATH_INTENT, path);
+  window.sessionStorage.setItem(PATH_INTENT, path);
+  window.localStorage.removeItem(PATH_INTENT);
 }
 
 export function readPathIntent(): StudyPath | null {
   if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(PATH_INTENT);
+  const session = window.sessionStorage.getItem(PATH_INTENT);
+  const legacy = window.localStorage.getItem(PATH_INTENT);
+  const raw = session ?? legacy;
   return isStudyPath(raw) ? raw : null;
+}
+
+/** Drop a remembered path from this browser, including an older local-storage copy. */
+export function clearPathIntent() {
+  for (const store of intentStores()) store.removeItem(PATH_INTENT);
+}
+
+/** Take the remembered path and drop it, so the next student on this computer is not placed by it. */
+export function claimPathIntent(): StudyPath | null {
+  const path = readPathIntent();
+  clearPathIntent();
+  return path;
 }
 
 export function rememberDoor(path: StudyPath) {
