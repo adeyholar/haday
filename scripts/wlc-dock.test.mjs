@@ -5,6 +5,7 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const prefs = await jiti.import(new URL("../src/lib/wlc-prefs.ts", import.meta.url).pathname);
+const cardPlace = await jiti.import(new URL("../src/lib/wlc-card-place.ts", import.meta.url).pathname);
 
 function stripMinWidth1024(css) {
   let out = css;
@@ -91,7 +92,11 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   const wide = css.slice(css.indexOf("@media (min-width: 1024px)"));
   assert.match(wide, /body:has\(\.wlc-stage\) main/);
   assert.doesNotMatch(wide, /body:has\(\.wlc-stage\):has\(\.wlc-card\)/);
+  assert.doesNotMatch(wide, /grid-template-columns/);
+  assert.doesNotMatch(wide, /22rem \+ 0\.75rem/);
+  assert.match(wide, /calc\(48rem \+ 2rem\)/);
   assert.match(wide, /body:has\(\.wlc-wide\) main/);
+  assert.match(wide, /calc\(56rem \+ 2rem\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   const belowDesktop = stripMinWidth1024(css);
   assert.match(belowDesktop, /\.wlc-wide/, "wide rules exist outside the 1024px query");
@@ -108,6 +113,64 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.match(page, /min-w-\[4\.75rem\]/);
   assert.match(page, /\{meta\.id\} \{chapterNo\}/);
   assert.match(page, /hidden min-w-0 flex-1 truncate/);
+});
+
+test("a desktop word card uses the margin, and otherwise stays off the tapped word", () => {
+  const desk = readFileSync(new URL("../src/components/wlc-desk.tsx", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+  assert.match(desk, /placeDesktopCard/);
+  assert.match(desk, /event\.key !== "Escape"/);
+  assert.match(desk, /focus\(\{ preventScroll: true \}\)/);
+  assert.doesNotMatch(desk, /wlc-card-hint/);
+  assert.doesNotMatch(css, /wlc-card-hint/);
+  assert.match(css, /overflow-y:\s*auto/);
+
+  const max = 22 * 16;
+  const gap = 0.75 * 16;
+  const placed = (sheet, word, viewportWidth) =>
+    cardPlace.placeDesktopCard({
+      sheet,
+      word,
+      viewportWidth,
+      toolbarBottom: 120,
+      dockTop: 860,
+      rootFontPx: 16,
+    });
+  const misses = (box, word) => box.left + box.width <= word.left + 0.1 || box.left >= word.right - 0.1;
+
+  const wideSheet = { left: 576, right: 1344 };
+  const onRight = { left: 1200, right: 1300 };
+  const marginLeft = placed(wideSheet, onRight, 1920);
+  assert.equal(marginLeft.mode, "margin");
+  assert.equal(marginLeft.side, "left");
+  assert.equal(marginLeft.width, max);
+  assert.ok(marginLeft.left + marginLeft.width <= wideSheet.left - gap + 0.1);
+  assert.equal(misses(marginLeft, onRight), true);
+
+  const onLeft = { left: 600, right: 700 };
+  const marginRight = placed(wideSheet, onLeft, 1920);
+  assert.equal(marginRight.mode, "margin");
+  assert.equal(marginRight.side, "right");
+  assert.ok(marginRight.left >= wideSheet.right + gap - 0.1);
+  assert.equal(misses(marginRight, onLeft), true);
+
+  const narrow = { left: 256, right: 1024 };
+  const overlayLeft = placed(narrow, { left: 900, right: 1000 }, 1280);
+  assert.equal(overlayLeft.mode, "overlay");
+  assert.equal(overlayLeft.side, "left");
+  assert.ok(overlayLeft.left + overlayLeft.width <= 900 - gap + 0.1);
+  assert.equal(misses(overlayLeft, { left: 900, right: 1000 }), true);
+
+  const overlayRight = placed(narrow, { left: 270, right: 360 }, 1280);
+  assert.equal(overlayRight.mode, "overlay");
+  assert.equal(overlayRight.side, "right");
+  assert.ok(overlayRight.left >= 360 + gap - 0.1);
+  assert.equal(misses(overlayRight, { left: 270, right: 360 }), true);
+
+  const onlyRight = placed({ left: 80, right: 848 }, { left: 700, right: 820 }, 1248);
+  assert.equal(onlyRight.mode, "margin");
+  assert.equal(onlyRight.side, "right");
+  assert.equal(misses(onlyRight, { left: 700, right: 820 }), true);
 });
 
 test("the first play stays in the tap, and the sheet hides only on a wide screen", () => {
@@ -279,7 +342,9 @@ test(
         { width: 390, height: 844, beside: false },
         { width: 768, height: 1024, beside: false },
         { width: 1024, height: 816, beside: true },
+        { width: 1280, height: 800, beside: true },
         { width: 1440, height: 900, beside: true },
+        { width: 1920, height: 1080, beside: true },
       ]) {
         const ctx = await browser.newContext({
           viewport: { width: viewport.width, height: viewport.height },
@@ -303,7 +368,19 @@ test(
         const label = `${viewport.width} card`;
         if (viewport.beside) {
           assert.ok(sheet.width >= 720 && sheet.width <= 820, `${label}: Hebrew is ${sheet.width}`);
-          assert.ok(cardBox.x >= sheet.x + sheet.width - 8, `${label}: card is not beside the text`);
+          const rightGap = viewport.width - (sheet.x + sheet.width);
+          assert.ok(Math.abs(sheet.x - rightGap) <= 2, `${label}: sheet is not centred (${sheet.x} vs ${rightGap})`);
+          const word = await cardPage.locator(".ms-picked").boundingBox();
+          assert.ok(word, `${label}: picked word missing`);
+          const covers = cardBox.x < word.x + word.width - 1 && cardBox.x + cardBox.width > word.x + 1;
+          assert.equal(covers, false, `${label}: card covers the tapped word`);
+          const room = Math.min(sheet.x, rightGap);
+          if (room >= 22 * 16 + 12) {
+            const outside = cardBox.x + cardBox.width <= sheet.x + 1 || cardBox.x >= sheet.x + sheet.width - 1;
+            assert.ok(outside, `${label}: card is not in the margin`);
+          } else {
+            assert.equal(await card.getAttribute("data-place"), "overlay", `${label}: expected an overlay`);
+          }
           const opened = await cardPage.evaluate(() => ({
             word: document.querySelector(".ms-word")?.getBoundingClientRect().x ?? Number.NaN,
             dock: document.querySelector(".read-dock-sheet")?.getBoundingClientRect().x ?? Number.NaN,
@@ -312,8 +389,10 @@ test(
           assert.ok(Math.abs(opened.word - beforeX) <= 1, `${label}: word moved ${opened.word - beforeX}px when the card opened`);
           assert.ok(Math.abs(opened.dock - beforeDock) <= 1, `${label}: dock moved ${opened.dock - beforeDock}px when the card opened`);
           assert.ok(Math.abs(opened.bar - beforeBar) <= 1, `${label}: toolbar moved ${opened.bar - beforeBar}px when the card opened`);
-          await cardPage.getByRole("button", { name: "Close", exact: true }).click();
+          await cardPage.keyboard.press("Escape");
           await cardPage.waitForSelector(".wlc-card", { state: "detached" });
+          const focusedWord = await cardPage.evaluate(() => document.activeElement?.classList.contains("ms-word") === true);
+          assert.equal(focusedWord, true, `${label}: Esc did not return focus to the word`);
           const closedX = await cardPage.evaluate(() => document.querySelector(".ms-word")?.getBoundingClientRect().x ?? Number.NaN);
           assert.ok(Math.abs(closedX - beforeX) <= 1, `${label}: word moved ${closedX - beforeX}px when the card closed`);
         } else {

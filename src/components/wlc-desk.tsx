@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
 import type { FollowSpot } from "@/lib/wlc-follow";
 import { useFollowScroll } from "@/lib/use-follow-scroll";
+import { placeDesktopCard, type DesktopCardPlace } from "@/lib/wlc-card-place";
 
-/** The chapter page scrolls. Wide screens keep the word card beside the text. */
+/** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
 const WLC_SIDE_CARD_QUERY = "(min-width: 1024px)";
 
@@ -175,11 +176,29 @@ export function WlcReading({
 
   const card = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState(0);
+  const [place, setPlace] = useState<DesktopCardPlace | null>(null);
+
+  const closeCard = () => {
+    const word = frame.current?.querySelector<HTMLElement>(".ms-picked");
+    setPicked(null);
+    window.setTimeout(() => word?.focus({ preventScroll: true }), 0);
+  };
 
   useEffect(() => {
     setPicked(null);
     if (pageScrolls()) window.scrollTo({ top: 0 });
   }, [chapter.book, chapter.chapter]);
+
+  useEffect(() => {
+    if (!picked) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      closeCard();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [picked]);
 
   // Phones and short screens: the card is a bottom sheet over the page. Keep the
   // picked word in sight above it, and leave room under the last verse.
@@ -194,6 +213,63 @@ export function WlcReading({
     const watch = new ResizeObserver(sync);
     watch.observe(el);
     return () => watch.disconnect();
+  }, [picked]);
+
+  useLayoutEffect(() => {
+    if (!picked) {
+      setPlace(null);
+      return;
+    }
+    const mq = window.matchMedia(WLC_SIDE_CARD_QUERY);
+    let last: DesktopCardPlace | null = null;
+    const measure = () => {
+      if (!mq.matches) {
+        if (last) {
+          last = null;
+          setPlace(null);
+        }
+        return;
+      }
+      const sheet = frame.current?.getBoundingClientRect();
+      const word = frame.current?.querySelector(".ms-picked")?.getBoundingClientRect();
+      const toolbar = document.querySelector(".wlc-toolbar")?.getBoundingClientRect();
+      if (!sheet || !word || !toolbar || sheet.width < 1) return;
+      const dock = document.querySelector(".read-dock")?.getBoundingClientRect();
+      const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const next = placeDesktopCard({
+        sheet: { left: sheet.left, right: sheet.right },
+        word: { left: word.left, right: word.right },
+        viewportWidth: window.innerWidth,
+        toolbarBottom: toolbar.bottom + 8,
+        dockTop: dock?.top ?? window.innerHeight,
+        rootFontPx: root,
+      });
+      if (
+        last &&
+        last.mode === next.mode &&
+        last.side === next.side &&
+        Math.abs(last.left - next.left) < 0.5 &&
+        Math.abs(last.width - next.width) < 0.5 &&
+        Math.abs(last.top - next.top) < 0.5 &&
+        Math.abs(last.maxHeight - next.maxHeight) < 0.5
+      ) {
+        return;
+      }
+      last = next;
+      setPlace(next);
+    };
+    measure();
+    const watch = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    if (watch && frame.current) watch.observe(frame.current);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    mq.addEventListener("change", measure);
+    return () => {
+      watch?.disconnect();
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+      mq.removeEventListener("change", measure);
+    };
   }, [picked]);
 
   useEffect(() => {
@@ -215,12 +291,20 @@ export function WlcReading({
       style={cardHeight ? ({ "--wlc-card-h": `${Math.ceil(cardHeight)}px` } as CSSProperties) : undefined}
     >
       {picked ? (
-        <div ref={card} className="wlc-card">
-          <WordCard word={picked} onClose={() => setPicked(null)} />
+        <div
+          ref={card}
+          className="wlc-card"
+          data-place={place?.mode}
+          data-side={place?.side}
+          style={
+            place
+              ? { left: place.left, width: place.width, top: place.top, maxHeight: place.maxHeight }
+              : undefined
+          }
+        >
+          <WordCard word={picked} onClose={closeCard} />
         </div>
-      ) : (
-        <p className="wlc-card-hint">Tap a word to see its form and meaning.</p>
-      )}
+      ) : null}
       {showBack ? (
         <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resume}>
           Back to the reader
