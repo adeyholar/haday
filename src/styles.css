@@ -317,6 +317,18 @@ html {
   .wlc-card:not([data-place]) {
     visibility: hidden;
   }
+  .wlc-card[data-place="sheet"] {
+    inset-inline: 0;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: calc(var(--nav-h) + var(--dock-h, 0px));
+    z-index: 40;
+    width: auto;
+    max-height: min(55dvh, 26rem);
+    padding: 0 0.5rem 0.5rem;
+    visibility: visible;
+  }
   .wlc-card > div {
     box-shadow:
       var(--shadow-border),

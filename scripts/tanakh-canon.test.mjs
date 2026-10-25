@@ -33,6 +33,14 @@ test("catalog is the Hebrew Tanakh: 39 books, 929 chapters", () => {
   assert.equal(bookMeta("Joel")?.chapters, 4);
   assert.equal(bookMeta("Mal")?.chapters, 3);
   assert.equal(bookMeta("Ps")?.chapters, 150);
+  assert.equal(bookMeta("Gen")?.short, undefined);
+  assert.equal(bookMeta("1Sam")?.short, "1 Sam");
+  assert.equal(bookMeta("2Sam")?.short, "2 Sam");
+  assert.equal(bookMeta("1Kgs")?.short, "1 Kgs");
+  assert.equal(bookMeta("2Kgs")?.short, "2 Kgs");
+  assert.equal(bookMeta("1Chr")?.short, "1 Chr");
+  assert.equal(bookMeta("2Chr")?.short, "2 Chr");
+  assert.equal(bookMeta("1Chr")?.id, "1Chr");
   assert.equal(isBookId("Gen"), true);
   assert.equal(isBookId("Genesis"), false);
 });

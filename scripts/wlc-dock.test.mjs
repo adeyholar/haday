@@ -109,10 +109,11 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.match(page, /verseAnchorScroll/);
   assert.match(page, /getBoundingClientRect\(\)\.top/);
   assert.match(page, /flex shrink-0 items-center/);
-  assert.match(page, /sm:hidden/);
+  assert.match(page, /min-\[720px\]:hidden/);
   assert.match(page, /min-w-\[4\.75rem\]/);
-  assert.match(page, /\{meta\.id\} \{chapterNo\}/);
-  assert.match(page, /hidden min-w-0 flex-1 truncate/);
+  assert.match(page, /meta\.short \?\? meta\.id/);
+  assert.match(page, /hidden min-w-\[10rem\] flex-1 truncate/);
+  assert.match(page, /min-\[720px\]:block/);
 });
 
 test("a desktop word card uses the margin, and otherwise stays off the tapped word", () => {
@@ -166,6 +167,32 @@ test("a desktop word card uses the margin, and otherwise stays off the tapped wo
   assert.equal(overlayRight.side, "right");
   assert.ok(overlayRight.left >= 360 + gap - 0.1);
   assert.equal(misses(overlayRight, { left: 270, right: 360 }), true);
+
+  assert.match(desk, /wordFullyOffScreen/);
+  assert.match(desk, /desktopCardSheet/);
+  assert.match(desk, /closeCard\(true\)/);
+  assert.match(desk, /wordFullyOffScreen\(word, window\.innerHeight\)\) \{\n\s*closeCard\(false\)/);
+  assert.match(css, /data-place="sheet"[\s\S]{0,220}z-index:\s*40/);
+  assert.equal(cardPlace.wordFullyOffScreen({ top: -40, bottom: -4 }, 800), true);
+  assert.equal(cardPlace.wordFullyOffScreen({ top: 820, bottom: 860 }, 800), true);
+  assert.equal(cardPlace.wordFullyOffScreen({ top: 40, bottom: 80 }, 800), false);
+
+  const minW = 16 * 16;
+  const centred = { left: 256, right: 1024 };
+  const longWord = { left: 500, right: 780 };
+  const thin = placed(centred, longWord, 1280);
+  assert.equal(thin.mode, "sheet", "a long word near the centre uses the bottom sheet");
+
+  const floorSheet = { left: 100, right: 900 };
+  const exact = placed(floorSheet, { left: 368, right: 700 }, 1000);
+  assert.equal(exact.mode, "overlay");
+  assert.equal(exact.width, minW);
+  const under = placed(floorSheet, { left: 367, right: 700 }, 1000);
+  assert.equal(under.mode, "sheet", "under 16rem uses the bottom sheet");
+
+  for (const sample of [marginLeft, marginRight, overlayLeft, overlayRight, exact]) {
+    if (sample.mode === "overlay" || sample.mode === "margin") assert.ok(sample.width >= minW, `card is ${sample.width}`);
+  }
 
   const onlyRight = placed({ left: 80, right: 848 }, { left: 700, right: 820 }, 1248);
   assert.equal(onlyRight.mode, "margin");
