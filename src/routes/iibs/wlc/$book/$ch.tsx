@@ -98,6 +98,7 @@ function WlcChapterPage() {
   const [tone, setTone] = useState<SheetTone>("light");
   const [size, setSize] = useState<SheetSize>("page");
   const [width, setWidth] = useState<WlcSheetWidth>("normal");
+  const [sized, setSized] = useState(false);
   const [aaOpen, setAaOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [spot, setSpot] = useState<FollowSpot | null>(null);
@@ -107,6 +108,7 @@ function WlcChapterPage() {
     setTone(readSheet());
     setSize(readSize());
     setWidth(readWidth());
+    setSized(true);
     try {
       if (window.localStorage.getItem(NOTE_KEY) !== "seen") {
         setNoteOpen(true);
@@ -180,7 +182,7 @@ function WlcChapterPage() {
   };
 
   return (
-    <div className={width === "wide" ? "wlc-stage wlc-wide" : "wlc-stage"}>
+    <div className={`${width === "wide" ? "wlc-stage wlc-wide" : "wlc-stage"}${sized ? " wlc-sized" : ""}`}>
       <div className="wlc-toolbar -mx-4 mb-2 overflow-x-auto px-2 py-0.5">
         <div className="flex w-max min-w-full items-center gap-1">
           <ScriptureTabs active="lab" compact />

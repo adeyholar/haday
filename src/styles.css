@@ -268,6 +268,17 @@ html {
   padding: 0.75rem 0.85rem calc(1.25rem + var(--wlc-card-h, 0px));
   outline: none;
 }
+.wlc-stage:not(.wlc-sized) .manuscript-sheet {
+  opacity: 0;
+}
+.wlc-stage.wlc-sized .manuscript-sheet {
+  transition: opacity 180ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wlc-stage.wlc-sized .manuscript-sheet {
+    transition: none;
+  }
+}
 .wlc-card {
   position: fixed;
   inset-inline: 0;
@@ -284,22 +295,22 @@ html {
     0 -12px 32px -12px rgba(28, 24, 20, 0.35);
 }
 @media (min-width: 1024px) {
-  body:has(.wlc-stage):has(.wlc-card) main {
+  body:has(.wlc-stage) main {
     max-width: min(100%, calc(48rem + 22rem + 0.75rem + 2rem));
   }
-  body:has(.wlc-stage):has(.wlc-card) .read-dock-row {
+  body:has(.wlc-stage) .read-dock-row {
     width: min(100%, calc(48rem + 22rem + 0.75rem + 2rem));
   }
-  body:has(.wlc-stage):has(.wlc-card) .read-dock-sheet {
+  body:has(.wlc-stage) .read-dock-sheet {
     width: min(100%, 48rem);
   }
-  .wlc-reading:has(.wlc-card) {
+  .wlc-stage .wlc-reading {
     display: grid;
     grid-template-columns: minmax(min(48rem, calc(100% - 12.5rem - 0.75rem)), 48rem) minmax(12.5rem, 22rem);
     align-items: start;
     gap: 0.75rem;
   }
-  .wlc-reading:has(.wlc-card) .manuscript-sheet {
+  .wlc-stage .wlc-reading .manuscript-sheet {
     grid-column: 1;
     grid-row: 1;
     min-width: 0;
@@ -326,24 +337,15 @@ html {
 }
 @media (min-width: 1024px) {
   body:has(.wlc-wide) main {
-    max-width: calc(56rem + 2rem);
-  }
-  body:has(.wlc-wide):has(.wlc-card) main {
     max-width: min(100%, calc(56rem + 22rem + 0.75rem + 2rem));
   }
-  .wlc-wide .read-dock-row {
-    width: min(100%, calc(56rem + 2rem));
-  }
-  .wlc-wide .read-dock-sheet {
-    width: 100%;
-  }
-  body:has(.wlc-wide):has(.wlc-card) .read-dock-row {
+  body:has(.wlc-wide) .read-dock-row {
     width: min(100%, calc(56rem + 22rem + 0.75rem + 2rem));
   }
-  body:has(.wlc-wide):has(.wlc-card) .read-dock-sheet {
+  body:has(.wlc-wide) .read-dock-sheet {
     width: min(100%, 56rem);
   }
-  .wlc-wide .wlc-reading:has(.wlc-card) {
+  .wlc-wide .wlc-reading {
     grid-template-columns: minmax(min(56rem, calc(100% - 16rem - 0.75rem)), 56rem) minmax(16rem, 22rem);
   }
 }

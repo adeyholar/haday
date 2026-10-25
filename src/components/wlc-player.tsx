@@ -9,6 +9,26 @@ import type { WlcVerse } from "@/lib/wlc";
 
 const NUDGE_SEC = 5;
 
+function clockLabel(seconds: number): string {
+  const whole = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+  const minutes = Math.floor(whole / 60);
+  const remain = whole % 60;
+  return `${minutes}:${String(remain).padStart(2, "0")}`;
+}
+
+function waitForMetadata(el: HTMLAudioElement): Promise<void> {
+  if (el.readyState >= 1) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      el.removeEventListener("loadedmetadata", done);
+      el.removeEventListener("error", done);
+      resolve();
+    };
+    el.addEventListener("loadedmetadata", done);
+    el.addEventListener("error", done);
+  });
+}
+
 export function WlcPlayer({
   book,
   chapter,
@@ -34,6 +54,7 @@ export function WlcPlayer({
   const [verseNo, setVerseNo] = useState(1);
   const [now, setNow] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [hasStarts, setHasStarts] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
   const verseNoRef = useRef(1);
   const onEngageRef = useRef(onEngage);
@@ -61,6 +82,7 @@ export function WlcPlayer({
     setMissing(false);
     setNow(0);
     setDuration(0);
+    setHasStarts(false);
     verseNoRef.current = 1;
     setVerseNo(1);
     spotRef.current = "";
@@ -73,7 +95,9 @@ export function WlcPlayer({
     void fetchBookAlign(book).then((align) => {
       if (cancelled) return;
       const timed = chapterFromAlign(book, chapter, align);
-      startsRef.current = { verses: timed.verses ?? [], words: timed.words };
+      const verseStarts = timed.verses ?? [];
+      startsRef.current = { verses: verseStarts, words: timed.words };
+      setHasStarts(verseStarts.length > 0);
       if (el && timed.src) el.src = timed.src;
       if (el) el.playbackRate = rateRef.current;
       if (!timed.aligned) setMissing(true);
@@ -112,11 +136,25 @@ export function WlcPlayer({
   async function playFrom(time: number) {
     const el = audioRef.current;
     if (!el) return;
-    const cap = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : time;
-    const next = Math.max(0, Math.min(time, cap));
-    el.currentTime = next;
-    setNow(next);
-    paint(next);
+    if (el.readyState < 1) await waitForMetadata(el);
+    if (audioRef.current !== el || el.readyState < 1) return;
+    const known = Number.isFinite(el.duration) && el.duration > 0;
+    if (!known) {
+      setPlaying(false);
+      setMissing(true);
+      return;
+    }
+    const next = Math.max(0, Math.min(time, el.duration));
+    try {
+      el.currentTime = next;
+    } catch {
+      setPlaying(false);
+      setMissing(true);
+      return;
+    }
+    if (time > 0 && el.currentTime === 0) return;
+    setNow(el.currentTime);
+    paint(el.currentTime);
     if (!el.paused) return;
     try {
       el.playbackRate = rateRef.current;
@@ -142,11 +180,15 @@ export function WlcPlayer({
   }
 
   function jumpVerse(index: number) {
-    const count = Math.max(versesRef.current.length, startsRef.current.verses.length, 1);
-    const next = Math.min(count - 1, Math.max(0, index));
+    const starts = startsRef.current.verses;
+    if (!starts.length) return;
+    const next = Math.min(starts.length - 1, Math.max(0, index));
+    const at = starts[next];
+    if (typeof at !== "number" || !Number.isFinite(at)) return;
     verseNoRef.current = next + 1;
     setVerseNo(next + 1);
-    void playFrom(startsRef.current.verses[next] ?? 0);
+    onEngageRef.current?.();
+    void playFrom(at);
   }
 
   function stepVerse(delta: number) {
@@ -204,34 +246,43 @@ export function WlcPlayer({
   const rateLabel = readRateLabel(rate);
   const atStart = verseNo <= 1;
   const atEnd = verseNo >= total;
+  const heard = clockLabel(now);
+  const lengthLabel = clockLabel(duration);
 
   return (
     <div className="read-dock" ref={dockRef}>
       <div className="read-dock-row">
         <div className="read-dock-sheet">
-          <input
-            className="audio-seek w-full"
-            type="range"
-            min={0}
-            max={duration || 1}
-            step={0.1}
-            value={Math.min(now, duration || now)}
-            aria-label="Seek recording"
-            onChange={(event) => {
-              const time = Number(event.target.value);
-              const el = audioRef.current;
-              if (!el) return;
-              el.currentTime = time;
-              setNow(time);
-              paint(time);
-            }}
-          />
+          <div className="flex items-center gap-2">
+            <input
+              className="audio-seek min-w-0 flex-1"
+              type="range"
+              min={0}
+              max={duration || 1}
+              step={0.1}
+              value={Math.min(now, duration || now)}
+              disabled={!(duration > 0)}
+              aria-label="Seek recording"
+              aria-valuetext={`${heard} of ${lengthLabel}`}
+              onChange={(event) => {
+                const time = Number(event.target.value);
+                const el = audioRef.current;
+                if (!el || !(duration > 0)) return;
+                el.currentTime = time;
+                setNow(time);
+                paint(time);
+              }}
+            />
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-muted" aria-hidden="true">
+              {heard} / {lengthLabel}
+            </span>
+          </div>
           <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-1 py-0.5" role="group" aria-label="Play and reading speed">
             <button
               type="button"
               className="inline-flex size-11 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
               aria-label="Previous verse"
-              disabled={atStart}
+              disabled={!hasStarts || atStart}
               onClick={() => stepVerse(-1)}
             >
               ‹
@@ -261,6 +312,7 @@ export function WlcPlayer({
                 className="col-start-3 row-start-1 h-11 w-full max-w-16 justify-self-start rounded-[var(--radius-sm)] bg-surface px-1 text-sm font-semibold text-ink"
                 value={String(Math.min(verseNo, total))}
                 aria-label={`Verse ${verseNo} of ${total}`}
+                disabled={!hasStarts}
                 onChange={(event) => jumpVerse(Number(event.target.value) - 1)}
               >
                 {Array.from({ length: total }, (_, index) => (
@@ -274,7 +326,7 @@ export function WlcPlayer({
               type="button"
               className="inline-flex size-11 items-center justify-center text-sm font-semibold text-ink disabled:text-muted"
               aria-label="Next verse"
-              disabled={atEnd}
+              disabled={!hasStarts || atEnd}
               onClick={() => stepVerse(1)}
             >
               ›
@@ -285,7 +337,7 @@ export function WlcPlayer({
       {missing ? <span className="px-3 pb-1 text-sm text-muted">The recording did not load.</span> : null}
       <audio
         ref={audioRef}
-        preload="none"
+        preload="metadata"
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
         onTimeUpdate={(event) => {
           setNow(event.currentTarget.currentTime);

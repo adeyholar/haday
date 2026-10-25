@@ -38,6 +38,14 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.match(player, /Reading speed,/);
   assert.match(player, /haday\.wlc\.rate|WLC_RATE_KEY/);
   assert.match(player, /aria-label="Seek recording"/);
+  assert.match(player, /aria-valuetext/);
+  assert.match(player, /preload="metadata"/);
+  assert.match(player, /readyState < 1/);
+  assert.match(player, /loadedmetadata/);
+  assert.match(player, /disabled=\{!hasStarts/);
+  assert.match(player, /if \(!starts\.length\) return/);
+  assert.match(player, /onEngageRef\.current\?\.\(\)/);
+  assert.doesNotMatch(player, /starts\[next\] \?\? 0|verses\[next\] \?\? 0/);
   assert.match(page, /aria-label="Previous chapter"/);
   assert.match(page, /aria-label="Next chapter"/);
   assert.match(page, /Next chapter ›/);
@@ -52,6 +60,11 @@ test("the dock steps verses, not chapters, and the bars use variables", () => {
   assert.doesNotMatch(dock, /3\.5rem|5\.5rem|6rem/);
   assert.match(dock, /bottom:\s*var\(--nav-h\)/);
   assert.match(dock, /bottom:\s*calc\(var\(--nav-h\) \+ var\(--dock-h\)\)/);
+  const wide = css.slice(css.indexOf("@media (min-width: 1024px)"));
+  assert.match(wide, /body:has\(\.wlc-stage\) main/);
+  assert.doesNotMatch(wide, /body:has\(\.wlc-stage\):has\(\.wlc-card\)/);
+  assert.match(wide, /body:has\(\.wlc-wide\) main/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
 const base = process.env.WLC_E2E_BASE;
@@ -164,12 +177,21 @@ test(
       assert.equal(shown, (await speed.innerText()).trim());
 
       const verse = page.locator("#wlc-verse");
+      await page.waitForFunction(() => {
+        const next = document.querySelector('[aria-label="Next verse"]');
+        const select = document.querySelector("#wlc-verse");
+        return Boolean(next && !next.disabled && select && !select.disabled);
+      });
       const beforeVerse = await verse.inputValue();
       await page.getByRole("button", { name: "Next verse" }).click();
       await page.waitForFunction((prev) => document.querySelector("#wlc-verse")?.value !== prev, beforeVerse);
       assert.equal(Number(await verse.inputValue()), Number(beforeVerse) + 1);
 
       const beforeTime = await page.evaluate(() => document.querySelector("audio")?.currentTime ?? 0);
+      await page.waitForFunction(() => {
+        const slider = document.querySelector(".audio-seek");
+        return Boolean(slider && !slider.disabled);
+      });
       const seek = await page.getByRole("slider", { name: "Seek recording" }).boundingBox();
       assert.ok(seek);
       await page.mouse.click(seek.x + seek.width * 0.55, seek.y + seek.height / 2);
@@ -193,6 +215,11 @@ test(
         const cardPage = await ctx.newPage();
         await cardPage.goto(`${base}/iibs/wlc/Gen/1`, { waitUntil: "networkidle" });
         await cardPage.waitForSelector(".ms-word", { timeout: 20000 });
+        await cardPage.waitForSelector(".wlc-sized", { timeout: 4000 });
+        if (viewport.beside) await cardPage.waitForSelector(".manuscript-large", { timeout: 4000 });
+        const beforeX = await cardPage.evaluate(() => document.querySelector(".ms-word")?.getBoundingClientRect().x ?? Number.NaN);
+        const beforeDock = await cardPage.evaluate(() => document.querySelector(".read-dock-sheet")?.getBoundingClientRect().x ?? Number.NaN);
+        const beforeBar = await cardPage.evaluate(() => document.querySelector(".wlc-toolbar")?.getBoundingClientRect().x ?? Number.NaN);
         await cardPage.locator(".ms-word").first().click();
         const card = cardPage.locator(".wlc-card");
         await card.waitFor({ timeout: 5000 });
@@ -204,6 +231,18 @@ test(
         if (viewport.beside) {
           assert.ok(sheet.width >= 720 && sheet.width <= 820, `${label}: Hebrew is ${sheet.width}`);
           assert.ok(cardBox.x >= sheet.x + sheet.width - 8, `${label}: card is not beside the text`);
+          const opened = await cardPage.evaluate(() => ({
+            word: document.querySelector(".ms-word")?.getBoundingClientRect().x ?? Number.NaN,
+            dock: document.querySelector(".read-dock-sheet")?.getBoundingClientRect().x ?? Number.NaN,
+            bar: document.querySelector(".wlc-toolbar")?.getBoundingClientRect().x ?? Number.NaN,
+          }));
+          assert.ok(Math.abs(opened.word - beforeX) <= 1, `${label}: word moved ${opened.word - beforeX}px when the card opened`);
+          assert.ok(Math.abs(opened.dock - beforeDock) <= 1, `${label}: dock moved ${opened.dock - beforeDock}px when the card opened`);
+          assert.ok(Math.abs(opened.bar - beforeBar) <= 1, `${label}: toolbar moved ${opened.bar - beforeBar}px when the card opened`);
+          await cardPage.getByRole("button", { name: "Close", exact: true }).click();
+          await cardPage.waitForSelector(".wlc-card", { state: "detached" });
+          const closedX = await cardPage.evaluate(() => document.querySelector(".ms-word")?.getBoundingClientRect().x ?? Number.NaN);
+          assert.ok(Math.abs(closedX - beforeX) <= 1, `${label}: word moved ${closedX - beforeX}px when the card closed`);
         } else {
           assert.ok(cardBox.y >= 0 && cardBox.y + cardBox.height <= dock.y + 2, `${label}: card is not fully above the dock`);
           assert.ok(cardBox.x <= sheet.x + 24, `${label}: phone card left the sheet`);
