@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
 import type { FollowSpot } from "@/lib/wlc-follow";
+import { useFollowScroll } from "@/lib/use-follow-scroll";
 
 /** The chapter page scrolls. Wide screens keep the word card beside the text. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -157,16 +158,20 @@ export function WlcReading({
   size,
   showNote,
   spot,
+  resumeTick = 0,
 }: {
   chapter: WlcChapter;
   tone: SheetTone;
   size: SheetSize;
   showNote: boolean;
   spot: FollowSpot | null;
+  resumeTick?: number;
 }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
+  const follow = useFollowScroll(spot ? String(spot.verse) : "");
+  const { resume, showBack, targetRef } = follow;
 
   const card = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState(0);
@@ -201,10 +206,8 @@ export function WlcReading({
   }, [picked, cardHeight]);
 
   useEffect(() => {
-    if (!spot) return;
-    const el = frame.current?.querySelector<HTMLElement>(spot.word == null ? ".ms-spoken-verse" : ".ms-spoken");
-    el?.scrollIntoView({ block: "center", inline: "nearest" });
-  }, [spot]);
+    if (resumeTick) resume();
+  }, [resumeTick, resume]);
 
   return (
     <div
@@ -215,6 +218,11 @@ export function WlcReading({
         <div ref={card} className="wlc-card">
           <WordCard word={picked} onClose={() => setPicked(null)} />
         </div>
+      ) : null}
+      {showBack ? (
+        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resume}>
+          Back to the reader
+        </button>
       ) : null}
       <div
         ref={frame}
@@ -236,7 +244,10 @@ export function WlcReading({
             return (
             <div
               key={verse.ref}
-              className={`ms-verse flex items-start ${spot?.verse === verseIndex && spot.word == null ? "ms-spoken-verse" : ""}`}
+              ref={(node) => {
+                if (spot?.verse === verseIndex) targetRef.current = node;
+              }}
+              className={`read-line ms-verse flex items-start ${spot?.verse === verseIndex && spot.word == null ? "ms-spoken-verse" : ""}`}
               dir="rtl"
             >
               <span className="ms-verse-no mt-3 w-8 shrink-0 text-sm font-semibold" dir="ltr">

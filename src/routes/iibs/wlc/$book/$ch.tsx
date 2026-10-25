@@ -92,6 +92,7 @@ function WlcChapterPage() {
   const [aaOpen, setAaOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [spot, setSpot] = useState<FollowSpot | null>(null);
+  const [resumeTick, setResumeTick] = useState(0);
 
   useEffect(() => {
     setTone(readSheet());
@@ -234,9 +235,21 @@ function WlcChapterPage() {
         </div>
       ) : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
-      <WlcPlayer book={meta.id} chapter={chapterNo} verses={chapter?.verses ?? []} onSpot={setSpot} />
+      <WlcPlayer
+        book={meta.id}
+        chapter={chapterNo}
+        verses={chapter?.verses ?? []}
+        onSpot={setSpot}
+        canPrev={prev != null}
+        canNext={next != null}
+        onPrevChapter={() => prev && go(prev)}
+        onNextChapter={() => next && go(next)}
+        onEngage={() => setResumeTick((tick) => tick + 1)}
+      />
       {!chapter && !error ? <p className="text-sm text-muted">Opening the chapter.</p> : null}
-      {chapter ? <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} spot={spot} /> : null}
+      {chapter ? (
+        <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} spot={spot} resumeTick={resumeTick} />
+      ) : null}
       {next ? (
         <button type="button" onClick={() => go(next)} className="mt-4 min-h-11 font-semibold text-primary">
           Next chapter ›
