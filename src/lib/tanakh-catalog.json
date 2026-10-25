@@ -57,6 +57,7 @@
   },
   {
     "id": "1Sam",
+    "short": "1 Sam",
     "en": "1 Samuel",
     "he": "שְׁמוּאֵל א",
     "section": "neviim",
@@ -65,6 +66,7 @@
   },
   {
     "id": "2Sam",
+    "short": "2 Sam",
     "en": "2 Samuel",
     "he": "שְׁמוּאֵל ב",
     "section": "neviim",
@@ -73,6 +75,7 @@
   },
   {
     "id": "1Kgs",
+    "short": "1 Kgs",
     "en": "1 Kings",
     "he": "מְלָכִים א",
     "section": "neviim",
@@ -81,6 +84,7 @@
   },
   {
     "id": "2Kgs",
+    "short": "2 Kgs",
     "en": "2 Kings",
     "he": "מְלָכִים ב",
     "section": "neviim",
@@ -297,6 +301,7 @@
   },
   {
     "id": "1Chr",
+    "short": "1 Chr",
     "en": "1 Chronicles",
     "he": "דִּבְרֵי הַיָּמִים א",
     "section": "ketuvim",
@@ -305,6 +310,7 @@
   },
   {
     "id": "2Chr",
+    "short": "2 Chr",
     "en": "2 Chronicles",
     "he": "דִּבְרֵי הַיָּמִים ב",
     "section": "ketuvim",

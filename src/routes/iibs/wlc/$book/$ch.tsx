@@ -235,8 +235,8 @@ function WlcChapterPage() {
   return (
     <div className={`${shownWide ? "wlc-stage wlc-wide" : "wlc-stage"}${sized ? " wlc-sized" : ""}`}>
       <div className="wlc-toolbar -mx-4 mb-2 flex items-center px-2 py-0.5">
-        <h1 className="inline-flex h-11 min-w-[4.75rem] shrink-0 items-center px-1 text-sm font-semibold text-ink sm:hidden">
-          {meta.id} {chapterNo}
+        <h1 className="inline-flex h-11 min-w-[4.75rem] shrink-0 items-center px-1 text-sm font-semibold text-ink min-[720px]:hidden">
+          {meta.short ?? meta.id} {chapterNo}
         </h1>
         <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
           <div className="flex w-max min-w-full items-center gap-1">
@@ -244,7 +244,7 @@ function WlcChapterPage() {
             <Link to="/iibs/wlc" aria-label="Books" className="inline-flex h-11 shrink-0 items-center px-1 text-sm font-semibold text-primary">
               ‹ Books
             </Link>
-            <h1 className="hidden min-w-0 flex-1 truncate text-sm font-semibold text-ink sm:block">
+            <h1 className="hidden min-w-[10rem] flex-1 truncate text-sm font-semibold text-ink min-[720px]:block">
               {meta.en} {chapterNo}{" "}
               <span className="he-word font-normal text-muted" dir="rtl" lang="he">
                 {meta.he}

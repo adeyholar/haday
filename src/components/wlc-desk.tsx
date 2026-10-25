@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, type WlcWord } from "@/lib/wlc";
 import type { FollowSpot } from "@/lib/wlc-follow";
 import { useFollowScroll } from "@/lib/use-follow-scroll";
-import { placeDesktopCard, type DesktopCardPlace } from "@/lib/wlc-card-place";
+import { placeDesktopCard, wordFullyOffScreen, desktopCardSheet, type DesktopCardPlace } from "@/lib/wlc-card-place";
 
 /** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -178,10 +178,10 @@ export function WlcReading({
   const [cardHeight, setCardHeight] = useState(0);
   const [place, setPlace] = useState<DesktopCardPlace | null>(null);
 
-  const closeCard = () => {
+  const closeCard = (focusWord: boolean) => {
     const word = frame.current?.querySelector<HTMLElement>(".ms-picked");
     setPicked(null);
-    window.setTimeout(() => word?.focus({ preventScroll: true }), 0);
+    if (focusWord) window.setTimeout(() => word?.focus({ preventScroll: true }), 0);
   };
 
   useEffect(() => {
@@ -194,7 +194,7 @@ export function WlcReading({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
-      closeCard();
+      closeCard(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -208,12 +208,12 @@ export function WlcReading({
       setCardHeight(0);
       return;
     }
-    const sync = () => setCardHeight(sideCard() ? 0 : el.getBoundingClientRect().height);
+    const sync = () => setCardHeight(!sideCard() || place?.mode === "sheet" ? el.getBoundingClientRect().height : 0);
     sync();
     const watch = new ResizeObserver(sync);
     watch.observe(el);
     return () => watch.disconnect();
-  }, [picked]);
+  }, [picked, place?.mode]);
 
   useLayoutEffect(() => {
     if (!picked) {
@@ -233,17 +233,25 @@ export function WlcReading({
       const sheet = frame.current?.getBoundingClientRect();
       const word = frame.current?.querySelector(".ms-picked")?.getBoundingClientRect();
       const toolbar = document.querySelector(".wlc-toolbar")?.getBoundingClientRect();
-      if (!sheet || !word || !toolbar || sheet.width < 1) return;
       const dock = document.querySelector(".read-dock")?.getBoundingClientRect();
       const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      const next = placeDesktopCard({
-        sheet: { left: sheet.left, right: sheet.right },
-        word: { left: word.left, right: word.right },
-        viewportWidth: window.innerWidth,
-        toolbarBottom: toolbar.bottom + 8,
-        dockTop: dock?.top ?? window.innerHeight,
-        rootFontPx: root,
-      });
+      const dockTop = dock?.top ?? window.innerHeight;
+      const toolbarBottom = (toolbar?.bottom ?? 6.75 * root) + 8;
+      if (word && wordFullyOffScreen(word, window.innerHeight)) {
+        closeCard(false);
+        return;
+      }
+      const next =
+        !sheet || !word || sheet.width < 1 || word.width < 1
+          ? desktopCardSheet(toolbarBottom, dockTop)
+          : placeDesktopCard({
+              sheet: { left: sheet.left, right: sheet.right },
+              word: { left: word.left, right: word.right },
+              viewportWidth: window.innerWidth,
+              toolbarBottom,
+              dockTop,
+              rootFontPx: root,
+            });
       if (
         last &&
         last.mode === next.mode &&
@@ -297,12 +305,12 @@ export function WlcReading({
           data-place={place?.mode}
           data-side={place?.side}
           style={
-            place
+            place && place.mode !== "sheet"
               ? { left: place.left, width: place.width, top: place.top, maxHeight: place.maxHeight }
               : undefined
           }
         >
-          <WordCard word={picked} onClose={closeCard} />
+          <WordCard word={picked} onClose={() => closeCard(true)} />
         </div>
       ) : null}
       {showBack ? (

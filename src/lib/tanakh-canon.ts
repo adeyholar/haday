@@ -50,6 +50,8 @@ export type BookMeta = {
   section: SectionId;
   chapters: number;
   verses: number;
+  /** Phone label, only where the id is hard to read. Routes still use `id`. */
+  short?: string;
 };
 
 export const SECTIONS: { id: SectionId; en: string; he: string }[] = [
