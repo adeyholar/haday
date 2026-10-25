@@ -3,6 +3,7 @@ import { joinsNext, verseLabel, wlcClusters, wlcMaqafChains, type WlcChapter, ty
 import type { FollowSpot } from "@/lib/wlc-follow";
 import { useFollowScroll } from "@/lib/use-follow-scroll";
 import { placeDesktopCard, wordFullyOffScreen, desktopCardSheet, type DesktopCardPlace } from "@/lib/wlc-card-place";
+import { WlcLexicon } from "@/components/wlc-lexicon";
 
 /** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -149,6 +150,7 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
           Signed correction. The marks in this frame are the corrected Leningrad reading.
         </p>
       ) : null}
+      <WlcLexicon lemma={word.lemma} morph={word.morph} />
     </div>
   );
 }
