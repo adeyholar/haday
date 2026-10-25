@@ -17,6 +17,7 @@ const {
   readGoogleCredentials,
   missingGoogleSignInWarning,
   googleMayLinkExistingAccount,
+  googlePathToRemember,
   socialSignInErrorMessage,
   loginSocialOffer,
   isLegacyBrokerProvider,
@@ -132,6 +133,62 @@ test("sign-in/social redirects to Google with the real client id and class callb
   assert.equal(url.searchParams.get("redirect_uri"), `${ORIGIN}/api/auth/callback/google`);
   assert.doesNotMatch(body.url, /grok_preview|auth\.grok\.me|grok-google|grok-x/);
   assert.equal(JSON.stringify(body).includes("grok_preview"), false);
+});
+
+test("Create account with nothing answered still starts Google", async () => {
+  assert.equal(googlePathToRemember("up", null), null);
+  assert.equal(googlePathToRemember("up", "bbh"), "bbh");
+  assert.equal(googlePathToRemember("up", "iibs"), "iibs");
+  assert.equal(googlePathToRemember("in", "bbh"), null);
+  assert.equal(googlePathToRemember("in", null), null);
+
+  const login = read("src/routes/login.tsx");
+  const onGoogle = login.slice(login.indexOf("async function onGoogle"), login.indexOf("async function onForgot"));
+  const emailStart = login.indexOf("async function onEmail");
+  const onEmail = login.slice(emailStart, login.indexOf("return (", emailStart));
+  assert.match(onGoogle, /googlePathToRemember\(mode, placed\)/);
+  assert.match(onGoogle, /stashPathIntent\(remember\)/);
+  assert.match(onGoogle, /signIn\(GOOGLE_PROVIDER_ID/);
+  assert.doesNotMatch(onGoogle, /if \(!placed\)/);
+  assert.match(onEmail, /if \(!placed\)/);
+  assert.doesNotMatch(login, /Answer the question above to use Google/);
+
+  const { signInLanding } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
+  assert.equal(signInLanding({ path: null, admin: false }), "/");
+  assert.equal(signInLanding({ path: "bbh", admin: false }), "/bbh");
+  assert.equal(signInLanding({ path: "iibs", admin: false }), "/iibs");
+
+  const creds = readGoogleCredentials({ GOOGLE_CLIENT_ID: CLIENT_ID, GOOGLE_CLIENT_SECRET: CLIENT_SECRET });
+  const auth = betterAuth({
+    baseURL: ORIGIN,
+    secret: "test-secret-test-secret-test-secret-32",
+    trustedOrigins: [ORIGIN],
+    socialProviders: {
+      google: {
+        clientId: creds.clientId,
+        clientSecret: creds.clientSecret,
+        prompt: "select_account",
+      },
+    },
+  });
+  const response = await auth.handler(
+    new Request(`${ORIGIN}/api/auth/sign-in/social`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: ORIGIN },
+      body: JSON.stringify({
+        provider: "google",
+        callbackURL: "/login",
+        errorCallbackURL: "/login",
+        disableRedirect: true,
+      }),
+    }),
+  );
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  const url = new URL(body.url);
+  assert.equal(url.origin, "https://accounts.google.com");
+  assert.equal(url.searchParams.get("client_id"), CLIENT_ID);
+  assert.doesNotMatch(body.url, /grok_preview/);
 });
 
 test("an unverified Google email does not link to an existing account", async () => {

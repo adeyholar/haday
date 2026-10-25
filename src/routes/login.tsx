@@ -3,7 +3,7 @@ import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react
 import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getGoogleSignInOffered } from "@/lib/auth/google-status";
-import { GOOGLE_PROVIDER_ID, socialSignInErrorMessage } from "@/lib/auth/google";
+import { GOOGLE_PROVIDER_ID, googlePathToRemember, socialSignInErrorMessage } from "@/lib/auth/google";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
@@ -115,13 +115,8 @@ function Login() {
 
   async function onGoogle() {
     setError(null);
-    if (mode === "up") {
-      if (!placed) {
-        setError(heard === "other" ? PATH_CHOICE : HEARD_NEED);
-        return;
-      }
-      stashPathIntent(placed);
-    }
+    const remember = googlePathToRemember(mode, placed);
+    if (remember) stashPathIntent(remember);
     setBusy(true);
     try {
       await signIn(GOOGLE_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
@@ -397,11 +392,8 @@ function Login() {
             )}
 
             {mode !== "reset" && googleOffered && (
-            <div className="mt-4 grid gap-2">
+            <div className="mt-4">
               <GoogleSignInButton busy={busy} onClick={() => void onGoogle()} />
-              {mode === "up" && !placed ? (
-                <p className="text-sm text-muted">Answer the question above to use Google.</p>
-              ) : null}
             </div>
             )}
 
