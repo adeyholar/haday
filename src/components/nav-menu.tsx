@@ -64,6 +64,7 @@ export type NavHref =
   | "/game/qal-imperfect"
   | "/ask"
   | "/ideas"
+  | "/account"
   | "/iibs"
   | "/iibs/vocab"
   | "/iibs/road"

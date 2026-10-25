@@ -1,4 +1,5 @@
 import type { StudyPath } from "@/lib/path";
+import { X_LINK_REQUIRED_MESSAGE, X_NO_EMAIL_MESSAGE } from "./x";
 
 /**
  * Direct Google sign-in (Better Auth's built-in provider).
@@ -7,13 +8,10 @@ import type { StudyPath } from "@/lib/path";
  * a preview or sandbox client id. Both GOOGLE_CLIENT_ID and
  * GOOGLE_CLIENT_SECRET must be set or the Google button stays off.
  *
- * TODO: X sign-in is hidden. Do not add an X button or an X provider until a
- * direct provider is wired here. Do not send classmates through the old broker.
+ * X is a separate direct provider in `./x`. It is offered only when its own
+ * env vars are set. Do not send classmates through the old broker.
  */
 export const GOOGLE_PROVIDER_ID = "google" as const;
-
-/** X stays off. See the TODO above. */
-export const X_SIGN_IN_OFFERED = false;
 
 export const GOOGLE_BUTTON_LABEL = "Continue with Google";
 
@@ -83,9 +81,12 @@ export function googleMayLinkExistingAccount(input: {
 export const GOOGLE_LINK_REFUSAL =
   "This email already has a HaDay account. Sign in with your email and password, or confirm the email we sent you, then Continue with Google will work.";
 
-/** Friendly copy for Better Auth's link refusal. Other codes return null. */
+/** Friendly copy for Better Auth's link refusal, and the two X codes. Other codes return null. */
 export function socialSignInErrorMessage(code: string): string | null {
-  const normalized = code.toLowerCase().replace(/_/g, " ");
+  const raw = code.trim().toLowerCase();
+  if (raw === "x_no_email" || raw === "x no email") return X_NO_EMAIL_MESSAGE;
+  if (raw === "x_link_required" || raw === "x link required") return X_LINK_REQUIRED_MESSAGE;
+  const normalized = raw.replace(/_/g, " ");
   if (normalized.includes("account not linked") || normalized.includes("unable to link")) {
     return GOOGLE_LINK_REFUSAL;
   }
@@ -101,17 +102,18 @@ export function googlePathToRemember(
   return null;
 }
 
-/** The login page shows the Google button only when the server says it is configured. Never X. */
-export function loginSocialOffer(googleConfigured: boolean): {
+/** The login page shows each button only when that provider is configured. */
+export function loginSocialOffer(googleOn: boolean, xOn: boolean): {
   showGoogle: boolean;
   showX: boolean;
   divider: "or" | null;
 } {
-  const showGoogle = googleConfigured === true && X_SIGN_IN_OFFERED === false;
+  const showGoogle = googleOn === true;
+  const showX = xOn === true;
   return {
     showGoogle,
-    showX: false,
-    divider: showGoogle ? "or" : null,
+    showX,
+    divider: showGoogle || showX ? "or" : null,
   };
 }
 

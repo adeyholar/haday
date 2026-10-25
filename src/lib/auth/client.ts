@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 import { runPreSignInSignOut, runSignOut } from "../../../scripts/sign-out-plan.mjs";
-import { GOOGLE_PROVIDER_ID } from "./providers";
+import { GOOGLE_PROVIDER_ID, X_PROVIDER_ID } from "./providers";
 
 /**
  * Better Auth client for this React SPA (browser-side).
@@ -35,8 +35,8 @@ export const authClient = createAuthClient({
  */
 export const authEnabled = import.meta.env.VITE_AUTH_ENABLED !== "false";
 
-/** Google is the only social provider. X is not offered. */
-export { GOOGLE_PROVIDER_ID };
+/** Google and X. A button is shown only when the server says that provider is configured. */
+export { GOOGLE_PROVIDER_ID, X_PROVIDER_ID };
 
 // ── Live-preview bearer token ────────────────────────────────────────────────
 // The embedded preview iframe has partitioned cookies, so we keep the session's
@@ -78,18 +78,20 @@ function inLivePreview(): boolean {
 }
 
 /**
- * Start Google sign-in. Full-page redirect to accounts.google.com.
- * The server only offers this when GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
- * are set. X is not a provider.
+ * Start Google or X sign-in. Full-page redirect to that provider.
+ * The server only offers a provider when both of its env vars are set.
  *
  * Clears any existing local session FIRST so switching accounts actually
- * switches identity.
+ * switches identity. Do not use this to link an account the student is
+ * already signed into — that would sign them out first.
  */
+const SOCIAL_PROVIDER_IDS = new Set<string>([GOOGLE_PROVIDER_ID, X_PROVIDER_ID]);
+
 export async function signIn(
   providerId: string,
   opts: { callbackURL?: string; errorCallbackURL?: string } = {},
 ): Promise<void> {
-  if (providerId !== GOOGLE_PROVIDER_ID) {
+  if (!SOCIAL_PROVIDER_IDS.has(providerId)) {
     throw new Error("That sign-in is not offered.");
   }
   const callbackURL = opts.callbackURL ?? "/";
@@ -107,7 +109,7 @@ export async function signIn(
   });
 
   const { data, error } = await authClient.signIn.social({
-    provider: GOOGLE_PROVIDER_ID,
+    provider: providerId as "google" | "twitter",
     callbackURL,
     errorCallbackURL,
     disableRedirect: true,

@@ -3,8 +3,10 @@ import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react
 import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getGoogleSignInOffered } from "@/lib/auth/google-status";
-import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
+import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, loginSocialOffer, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
+import { X_PRIVACY_BEFORE, X_PRIVACY_LINK, X_PROVIDER_ID, showXPrivacyNotice } from "@/lib/auth/x";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { XSignInButton } from "@/components/x-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
@@ -87,19 +89,26 @@ function Login() {
   const [awaitingVerify, setAwaitingVerify] = useState(false);
   const [resent, setResent] = useState(false);
   const [googleOffered, setGoogleOffered] = useState(false);
+  const [xOffered, setXOffered] = useState(false);
   useEffect(() => {
     let cancel = false;
     getGoogleSignInOffered()
       .then((result) => {
-        if (!cancel) setGoogleOffered(result.offered === true);
+        if (cancel) return;
+        setGoogleOffered(result.google === true);
+        setXOffered(result.x === true);
       })
       .catch(() => {
-        if (!cancel) setGoogleOffered(false);
+        if (!cancel) {
+          setGoogleOffered(false);
+          setXOffered(false);
+        }
       });
     return () => {
       cancel = true;
     };
   }, []);
+  const offer = loginSocialOffer(googleOffered, xOffered);
 
   if (isPending) {
     return (
@@ -120,6 +129,19 @@ function Login() {
     setBusy(true);
     try {
       await signIn(GOOGLE_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed.");
+      setBusy(false);
+    }
+  }
+
+  async function onX() {
+    setError(null);
+    const remember = googlePathToRemember(mode, placed);
+    if (remember) stashPathIntent(remember);
+    setBusy(true);
+    try {
+      await signIn(X_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
       setBusy(false);
@@ -391,7 +413,7 @@ function Login() {
               </fieldset>
             )}
 
-            {mode !== "reset" && googleOffered && (
+            {mode !== "reset" && offer.showGoogle && (
             <div className="mt-4">
               <GoogleSignInButton busy={busy} onClick={() => void onGoogle()} />
               {showGooglePrivacyNotice(mode) ? (
@@ -406,7 +428,22 @@ function Login() {
             </div>
             )}
 
-            {mode !== "reset" && googleOffered && (
+            {mode !== "reset" && offer.showX && (
+            <div className={offer.showGoogle ? "mt-3" : "mt-4"}>
+              <XSignInButton busy={busy} onClick={() => void onX()} />
+              {showXPrivacyNotice(mode) ? (
+                <p className="mt-2 text-center text-xs leading-snug text-muted">
+                  {X_PRIVACY_BEFORE}{" "}
+                  <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
+                    {X_PRIVACY_LINK}
+                  </Link>
+                  .
+                </p>
+              ) : null}
+            </div>
+            )}
+
+            {mode !== "reset" && offer.divider && (
             <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-subtle">
               <span className="h-px flex-1 bg-border" />
               or

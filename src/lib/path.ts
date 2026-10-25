@@ -119,7 +119,7 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
   return () => termListeners.delete(hear);
 }
 
-const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide"];
+const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/account"];
 
 /** Study tools that read the open week, plus Semester 2’s own game, exams, and listen under /study/term2. Semester 1 Game, Listen, and Keep stay blocked. */
 const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/hub"];
@@ -181,7 +181,7 @@ export function subscribeHall(hear: () => void): () => void {
   return () => hallListeners.delete(hear);
 }
 
-const SHARED = ["/login", "/reset-password", "/ask", "/ideas"];
+const SHARED = ["/login", "/reset-password", "/ask", "/ideas", "/account"];
 
 export const PATH_INTENT = "haday-path-intent";
 export const OPEN_DOOR = "haday-open-door";
