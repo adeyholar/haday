@@ -39,6 +39,7 @@ function DoorsPage() {
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user } = useCurrentUserState();
   const signedIn = sessionUser != null || user != null;
+  const unconfirmed = sessionUser?.emailVerified === false;
   const [gate, setGate] = useState<MyPath | null>(null);
   const [error, setError] = useState("");
   const [visitor, setVisitor] = useState(false);
@@ -46,6 +47,7 @@ function DoorsPage() {
   const [heard, setHeard] = useState<HeardSource | "">("");
 
   useEffect(() => {
+    if (unconfirmed) return;
     let cancelled = false;
     (async () => {
       let lastError = "";
@@ -93,7 +95,7 @@ function DoorsPage() {
     return () => {
       cancelled = true;
     };
-  }, [signedIn]);
+  }, [signedIn, unconfirmed]);
 
   async function choose(path: StudyPath) {
     if (busy) return;
@@ -155,10 +157,19 @@ function DoorsPage() {
           you're a student, a pastor, or simply hungry for the Word, you'll start with the letters, hear every word, and
           step by step read the Tanakh for yourself, seeing what the text says and meeting God in it.
         </p>
-        <h2 className="mt-4 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
+        {unconfirmed ? null : (
+          <h2 className="mt-4 font-display text-2xl font-semibold text-ink">Choose your Study Path</h2>
+        )}
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       </Panel>
-      {placedHome ? (
+      {unconfirmed ? (
+        <Panel className="mt-4 text-center">
+          <p className="text-sm leading-relaxed text-muted">Confirm your email before choosing a path.</p>
+          <Link to="/confirm-email" search={{ next: "" }} className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
+            Confirm email
+          </Link>
+        </Panel>
+      ) : placedHome ? (
         <Panel className="mt-4 text-center">
           <Link to={placedHome} className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline">
             Continue to your study

@@ -16,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isPublic =
     pathname === "/login" ||
     pathname === "/reset-password" ||
+    pathname === "/confirm-email" ||
     (openReading && !user && sessionUser == null);
   const doorsForVisitor = pathname === "/" && !user && sessionUser == null;
 

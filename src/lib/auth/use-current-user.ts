@@ -31,6 +31,8 @@ export type CurrentUserState = {
   user: AppUser | null;
   /** True while the session is still resolving — don't treat `user: null` as signed out yet. */
   isPending: boolean;
+  /** False only for a signed-in account that still has to confirm its email. */
+  emailVerified: boolean;
 };
 
 /**
@@ -55,7 +57,7 @@ export type CurrentUserState = {
  * call keeps a stable hook order across every render of a given component.
  */
 export function useCurrentUserState(): CurrentUserState {
-  if (!authEnabled) return { user: DEV_USER, isPending: false };
+  if (!authEnabled) return { user: DEV_USER, isPending: false, emailVerified: true };
   // eslint-disable-next-line react-hooks/rules-of-hooks -- authEnabled is constant for the app's lifetime
   const { data, isPending } = authClient.useSession();
   const user = data?.user;
@@ -70,6 +72,7 @@ export function useCurrentUserState(): CurrentUserState {
         }
       : null,
     isPending,
+    emailVerified: user ? user.emailVerified !== false : true,
   };
 }
 

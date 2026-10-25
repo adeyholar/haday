@@ -8,6 +8,7 @@ import {
   FileText,
   Headphones,
   House,
+  KeyRound,
   Library,
   ListChecks,
   Medal,
@@ -109,6 +110,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
 
 function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
   const items: NavItem[] = [
+    { to: "/account", label: "Account", hint: "Sign-in methods", icon: KeyRound },
     { to: "/ideas", label: "Suggest a feature", hint: "Class inventory", icon: Lightbulb },
   ];
   if (!iibsSide) {
@@ -357,7 +359,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
               label="More"
               icon={MoreHorizontal}
               items={moreItems(isAdmin, iibsOnly || secondRoom)}
-              active={["/guide", "/rewards", "/leaderboard", "/admin", "/admin/use", "/admin/voice", "/admin/query", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/admin")}
+              active={["/account", "/guide", "/rewards", "/leaderboard", "/admin", "/admin/use", "/admin/voice", "/admin/query", "/ideas", "/legal", "/credits"].includes(pathname) || pathname.startsWith("/admin")}
             />
             {secondRoom ? null : <HonorBadge honor={honor} compact className="hidden max-w-[7.5rem] sm:inline-flex" />}
             {secondRoom || !board.crown ? null : <CrownBadge compact className="hidden sm:inline-flex" />}

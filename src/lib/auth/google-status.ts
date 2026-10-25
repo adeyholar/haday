@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { googleSignInConfigured } from "./server";
+import { googleSignInConfigured, xSignInConfigured } from "./server";
 
-/** Login reads this so the Google button exists only when both Google env vars are set. */
-export const getGoogleSignInOffered = createServerFn({ method: "GET" }).handler(async () => {
-  return { offered: googleSignInConfigured };
+/** Login reads this so a social button exists only when that provider's env vars are set. */
+export const getSocialSignInOffered = createServerFn({ method: "GET" }).handler(async () => {
+  return { google: googleSignInConfigured, x: xSignInConfigured };
 });

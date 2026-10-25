@@ -10,8 +10,9 @@
  * provider and no Google button. This app does not call the Grok auth broker
  * and does not fall back to a preview or sandbox client id.
  *
- * X is not offered. TODO: add a direct X provider later. Do not route that
- * through the old Grok auth broker.
+ * X is the built-in Twitter provider when both X_CLIENT_ID and
+ * X_CLIENT_SECRET are set. The callback is `/api/auth/callback/twitter`.
+ * If either var is missing, there is no X provider and no X button. No broker.
  *
  * Tri-mode:
  *   - Deployed: the host sets `BETTER_AUTH_URL` + `DATABASE_URL` and, for
@@ -38,6 +39,8 @@ import { resolveDatabaseUrl, pgPoolOptions } from "../database-url";
 import { ensureDbReady, getPglite } from "../db";
 import { emailAndPasswordEnabled, emailAndPassword, emailVerification, authHooks } from "./email-password";
 import { missingGoogleSignInWarning, readGoogleCredentials } from "./google";
+import { missingXSignInWarning, readXCredentials, mapXProfile, X_SCOPES } from "./x";
+import { xCallbackAfter, xGetUserInfo } from "./x.server";
 import { pgliteDialect } from "./pglite-dialect";
 import { PREVIEW_ALLOWED_HOSTS } from "./preview";
 
@@ -71,6 +74,9 @@ const authDisabled = env("VITE_AUTH_ENABLED") === "false";
 const googleCredentials = readGoogleCredentials(process.env);
 const googleClientId = googleCredentials.clientId;
 const googleClientSecret = googleCredentials.clientSecret;
+const xCredentials = readXCredentials(process.env);
+const xClientId = xCredentials.clientId;
+const xClientSecret = xCredentials.clientSecret;
 
 /**
  * True when sign-in is enforced (email/password, and Google when configured).
@@ -81,9 +87,14 @@ export const authConfigured = !authDisabled;
 /** True when the Google button and the Google provider are both on. */
 export const googleSignInConfigured = authConfigured && googleCredentials.configured;
 
+/** True when the X button and the Twitter provider are both on. */
+export const xSignInConfigured = authConfigured && xCredentials.configured;
+
 if (!authDisabled) {
   const googleWarning = missingGoogleSignInWarning(process.env);
   if (googleWarning) console.warn(googleWarning);
+  const xWarning = missingXSignInWarning(process.env);
+  if (xWarning) console.warn(xWarning);
 }
 
 // This app's own Better Auth origin. When deployed the host sets the public
@@ -179,27 +190,50 @@ export const auth = betterAuth({
   // local loopback variants, or clients get "Invalid origin".
   trustedOrigins,
 
-  // Encrypt Google tokens at rest. Do not treat any provider as trusted.
+  // Encrypt OAuth tokens at rest. Do not treat any provider as trusted.
   // Linking an existing account requires Google's email_verified claim and a
   // local email that is already verified (Better Auth's default). An unverified
-  // Google address is refused instead of being attached.
+  // Google address is refused instead of being attached. X never auto-links:
+  // the profile claim stays unverified, so an existing email is sent back to
+  // sign in and link from Account.
   account: {
     encryptOAuthTokens: true,
     accountLinking: {
       enabled: true,
+      // explicit Link only; also applies to any future Link Google button
+      allowDifferentEmails: true,
     },
   },
 
-  ...(googleSignInConfigured
+  ...((googleSignInConfigured || xSignInConfigured)
     ? {
         socialProviders: {
-          google: {
-            clientId: googleClientId as string,
-            clientSecret: googleClientSecret as string,
-            // Always show Google's account chooser. Shared class computers
-            // should not silently reuse the last Google session.
-            prompt: "select_account",
-          },
+          ...(googleSignInConfigured
+            ? {
+                google: {
+                  clientId: googleClientId as string,
+                  clientSecret: googleClientSecret as string,
+                  // Always show Google's account chooser. Shared class computers
+                  // should not silently reuse the last Google session.
+                  // Google sets emailVerified from email_verified. This block leaves
+                  // that claim alone, so a new Google user arrives verified.
+                  prompt: "select_account" as const,
+                },
+              }
+            : {}),
+          ...(xSignInConfigured
+            ? {
+                twitter: {
+                  clientId: xClientId as string,
+                  clientSecret: xClientSecret as string,
+                  disableDefaultScope: true,
+                  scope: [...X_SCOPES],
+                  mapProfileToUser: (profile: Parameters<typeof mapXProfile>[0]) => mapXProfile(profile),
+                  getUserInfo: (token: { accessToken?: string | null }) =>
+                    xGetUserInfo(xClientId as string, xClientSecret as string, token),
+                },
+              }
+            : {}),
         },
       }
     : {}),
@@ -211,7 +245,12 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword, emailVerification, hooks: authHooks } : {}),
+  // The X callback rewrite runs even when email/password is off.
+  ...(emailAndPasswordEnabled ? { emailAndPassword, emailVerification } : {}),
+  hooks: {
+    before: emailAndPasswordEnabled ? authHooks.before : undefined,
+    after: xCallbackAfter,
+  },
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a

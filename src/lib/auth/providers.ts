@@ -1,11 +1,10 @@
 /**
  * Providers the sign-in page may offer.
  *
- * Google is Better Auth's built-in provider. Whether the button is shown is
- * decided on the server (`googleSignInConfigured` in `server.ts`): both
- * GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set. There is no
- * grok-google provider and no preview client.
- *
- * TODO: X sign-in is hidden. Do not add an X button or provider here.
+ * Google and X are Better Auth's built-in providers. Whether a button is
+ * shown is decided on the server (`googleSignInConfigured` / `xSignInConfigured`
+ * in `server.ts`): both client id and client secret must be set. There is no
+ * broker provider and no preview client.
  */
-export { GOOGLE_PROVIDER_ID, X_SIGN_IN_OFFERED } from "./google";
+export { GOOGLE_PROVIDER_ID } from "./google";
+export { X_PROVIDER_ID } from "./x";

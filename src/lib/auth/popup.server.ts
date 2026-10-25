@@ -5,9 +5,11 @@
  * in a top-level popup (first-party cookies). This handler is the ENTIRE popup
  * document — no React shell:
  *
- *   Phase 1 (no `done`): start Google sign-in server-side and 302 straight to
- *     accounts.google.com. The popup never paints the app. If Google is not
+ *   Phase 1 (no `done`): start Google or X sign-in server-side and 302 straight
+ *     to the provider. The popup never paints the app. If that provider is not
  *     configured, this returns a plain message and does not call any broker.
+ *     X is allowed only when `xSignInConfigured` (`?provider=twitter`).
+ *     With no provider param, this stays Google.
  *   Phase 2 (`?done=1`): after Google returns, emit a tiny HTML page that
  *     posts the session token to the opener and closes. No SPA hydrate, no
  *     server-fn round-trip.
@@ -17,7 +19,8 @@
  * React route here paints the full app shell in the popup. The opener lives in
  * `client.ts` (`signIn` → `openSignInPopup`).
  */
-import { auth, googleSignInConfigured, SESSION_TOKEN_COOKIE } from "./server";
+import { auth, googleSignInConfigured, xSignInConfigured, SESSION_TOKEN_COOKIE } from "./server";
+import { X_PROVIDER_ID } from "./x";
 
 /** Message shape the popup posts to the opener (must match `client.ts`). */
 type PopupMessage = {
@@ -52,8 +55,12 @@ export async function handleAuthPopupRequest(request: Request): Promise<Response
     });
   }
 
-  if (!googleSignInConfigured) {
-    return new Response("Google sign-in is not configured on this host.", {
+  const requested = url.searchParams.get("provider");
+  const provider = requested === X_PROVIDER_ID ? X_PROVIDER_ID : "google";
+  const configured = provider === X_PROVIDER_ID ? xSignInConfigured : googleSignInConfigured;
+  if (!configured) {
+    const label = provider === X_PROVIDER_ID ? "X" : "Google";
+    return new Response(`${label} sign-in is not configured on this host.`, {
       status: 404,
       headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
     });
@@ -64,7 +71,7 @@ export async function handleAuthPopupRequest(request: Request): Promise<Response
   try {
     const apiRes = await auth.api.signInSocial({
       body: {
-        provider: "google",
+        provider,
         callbackURL: back,
         errorCallbackURL: `${back}&error=1`,
         disableRedirect: true,

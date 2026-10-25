@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createFileRoute, Link, Navigate, useRouterState } from "@tanstack/react-router";
 import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { getGoogleSignInOffered } from "@/lib/auth/google-status";
-import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
+import { getSocialSignInOffered } from "@/lib/auth/google-status";
+import { GOOGLE_PRIVACY_BEFORE, GOOGLE_PRIVACY_LINK, GOOGLE_PROVIDER_ID, googlePathToRemember, loginSocialOffer, showGooglePrivacyNotice, socialSignInErrorMessage } from "@/lib/auth/google";
+import { X_PRIVACY_BEFORE, X_PRIVACY_LINK, X_PROVIDER_ID, showXPrivacyNotice } from "@/lib/auth/x";
+import { loginVerificationNote, verificationSendResult } from "@/lib/auth/confirm-hold";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { XSignInButton } from "@/components/x-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
@@ -48,7 +51,7 @@ function GoToStudy() {
 }
 
 function Login() {
-  const { user, isPending } = useCurrentUserState();
+  const { user, isPending, emailVerified } = useCurrentUserState();
   const href = useRouterState({ select: (s) => s.location.href });
   const linkError = useMemo(() => {
     try {
@@ -85,21 +88,28 @@ function Login() {
   const [error, setError] = useState<string | null>(linkError ? verifyErrorMessage(linkError) : null);
   const [resetSent, setResetSent] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
-  const [resent, setResent] = useState(false);
+  const [resendNote, setResendNote] = useState<string | null>(null);
   const [googleOffered, setGoogleOffered] = useState(false);
+  const [xOffered, setXOffered] = useState(false);
   useEffect(() => {
     let cancel = false;
-    getGoogleSignInOffered()
+    getSocialSignInOffered()
       .then((result) => {
-        if (!cancel) setGoogleOffered(result.offered === true);
+        if (cancel) return;
+        setGoogleOffered(result.google === true);
+        setXOffered(result.x === true);
       })
       .catch(() => {
-        if (!cancel) setGoogleOffered(false);
+        if (!cancel) {
+          setGoogleOffered(false);
+          setXOffered(false);
+        }
       });
     return () => {
       cancel = true;
     };
   }, []);
+  const offer = loginSocialOffer(googleOffered, xOffered);
 
   if (isPending) {
     return (
@@ -111,6 +121,8 @@ function Login() {
     );
   }
 
+  if (user && emailVerified === false) return <Navigate to="/confirm-email" search={{ next: "" }} replace />;
+
   if (user) return <GoToStudy />;
 
   async function onGoogle() {
@@ -120,6 +132,19 @@ function Login() {
     setBusy(true);
     try {
       await signIn(GOOGLE_PROVIDER_ID, { callbackURL: "/login", errorCallbackURL: "/login" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed.");
+      setBusy(false);
+    }
+  }
+
+  async function onX() {
+    setError(null);
+    const remember = googlePathToRemember(mode, placed);
+    if (remember) stashPathIntent(remember);
+    setBusy(true);
+    try {
+      await signIn(X_PROVIDER_ID, { callbackURL: "/confirm-email", errorCallbackURL: "/login" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign-in failed.");
       setBusy(false);
@@ -147,14 +172,14 @@ function Login() {
   async function resendVerify() {
     setError(null);
     setBusy(true);
-    setResent(false);
+    setResendNote(null);
     try {
-      const { error: sendError } = await authClient.sendVerificationEmail({
+      const { data, error: sendError } = await authClient.sendVerificationEmail({
         email: email.trim(),
         callbackURL: "/login",
       });
       if (sendError) throw new Error(sendError.message || "Could not send the confirmation email.");
-      setResent(true);
+      setResendNote(loginVerificationNote(verificationSendResult(data)));
       setBusy(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the confirmation email.");
@@ -236,9 +261,7 @@ function Login() {
               Check the inbox for <span className="font-semibold text-ink">{email.trim() || "that address"}</span>.
               Open the confirmation link in the next 24 hours to finish the account. Check spam too.
             </p>
-            {resent ? (
-              <p className="text-sm text-muted">Another confirmation email is on the way.</p>
-            ) : null}
+            {resendNote ? <p className="text-sm text-muted">{resendNote}</p> : null}
             {error && <p className="text-sm text-danger">{error}</p>}
             <Button type="button" className="w-full" disabled={busy || !email.trim()} onClick={() => void resendVerify()}>
               {busy ? "Sending…" : "Send the email again"}
@@ -249,7 +272,7 @@ function Login() {
               onClick={() => {
                 setAwaitingVerify(false);
                 setError(null);
-                setResent(false);
+                setResendNote(null);
                 setMode("in");
               }}
             >
@@ -391,7 +414,7 @@ function Login() {
               </fieldset>
             )}
 
-            {mode !== "reset" && googleOffered && (
+            {mode !== "reset" && offer.showGoogle && (
             <div className="mt-4">
               <GoogleSignInButton busy={busy} onClick={() => void onGoogle()} />
               {showGooglePrivacyNotice(mode) ? (
@@ -406,7 +429,22 @@ function Login() {
             </div>
             )}
 
-            {mode !== "reset" && googleOffered && (
+            {mode !== "reset" && offer.showX && (
+            <div className={offer.showGoogle ? "mt-3" : "mt-4"}>
+              <XSignInButton busy={busy} onClick={() => void onX()} />
+              {showXPrivacyNotice(mode) ? (
+                <p className="mt-2 text-center text-xs leading-snug text-muted">
+                  {X_PRIVACY_BEFORE}{" "}
+                  <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
+                    {X_PRIVACY_LINK}
+                  </Link>
+                  .
+                </p>
+              ) : null}
+            </div>
+            )}
+
+            {mode !== "reset" && offer.divider && (
             <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-subtle">
               <span className="h-px flex-1 bg-border" />
               or

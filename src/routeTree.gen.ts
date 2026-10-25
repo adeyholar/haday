@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AlphabetRouteImport } from './routes/alphabet'
 import { Route as AskRouteImport } from './routes/ask'
@@ -18,6 +19,7 @@ import { Route as BbhRouteImport } from './routes/bbh'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as CardsRouteImport } from './routes/cards'
 import { Route as ChallengeRouteImport } from './routes/challenge'
+import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as DrillRouteImport } from './routes/drill'
 import { Route as GuideRouteImport } from './routes/guide'
@@ -134,6 +136,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -167,6 +174,11 @@ const CardsRoute = CardsRouteImport.update({
 const ChallengeRoute = ChallengeRouteImport.update({
   id: '/challenge',
   path: '/challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreditsRoute = CreditsRouteImport.update({
@@ -702,6 +714,7 @@ const StudyTerm2GameChapterStageRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
@@ -709,6 +722,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -818,6 +832,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
@@ -825,6 +840,7 @@ export interface FileRoutesByTo {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -933,6 +949,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/alphabet': typeof AlphabetRoute
   '/ask': typeof AskRoute
@@ -940,6 +957,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRoute
   '/challenge': typeof ChallengeRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/credits': typeof CreditsRoute
   '/drill': typeof DrillRoute
   '/guide': typeof GuideRoute
@@ -1051,6 +1069,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/admin'
     | '/alphabet'
     | '/ask'
@@ -1058,6 +1077,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1167,6 +1187,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/admin'
     | '/alphabet'
     | '/ask'
@@ -1174,6 +1195,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1281,6 +1303,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/admin'
     | '/alphabet'
     | '/ask'
@@ -1288,6 +1311,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/challenge'
+    | '/confirm-email'
     | '/credits'
     | '/drill'
     | '/guide'
@@ -1398,6 +1422,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   AlphabetRoute: typeof AlphabetRoute
   AskRoute: typeof AskRoute
@@ -1405,6 +1430,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   CardsRoute: typeof CardsRoute
   ChallengeRoute: typeof ChallengeRoute
+  ConfirmEmailRoute: typeof ConfirmEmailRoute
   CreditsRoute: typeof CreditsRoute
   DrillRoute: typeof DrillRoute
   GuideRoute: typeof GuideRoute
@@ -1503,6 +1529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -1550,6 +1583,13 @@ declare module '@tanstack/react-router' {
       path: '/challenge'
       fullPath: '/challenge'
       preLoaderRoute: typeof ChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm-email': {
+      id: '/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof ConfirmEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/credits': {
@@ -2378,6 +2418,7 @@ const ListenRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   AlphabetRoute: AlphabetRoute,
   AskRoute: AskRoute,
@@ -2385,6 +2426,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   CardsRoute: CardsRoute,
   ChallengeRoute: ChallengeRoute,
+  ConfirmEmailRoute: ConfirmEmailRoute,
   CreditsRoute: CreditsRoute,
   DrillRoute: DrillRoute,
   GuideRoute: GuideRoute,

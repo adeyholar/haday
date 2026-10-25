@@ -12,7 +12,6 @@ const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", impor
 const {
   GOOGLE_BUTTON_LABEL,
   GOOGLE_LINK_REFUSAL,
-  X_SIGN_IN_OFFERED,
   googleCallbackUrl,
   readGoogleCredentials,
   missingGoogleSignInWarning,
@@ -33,10 +32,9 @@ function read(rel) {
   return readFileSync(new URL(rel, root), "utf8");
 }
 
-test("the login page offers Google only when it is configured, and never X", () => {
-  assert.equal(X_SIGN_IN_OFFERED, false);
-  assert.deepEqual(loginSocialOffer(false), { showGoogle: false, showX: false, divider: null });
-  assert.deepEqual(loginSocialOffer(true), { showGoogle: true, showX: false, divider: "or" });
+test("the login page offers Google only when it is configured", () => {
+  assert.deepEqual(loginSocialOffer(false, false), { showGoogle: false, showX: false, divider: null });
+  assert.deepEqual(loginSocialOffer(true, false), { showGoogle: true, showX: false, divider: "or" });
   assert.equal(readGoogleCredentials({}).configured, false);
   assert.equal(readGoogleCredentials({ GOOGLE_CLIENT_ID: "only-id" }).configured, false);
   assert.equal(readGoogleCredentials({ GOOGLE_CLIENT_SECRET: "only-secret" }).configured, false);
@@ -59,6 +57,10 @@ test("the login page offers Google only when it is configured, and never X", () 
 
   const login = read("src/routes/login.tsx");
   assert.match(login, /googleOffered/);
+  assert.match(login, /xOffered/);
+  assert.match(login, /loginSocialOffer\(googleOffered, xOffered\)/);
+  assert.match(login, /offer\.showGoogle/);
+  assert.match(login, /offer\.showX/);
   assert.match(login, /signInLanding/);
   assert.equal(showGooglePrivacyNotice("up"), true);
   assert.equal(showGooglePrivacyNotice("in"), false);
@@ -71,8 +73,8 @@ test("the login page offers Google only when it is configured, and never X", () 
   assert.match(login, /GOOGLE_PRIVACY_BEFORE/);
   assert.match(login, /to="\/legal"/);
   assert.match(login, /GoogleSignInButton/);
-  assert.match(login, /getGoogleSignInOffered/);
-  assert.doesNotMatch(login, /Continue with X|grok-x|GROK_PROVIDERS|genericOAuth/);
+  assert.match(login, /getSocialSignInOffered/);
+  assert.doesNotMatch(login, /grok-x|GROK_PROVIDERS|genericOAuth/);
   assert.match(login, /\n\s*or\n/);
 });
 
@@ -321,6 +323,8 @@ test("the auth source does not call the Grok broker or a preview client", () => 
     "src/lib/auth/preview.ts",
     "src/lib/auth/popup.server.ts",
     "src/lib/auth/google.ts",
+    "src/lib/auth/x.ts",
+    "src/lib/auth/x.server.ts",
     "src/routes/login.tsx",
     ".env.example",
   ];
