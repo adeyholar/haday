@@ -212,12 +212,12 @@
   position: fixed;
   left: 50%;
   z-index: 31;
-  bottom: calc(3.5rem + 5.75rem + env(safe-area-inset-bottom));
+  bottom: calc(var(--nav-h) + var(--dock-h) + 0.75rem);
   transform: translateX(-50%);
 }
 .read-line {
-  scroll-margin-top: 4.5rem;
-  scroll-margin-bottom: calc(9.5rem + env(safe-area-inset-bottom));
+  scroll-margin-top: calc(var(--read-header) + 0.5rem);
+  scroll-margin-bottom: calc(var(--dock-h) + var(--nav-h) + 0.5rem);
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -232,8 +232,12 @@
     bottom: 6rem;
   }
   .read-line {
-    scroll-margin-top: 0.5rem;
-    scroll-margin-bottom: calc(6rem + env(safe-area-inset-bottom));
+    scroll-margin-top: var(--read-header);
+    scroll-margin-bottom: calc(var(--dock-h) + var(--nav-h) + 0.5rem);
+  }
+  body:has(.read-dock) {
+    --nav-h: env(safe-area-inset-bottom);
+    --read-header: 0.5rem;
   }
   body:has(.read-dock) header.sticky,
   body:has(.read-dock) nav.fixed {
@@ -243,6 +247,8 @@
 
 html {
   --nav-h: calc(3.5rem + env(safe-area-inset-bottom));
+  --dock-h: 0px;
+  --read-header: 3.5rem;
 }
 
 /* Reading Lab: the chapter is the page. One scrollbar, the browser's. */
@@ -267,7 +273,7 @@ html {
 .wlc-card {
   position: fixed;
   inset-inline: 0;
-  bottom: var(--nav-h);
+  bottom: calc(var(--nav-h) + var(--dock-h, 0px));
   z-index: 40;
   max-height: min(55dvh, 26rem);
   margin: 0;

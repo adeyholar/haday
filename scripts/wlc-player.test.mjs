@@ -37,6 +37,10 @@ test("Play is the first segment of the reading-speed pill", () => {
   assert.match(src, /onPause=\{\(\) => setPlaying\(false\)\}/);
   assert.match(src, /onEnded=\{\(\) => \{/);
   assert.match(src, /The recording did not load\./);
+  assert.match(src, /className="read-dock"/);
+  assert.match(src, /Verse \{verseNo\} of/);
+  assert.match(src, /event\.key !== " "/);
+  assert.match(src, /useDockHeight/);
 });
 
 const base = process.env.WLC_E2E_BASE;

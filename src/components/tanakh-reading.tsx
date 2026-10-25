@@ -8,7 +8,7 @@ import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { Panel } from "@/components/panel";
-import { readLineInComfort, shouldFollowScroll } from "@/lib/read-follow";
+import { useDockHeight, useFollowScroll } from "@/lib/use-follow-scroll";
 import { playGrade } from "@/lib/sfx";
 import {
   AUDIO_CREDIT,
@@ -1148,28 +1148,22 @@ function FollowCard({
   const [vol, setVol] = useState(loadReadVolume);
   const lastVol = useRef(vol || 1);
   const [pick, setPick] = useState<WordPick | null>(null);
-  const activeRef = useRef<HTMLLIElement | null>(null);
   const wordEl = useRef<HTMLButtonElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const followRef = useRef(true);
-  const skipScroll = useRef(true);
-  const [pausedFollow, setPausedFollow] = useState(false);
+  const follow = useFollowScroll(verse.ref);
+  useDockHeight(dockRef, !hideTransport);
   const [more, setMore] = useState(false);
   const list = verses.length ? verses : [verse];
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
   useEffect(() => {
-    const pause = (event: Event) => {
-      const target = event.target;
-      if (target instanceof Node && dockRef.current?.contains(target)) return;
-      if (!followRef.current) return;
-      followRef.current = false;
-      setPausedFollow(true);
-    };
     const onKey = (event: KeyboardEvent) => {
       const target = event.target;
-      if (target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      const field =
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable);
+      if (field) return;
       if (!hideTransport && event.key === "ArrowLeft") {
         event.preventDefault();
         onNudge(-5);
@@ -1180,43 +1174,16 @@ function FollowCard({
         onNudge(5);
         return;
       }
-      if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "PageUp" || event.key === "PageDown" || event.key === "Home" || event.key === "End") {
-        pause(event);
+      if (event.key === " " && event.target instanceof HTMLElement && event.target.tagName === "BUTTON") return;
+      if (event.key === " " && !event.repeat && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        event.preventDefault();
+        if (!playing) follow.resume();
+        onToggle();
       }
     };
-    window.addEventListener("wheel", pause, { passive: true });
-    window.addEventListener("touchmove", pause, { passive: true });
     window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("wheel", pause);
-      window.removeEventListener("touchmove", pause);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [hideTransport, onNudge]);
-  useEffect(() => {
-    if (skipScroll.current) {
-      skipScroll.current = false;
-      return;
-    }
-    if (!followRef.current) return;
-    const node = activeRef.current;
-    if (!node) return;
-    const rect = node.getBoundingClientRect();
-    const landscape = window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
-    const viewTop = 56;
-    const viewBottom = window.innerHeight - 88 - (landscape ? 0 : 56);
-    if (!shouldFollowScroll(true, readLineInComfort(rect.top, rect.bottom, viewTop, viewBottom))) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    node.scrollIntoView({ block: "center", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
-  }, [i, verse.ref]);
-  function resumeFollow() {
-    followRef.current = true;
-    setPausedFollow(false);
-    const node = activeRef.current;
-    if (!node) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    node.scrollIntoView({ block: "center", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
-  }
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hideTransport, onNudge, onToggle, follow, playing]);
   function cycleRate() {
     const at = READ_RATES.findIndex((row) => row.value === rate);
     const next = READ_RATES[(at + 1) % READ_RATES.length] ?? READ_RATES[0];
@@ -1273,7 +1240,7 @@ function FollowCard({
               className="inline-flex size-11 items-center justify-center rounded-full bg-ink text-parchment"
               aria-label={playing ? "Pause" : "Play"}
               onClick={() => {
-                if (!playing) resumeFollow();
+                if (!playing) follow.resume();
                 onToggle();
               }}
             >
@@ -1348,8 +1315,8 @@ function FollowCard({
           <VerseClipBar book={verse.book as BookId} chapter={verse.chapter} fromV={fromV} toV={toV} loop={loop} />
         </div>
       )}
-      {pausedFollow ? (
-        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={resumeFollow}>
+      {follow.showBack ? (
+        <button type="button" className="read-back min-h-11 rounded-full bg-ink px-4 text-sm font-semibold text-parchment" onClick={follow.resume}>
           Back to the reader
         </button>
       ) : null}
@@ -1358,7 +1325,13 @@ function FollowCard({
           {list.map((row, idx) => {
             const active = idx === i;
             return (
-              <li key={row.ref} ref={active ? activeRef : undefined} className="read-line">
+              <li
+                key={row.ref}
+                ref={(node) => {
+                  if (active) follow.targetRef.current = node;
+                }}
+                className="read-line"
+              >
                 <button
                   type="button"
                   className="text-xs font-semibold uppercase tracking-wide text-muted"
