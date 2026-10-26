@@ -1,13 +1,13 @@
 import { FORMS, ROOTS, buildForm, expectedThird, expectsMerge, needsTone } from "@/lib/qal-perfect-builder";
 import type { ParadigmCell, ParadigmRoot, PracticeCell } from "@/lib/paradigm/book";
 
-/** Strong and assimilating roots, with ole where the perfect stress is not final. Meteg is not required. */
+/** Strong and assimilating roots. Ole where stress is not final. Meteg on 3fs and 3cp, the same forms the builder requires. */
 export function strongCells(): PracticeCell[] {
   const out: PracticeCell[] = [];
   for (const root of ROOTS) {
     const cells: Record<string, ParadigmCell> = {};
     for (const form of FORMS) {
-      const tone = needsTone(form.k) === "accent" ? "accent" : "none";
+      const tone = needsTone(form.k);
       const word =
         buildForm(
           root,
@@ -25,7 +25,7 @@ export function strongCells(): PracticeCell[] {
         form: word,
         origin: "generated",
         status: "verified",
-        verifiedBy: "Tutor",
+        verifiedBy: "generated",
         verifiedOn: "2026-10-26",
         note: "",
         attestation: null,

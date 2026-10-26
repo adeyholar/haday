@@ -398,7 +398,9 @@ export function GameTest({ kind }: { kind: "strong" | "weak" }) {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal perfect test</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink">{kind === "strong" ? "Strong roots" : "Weak roots"}</h2>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Graded, with stress. No hints until you check. Meteg is ignored. A hit moves the form ahead. A miss brings it back.
+          {kind === "strong"
+            ? "Graded, with the accent and the meteg. No hints until you check. A hit moves the form ahead. A miss brings it back."
+            : "Graded, with stress. No hints until you check. Meteg is ignored. A hit moves the form ahead. A miss brings it back."}
         </p>
         <Link to="/study/verb-lab/qal-perfect" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary">
           Practice first

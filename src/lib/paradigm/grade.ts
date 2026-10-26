@@ -18,6 +18,7 @@ export const MISS_TAGS = [
   "missing_vowel",
   "extra_mark",
   "stress",
+  "meteg",
   "pgn_confusion",
   "other",
 ] as const;
@@ -40,12 +41,14 @@ export const TAG_LABEL: Record<MissTag, string> = {
   missing_vowel: "A vowel is missing.",
   extra_mark: "An extra mark is in the word.",
   stress: "Check where the stress falls.",
+  meteg: "Check the meteg.",
   pgn_confusion: "That form is real, but it is a different person.",
   other: "Not this form.",
 };
 
 const DAG = "\u05BC";
 const OLE = "\u05AB";
+const METEG = "\u05BD";
 const HATEPH = new Set(["\u05B1", "\u05B2", "\u05B3"]);
 const SHEWA = "\u05B0";
 const VOWELS = /[\u05B0-\u05BB\u05C1\u05C2]/;
@@ -58,9 +61,9 @@ export type Grade = {
   expected: string;
 };
 
-function same(expected: string, typed: string, strict: boolean) {
+function same(expected: string, typed: string, strict: boolean, keepMeteg = false) {
   if (!typed.trim()) return false;
-  if (strict) return normalizeParadigm(expected) === normalizeParadigm(typed);
+  if (strict) return normalizeParadigm(expected, { meteg: keepMeteg }) === normalizeParadigm(typed, { meteg: keepMeteg });
   return lettersOnly(expected) === lettersOnly(typed);
 }
 
@@ -68,21 +71,32 @@ function marksOf(token: string) {
   return [...normalizeParadigm(token)].filter((ch) => !/[\u05D0-\u05EA]/.test(ch) && ch !== OLE);
 }
 
-function stressOnly(expected: string, typed: string) {
-  const want = normalizeParadigm(expected);
-  const got = normalizeParadigm(typed);
+function stressOnly(expected: string, typed: string, keepMeteg: boolean) {
+  const want = normalizeParadigm(expected, { meteg: keepMeteg });
+  const got = normalizeParadigm(typed, { meteg: keepMeteg });
   return want !== got && want.replaceAll(OLE, "") === got.replaceAll(OLE, "");
+}
+
+function metegOnly(expected: string, typed: string) {
+  const want = normalizeParadigm(expected, { meteg: true });
+  const got = normalizeParadigm(typed, { meteg: true });
+  const strip = (token: string) => token.replaceAll(METEG, "");
+  return want !== got && strip(want) === strip(got);
 }
 
 export function gradeAnswer(item: PracticeCell, typed: string, strict = true): Grade {
   const expected = item.cell.form;
-  const mainHit = same(expected, typed, strict);
-  const altHit = item.alternates.some((alt) => same(alt, typed, strict));
+  const keepMeteg = item.root.classId === "strong";
+  const mainHit = same(expected, typed, strict, keepMeteg);
+  const altHit = item.alternates.some((alt) => same(alt, typed, strict, keepMeteg));
   if (mainHit || altHit) {
     return { ok: true, alt: !mainHit, lenient: !strict, tags: [], expected };
   }
-  if (strict && [expected, ...item.alternates].some((form) => stressOnly(form, typed))) {
+  if (strict && [expected, ...item.alternates].some((form) => stressOnly(form, typed, keepMeteg))) {
     return { ok: false, alt: false, lenient: false, tags: ["stress"], expected };
+  }
+  if (strict && keepMeteg && [expected, ...item.alternates].some((form) => metegOnly(form, typed))) {
+    return { ok: false, alt: false, lenient: false, tags: ["meteg"], expected };
   }
   const tags = new Set<MissTag>();
   const wantLetters = lettersOnly(expected);
@@ -90,7 +104,7 @@ export function gradeAnswer(item: PracticeCell, typed: string, strict = true): G
   if (gotLetters && foldFinals(wantLetters) === foldFinals(gotLetters) && wantLetters !== gotLetters) tags.add("final_form_letter");
   if (
     siblings(item).some(
-      (other) => same(other.cell.form, typed, true) || other.alternates.some((alt) => same(alt, typed, true)),
+      (other) => same(other.cell.form, typed, true, keepMeteg) || other.alternates.some((alt) => same(alt, typed, true, keepMeteg)),
     )
   ) {
     tags.add("pgn_confusion");

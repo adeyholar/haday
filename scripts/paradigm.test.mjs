@@ -13,6 +13,12 @@ const diff = await jiti.import(new URL("../src/lib/paradigm/diff.ts", import.met
 const choices = await jiti.import(new URL("../src/lib/paradigm/choices.ts", import.meta.url).pathname);
 const { normalizeHebrewFull, liveMatchAny } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
 const { normalizeParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
+const { strongCells } = await jiti.import(new URL("../src/lib/paradigm/strong-set.ts", import.meta.url).pathname);
+const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
+const { VOCAB_S2 } = await jiti.import(new URL("../src/lib/vocab-s2.ts", import.meta.url).pathname);
+const { buildForm, needsTone, FORMS, ROOTS, expectedThird, expectsMerge } = await jiti.import(
+  new URL("../src/lib/qal-perfect-builder.ts", import.meta.url).pathname,
+);
 
 const { book, allCells, perfectCells, practiceCells, renderCell, shownInPractice } = bookMod;
 const { generationGaps, placeOle, shownForm } = gen;
@@ -116,6 +122,10 @@ test("each miss tag has three seeded examples", () => {
       gradeAnswer(cell("qum", "3fs"), cell("qum", "3fs").cell.form.replace(OLE, "").replace(/מ([\u05B0-\u05BC]*)/, "מ$1" + OLE)),
       gradeAnswer(cell("amad", "2fs"), placeOle(cell("amad", "2fs").cell.form, 1)),
     ],
+    meteg: ["קטל", "כתב", "שמר"].map((root) => {
+      const row = strongCells().find((item) => item.root.root === root && item.pgn === "3fs");
+      return gradeAnswer(row, row.cell.form.replaceAll(METEG, ""));
+    }),
   };
   for (const tag of MISS_TAGS) {
     const rows = seeds[tag];
@@ -229,12 +239,82 @@ test("contracted geminate alternates need ole unless the check is lenient", () =
   }
 });
 
-test("strict vocab spelling ignores ole on melek", () => {
-  const marked = placeOle("מֶלֶךְ", 0);
-  assert.equal(marked.includes(OLE), true);
-  assert.equal(liveMatchAny(marked, "מֶלֶךְ", [], true), "exact");
-  assert.equal(normalizeHebrewFull(marked), normalizeHebrewFull("מֶלֶךְ"));
-  assert.notEqual(normalizeParadigm(marked), normalizeParadigm("מֶלֶךְ"));
+test("the hollow 3fs diff shows the ole as a changed mark", () => {
+  const weak = cell("qum", "3fs").cell.form;
+  assert.equal(weak, "קָ֫מָה");
+  const pieces = diff.highlightWeak("3fs", weak);
+  const ole = pieces.find((piece) => piece.ch === OLE);
+  assert.equal(ole?.changed, true);
+  assert.equal(diff.strongPerfect("3fs").includes(OLE), false);
+  assert.equal(normalizeParadigm(diff.strongPerfect("3fs")).includes(OLE), false);
+});
+
+test("strict vocab spelling ignores ole on every stressed lemma", () => {
+  const spans = [];
+  for (const item of [...VOCAB, ...VOCAB_S2]) {
+    for (const field of [item.hebrew, item.stems ?? ""]) {
+      for (const span of field.match(/[\u0590-\u05FF]+/g) ?? []) {
+        if (span.includes(OLE)) spans.push({ id: item.id, span });
+      }
+    }
+  }
+  assert.equal(spans.length, 8);
+  for (const { id, span } of spans) {
+    const typed = span.replaceAll(OLE, "");
+    assert.notEqual(typed, span, id);
+    assert.equal(liveMatchAny(span, typed, [], true), "exact", id);
+    assert.equal(normalizeHebrewFull(span), normalizeHebrewFull(typed), id);
+    assert.notEqual(normalizeParadigm(span), normalizeParadigm(typed), id);
+  }
+});
+
+test("the natan 2ms alternate takes ole on the first tav", () => {
+  const item = cell("natan", "2ms");
+  const marked = "\u05E0\u05B8\u05EA\u05B7\u05AB\u05EA\u05B8\u05BC\u05D4";
+  assert.deepEqual(item.alternates, [marked]);
+  const strict = gradeAnswer(item, marked, true);
+  assert.equal(strict.ok, true);
+  assert.equal(strict.alt, true);
+  const missed = gradeAnswer(item, marked.replaceAll(OLE, ""), true);
+  assert.equal(missed.ok, false);
+  assert.deepEqual(missed.tags, ["stress"]);
+  const easy = gradeAnswer(item, marked.replaceAll(OLE, ""), false);
+  assert.equal(easy.ok, true);
+  assert.equal(easy.lenient, true);
+});
+
+test("strong 3fs and 3cp grade the builder meteg", () => {
+  const cells = strongCells();
+  assert.equal(cells.every((item) => item.cell.verifiedBy === "generated"), true);
+  assert.equal(cells.some((item) => item.cell.verifiedBy === "Tutor"), false);
+  for (const root of ROOTS) {
+    for (const form of FORMS) {
+      const row = cells.find((item) => item.root.root === root.c && item.pgn === form.k);
+      const built = buildForm(
+        root,
+        {
+          v1: form.v1,
+          v2: form.v2,
+          v3: expectedThird(root, form),
+          end: form.end,
+          merge: expectsMerge(root, form.k),
+          tone: needsTone(form.k),
+        },
+        form.k,
+      );
+      assert.equal(row.cell.form, built, `${root.c} ${form.k}`);
+    }
+  }
+  for (const pgn of ["3fs", "3cp"]) {
+    const row = cells.find((item) => item.root.root === "קטל" && item.pgn === pgn);
+    assert.equal(row.cell.form.includes(METEG), true);
+    assert.equal(gradeAnswer(row, row.cell.form, true).ok, true);
+    const missed = gradeAnswer(row, row.cell.form.replaceAll(METEG, ""), true);
+    assert.equal(missed.ok, false);
+    assert.deepEqual(missed.tags, ["meteg"]);
+  }
+  const plain = cells.find((item) => item.root.root === "קטל" && item.pgn === "3ms");
+  assert.equal(plain.cell.form.includes(METEG), false);
 });
 
 test("parse chips reshuffle when the card is shown again", () => {
@@ -282,6 +362,10 @@ test("practice lives in study and the test stays graded", () => {
   assert.match(gameFn, /schedule\(/);
   assert.equal(gameFn.includes("Full pointing"), false);
   assert.equal(gameFn.includes("hintFor"), false);
+  assert.match(gameFn, /with the accent and the meteg/);
+  assert.match(gameFn, /Meteg is ignored/);
+  const door = readFileSync(new URL("../src/components/term-door.tsx", import.meta.url), "utf8");
+  assert.match(door, /with the accent and the meteg/);
   assert.equal((hub.match(/Qal perfect practice/g) ?? []).length, 2);
   assert.equal((hub.match(/Qal perfect test/g) ?? []).length, 2);
   const banned = [["Chapter", "14"].join(" "), ["ch", "14"].join(""), ["chapter", "Cells"].join("")];

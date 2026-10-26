@@ -40,7 +40,7 @@ export function foldShureq(s: string): string {
  * pausal/display). Plene writes the yod. All of these are the same name.
  * Tsere/segol/etc. on that lamed are not.
  */
-function foldJerusalem(s: string): string {
+export function foldJerusalem(s: string): string {
   return s.replace(
     /(\u05D9\u05B0\u05E8\u05BB\u05E9[\u05B0-\u05C2]*\u05DC)[\u05B4\u05B7\u05B8]*(\u05D9\u05B4?)?\u05DD\u05B4?/g,
     "$1\u05B7\u05DD",
@@ -48,7 +48,7 @@ function foldJerusalem(s: string): string {
 }
 
 /** Bare ש is shin. Only a sin-dot makes it sin. */
-function foldBareShin(s: string): string {
+export function foldBareShin(s: string): string {
   const cons = /[\u05D0-\u05EA]/;
   const chars = [...s];
   let out = "";
@@ -72,7 +72,7 @@ function foldBareShin(s: string): string {
   return out;
 }
 
-function canonMarks(s: string): string {
+export function canonMarks(s: string): string {
   const cons = /[\u05D0-\u05EA]/;
   const chars = [...s];
   let out = "";

@@ -1,5 +1,5 @@
 import { buildForm, expectedThird, FORMS, type PgnKey } from "@/lib/qal-perfect-builder";
-import { normalizeHebrewFull } from "@/lib/hebrew";
+import { normalizeParadigm } from "@/lib/paradigm/normalize";
 
 const STRONG = { c: "קטל", gloss: "kill", lvl: 1 as const };
 
@@ -26,8 +26,8 @@ export type DiffPiece = { ch: string; changed: boolean };
 
 /** Marks on the weak form that are not in the strong form. */
 export function highlightWeak(pgn: string, weak: string): DiffPiece[] {
-  const left = [...normalizeHebrewFull(strongPerfect(pgn))];
-  const right = [...normalizeHebrewFull(weak)];
+  const left = [...normalizeParadigm(strongPerfect(pgn))];
+  const right = [...normalizeParadigm(weak)];
   const matched = lcs(left, right);
   let at = 0;
   return right.map((ch) => {
