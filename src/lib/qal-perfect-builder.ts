@@ -193,8 +193,17 @@ export function buildForm(root: BuilderRoot, choice: RowChoice, _person: PgnKey 
   return word;
 }
 
+/** Root label only. The last letter takes its final form. Stored roots stay medial. */
+export function displayRoot(letters: string): string {
+  const chars = [...letters];
+  const last = chars.length - 1;
+  if (last < 0) return letters;
+  chars[last] = FINAL[chars[last]] ?? chars[last];
+  return chars.join("");
+}
+
 export function rootDisplay(root: BuilderRoot): string {
-  return [...root.c].map((c, i) => letter(i === 2 ? FINAL[c] || c : c, "", false)).join(" · ");
+  return [...displayRoot(root.c)].map((c) => letter(c, "", false)).join(" · ");
 }
 
 export function filled(choice: RowChoice): boolean {

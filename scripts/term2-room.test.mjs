@@ -40,6 +40,7 @@ test("semester 2 words stay off the first-term list", () => {
   assert.equal(secondTermBlock("/game/verbal-system", 2), null);
   assert.equal(secondTermBlock("/game/verb-paradigm-quest", 2), null);
   assert.equal(secondTermBlock("/game/qal-perfect", 2), null);
+  assert.equal(secondTermBlock("/study/verb-lab/qal-perfect", 2), null);
   assert.equal(secondTermBlock("/game/qal-imperfect", 2), null);
   assert.equal(secondTermBlock("/game/lessons/verbs", 2), null);
   assert.equal(secondTermBlock("/game/lessons/verbs/3", 2), null);
