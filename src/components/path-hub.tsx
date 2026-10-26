@@ -87,7 +87,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/game/article", title: "Article and vav", line: "The, and." },
       { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
       { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
-      { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
+      { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Strong roots, and the chapter 14 weak roots." },
       { to: "/game/qal-imperfect", title: "Verb Lab · Qal imperfect", line: "Ten forms. Class roots, then the Tanakh." },
       { to: "/game/road", title: "Exam prep · Week 7 road", line: "Say A, B, C, or D." },
       { to: "/game/week7", title: "Exam prep · Week 7 mock", line: "Grammar, then the word list." },
@@ -135,7 +135,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. Recognize, gloss, then spell." },
       { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
       { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
-      { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Nine forms, with the accent and the meteg." },
+      { to: "/game/qal-perfect", title: "Verb Lab · Qal perfect", line: "Strong roots, and the chapter 14 weak roots." },
       { to: "/game/qal-imperfect", title: "Verb Lab · Qal imperfect", line: "Ten forms. Class roots, then the Tanakh." },
       ...VERB_STEM_MENU.map((stem) => ({
         to: "/game/verbal-system" as const,
