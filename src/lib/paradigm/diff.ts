@@ -1,4 +1,4 @@
-import { buildForm, expectedThird, FORMS, type PgnKey } from "@/lib/qal-perfect-builder";
+import { buildForm, expectedThird, FORMS, needsTone, type PgnKey } from "@/lib/qal-perfect-builder";
 import { normalizeParadigm } from "@/lib/paradigm/normalize";
 
 const STRONG = { c: "קטל", gloss: "kill", lvl: 1 as const };
@@ -15,7 +15,7 @@ export function strongPerfect(pgn: string): string {
         v3: expectedThird(STRONG, form),
         end: form.end,
         merge: false,
-        tone: "none",
+        tone: needsTone(form.k),
       },
       form.k as PgnKey,
     ) ?? ""

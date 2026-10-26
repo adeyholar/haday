@@ -16,9 +16,10 @@ const { normalizeParadigm } = await jiti.import(new URL("../src/lib/paradigm/nor
 const { strongCells } = await jiti.import(new URL("../src/lib/paradigm/strong-set.ts", import.meta.url).pathname);
 const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
 const { VOCAB_S2 } = await jiti.import(new URL("../src/lib/vocab-s2.ts", import.meta.url).pathname);
-const { buildForm, needsTone, FORMS, ROOTS, expectedThird, expectsMerge } = await jiti.import(
+const { buildForm, needsTone, FORMS, ROOTS, expectedThird, expectsMerge, displayRoot, rootDisplay } = await jiti.import(
   new URL("../src/lib/qal-perfect-builder.ts", import.meta.url).pathname,
 );
+const { perfectVerse } = await jiti.import(new URL("../src/lib/verbal-paradigm-verses.ts", import.meta.url).pathname);
 
 const { book, allCells, perfectCells, practiceCells, renderCell, shownInPractice } = bookMod;
 const { generationGaps, placeOle, shownForm } = gen;
@@ -247,6 +248,127 @@ test("the hollow 3fs diff shows the ole as a changed mark", () => {
   assert.equal(ole?.changed, true);
   assert.equal(diff.strongPerfect("3fs").includes(OLE), false);
   assert.equal(normalizeParadigm(diff.strongPerfect("3fs")).includes(OLE), false);
+  const amad = diff.highlightWeak("2ms", cell("amad", "2ms").cell.form);
+  const amadOle = amad.filter((piece) => piece.ch === OLE);
+  assert.ok(amadOle.length > 0);
+  assert.equal(amadOle.every((piece) => piece.changed === false), true);
+});
+
+test("a root label uses the final letter and the built form does not", () => {
+  const toFinal = { כ: "ך", מ: "ם", נ: "ן", פ: "ף", צ: "ץ" };
+  for (const root of ROOTS) {
+    const label = displayRoot(root.c);
+    const storedLast = [...root.c].at(-1);
+    assert.equal([...label].at(-1), toFinal[storedLast] ?? storedLast, root.c);
+    const shown = rootDisplay(root).replace(/[^\u05D0-\u05EA]/g, "");
+    assert.equal([...shown].at(-1), [...label].at(-1), root.c);
+  }
+  const shakan = ROOTS.find((root) => root.c === "שכנ");
+  assert.equal(displayRoot(shakan.c), "שכן");
+  assert.equal(shakan.c, "שכנ");
+  const strong = strongCells().find((item) => item.root.root === "שכנ");
+  assert.equal(strong.root.id, "strong-שכנ");
+  assert.deepEqual(strong.root.letters, ["ש", "כ", "נ"]);
+  function built(pgn) {
+    const form = FORMS.find((row) => row.k === pgn);
+    return buildForm(
+      shakan,
+      {
+        v1: form.v1,
+        v2: form.v2,
+        v3: expectedThird(shakan, form),
+        end: form.end,
+        merge: expectsMerge(shakan, pgn),
+        tone: needsTone(pgn),
+      },
+      pgn,
+    );
+  }
+  for (const pgn of ["2ms", "1cp"]) {
+    const word = built(pgn);
+    assert.equal(word.includes("נ"), true, pgn);
+    assert.equal(word.includes("ן"), false, pgn);
+  }
+  assert.equal(built("2ms").includes("ת"), true);
+  assert.equal(built("1cp").includes("ו"), true);
+  const verse = perfectVerse("שכנ");
+  assert.equal(verse.where, "Deuteronomy 33:20");
+  assert.equal(verse.ref, "Deut.33.20");
+});
+
+function clustersOf(word) {
+  const parts = [];
+  for (const ch of word) {
+    const cp = ch.codePointAt(0) ?? 0;
+    if ((cp >= 0x05d0 && cp <= 0x05ea) || parts.length === 0) parts.push(ch);
+    else parts[parts.length - 1] += ch;
+  }
+  return parts;
+}
+
+function moveMark(word, mark, slot) {
+  const parts = clustersOf(word);
+  const index = parts.findIndex((part) => [...part].includes(mark));
+  const chars = [...parts[index]];
+  const base = chars[0];
+  const rest = chars.slice(1).filter((ch) => ch !== mark);
+  if (slot === "before-vowel") {
+    const at = rest.findIndex((ch) => /[\u05B0-\u05BB]/.test(ch));
+    rest.splice(at < 0 ? 0 : at, 0, mark);
+  } else {
+    const vowels = rest.flatMap((ch, i) => (/[\u05B0-\u05BB]/.test(ch) ? [i] : []));
+    const at = vowels.length ? vowels[vowels.length - 1] + 1 : rest.length;
+    rest.splice(at, 0, mark);
+  }
+  parts[index] = base + rest.join("");
+  return parts.join("");
+}
+
+test("mark order and a separated shin dot still match the strong answer", () => {
+  const qatal2 = strongCells().find((item) => item.root.root === "קטל" && item.pgn === "2ms");
+  const qatal3 = strongCells().find((item) => item.root.root === "קטל" && item.pgn === "3fs");
+  const shamar2 = strongCells().find((item) => item.root.root === "שמר" && item.pgn === "2ms");
+  const variants = [
+    moveMark(qatal2.cell.form, OLE, "before-vowel"),
+    moveMark(qatal2.cell.form, OLE, "after-vowel"),
+    moveMark(qatal2.cell.form, "\u05BC", "before-vowel"),
+    moveMark(qatal2.cell.form, "\u05BC", "after-vowel"),
+    moveMark(qatal3.cell.form, METEG, "before-vowel"),
+    moveMark(qatal3.cell.form, METEG, "after-vowel"),
+  ];
+  assert.equal(variants[0] === qatal2.cell.form, false);
+  assert.equal(variants[3] === qatal2.cell.form, false);
+  assert.equal(variants[4] === qatal3.cell.form, false);
+  for (const typed of variants.slice(0, 4)) {
+    assert.equal(normalizeParadigm(typed), normalizeParadigm(qatal2.cell.form));
+    assert.equal(gradeAnswer(qatal2, typed, true).ok, true);
+  }
+  for (const typed of variants.slice(4)) {
+    assert.equal(normalizeParadigm(typed, { meteg: true }), normalizeParadigm(qatal3.cell.form, { meteg: true }));
+    assert.equal(gradeAnswer(qatal3, typed, true).ok, true);
+  }
+  const parts = clustersOf(shamar2.cell.form);
+  const shin = [...parts[0]];
+  const dot = "\u05C1";
+  const rest = shin.slice(1).filter((ch) => ch !== dot);
+  parts[0] = "ש" + rest.join("") + dot;
+  const separated = parts.join("");
+  assert.notEqual(separated, shamar2.cell.form);
+  assert.equal(separated.normalize("NFD").includes(dot), true);
+  assert.equal(normalizeParadigm(separated), normalizeParadigm(shamar2.cell.form));
+  assert.equal(gradeAnswer(shamar2, separated, true).ok, true);
+});
+
+test("a strong answer that misses both ole and meteg names both", () => {
+  for (const pgn of ["3fs", "3cp"]) {
+    const row = strongCells().find((item) => item.root.root === "קטל" && item.pgn === pgn);
+    const typed = placeOle(row.cell.form.replaceAll(METEG, ""), 0);
+    assert.equal(typed.includes(OLE), true);
+    assert.equal(typed.includes(METEG), false);
+    const missed = gradeAnswer(row, typed, true);
+    assert.equal(missed.ok, false);
+    assert.deepEqual(missed.tags, ["stress", "meteg"]);
+  }
 });
 
 test("strict vocab spelling ignores ole on every stressed lemma", () => {

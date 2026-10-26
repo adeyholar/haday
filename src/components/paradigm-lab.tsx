@@ -19,6 +19,7 @@ import { shuffledChoices } from "@/lib/paradigm/choices";
 import { highlightWeak, strongPerfect } from "@/lib/paradigm/diff";
 import { TAG_LABEL, gradeAnswer, hintFor, type MissTag } from "@/lib/paradigm/grade";
 import { strongCells } from "@/lib/paradigm/strong-set";
+import { displayRoot } from "@/lib/qal-perfect-builder";
 import {
   masteryCount,
   notePractice,
@@ -278,7 +279,7 @@ export function StudyLab() {
           <ChoiceRow
             label="Root"
             value={parsePick.root}
-            options={choices.rootChoices.map((root) => ({ id: root.id, label: `${root.root} ${root.gloss}` }))}
+            options={choices.rootChoices.map((root) => ({ id: root.id, label: `${displayRoot(root.root)} ${root.gloss}` }))}
             onPick={(id) => setParsePick((prev) => ({ ...prev, root: id }))}
           />
           <ChoiceRow
@@ -314,7 +315,7 @@ export function StudyLab() {
           </div>
           {graded ? (
             <p className="mt-3 text-sm text-muted">
-              {tags.length === 0 ? "Correct" : `Qal perfect · ${item.root.root} ${item.root.gloss} · ${item.root.classId} · ${PGN_LONG[item.pgn]}`}
+              {tags.length === 0 ? "Correct" : `Qal perfect · ${displayRoot(item.root.root)} ${item.root.gloss} · ${item.root.classId} · ${PGN_LONG[item.pgn]}`}
             </p>
           ) : null}
         </Panel>
@@ -462,7 +463,7 @@ function Prompt({ item }: { item: PracticeCell }) {
         {item.root.supplementary ? " · Supplementary" : ""}
       </p>
       <p className="he-word mt-1 text-4xl text-ink" dir="rtl" lang="he">
-        {item.root.root}
+        {displayRoot(item.root.root)}
       </p>
       <p className="mt-2 text-sm text-ink">{PGN_LONG[item.pgn] ?? item.pgn}</p>
     </>

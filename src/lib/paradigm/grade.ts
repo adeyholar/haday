@@ -77,11 +77,16 @@ function stressOnly(expected: string, typed: string, keepMeteg: boolean) {
   return want !== got && want.replaceAll(OLE, "") === got.replaceAll(OLE, "");
 }
 
-function metegOnly(expected: string, typed: string) {
+/** Ole, meteg, or both, and nothing else. Null when some other mark differs. */
+function toneTags(expected: string, typed: string): MissTag[] | null {
   const want = normalizeParadigm(expected, { meteg: true });
   const got = normalizeParadigm(typed, { meteg: true });
-  const strip = (token: string) => token.replaceAll(METEG, "");
-  return want !== got && strip(want) === strip(got);
+  const bare = (token: string) => token.replaceAll(OLE, "").replaceAll(METEG, "");
+  if (!got || want === got || bare(want) !== bare(got)) return null;
+  const tags: MissTag[] = [];
+  if (want.replaceAll(METEG, "") !== got.replaceAll(METEG, "")) tags.push("stress");
+  if (want.replaceAll(OLE, "") !== got.replaceAll(OLE, "")) tags.push("meteg");
+  return tags.length ? tags : null;
 }
 
 export function gradeAnswer(item: PracticeCell, typed: string, strict = true): Grade {
@@ -92,11 +97,13 @@ export function gradeAnswer(item: PracticeCell, typed: string, strict = true): G
   if (mainHit || altHit) {
     return { ok: true, alt: !mainHit, lenient: !strict, tags: [], expected };
   }
-  if (strict && [expected, ...item.alternates].some((form) => stressOnly(form, typed, keepMeteg))) {
+  if (strict && keepMeteg) {
+    for (const form of [expected, ...item.alternates]) {
+      const tags = toneTags(form, typed);
+      if (tags) return { ok: false, alt: false, lenient: false, tags, expected };
+    }
+  } else if (strict && [expected, ...item.alternates].some((form) => stressOnly(form, typed, false))) {
     return { ok: false, alt: false, lenient: false, tags: ["stress"], expected };
-  }
-  if (strict && keepMeteg && [expected, ...item.alternates].some((form) => metegOnly(form, typed))) {
-    return { ok: false, alt: false, lenient: false, tags: ["meteg"], expected };
   }
   const tags = new Set<MissTag>();
   const wantLetters = lettersOnly(expected);
