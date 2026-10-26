@@ -122,7 +122,7 @@ export function subscribeTerm(hear: (term: GrammarTerm) => void): () => void {
 const SECOND_ROOM = ["/bbh", "/ask", "/ideas", "/guide", "/account"];
 
 /** Study tools that read the open week, plus Semester 2’s own game, exams, and listen under /study/term2. Semester 1 Game, Listen, and Keep stay blocked. */
-const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/hub"];
+const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", "/study/term2", "/study/verb-lab", "/hub"];
 
 /** Verb games belong to both semesters. Semester 1 exams and the first-term word path do not. */
 const TERM2_VERBS = [

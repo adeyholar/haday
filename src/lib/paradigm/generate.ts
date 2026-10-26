@@ -12,6 +12,34 @@ const SHIN = "\u05C1";
 const SIN = "\u05C2";
 const BGDKPT = new Set(["ב", "ג", "ד", "כ", "פ", "ת"]);
 
+const OLE = "\u05AB";
+
+/** Penultimate stress. Null means final stress: no mark. 2fs, 2mp, and 2fp stay unmarked. */
+export function stressAt(classId: string, pgn: string): number | null {
+  if (classId === "hollow" || classId === "hollow-aleph") {
+    return ["3fs", "3cp", "2ms", "1cs", "1cp"].includes(pgn) ? 0 : null;
+  }
+  if (["2ms", "1cs", "1cp"].includes(pgn)) return 1;
+  return null;
+}
+
+/** Put ole on consonant `at` (0 = first letter). A letter that already has it is left alone. */
+export function placeOle(word: string, at: number): string {
+  const parts: string[] = [];
+  for (const ch of word) {
+    const cp = ch.codePointAt(0) ?? 0;
+    if ((cp >= 0x05d0 && cp <= 0x05ea) || parts.length === 0) parts.push(ch);
+    else parts[parts.length - 1] += ch;
+  }
+  if (!parts[at] || [...parts[at]].includes(OLE)) return parts.join("");
+  parts[at] += OLE;
+  return parts.join("");
+}
+
+function withStress(classId: string, pgn: string, word: string): string {
+  const at = stressAt(classId, pgn);
+  return at == null ? word : placeOle(word, at);
+}
 function letter(consonant: string, vowel: string, dagesh: boolean, shin: ParadigmRoot["shin"]) {
   const dot = consonant === "ש" ? (shin === "sin" ? SIN : SHIN) : "";
   const dag = dagesh && BGDKPT.has(consonant) ? D : "";
@@ -24,6 +52,10 @@ function tav(vowel: string, dagesh: boolean) {
 
 /** A draft from the class rule. The signed table wins when they differ. */
 export function draftPerfect(root: ParadigmRoot, pgn: Pgn): string {
+  return withStress(root.classId, pgn, draftPerfectBare(root, pgn));
+}
+
+function draftPerfectBare(root: ParadigmRoot, pgn: Pgn): string {
   const [r1, r2, r3] = root.letters;
   const shin = root.shin;
   if (root.classId === "III-he" || root.classId === "I-gutt-III-he" || root.classId === "III-he-aleph") {

@@ -183,7 +183,7 @@ export function liveMatch(expected: string, typed: string): "empty" | "prefix" |
   return "off";
 }
 
-/** Keep vowels, dagesh, and shin/sin dots; drop cantillation and whitespace. */
+/** Keep vowels, dagesh, shin/sin dots, and the classroom stress mark (ole). Drop other cantillation, meteg, and whitespace. */
 export function normalizeHebrewFull(s: string): string {
   return foldJerusalem(
     canonMarks(
@@ -191,11 +191,11 @@ export function normalizeHebrewFull(s: string): string {
         foldShureq(
           s
             .normalize("NFC")
-            .replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C5\u05C6\u05C7]/g, "")
+            .replace(/[\u0591-\u05AA\u05AC-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C5\u05C6\u05C7]/g, "")
             .replace(/[\u05F3\u05F4\u05BE]/g, "")
             .replace(/[־–—]/g, "")
             .replace(/\s+/g, ""),
-        ).replace(/[^\u05D0-\u05EA\u05B0-\u05BC\u05C1\u05C2]/g, ""),
+        ).replace(/[^\u05D0-\u05EA\u05AB\u05B0-\u05BC\u05C1\u05C2]/g, ""),
       ),
     ),
   );

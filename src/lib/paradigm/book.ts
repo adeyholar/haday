@@ -32,7 +32,7 @@ export type ParadigmRoot = {
   classId: string;
   gloss: string;
   source: string;
-  deck: "chapter" | "supplementary";
+  supplementary: boolean;
   memorize: boolean;
   conjugations: Record<string, Conjugation>;
 };
@@ -56,7 +56,7 @@ export type PracticeCell = {
   alternates: string[];
 };
 
-export type DeckFilter = "chapter" | "memorize" | "supplementary";
+export type DeckFilter = "all" | "memorize" | `class:${string}`;
 
 export const book = raw as unknown as ParadigmBook;
 
@@ -86,10 +86,11 @@ export function classHint(classId: string): string {
 
 export function practiceCells(deck: DeckFilter, includeUnverified = false): PracticeCell[] {
   const out: PracticeCell[] = [];
+  const classId = deck.startsWith("class:") ? deck.slice("class:".length) : "";
   for (const root of book.roots) {
     if (deck === "memorize" && !root.memorize) continue;
-    if (deck === "chapter" && (root.deck !== "chapter" || root.memorize)) continue;
-    if (deck === "supplementary" && root.deck !== "supplementary") continue;
+    if (deck === "all" && root.supplementary) continue;
+    if (classId && root.classId !== classId) continue;
     for (const [conjugation, table] of Object.entries(root.conjugations)) {
       if (table.phase !== 1) continue;
       for (const [pgn, cell] of Object.entries(table.cells)) {
@@ -108,10 +109,34 @@ export function practiceCells(deck: DeckFilter, includeUnverified = false): Prac
   return out;
 }
 
-/** Chapter 14, including the two roots marked Memorize. Supplementary stays on its own deck. */
-export function chapterCells(includeUnverified = false): PracticeCell[] {
-  return [...practiceCells("chapter", includeUnverified), ...practiceCells("memorize", includeUnverified)];
+/** Every signed perfect, including נתן and היה. Imperfect and imperative stay out. */
+export function perfectCells(includeUnverified = false): PracticeCell[] {
+  const out: PracticeCell[] = [];
+  for (const root of book.roots) {
+    const table = root.conjugations.qal_perfect;
+    if (!table || table.phase !== 1) continue;
+    for (const [pgn, cell] of Object.entries(table.cells)) {
+      if (!shownInPractice(cell.status, table.phase, includeUnverified)) continue;
+      out.push({
+        id: `${root.id}:qal_perfect:${pgn}`,
+        root,
+        conjugation: "qal_perfect",
+        pgn,
+        cell,
+        alternates: table.alternates[pgn] ?? [],
+      });
+    }
+  }
+  return out;
 }
+
+/** The twelve weak roots, including the two marked Memorize. נתן and היה stay on their class tabs. */
+export function allCells(includeUnverified = false): PracticeCell[] {
+  return practiceCells("all", includeUnverified);
+}
+
+export const HOLLOW_STRESS_NOTE =
+  "Participles such as קָמָ֫ה and קָמִ֫ים take final stress. The perfect קָ֫מָה is penultimate.";
 
 export function siblings(cell: PracticeCell): PracticeCell[] {
   const table = cell.root.conjugations[cell.conjugation];

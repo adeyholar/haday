@@ -16,6 +16,7 @@ export const MISS_TAGS = [
   "missing_dagesh_lene",
   "missing_vowel",
   "extra_mark",
+  "stress",
   "pgn_confusion",
   "other",
 ] as const;
@@ -37,19 +38,21 @@ export const TAG_LABEL: Record<MissTag, string> = {
   missing_dagesh_lene: "A begadkephat is missing its dagesh.",
   missing_vowel: "A vowel is missing.",
   extra_mark: "An extra mark is in the word.",
+  stress: "Check where the stress falls.",
   pgn_confusion: "That form is real, but it is a different person.",
   other: "Not this form.",
 };
 
 const DAG = "\u05BC";
+const OLE = "\u05AB";
 const HATEPH = new Set(["\u05B1", "\u05B2", "\u05B3"]);
 const SHEWA = "\u05B0";
 const VOWELS = /[\u05B0-\u05BB\u05C1\u05C2]/;
-const BGDKPT = new Set(["ב", "ג", "ד", "כ", "פ", "ת"]);
 
 export type Grade = {
   ok: boolean;
   alt: boolean;
+  lenient: boolean;
   tags: MissTag[];
   expected: string;
 };
@@ -61,13 +64,19 @@ function same(expected: string, typed: string, strict: boolean) {
 }
 
 function marksOf(token: string) {
-  return [...normalizeHebrewFull(token)].filter((ch) => !/[\u05D0-\u05EA]/.test(ch));
+  return [...normalizeHebrewFull(token)].filter((ch) => !/[\u05D0-\u05EA]/.test(ch) && ch !== OLE);
+}
+
+function withoutOle(token: string) {
+  return normalizeHebrewFull(token).replaceAll(OLE, "");
 }
 
 export function gradeAnswer(item: PracticeCell, typed: string, strict = true): Grade {
   const expected = item.cell.form;
-  if (same(expected, typed, strict) || item.alternates.some((alt) => same(alt, typed, strict))) {
-    return { ok: true, alt: !same(expected, typed, strict), tags: [], expected };
+  const mainHit = same(expected, typed, strict);
+  const altHit = item.alternates.some((alt) => same(alt, typed, strict));
+  if (mainHit || altHit) {
+    return { ok: true, alt: !mainHit, lenient: !strict, tags: [], expected };
   }
   const tags = new Set<MissTag>();
   const wantLetters = lettersOnly(expected);
@@ -83,12 +92,13 @@ export function gradeAnswer(item: PracticeCell, typed: string, strict = true): G
   const wantNorm = normalizeHebrewFull(expected);
   const gotNorm = normalizeHebrewFull(typed);
   if (wantLetters === gotLetters) {
-    tagVowels(item, wantNorm, gotNorm, tags);
+    if (withoutOle(wantNorm) === withoutOle(gotNorm) && wantNorm !== gotNorm) tags.add("stress");
+    else tagVowels(item, wantNorm, gotNorm, tags);
   } else {
     tagConsonants(item, wantLetters, gotLetters, tags);
   }
   if (!tags.size) tags.add("other");
-  return { ok: false, alt: false, tags: [...tags], expected };
+  return { ok: false, alt: false, lenient: false, tags: [...tags], expected };
 }
 
 function tagVowels(item: PracticeCell, want: string, got: string, tags: Set<MissTag>) {
@@ -98,9 +108,7 @@ function tagVowels(item: PracticeCell, want: string, got: string, tags: Set<Miss
   const gotD = gotMarks.filter((mark) => mark === DAG).length;
   if (wantD > gotD) {
     if (item.root.classId === "geminate" || item.root.classId === "geminate-2") tags.add("gemination_dagesh");
-    else if ([...want].some((ch, i) => BGDKPT.has(ch) && want.slice(i + 1, i + 4).includes(DAG) && !got.includes(ch + DAG) && !got.includes(DAG))) {
-      tags.add("missing_dagesh_lene");
-    } else tags.add("missing_dagesh_lene");
+    else tags.add("missing_dagesh_lene");
   }
   if (gotMarks.length > wantMarks.length) tags.add("extra_mark");
   const wantVowels = wantMarks.filter((mark) => mark !== DAG && mark !== "\u05C1" && mark !== "\u05C2");

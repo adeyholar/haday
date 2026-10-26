@@ -1,22 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { HebrewType } from "@/components/hebrew-type";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import {
+  HOLLOW_STRESS_NOTE,
   PGN_LONG,
+  allCells,
   book,
-  chapterCells,
+  perfectCells,
   practiceCells,
   renderCell,
   type DeckFilter,
   type PracticeCell,
 } from "@/lib/paradigm/book";
+import { shuffledChoices } from "@/lib/paradigm/choices";
 import { highlightWeak, strongPerfect } from "@/lib/paradigm/diff";
 import { TAG_LABEL, gradeAnswer, hintFor, type MissTag } from "@/lib/paradigm/grade";
-import { dueIds, schedule, type SrsState } from "@/lib/paradigm/srs";
+import { strongCells } from "@/lib/paradigm/strong-set";
+import {
+  masteryCount,
+  notePractice,
+  schedule,
+  selectTestIds,
+  type PracticeLog,
+  type SrsState,
+} from "@/lib/paradigm/srs";
 
 const SRS_KEY = "haday-paradigm-srs-v1";
+const PRACTICE_KEY = "haday-paradigm-practice-v1";
 const FINALS = [
   { from: "כ", to: "ך", name: "kaf" },
   { from: "מ", to: "ם", name: "mem" },
@@ -27,70 +40,67 @@ const FINALS = [
 
 type Mode = "build" | "review" | "mixed" | "parse" | "diff" | "finals";
 
-function loadSrs(): SrsState {
-  if (typeof window === "undefined") return {};
+function loadJson<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
   try {
-    const raw = window.localStorage.getItem(SRS_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as SrsState;
-    return parsed && typeof parsed === "object" ? parsed : {};
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as T;
+    return parsed && typeof parsed === "object" ? parsed : fallback;
   } catch {
-    return {};
+    return fallback;
   }
 }
 
-function pick<T>(items: T[], avoid?: T): T {
-  const open = avoid ? items.filter((item) => item !== avoid) : items;
-  const list = open.length ? open : items;
-  return list[Math.floor(Math.random() * list.length)] ?? items[0];
+function saveJson(key: string, value: unknown) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* a private window can refuse the write */
+  }
 }
 
-export function ParadigmLab() {
+export function StudyLab() {
   const [mode, setMode] = useState<Mode>("build");
-  const [deck, setDeck] = useState<DeckFilter>("chapter");
+  const [deck, setDeck] = useState<DeckFilter>("all");
   const [strict, setStrict] = useState(true);
   const [srs, setSrs] = useState<SrsState>({});
+  const [practice, setPractice] = useState<PracticeLog>({});
   const [cursor, setCursor] = useState(0);
   const [typed, setTyped] = useState("");
   const [graded, setGraded] = useState(false);
   const [tags, setTags] = useState<MissTag[]>([]);
   const [alt, setAlt] = useState(false);
+  const [lenient, setLenient] = useState(false);
   const [rootId, setRootId] = useState(book.roots.find((root) => root.memorize)?.id ?? book.roots[0].id);
   const [finalAt, setFinalAt] = useState(0);
   const [parsePick, setParsePick] = useState({ root: "", classId: "", pgn: "" });
   const [pin, setPin] = useState<string | null>(null);
 
-  const pool = useMemo(() => (deck === "chapter" ? chapterCells() : practiceCells(deck)), [deck]);
-  const mixed = useMemo(() => [...chapterCells(), ...practiceCells("supplementary")], []);
-  const reviewIds = dueIds(
-    pool.map((item) => item.id),
-    srs,
-    Date.now(),
+  const pool = useMemo(() => practiceCells(deck), [deck]);
+  const mixed = useMemo(() => perfectCells(), []);
+  const reviewList = useMemo(
+    () => pool.filter((item) => (practice[item.id]?.misses ?? 0) > 0),
+    [pool, practice],
   );
-  const activeList = mode === "mixed" ? mixed : mode === "review" ? pool.filter((item) => reviewIds.includes(item.id)) : pool;
+  const activeList = mode === "mixed" ? mixed : mode === "review" ? reviewList : pool;
   const listed = activeList[cursor % Math.max(activeList.length, 1)];
   const item = mode === "review" && pin ? (pool.find((row) => row.id === pin) ?? listed) : listed;
+  const mastered = masteryCount(allCells().map((row) => row.id), srs);
 
   useEffect(() => {
-    setSrs(loadSrs());
+    setSrs(loadJson<SrsState>(SRS_KEY, {}));
+    setPractice(loadJson<PracticeLog>(PRACTICE_KEY, {}));
   }, []);
-
-  function persist(next: SrsState) {
-    setSrs(next);
-    try {
-      window.localStorage.setItem(SRS_KEY, JSON.stringify(next));
-    } catch {
-      /* a private window can refuse the write */
-    }
-  }
 
   function resetCard() {
     setTyped("");
     setGraded(false);
     setTags([]);
     setAlt(false);
-    setParsePick({ root: "", classId: "", pgn: "" });
+    setLenient(false);
     setPin(null);
+    setParsePick({ root: "", classId: "", pgn: "" });
   }
 
   function nextCard() {
@@ -104,32 +114,58 @@ export function ParadigmLab() {
     setGraded(true);
     setTags(result.tags);
     setAlt(result.alt);
+    setLenient(result.lenient);
     setPin(item.id);
-    persist({ ...srs, [item.id]: schedule(srs[item.id], result.ok, Date.now()) });
+    const next = notePractice(practice, item.id, result.ok && !result.lenient, result.tags);
+    setPractice(next);
+    saveJson(PRACTICE_KEY, next);
   }
 
   const choices = useMemo(() => {
     if (!item || mode !== "parse") return null;
-    const roots = book.roots.filter((root) => root.deck === "chapter" || root.deck === "supplementary");
-    const rootChoices = unique([item.root, ...roots.filter((root) => root.id !== item.root.id).slice(0, 3)]);
-    const classChoices = unique([item.root.classId, ...book.classes.map((row) => row.id).filter((id) => id !== item.root.classId)]).slice(0, 4);
-    const pgnChoices = unique([item.pgn, "3fs", "2ms", "1cs", "3cp"]).slice(0, 4);
-    return { rootChoices, classChoices, pgnChoices };
+    const roots = shuffledChoices(
+      `${item.id}:root`,
+      item.root.id,
+      book.roots.map((root) => root.id),
+    );
+    const classChoices = shuffledChoices(
+      `${item.id}:class`,
+      item.root.classId,
+      book.classes.map((row) => row.id),
+    );
+    const pgnChoices = shuffledChoices(`${item.id}:pgn`, item.pgn, ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "2mp", "1cp"]);
+    return {
+      rootChoices: roots.map((id) => book.roots.find((root) => root.id === id)!).filter(Boolean),
+      classChoices,
+      pgnChoices,
+    };
   }, [item, mode]);
+
+  const filters: { id: DeckFilter; label: string }[] = [
+    { id: "all", label: "All" },
+    ...book.classes.map((row) => ({ id: `class:${row.id}` as DeckFilter, label: row.id })),
+    { id: "memorize", label: "Memorize" },
+  ];
 
   return (
     <div className="grid gap-4">
       <Panel>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Chapter 14</p>
-        <h2 className="mt-1 font-display text-3xl font-bold text-ink">Weak Qal perfect</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal perfect · weak roots</p>
+        <h2 className="mt-1 font-display text-3xl font-bold text-ink">Practice</h2>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Twelve roots from the chapter, plus a supplementary deck for נתן and היה. סבב and קום are marked Memorize. Full pointing is the grade. Accents and meteg are not required. Imperfect and imperative stay locked until a later chapter.
+          Twelve weak roots by class, plus נתן and היה. סבב and קום are marked Memorize. Full pointing is the grade. Stress is marked only when it is not on the last syllable. Meteg is ignored. Imperfect and imperative stay locked.
         </p>
+        <p className="mt-3 text-sm text-ink">
+          Mastered {mastered} / {allCells().length}. This number comes from the test. Practice does not move it.
+        </p>
+        <Link to="/game/qal-perfect" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary">
+          Take the test
+        </Link>
         <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Practice">
           {(
             [
               ["build", "Build"],
-              ["review", "Review"],
+              ["review", "Misses"],
               ["mixed", "Mixed"],
               ["parse", "Parse"],
               ["diff", "Strong vs weak"],
@@ -158,28 +194,25 @@ export function ParadigmLab() {
       </Panel>
 
       {mode !== "diff" && mode !== "finals" ? (
-        <Panel className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex overflow-hidden rounded-[var(--radius-md)] bg-card shadow-[var(--shadow-border)]" role="radiogroup" aria-label="Deck">
-            {(
-              [
-                ["chapter", "Chapter 14"],
-                ["memorize", "Memorize"],
-                ["supplementary", "Supplementary"],
-              ] as const
-            ).map(([id, label]) => (
+        <Panel className="grid gap-3">
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Verb class">
+            {filters.map((filter) => (
               <button
-                key={id}
+                key={filter.id}
                 type="button"
                 role="radio"
-                aria-checked={deck === id}
+                aria-checked={deck === filter.id}
                 onClick={() => {
-                  setDeck(id);
+                  setDeck(filter.id);
                   setCursor(0);
                   resetCard();
                 }}
-                className={cn("min-h-11 px-3 text-sm font-semibold", deck === id ? "bg-primary text-primary-foreground" : "text-muted")}
+                className={cn(
+                  "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
+                  deck === filter.id ? "bg-primary text-primary-foreground" : "bg-card text-muted shadow-[var(--shadow-border)]",
+                )}
               >
-                {label}
+                {filter.label}
               </button>
             ))}
           </div>
@@ -190,31 +223,34 @@ export function ParadigmLab() {
         </Panel>
       ) : null}
 
-      {mode === "finals" ? (
-        <FinalWarmup at={finalAt} onNext={() => setFinalAt((value) => (value + 1) % FINALS.length)} />
-      ) : null}
-
+      {mode === "finals" ? <FinalWarmup at={finalAt} onNext={() => setFinalAt((value) => (value + 1) % FINALS.length)} /> : null}
       {mode === "diff" ? <DiffView rootId={rootId} onRoot={setRootId} /> : null}
 
       {mode === "review" && activeList.length === 0 && !pin ? (
         <Panel>
-          <p className="text-sm text-muted">Nothing is due. A miss comes back before a form you already have.</p>
+          <p className="text-sm text-muted">No misses yet. A miss in practice is remembered here. It does not change mastery.</p>
         </Panel>
       ) : null}
 
       {item && (mode === "build" || mode === "mixed" || (mode === "review" && (activeList.length > 0 || pin))) ? (
         <Panel>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-            {item.root.gloss}
-            {item.root.memorize ? " · Memorize" : ""}
-            {item.alternates.length ? " · alt accepted" : ""}
-          </p>
-          <p className="he-word mt-1 text-4xl text-ink" dir="rtl" lang="he">
-            {item.root.root}
-          </p>
-          <p className="mt-2 text-sm text-ink">{PGN_LONG[item.pgn] ?? item.pgn}</p>
+          <Prompt item={item} />
+          {item.root.classId === "hollow" || item.root.classId === "hollow-aleph" ? (
+            <p className="mt-3 text-sm text-muted">{HOLLOW_STRESS_NOTE}</p>
+          ) : null}
           <div className="mt-4">
-            <HebrewType value={typed} onChange={setTyped} target={item.cell.form} alts={item.alternates} strict={strict} liveGrade={false} hideHint hideVowelLetters markBackspace />
+            <HebrewType
+              value={typed}
+              onChange={setTyped}
+              target={item.cell.form}
+              alts={item.alternates}
+              strict={strict}
+              liveGrade={false}
+              hideHint
+              hideVowelLetters
+              markBackspace
+              extraMarks
+            />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" onClick={grade} disabled={!typed.trim() || graded}>
@@ -225,29 +261,36 @@ export function ParadigmLab() {
             </Button>
           </div>
           {graded ? (
-            <div className="mt-4 grid gap-2">
-              <p className={cn("text-sm font-semibold", tags.length === 0 ? "text-primary" : "text-danger")}>
-                {tags.length === 0 ? (alt ? "Correct · alt" : "Correct") : "Not yet"}
-              </p>
-              <p className="he-word text-3xl text-ink" dir="rtl" lang="he">
-                {renderCell(item.cell)}
-              </p>
-              {item.cell.attestation ? <p className="text-sm text-muted">Attested · {item.cell.attestation.ref}</p> : null}
-              {tags.length ? <p className="text-sm text-muted">{hintFor(item, tags)}</p> : null}
-            </div>
+            <Result item={item} tags={tags} alt={alt} lenient={lenient} hint />
           ) : null}
         </Panel>
       ) : null}
 
       {item && mode === "parse" && choices ? (
         <Panel>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Name this form · Qal perfect</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Name this form</p>
+          <p className="mt-1 text-sm text-muted">Qal perfect</p>
           <p className="he-word mt-2 text-4xl text-ink" dir="rtl" lang="he">
             {renderCell(item.cell)}
           </p>
-          <ChoiceRow label="Root" value={parsePick.root} options={choices.rootChoices.map((root) => ({ id: root.id, label: `${root.root} ${root.gloss}` }))} onPick={(id) => setParsePick((prev) => ({ ...prev, root: id }))} />
-          <ChoiceRow label="Class" value={parsePick.classId} options={choices.classChoices.map((id) => ({ id, label: id }))} onPick={(id) => setParsePick((prev) => ({ ...prev, classId: id }))} />
-          <ChoiceRow label="Person" value={parsePick.pgn} options={choices.pgnChoices.map((id) => ({ id, label: PGN_LONG[id] ?? id }))} onPick={(id) => setParsePick((prev) => ({ ...prev, pgn: id }))} />
+          <ChoiceRow
+            label="Root"
+            value={parsePick.root}
+            options={choices.rootChoices.map((root) => ({ id: root.id, label: `${root.root} ${root.gloss}` }))}
+            onPick={(id) => setParsePick((prev) => ({ ...prev, root: id }))}
+          />
+          <ChoiceRow
+            label="Class"
+            value={parsePick.classId}
+            options={choices.classChoices.map((id) => ({ id, label: id }))}
+            onPick={(id) => setParsePick((prev) => ({ ...prev, classId: id }))}
+          />
+          <ChoiceRow
+            label="Person"
+            value={parsePick.pgn}
+            options={choices.pgnChoices.map((id) => ({ id, label: PGN_LONG[id] ?? id }))}
+            onPick={(id) => setParsePick((prev) => ({ ...prev, pgn: id }))}
+          />
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               type="button"
@@ -255,7 +298,9 @@ export function ParadigmLab() {
                 const ok = parsePick.root === item.root.id && parsePick.classId === item.root.classId && parsePick.pgn === item.pgn;
                 setGraded(true);
                 setTags(ok ? [] : ["other"]);
-                persist({ ...srs, [item.id]: schedule(srs[item.id], ok, Date.now()) });
+                const next = notePractice(practice, item.id, ok, ok ? [] : ["other"]);
+                setPractice(next);
+                saveJson(PRACTICE_KEY, next);
               }}
               disabled={graded || !parsePick.root || !parsePick.classId || !parsePick.pgn}
             >
@@ -276,8 +321,176 @@ export function ParadigmLab() {
   );
 }
 
-function unique<T>(items: T[]): T[] {
-  return [...new Set(items)];
+export function GameTest({ kind }: { kind: "strong" | "weak" }) {
+  const pool = useMemo(() => (kind === "strong" ? strongCells() : perfectCells()), [kind]);
+  const [srs, setSrs] = useState<SrsState>({});
+  const [queue, setQueue] = useState<PracticeCell[]>([]);
+  const [cursor, setCursor] = useState(0);
+  const [typed, setTyped] = useState("");
+  const [graded, setGraded] = useState(false);
+  const [tags, setTags] = useState<MissTag[]>([]);
+  const [alt, setAlt] = useState(false);
+  const [correct, setCorrect] = useState(0);
+  const [done, setDone] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  function begin(state: SrsState) {
+    const practice = loadJson<PracticeLog>(PRACTICE_KEY, {});
+    const ids = selectTestIds(
+      pool.map((item) => item.id),
+      state,
+      practice,
+      Date.now(),
+    );
+    setQueue(ids.map((id) => pool.find((item) => item.id === id)).filter((item): item is PracticeCell => Boolean(item)));
+    setCursor(0);
+    setTyped("");
+    setGraded(false);
+    setTags([]);
+    setAlt(false);
+    setCorrect(0);
+    setDone(false);
+    setReady(true);
+  }
+
+  useEffect(() => {
+    const state = loadJson<SrsState>(SRS_KEY, {});
+    setSrs(state);
+    begin(state);
+    // The sitting is fixed when the set changes. Practice answers must not rebuild it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind]);
+
+  const item = queue[cursor];
+  const total = queue.length;
+
+  function grade() {
+    if (!item || graded) return;
+    const result = gradeAnswer(item, typed, true);
+    setGraded(true);
+    setTags(result.tags);
+    setAlt(result.alt);
+    if (result.ok) setCorrect((value) => value + 1);
+    const next = { ...srs, [item.id]: schedule(srs[item.id], result.ok, Date.now()) };
+    setSrs(next);
+    saveJson(SRS_KEY, next);
+  }
+
+  function next() {
+    if (cursor + 1 >= total) {
+      setDone(true);
+      return;
+    }
+    setCursor((value) => value + 1);
+    setTyped("");
+    setGraded(false);
+    setTags([]);
+    setAlt(false);
+  }
+
+  if (!ready) return null;
+
+  return (
+    <div className="grid gap-4">
+      <Panel>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal perfect test</p>
+        <h2 className="mt-1 font-display text-3xl font-bold text-ink">{kind === "strong" ? "Strong roots" : "Weak roots"}</h2>
+        <p className="mt-3 max-w-prose text-sm text-muted">
+          Graded, with stress. No hints until you check. Meteg is ignored. A hit moves the form ahead. A miss brings it back.
+        </p>
+        <Link to="/study/verb-lab/qal-perfect" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary">
+          Practice first
+        </Link>
+      </Panel>
+      {done || !item ? (
+        <Panel>
+          <p className="font-display text-3xl font-bold text-ink">
+            {total ? `${correct} of ${total}` : "Nothing is due"}
+          </p>
+          <p className="mt-2 text-sm text-muted">
+            {total ? "Mastery updates from this test only." : "Practice first, or wait until a form is due again."}
+          </p>
+          <Button type="button" className="mt-4" onClick={() => begin(srs)}>
+            Another sitting
+          </Button>
+        </Panel>
+      ) : (
+        <Panel>
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+            {cursor + 1} / {total}
+          </p>
+          <Prompt item={item} />
+          <div className="mt-4">
+            <HebrewType
+              value={typed}
+              onChange={setTyped}
+              target={item.cell.form}
+              alts={item.alternates}
+              strict
+              liveGrade={false}
+              hideHint
+              hideVowelLetters
+              markBackspace
+              extraMarks
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" onClick={grade} disabled={!typed.trim() || graded}>
+              Check
+            </Button>
+            <Button type="button" variant="outline" onClick={next} disabled={!graded}>
+              {cursor + 1 >= total ? "Score" : "Next"}
+            </Button>
+          </div>
+          {graded ? <Result item={item} tags={tags} alt={alt} lenient={false} hint={false} /> : null}
+        </Panel>
+      )}
+    </div>
+  );
+}
+
+function Prompt({ item }: { item: PracticeCell }) {
+  return (
+    <>
+      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+        {item.root.gloss}
+        {item.root.memorize ? " · Memorize" : ""}
+        {item.root.supplementary ? " · Supplementary" : ""}
+      </p>
+      <p className="he-word mt-1 text-4xl text-ink" dir="rtl" lang="he">
+        {item.root.root}
+      </p>
+      <p className="mt-2 text-sm text-ink">{PGN_LONG[item.pgn] ?? item.pgn}</p>
+    </>
+  );
+}
+
+function Result({
+  item,
+  tags,
+  alt,
+  lenient,
+  hint,
+}: {
+  item: PracticeCell;
+  tags: MissTag[];
+  alt: boolean;
+  lenient: boolean;
+  hint: boolean;
+}) {
+  const line = lenient ? "letters right, now point it" : tags.length === 0 ? (alt ? "Correct · alt" : "Correct") : "Not yet";
+  return (
+    <div className="mt-4 grid gap-2">
+      <p className={cn("text-sm font-semibold", tags.length === 0 && !lenient ? "text-primary" : "text-danger")}>{line}</p>
+      <p className="he-word text-3xl text-ink" dir="rtl" lang="he">
+        {renderCell(item.cell)}
+      </p>
+      {item.cell.attestation ? <p className="text-sm text-muted">Attested · {item.cell.attestation.ref}</p> : null}
+      {tags.length ? (
+        <p className="text-sm text-muted">{hint ? hintFor(item, tags) : tags.map((tag) => TAG_LABEL[tag]).join(" ")}</p>
+      ) : null}
+    </div>
+  );
 }
 
 function ChoiceRow({
@@ -305,7 +518,7 @@ function ChoiceRow({
               value === option.id ? "bg-primary text-primary-foreground" : "bg-card text-ink shadow-[var(--shadow-border)]",
             )}
           >
-            <span className={option.label.includes(" ") ? "he-word" : undefined} dir="rtl" lang="he">
+            <span className="he-word" dir="rtl" lang="he">
               {option.label}
             </span>
           </button>
@@ -333,7 +546,7 @@ function DiffView({ rootId, onRoot }: { rootId: string; onRoot: (id: string) => 
             ))}
         </select>
       </label>
-      <p className="mt-3 text-sm text-muted">קָטַל on the left. The chapter root on the right. Marks that differ are marked.</p>
+      <p className="mt-3 text-sm text-muted">קָטַל on the left. The weak root on the right. Marks that differ are marked.</p>
       <div className="mt-3 grid gap-2">
         {Object.entries(table.cells).map(([pgn, cell]) => (
           <div key={pgn} className="grid grid-cols-[5rem_1fr_1fr] items-baseline gap-2 text-sm">
@@ -366,25 +579,10 @@ function FinalWarmup({ at, onNext }: { at: number; onNext: () => void }) {
         {card.from}
       </p>
       <div className="mt-4">
-        <HebrewType
-          value={typed}
-          onChange={(next) => {
-            setTyped(next);
-            setOk(null);
-            return next;
-          }}
-          target={card.to}
-          strict
-          liveGrade={false}
-          hideHint
-          hideVowelLetters
-        />
+        <HebrewType value={typed} onChange={setTyped} target={card.to} strict liveGrade={false} hideHint hideVowelLetters />
       </div>
       <div className="mt-4 flex gap-2">
-        <Button
-          type="button"
-          onClick={() => setOk(typed === card.to)}
-        >
+        <Button type="button" onClick={() => setOk(typed === card.to)}>
           Check
         </Button>
         <Button
