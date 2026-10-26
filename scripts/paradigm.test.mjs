@@ -11,7 +11,8 @@ const gradeMod = await jiti.import(new URL("../src/lib/paradigm/grade.ts", impor
 const srs = await jiti.import(new URL("../src/lib/paradigm/srs.ts", import.meta.url).pathname);
 const diff = await jiti.import(new URL("../src/lib/paradigm/diff.ts", import.meta.url).pathname);
 const choices = await jiti.import(new URL("../src/lib/paradigm/choices.ts", import.meta.url).pathname);
-const { normalizeHebrewFull } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
+const { normalizeHebrewFull, liveMatchAny } = await jiti.import(new URL("../src/lib/hebrew.ts", import.meta.url).pathname);
+const { normalizeParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
 
 const { book, allCells, perfectCells, practiceCells, renderCell, shownInPractice } = bookMod;
 const { generationGaps, placeOle, shownForm } = gen;
@@ -164,7 +165,7 @@ test("stress is required only where the perfect is not final", () => {
     assert.equal(row.alt, true);
   }
   assert.equal(savav.alternates.some((alt) => alt.includes(OLE)), true);
-  assert.equal(savav.alternates.some((alt) => !alt.includes(OLE)), true);
+  assert.equal(savav.alternates.every((alt) => alt.includes(OLE)), true);
 });
 
 test("a consonant-only hit does not move the review box", () => {
@@ -179,14 +180,80 @@ test("a consonant-only hit does not move the review box", () => {
   assert.deepEqual(dagesh.tags, ["missing_dagesh_lene"]);
 });
 
-test("parse chips do not keep the answer in one seat", () => {
+test("tamam 3fs and 3cp take penultimate ole, and a bare typing is only lenient", () => {
+  const fs = cell("tam", "3fs");
+  const cp = cell("tam", "3cp");
+  assert.equal(fs.cell.form, "תַּ֫מָּה");
+  assert.equal(cp.cell.form, "תַּ֫מּוּ");
+  assert.equal(gradeAnswer(fs, fs.cell.form, true).ok, true);
+  assert.equal(gradeAnswer(cp, cp.cell.form, true).ok, true);
+  const bareFs = gradeAnswer(fs, fs.cell.form.replaceAll(OLE, ""), true);
+  const bareCp = gradeAnswer(cp, cp.cell.form.replaceAll(OLE, ""), true);
+  assert.equal(bareFs.ok, false);
+  assert.deepEqual(bareFs.tags, ["stress"]);
+  assert.equal(bareCp.ok, false);
+  assert.deepEqual(bareCp.tags, ["stress"]);
+  const easyFs = gradeAnswer(fs, fs.cell.form.replaceAll(OLE, ""), false);
+  const easyCp = gradeAnswer(cp, cp.cell.form.replaceAll(OLE, ""), false);
+  assert.equal(easyFs.ok, true);
+  assert.equal(easyFs.lenient, true);
+  assert.equal(easyFs.alt, false);
+  assert.equal(easyCp.ok, true);
+  assert.equal(easyCp.lenient, true);
+});
+
+test("contracted geminate alternates need ole unless the check is lenient", () => {
+  const fs = cell("savav", "3fs");
+  const cp = cell("savav", "3cp");
+  assert.equal(fs.cell.form, "סָבְבָה");
+  assert.equal(cp.cell.form, "סָבְבוּ");
+  assert.equal(fs.cell.form.includes(OLE), false);
+  assert.equal(cp.cell.form.includes(OLE), false);
+  assert.deepEqual(fs.alternates, ["סַ֫בָּה"]);
+  assert.deepEqual(cp.alternates, ["סַ֫בּוּ"]);
+  for (const item of [fs, cp]) {
+    const marked = item.alternates[0];
+    const bare = marked.replaceAll(OLE, "");
+    const strict = gradeAnswer(item, marked, true);
+    assert.equal(strict.ok, true);
+    assert.equal(strict.alt, true);
+    assert.equal(strict.lenient, false);
+    const missed = gradeAnswer(item, bare, true);
+    assert.equal(missed.ok, false);
+    assert.deepEqual(missed.tags, ["stress"]);
+    const easy = gradeAnswer(item, bare, false);
+    assert.equal(easy.ok, true);
+    assert.equal(easy.lenient, true);
+    assert.equal(easy.alt, true);
+    assert.equal(gradeAnswer(item, item.cell.form, true).ok, true);
+  }
+});
+
+test("strict vocab spelling ignores ole on melek", () => {
+  const marked = placeOle("מֶלֶךְ", 0);
+  assert.equal(marked.includes(OLE), true);
+  assert.equal(liveMatchAny(marked, "מֶלֶךְ", [], true), "exact");
+  assert.equal(normalizeHebrewFull(marked), normalizeHebrewFull("מֶלֶךְ"));
+  assert.notEqual(normalizeParadigm(marked), normalizeParadigm("מֶלֶךְ"));
+});
+
+test("parse chips reshuffle when the card is shown again", () => {
   const indexes = [];
   for (let i = 0; i < 24; i++) {
     indexes.push(choices.shuffledChoices(`item-${i}`, "ok", ["a", "b", "c", "d", "e"]).indexOf("ok"));
   }
   assert.ok(new Set(indexes).size > 1);
-  const once = choices.shuffledChoices("same", "ok", ["a", "b", "c"]);
-  assert.deepEqual(choices.shuffledChoices("same", "ok", ["a", "b", "c"]), once);
+  const once = choices.shuffledChoices("card:show-1", "ok", ["a", "b", "c"]);
+  assert.deepEqual(choices.shuffledChoices("card:show-1", "ok", ["a", "b", "c"]), once);
+  const again = new Set();
+  for (let show = 0; show < 12; show++) {
+    again.add(choices.shuffledChoices(`card:show-${show}`, "ok", ["a", "b", "c", "d"]).join(","));
+  }
+  assert.ok(again.size > 1);
+  const studyFn = readFileSync(new URL("../src/components/paradigm-lab.tsx", import.meta.url), "utf8");
+  assert.match(studyFn, /shownDeal/);
+  assert.match(studyFn, /\$\{item\.id\}:root:\$\{shownDeal\}/);
+  assert.match(studyFn, /\$\{item\.id\}:pgn:\$\{shownDeal\}/);
 });
 
 test("study misses lead the next test and do not move mastery", () => {

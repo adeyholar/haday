@@ -19,7 +19,7 @@ export function seededOrder<T>(seed: string, items: T[]): T[] {
   return out;
 }
 
-/** The correct chip is not stuck in the first seat. The same seed keeps the same order. */
+/** The correct chip is not stuck in the first seat. One showing keeps one order; a new deal seed reshuffles. */
 export function shuffledChoices<T>(seed: string, correct: T, distractors: T[], count = 4): T[] {
   const pool = seededOrder(`${seed}:pool`, distractors.filter((item) => item !== correct)).slice(0, count - 1);
   return seededOrder(seed, [correct, ...pool]);

@@ -76,6 +76,7 @@ export function StudyLab() {
   const [finalAt, setFinalAt] = useState(0);
   const [parsePick, setParsePick] = useState({ root: "", classId: "", pgn: "" });
   const [pin, setPin] = useState<string | null>(null);
+  const [shownDeal, setShownDeal] = useState(0);
 
   const pool = useMemo(() => practiceCells(deck), [deck]);
   const mixed = useMemo(() => perfectCells(), []);
@@ -101,6 +102,7 @@ export function StudyLab() {
     setLenient(false);
     setPin(null);
     setParsePick({ root: "", classId: "", pgn: "" });
+    setShownDeal((n) => n + 1);
   }
 
   function nextCard() {
@@ -124,22 +126,22 @@ export function StudyLab() {
   const choices = useMemo(() => {
     if (!item || mode !== "parse") return null;
     const roots = shuffledChoices(
-      `${item.id}:root`,
+      `${item.id}:root:${shownDeal}`,
       item.root.id,
       book.roots.map((root) => root.id),
     );
     const classChoices = shuffledChoices(
-      `${item.id}:class`,
+      `${item.id}:class:${shownDeal}`,
       item.root.classId,
       book.classes.map((row) => row.id),
     );
-    const pgnChoices = shuffledChoices(`${item.id}:pgn`, item.pgn, ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "2mp", "1cp"]);
+    const pgnChoices = shuffledChoices(`${item.id}:pgn:${shownDeal}`, item.pgn, ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "2mp", "1cp"]);
     return {
       rootChoices: roots.map((id) => book.roots.find((root) => root.id === id)!).filter(Boolean),
       classChoices,
       pgnChoices,
     };
-  }, [item, mode]);
+  }, [item, mode, shownDeal]);
 
   const filters: { id: DeckFilter; label: string }[] = [
     { id: "all", label: "All" },

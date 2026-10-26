@@ -1,5 +1,6 @@
-import { foldFinals, lettersOnly, normalizeHebrewFull } from "@/lib/hebrew";
+import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { classHint, siblings, type PracticeCell } from "@/lib/paradigm/book";
+import { normalizeParadigm } from "@/lib/paradigm/normalize";
 
 export const MISS_TAGS = [
   "wrong_suffix",
@@ -59,16 +60,18 @@ export type Grade = {
 
 function same(expected: string, typed: string, strict: boolean) {
   if (!typed.trim()) return false;
-  if (strict) return normalizeHebrewFull(expected) === normalizeHebrewFull(typed);
+  if (strict) return normalizeParadigm(expected) === normalizeParadigm(typed);
   return lettersOnly(expected) === lettersOnly(typed);
 }
 
 function marksOf(token: string) {
-  return [...normalizeHebrewFull(token)].filter((ch) => !/[\u05D0-\u05EA]/.test(ch) && ch !== OLE);
+  return [...normalizeParadigm(token)].filter((ch) => !/[\u05D0-\u05EA]/.test(ch) && ch !== OLE);
 }
 
-function withoutOle(token: string) {
-  return normalizeHebrewFull(token).replaceAll(OLE, "");
+function stressOnly(expected: string, typed: string) {
+  const want = normalizeParadigm(expected);
+  const got = normalizeParadigm(typed);
+  return want !== got && want.replaceAll(OLE, "") === got.replaceAll(OLE, "");
 }
 
 export function gradeAnswer(item: PracticeCell, typed: string, strict = true): Grade {
@@ -77,6 +80,9 @@ export function gradeAnswer(item: PracticeCell, typed: string, strict = true): G
   const altHit = item.alternates.some((alt) => same(alt, typed, strict));
   if (mainHit || altHit) {
     return { ok: true, alt: !mainHit, lenient: !strict, tags: [], expected };
+  }
+  if (strict && [expected, ...item.alternates].some((form) => stressOnly(form, typed))) {
+    return { ok: false, alt: false, lenient: false, tags: ["stress"], expected };
   }
   const tags = new Set<MissTag>();
   const wantLetters = lettersOnly(expected);
@@ -89,11 +95,10 @@ export function gradeAnswer(item: PracticeCell, typed: string, strict = true): G
   ) {
     tags.add("pgn_confusion");
   }
-  const wantNorm = normalizeHebrewFull(expected);
-  const gotNorm = normalizeHebrewFull(typed);
+  const wantNorm = normalizeParadigm(expected);
+  const gotNorm = normalizeParadigm(typed);
   if (wantLetters === gotLetters) {
-    if (withoutOle(wantNorm) === withoutOle(gotNorm) && wantNorm !== gotNorm) tags.add("stress");
-    else tagVowels(item, wantNorm, gotNorm, tags);
+    tagVowels(item, wantNorm, gotNorm, tags);
   } else {
     tagConsonants(item, wantLetters, gotLetters, tags);
   }
@@ -169,5 +174,5 @@ export function hintFor(item: PracticeCell, tags: MissTag[]): string {
 }
 
 export function acceptsVowels(sample: string): boolean {
-  return VOWELS.test(normalizeHebrewFull(sample));
+  return VOWELS.test(normalizeParadigm(sample));
 }
