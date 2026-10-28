@@ -21,7 +21,7 @@ const { buildForm, needsTone, FORMS, ROOTS, expectedThird, expectsMerge, display
 );
 const { perfectVerse } = await jiti.import(new URL("../src/lib/verbal-paradigm-verses.ts", import.meta.url).pathname);
 
-const { book, allCells, perfectCells, practiceCells, renderCell, shownInPractice } = bookMod;
+const { book, allCells, openCells, perfectCells, practiceCells, renderCell, shownInPractice } = bookMod;
 const { generationGaps, placeOle, shownForm } = gen;
 const { gradeAnswer, MISS_TAGS } = gradeMod;
 const OLE = "\u05AB";
@@ -50,12 +50,16 @@ test("the signed Qal perfect table is what practice shows", () => {
     assert.equal(row.form, row.form.normalize("NFC"));
     assert.equal(renderCell(row), row.form);
   }
-  assert.equal(allCells().length, 108);
+  assert.equal(allCells().length, 206);
   assert.equal(perfectCells().length, 126);
-  assert.equal(practiceCells("class:I-nun").length, 9);
-  assert.equal(allCells().some((row) => row.conjugation !== "qal_perfect"), false);
+  assert.equal(perfectCells().every((row) => row.conjugation === "qal_perfect"), true);
+  assert.equal(practiceCells("class:I-nun").length, 23);
+  assert.equal(openCells().some((row) => row.conjugation === "qal_imperfect"), true);
+  assert.equal(allCells().some((row) => row.conjugation === "qal_imperative"), true);
+  assert.equal(allCells().some((row) => row.root.supplementary), false);
   assert.equal(shownInPractice("to_verify", 1), false);
-  assert.equal(shownInPractice("verified", 2), false);
+  assert.equal(shownInPractice("verified", 2), true);
+  assert.equal(shownInPractice("verified", 3), true);
   assert.equal(shownInPractice("verified", 1), true);
   const hayah = book.roots.find((row) => row.id === "hayah");
   assert.equal(hayah.conjugations.qal_imperative.cells["2fp"], undefined);
