@@ -9,6 +9,7 @@ import {
   PGN_LONG,
   allCells,
   book,
+  openCells,
   perfectCells,
   practiceCells,
   renderCell,
@@ -29,6 +30,19 @@ import {
   type SrsState,
 } from "@/lib/paradigm/srs";
 
+const CONJ_LABEL: Record<string, string> = {
+  qal_perfect: "Qal perfect",
+  qal_imperfect: "Qal imperfect",
+  qal_imperative: "Qal imperative",
+};
+
+const CONJ_PERSONS: Record<string, string[]> = {
+  qal_perfect: ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "2mp", "2fp", "1cp"],
+  qal_imperfect: ["3ms", "3fs", "2ms", "2fs", "1cs", "3mp", "3fp", "2mp", "2fp", "1cp"],
+  qal_imperative: ["2ms", "2fs", "2mp", "2fp"],
+};
+
+type ConjFilter = "all" | "qal_perfect" | "qal_imperfect" | "qal_imperative";
 const SRS_KEY = "haday-paradigm-srs-v1";
 const PRACTICE_KEY = "haday-paradigm-practice-v1";
 const FINALS = [
@@ -64,6 +78,7 @@ function saveJson(key: string, value: unknown) {
 export function StudyLab() {
   const [mode, setMode] = useState<Mode>("build");
   const [deck, setDeck] = useState<DeckFilter>("all");
+  const [conj, setConj] = useState<ConjFilter>("all");
   const [strict, setStrict] = useState(true);
   const [srs, setSrs] = useState<SrsState>({});
   const [practice, setPractice] = useState<PracticeLog>({});
@@ -79,8 +94,14 @@ export function StudyLab() {
   const [pin, setPin] = useState<string | null>(null);
   const [shownDeal, setShownDeal] = useState(0);
 
-  const pool = useMemo(() => practiceCells(deck), [deck]);
-  const mixed = useMemo(() => perfectCells(), []);
+  const pool = useMemo(() => {
+    const rows = practiceCells(deck);
+    return conj === "all" ? rows : rows.filter((row) => row.conjugation === conj);
+  }, [deck, conj]);
+  const mixed = useMemo(() => {
+    const rows = openCells();
+    return conj === "all" ? rows : rows.filter((row) => row.conjugation === conj);
+  }, [conj]);
   const reviewList = useMemo(
     () => pool.filter((item) => (practice[item.id]?.misses ?? 0) > 0),
     [pool, practice],
@@ -88,7 +109,8 @@ export function StudyLab() {
   const activeList = mode === "mixed" ? mixed : mode === "review" ? reviewList : pool;
   const listed = activeList[cursor % Math.max(activeList.length, 1)];
   const item = mode === "review" && pin ? (pool.find((row) => row.id === pin) ?? listed) : listed;
-  const mastered = masteryCount(allCells().map((row) => row.id), srs);
+  const gradedPerfect = allCells().filter((row) => row.conjugation === "qal_perfect");
+  const mastered = masteryCount(gradedPerfect.map((row) => row.id), srs);
 
   useEffect(() => {
     setSrs(loadJson<SrsState>(SRS_KEY, {}));
@@ -136,7 +158,11 @@ export function StudyLab() {
       item.root.classId,
       book.classes.map((row) => row.id),
     );
-    const pgnChoices = shuffledChoices(`${item.id}:pgn:${shownDeal}`, item.pgn, ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "2mp", "1cp"]);
+    const pgnChoices = shuffledChoices(
+      `${item.id}:pgn:${shownDeal}`,
+      item.pgn,
+      CONJ_PERSONS[item.conjugation] ?? CONJ_PERSONS.qal_perfect,
+    );
     return {
       rootChoices: roots.map((id) => book.roots.find((root) => root.id === id)!).filter(Boolean),
       classChoices,
@@ -156,10 +182,10 @@ export function StudyLab() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal perfect · weak roots</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink">Practice</h2>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Twelve weak roots by class, plus נתן and היה. סבב and קום are marked Memorize. Full pointing is the grade. Stress is marked only when it is not on the last syllable. Meteg is ignored. Imperfect and imperative stay locked.
+          Twelve weak roots by class, plus נתן and היה. סבב and קום are marked Memorize. Full pointing is the grade. Stress is marked only when it is not on the last syllable. Meteg is ignored. Perfect, imperfect, and imperative are all open here.
         </p>
         <p className="mt-3 text-sm text-ink">
-          Mastered {mastered} / {allCells().length}. This number comes from the test. Practice does not move it.
+          Mastered {mastered} / {gradedPerfect.length}. This number comes from the test, and the test grades the Qal perfect only.
         </p>
         <Link to="/game/qal-perfect" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-primary">
           Take the test
@@ -219,6 +245,34 @@ export function StudyLab() {
               </button>
             ))}
           </div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Conjugation">
+            {(
+              [
+                ["all", "All forms"],
+                ["qal_perfect", "Perfect"],
+                ["qal_imperfect", "Imperfect"],
+                ["qal_imperative", "Imperative"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={conj === id}
+                onClick={() => {
+                  setConj(id);
+                  setCursor(0);
+                  resetCard();
+                }}
+                className={cn(
+                  "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
+                  conj === id ? "bg-primary text-primary-foreground" : "bg-card text-muted shadow-[var(--shadow-border)]",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <label className="inline-flex min-h-11 items-center gap-2 text-sm text-muted">
             <input type="checkbox" checked={strict} onChange={(event) => setStrict(event.target.checked)} />
             Full pointing
@@ -272,7 +326,7 @@ export function StudyLab() {
       {item && mode === "parse" && choices ? (
         <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Name this form</p>
-          <p className="mt-1 text-sm text-muted">Qal perfect</p>
+          <p className="mt-1 text-sm text-muted">{CONJ_LABEL[item.conjugation] ?? item.conjugation}</p>
           <p className="he-word mt-2 text-4xl text-ink" dir="rtl" lang="he">
             {renderCell(item.cell)}
           </p>
@@ -315,7 +369,7 @@ export function StudyLab() {
           </div>
           {graded ? (
             <p className="mt-3 text-sm text-muted">
-              {tags.length === 0 ? "Correct" : `Qal perfect · ${displayRoot(item.root.root)} ${item.root.gloss} · ${item.root.classId} · ${PGN_LONG[item.pgn]}`}
+              {tags.length === 0 ? "Correct" : `${CONJ_LABEL[item.conjugation] ?? item.conjugation} · ${displayRoot(item.root.root)} ${item.root.gloss} · ${item.root.classId} · ${PGN_LONG[item.pgn]}`}
             </p>
           ) : null}
         </Panel>
@@ -465,7 +519,9 @@ function Prompt({ item }: { item: PracticeCell }) {
       <p className="he-word mt-1 text-4xl text-ink" dir="rtl" lang="he">
         {displayRoot(item.root.root)}
       </p>
-      <p className="mt-2 text-sm text-ink">{PGN_LONG[item.pgn] ?? item.pgn}</p>
+      <p className="mt-2 text-sm text-ink">
+        {CONJ_LABEL[item.conjugation] ?? item.conjugation} · {PGN_LONG[item.pgn] ?? item.pgn}
+      </p>
     </>
   );
 }

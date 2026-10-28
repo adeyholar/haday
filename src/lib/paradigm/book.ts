@@ -74,8 +74,8 @@ export const PGN_LONG: Record<string, string> = {
   "3fp": "3rd fem. plural",
 };
 
-export function shownInPractice(status: CellStatus, phase: number, includeUnverified = false): boolean {
-  if (phase !== 1) return false;
+/** Practice shows every signed cell. The game gate is perfectCells, not this check. */
+export function shownInPractice(status: CellStatus, _phase: number, includeUnverified = false): boolean {
   if (!includeUnverified && status !== "verified") return false;
   return true;
 }
@@ -84,32 +84,40 @@ export function classHint(classId: string): string {
   return book.classes.find((row) => row.id === classId)?.hint ?? "";
 }
 
-export function practiceCells(deck: DeckFilter, includeUnverified = false): PracticeCell[] {
+function cellsOf(root: ParadigmRoot, includeUnverified: boolean): PracticeCell[] {
   const out: PracticeCell[] = [];
-  const classId = deck.startsWith("class:") ? deck.slice("class:".length) : "";
-  for (const root of book.roots) {
-    if (deck === "memorize" && !root.memorize) continue;
-    if (deck === "all" && root.supplementary) continue;
-    if (classId && root.classId !== classId) continue;
-    for (const [conjugation, table] of Object.entries(root.conjugations)) {
-      if (table.phase !== 1) continue;
-      for (const [pgn, cell] of Object.entries(table.cells)) {
-        if (!shownInPractice(cell.status, table.phase, includeUnverified)) continue;
-        out.push({
-          id: `${root.id}:${conjugation}:${pgn}`,
-          root,
-          conjugation,
-          pgn,
-          cell,
-          alternates: table.alternates[pgn] ?? [],
-        });
-      }
+  for (const [conjugation, table] of Object.entries(root.conjugations)) {
+    for (const [pgn, cell] of Object.entries(table.cells)) {
+      if (!shownInPractice(cell.status, table.phase, includeUnverified)) continue;
+      out.push({
+        id: `${root.id}:${conjugation}:${pgn}`,
+        root,
+        conjugation,
+        pgn,
+        cell,
+        alternates: table.alternates[pgn] ?? [],
+      });
     }
   }
   return out;
 }
 
-/** Every signed perfect, including נתן and היה. Imperfect and imperative stay out. */
+/** Every signed form a student may practice, including נתן and היה. */
+export function openCells(includeUnverified = false): PracticeCell[] {
+  return book.roots.flatMap((root) => cellsOf(root, includeUnverified));
+}
+
+export function practiceCells(deck: DeckFilter, includeUnverified = false): PracticeCell[] {
+  const classId = deck.startsWith("class:") ? deck.slice("class:".length) : "";
+  return openCells(includeUnverified).filter((item) => {
+    if (deck === "memorize" && !item.root.memorize) return false;
+    if (deck === "all" && item.root.supplementary) return false;
+    if (classId && item.root.classId !== classId) return false;
+    return true;
+  });
+}
+
+/** Graded weak test. Qal perfect only. Imperfect and imperative stay out. */
 export function perfectCells(includeUnverified = false): PracticeCell[] {
   const out: PracticeCell[] = [];
   for (const root of book.roots) {
@@ -130,7 +138,7 @@ export function perfectCells(includeUnverified = false): PracticeCell[] {
   return out;
 }
 
-/** The twelve weak roots, including the two marked Memorize. נתן and היה stay on their class tabs. */
+/** The twelve weak roots, every signed form. נתן and היה stay on their class tabs. */
 export function allCells(includeUnverified = false): PracticeCell[] {
   return practiceCells("all", includeUnverified);
 }
