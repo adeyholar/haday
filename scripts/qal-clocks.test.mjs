@@ -99,6 +99,19 @@ test("each tap stays on the form, and the accent is still open until it is typed
   assert.equal(liveMatchParadigm(stressed, "ק"), "off");
 });
 
+test("an extra dagesh lene is not a miss; a dagesh the form has still counts", () => {
+  const D = "\u05BC";
+  const fs = form("qatal", "imperfect", "3fs");
+  const withLene = "ת" + D + fs.slice(1);
+  assert.equal(liveMatchParadigm(fs, "ת" + D), "prefix");
+  assert.equal(liveMatchParadigm(fs, withLene), "exact");
+  assert.equal(gradeClock(fs, withLene, true).ok, true);
+  const story = form("qatal", "wayyiqtol", "3ms");
+  assert.equal(liveMatchParadigm(story, story.replace(D, "")), "off");
+  const two = form("qatal", "perfect", "2ms");
+  assert.equal(gradeClock(two, two.replace(D, ""), true).ok, false);
+});
+
 test("qatal is the first strong verb, and the engine signs it", () => {
   assert.equal(ROOTS[0].id, "qatal");
   assert.equal(ROOTS[0].cls, "strong");
