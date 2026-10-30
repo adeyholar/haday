@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { HebrewType } from "@/components/hebrew-type";
+import { ScreenChoices } from "@/components/screen-lamp";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -76,7 +77,7 @@ export function QalClockPractice() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal · practice</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink">Yiqtol, wayyiqtol, weqatal</h2>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Pick a root. Three rounds of its forms. A miss comes back in the same round. This practice is not the graded test.
+          Pick a root. Three rounds of its forms. Each tap says whether that part is still right. A miss comes back in the same round. This practice is not the graded test.
         </p>
         <div className="mt-4 flex flex-wrap gap-2" role="radiogroup" aria-label="Clock">
           {(
@@ -107,6 +108,10 @@ export function QalClockPractice() {
           <input type="checkbox" checked={strict} onChange={(event) => setStrict(event.target.checked)} />
           Full pointing
         </label>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold text-ink">Screen</span>
+          <ScreenChoices className="w-full sm:w-auto" />
+        </div>
       </Panel>
       <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Root</p>
@@ -185,8 +190,6 @@ export function QalClockPractice() {
               onChange={setTyped}
               target={card.form}
               strict={strict}
-              liveGrade={false}
-              hideHint
               hideVowelLetters
               markBackspace
               extraMarks

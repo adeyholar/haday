@@ -321,9 +321,7 @@ export function guideTarget(typed: string, lemma: string, alts: string[]): strin
   return best;
 }
 
-export function liveMatchFull(expected: string, typed: string): "empty" | "prefix" | "exact" | "off" {
-  const want = normalizeHebrewFull(expected);
-  const got = normalizeHebrewFull(typed);
+export function matchClusters(want: string, got: string): "empty" | "prefix" | "exact" | "off" {
   if (!got) return "empty";
   if (got === want) return "exact";
   const wc = toClusters(want);
@@ -339,6 +337,10 @@ export function liveMatchFull(expected: string, typed: string): "empty" | "prefi
   if (!marksSubset(gc[last].marks, wc[last].marks)) return "off";
   if (gc.length === wc.length && gc[last].marks.join("") === wc[last].marks.join("")) return "exact";
   return "prefix";
+}
+
+export function liveMatchFull(expected: string, typed: string): "empty" | "prefix" | "exact" | "off" {
+  return matchClusters(normalizeHebrewFull(expected), normalizeHebrewFull(typed));
 }
 
 export function liveMatchAny(

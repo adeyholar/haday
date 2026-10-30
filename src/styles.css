@@ -890,3 +890,43 @@ mark.en-hit {
   .table-card-label { display: block; font-size: 0.75rem; font-weight: 650; }
 }
 
+/* Screen lamp. Light is the paper. Dim is the same room, turned down. Dark is for night study. */
+html[data-lamp="dim"] {
+  --color-bg: #cfc6b6;
+  --color-surface: #c4baa8;
+  --color-card: #ddd4c4;
+  --color-fg: #1a1612;
+  --color-foreground: #1a1612;
+  --color-muted: #3a342e;
+  --color-subtle: #514b44;
+  --color-ink: #1a1612;
+  --color-parchment: #e7dfd0;
+  --color-border: color-mix(in oklab, #1c1814 18%, transparent);
+  --color-primary: #243c36;
+  --color-primary-foreground: #f3eadc;
+  --color-danger: #7a332c;
+  --color-good: #2f4a3a;
+  color-scheme: light;
+}
+html[data-lamp="dark"] {
+  --color-bg: #12100e;
+  --color-surface: #1c1916;
+  --color-card: #24201c;
+  --color-fg: #f4ebdd;
+  --color-foreground: #f4ebdd;
+  --color-muted: #d2c4b0;
+  --color-subtle: #b5a690;
+  --color-ink: #f4ebdd;
+  --color-parchment: #1a1714;
+  --color-border: color-mix(in oklab, #f4ebdd 16%, transparent);
+  --color-ring: #9dcec0;
+  --color-primary: #8fb8aa;
+  --color-primary-foreground: #14211d;
+  --color-danger: #f0a097;
+  --color-good: #9dcea8;
+  --shadow-border:
+    0 0 0 1px color-mix(in oklab, #f4ebdd 14%, transparent),
+    0 8px 24px -16px color-mix(in oklab, #000 55%, transparent);
+  color-scheme: dark;
+}
+

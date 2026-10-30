@@ -5,6 +5,7 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { answerSitting, clockCards, gradeClock, sittingFrom, weqatalOf } = await jiti.import(new URL("../src/lib/qal-clocks.ts", import.meta.url).pathname);
 const { openPattern } = await jiti.import(new URL("../src/lib/verbal-system.ts", import.meta.url).pathname);
+const { accentStillOpen, liveMatchParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
 
 function form(root, conj, pgn) {
   const pattern = openPattern(root, "qal", conj);
@@ -61,4 +62,16 @@ test("one root is three rounds, and a miss comes back", () => {
   sitting = answerSitting(sitting, true);
   assert.equal(sitting.finished, true);
   assert.equal(sitting.queue.length, 0);
+});
+
+test("each tap stays on the form, and the accent is still open until it is typed", () => {
+  const stressed = form("shamar", "perfect", "2ms");
+  const bare = stressed.replaceAll("\u05AB", "");
+  assert.equal(liveMatchParadigm(stressed, ""), "empty");
+  assert.equal(liveMatchParadigm(stressed, [...bare][0]), "prefix");
+  assert.equal(liveMatchParadigm(stressed, bare), "prefix");
+  assert.equal(accentStillOpen(stressed, bare), true);
+  assert.equal(liveMatchParadigm(stressed, stressed), "exact");
+  assert.equal(accentStillOpen(stressed, stressed), false);
+  assert.equal(liveMatchParadigm(stressed, "ק"), "off");
 });
