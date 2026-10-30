@@ -113,6 +113,7 @@ import { Route as StudyLessonIdRouteImport } from './routes/study/lesson/$id'
 import { Route as StudyStationIdRouteImport } from './routes/study/station/$id'
 import { Route as StudyTerm2IndexRouteImport } from './routes/study/term2/index'
 import { Route as StudyTerm2ChapterRouteImport } from './routes/study/term2/$chapter'
+import { Route as StudyVerbLabQalClocksRouteImport } from './routes/study/verb-lab.qal-clocks'
 import { Route as StudyVerbLabQalPerfectRouteImport } from './routes/study/verb-lab.qal-perfect'
 import { Route as GameLessonsTrackIndexRouteImport } from './routes/game/lessons/$track/index'
 import { Route as GameLessonsTrackUnitRouteImport } from './routes/game/lessons/$track/$unit'
@@ -649,6 +650,11 @@ const StudyTerm2ChapterRoute = StudyTerm2ChapterRouteImport.update({
   path: '/study/term2/$chapter',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudyVerbLabQalClocksRoute = StudyVerbLabQalClocksRouteImport.update({
+  id: '/study/verb-lab/qal-clocks',
+  path: '/study/verb-lab/qal-clocks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudyVerbLabQalPerfectRoute = StudyVerbLabQalPerfectRouteImport.update({
   id: '/study/verb-lab/qal-perfect',
   path: '/study/verb-lab/qal-perfect',
@@ -808,6 +814,7 @@ export interface FileRoutesByFullPath {
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
   '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
+  '/study/verb-lab/qal-clocks': typeof StudyVerbLabQalClocksRoute
   '/study/verb-lab/qal-perfect': typeof StudyVerbLabQalPerfectRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
@@ -925,6 +932,7 @@ export interface FileRoutesByTo {
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
   '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
+  '/study/verb-lab/qal-clocks': typeof StudyVerbLabQalClocksRoute
   '/study/verb-lab/qal-perfect': typeof StudyVerbLabQalPerfectRoute
   '/game/$chapter': typeof GameChapterIndexRoute
   '/game/alefbet': typeof GameAlefbetIndexRoute
@@ -1045,6 +1053,7 @@ export interface FileRoutesById {
   '/study/lesson/$id': typeof StudyLessonIdRoute
   '/study/station/$id': typeof StudyStationIdRoute
   '/study/term2/$chapter': typeof StudyTerm2ChapterRoute
+  '/study/verb-lab/qal-clocks': typeof StudyVerbLabQalClocksRoute
   '/study/verb-lab/qal-perfect': typeof StudyVerbLabQalPerfectRoute
   '/game/$chapter/': typeof GameChapterIndexRoute
   '/game/alefbet/': typeof GameAlefbetIndexRoute
@@ -1166,6 +1175,7 @@ export interface FileRouteTypes {
     | '/study/lesson/$id'
     | '/study/station/$id'
     | '/study/term2/$chapter'
+    | '/study/verb-lab/qal-clocks'
     | '/study/verb-lab/qal-perfect'
     | '/game/$chapter/'
     | '/game/alefbet/'
@@ -1283,6 +1293,7 @@ export interface FileRouteTypes {
     | '/study/lesson/$id'
     | '/study/station/$id'
     | '/study/term2/$chapter'
+    | '/study/verb-lab/qal-clocks'
     | '/study/verb-lab/qal-perfect'
     | '/game/$chapter'
     | '/game/alefbet'
@@ -1402,6 +1413,7 @@ export interface FileRouteTypes {
     | '/study/lesson/$id'
     | '/study/station/$id'
     | '/study/term2/$chapter'
+    | '/study/verb-lab/qal-clocks'
     | '/study/verb-lab/qal-perfect'
     | '/game/$chapter/'
     | '/game/alefbet/'
@@ -1505,6 +1517,7 @@ export interface RootRouteChildren {
   StudyLessonIdRoute: typeof StudyLessonIdRoute
   StudyStationIdRoute: typeof StudyStationIdRoute
   StudyTerm2ChapterRoute: typeof StudyTerm2ChapterRoute
+  StudyVerbLabQalClocksRoute: typeof StudyVerbLabQalClocksRoute
   StudyVerbLabQalPerfectRoute: typeof StudyVerbLabQalPerfectRoute
   GameChapterIndexRoute: typeof GameChapterIndexRoute
   GameAlefbetIndexRoute: typeof GameAlefbetIndexRoute
@@ -2256,6 +2269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudyTerm2ChapterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/study/verb-lab/qal-clocks': {
+      id: '/study/verb-lab/qal-clocks'
+      path: '/study/verb-lab/qal-clocks'
+      fullPath: '/study/verb-lab/qal-clocks'
+      preLoaderRoute: typeof StudyVerbLabQalClocksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/study/verb-lab/qal-perfect': {
       id: '/study/verb-lab/qal-perfect'
       path: '/study/verb-lab/qal-perfect'
@@ -2510,6 +2530,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudyLessonIdRoute: StudyLessonIdRoute,
   StudyStationIdRoute: StudyStationIdRoute,
   StudyTerm2ChapterRoute: StudyTerm2ChapterRoute,
+  StudyVerbLabQalClocksRoute: StudyVerbLabQalClocksRoute,
   StudyVerbLabQalPerfectRoute: StudyVerbLabQalPerfectRoute,
   GameChapterIndexRoute: GameChapterIndexRoute,
   GameAlefbetIndexRoute: GameAlefbetIndexRoute,
