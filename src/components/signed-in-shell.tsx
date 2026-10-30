@@ -28,6 +28,7 @@ import { RedirectToSignIn, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { BrandLockup } from "@/components/brand-lockup";
 import { SfxToggle } from "@/components/sfx-toggle";
+import { ScreenLamp } from "@/components/screen-lamp";
 import { getAdminStatus } from "@/lib/admin";
 import { STUDY_MENU_BLOG } from "@/lib/public-nav";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
@@ -354,6 +355,9 @@ export function SignedInShell({ children }: { children: ReactNode }) {
             </Link>
             <NavTip label="Answer sounds">
               <SfxToggle />
+            </NavTip>
+            <NavTip label="Screen">
+              <ScreenLamp />
             </NavTip>
             <NavMenu
               label="More"

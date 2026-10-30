@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 import { cn } from "@/lib/cn";
 import { liveMatchAny, normalizeHebrewFull, pointingHint } from "@/lib/hebrew";
+import { accentStillOpen, liveMatchParadigm } from "@/lib/paradigm/normalize";
 import { GradeBanner } from "@/components/grade-banner";
 import { CONSONANTS } from "@/lib/alphabet";
 
@@ -188,18 +189,24 @@ export function HebrewType({
   markBackspace = false,
   onSpecialMark,
 }: Props) {
-  const live = liveMatchAny(target, value, alts, strict);
+  const paradigm = extraMarks && strict;
+  const live = paradigm ? liveMatchParadigm(target, value) : liveMatchAny(target, value, alts, strict);
   const valueRef = useRef(value);
   valueRef.current = value;
   const extra = live === "off" ? pointingHint(target, value) : null;
   const offLabel = extra === "Use the final form" ? extra : "Try again";
+  const accentOpen = paradigm && live === "prefix" && accentStillOpen(target, value);
   const hint = strict
     ? live === "empty"
       ? "Consonant first, then its vowel. Full match."
       : live === "exact"
         ? "Correct"
         : live === "prefix"
-          ? "Keep going — that prefix is right."
+          ? accentOpen
+            ? "Right so far. Add the accent."
+            : paradigm
+              ? "Right so far."
+              : "Keep going — that prefix is right."
           : offLabel
     : live === "empty"
       ? "Consonant first, then its vowel. Vowels optional to match."
@@ -264,6 +271,7 @@ export function HebrewType({
           "w-full rounded-[var(--radius-md)] border border-border bg-parchment px-4 text-center text-3xl text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           extraMarks ? "he-taam min-h-20 py-2 leading-[2.4]" : "h-14 font-hebrew",
           paint && live === "exact" && "ring-2 ring-good",
+          paint && live === "prefix" && extraMarks && "ring-2 ring-primary",
           paint && live === "off" && value && "ring-2 ring-danger",
         )}
       />
@@ -279,7 +287,9 @@ export function HebrewType({
         <p className="mt-1 text-center text-sm font-semibold text-danger">{extra}</p>
       )}
       {!disabled && showLive && live !== "exact" && live !== "off" && (
-        <p className="mt-2 text-center text-sm font-medium text-muted">{hint}</p>
+        <p className={cn("mt-2 text-center text-sm font-medium", paradigm && live === "prefix" ? "font-semibold text-primary" : "text-muted")}>
+          {hint}
+        </p>
       )}
 
       <div className="mt-2 grid grid-cols-3 gap-1.5">

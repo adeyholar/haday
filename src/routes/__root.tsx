@@ -10,6 +10,7 @@ import { AppErrorComponent } from "@/lib/error-component";
 import { isRetiredVercelHost } from "@/lib/class-site";
 import { emailConfirmRedirect, freshRootSession, storeRootSession } from "@/lib/auth/confirm-hold";
 import { SEO_DESCRIPTION, SEO_TITLE, shareMeta } from "@/lib/seo";
+import { LAMP_BOOT, readLamp } from "@/lib/lamp";
 import appCss from "../styles.css?url";
 
 const loadRootContext = createServerFn({ method: "GET" }).handler(async () => {
@@ -110,9 +111,10 @@ function RootDocument() {
   }
 
   return (
-    <html lang="en" className="antialiased" suppressHydrationWarning>
+    <html lang="en" className="antialiased" data-lamp={readLamp() === "light" ? undefined : readLamp()} suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: LAMP_BOOT }} />
       </head>
       <body>
         <PreviewHostBridge />
