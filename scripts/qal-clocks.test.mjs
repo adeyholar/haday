@@ -4,7 +4,7 @@ import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { answerSitting, clockCards, gradeClock, sittingFrom, weqatalOf } = await jiti.import(new URL("../src/lib/qal-clocks.ts", import.meta.url).pathname);
-const { openPattern } = await jiti.import(new URL("../src/lib/verbal-system.ts", import.meta.url).pathname);
+const { openPattern, ROOTS } = await jiti.import(new URL("../src/lib/verbal-system.ts", import.meta.url).pathname);
 const { accentStillOpen, liveMatchParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
 
 function form(root, conj, pgn) {
@@ -29,9 +29,9 @@ test("weqatal is the perfect with the conjunction, not wayyiqtol", () => {
 
 test("practice deals yiqtol, wayyiqtol, and weqatal", () => {
   const cards = clockCards();
-  assert.equal(cards.filter((card) => card.clock === "yiqtol").length, 249);
-  assert.equal(cards.filter((card) => card.clock === "wayyiqtol").length, 202);
-  assert.equal(cards.filter((card) => card.clock === "weqatal").length, 284);
+  assert.equal(cards.filter((card) => card.clock === "yiqtol").length, 259);
+  assert.equal(cards.filter((card) => card.clock === "wayyiqtol").length, 212);
+  assert.equal(cards.filter((card) => card.clock === "weqatal").length, 293);
   const shamar = cards.find((card) => card.rootId === "shamar" && card.clock === "yiqtol" && card.pgn === "3ms");
   assert.equal(shamar.form, "יִשְׁמֹר");
   const story = cards.find((card) => card.rootId === "shamar" && card.clock === "wayyiqtol" && card.pgn === "3ms");
@@ -64,6 +64,29 @@ test("one root is three rounds, and a miss comes back", () => {
   assert.equal(sitting.queue.length, 0);
 });
 
+test("person order starts at 3ms and the next round keeps it", () => {
+  const row = (id, clock, pgn) => ({ id, clock, rootId: "qatal", cite: "ק", gloss: "kill", pgn, label: pgn, form: id });
+  const cards = [
+    row("fs", "yiqtol", "3fs"),
+    row("cp", "weqatal", "3cp"),
+    row("mp", "yiqtol", "3mp"),
+    row("msw", "wayyiqtol", "3ms"),
+    row("fp", "yiqtol", "3fp"),
+    row("ms", "yiqtol", "3ms"),
+    row("we", "weqatal", "1cp"),
+  ];
+  const want = "yiqtol:3ms,yiqtol:3fs,yiqtol:3mp,yiqtol:3fp,wayyiqtol:3ms,weqatal:3cp,weqatal:1cp";
+  let sitting = sittingFrom(cards, "pgn");
+  const line = (queue) => queue.map((card) => `${card.clock}:${card.pgn}`).join(",");
+  assert.equal(line(sitting.queue), want);
+  sitting = answerSitting(sitting, false);
+  assert.equal(sitting.queue[0].id, "fs");
+  assert.equal(sitting.queue.at(-1).id, "ms");
+  for (let i = 0; i < cards.length; i++) sitting = answerSitting(sitting, true);
+  assert.equal(sitting.round, 2);
+  assert.equal(line(sitting.queue), want);
+});
+
 test("each tap stays on the form, and the accent is still open until it is typed", () => {
   const stressed = form("shamar", "perfect", "2ms");
   const bare = stressed.replaceAll("\u05AB", "");
@@ -74,4 +97,16 @@ test("each tap stays on the form, and the accent is still open until it is typed
   assert.equal(liveMatchParadigm(stressed, stressed), "exact");
   assert.equal(accentStillOpen(stressed, stressed), false);
   assert.equal(liveMatchParadigm(stressed, "ק"), "off");
+});
+
+test("qatal is the first strong verb, and the engine signs it", () => {
+  assert.equal(ROOTS[0].id, "qatal");
+  assert.equal(ROOTS[0].cls, "strong");
+  assert.equal(form("qatal", "perfect", "3ms"), "קָטַל");
+  assert.equal(form("qatal", "imperfect", "3ms"), "יִקְטֹל");
+  assert.equal(form("qatal", "wayyiqtol", "3ms"), "וַיִּקְטֹל");
+  const cards = clockCards().filter((card) => card.rootId === "qatal");
+  assert.equal(cards.filter((card) => card.clock === "yiqtol").length, 10);
+  assert.equal(cards.filter((card) => card.clock === "wayyiqtol").length, 10);
+  assert.equal(cards.filter((card) => card.clock === "weqatal").length, 9);
 });

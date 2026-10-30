@@ -122,8 +122,28 @@ export function gradeClock(form: string, typed: string, strict = true): { ok: bo
 /** One root, three passes. A miss stays in the same pass. */
 export const PRACTICE_ROUNDS = 3;
 
+/** 3cp is the perfect “they.” On the imperfect that slot is 3mp, then 3fp. */
+export const PGN_ORDER = ["3ms", "3fs", "2ms", "2fs", "1cs", "3cp", "3mp", "3fp", "2mp", "2fp", "1cp"] as const;
+
+export type PracticeOrder = "mixed" | "pgn";
+
+const CLOCK_RANK: Record<Clock, number> = { yiqtol: 0, wayyiqtol: 1, weqatal: 2 };
+
+export function byPerson(cards: ClockCard[]): ClockCard[] {
+  const rank = (pgn: string) => {
+    const at = PGN_ORDER.indexOf(pgn as (typeof PGN_ORDER)[number]);
+    return at < 0 ? PGN_ORDER.length : at;
+  };
+  return cards.slice().sort((a, b) => {
+    const clock = CLOCK_RANK[a.clock] - CLOCK_RANK[b.clock];
+    if (clock !== 0) return clock;
+    return rank(a.pgn) - rank(b.pgn);
+  });
+}
+
 export type Sitting = {
   source: ClockCard[];
+  order: PracticeOrder;
   round: number;
   queue: ClockCard[];
   cleared: number;
@@ -131,11 +151,13 @@ export type Sitting = {
   finished: boolean;
 };
 
-export function sittingFrom(cards: ClockCard[]): Sitting {
+export function sittingFrom(cards: ClockCard[], order: PracticeOrder = "mixed"): Sitting {
+  const source = order === "pgn" ? byPerson(cards) : cards.slice();
   return {
-    source: cards,
+    source,
+    order,
     round: 1,
-    queue: cards.slice(),
+    queue: source.slice(),
     cleared: 0,
     misses: 0,
     finished: false,
@@ -163,5 +185,6 @@ export function answerSitting(sitting: Sitting, ok: boolean): Sitting {
   if (sitting.round >= PRACTICE_ROUNDS) {
     return { ...sitting, queue: [], cleared: sitting.cleared + 1, finished: true };
   }
-  return { ...sitting, round: sitting.round + 1, queue: reshuffle(sitting.source), cleared: 0, misses: 0 };
+  const next = sitting.order === "pgn" ? byPerson(sitting.source) : reshuffle(sitting.source);
+  return { ...sitting, round: sitting.round + 1, queue: next, cleared: 0, misses: 0 };
 }
