@@ -118,3 +118,50 @@ export function gradeClock(form: string, typed: string, strict = true): { ok: bo
   if (strict && want.replaceAll(OLE, "") === got.replaceAll(OLE, "")) return { ok: false, lenient: false, tag: "stress" };
   return { ok: false, lenient: false, tag: "" };
 }
+
+/** One root, three passes. A miss stays in the same pass. */
+export const PRACTICE_ROUNDS = 3;
+
+export type Sitting = {
+  source: ClockCard[];
+  round: number;
+  queue: ClockCard[];
+  cleared: number;
+  misses: number;
+  finished: boolean;
+};
+
+export function sittingFrom(cards: ClockCard[]): Sitting {
+  return {
+    source: cards,
+    round: 1,
+    queue: cards.slice(),
+    cleared: 0,
+    misses: 0,
+    finished: false,
+  };
+}
+
+function reshuffle(cards: ClockCard[]): ClockCard[] {
+  const out = cards.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const hold = out[i];
+    out[i] = out[j];
+    out[j] = hold;
+  }
+  return out;
+}
+
+/** A hit leaves the pass. A miss goes to the back. The next pass starts when this one is clear. */
+export function answerSitting(sitting: Sitting, ok: boolean): Sitting {
+  if (sitting.finished || sitting.queue.length === 0) return sitting;
+  const head = sitting.queue[0];
+  const rest = sitting.queue.slice(1);
+  if (!ok) return { ...sitting, queue: [...rest, head], misses: sitting.misses + 1 };
+  if (rest.length > 0) return { ...sitting, queue: rest, cleared: sitting.cleared + 1 };
+  if (sitting.round >= PRACTICE_ROUNDS) {
+    return { ...sitting, queue: [], cleared: sitting.cleared + 1, finished: true };
+  }
+  return { ...sitting, round: sitting.round + 1, queue: reshuffle(sitting.source), cleared: 0, misses: 0 };
+}
