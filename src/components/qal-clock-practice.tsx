@@ -1,11 +1,32 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { HebrewType } from "@/components/hebrew-type";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import { CLOCK_LABEL, CLOCK_NOTE, CLOCKS, clockCards, gradeClock, type Clock, type ClockCard } from "@/lib/qal-clocks";
+import {
+  CLOCK_LABEL,
+  CLOCK_NOTE,
+  CLOCKS,
+  PRACTICE_ROUNDS,
+  answerSitting,
+  clockCards,
+  gradeClock,
+  sittingFrom,
+  type Clock,
+  type ClockCard,
+  type Sitting,
+} from "@/lib/qal-clocks";
+import { CLASS_LABEL, ROOTS, type RootClass } from "@/lib/verbal-system";
 
 type Filter = "all" | Clock;
+
+const ROOT_GROUPS: { cls: RootClass; roots: (typeof ROOTS)[number][] }[] = [];
+for (const root of ROOTS) {
+  const last = ROOT_GROUPS[ROOT_GROUPS.length - 1];
+  if (!last || last.cls !== root.cls) ROOT_GROUPS.push({ cls: root.cls, roots: [root] });
+  else last.roots.push(root);
+}
 
 function shuffle(cards: ClockCard[]): ClockCard[] {
   const out = cards.slice();
@@ -19,39 +40,34 @@ function shuffle(cards: ClockCard[]): ClockCard[] {
 }
 
 export function QalClockPractice() {
-  const deck = useMemo(() => shuffle(clockCards()), []);
+  const deck = useMemo(() => clockCards(), []);
   const [filter, setFilter] = useState<Filter>("all");
-  const [cursor, setCursor] = useState(0);
+  const [rootId, setRootId] = useState<string | null>(null);
+  const [sitting, setSitting] = useState<Sitting | null>(null);
   const [typed, setTyped] = useState("");
   const [strict, setStrict] = useState(true);
-  const [graded, setGraded] = useState(false);
-  const [ok, setOk] = useState(false);
-  const [lenient, setLenient] = useState(false);
-  const [tag, setTag] = useState<"" | "stress">("");
+  const [graded, setGraded] = useState<{ ok: boolean; lenient: boolean; tag: "" | "stress" } | null>(null);
 
-  const pool = filter === "all" ? deck : deck.filter((card) => card.clock === filter);
-  const card = pool[cursor % Math.max(pool.length, 1)];
+  const card = sitting?.queue[0];
 
-  function reset() {
+  function begin(nextRoot: string, nextFilter: Filter) {
+    const cards = deck.filter((item) => item.rootId === nextRoot && (nextFilter === "all" || item.clock === nextFilter));
+    setRootId(nextRoot);
+    setSitting(sittingFrom(shuffle(cards)));
     setTyped("");
-    setGraded(false);
-    setOk(false);
-    setLenient(false);
-    setTag("");
-  }
-
-  function next() {
-    setCursor((value) => value + 1);
-    reset();
+    setGraded(null);
   }
 
   function check() {
-    if (!card) return;
-    const result = gradeClock(card.form, typed, strict);
-    setGraded(true);
-    setOk(result.ok);
-    setLenient(result.lenient);
-    setTag(result.tag);
+    if (!card || graded) return;
+    setGraded(gradeClock(card.form, typed, strict));
+  }
+
+  function next() {
+    if (!sitting || !graded) return;
+    setSitting(answerSitting(sitting, graded.ok));
+    setTyped("");
+    setGraded(null);
   }
 
   return (
@@ -60,7 +76,7 @@ export function QalClockPractice() {
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Qal · practice</p>
         <h2 className="mt-1 font-display text-3xl font-bold text-ink">Yiqtol, wayyiqtol, weqatal</h2>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          Type the Qal form. Yiqtol is the imperfect. Wayyiqtol is the story past. Weqatal is the perfect with “and.” This practice is not the graded test.
+          Pick a root. Three rounds of its forms. A miss comes back in the same round. This practice is not the graded test.
         </p>
         <div className="mt-4 flex flex-wrap gap-2" role="radiogroup" aria-label="Clock">
           {(
@@ -76,8 +92,7 @@ export function QalClockPractice() {
               aria-checked={filter === id}
               onClick={() => {
                 setFilter(id);
-                setCursor(0);
-                reset();
+                if (rootId) begin(rootId, id);
               }}
               className={cn(
                 "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
@@ -93,9 +108,70 @@ export function QalClockPractice() {
           Full pointing
         </label>
       </Panel>
+      <Panel>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Root</p>
+        <div className="mt-3 grid gap-3" role="radiogroup" aria-label="Root">
+          {ROOT_GROUPS.map((group) => (
+            <div key={group.cls}>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{CLASS_LABEL[group.cls]}</p>
+              <div className="mt-1.5 flex flex-wrap gap-2">
+                {group.roots.map((root) => (
+                  <button
+                    key={root.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={rootId === root.id}
+                    onClick={() => begin(root.id, filter)}
+                    className={cn(
+                      "inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
+                      rootId === root.id ? "bg-primary text-primary-foreground" : "bg-card text-ink shadow-[var(--shadow-border)]",
+                    )}
+                  >
+                    <span className="he-word text-xl leading-none" dir="rtl" lang="he">
+                      {root.cite}
+                    </span>
+                    <span className={rootId === root.id ? "text-primary-foreground" : "text-muted"}>{root.gloss}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+      {sitting?.finished ? (
+        <Panel>
+          <p className="text-sm font-semibold text-ink">Three rounds done.</p>
+          <p className="mt-2 max-w-prose text-sm text-muted">
+            This root is ready to take into the game. The graded tests stay under Play. This room did not score them.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" onClick={() => rootId && begin(rootId, filter)}>
+              Practice this root again
+            </Button>
+            <Link
+              to="/game/qal-imperfect"
+              className="inline-flex min-h-11 items-center rounded-[var(--radius-md)] px-3 text-sm font-semibold text-primary"
+            >
+              Qal imperfect test
+            </Link>
+          </div>
+        </Panel>
+      ) : null}
+      {!rootId ? (
+        <Panel>
+          <p className="text-sm text-muted">Choose a root to start the three rounds.</p>
+        </Panel>
+      ) : null}
       {card ? (
         <Panel>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{card.gloss}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+            Round {sitting?.round} of {PRACTICE_ROUNDS}
+            {sitting && sitting.misses > 0 ? ` · ${sitting.misses} came back` : ""}
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            {sitting ? `${sitting.cleared} done · ${sitting.queue.length} left` : ""}
+          </p>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted">{card.gloss}</p>
           <p className="he-word mt-1 text-4xl text-ink" dir="rtl" lang="he">
             {card.cite}
           </p>
@@ -104,26 +180,43 @@ export function QalClockPractice() {
           </p>
           <p className="mt-1 text-sm text-muted">{CLOCK_NOTE[card.clock]}</p>
           <div className="mt-4">
-            <HebrewType value={typed} onChange={setTyped} target={card.form} strict={strict} liveGrade={false} hideHint hideVowelLetters markBackspace extraMarks />
+            <HebrewType
+              value={typed}
+              onChange={setTyped}
+              target={card.form}
+              strict={strict}
+              liveGrade={false}
+              hideHint
+              hideVowelLetters
+              markBackspace
+              extraMarks
+            />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" onClick={check} disabled={!typed.trim() || graded}>
+            <Button type="button" onClick={check} disabled={!typed.trim() || graded !== null}>
               Check
             </Button>
-            <Button type="button" variant="outline" onClick={next}>
+            <Button type="button" variant="outline" onClick={next} disabled={graded === null}>
               Next
             </Button>
           </div>
           {graded ? (
             <div className="mt-4 grid gap-2">
-              <p className={cn("text-sm font-semibold", ok && !lenient ? "text-primary" : "text-danger")}>
-                {lenient ? "Letters right, now point it" : ok ? "Correct" : tag === "stress" ? "The accent is missing" : "Not yet"}
+              <p className={cn("text-sm font-semibold", graded.ok ? "text-primary" : "text-danger")}>
+                {graded.lenient ? "Letters match" : graded.ok ? "Correct" : graded.tag === "stress" ? "The accent is missing" : "Not yet"}
               </p>
-              <p className="he-word text-3xl text-ink" dir="rtl" lang="he">
-                {card.form}
-              </p>
+              {!graded.ok || graded.lenient ? (
+                <p className="he-word text-3xl text-ink" dir="rtl" lang="he">
+                  {card.form}
+                </p>
+              ) : null}
             </div>
           ) : null}
+        </Panel>
+      ) : null}
+      {rootId && sitting && !sitting.finished && !card ? (
+        <Panel>
+          <p className="text-sm text-muted">This root has no forms for that clock. Pick another clock, or another root.</p>
         </Panel>
       ) : null}
     </div>

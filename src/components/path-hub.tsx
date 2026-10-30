@@ -76,7 +76,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/cards", title: "Cards", line: "Turn a card. Say it before you look." },
       { to: "/keep", title: "Zakhor", line: "A short keep for today." },
       { to: "/study/verb-lab/qal-perfect", title: "Verb Lab · Qal perfect practice", line: "Drill strong and weak roots by verb class, with hints." },
-      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Qal practice. Type the form. Not the graded test." },
+      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Pick a root. Three rounds. Not the graded test." },
     ],
   },
   play: {
@@ -131,7 +131,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/match", title: "Match", line: "Select the pairs." },
       { to: "/weak", title: "Weak words", line: "Words you miss will gather here." },
       { to: "/study/verb-lab/qal-perfect", title: "Verb Lab · Qal perfect practice", line: "Drill strong and weak roots by verb class, with hints." },
-      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Qal practice. Type the form. Not the graded test." },
+      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Pick a root. Three rounds. Not the graded test." },
     ],
   },
   play: {
