@@ -30,11 +30,59 @@ export function normalizeParadigm(s: string, options?: { meteg?: boolean }): str
   );
 }
 
+const OLE = "\u05AB";
+const DAGESH = "\u05BC";
+const CONS = /[\u05D0-\u05EA]/;
+const FULL_VOWEL = /[\u05B1-\u05BB]/;
+const BEGAD = new Set(["ב", "ג", "ד", "כ", "פ", "ת", "ך", "ף"]);
+
+type Cluster = { letter: string; marks: string[] };
+
+function clustersOf(s: string): Cluster[] {
+  const chars = [...s];
+  const out: Cluster[] = [];
+  let i = 0;
+  while (i < chars.length) {
+    if (!CONS.test(chars[i])) {
+      i += 1;
+      continue;
+    }
+    const letter = chars[i];
+    i += 1;
+    const marks: string[] = [];
+    while (i < chars.length && !CONS.test(chars[i])) {
+      marks.push(chars[i]);
+      i += 1;
+    }
+    out.push({ letter, marks });
+  }
+  return out;
+}
+
+/** A dagesh lene the signed form does not write is not a miss. Forte, and a lene the form already has, still count. */
+export function dropExtraLene(want: string, got: string): string {
+  const wc = clustersOf(want);
+  const gc = clustersOf(got);
+  let out = "";
+  for (let i = 0; i < gc.length; i++) {
+    const g = gc[i];
+    const w = wc[i];
+    let marks = g.marks;
+    const prev = i > 0 ? gc[i - 1] : undefined;
+    const lene = BEGAD.has(g.letter) && !(prev && FULL_VOWEL.test(prev.marks.join("")));
+    if (lene && w && g.letter === w.letter && marks.includes(DAGESH) && !w.marks.includes(DAGESH)) {
+      marks = marks.filter((mark) => mark !== DAGESH);
+    }
+    out += g.letter + marks.join("");
+  }
+  return out;
+}
+
 /** Same walk as a vocab word, but a missing accent stays “right so far,” not “wrong.” An accent on the wrong letter is wrong at once. */
 export function liveMatchParadigm(expected: string, typed: string): "empty" | "prefix" | "exact" | "off" {
   const want = normalizeParadigm(expected);
-  const got = normalizeParadigm(typed);
-  const body = matchClusters(want.replaceAll("\u05AB", ""), got.replaceAll("\u05AB", ""));
+  const got = dropExtraLene(want, normalizeParadigm(typed));
+  const body = matchClusters(want.replaceAll(OLE, ""), got.replaceAll(OLE, ""));
   if (body === "off" || body === "empty") return body;
   const wantAt = oleAt(want);
   const gotAt = oleAt(got);
@@ -57,6 +105,6 @@ function oleAt(s: string): number[] {
 /** Vowels are in. The accent is the only piece still open. */
 export function accentStillOpen(expected: string, typed: string): boolean {
   const want = normalizeParadigm(expected);
-  const got = normalizeParadigm(typed);
-  return want.includes("\u05AB") && !got.includes("\u05AB") && want.replaceAll("\u05AB", "") === got;
+  const got = dropExtraLene(want, normalizeParadigm(typed));
+  return want.includes(OLE) && !got.includes(OLE) && want.replaceAll(OLE, "") === got.replaceAll(OLE, "");
 }

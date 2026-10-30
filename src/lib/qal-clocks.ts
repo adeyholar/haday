@@ -1,5 +1,5 @@
 import { foldFinals, lettersOnly } from "@/lib/hebrew";
-import { normalizeParadigm } from "@/lib/paradigm/normalize";
+import { normalizeParadigm, dropExtraLene } from "@/lib/paradigm/normalize";
 import { openPattern, ROOTS, type VerbRoot } from "@/lib/verbal-system";
 
 export const CLOCKS = ["yiqtol", "wayyiqtol", "weqatal"] as const;
@@ -110,7 +110,7 @@ export function clockCards(): ClockCard[] {
 
 export function gradeClock(form: string, typed: string, strict = true): { ok: boolean; lenient: boolean; tag: "stress" | "" } {
   const want = normalizeParadigm(form);
-  const got = normalizeParadigm(typed);
+  const got = dropExtraLene(want, normalizeParadigm(typed));
   if (strict && want === got) return { ok: true, lenient: false, tag: "" };
   if (!strict && foldFinals(lettersOnly(form)) === foldFinals(lettersOnly(typed)) && lettersOnly(typed)) {
     return { ok: true, lenient: true, tag: "" };
