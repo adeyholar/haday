@@ -16,6 +16,7 @@ import {
   sittingFrom,
   type Clock,
   type ClockCard,
+  type PracticeOrder,
   type Sitting,
 } from "@/lib/qal-clocks";
 import { CLASS_LABEL, ROOTS, type RootClass } from "@/lib/verbal-system";
@@ -43,6 +44,7 @@ function shuffle(cards: ClockCard[]): ClockCard[] {
 export function QalClockPractice() {
   const deck = useMemo(() => clockCards(), []);
   const [filter, setFilter] = useState<Filter>("all");
+  const [order, setOrder] = useState<PracticeOrder>("pgn");
   const [rootId, setRootId] = useState<string | null>(null);
   const [sitting, setSitting] = useState<Sitting | null>(null);
   const [typed, setTyped] = useState("");
@@ -51,10 +53,10 @@ export function QalClockPractice() {
 
   const card = sitting?.queue[0];
 
-  function begin(nextRoot: string, nextFilter: Filter) {
+  function begin(nextRoot: string, nextFilter: Filter, nextOrder: PracticeOrder) {
     const cards = deck.filter((item) => item.rootId === nextRoot && (nextFilter === "all" || item.clock === nextFilter));
     setRootId(nextRoot);
-    setSitting(sittingFrom(shuffle(cards)));
+    setSitting(sittingFrom(nextOrder === "pgn" ? cards : shuffle(cards), nextOrder));
     setTyped("");
     setGraded(null);
   }
@@ -93,7 +95,7 @@ export function QalClockPractice() {
               aria-checked={filter === id}
               onClick={() => {
                 setFilter(id);
-                if (rootId) begin(rootId, id);
+                if (rootId) begin(rootId, id, order);
               }}
               className={cn(
                 "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
@@ -104,6 +106,36 @@ export function QalClockPractice() {
             </button>
           ))}
         </div>
+        <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Order">
+          {(
+            [
+              ["pgn", "Person order"],
+              ["mixed", "Mixed"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={order === id}
+              onClick={() => {
+                setOrder(id);
+                if (rootId) begin(rootId, filter, id);
+              }}
+              className={cn(
+                "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
+                order === id ? "bg-primary text-primary-foreground" : "bg-card text-muted shadow-[var(--shadow-border)]",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {order === "pgn" ? (
+          <p className="mt-2 text-sm text-muted">
+            Yiqtol, then wayyiqtol, then weqatal. Each clock runs 3ms, 3fs, 2ms, 2fs, 1cs, 3cp (3mp, 3fp), 2mp, 2fp, 1cp.
+          </p>
+        ) : null}
         <label className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted">
           <input type="checkbox" checked={strict} onChange={(event) => setStrict(event.target.checked)} />
           Full pointing
@@ -119,6 +151,9 @@ export function QalClockPractice() {
           {ROOT_GROUPS.map((group) => (
             <div key={group.cls}>
               <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{CLASS_LABEL[group.cls]}</p>
+              {group.cls === "strong" ? (
+                <p className="mt-1 text-sm text-muted">Start with קָטַל. It is the plain strong verb. The others use the same pattern with harder letters.</p>
+              ) : null}
               <div className="mt-1.5 flex flex-wrap gap-2">
                 {group.roots.map((root) => (
                   <button
@@ -126,7 +161,7 @@ export function QalClockPractice() {
                     type="button"
                     role="radio"
                     aria-checked={rootId === root.id}
-                    onClick={() => begin(root.id, filter)}
+                    onClick={() => begin(root.id, filter, order)}
                     className={cn(
                       "inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
                       rootId === root.id ? "bg-primary text-primary-foreground" : "bg-card text-ink shadow-[var(--shadow-border)]",
@@ -150,7 +185,7 @@ export function QalClockPractice() {
             This root is ready to take into the game. The graded tests stay under Play. This room did not score them.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" onClick={() => rootId && begin(rootId, filter)}>
+            <Button type="button" onClick={() => rootId && begin(rootId, filter, order)}>
               Practice this root again
             </Button>
             <Link

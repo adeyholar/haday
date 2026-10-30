@@ -195,6 +195,7 @@ const stemEn = Object.fromEntries(STEMS.map((s) => [s.id, s.en])) as Record<Stem
 const conjEn = Object.fromEntries(CONJS.map((s) => [s.id, s.en])) as Record<ConjId, string>;
 
 export const ROOTS: VerbRoot[] = [
+  { id: "qatal", letters: ["ק", "ט", "ל"], dots: ["", "", ""], gloss: "kill", cls: "strong", cite: "קָטַל" },
   { id: "shamar", letters: ["ש", "מ", "ר"], dots: ["shin", "", ""], gloss: "keep, guard", cls: "strong", cite: "שָׁמַר" },
   { id: "katav", letters: ["כ", "ת", "ב"], dots: ["", "", ""], gloss: "write", cls: "strong", cite: "כָּתַב" },
   { id: "paqad", letters: ["פ", "ק", "ד"], dots: ["", "", ""], gloss: "attend, number", cls: "strong", cite: "פָּקַד" },
