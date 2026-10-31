@@ -39,6 +39,9 @@ test("the nine Qal perfect forms match the chart, including accent and meteg", (
   }
   const by = Object.fromEntries(forms.map((row) => [row.pgn, row.form]));
   assert.equal(by["2ms"].includes(O), true);
+  assert.equal(by["2ms"].includes(P + O), true);
+  assert.equal(by["2ms"].includes(O + P), false);
+  assert.equal(by["2ms"].includes("ת" + D + Q), true);
   assert.equal(by["1cs"].includes(O), true);
   assert.equal(by["1cp"].includes(O), true);
   assert.equal(by["3ms"].includes(O), false);

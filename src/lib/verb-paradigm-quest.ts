@@ -1,4 +1,5 @@
 import { VOCAB, type VocabItem } from "@/lib/vocab";
+import { sortHebrewMarks } from "@/lib/hebrew";
 
 /** Stress mark (ole). Required on 2ms, 1cs, and 1cp. */
 export const OLE = "\u05AB";
@@ -92,7 +93,7 @@ function isLetter(cp: number): boolean {
   return cp >= 0x05d0 && cp <= 0x05ea;
 }
 
-/** Keep every Hebrew mark. Drop only bidi marks and spaces. Order on a letter does not matter. */
+/** Keep every Hebrew mark. Drop only bidi marks and spaces. Stored order is dagesh, then the vowel, then the accent, so the vowel stays on its letter. */
 export function canonicalize(s: string): string {
   const nfd = s.normalize("NFD").replace(/\u05BA/g, "\u05B9").replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\s]/g, "");
   const groups: string[] = [];
@@ -105,7 +106,7 @@ export function canonicalize(s: string): string {
     .map((group) => {
       const pieces = chars(group);
       const base = pieces[0] ?? "";
-      const marks = pieces.slice(1).sort((a, b) => (a.codePointAt(0) ?? 0) - (b.codePointAt(0) ?? 0));
+      const marks = sortHebrewMarks(pieces.slice(1));
       return base + marks.join("");
     })
     .join("");

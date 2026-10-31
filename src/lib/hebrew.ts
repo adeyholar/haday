@@ -72,6 +72,25 @@ export function foldBareShin(s: string): string {
   return out;
 }
 
+/** Ezra SIL draws a vowel on the next letter if a cantillation mark precedes it. Dagesh before the vowel, then the vowel, then meteg, then the accent. */
+export function hebrewMarkRank(cp: number): number {
+  if (cp === 0x05c1 || cp === 0x05c2) return 1;
+  if (cp === 0x05bc) return 2;
+  if (cp === 0x05bf) return 3;
+  if ((cp >= 0x05b0 && cp <= 0x05bb) || cp === 0x05c7) return 4;
+  if (cp === 0x05bd) return 5;
+  if (cp >= 0x0591 && cp <= 0x05af) return 6;
+  if (cp === 0x05c4 || cp === 0x05c5) return 7;
+  return 8;
+}
+
+export function sortHebrewMarks(marks: string[]): string[] {
+  return marks
+    .map((ch, at) => ({ ch, at, rank: hebrewMarkRank(ch.codePointAt(0) ?? 0) }))
+    .sort((a, b) => a.rank - b.rank || a.at - b.at)
+    .map((row) => row.ch);
+}
+
 export function canonMarks(s: string): string {
   const cons = /[\u05D0-\u05EA]/;
   const chars = [...s];
@@ -90,8 +109,7 @@ export function canonMarks(s: string): string {
       marks.push(chars[i]);
       i += 1;
     }
-    marks.sort();
-    out += ch + marks.join("");
+    out += ch + sortHebrewMarks(marks).join("");
   }
   return out;
 }

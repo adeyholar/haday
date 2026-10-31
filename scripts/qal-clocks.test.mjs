@@ -143,6 +143,8 @@ test("yiqtol 3fp and 2fp take the accent on the theme vowel", () => {
     assert.equal(gradeClock(y, withLene, true).ok, true);
     const seated = placeChosenMark(bare, y, OLE);
     assert.equal(seated.status, "placed");
+    assert.ok(seated.text.includes(HOLEM + OLE));
+    assert.equal(seated.text.includes(OLE + HOLEM), false);
     assert.equal(gradeClock(y, seated.text, true).ok, true);
     assert.equal(accentPlace(y, bare + OLE), "wrong");
   }
