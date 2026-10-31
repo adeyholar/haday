@@ -31,8 +31,6 @@ import {
   type SrsState,
 } from "@/lib/paradigm/srs";
 
-import { placeChosenMark } from "@/lib/verb-paradigm-quest";
-
 function seatMark(current: string, target: string, mark: string): boolean | string {
   const placed = placeChosenMark(current, target, mark);
   if (placed.status === "wait") return true;
