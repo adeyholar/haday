@@ -693,6 +693,17 @@ export function glossMatches(item: VocabItem, input: string): boolean {
   return bits.length > 1 && bits.every((bit) => senses.includes(bit));
 }
 
+/** Both lemmas list the same English sense, so neither can be a wrong button for the other. */
+export function sharesSense(a: VocabItem, b: VocabItem): boolean {
+  if (a.id === b.id) return false;
+  const mine = new Set(acceptedSenses(a));
+  for (const sense of acceptedSenses(b)) {
+    if (sense.length < 3) continue;
+    if (mine.has(sense)) return true;
+  }
+  return false;
+}
+
 export function liveGloss(item: VocabItem, input: string): "empty" | "prefix" | "exact" | "off" {
   const n = normalizeGloss(input);
   if (!n) return "empty";
@@ -869,12 +880,21 @@ export function quizChoices(item: VocabItem, pool: VocabItem[], n = 4): string[]
     for (const { x, s } of scored) {
       if (distractors.length >= need) break;
       if (seen.has(x.gloss)) continue;
-      if (glossMatches(item, x.gloss) || glossMatches(x, item.gloss)) continue;
+      if (glossMatches(item, x.gloss) || glossMatches(x, item.gloss) || sharesSense(item, x)) continue;
       if (!last && s < 8) continue;
       seen.add(x.gloss);
       distractors.push(x.gloss);
     }
     if (distractors.length >= need) break;
+  }
+  if (distractors.length < need) {
+    for (const x of VOCAB) {
+      if (distractors.length >= need) break;
+      if (x.id === item.id || seen.has(x.gloss)) continue;
+      if (glossMatches(item, x.gloss) || glossMatches(x, item.gloss) || sharesSense(item, x)) continue;
+      seen.add(x.gloss);
+      distractors.push(x.gloss);
+    }
   }
   return shuffle([item.gloss, ...distractors]);
 }

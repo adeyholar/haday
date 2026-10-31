@@ -168,20 +168,12 @@ function clusters(word: string): string[] {
   return parts;
 }
 
-/** The classroom accent sits on the theme vowel, before that vowel and after a dagesh. */
+/** The classroom accent follows the theme vowel, so the holem stays on that letter. */
 export function accentTheme(word: string): string {
   const parts = clusters(word);
   const theme = parts[2];
   if (!theme || [...theme].includes(OLE)) return word;
-  const chars = [...theme];
-  let i = 1;
-  while (i < chars.length) {
-    const cp = chars[i].codePointAt(0) ?? 0;
-    if (cp === 0x05bc || cp === 0x05c1 || cp === 0x05c2) i += 1;
-    else break;
-  }
-  chars.splice(i, 0, OLE);
-  parts[2] = chars.join("");
+  parts[2] = theme + OLE;
   return parts.join("");
 }
 

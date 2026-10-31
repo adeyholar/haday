@@ -74,7 +74,7 @@ function shuffled<T>(items: T[]): T[] {
   return next;
 }
 
-export function QalImperfectBuilder() {
+export function QalImperfectBuilder({ scripture = false }: { scripture?: boolean } = {}) {
   const [shuffleRows, setShuffleRows] = useState(false);
   const [root, setRoot] = useState<BuilderRoot>(ROOTS[0]);
   const [sel, setSel] = useState<Record<PgnKey, RowChoice>>(blankChoices);
@@ -136,10 +136,12 @@ export function QalImperfectBuilder() {
   return (
     <div className="grid gap-4">
       <Panel>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal imperfect</p>
-        <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Imperfect Builder</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{scripture ? "Scripture Path · Qal yiqtol" : "Grammar · Qal imperfect"}</p>
+        <h1 className="mt-1 font-display text-3xl font-bold text-ink">{scripture ? "Qal Yiqtol" : "Qal Imperfect Builder"}</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
-          The imperfect is the prefix conjugation. A prefix may be there, and an ending may be there. No prefix, no vowel, no ending, and no meteg are real choices. Build all ten. A blank menu is not a choice.
+          {scripture
+            ? "Yiqtol is the prefix conjugation. A prefix may be there, and an ending may be there. No prefix, no vowel, no ending, and no meteg are real choices. Build all ten. A blank menu is not a choice."
+            : "The imperfect is the prefix conjugation. A prefix may be there, and an ending may be there. No prefix, no vowel, no ending, and no meteg are real choices. Build all ten. A blank menu is not a choice."}
         </p>
         <p className="mt-2 max-w-prose text-sm text-muted">
           Four class roots need {KNOWN_PASSES} cleared rounds each: remember, write, keep, gather. {ROOTS.length - 4} more roots are strong verbs the Tanakh uses in this same pattern. Each of those needs one cleared round. A miss brings that root back. The reference stays on the root. The verse opens when the round clears.
@@ -187,7 +189,7 @@ export function QalImperfectBuilder() {
         </div>
         <p className="text-base text-ink">
           “{root.gloss}”
-          <span className="mt-1 block text-sm text-muted">Qal imperfect in {root.where}</span>
+          <span className="mt-1 block text-sm text-muted">{scripture ? "Qal yiqtol" : "Qal imperfect"} in {root.where}</span>
           <span className="mt-1 block text-sm text-muted">
             {rootKnown(stats, root) ? "Known. It can still return." : `Cleared ${Math.min(passesNeeded(root), passCount(stats, root))} of ${passesNeeded(root)}.`}
           </span>

@@ -65,7 +65,7 @@ function shuffled<T>(items: T[]): T[] {
   return next;
 }
 
-export function QalPerfectBuilder() {
+export function QalPerfectBuilder({ scripture = false }: { scripture?: boolean } = {}) {
   const [level, setLevel] = useState<LevelFilter>("1");
   const [shuffleRows, setShuffleRows] = useState(false);
   const [root, setRoot] = useState<BuilderRoot>(ROOTS[0]);
@@ -144,8 +144,8 @@ export function QalPerfectBuilder() {
   return (
     <div className="grid gap-4">
       <Panel>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar · Qal perfect</p>
-        <h1 className="mt-1 font-display text-3xl font-bold text-ink">Qal Perfect Builder</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{scripture ? "Scripture Path · Qal qatal" : "Grammar · Qal perfect"}</p>
+        <h1 className="mt-1 font-display text-3xl font-bold text-ink">{scripture ? "Qal Qatal" : "Qal Perfect Builder"}</h1>
         <p className="mt-3 max-w-prose text-sm text-muted">
           Build all nine forms of the root. For each row pick the vowel under each root letter, the ending, and the accent or the meteg. No vowel, no accent, and no meteg are real choices. The word assembles as you choose.
         </p>

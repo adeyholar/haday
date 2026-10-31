@@ -5,7 +5,8 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { answerSitting, clockCards, gradeClock, sittingFrom, weqatalOf } = await jiti.import(new URL("../src/lib/qal-clocks.ts", import.meta.url).pathname);
 const { openPattern, ROOTS } = await jiti.import(new URL("../src/lib/verbal-system.ts", import.meta.url).pathname);
-const { accentStillOpen, liveMatchParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
+const { accentPlace, accentStillOpen, liveMatchParadigm } = await jiti.import(new URL("../src/lib/paradigm/normalize.ts", import.meta.url).pathname);
+const { placeChosenMark } = await jiti.import(new URL("../src/lib/verb-paradigm-quest.ts", import.meta.url).pathname);
 
 function form(root, conj, pgn) {
   const pattern = openPattern(root, "qal", conj);
@@ -122,4 +123,30 @@ test("qatal is the first strong verb, and the engine signs it", () => {
   assert.equal(cards.filter((card) => card.clock === "yiqtol").length, 10);
   assert.equal(cards.filter((card) => card.clock === "wayyiqtol").length, 10);
   assert.equal(cards.filter((card) => card.clock === "weqatal").length, 9);
+});
+
+test("yiqtol 3fp and 2fp take the accent on the theme vowel", () => {
+  const OLE = "\u05AB";
+  const HOLEM = "\u05B9";
+  const D = "\u05BC";
+  for (const pgn of ["3fp", "2fp"]) {
+    const y = form("qatal", "imperfect", pgn);
+    const w = form("qatal", "wayyiqtol", pgn);
+    assert.ok(y.includes(HOLEM + OLE), y);
+    assert.ok(w.includes(HOLEM + OLE), w);
+    const bare = y.replaceAll(OLE, "");
+    assert.equal(liveMatchParadigm(y, bare), "prefix");
+    assert.equal(accentStillOpen(y, bare), true);
+    assert.equal(gradeClock(y, bare, true).tag, "stress");
+    const withLene = "ת" + D + y.slice(1);
+    assert.equal(liveMatchParadigm(y, withLene), "exact");
+    assert.equal(gradeClock(y, withLene, true).ok, true);
+    const seated = placeChosenMark(bare, y, OLE);
+    assert.equal(seated.status, "placed");
+    assert.equal(gradeClock(y, seated.text, true).ok, true);
+    assert.equal(accentPlace(y, bare + OLE), "wrong");
+  }
+  assert.equal(form("qatal", "imperfect", "2mp").includes(OLE), false);
+  assert.equal(form("shama", "imperfect", "3fp").includes("\u05B7" + OLE), true);
+  assert.equal(form("amad", "wayyiqtol", "2fp").includes(HOLEM + OLE), true);
 });

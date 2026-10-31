@@ -20,6 +20,7 @@ import {
   type Sitting,
 } from "@/lib/qal-clocks";
 import { CLASS_LABEL, ROOTS, type RootClass } from "@/lib/verbal-system";
+import { placeChosenMark } from "@/lib/verb-paradigm-quest";
 
 type Filter = "all" | Clock;
 
@@ -228,6 +229,12 @@ export function QalClockPractice() {
               hideVowelLetters
               markBackspace
               extraMarks
+              onSpecialMark={(mark, current) => {
+                const placed = placeChosenMark(current, card.form, mark);
+                if (placed.status === "wait") return true;
+                if (placed.status === "skip") return false;
+                return placed.text;
+              }}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -241,10 +248,10 @@ export function QalClockPractice() {
           {graded ? (
             <div className="mt-4 grid gap-2">
               <p className={cn("text-sm font-semibold", graded.ok ? "text-primary" : "text-danger")}>
-                {graded.lenient ? "Letters match" : graded.ok ? "Correct" : graded.tag === "stress" ? "The accent is missing" : "Not yet"}
+                {graded.lenient ? "Letters match" : graded.ok ? "Correct" : graded.tag === "stress" ? (typed.includes("\u05AB") ? "The accent is on the wrong letter" : "The accent is missing") : "Not yet"}
               </p>
               {!graded.ok || graded.lenient ? (
-                <p className="he-word text-3xl text-ink" dir="rtl" lang="he">
+                <p className="he-taam text-3xl leading-[2.2] text-ink" dir="rtl" lang="he">
                   {card.form}
                 </p>
               ) : null}
