@@ -29,8 +29,8 @@ const {
   GUESS_MS,
 } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
-const { VOCAB, itemsForWeek, glossMatches, liveGloss, studySenseLine } = await jiti.import(join(root, "src/lib/vocab.ts"));
-const { applyRating, newCard } = await jiti.import(join(root, "src/lib/srs.ts"));
+const { VOCAB, itemsForWeek, glossMatches, liveGloss, sharesSense, studySenseLine } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { applyRating, newCard, isWeak, weaknessScore } = await jiti.import(join(root, "src/lib/srs.ts"));
 const { coachLine, guideKeys } = await jiti.import(join(root, "src/lib/show-me.ts"));
 
 const WAYS = [
@@ -72,6 +72,71 @@ test("the same seed deals the same cards, and a saved place rebuilds card N", ()
   const withReview = applyDrillReviews(again, [{ key: again[0].baseKey, at: 4, n: 1 }]);
   assert.equal(withReview[4].back, 1);
   assert.equal(withReview[4].baseKey, again[0].baseKey);
+});
+
+test("a new round and the next group serve the weakest words first", () => {
+  const pool = VOCAB.filter((v) => v.chapter === 3);
+  assert.ok(pool.length >= 8);
+  const picked = pool.slice(0, 8);
+  const rested = picked[6];
+  const unseen = picked[7];
+  const now = Date.now();
+  const specs = [
+    { misses: 2, reveals: 2, lapses: 4, hits: 0, ease: 1.8 },
+    { misses: 6, reveals: 0, lapses: 6, hits: 0, ease: 1.3 },
+    { misses: 4, reveals: 0, lapses: 4, hits: 2, ease: 1.6 },
+    { misses: 3, reveals: 0, lapses: 3, hits: 3, ease: 1.9 },
+    { misses: 2, reveals: 0, lapses: 2, hits: 4, ease: 2.1 },
+    { misses: 1, reveals: 0, lapses: 1, hits: 6, ease: 2.3 },
+  ];
+  const cards = {};
+  picked.slice(0, 6).forEach((item, i) => {
+    const spec = specs[i];
+    const recent = [];
+    for (let n = 0; n < spec.misses; n++) recent.push("m");
+    for (let n = 0; n < spec.hits; n++) recent.push("h");
+    cards[item.id] = {
+      ...newCard(now),
+      ...spec,
+      due: now + 86_400_000,
+      last: now,
+      reps: 0,
+      interval: 1,
+      recent,
+    };
+  });
+  cards[rested.id] = {
+    ...newCard(now),
+    ease: 2.8,
+    interval: 14,
+    due: now + 14 * 86_400_000,
+    reps: 4,
+    hits: 4,
+    misses: 0,
+    reveals: 0,
+    lapses: 0,
+    last: now - 10 * 86_400_000,
+    recent: ["h", "h", "h", "h"],
+  };
+  for (let i = 1; i < 6; i++) {
+    assert.ok(weaknessScore(cards[picked[i - 1].id]) > weaknessScore(cards[picked[i].id]));
+    assert.equal(isWeak(cards[picked[i].id]), true);
+  }
+  assert.equal(isWeak(cards[rested.id]), false);
+
+  function studyIds(sitting) {
+    return sitting.filter((task) => task.kind === "study" && task.back === 0).map((task) => task.item.id);
+  }
+
+  const lead = picked.slice(0, 6).map((item) => item.id);
+  const due = studyIds(buildEtchSitting(pool, cards, undefined, now, "due", 42));
+  const again = studyIds(buildEtchSitting(pool, cards, undefined, now, "due", 7));
+  assert.deepEqual(due.slice(0, 5), lead.slice(0, 5));
+  assert.equal(due[5], lead[5]);
+  assert.deepEqual(again.slice(0, 6), lead);
+  assert.ok(due.indexOf(unseen.id) > 5);
+  assert.ok(due.indexOf(rested.id) > due.indexOf(unseen.id));
+  assert.deepEqual(studyIds(buildEtchSitting(pool, cards, undefined, now, "weak", 99)), lead);
 });
 
 test("a drill place survives hydrateGame", () => {
@@ -217,6 +282,23 @@ test("hebrew-to-english choices stay distinct, and the meaning stays hidden", ()
   const src = readFileSync(join(root, "src/components/etch-play.tsx"), "utf8");
   assert.match(src, /answerIsEnglish/);
   assert.match(src, /choiceLabel/);
+});
+
+test("a second sense of the answer is not a wrong english button", () => {
+  const shalach = VOCAB.find((item) => item.id === "shalach");
+  assert.ok(shalach);
+  assert.equal(sharesSense(shalach, VOCAB.find((item) => item.id === "natah")), true);
+  const pool = VOCAB.filter((item) => item.pos === "verb");
+  const task = { kind: "contrast", cue: "he", item: shalach, baseKey: "contrast:he:shalach:0", choices: [] };
+  const board = drillCardChoices(task, pool, 1);
+  assert.ok(board.some((item) => item.id === "shalach"));
+  assert.equal(board.some((item) => item.id === "natah"), false);
+  for (const other of board) {
+    if (other.id === "shalach") continue;
+    assert.equal(sharesSense(shalach, other), false, other.id);
+    assert.equal(glossMatches(shalach, choiceLabel(other, board)), false, choiceLabel(other, board));
+  }
+  assert.equal(board.map((item) => choiceLabel(item, board)).includes("to stretch out"), false);
 });
 
 test("contrast board never seats the answer first and includes the lemma", () => {

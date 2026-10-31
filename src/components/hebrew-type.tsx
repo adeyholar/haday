@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 import { cn } from "@/lib/cn";
 import { liveMatchAny, normalizeHebrewFull, pointingHint } from "@/lib/hebrew";
-import { accentStillOpen, liveMatchParadigm } from "@/lib/paradigm/normalize";
+import { accentPlace, accentStillOpen, liveMatchParadigm } from "@/lib/paradigm/normalize";
 import { GradeBanner } from "@/components/grade-banner";
 import { CONSONANTS } from "@/lib/alphabet";
 
@@ -170,8 +170,8 @@ type Props = {
   hideVowelLetters?: boolean;
   /** Backspace removes one mark, not the whole letter. */
   markBackspace?: boolean;
-  /** When it returns true, the accent or meteg is placed by the parent. A string is the word after that placement. */
-  onSpecialMark?: (insert: string) => boolean | string;
+  /** When it returns true, the accent or meteg is placed by the parent. A string is the word after that placement. The second argument is the word as it stands. */
+  onSpecialMark?: (insert: string, current: string) => boolean | string;
 };
 
 export function HebrewType({
@@ -193,7 +193,15 @@ export function HebrewType({
   const live = paradigm ? liveMatchParadigm(target, value) : liveMatchAny(target, value, alts, strict);
   const valueRef = useRef(value);
   valueRef.current = value;
-  const extra = live === "off" ? pointingHint(target, value) : null;
+  const placedAccent = paradigm ? accentPlace(target, value) : "other";
+  const extra =
+    live === "off"
+      ? placedAccent === "wrong"
+        ? "The accent goes on the stressed vowel."
+        : placedAccent === "missing"
+          ? "Add the accent."
+          : pointingHint(target, value)
+      : null;
   const offLabel = extra === "Use the final form" ? extra : "Try again";
   const accentOpen = paradigm && live === "prefix" && accentStillOpen(target, value);
   const hint = strict
@@ -230,7 +238,7 @@ export function HebrewType({
       }
     }
     if (chunk === "\u05AB" || chunk === "\u05BD") {
-      const placed = onSpecialMark?.(chunk);
+      const placed = onSpecialMark?.(chunk, current);
       if (placed === true) return;
       if (typeof placed === "string") {
         const stored = onChange(placed);

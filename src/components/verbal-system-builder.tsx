@@ -10,6 +10,8 @@ import { markQueryInVerse } from "@/lib/tanakh-word";
 import {
   CLASS_LABEL,
   CONJS,
+  conjLabel,
+  scriptureVerbWords,
   POOLS,
   STEMS,
   conjsFor,
@@ -102,7 +104,7 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
       ? passageForRoot(root.id)
       : null;
   const passageName = specific
-    ? `${STEMS.find((item) => item.id === stem)?.en ?? stem} ${CONJS.find((item) => item.id === conj)?.en ?? conj}`
+    ? `${STEMS.find((item) => item.id === stem)?.en ?? stem} ${conjLabel(conj, scripture)}`
     : "";
 
   useEffect(() => {
@@ -234,13 +236,13 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
         </p>
         {scripture ? (
           <p className="mt-2 text-sm text-muted">
-            Build the Qal perfect from the three root letters in{" "}
+            Build the Qal qatal from the three root letters in{" "}
             <Link to="/iibs/verb-paradigm-quest" className="font-semibold text-primary">
               Build from the root
             </Link>
-            . The ten-row Qal imperfect drill is in{" "}
+            . The ten-row Qal yiqtol drill is in{" "}
             <Link to="/iibs/qal-imperfect" className="font-semibold text-primary">
-              Qal Imperfect Builder
+              Qal Yiqtol
             </Link>
             .
           </p>
@@ -333,7 +335,7 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
             >
               {CONJS.filter((item) => conjIds.includes(item.id)).map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.en}
+                  {conjLabel(item.id, scripture)}
                 </option>
               ))}
             </select>
@@ -356,7 +358,7 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
               <p className="he-word mt-1 font-hebrew text-lg text-muted" dir="rtl" lang="he">
                 {rootFace(root)}
               </p>
-              <p className="mt-2 max-w-prose text-sm text-muted">{pattern.blurb}</p>
+              <p className="mt-2 max-w-prose text-sm text-muted">{scripture ? scriptureVerbWords(pattern.blurb) : pattern.blurb}</p>
               <p className="mt-1 text-xs text-muted">
                 {pattern.cells.length} {pattern.cells.length === 1 ? "form" : "forms"} in this conjugation. All of them.
               </p>

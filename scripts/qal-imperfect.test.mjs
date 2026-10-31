@@ -27,7 +27,7 @@ test("the four class roots match the paradigm, and every root keeps a Tanakh ver
       const accented = formNeedsAccent(q.FORMS[i]);
       if (accented) {
         assert.ok(built[i].includes("\u05B9"), `${verb.c} ${q.FORMS[i].k} keeps holem`);
-        assert.ok(built[i].includes("\u05AB\u05B9"), `${verb.c} ${q.FORMS[i].k} accents the holem`);
+        assert.ok(built[i].includes("\u05B9\u05AB"), `${verb.c} ${q.FORMS[i].k} accents the holem`);
       } else assert.equal(built[i].includes("\u05AB"), false);
       assert.equal(stripAccent(built[i]), book[i], `${verb.c} ${q.FORMS[i].k}`);
     }

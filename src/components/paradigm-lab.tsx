@@ -21,6 +21,7 @@ import { highlightWeak, strongPerfect } from "@/lib/paradigm/diff";
 import { TAG_LABEL, gradeAnswer, hintFor, type MissTag } from "@/lib/paradigm/grade";
 import { strongCells } from "@/lib/paradigm/strong-set";
 import { displayRoot } from "@/lib/qal-perfect-builder";
+import { placeChosenMark } from "@/lib/verb-paradigm-quest";
 import {
   masteryCount,
   notePractice,
@@ -29,6 +30,15 @@ import {
   type PracticeLog,
   type SrsState,
 } from "@/lib/paradigm/srs";
+
+import { placeChosenMark } from "@/lib/verb-paradigm-quest";
+
+function seatMark(current: string, target: string, mark: string): boolean | string {
+  const placed = placeChosenMark(current, target, mark);
+  if (placed.status === "wait") return true;
+  if (placed.status === "skip") return false;
+  return placed.text;
+}
 
 const CONJ_LABEL: Record<string, string> = {
   qal_perfect: "Qal perfect",
@@ -307,6 +317,7 @@ export function StudyLab() {
               hideVowelLetters
               markBackspace
               extraMarks
+              onSpecialMark={(mark, current) => seatMark(current, item.cell.form, mark)}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -491,6 +502,7 @@ export function GameTest({ kind }: { kind: "strong" | "weak" }) {
               hideVowelLetters
               markBackspace
               extraMarks
+              onSpecialMark={(mark, current) => seatMark(current, item.cell.form, mark)}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">

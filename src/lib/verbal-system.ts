@@ -194,6 +194,22 @@ export const CONJS: { id: ConjId; en: string }[] = [
 const stemEn = Object.fromEntries(STEMS.map((s) => [s.id, s.en])) as Record<StemId, string>;
 const conjEn = Object.fromEntries(CONJS.map((s) => [s.id, s.en])) as Record<ConjId, string>;
 
+/** Scripture Path says Qatal and yiqtol. Grammar keeps perfect and imperfect. */
+export function conjLabel(id: ConjId, scripture = false): string {
+  if (!scripture) return conjEn[id];
+  if (id === "perfect") return "Qatal";
+  if (id === "imperfect") return "Yiqtol";
+  return conjEn[id];
+}
+
+export function scriptureVerbWords(text: string): string {
+  return text
+    .replaceAll("Imperfect", "Yiqtol")
+    .replaceAll("imperfect", "yiqtol")
+    .replaceAll("Perfect", "Qatal")
+    .replaceAll("perfect", "qatal");
+}
+
 export const ROOTS: VerbRoot[] = [
   { id: "qatal", letters: ["ק", "ט", "ל"], dots: ["", "", ""], gloss: "kill", cls: "strong", cite: "קָטַל" },
   { id: "shamar", letters: ["ש", "מ", "ר"], dots: ["shin", "", ""], gloss: "keep, guard", cls: "strong", cite: "שָׁמַר" },
@@ -556,6 +572,26 @@ const IMPF_PEOPLE: [string, string, string][] = [
   ["1cp", "1st common plural", "ni"],
 ];
 
+/** 3fp and 2fp keep the theme vowel. The accent follows that vowel, so the holem stays on its letter. */
+function accentNah(word: string): string {
+  const OLE = "\u05AB";
+  const QAMETS = "\u05B8";
+  const parts: string[] = [];
+  for (const ch of word) {
+    const cp = ch.codePointAt(0) ?? 0;
+    if ((cp >= 0x05d0 && cp <= 0x05ea) || parts.length === 0) parts.push(ch);
+    else parts[parts.length - 1] += ch;
+  }
+  if (parts.length < 4) return word;
+  const he = parts[parts.length - 1];
+  const nun = parts[parts.length - 2];
+  if (he !== "ה" || ![...nun].includes("נ") || ![...nun].includes(QAMETS)) return word;
+  const theme = parts[parts.length - 4];
+  if (!theme || [...theme].includes(OLE)) return word;
+  parts[parts.length - 4] = theme + OLE;
+  return parts.join("");
+}
+
 function qalImpf(root: VerbRoot, theme: "holem" | "patah", family: "strong" | "igutt"): Engine {
   const reduced = new Set(["2fs", "3mp", "2mp"]);
   const femininePlural = new Set(["3fp", "2fp"]);
@@ -568,7 +604,10 @@ function qalImpf(root: VerbRoot, theme: "holem" | "patah", family: "strong" | "i
     }
     const v2 = reduced.has(id) ? "shewa" : theme;
     const end = id === "2fs" ? "iy" : id.endsWith("mp") ? "u" : femininePlural.has(id) ? "nah" : "none";
-    return seed(id, label, "Prefix for the person. The stem vowel follows the root class.", { pre: prefix, v1, v2, end });
+    const note = femininePlural.has(id)
+      ? "The feminine plural keeps the theme vowel, and that vowel takes the accent."
+      : "Prefix for the person. The stem vowel follows the root class.";
+    return seed(id, label, note, { pre: prefix, v1, v2, end });
   });
   const pres = family === "igutt" ? person("patah") : person("hireq");
   const v1 = family === "igutt" ? vowels(["hatef", "patah", "shewa", "hireq"]) : vowels(["shewa", "hireq", "patah"]);
@@ -576,12 +615,15 @@ function qalImpf(root: VerbRoot, theme: "holem" | "patah", family: "strong" | "i
   return {
     slots: [slot("pre", "Prefix", pres), slot("v1", "Vowel under the first root letter", v1), slot("v2", "Vowel under the second root letter", v2), slot("end", "Ending", IMPF_END)],
     cells,
-    render: (r, picks) => renderPrefixed(r, picks, false),
+    render: (r, picks) => {
+      const word = renderPrefixed(r, picks, false);
+      return picks.end === "nah" ? accentNah(word) : word;
+    },
     blurb: family === "igutt"
-      ? "I-guttural imperfect. The prefix takes patah, and the guttural takes a hatef, except 1cs."
+      ? "I-guttural imperfect. The prefix takes patah, and the guttural takes a hatef, except 1cs. The feminine plural marks the accent on the theme vowel."
       : theme === "patah"
-        ? "III-guttural imperfect. The theme vowel is patah, not holem."
-        : "Qal imperfect. 1cs is alef with segol. A vowel ending reduces the theme vowel.",
+        ? "III-guttural imperfect. The theme vowel is patah, not holem. The feminine plural marks the accent on that patah."
+        : "Qal imperfect. 1cs is alef with segol. A vowel ending reduces the theme vowel. 3fp and 2fp keep it, and take the accent.",
   };
 }
 
@@ -2350,8 +2392,4 @@ export function auditPatterns(): string[] {
 
 export function stemLabel(id: StemId): string {
   return stemEn[id];
-}
-
-export function conjLabel(id: ConjId): string {
-  return conjEn[id];
 }

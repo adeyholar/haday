@@ -1,7 +1,7 @@
 import { lettersOnly } from "@/lib/hebrew";
 import { verseFor, type VerseEx } from "@/lib/verses";
 import { tanakhVerseFor, isInflected } from "@/lib/tanakh-pool";
-import { closeItems, shuffle, type VocabItem } from "@/lib/vocab";
+import { closeItems, glossMatches, sharesSense, shuffle, type VocabItem } from "@/lib/vocab";
 import { vocabArtSrc } from "@/lib/vocab-art";
 import { hydrateCard, isWeak, weaknessScore, type CardState } from "@/lib/srs";
 import type { GameSnapshot } from "@/lib/game";
@@ -158,10 +158,16 @@ function drillOrder(
   now: number,
   rand: () => number,
 ): VocabItem[] {
+  const score = new Map(pool.map((item) => [item.id, weaknessScore(hydrateCard(cards[item.id], now))]));
   const weak = pool
     .filter((item) => isWeak(hydrateCard(cards[item.id], now)))
-    .sort((a, b) => weaknessScore(hydrateCard(cards[b.id], now)) - weaknessScore(hydrateCard(cards[a.id], now)));
-  if (focus === "weak" && weak.length) return seededShuffle(weak, rand);
+    .sort((a, b) => {
+      const gap = (score.get(b.id) ?? 0) - (score.get(a.id) ?? 0);
+      if (gap !== 0) return gap;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+  // Weakest first, and not shuffled. A new round and every later group keep that rank.
+  if (focus === "weak" && weak.length) return weak;
   const weakIds = new Set(weak.map((item) => item.id));
   const due = pool.filter((item) => {
     if (weakIds.has(item.id)) return false;
@@ -170,7 +176,7 @@ function drillOrder(
   });
   const front = new Set<string>([...weakIds, ...due.map((item) => item.id)]);
   const rest = pool.filter((item) => !front.has(item.id));
-  return [...seededShuffle(weak, rand), ...seededShuffle(due, rand), ...seededShuffle(rest, rand)];
+  return [...weak, ...seededShuffle(due, rand), ...seededShuffle(rest, rand)];
 }
 
 const CHECKS: Array<{ kind: EtchKind; cue: EtchCue }> = [
@@ -223,7 +229,8 @@ function sitWords(words: VocabItem[], _pool: VocabItem[], rand: () => number): E
 }
 
 /**
- * Groups of five. The first card of a group is a study card. The second is a question.
+ * Groups of five. Weak words lead, weakest first, on a new round and on every later group.
+ * The first card of a group is a study card. The second is a question.
  * The same seed and the same word order always deal the same cards.
  */
 export function buildEtchSitting(
@@ -246,8 +253,22 @@ export function buildEtchFromIds(pool: VocabItem[], ids: string[], seed: number)
 
 const choiceCache = new Map<string, VocabItem[]>();
 
-function choiceKey(itemId: string, pool: VocabItem[]): string {
-  return `${itemId}:${pool.length}:${pool[0]?.id ?? ""}:${pool[pool.length - 1]?.id ?? ""}`;
+function choiceKey(itemId: string, pool: VocabItem[], mode: string): string {
+  return `${mode}:${itemId}:${pool.length}:${pool[0]?.id ?? ""}:${pool[pool.length - 1]?.id ?? ""}`;
+}
+
+/** Wrong buttons for “pick the English.” Skip a lemma that lists a sense of the answer. */
+function englishMates(item: VocabItem, pool: VocabItem[], n: number): VocabItem[] {
+  const ranked = closeItems(item, pool, Math.max(n * 6, 12)).filter((other) => !sharesSense(item, other));
+  if (ranked.length >= n) return ranked.slice(0, n);
+  const seen = new Set([item.id, ...ranked.map((other) => other.id)]);
+  const rest = pool
+    .filter((other) => !seen.has(other.id) && !sharesSense(item, other))
+    .sort((a, b) => {
+      const near = (v: VocabItem) => (v.chapter === item.chapter ? 0 : Math.abs(v.chapter - item.chapter) + (v.pos === item.pos ? 0 : 2));
+      return near(a) - near(b);
+    });
+  return [...ranked, ...rest].slice(0, n);
 }
 
 /** Look-alikes for the card on screen. The same seed and word deal the same set. */
@@ -255,9 +276,12 @@ export function drillCardChoices(task: EtchTask, pool: VocabItem[], seed: number
   const need = task.kind === "contrast" || task.kind === "study" || task.kind === "verse";
   if (!need) return [];
   if (task.choices.length > 1) return task.choices;
-  const cached = choiceCache.get(choiceKey(task.item.id, pool));
-  const mates = cached ?? closeItems(task.item, pool, 3);
-  if (!cached) choiceCache.set(choiceKey(task.item.id, pool), mates);
+  const english = task.kind === "contrast" && task.cue === "he";
+  const mode = english ? "en" : "close";
+  const key = choiceKey(task.item.id, pool, mode);
+  const cached = choiceCache.get(key);
+  const mates = cached ?? (english ? englishMates(task.item, pool, 3) : closeItems(task.item, pool, 3));
+  if (!cached) choiceCache.set(key, mates);
   const mixed = (seed ^ choiceMix(task.baseKey)) >>> 0 || 1;
   return seededOffFirst([task.item, ...mates], task.item.id, randOf(mixed));
 }
@@ -404,11 +428,14 @@ function takeDrillRuns(raw: unknown, accept: (key: string) => boolean): DrillRun
   return out;
 }
 
-/** Short English for a choice button. If the first sense is shared, show the whole gloss. */
+/** Short English for a choice button. A sense that another button also owns is written in full. */
 export function choiceLabel(item: VocabItem, board: VocabItem[]): string {
   const head = (gloss: string) => gloss.split(/[,;]/)[0]?.trim() || gloss.trim();
   const first = head(item.gloss);
-  const shared = board.filter((other) => head(other.gloss) === first).length > 1;
+  const shared = board.some((other) => {
+    if (other.id === item.id) return false;
+    return head(other.gloss) === first || glossMatches(other, first);
+  });
   return shared ? item.gloss : first;
 }
 

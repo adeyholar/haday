@@ -108,3 +108,14 @@ export function accentStillOpen(expected: string, typed: string): boolean {
   const got = dropExtraLene(want, normalizeParadigm(typed));
   return want.includes(OLE) && !got.includes(OLE) && want.replaceAll(OLE, "") === got.replaceAll(OLE, "");
 }
+
+/** Exact vowels, but the accent is missing or sitting on another letter. */
+export function accentPlace(expected: string, typed: string): "match" | "missing" | "wrong" | "other" {
+  const want = normalizeParadigm(expected);
+  const got = dropExtraLene(want, normalizeParadigm(typed));
+  if (matchClusters(want.replaceAll(OLE, ""), got.replaceAll(OLE, "")) !== "exact") return "other";
+  const wantAt = oleAt(want).join(",");
+  const gotAt = oleAt(got).join(",");
+  if (wantAt === gotAt) return "match";
+  return gotAt ? "wrong" : "missing";
+}
