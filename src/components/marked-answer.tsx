@@ -9,6 +9,7 @@ type Props = {
 
 function Line({ label, text, good }: { label: string; text: string; good: boolean }) {
   const hebrew = /[\u0590-\u05FF]/.test(text) && !/[A-Za-z]/.test(text);
+  const taam = hebrew && /[\u0591-\u05AF\u05BD]/.test(text);
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{label}</p>
@@ -16,7 +17,7 @@ function Line({ label, text, good }: { label: string; text: string; good: boolea
         className={cn(
           "mt-1 font-semibold",
           good ? "text-good" : "text-danger",
-          hebrew ? "he-word text-3xl" : "text-xl",
+          taam ? "he-taam text-3xl leading-[2.2]" : hebrew ? "he-word text-3xl" : "text-xl",
         )}
         dir={hebrew ? "rtl" : undefined}
         lang={hebrew ? "he" : undefined}

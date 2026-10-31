@@ -7,6 +7,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const q = await jiti.import(join(root, "src/lib/qal-imperfect-builder.ts"));
+const norm = await jiti.import(join(root, "src/lib/paradigm/normalize.ts"));
 
 const BOOK = {
   זכר: ["יִזְכֹּר", "תִּזְכֹּר", "תִּזְכֹּר", "תִּזְכְּרִי", "אֶזְכֹּר", "יִזְכְּרוּ", "תִּזְכֹּרְנָה", "תִּזְכְּרוּ", "תִּזְכֹּרְנָה", "נִזְכֹּר"],
@@ -28,6 +29,9 @@ test("the four class roots match the paradigm, and every root keeps a Tanakh ver
       if (accented) {
         assert.ok(built[i].includes("\u05B9"), `${verb.c} ${q.FORMS[i].k} keeps holem`);
         assert.ok(built[i].includes("\u05B9\u05AB"), `${verb.c} ${q.FORMS[i].k} accents the holem`);
+        const shown = norm.normalizeParadigm(built[i]);
+        assert.ok(shown.includes("\u05B9\u05AB"), `${verb.c} ${q.FORMS[i].k} keeps the accent after the holem`);
+        assert.equal(shown.includes("\u05AB\u05B9"), false);
       } else assert.equal(built[i].includes("\u05AB"), false);
       assert.equal(stripAccent(built[i]), book[i], `${verb.c} ${q.FORMS[i].k}`);
     }
