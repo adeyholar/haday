@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
@@ -12,6 +13,7 @@ import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
 import { EnglishVerse } from "@/components/english-verse";
 import { StrongGlance } from "@/components/strong-glance";
+import type { WordBalloonPlace } from "@/lib/word-balloon";
 import type { BookId } from "@/lib/tanakh-canon";
 
 export type WordPick = {
@@ -30,9 +32,11 @@ export type WordPick = {
 
 export function WordSheet({
   pick,
+  place,
   onClose,
 }: {
   pick: WordPick;
+  place: WordBalloonPlace;
   onClose: () => void;
 }) {
   const lemma = classLemmaForWord(pick.word);
@@ -49,6 +53,27 @@ export function WordSheet({
   const vocab = vocabLine(lemma);
   const pathLemma = matchInPool(pick.word, poolFor("bbh"));
   const back = `/listen/read/${pick.book}/${pick.chapter}`;
+  const root = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") closeRef.current();
+    }
+    function onPointer(event: PointerEvent) {
+      const node = event.target;
+      if (!(node instanceof Node) || root.current?.contains(node)) return;
+      if (node instanceof Element && node.closest("[data-word-pick='1']")) return;
+      closeRef.current();
+    }
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,8 +125,19 @@ export function WordSheet({
     setAskBusy(false);
   }
 
-  return (
-    <div className="mt-4 rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)]">
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      ref={root}
+      role="dialog"
+      aria-modal="false"
+      aria-label="This word"
+      className="word-balloon"
+      data-side={place.side}
+      style={{ top: place.top, left: place.left, width: place.width, "--tail": `${place.tail}px` } as CSSProperties}
+    >
+      <div className="word-balloon-body" style={{ maxHeight: place.maxHeight }}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">This word</p>
@@ -225,6 +261,8 @@ export function WordSheet({
           </form>
         </div>
       ) : null}
-    </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
