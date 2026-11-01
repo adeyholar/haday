@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { WlcReading, type SheetSize, type SheetTone } from "@/components/wlc-desk";
 import { WlcPlayer } from "@/components/wlc-player";
 import { ScriptureTabs } from "@/components/iibs-door";
+import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { bookMeta, isBookId, parseChapter } from "@/lib/tanakh-canon";
 import { defaultSheetSize, defaultSheetWidth, verseAnchorScroll, wideHasRoom, WLC_SIZE_KEY, WLC_WIDTH_KEY, type WlcSheetWidth } from "@/lib/wlc-prefs";
 import { loadWlcChapter } from "@/lib/wlc-server";
 import type { FollowSpot } from "@/lib/wlc-follow";
 import type { WlcChapter } from "@/lib/wlc";
+import { chapterKnown } from "@/lib/reading-loop/known";
+import { poolFor } from "@/lib/reading-loop/pool";
+import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
+import { useStudy } from "@/lib/store";
 
 const chapterCache = new Map<string, WlcChapter>();
 
@@ -135,6 +140,33 @@ function WlcChapterPage() {
   const [noteOpen, setNoteOpen] = useState(false);
   const [spot, setSpot] = useState<FollowSpot | null>(null);
   const [resumeTick, setResumeTick] = useState(0);
+  const cards = useStudy((s) => s.cards);
+  const [dim, setDim] = useState(false);
+  const [session, setSession] = useState<ReadSession>({ day: "", today: 0, goal: DAILY_GOAL, last: null });
+  const back = meta && chapterNo ? `/iibs/wlc/${meta.id}/${chapterNo}` : "/iibs/wlc";
+  const refLabel = meta && chapterNo ? `${meta.id}.${chapterNo}` : "";
+  const words = useMemo(
+    () =>
+      chapter
+        ? chapter.verses.flatMap((verse) =>
+            verse.words.filter((word) => word.kq_role !== "qere").map((word) => ({ id: word.id, surface: word.surface })),
+          )
+        : [],
+    [chapter],
+  );
+  const report = useMemo(() => chapterKnown(words, poolFor("iibs"), cards), [words, cards]);
+  const dimIds = useMemo(() => (dim ? new Set(report.unknownWordIds) : undefined), [dim, report.unknownWordIds]);
+
+  useEffect(() => {
+    setDim(readDimUnknown());
+    setSession(peekSession());
+  }, []);
+
+  useEffect(() => {
+    if (!meta || chapterNo == null) return;
+    const verse = (spot?.verse ?? 0) + 1;
+    setSession(noteVerse({ scope: "iibs", book: meta.id, chapter: chapterNo, verse, href: back }));
+  }, [meta, chapterNo, spot?.verse, back]);
 
   useEffect(() => {
     setTone(readSheet());
@@ -342,7 +374,30 @@ function WlcChapterPage() {
       />
       {!chapter && !error ? <p className="text-sm text-muted">Opening the chapter.</p> : null}
       {chapter ? (
-        <WlcReading chapter={chapter} tone={tone} size={size} showNote={noteOpen} spot={spot} resumeTick={resumeTick} />
+        <>
+          <ReadingLoopBar
+            scope="iibs"
+            report={report}
+            session={session}
+            dim={dim}
+            onDim={(on) => {
+              setDim(on);
+              writeDimUnknown(on);
+            }}
+            refLabel={refLabel}
+            back={back}
+          />
+          <WlcReading
+            chapter={chapter}
+            tone={tone}
+            size={size}
+            showNote={noteOpen}
+            spot={spot}
+            resumeTick={resumeTick}
+            dimIds={dimIds}
+            loop={{ scope: "iibs", ref: refLabel, back }}
+          />
+        </>
       ) : null}
       {next ? (
         <button type="button" onClick={() => go(next)} className="mt-4 min-h-11 font-semibold text-primary">

@@ -7,6 +7,11 @@ import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
+import { ReadingLoopBar } from "@/components/reading-loop-bar";
+import { chapterKnown } from "@/lib/reading-loop/known";
+import { poolFor } from "@/lib/reading-loop/pool";
+import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
+import { useStudy } from "@/lib/store";
 import { Panel } from "@/components/panel";
 import { useDockHeight, useFollowScroll } from "@/lib/use-follow-scroll";
 import { playGrade } from "@/lib/sfx";
@@ -1164,6 +1169,31 @@ function FollowCard({
   useDockHeight(dockRef, !hideTransport);
   const [more, setMore] = useState(false);
   const list = verses.length ? verses : [verse];
+  const cards = useStudy((s) => s.cards);
+  const [dim, setDim] = useState(false);
+  const [session, setSession] = useState<ReadSession>({ day: "", today: 0, goal: DAILY_GOAL, last: null });
+  const loopWords = useMemo(
+    () => list.flatMap((row) => row.words.map((surface, wi) => ({ id: `${row.ref}:${wi}`, surface }))),
+    [list],
+  );
+  const knownReport = useMemo(() => chapterKnown(loopWords, poolFor("bbh"), cards), [loopWords, cards]);
+  const unknownKeys = useMemo(() => new Set(knownReport.unknownWordIds), [knownReport]);
+  useEffect(() => {
+    setDim(readDimUnknown());
+    setSession(peekSession());
+  }, []);
+  useEffect(() => {
+    const row = list[i] ?? verse;
+    setSession(
+      noteVerse({
+        scope: "bbh",
+        book: String(row.book),
+        chapter: row.chapter,
+        verse: row.verse,
+        href: `/listen/read/${row.book}/${row.chapter}`,
+      }),
+    );
+  }, [i, verse.book, verse.chapter, verse.verse]);
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
@@ -1215,6 +1245,7 @@ function FollowCard({
   const span = Math.max(0, hi - lo);
   const rel = Math.max(0, Math.min(span, now - lo));
   const bookId = verse.book === "Gen" ? "Gen" : verse.book;
+  const loopBack = `/listen/read/${bookId}/${verse.chapter}`;
   const focusWord = pick?.word ?? verse.words[wordI] ?? "";
   const enKeys = englishKeysForWord(focusWord);
   return (
@@ -1331,6 +1362,20 @@ function FollowCard({
         </button>
       ) : null}
       <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-4 shadow-[var(--shadow-border)] sm:px-5">
+        {hideTransport ? null : (
+          <ReadingLoopBar
+            scope="bbh"
+            report={knownReport}
+            session={session}
+            dim={dim}
+            onDim={(on) => {
+              setDim(on);
+              writeDimUnknown(on);
+            }}
+            refLabel={`${bookId}.${verse.chapter}`}
+            back={loopBack}
+          />
+        )}
         <ol className="flex flex-col gap-6">
           {list.map((row, idx) => {
             const active = idx === i;
@@ -1368,7 +1413,7 @@ function FollowCard({
                               : "text-ink"
                         } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
                           (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
-                        }`}
+                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && wi !== wordI ? "ms-unknown" : ""}`}
                         onClick={() => {
                           const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
                           const { id: sid, morph } = splitStrongTag(tag);
@@ -1410,7 +1455,9 @@ function FollowCard({
                       <button
                         type="button"
                         key={`${row.ref}-${wi}`}
-                        className="max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none"
+                        className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none ${
+                          dim && unknownKeys.has(`${row.ref}:${wi}`) ? "ms-unknown" : ""
+                        }`}
                         onClick={() => {
                           const { id: sid, morph } = splitStrongTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
                           if (!onWord && sid) {

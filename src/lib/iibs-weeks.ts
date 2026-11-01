@@ -28,6 +28,13 @@ export function iibsWeekLabel(level: string, week: number): string {
   return `Level ${level} · Week ${week}`;
 }
 
+/** Every Scripture Path lemma, levels A–E. Used by the reading loop, not by a week sitting. */
+let iibsAll: VocabItem[] | null = null;
+export function iibsPathItems(): VocabItem[] {
+  if (!iibsAll) iibsAll = IIBS_WEEK_LEVELS.flatMap((level) => levelWords(level));
+  return iibsAll;
+}
+
 const WORDS = new Map<IibsVocabLevel, VocabItem[]>();
 const LEGACY = new Map<string, string>();
 let studyIds: Set<string> | null = null;

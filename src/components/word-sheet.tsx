@@ -3,6 +3,10 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
 import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, hasGlossInEnglish, vocabLine } from "@/lib/word-card";
+import { MorphLines } from "@/components/morph-lines";
+import { matchInPool } from "@/lib/reading-loop/known";
+import { poolFor } from "@/lib/reading-loop/pool";
+import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
@@ -43,6 +47,8 @@ export function WordSheet({
   const deck = grammarAskFromTags(tags);
   const labels = describeTags(tags);
   const vocab = vocabLine(lemma);
+  const pathLemma = matchInPool(pick.word, poolFor("bbh"));
+  const back = `/listen/read/${pick.book}/${pick.chapter}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -144,6 +150,25 @@ export function WordSheet({
             </li>
           ))}
         </ul>
+      ) : null}
+      <MorphLines code={pick.morph ?? ""} />
+      {pathLemma ? (
+        <Link
+          to="/drill"
+          search={{ set: "passage", from: back }}
+          onClick={() =>
+            savePassagePack({
+              scope: "bbh",
+              ref: `${pick.book}.${pick.chapter}`,
+              label: pathLemma.gloss,
+              ids: [pathLemma.id],
+              back,
+            })
+          }
+          className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+        >
+          Drill this lemma
+        </Link>
       ) : null}
       <div className="mt-3 flex flex-col gap-2">
         {deck ? (

@@ -164,6 +164,76 @@ export function explainMorph(code: string): string {
   return lines.filter(Boolean).join(" · ");
 }
 
+export type MorphLine = { label: string; value: string };
+
+const PERSON_WORD: Record<string, string> = { "1": "1st", "2": "2nd", "3": "3rd" };
+const GENDER_WORD: Record<string, string> = { m: "masculine", f: "feminine", c: "common" };
+const NUMBER_WORD: Record<string, string> = { s: "singular", p: "plural", d: "dual" };
+
+function pngLines(code: string, at: number): MorphLine[] {
+  let i = at;
+  const lines: MorphLine[] = [];
+  const personCh = code[i] ?? "";
+  let person = "";
+  if (personCh === "1" || personCh === "2" || personCh === "3") {
+    person = personCh;
+    i += 1;
+  }
+  const g = code[i] ?? "";
+  const both = g === "b";
+  const gender = g === "m" || g === "f" || g === "c" ? g : "";
+  if (gender || both) i += 1;
+  const n = code[i] ?? "";
+  const number = n === "s" || n === "p" || n === "d" ? n : "";
+  if (number) i += 1;
+  const st = code[i] ?? "";
+  const state = st === "a" ? "absolute" : st === "c" ? "construct" : st === "d" ? "determined" : "";
+  if (person) lines.push({ label: "Person", value: PERSON_WORD[person] ?? person });
+  if (both) lines.push({ label: "Gender", value: "masculine or feminine" });
+  else if (gender) lines.push({ label: "Gender", value: GENDER_WORD[gender] ?? gender });
+  if (number) lines.push({ label: "Number", value: NUMBER_WORD[number] ?? number });
+  if (state) lines.push({ label: "State", value: state });
+  return lines;
+}
+
+function chunkLines(code: string, aramaic: boolean): MorphLine[] {
+  const pos = code[0] ?? "";
+  const rest = code.slice(1);
+  if (pos === "V") {
+    const stem = (aramaic ? STEM_A : STEM_H)[rest[0] ?? ""] ?? "";
+    const aspect = ASPECT[rest[1] ?? ""] ?? "";
+    const lines: MorphLine[] = [];
+    if (stem) lines.push({ label: "Stem", value: stem });
+    if (aspect) lines.push({ label: "Form", value: aspect });
+    lines.push(...pngLines(rest, 2));
+    return lines;
+  }
+  if (pos === "N" || pos === "A" || pos === "P") {
+    const kind = pos === "N" ? (NOUN[rest[0] ?? ""] ?? "noun") : pos === "A" ? (ADJ[rest[0] ?? ""] ?? "adjective") : (PRON[rest[0] ?? ""] ?? "pronoun");
+    return [{ label: "Kind", value: kind }, ...pngLines(rest, 1)];
+  }
+  const plain = parseChunk(code, aramaic);
+  return plain ? [{ label: "Parsing", value: plain }] : [];
+}
+
+/** Labeled morphology for the word card. Same codes as explainMorph. */
+export function morphLines(code: string): MorphLine[] {
+  const blocks = code
+    .split("+")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const lines: MorphLine[] = [];
+  for (const block of blocks) {
+    const aramaic = block.startsWith("A");
+    const body = block.startsWith("H") || block.startsWith("A") ? block.slice(1) : block;
+    for (const chunk of body.split("/")) {
+      if (!chunk) continue;
+      lines.push(...chunkLines(chunk, aramaic));
+    }
+  }
+  return lines;
+}
+
 export function splitStrongTag(tag: string): { id: string; morph: string } {
   const [id = "", morph = ""] = tag.split("|");
   return { id, morph };
