@@ -4,6 +4,11 @@ import type { FollowSpot } from "@/lib/wlc-follow";
 import { useFollowScroll } from "@/lib/use-follow-scroll";
 import { placeDesktopCard, wordFullyOffScreen, desktopCardSheet, type DesktopCardPlace } from "@/lib/wlc-card-place";
 import { WlcLexicon } from "@/components/wlc-lexicon";
+import { Link } from "@tanstack/react-router";
+import { MorphLines } from "@/components/morph-lines";
+import { matchInPool } from "@/lib/reading-loop/known";
+import { poolFor } from "@/lib/reading-loop/pool";
+import { savePassagePack, type StudyScope } from "@/lib/reading-loop/passage";
 
 /** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -26,11 +31,13 @@ function WordFace({
   word,
   picked,
   spoken,
+  dim,
   onPick,
 }: {
   word: WlcWord;
   picked: boolean;
   spoken: boolean;
+  dim: boolean;
   onPick: (word: WlcWord) => void;
 }) {
   const clusters = wlcClusters(word.surface);
@@ -44,7 +51,7 @@ function WordFace({
       onClick={() => onPick(word)}
       className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""} ${
         spoken ? "ms-spoken" : ""
-      } ${joinsNext(word) ? "ms-joins" : ""}`}
+      } ${dim && !picked && !spoken ? "ms-unknown" : ""} ${joinsNext(word) ? "ms-joins" : ""}`}
     >
       <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (
@@ -86,8 +93,17 @@ function metegLine(word: WlcWord): string {
     .join(", ");
 }
 
-function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
+function WordCard({
+  word,
+  loop,
+  onClose,
+}: {
+  word: WlcWord;
+  loop?: { scope: StudyScope; ref: string; back: string };
+  onClose: () => void;
+}) {
   const qere = word.qere ?? [];
+  const lemma = loop ? matchInPool(word.surface, poolFor(loop.scope)) : undefined;
   return (
     <div className="rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
       <div className="flex items-start justify-between gap-3">
@@ -144,6 +160,25 @@ function WordCard({ word, onClose }: { word: WlcWord; onClose: () => void }) {
           <dd className="break-all">{word.morph || "—"}</dd>
         </div>
       </dl>
+      <MorphLines code={word.morph} />
+      {lemma && loop ? (
+        <Link
+          to="/drill"
+          search={{ set: "passage", from: loop.back }}
+          onClick={() =>
+            savePassagePack({
+              scope: loop.scope,
+              ref: loop.ref,
+              label: lemma.gloss,
+              ids: [lemma.id],
+              back: loop.back,
+            })
+          }
+          className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+        >
+          Drill this lemma
+        </Link>
+      ) : null}
       {word.morph_note ? <p className="mt-3 text-sm text-muted">{word.morph_note}</p> : null}
       {word.review ? (
         <p className="mt-3 text-sm text-primary">
@@ -162,6 +197,8 @@ export function WlcReading({
   showNote,
   spot,
   resumeTick = 0,
+  dimIds,
+  loop,
 }: {
   chapter: WlcChapter;
   tone: SheetTone;
@@ -169,6 +206,9 @@ export function WlcReading({
   showNote: boolean;
   spot: FollowSpot | null;
   resumeTick?: number;
+  /** Word ids still to learn. Only applied while Dim unknowns is on. */
+  dimIds?: ReadonlySet<string>;
+  loop?: { scope: StudyScope; ref: string; back: string };
 }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
   const frame = useRef<HTMLDivElement>(null);
@@ -312,7 +352,7 @@ export function WlcReading({
               : undefined
           }
         >
-          <WordCard word={picked} onClose={() => closeCard(true)} />
+          <WordCard word={picked} loop={loop} onClose={() => closeCard(true)} />
         </div>
       ) : null}
       {showBack ? (
@@ -357,6 +397,7 @@ export function WlcReading({
                       word={chain[0]}
                       picked={picked?.id === chain[0].id}
                       spoken={spokenId === chain[0].id}
+                      dim={Boolean(dimIds?.has(chain[0].id))}
                       onPick={setPicked}
                     />
                   ) : (
@@ -367,6 +408,7 @@ export function WlcReading({
                           word={word}
                           picked={picked?.id === word.id}
                           spoken={spokenId === word.id}
+                          dim={Boolean(dimIds?.has(word.id))}
                           onPick={setPicked}
                         />
                       ))}

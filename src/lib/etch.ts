@@ -391,7 +391,7 @@ export function vocabDistance(
 }
 
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
-  return takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key));
+  return takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,16}$/.test(key));
 }
 
 /** Scripture Path sittings. The key is the level, the week, and the focus. */

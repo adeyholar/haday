@@ -10,6 +10,7 @@ import { speakHebrewWord } from "@/lib/listen";
 import { markQueryInVerse } from "@/lib/tanakh-word";
 import { perfectVerse } from "@/lib/verbal-paradigm-verses";
 import { useStudy } from "@/lib/store";
+import { RealFormLab } from "@/components/real-form-lab";
 import { shuffle } from "@/lib/vocab";
 import {
   PGN_ORDER,
@@ -54,9 +55,14 @@ export function VerbQuestHome({ scripture = false }: { scripture?: boolean }) {
   const quest = useStudy((s) => s.game.verbParadigmQuest);
   const [level, setLevel] = useState(0);
   const [builder, setBuilder] = useState(false);
+  const [real, setReal] = useState(false);
   const roots = useMemo(() => transferRoots(), []);
   const [rootAt, setRootAt] = useState(0);
   const root = level === 4 ? (roots[rootAt % Math.max(roots.length, 1)] ?? QATAL) : QATAL;
+
+  if (real) {
+    return <RealFormLab scripture={scripture} onExit={() => setReal(false)} />;
+  }
 
   if (builder) {
     return (
@@ -109,6 +115,18 @@ export function VerbQuestHome({ scripture = false }: { scripture?: boolean }) {
                 Ten forms. The prefix is on every row. The class roots, then the same pattern in the Tanakh.
               </span>
             </Link>
+          </li>
+          <li>
+            <button
+              type="button"
+              onClick={() => setReal(true)}
+              className="w-full rounded-[var(--radius-md)] bg-card px-4 py-3 text-left text-ink shadow-[var(--shadow-border)]"
+            >
+              <span className="font-semibold">Real Qal forms</span>
+              <span className="mt-1 block text-sm text-muted">
+                Attested perfect and imperfect forms from the Tanakh. Name the parse. A miss shows the answer.
+              </span>
+            </button>
           </li>
           {LEVELS.map((row) => {
             const open = row.id <= quest.unlocked;
