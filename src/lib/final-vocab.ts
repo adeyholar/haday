@@ -1,4 +1,6 @@
 import { normAnswer } from "@/lib/week7-mock";
+import { lettersOnly } from "@/lib/hebrew";
+import { glossMatches, VOCAB, type Pos, type VocabItem } from "@/lib/vocab";
 
 /** Final exam vocabulary. The professor's Week 15 slides, in slide order. */
 export type FinalVocabItem = {
@@ -100,6 +102,55 @@ export const FINAL_VOCAB: FinalVocabItem[] = [
 
 
 const BY_ID = new Map(FINAL_VOCAB.map((item) => [item.id, item]));
+
+let drillPool: VocabItem[] | null = null;
+
+/** The same eighty words, as drill cards. A class lemma keeps its id so misses stay on that card. */
+export function finalExamDrillItems(): VocabItem[] {
+  if (drillPool) return drillPool;
+  const exact = new Map<string, VocabItem>();
+  const byLetters = new Map<string, VocabItem[]>();
+  for (const book of VOCAB) {
+    exact.set(book.hebrew.normalize("NFC"), book);
+    for (const he of [book.hebrew, ...(book.hebrewAlts ?? [])]) {
+      const key = lettersOnly(he);
+      const list = byLetters.get(key) ?? [];
+      if (!list.some((row) => row.id === book.id)) list.push(book);
+      byLetters.set(key, list);
+    }
+  }
+  const used = new Set<string>();
+  drillPool = FINAL_VOCAB.map((row) => {
+    const spelled = row.hebrew.normalize("NFC");
+    const book = exact.get(spelled) ?? uniqueLetters(byLetters.get(lettersOnly(spelled)));
+    const exam = row.accept[0] ?? "";
+    if (!book || used.has(book.id)) return standIn(row.id, spelled, exam);
+    used.add(book.id);
+    const card = glossMatches(book, exam) ? book : { ...book, gloss: exam, alts: bookGlossAlts(book, exam) };
+    return card.hebrew === spelled ? card : { ...card, hebrew: spelled };
+  });
+  return drillPool;
+}
+
+function uniqueLetters(list: VocabItem[] | undefined): VocabItem | undefined {
+  return list?.length === 1 ? list[0] : undefined;
+}
+
+function bookGlossAlts(book: VocabItem, exam: string): string[] {
+  const alts = [book.gloss, ...book.alts];
+  return alts.filter((alt, i) => alt && alt !== exam && alts.indexOf(alt) === i);
+}
+
+function standIn(id: string, hebrew: string, gloss: string): VocabItem {
+  return { id, hebrew, translit: "", gloss, alts: [], pos: posOf(gloss), chapter: 0, freq: 0 };
+}
+
+function posOf(gloss: string): Pos {
+  if (gloss.startsWith("to ")) return "verb";
+  if (/^(not|also|so)\b/.test(gloss)) return "particle";
+  if (/^(here|now|outside|behind|in front)\b/.test(gloss)) return "prep";
+  return "noun";
+}
 
 export function finalVocabItem(id: string): FinalVocabItem | null {
   return BY_ID.get(id) ?? null;

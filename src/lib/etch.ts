@@ -151,6 +151,11 @@ export function drillKey(week: number, focus: string | undefined): string {
   return `${weekN}:${face}`;
 }
 
+/** Final exam vocab keeps its own sitting. It does not replace the open week. */
+export function finalDrillKey(focus: string | undefined): string {
+  return `final:${focus === "weak" ? "weak" : "due"}`;
+}
+
 function drillOrder(
   pool: VocabItem[],
   cards: Record<string, CardState>,
@@ -386,7 +391,7 @@ export function vocabDistance(
 }
 
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
-  return takeDrillRuns(raw, (key) => /^\d+:(due|weak)$/.test(key));
+  return takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key));
 }
 
 /** Scripture Path sittings. The key is the level, the week, and the focus. */

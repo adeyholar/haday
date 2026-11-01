@@ -152,6 +152,8 @@ test("a drill place survives hydrateGame", () => {
   const game = hydrateGame({ drillRuns: { "3:due": place, "nope": { seed: 1 } } });
   assert.deepEqual(game.drillRuns["3:due"], place);
   assert.equal(game.drillRuns.nope, undefined);
+  assert.equal(hydrateDrillRuns({ "final:due": place })["final:due"]?.index, 3);
+  assert.equal(hydrateDrillRuns({ "final:nope": place })["final:nope"], undefined);
   assert.equal(hydrateDrillRuns(null)["3:due"], undefined);
 });
 

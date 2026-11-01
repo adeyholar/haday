@@ -1,13 +1,13 @@
 import { cn } from "@/lib/cn";
 import { statsFor, useStudy, type FocusMode } from "@/lib/store";
-import { itemsForWeek } from "@/lib/vocab";
+import { itemsForWeek, type VocabItem } from "@/lib/vocab";
 
-export function FocusToggle() {
+export function FocusToggle({ pool }: { pool?: VocabItem[] }) {
   const week = useStudy((s) => s.week);
   const cards = useStudy((s) => s.cards);
   const focus = useStudy((s) => s.focus);
   const setFocus = useStudy((s) => s.setFocus);
-  const st = statsFor(itemsForWeek(week), cards);
+  const st = statsFor(pool ?? itemsForWeek(week), cards);
   const weak = (st.weak ?? 0) + (st.high ?? 0);
 
   const options: Array<{ id: FocusMode; label: string; hint: string }> = [
