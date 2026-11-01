@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Ellipsis, Pause, Play, Repeat, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { hebrewClusters } from "@/lib/hebrew-phones";
@@ -7,6 +7,7 @@ import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
 import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
+import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { chapterKnown } from "@/lib/reading-loop/known";
 import { poolFor } from "@/lib/reading-loop/pool";
@@ -1153,6 +1154,7 @@ function FollowCard({
   const [vol, setVol] = useState(loadReadVolume);
   const lastVol = useRef(vol || 1);
   const [pick, setPick] = useState<WordPick | null>(null);
+  const [balloon, setBalloon] = useState<WordBalloonPlace | null>(null);
   const wordEl = useRef<HTMLButtonElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const follow = useFollowScroll(verse.ref);
@@ -1197,6 +1199,56 @@ function FollowCard({
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
+  useLayoutEffect(() => {
+    if (!pick) {
+      setBalloon(null);
+      return;
+    }
+    let last: WordBalloonPlace | null = null;
+    const measure = () => {
+      const el = document.querySelector<HTMLElement>("[data-word-pick='1']");
+      const rect = el?.getBoundingClientRect();
+      if (!rect || rect.width < 1) return;
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+        setPick(null);
+        return;
+      }
+      const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const headerRaw = getComputedStyle(document.documentElement).getPropertyValue("--read-header");
+      const header = headerRaw.trim().endsWith("rem") ? parseFloat(headerRaw) * rootPx : parseFloat(headerRaw) || 3.5 * rootPx;
+      const navRaw = getComputedStyle(document.documentElement).getPropertyValue("--nav-h").trim();
+      const nav = navRaw.endsWith("rem") ? parseFloat(navRaw) * rootPx : parseFloat(navRaw) || 3.5 * rootPx;
+      const dock = document.querySelector(".read-dock")?.getBoundingClientRect();
+      const floor = (dock && dock.top > 0 ? dock.top : window.innerHeight - nav) - 8;
+      const next = placeWordBalloon({
+        word: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+        viewportWidth: window.innerWidth,
+        ceiling: header + 8,
+        floor,
+        rootFontPx: rootPx,
+      });
+      if (
+        last &&
+        last.side === next.side &&
+        Math.abs(last.top - next.top) < 0.5 &&
+        Math.abs(last.left - next.left) < 0.5 &&
+        Math.abs(last.width - next.width) < 0.5 &&
+        Math.abs(last.maxHeight - next.maxHeight) < 0.5 &&
+        Math.abs(last.tail - next.tail) < 0.5
+      ) {
+        return;
+      }
+      last = next;
+      setBalloon(next);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [pick]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target;
@@ -1414,6 +1466,7 @@ function FollowCard({
                         } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
                           (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
                         } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && wi !== wordI ? "ms-unknown" : ""}`}
+                        data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
                           const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
                           const { id: sid, morph } = splitStrongTag(tag);
@@ -1456,8 +1509,9 @@ function FollowCard({
                         type="button"
                         key={`${row.ref}-${wi}`}
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none ${
-                          dim && unknownKeys.has(`${row.ref}:${wi}`) ? "ms-unknown" : ""
-                        }`}
+                          pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""
+                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) ? "ms-unknown" : ""}`}
+                        data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
                           const { id: sid, morph } = splitStrongTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
                           if (!onWord && sid) {
@@ -1499,7 +1553,7 @@ function FollowCard({
             ? "Tap a word to start there. The marked words are the phrase you repeat after the pulse."
             : list.length >= 10
               ? "Every verse in this range is on the page. Tap a verse to read it. Highlight follows the reader."
-              : "Tap a word for its card. Highlight still follows the reader."}
+              : "Tap a word. The card opens on that word."}
         </p>
         <p className="mt-6 text-sm tabular-nums text-muted">
           {i + 1} / {total}
@@ -1508,7 +1562,7 @@ function FollowCard({
           <EchoVerse src={audioSrc} start={verseStart} end={verseEnd} onHalt={onHalt} onClock={onEchoClock} />
         )}
       </div>
-      {pick ? <WordSheet pick={pick} onClose={() => setPick(null)} /> : null}
+      {pick && balloon ? <WordSheet pick={pick} place={balloon} onClose={() => setPick(null)} /> : null}
 
       <audio ref={audioRef} className="sr-only" preload={preload} playsInline />
     </>
