@@ -125,6 +125,7 @@ type StudyState = StudySnapshot & {
   saveRoadFinalRun: (run: RoadRun | null) => void;
   saveWeakRun: (run: WeakRun | null) => void;
   saveDrillRun: (week: number, focus: string, place: DrillPlace | null) => void;
+  saveDrillAt: (key: string, place: DrillPlace | null) => void;
   saveIibsDrill: (level: string, week: number, focus: string, place: DrillPlace | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   saveVerbQuest: (quest: VerbQuestProgress) => void;
@@ -361,7 +362,10 @@ export const useStudy = create<StudyState>()(
         set({ game: { ...get().game, weakRun: run } });
       },
       saveDrillRun: (week, focus, place) => {
-        const key = drillKey(week, focus);
+        get().saveDrillAt(drillKey(week, focus), place);
+      },
+      saveDrillAt: (key, place) => {
+        if (!/^(?:\d+|final):(due|weak)$/.test(key)) return;
         const drillRuns = { ...(get().game.drillRuns ?? {}) };
         if (place) drillRuns[key] = place;
         else delete drillRuns[key];

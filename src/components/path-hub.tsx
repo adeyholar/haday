@@ -49,6 +49,8 @@ type Card = {
   title: string;
   line: string;
   hash?: string;
+  /** Final exam vocab uses the drill sitting, not the scored quiz. */
+  final?: boolean;
 };
 
 const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
@@ -69,6 +71,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
     line: "Remember the words. A miss gathers in Weak words.",
     cards: [
       { to: "/drill", title: "Drill", line: "This week’s words, six ways." },
+      { to: "/drill", final: true, title: "Final exam vocab", line: "The professor’s eighty words, every way." },
       { to: "/quiz", title: "Quiz", line: "Choose the gloss, or type it." },
       { to: "/write", title: "Write", line: "Type the meaning, or write it by hand." },
       { to: "/match", title: "Match", line: "Pair the Hebrew with the English." },
@@ -126,6 +129,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
     line: "The words of the open chapter.",
     cards: [
       { to: "/drill", title: "Drill", line: "This chapter’s words." },
+      { to: "/drill", final: true, title: "Final exam vocab", line: "The professor’s eighty words, every way." },
       { to: "/quiz", title: "Quiz", line: "Choice, or type the gloss." },
       { to: "/write", title: "Write", line: "Type the meaning." },
       { to: "/match", title: "Match", line: "Select the pairs." },
@@ -178,15 +182,26 @@ export function PathHub({ kind }: { kind: HubKind }) {
       <ul className="mt-4 grid gap-2">
         {room.cards.map((card) => (
           <li key={card.title}>
-            <Link
-              to={card.to}
-              params={card.params}
-              hash={card.hash}
-              className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
-            >
-              <span className="block font-display text-2xl font-bold">{card.title}</span>
-              <span className="mt-1 block text-sm text-muted">{card.line}</span>
-            </Link>
+            {card.final ? (
+              <Link
+                to="/drill"
+                search={{ set: "final" }}
+                className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="block font-display text-2xl font-bold">{card.title}</span>
+                <span className="mt-1 block text-sm text-muted">{card.line}</span>
+              </Link>
+            ) : (
+              <Link
+                to={card.to}
+                params={card.params}
+                hash={card.hash}
+                className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="block font-display text-2xl font-bold">{card.title}</span>
+                <span className="mt-1 block text-sm text-muted">{card.line}</span>
+              </Link>
+            )}
           </li>
         ))}
       </ul>

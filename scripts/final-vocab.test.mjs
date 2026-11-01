@@ -6,10 +6,13 @@ import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
-const { FINAL_VOCAB, startFinalVocab, takeFinalVocab, finalVocabGrade, finalVocabItem } = await jiti.import(
+const { FINAL_VOCAB, startFinalVocab, takeFinalVocab, finalVocabGrade, finalVocabItem, finalExamDrillItems } = await jiti.import(
   join(root, "src/lib/final-vocab.ts"),
 );
 const { areaOf } = await jiti.import(join(root, "src/lib/use-report.ts"));
+const { glossMatches } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { finalDrillKey, buildEtchSitting } = await jiti.import(join(root, "src/lib/etch.ts"));
+const { hydrateGame } = await jiti.import(join(root, "src/lib/game.ts"));
 
 test("the final vocab list is the professor's 80 words, quizzed like Week 7", () => {
   assert.equal(FINAL_VOCAB.length, 80);
@@ -36,4 +39,32 @@ test("the final vocab list is the professor's 80 words, quizzed like Week 7", ()
   assert.equal(finalVocabGrade(hit.run).held, 1);
   assert.equal(areaOf("/game/final-vocab").id, "final-vocab");
   assert.equal(areaOf("/game/final").id, "final");
+});
+
+test("final exam vocab drills as eighty cards and keeps its own place", () => {
+  const items = finalExamDrillItems();
+  assert.equal(items.length, 80);
+  assert.equal(new Set(items.map((item) => item.id)).size, 80);
+  for (let i = 0; i < FINAL_VOCAB.length; i++) {
+    const row = FINAL_VOCAB[i];
+    const card = items[i];
+    assert.equal(card.hebrew, row.hebrew);
+    assert.equal(glossMatches(card, row.accept[0]), true, row.hebrew);
+  }
+  assert.equal(finalDrillKey("weak"), "final:weak");
+  assert.equal(finalDrillKey("due"), "final:due");
+  const place = {
+    seed: 3,
+    ids: items.slice(0, 2).map((item) => item.id),
+    index: 1,
+    reviews: [],
+    hits: 0,
+    checks: 0,
+    fingerprint: "x",
+  };
+  const game = hydrateGame({ drillRuns: { "final:due": place, "final:other": { seed: 1, ids: ["nope"] } } });
+  assert.deepEqual(game.drillRuns["final:due"], place);
+  assert.equal(game.drillRuns["final:other"], undefined);
+  const sitting = buildEtchSitting(items, {}, undefined, 1_700_000_000_000, "due", 4);
+  assert.equal(sitting.filter((task) => task.kind === "study" && task.back === 0).length, 80);
 });
