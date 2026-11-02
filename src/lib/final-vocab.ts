@@ -1,5 +1,6 @@
 import { normAnswer } from "@/lib/week7-mock";
 import { lettersOnly } from "@/lib/hebrew";
+import type { ListenItem } from "@/lib/listen";
 import { glossMatches, VOCAB, type Pos, type VocabItem } from "@/lib/vocab";
 
 /** Final exam vocabulary. The professor's Week 15 slides, in slide order. */
@@ -130,6 +131,19 @@ export function finalExamDrillItems(): VocabItem[] {
     return card.hebrew === spelled ? card : { ...card, hebrew: spelled };
   });
   return drillPool;
+}
+
+let roadPool: ListenItem[] | null = null;
+
+/** The same eighty words, for the car. The exam gloss is spoken. A class lemma keeps its Hebrew clip. */
+export function finalExamRoadItems(): ListenItem[] {
+  if (roadPool) return roadPool;
+  roadPool = finalExamDrillItems().map((card) => ({
+    ...card,
+    plainEnglish: true as const,
+    ...(card.chapter !== 0 ? { heVoiceId: card.id } : {}),
+  }));
+  return roadPool;
 }
 
 function uniqueLetters(list: VocabItem[] | undefined): VocabItem | undefined {
