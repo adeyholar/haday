@@ -220,6 +220,13 @@ function ListenPage() {
         >
           Play a week on the road
         </Link>
+        <Link
+          to="/listen/road"
+          search={{ set: "final" }}
+          className="mt-2 flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-card px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
+        >
+          Final exam on the road
+        </Link>
         {isAppleMobile() && (
           <p className="mt-2 text-sm text-ink">
             On iPad: open this page in Safari, turn the volume up, and make sure the side Silent switch is not orange.

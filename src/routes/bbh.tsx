@@ -190,6 +190,20 @@ function Home() {
       </Link>
 
       <Link
+        to="/listen/road"
+        search={{ set: "final" }}
+        className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <Headphones className="mt-0.5 size-6 shrink-0 text-primary" />
+        <span>
+          <span className="block font-display text-2xl font-bold">Final exam on the road</span>
+          <span className="mt-1 block text-sm text-muted">
+            The professor’s eighty words. Hebrew, then the exam meaning. It repeats until you pause.
+          </span>
+        </span>
+      </Link>
+
+      <Link
         to="/listen/read"
         className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
       >

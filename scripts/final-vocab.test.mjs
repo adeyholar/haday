@@ -6,7 +6,7 @@ import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
-const { FINAL_VOCAB, startFinalVocab, takeFinalVocab, finalVocabGrade, finalVocabItem, finalExamDrillItems } = await jiti.import(
+const { FINAL_VOCAB, startFinalVocab, takeFinalVocab, finalVocabGrade, finalVocabItem, finalExamDrillItems, finalExamRoadItems } = await jiti.import(
   join(root, "src/lib/final-vocab.ts"),
 );
 const { areaOf } = await jiti.import(join(root, "src/lib/use-report.ts"));
@@ -67,4 +67,26 @@ test("final exam vocab drills as eighty cards and keeps its own place", () => {
   assert.equal(game.drillRuns["final:other"], undefined);
   const sitting = buildEtchSitting(items, {}, undefined, 1_700_000_000_000, "due", 4);
   assert.equal(sitting.filter((task) => task.kind === "study" && task.back === 0).length, 80);
+});
+
+test("final exam vocab speaks on the road in slide order", () => {
+  const items = finalExamRoadItems();
+  assert.equal(items.length, 80);
+  assert.equal(items[0].hebrew, "בָּנָה");
+  assert.equal(items[0].plainEnglish, true);
+  const classLemma = items.find((item) => item.chapter !== 0);
+  assert.ok(classLemma);
+  assert.equal(classLemma.heVoiceId, classLemma.id);
+  const evil = items.find((item) => item.hebrew === "רָעַע");
+  assert.equal(evil.chapter, 0);
+  assert.equal(evil.heVoiceId, undefined);
+  assert.equal(evil.id, "f-34");
+  assert.equal(evil.gloss, "to be evil, be bad");
+  assert.equal(evil.plainEnglish, true);
+  for (let i = 0; i < FINAL_VOCAB.length; i++) {
+    assert.equal(items[i].hebrew, FINAL_VOCAB[i].hebrew);
+    assert.equal(items[i].plainEnglish, true);
+    if (items[i].chapter === 0) assert.equal(items[i].heVoiceId, undefined);
+    else assert.equal(items[i].heVoiceId, items[i].id);
+  }
 });

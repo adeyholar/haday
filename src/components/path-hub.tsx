@@ -51,6 +51,8 @@ type Card = {
   hash?: string;
   /** Final exam vocab uses the drill sitting, not the scored quiz. */
   final?: boolean;
+  /** Final exam vocab on the road. Not the scored quiz, and not the drill. */
+  examRoad?: boolean;
 };
 
 const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
@@ -109,6 +111,12 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
     cards: [
       { to: "/listen", title: "Vocabulary", line: "Hebrew, then English." },
       { to: "/listen/road", title: "On the road", line: "This chapter, while you drive." },
+      {
+        to: "/listen/road",
+        examRoad: true,
+        title: "Final exam on the road",
+        line: "The professor’s eighty words, while you drive.",
+      },
       { to: "/listen/pet", title: "Alive Pet", line: "The class voice, your weak words first." },
       { to: "/listen/read", title: "Tanakh reader", line: "Torah, Nevi'im, and Ketuvim are inside the reader." },
     ],
@@ -185,6 +193,15 @@ export function PathHub({ kind }: { kind: HubKind }) {
             {card.final ? (
               <Link
                 to="/drill"
+                search={{ set: "final" }}
+                className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="block font-display text-2xl font-bold">{card.title}</span>
+                <span className="mt-1 block text-sm text-muted">{card.line}</span>
+              </Link>
+            ) : card.examRoad ? (
+              <Link
+                to="/listen/road"
                 search={{ set: "final" }}
                 className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
               >
