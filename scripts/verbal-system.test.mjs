@@ -51,6 +51,39 @@ test("Tanakh paradigm forms the class already knows", () => {
   assert.equal(form("shakan", "qal", "perfect", "1cp"), "\u05e9\u05c1\u05b8\u05db\u05b7\u05ab\u05e0\u05bc\u05d5\u05bc");
 });
 
+test("Qal weak forms the Tutor marked", () => {
+  const form = (id, stem, conj, cell) => vs.openPattern(id, stem, conj).cells.find((row) => row.id === cell);
+  assert.equal(form("banah", "qal", "perfect", "2mp").form, "בְּנִיתֶם");
+  assert.equal(form("banah", "qal", "perfect", "2mp").form.includes("תּ"), false);
+  assert.equal(vs.rootById("nagash").dots[2], "shin");
+  assert.equal(form("nagash", "qal", "perfect", "3ms").form, "נָגַשׁ");
+  assert.equal(form("nagash", "qal", "imperative", "ms").form, "גַּשׁ");
+  assert.equal(form("nagash", "qal", "imperative", "long").form, "גְּשָׁה");
+  assert.equal(form("nagash", "qal", "imperative", "fs").form, "גְּשִׁי");
+  assert.equal(form("nagash", "qal", "imperative", "mp").form, "גְּשׁוּ");
+  assert.equal(form("nagash", "qal", "imperative", "fp").form, "גַּשְׁנָה");
+  const fell = form("nafal", "qal", "imperative", "ms");
+  assert.equal(fell.form, "נְפֹל");
+  assert.equal(fell.form.includes("פּ"), false);
+  assert.match(fell.note, /nun stays/);
+  assert.doesNotMatch(fell.note, /nun is gone/);
+  assert.equal(form("nafal", "qal", "imperative", "fs").form, "נִפְלִי");
+  assert.equal(form("nafal", "qal", "imperative", "mp").form, "נִפְלוּ");
+  assert.equal(form("nafal", "qal", "imperative", "fp").form, "נְפֹלְנָה");
+  assert.match(form("nafal", "qal", "imperative", "fp").note, /nun stays/);
+  assert.equal(form("banah", "qal", "perfect", "2fs").form, "בָּנִית");
+  assert.equal(form("asah", "qal", "perfect", "2fs").form, "עָשִׂית");
+  assert.equal(form("raah", "qal", "perfect", "2fs").form, "רָאִית");
+  assert.equal(form("banah", "qal", "perfect", "2fp").form, "בְּנִיתֶן");
+  assert.equal(form("hayah", "qal", "perfect", "2ms").form, "הָיִיתָ");
+  assert.equal(form("hayah", "qal", "perfect", "2fs").form, "הָיִית");
+  assert.equal(form("hayah", "qal", "perfect", "1cs").form, "הָיִיתִי");
+  assert.equal(form("hayah", "qal", "perfect", "2mp").form, "הֱיִיתֶם");
+  assert.equal(form("hayah", "qal", "perfect", "1cp").form, "הָיִינוּ");
+  assert.equal(form("raah", "qal", "perfect", "3fs").form, "רָאֲתָה");
+  assert.equal(form("qatal", "qal", "perfect", "2fs").form, "קָטַלְתְּ");
+});
+
 test("the forms the Tutor marked are pointed", () => {
   const form = (id, stem, conj, cell) => vs.openPattern(id, stem, conj).cells.find((row) => row.id === cell).form;
   assert.equal(form("qatal", "qal", "imperfect", "3ms"), "יִקְטֹל");
