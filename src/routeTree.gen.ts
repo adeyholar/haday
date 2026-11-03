@@ -70,6 +70,7 @@ import { Route as HubPlayRouteImport } from './routes/hub/play'
 import { Route as HubPracticeRouteImport } from './routes/hub/practice'
 import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
+import { Route as IibsBinyanimRouteImport } from './routes/iibs/binyanim'
 import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
 import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfect'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
@@ -434,6 +435,11 @@ const IibsLevelRoute = IibsLevelRouteImport.update({
   path: '/$level',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsBinyanimRoute = IibsBinyanimRouteImport.update({
+  id: '/binyanim',
+  path: '/binyanim',
+  getParentRoute: () => IibsRoute,
+} as any)
 const IibsLearnRoute = IibsLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -781,6 +787,7 @@ export interface FileRoutesByFullPath {
   '/hub/play': typeof HubPlayRoute
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -899,6 +906,7 @@ export interface FileRoutesByTo {
   '/hub/play': typeof HubPlayRoute
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -1020,6 +1028,7 @@ export interface FileRoutesById {
   '/hub/play': typeof HubPlayRoute
   '/hub/practice': typeof HubPracticeRoute
   '/iibs/$level': typeof IibsLevelRoute
+  '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
@@ -1142,6 +1151,7 @@ export interface FileRouteTypes {
     | '/hub/play'
     | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/binyanim'
     | '/iibs/learn'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
@@ -1260,6 +1270,7 @@ export interface FileRouteTypes {
     | '/hub/play'
     | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/binyanim'
     | '/iibs/learn'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
@@ -1380,6 +1391,7 @@ export interface FileRouteTypes {
     | '/hub/play'
     | '/hub/practice'
     | '/iibs/$level'
+    | '/iibs/binyanim'
     | '/iibs/learn'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
@@ -1968,6 +1980,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsLevelRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/binyanim': {
+      id: '/iibs/binyanim'
+      path: '/binyanim'
+      fullPath: '/iibs/binyanim'
+      preLoaderRoute: typeof IibsBinyanimRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/iibs/learn': {
       id: '/iibs/learn'
       path: '/learn'
@@ -2402,6 +2421,7 @@ const IibsStudyLevelRouteWithChildren = IibsStudyLevelRoute._addFileChildren(
 
 interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
+  IibsBinyanimRoute: typeof IibsBinyanimRoute
   IibsLearnRoute: typeof IibsLearnRoute
   IibsQalImperfectRoute: typeof IibsQalImperfectRoute
   IibsRoadRoute: typeof IibsRoadRoute
@@ -2418,6 +2438,7 @@ interface IibsRouteChildren {
 
 const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
+  IibsBinyanimRoute: IibsBinyanimRoute,
   IibsLearnRoute: IibsLearnRoute,
   IibsQalImperfectRoute: IibsQalImperfectRoute,
   IibsRoadRoute: IibsRoadRoute,
