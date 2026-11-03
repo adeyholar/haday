@@ -69,6 +69,19 @@ test("Qal weak forms the Tutor marked", () => {
   assert.doesNotMatch(fell.note, /nun is gone/);
   assert.equal(form("nafal", "qal", "imperative", "fs").form, "נִפְלִי");
   assert.equal(form("nafal", "qal", "imperative", "mp").form, "נִפְלוּ");
+  assert.equal(form("nafal", "qal", "imperative", "fp").form, "נְפֹלְנָה");
+  assert.match(form("nafal", "qal", "imperative", "fp").note, /nun stays/);
+  assert.equal(form("banah", "qal", "perfect", "2fs").form, "בָּנִית");
+  assert.equal(form("asah", "qal", "perfect", "2fs").form, "עָשִׂית");
+  assert.equal(form("raah", "qal", "perfect", "2fs").form, "רָאִית");
+  assert.equal(form("banah", "qal", "perfect", "2fp").form, "בְּנִיתֶן");
+  assert.equal(form("hayah", "qal", "perfect", "2ms").form, "הָיִיתָ");
+  assert.equal(form("hayah", "qal", "perfect", "2fs").form, "הָיִית");
+  assert.equal(form("hayah", "qal", "perfect", "1cs").form, "הָיִיתִי");
+  assert.equal(form("hayah", "qal", "perfect", "2mp").form, "הֱיִיתֶם");
+  assert.equal(form("hayah", "qal", "perfect", "1cp").form, "הָיִינוּ");
+  assert.equal(form("raah", "qal", "perfect", "3fs").form, "רָאֲתָה");
+  assert.equal(form("qatal", "qal", "perfect", "2fs").form, "קָטַלְתְּ");
 });
 
 test("the forms the Tutor marked are pointed", () => {

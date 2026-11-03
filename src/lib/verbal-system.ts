@@ -1678,6 +1678,7 @@ function iiiHe(root: VerbRoot, conj: ConjId): Engine | null {
       ["1cs", "1st common sing.", "qamets", "iti"],
       ["3cp", "3rd common plural", "qamets", "u"],
       ["2mp", "2nd masc. plural", heavy, "item"],
+      ["2fp", "2nd fem. plural", heavy, "iten"],
       ["1cp", "1st common plural", "qamets", "inu"],
     ];
     return {
@@ -1687,32 +1688,33 @@ function iiiHe(root: VerbRoot, conj: ConjId): Engine | null {
           { id: "cite", label: "qamets he, the citation", mark: CIRC + V.qamets + "ה" },
           { id: "tha", label: "tav qamets he", mark: "ת" + V.qamets + "ה" },
           { id: "ita", label: "yod tav qamets", mark: "י" + "ת" + V.qamets },
-          { id: "it", label: "yod tav shewa", mark: "י" + "ת" + V.shewa },
+          { id: "it", label: "yod tav", mark: "ית" },
           { id: "iti", label: "yod tav hireq yod", mark: "יתִי" },
           { id: "u", label: "shureq", mark: SHUREQ },
           { id: "item", label: "yod tav segol mem", mark: "יתֶם" },
+          { id: "iten", label: "yod tav segol nun", mark: "יתֶן" },
           { id: "inu", label: "yod nun shureq", mark: "ינוּ" },
         ]),
       ],
       cells: rows.map(([id, label, v1, end]) => seed(id, label, "The final he drops as soon as an ending arrives. 2ms is yod, not the strong tav only.", { v1, end })),
       render: (r, picks) => {
         const A = M(r, 0, vowelChar(picks.v1), lene(r.letters[0], false));
-        const bHireq = picks.end === "ita" || picks.end === "it" || picks.end === "iti" || picks.end === "item" || picks.end === "inu";
+        const bHireq = picks.end === "ita" || picks.end === "it" || picks.end === "iti" || picks.end === "item" || picks.end === "iten" || picks.end === "inu";
         const bBare = picks.end === "u";
         const bShewa = picks.end === "tha";
+        const c2Reduced = HATEF_LETTER.has(medial(r.letters[1])) ? V.hatef : V.shewa;
         const B = bHireq
-          ? medial(r.letters[1]) === "י"
-            ? M(r, 1, V.hireq)
-            : M(r, 1, V.hireq) + "י"
-          : M(r, 1, bShewa ? V.shewa : bBare ? "" : V.qamets);
+          ? M(r, 1, V.hireq) + "י"
+          : M(r, 1, bShewa ? c2Reduced : bBare ? "" : V.qamets);
         const tails: Record<string, string> = {
           cite: "ה",
           tha: "ת" + V.qamets + "ה",
           ita: "ת" + V.qamets,
-          it: "ת" + V.shewa,
+          it: "ת",
           iti: "ת" + V.hireq + "י",
           u: SHUREQ,
           item: "ת" + V.segol + "ם",
+          iten: "ת" + V.segol + "ן",
           inu: "נ" + SHUREQ,
         };
         return A + B + (tails[picks.end ?? ""] ?? "");
@@ -1973,6 +1975,7 @@ function iNun(root: VerbRoot, conj: ConjId): Engine | null {
           seed("ms", "masc. sing.", "The nun stays.", { v1: "shewa", v2: "holem", end: "none" }),
           seed("fs", "fem. sing.", "The nun stays. Hireq yod.", { v1: "hireq", v2: "shewa", end: "iy" }),
           seed("mp", "masc. plural", "The nun stays. Shureq.", { v1: "hireq", v2: "shewa", end: "u" }),
+          seed("fp", "fem. plural", "The nun stays.", { v1: "shewa", v2: "holem", end: "nah" }),
         ],
         render: (r, picks) => {
           const A = M(r, 0, vowelChar(picks.v1), false);
