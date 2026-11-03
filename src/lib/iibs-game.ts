@@ -1,4 +1,4 @@
-import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
+import { vocabLessons } from "@/lib/iibs-vocab";
 
 export const IIBS_LESSON_PASS = 90;
 export const IIBS_LESSON_COUNT = 30;
@@ -148,21 +148,20 @@ export function lessonSatisfied(progress: IibsGameProgress, level: string, lesso
 }
 
 export function levelCleared(progress: IibsGameProgress, level: string) {
-  return lessonSatisfied(progress, level, IIBS_LESSON_COUNT);
+  for (let lesson = 1; lesson <= IIBS_LESSON_COUNT; lesson += 1) {
+    if (lessonWordCount(level, lesson) > 0 && !playedClear(progress, level, lesson)) return false;
+  }
+  return true;
 }
 
-export function levelUnlocked(progress: IibsGameProgress, id: string, admin: boolean) {
-  if (admin || id === "A") return true;
-  if (id === "lab") return levelCleared(progress, "E");
-  const index = IIBS_GAME_LEVELS.indexOf(id as IibsVocabLevel);
-  if (index <= 0) return false;
-  return levelCleared(progress, IIBS_GAME_LEVELS[index - 1]!);
+export function levelUnlocked(_progress: IibsGameProgress, id: string, _admin: boolean) {
+  if (id === "lab") return true;
+  return (IIBS_GAME_LEVELS as readonly string[]).includes(id);
 }
 
 export function lessonUnlocked(progress: IibsGameProgress, level: string, lesson: number, admin: boolean) {
   if (!levelUnlocked(progress, level, admin)) return false;
-  if (admin || lesson <= 1) return true;
-  return lessonSatisfied(progress, level, lesson - 1);
+  return lesson >= 1 && lesson <= IIBS_LESSON_COUNT;
 }
 
 export function iibsLessonRec(progress: IibsGameProgress, level: string, lesson: number): IibsLessonRec {

@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Headphones, ListChecks, Lock, Layers, ScrollText } from "lucide-react";
+import { Headphones, ListChecks, Layers, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { levelUnlocked, lessonUnlocked } from "@/lib/iibs-game";
 import { enterIibsRoom, leaveIibsRoom, readIibsRoom, subscribeIibsRoom } from "@/lib/iibs-room";
 import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
-import { IIBS_LEVELS, levelAfter, type IibsLevelId } from "@/lib/path";
+import { IIBS_LEVELS } from "@/lib/path";
 import { LEVEL_LEAVE, LEVEL_WHICH, LEVEL_WHICH_LINE } from "@/lib/path-names";
 import { isIibsWeekLevel } from "@/lib/iibs-weeks";
 import type { IibsGameProgress } from "@/lib/iibs-game";
@@ -57,8 +56,8 @@ export function ScriptureTabs({ active, compact = false }: { active: "levels" | 
 }
 
 export function LevelHall({
-  progress,
-  admin,
+  progress: _progress,
+  admin: _admin,
 }: {
   progress: IibsGameProgress;
   admin: boolean;
@@ -74,30 +73,17 @@ export function LevelHall({
       <div className="grid gap-3 sm:grid-cols-2">
         {IIBS_LEVELS.filter((level) => isIibsWeekLevel(level.id)).map((level) => {
           const id = level.id as IibsVocabLevel;
-          const open = levelUnlocked(progress, id, admin);
           const lessons = vocabLessons(id);
           const words = lessons ? lessons.reduce((sum, row) => sum + row.length, 0) : 0;
           return (
             <button
               key={id}
               type="button"
-              disabled={!open}
-              onClick={() => {
-                if (open) enterIibsRoom(id);
-              }}
-              className={`rounded-[var(--radius-xl)] p-5 text-left shadow-[var(--shadow-border)] ${
-                open ? "bg-card text-ink" : "bg-card text-muted opacity-70"
-              }`}
+              onClick={() => enterIibsRoom(id)}
+              className="rounded-[var(--radius-xl)] bg-card p-5 text-left text-ink shadow-[var(--shadow-border)]"
             >
-              <span className="flex items-center justify-between gap-2">
-                <span className="font-display text-3xl font-bold">{level.title}</span>
-                {open ? null : <Lock className="size-5 shrink-0" />}
-              </span>
-              <span className="mt-2 block text-sm text-muted">
-                {open
-                  ? `Thirty lessons · ${words} words`
-                  : `Locked until Level ${levelAfter(id as IibsLevelId)} is cleared.`}
-              </span>
+              <span className="font-display text-3xl font-bold">{level.title}</span>
+              <span className="mt-2 block text-sm text-muted">Thirty lessons · {words} words</span>
             </button>
           );
         })}
@@ -135,8 +121,8 @@ export function LevelHall({
 
 export function LevelRoom({
   level,
-  progress,
-  admin,
+  progress: _progress,
+  admin: _admin,
 }: {
   level: IibsVocabLevel;
   progress: IibsGameProgress;
@@ -242,25 +228,26 @@ export function LevelRoom({
         <ol className="mt-4 grid gap-2">
           {lists.map((row, index) => {
             const n = index + 1;
-            if (row.length === 0) return null;
-            const unlocked = lessonUnlocked(progress, level, n, admin);
+            if (row.length === 0) {
+              return (
+                <li key={n}>
+                  <div className="flex min-h-14 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card px-5 text-muted shadow-[var(--shadow-border)]">
+                    <span className="font-display text-2xl font-bold">Lesson {n}</span>
+                    <span className="text-sm">No words yet</span>
+                  </div>
+                </li>
+              );
+            }
             return (
               <li key={n}>
-                {unlocked && row.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => setLesson(index)}
-                    className="flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card px-5 text-left text-ink shadow-[var(--shadow-border)]"
-                  >
-                    <span className="font-display text-2xl font-bold">Lesson {n}</span>
-                    <span className="text-sm text-muted">{row.length} words</span>
-                  </button>
-                ) : (
-                  <div className="flex min-h-14 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card px-5 text-muted opacity-70 shadow-[var(--shadow-border)]">
-                    <span className="font-display text-2xl font-bold">Lesson {n}</span>
-                    {row.length === 0 ? <span className="text-sm">No words yet</span> : <Lock className="size-4" />}
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setLesson(index)}
+                  className="flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card px-5 text-left text-ink shadow-[var(--shadow-border)]"
+                >
+                  <span className="font-display text-2xl font-bold">Lesson {n}</span>
+                  <span className="text-sm text-muted">{row.length} words</span>
+                </button>
               </li>
             );
           })}

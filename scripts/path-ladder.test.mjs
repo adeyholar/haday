@@ -6,21 +6,13 @@ import { createJiti } from "jiti";
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
 const { blockedDestination, claimPathIntent, clearPathIntent, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readPathIntent, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, stashPathIntent, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
-test("only Level A is open until an exam is passed", () => {
+test("every Scripture Path level is open", () => {
   assert.equal(levelOpen("A", null, false), true);
-  assert.equal(levelOpen("B", null, false), false);
-  assert.equal(levelOpen("lab", null, false), false);
-});
-
-test("passing a level opens only the next one", () => {
-  assert.equal(levelOpen("B", "A", false), true);
-  assert.equal(levelOpen("C", "A", false), false);
+  assert.equal(levelOpen("B", null, false), true);
+  assert.equal(levelOpen("C", "A", false), true);
+  assert.equal(levelOpen("lab", null, false), true);
+  assert.equal(levelOpen("lab", "D", false), true);
   assert.equal(levelOpen("lab", "E", false), true);
-  assert.equal(levelOpen("lab", "D", false), false);
-});
-
-test("the owner opens every level", () => {
-  assert.equal(levelOpen("lab", null, true), true);
 });
 
 test("a student cannot walk into the other door", () => {

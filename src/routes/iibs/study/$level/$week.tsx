@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { DrillSitting } from "@/components/drill-sitting";
 import { FocusToggle } from "@/components/focus-toggle";
 import { Panel } from "@/components/panel";
 import { useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { levelUnlocked } from "@/lib/iibs-game";
-import { levelAfter } from "@/lib/path";
+import { enterIibsRoom } from "@/lib/iibs-room";
 import { iibsWeekCount, iibsWeekItems, iibsWeekLabel, isIibsWeekLevel } from "@/lib/iibs-weeks";
 import { useStudy } from "@/lib/store";
 
@@ -16,7 +15,6 @@ function WeekStudy() {
   const { level, week: weekParam } = Route.useParams();
   const room = useIibsRoom();
   const week = Math.round(Number(weekParam));
-  const progress = useStudy((s) => s.game.iibs);
   const focus = useStudy((s) => s.focus);
   const saveIibsDrill = useStudy((s) => s.saveIibsDrill);
   const [gate, setGate] = useState<MyPath | null>(null);
@@ -38,6 +36,11 @@ function WeekStudy() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!room.ready || !isIibsWeekLevel(level) || room.level === level) return;
+    enterIibsRoom(level);
+  }, [room.ready, room.level, level]);
+
   if (!room.ready) {
     return (
       <Panel>
@@ -46,7 +49,13 @@ function WeekStudy() {
     );
   }
 
-  if (!room.level || room.level !== level) return <Navigate to="/iibs" />;
+  if (!room.level || room.level !== level) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening this week…</p>
+      </Panel>
+    );
+  }
 
   if (!known || week < 1 || week > count) {
     return (
@@ -63,18 +72,6 @@ function WeekStudy() {
     return (
       <Panel>
         <p className="text-sm text-muted">Opening this week…</p>
-      </Panel>
-    );
-  }
-
-  if (!levelUnlocked(progress, level, gate.admin)) {
-    return (
-      <Panel>
-        <h1 className="font-display text-3xl font-bold text-ink">Level {level} is locked</h1>
-        <p className="mt-3 text-muted">Clear Level {levelAfter(level)} in Vocab Builder first.</p>
-        <Link to="/iibs/study/$level" params={{ level: room.level ?? level }} className="mt-4 inline-block font-semibold text-primary">
-          This level
-        </Link>
       </Panel>
     );
   }

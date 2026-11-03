@@ -11,14 +11,13 @@ import {
   IIBS_LESSON_PASS,
   IIBS_STAGES,
   iibsLessonRec,
-  lessonUnlocked,
   lessonWordCount,
-  levelUnlocked,
   stageUnlocked,
   type IibsStageId,
 } from "@/lib/iibs-game";
+import { enterIibsRoom } from "@/lib/iibs-room";
 import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
-import { IIBS_LEVELS, levelAfter } from "@/lib/path";
+import { IIBS_LEVELS } from "@/lib/path";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/iibs/vocab/$level")({ component: VocabLevelPage });
@@ -51,6 +50,11 @@ function VocabLevelPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!room.ready || !isGameLevel(level) || room.level === level) return;
+    enterIibsRoom(level);
+  }, [room.ready, room.level, level]);
+
   if (!isGameLevel(level)) {
     return <Navigate to="/iibs" />;
   }
@@ -63,11 +67,17 @@ function VocabLevelPage() {
     );
   }
 
-  if (!room.level || room.level !== level) return <Navigate to="/iibs" />;
+  if (!room.level || room.level !== level) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening this level…</p>
+      </Panel>
+    );
+  }
 
   const admin = gate.admin;
   const meta = IIBS_LEVELS.find((item) => item.id === level)!;
-  const open = levelUnlocked(progress, level, admin);
+  const open = true;
   const lists = vocabLessons(level);
   const playing = lesson !== null ? lists?.[lesson] : null;
   const lessonNo = lesson === null ? 0 : lesson + 1;
@@ -114,9 +124,6 @@ function VocabLevelPage() {
         {open && lesson !== null && !stage ? (
           <p className="mt-3 max-w-prose text-muted">Clear one stage at {IIBS_LESSON_PASS}% to open the next.</p>
         ) : null}
-        {!open ? (
-          <p className="mt-3 max-w-prose text-muted">This level is locked. Clear Level {levelAfter(level)} first.</p>
-        ) : null}
         {stage ? (
           <button type="button" className="mt-4 font-semibold text-primary" onClick={() => setStage(null)}>
             Stages
@@ -143,39 +150,31 @@ function VocabLevelPage() {
           {lists.map((row, index) => {
             const n = index + 1;
             if (row.length === 0) return null;
-            const unlocked = lessonUnlocked(progress, level, n, admin);
             const rec = iibsLessonRec(progress, level, n);
             const done = IIBS_STAGES.filter((item) => rec.stages[item.id].cleared).length;
             const frontier = lists.findIndex((item, itemIndex) => {
               const itemNo = itemIndex + 1;
               const itemRec = iibsLessonRec(progress, level, itemNo);
-              return lessonUnlocked(progress, level, itemNo, admin) && item.length > 0 && !itemRec.stages.strict.cleared;
+              return item.length > 0 && !itemRec.stages.strict.cleared;
             });
             return (
               <li key={n}>
-                {unlocked && row.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLesson(index);
-                      setStage(null);
-                    }}
-                    className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-xl)] px-5 text-left shadow-[var(--shadow-border)] ${
-                      index === frontier ? "bg-primary text-primary-foreground" : "bg-card text-ink"
-                    }`}
-                  >
-                    <span className="font-display text-2xl font-bold">Lesson {n}</span>
-                    <span className="inline-flex items-center gap-2 text-sm">
-                      {rec.stages.strict.cleared ? <Check className={`size-4 ${index === frontier ? "" : "text-good"}`} /> : null}
-                      {done}/4
-                    </span>
-                  </button>
-                ) : (
-                  <div className="flex min-h-14 items-center justify-between gap-3 rounded-[var(--radius-xl)] bg-card px-5 text-muted opacity-70 shadow-[var(--shadow-border)]">
-                    <span className="font-display text-2xl font-bold">Lesson {n}</span>
-                    {row.length === 0 ? <span className="text-sm">No words yet</span> : <Lock className="size-4" />}
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLesson(index);
+                    setStage(null);
+                  }}
+                  className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-xl)] px-5 text-left shadow-[var(--shadow-border)] ${
+                    index === frontier ? "bg-primary text-primary-foreground" : "bg-card text-ink"
+                  }`}
+                >
+                  <span className="font-display text-2xl font-bold">Lesson {n}</span>
+                  <span className="inline-flex items-center gap-2 text-sm">
+                    {rec.stages.strict.cleared ? <Check className={`size-4 ${index === frontier ? "" : "text-good"}`} /> : null}
+                    {done}/4
+                  </span>
+                </button>
               </li>
             );
           })}
