@@ -392,7 +392,60 @@ export function vocabDistance(
 }
 
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
-  return takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,16}$/.test(key));
+  return remapPassageDrillRuns(
+    takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,16}$/.test(key)),
+  );
+}
+
+function remapPassageId(id: string): string | null {
+  if (!id.startsWith("iibs-")) return id;
+  const next = iibsLegacyId(id) ?? id;
+  return iibsStudyIdSet().has(next) ? next : null;
+}
+
+function remapPassageReview(review: DrillReview): DrillReview | null {
+  const parts = review.key.split(":");
+  if (parts.length < 3) return review;
+  const next = remapPassageId(parts[2] ?? "");
+  if (!next) return null;
+  parts[2] = next;
+  return { ...review, key: parts.join(":") };
+}
+
+/** Old Level E ids in a passage sitting move forward. An id that is not a study word is dropped. The fingerprint stays until the pool is known. */
+function remapPassageDrillRuns(runs: DrillRuns): DrillRuns {
+  const out: DrillRuns = {};
+  for (const [key, place] of Object.entries(runs)) {
+    if (!key.startsWith("passage:iibs:")) {
+      out[key] = place;
+      continue;
+    }
+    const ids: string[] = [];
+    for (const id of place.ids) {
+      const next = remapPassageId(id);
+      if (next) ids.push(next);
+    }
+    if (!ids.length || new Set(ids).size !== ids.length) continue;
+    out[key] = {
+      ...place,
+      ids,
+      reviews: place.reviews.flatMap((review) => {
+        const next = remapPassageReview(review);
+        return next ? [next] : [];
+      }),
+    };
+  }
+  return out;
+}
+
+/** A passage sitting may resume only when every saved id is in this pool. A missing id keeps the stored fingerprint. */
+export function passagePlaceForPool(place: DrillPlace | undefined, poolIds: readonly string[]): DrillPlace | undefined {
+  if (!place) return place;
+  const allowed = new Set(poolIds);
+  if (place.ids.some((id) => !allowed.has(id))) return place;
+  const fingerprint = drillFingerprint(poolIds.slice());
+  if (place.fingerprint === fingerprint) return place;
+  return { ...place, fingerprint };
 }
 
 /** Scripture Path sittings. The key is the level, the week, and the focus. */
@@ -416,6 +469,7 @@ export function remapIibsDrillRuns(runs: DrillRuns): DrillRuns {
     const pool = iibsWeekItems(level, Number(match[2]));
     const allowed = new Set(pool.map((item) => item.id));
     const ids: string[] = [];
+    let moved = false;
     let ok = true;
     for (const id of place.ids) {
       const next = remapDrillWordId(id);
@@ -423,13 +477,14 @@ export function remapIibsDrillRuns(runs: DrillRuns): DrillRuns {
         ok = false;
         break;
       }
+      if (next !== id) moved = true;
       ids.push(next);
     }
     if (!ok || !ids.length || new Set(ids).size !== ids.length) continue;
     out[key] = {
       ...place,
       ids,
-      fingerprint: drillFingerprint(pool.map((item) => item.id)),
+      fingerprint: moved ? drillFingerprint(pool.map((item) => item.id)) : place.fingerprint,
       reviews: place.reviews.flatMap((review) => {
         const parts = review.key.split(":");
         if (parts.length < 3) return [review];

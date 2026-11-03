@@ -1,5 +1,7 @@
 /** A temporary Drill sitting built from one passage. It does not replace the week or the level. */
 
+import { iibsLegacyId, iibsStudyIdSet } from "@/lib/iibs-weeks";
+
 export type StudyScope = "bbh" | "iibs";
 
 export type PassagePack = {
@@ -44,6 +46,12 @@ export function savePassagePack(pack: PassagePack, store: PackStore | null = bro
   store.setItem(STORE_KEY, JSON.stringify(next));
 }
 
+function remapPackId(id: string): string | null {
+  if (!id.startsWith("iibs-")) return id;
+  const next = iibsLegacyId(id) ?? id;
+  return iibsStudyIdSet().has(next) ? next : null;
+}
+
 export function loadPassagePack(store: PackStore | null = browserStore()): PassagePack | null {
   if (!store) return null;
   const raw = store.getItem(STORE_KEY);
@@ -52,7 +60,15 @@ export function loadPassagePack(store: PackStore | null = browserStore()): Passa
     const row = JSON.parse(raw) as Partial<PassagePack>;
     if (row.scope !== "bbh" && row.scope !== "iibs") return null;
     if (typeof row.ref !== "string" || !/^[A-Za-z0-9.]{1,16}$/.test(row.ref)) return null;
-    const ids = Array.isArray(row.ids) ? row.ids.filter((id) => typeof id === "string").slice(0, 80) : [];
+    const rawIds = Array.isArray(row.ids) ? row.ids.filter((id) => typeof id === "string").slice(0, 80) : [];
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const id of rawIds) {
+      const next = remapPackId(id);
+      if (!next || seen.has(next)) continue;
+      seen.add(next);
+      ids.push(next);
+    }
     if (!ids.length) return null;
     return {
       scope: row.scope,
