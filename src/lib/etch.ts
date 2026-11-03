@@ -7,6 +7,7 @@ import { hydrateCard, isWeak, weaknessScore, type CardState } from "@/lib/srs";
 import type { GameSnapshot } from "@/lib/game";
 import { shuffleOffFirst } from "@/lib/quiz-draw";
 import type { FocusMode } from "@/lib/store";
+import { iibsLegacyId, iibsStudyIdSet, iibsWeekItems, isIibsWeekLevel } from "@/lib/iibs-weeks";
 
 export const ETCH_LEN = 12;
 /** Ways each word is asked before the verse, which is added only when the word has a line. */
@@ -396,7 +397,50 @@ export function hydrateDrillRuns(raw: unknown): DrillRuns {
 
 /** Scripture Path sittings. The key is the level, the week, and the focus. */
 export function hydrateIibsDrillRuns(raw: unknown): DrillRuns {
-  return takeDrillRuns(raw, (key) => /^[A-E]:(?:[1-9]|[12]\d|30):(due|weak)$/.test(key));
+  return remapIibsDrillRuns(takeDrillRuns(raw, (key) => /^[A-E]:(?:[1-9]|[12]\d|30):(due|weak)$/.test(key)));
+}
+
+function remapDrillWordId(id: string): string | null {
+  const next = iibsLegacyId(id) ?? id;
+  return iibsStudyIdSet().has(next) ? next : null;
+}
+
+/** Old word ids in a paused sitting move forward. A sitting that cannot is dropped. */
+export function remapIibsDrillRuns(runs: DrillRuns): DrillRuns {
+  const out: DrillRuns = {};
+  for (const [key, place] of Object.entries(runs)) {
+    const match = /^([A-E]):(\d+):(due|weak)$/.exec(key);
+    if (!match) continue;
+    const level = match[1];
+    if (!isIibsWeekLevel(level)) continue;
+    const pool = iibsWeekItems(level, Number(match[2]));
+    const allowed = new Set(pool.map((item) => item.id));
+    const ids: string[] = [];
+    let ok = true;
+    for (const id of place.ids) {
+      const next = remapDrillWordId(id);
+      if (!next || !allowed.has(next)) {
+        ok = false;
+        break;
+      }
+      ids.push(next);
+    }
+    if (!ok || !ids.length || new Set(ids).size !== ids.length) continue;
+    out[key] = {
+      ...place,
+      ids,
+      fingerprint: drillFingerprint(pool.map((item) => item.id)),
+      reviews: place.reviews.flatMap((review) => {
+        const parts = review.key.split(":");
+        if (parts.length < 3) return [review];
+        const next = remapDrillWordId(parts[2] ?? "");
+        if (!next) return [];
+        parts[2] = next;
+        return [{ ...review, key: parts.join(":") }];
+      }),
+    };
+  }
+  return out;
 }
 
 function takeDrillRuns(raw: unknown, accept: (key: string) => boolean): DrillRuns {

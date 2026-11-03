@@ -242,6 +242,7 @@ export function LevelRoom({
         <ol className="mt-4 grid gap-2">
           {lists.map((row, index) => {
             const n = index + 1;
+            if (row.length === 0) return null;
             const unlocked = lessonUnlocked(progress, level, n, admin);
             return (
               <li key={n}>

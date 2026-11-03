@@ -1,3 +1,4 @@
+import { E_REPAIR_SLOTS, E_SLOT_FREEZE, E_SPLITS } from "@/lib/iibs-e-freeze";
 import { vocabLessons, type IibsVocabLevel, type IibsVocabWord } from "@/lib/iibs-vocab";
 import type { Pos, VocabItem } from "@/lib/vocab";
 
@@ -64,13 +65,55 @@ function levelWords(level: IibsVocabLevel): VocabItem[] {
   });
   noteTwinMeanings(out);
   WORDS.set(level, out);
+  if (level === "E") linkLevelERepairs();
   return out;
 }
 
-/** The place-based id dealt on 14 Oct, rewritten to the word id. Unknown keys are left alone. */
+const FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+
+/** One old id is carried to the first new word and not to any word after it. */
+export function firstRepairTarget(targets: readonly string[]): string | undefined {
+  return targets[0];
+}
+
+/** Pre-fix hashes chain to the id the place has now. A split keeps the first target only. */
+function linkLevelERepairs() {
+  for (const slot of E_REPAIR_SLOTS) {
+    const from = FREEZE_ID.get(slot);
+    const current = LEGACY.get(slot);
+    if (!from || !current || from === current) continue;
+    if (!LEGACY.has(from)) LEGACY.set(from, current);
+    LEGACY.set(slot, from);
+  }
+  for (const split of E_SPLITS) {
+    const slot = firstRepairTarget(split.slots);
+    if (!slot) continue;
+    let target = LEGACY.get(slot) ?? slot;
+    const seen = new Set<string>();
+    while (LEGACY.has(target) && !seen.has(target)) {
+      seen.add(target);
+      const next = LEGACY.get(target);
+      if (!next || next === target) break;
+      target = next;
+    }
+    if (split.from !== target) LEGACY.set(split.from, target);
+  }
+}
+
+/** The place-based id dealt on 14 Oct, then any later hash of the same word. Unknown keys are left alone. */
 export function iibsLegacyId(id: string): string | undefined {
   for (const level of IIBS_WEEK_LEVELS) levelWords(level);
-  return LEGACY.get(id);
+  let current = id;
+  const seen = new Set<string>();
+  let hopped = false;
+  while (LEGACY.has(current) && !seen.has(current)) {
+    seen.add(current);
+    const next = LEGACY.get(current);
+    if (!next || next === current) break;
+    current = next;
+    hopped = true;
+  }
+  return hopped ? current : undefined;
 }
 
 /** Ids the week builder actually deals. A save may keep these and no other `iibs-` key. */
