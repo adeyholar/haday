@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
-const { applyIibsLesson, applyIibsStage, emptyIibsGame, heldIibsRank, iibsGlossHit, lessonUnlocked, levelCleared, levelUnlocked, stageUnlocked } =
+const { IIBS_STAGES, applyIibsLesson, applyIibsStage, emptyIibsGame, heldIibsRank, iibsGlossHit, lessonUnlocked, levelCleared, levelUnlocked, stageUnlocked } =
   await jiti.import(new URL("../src/lib/iibs-game.ts", import.meta.url).pathname);
 const { defaultGame } = await jiti.import(new URL("../src/lib/game.ts", import.meta.url).pathname);
 
@@ -18,6 +19,14 @@ test("every Scripture Path level and lesson starts open", () => {
   assert.equal(lessonUnlocked(progress, "E", 1, false), true);
   assert.equal(lessonUnlocked(progress, "E", 15, false), true);
   assert.equal(lessonUnlocked(progress, "E", 28, false), true);
+});
+
+test("the Hebrew stage shows English and the student types Hebrew", () => {
+  const hebrew = IIBS_STAGES.find((item) => item.id === "hebrew");
+  assert.equal(hebrew?.prompt, "English on the card. Type the Hebrew with the keys.");
+  const src = readFileSync(new URL("../src/components/iibs-write-play.tsx", import.meta.url), "utf8");
+  assert.equal(src.includes('stage === "gloss" || stage === "hebrew"'), false);
+  assert.equal(src.includes('stage === "gloss" ?'), true);
 });
 
 test("stage results do not change which lessons are open", () => {

@@ -125,7 +125,7 @@ export function IibsWritePlay({
       <p className="mb-3 text-center text-sm text-muted">
         Word {seen} of {words.length}
       </p>
-      {stage === "gloss" || stage === "hebrew" ? (
+      {stage === "gloss" ? (
         <p className="he-word text-center text-5xl text-ink" dir="rtl" lang="he">
           {word.hebrew}
         </p>
