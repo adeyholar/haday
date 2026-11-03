@@ -47,17 +47,22 @@ test("a round stays inside the open set and 90% opens the next", () => {
   assert.match(clue, /Dagesh/);
   assert.doesNotMatch(clue, /wrong/i);
   const qal = drill.binyanClue({ stem: "qal", conj: "imperfect", rootId: "shamar" });
-  assert.match(qal, /person prefix/);
-  assert.doesNotMatch(qal, /No prefix/);
+  assert.match(qal, /only a person prefix/);
+  assert.match(qal, /No stem prefix/);
   const hiphil = drill.binyanClue({ stem: "hiphil", conj: "imperfect", rootId: "katav" });
-  assert.match(hiphil, /Patah/);
-  assert.doesNotMatch(hiphil, /Hireq under the prefix/);
+  assert.match(hiphil, /Patah under the prefix/);
+  assert.doesNotMatch(hiphil, /He with hireq/);
   const hiphilPtc = drill.binyanClue({ stem: "hiphil", conj: "participle", rootId: "katav" });
-  assert.match(hiphilPtc, /Mem with patah/);
+  assert.match(hiphilPtc, /Patah under the prefix/);
   const swapped = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "shamar" });
-  assert.match(swapped, /traded places/);
+  assert.match(swapped, /tav moves after/);
   const hit = drill.binyanClue({ stem: "hithpael", conj: "imperfect", rootId: "qatal" });
-  assert.match(hit, /person prefix, then tav/);
+  assert.match(hit, /תִּתְ/);
+  assert.match(drill.binyanClue({ stem: "niphal", conj: "perfect", rootId: "qatal" }), /Nun with hireq/);
+  assert.match(drill.binyanClue({ stem: "niphal", conj: "imperfect", rootId: "qatal" }), /first letter is doubled/);
+  assert.match(drill.binyanClue({ stem: "pual", conj: "perfect", rootId: "qatal" }), /Qibbuts/);
+  assert.match(drill.binyanClue({ stem: "hophal", conj: "perfect", rootId: "qatal" }), /no doubling/);
+  assert.doesNotMatch(drill.binyanClue({ stem: "piel", conj: "perfect", rootId: "qatal" }), /wrong/i);
 });
 
 test("the drill hides the forms whose pointing is not signed yet", () => {

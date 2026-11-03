@@ -211,18 +211,19 @@ export function binyanClue(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): 
 }
 
 function clueFor(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
-  const root = rootById(card.rootId);
-  if (card.stem === "hithpael" && root && isSibilant(root.letters[0])) {
-    return "The tav has traded places with the first letter.";
+  const first = rootById(card.rootId)?.letters[0];
+  if (card.stem === "qal") {
+    return card.conj === "imperfect" ? "No stem prefix. The imperfect has only a person prefix." : "No stem prefix.";
   }
-  if (card.stem === "qal" && card.conj === "imperfect") return "A person prefix, and no doubling in the middle letter.";
-  if (card.stem === "qal" && card.conj === "participle") return "Holem or shureq, and no person prefix.";
-  if (card.stem === "hiphil" && card.conj === "imperfect") return "Patah under the prefix, and an i-vowel in the stem.";
-  if (card.stem === "hiphil" && card.conj === "participle") return "Mem with patah, and an i-vowel in the stem.";
-  if (card.stem === "hithpael" && card.conj === "imperfect") return "A person prefix, then tav with shewa.";
-  if (card.stem === "hithpael" && card.conj === "participle") return "Mem with hireq, then tav with shewa.";
-  if (card.stem === "hithpael" && card.conj === "perfect") return "He with hireq, then tav with shewa.";
-  return STEM_CARDS[card.stem].mark;
+  if (card.stem === "niphal") {
+    return card.conj === "imperfect" ? "The first letter is doubled." : "Nun with hireq.";
+  }
+  if (card.stem === "piel") return "Dagesh in the middle letter, after a vowel. Not נִ, הִ, or הֻ.";
+  if (card.stem === "pual") return "Qibbuts under the first letter, and the middle letter is doubled.";
+  if (card.stem === "hiphil") return card.conj === "perfect" ? "He with hireq." : "Patah under the prefix.";
+  if (card.stem === "hophal") return "Qibbuts or qamets hatuf on the prefix, shewa under the first letter, and no doubling.";
+  if (first === "ש" || first === "ז") return "The tav moves after the first letter, and the middle letter is doubled.";
+  return "Tav after the prefix: הִתְ, יִתְ, תִּתְ, אֶתְ, נִתְ, or מִתְ. The middle letter is doubled.";
 }
 
 export function dealBinyanRound(

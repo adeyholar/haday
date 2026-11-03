@@ -51,25 +51,19 @@ test("Tanakh paradigm forms the class already knows", () => {
   assert.equal(form("shakan", "qal", "perfect", "1cp"), "\u05e9\u05c1\u05b8\u05db\u05b7\u05ab\u05e0\u05bc\u05d5\u05bc");
 });
 
-test("dagesh lene and final kaf are written where the syllable requires them", () => {
+test("the forms the Tutor marked are pointed", () => {
   const form = (id, stem, conj, cell) => vs.openPattern(id, stem, conj).cells.find((row) => row.id === cell).form;
-  const D = "\u05BC";
-  const tav = form("shamar", "qal", "imperfect", "2ms");
-  assert.equal(tav.startsWith("ת" + D), true, tav);
-  const hiphil = form("katav", "hiphil", "imperfect", "2ms");
-  assert.equal(hiphil.startsWith("ת" + D), true, hiphil);
-  const niphal = form("katav", "niphal", "perfect", "3ms");
-  assert.equal(niphal, "\u05e0\u05b4\u05db\u05b0\u05ea\u05bc\u05b7\u05d1", niphal);
-  const niphalPart = form("zakar", "niphal", "participle", "ms");
-  assert.equal(niphalPart.includes("כ" + D), true, niphalPart);
-  const swapped = form("shamar", "hithpael", "perfect", "3ms");
-  assert.equal(swapped.includes("ת" + D), true, swapped);
-  const dalet = form("zakar", "hithpael", "perfect", "3ms");
-  assert.equal(dalet.includes("ד" + D), true, dalet);
-  const reigned = form("malak", "qal", "perfect", "3ms");
-  assert.equal(reigned.endsWith("ךְ"), true, reigned);
-  const soft = form("katav", "niphal", "imperfect", "3ms");
-  assert.equal(soft.includes("ת" + D), false, soft);
+  assert.equal(form("qatal", "qal", "imperfect", "3ms"), "יִקְטֹל");
+  assert.equal(form("qatal", "qal", "imperfect", "2ms"), "תִּקְטֹל");
+  assert.equal(form("katav", "niphal", "perfect", "3ms"), "נִכְתַּב");
+  assert.equal(form("katav", "niphal", "participle", "ms"), "נִכְתָּב");
+  assert.equal(form("shamar", "hithpael", "perfect", "3ms"), "הִשְׁתַּמֵּר");
+  assert.equal(form("zakar", "hithpael", "perfect", "3ms"), "הִזְדַּכֵּר");
+  assert.equal(form("malak", "qal", "perfect", "3ms").endsWith("ךְ"), true);
+  assert.equal(form("qatal", "qal", "participle", "fs"), "קֹטֶלֶת");
+  assert.equal(form("qatal", "hiphil", "participle", "mp"), "מַקְטִילִים");
+  assert.equal(form("lamad", "qal", "imperfect", "3ms"), "יִלְמַד");
+  assert.equal(form("katav", "niphal", "imperfect", "3ms").includes("תּ"), false);
 });
 
 test("a round is ten builds and 90% clears it", () => {

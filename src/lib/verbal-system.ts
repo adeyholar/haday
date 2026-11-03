@@ -732,7 +732,7 @@ function qalPtc(root: VerbRoot): Engine {
   return {
     slots: [slot("shape", "Participle shape", [
       { id: "active-ms", label: "holem, tsere", mark: CIRC + V.holem + " " + CIRC + V.tsere },
-      { id: "active-fs", label: "holem, segol, tav", mark: CIRC + V.holem + " " + CIRC + V.segol + "ת" },
+      { id: "active-fs", label: "holem, segol, segol, tav", mark: CIRC + V.holem + " " + CIRC + V.segol + " " + CIRC + V.segol + "ת" },
       { id: "active-mp", label: "holem, then ים", mark: CIRC + V.holem + "ִים" },
       { id: "active-fp", label: "holem, then וֹת", mark: CIRC + V.holem + "וֹת" },
       { id: "active-mpc", label: "holem, then tsere yod", mark: CIRC + V.holem + "ֵי" },
@@ -744,7 +744,7 @@ function qalPtc(root: VerbRoot): Engine {
     cells: rows.map(([id, label, shape]) => seed(id, label, "Holem after the first letter is the active participle. Qamets and shureq is passive.", { shape })),
     render: (r, picks) => {
       const dag = lene(r.letters[0], false);
-      if (picks.shape === "active-fs") return M(r, 0, V.holem, dag) + M(r, 1, V.segol) + M(r, 2, "") + "ת";
+      if (picks.shape === "active-fs") return M(r, 0, V.holem, dag) + M(r, 1, V.segol) + M(r, 2, V.segol) + "ת";
       if (picks.shape === "active-mp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.hireq) + "ים";
       if (picks.shape === "active-fp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, "") + HOLAM_VAV + "ת";
       if (picks.shape === "active-mpc") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.tsere) + "י";
@@ -1039,7 +1039,7 @@ function hiphilPtc(root: VerbRoot): Engine {
     ],
     render: (r, picks) => {
       const body = mark("מ", V.patah) + M(r, 0, V.shewa) + M(r, 1, V.hireq, lene(r.letters[1], false)) + "י";
-      if (picks.shape === "mp") return body + M(r, 2, "") + "ים";
+      if (picks.shape === "mp") return body + M(r, 2, V.hireq) + "ים";
       return body + M(r, 2, "", false, true);
     },
     blurb: "Hiphil participle. Mem with patah, not shewa.",
@@ -1408,7 +1408,7 @@ function buildEngine(root: VerbRoot, stem: StemId, conj: ConjId): Engine | null 
   if (root.cls === "I-gutt" && stem === "niphal" && (conj === "perfect" || conj === "imperfect")) return conj === "perfect" ? niphalPerfect(root) : niphalImpf(root, false);
 
   const qalFamily = root.cls === "I-gutt" || root.cls === "I-aleph" ? "igutt" : "strong";
-  const theme = root.cls === "III-gutt" ? "patah" : "holem";
+  const theme = root.cls === "III-gutt" || root.id === "lamad" ? "patah" : "holem";
   if (stem === "qal" && strongLike(root) && root.cls !== "III-he" && root.cls !== "III-aleph") {
     if (conj === "perfect") return qalPerfect(root);
     if (conj === "imperfect" && root.cls !== "I-nun" && root.cls !== "I-yod" && root.cls !== "I-aleph") return qalImpf(root, theme, root.cls === "I-gutt" ? "igutt" : "strong");
