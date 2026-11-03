@@ -4,7 +4,7 @@ import { MixHe } from "@/components/grammar-play";
 import { Panel } from "@/components/panel";
 import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { grammarUnitRecord, grammarUnitOpen } from "@/lib/game";
+import { grammarUnitRecord } from "@/lib/game";
 import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
 
@@ -75,7 +75,6 @@ function StudyTrackPage() {
       <ol className="grid grid-cols-1 gap-2">
         {track.units.map((u) => {
           const rec = grammarUnitRecord(game, track.id, u.id);
-          const examOpen = grammarUnitOpen(game, track.id, u.id, term);
           return (
             <li key={u.id}>
               <Link
@@ -86,7 +85,7 @@ function StudyTrackPage() {
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-display text-2xl font-bold">{u.title}</span>
                   <span className="text-xs text-muted">
-                    {rec.cleared ? `exam ${rec.best}%` : examOpen ? "exam open" : "prepare"}
+                    {rec.cleared ? `exam ${rec.best}%` : "exam open"}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted">{u.short}</p>

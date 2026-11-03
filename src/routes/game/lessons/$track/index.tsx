@@ -1,11 +1,11 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
+import { Check } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { grammarUnitRecord, grammarUnitOpen } from "@/lib/game";
+import { grammarUnitRecord } from "@/lib/game";
 import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
 
@@ -126,18 +126,16 @@ function GrammarTrackMapPage() {
       <ol className="grid grid-cols-1 gap-2">
         {track.units.map((u) => {
           const rec = grammarUnitRecord(game, track.id, u.id);
-          const unlocked = grammarUnitOpen(game, track.id, u.id, term);
-          const current = term === 2 && track.id === "verbs" ? false : unlocked && !rec.cleared;
+          const frontier = track.units.find((item) => !grammarUnitRecord(game, track.id, item.id).cleared)?.id;
+          const current = term === 2 && track.id === "verbs" ? false : u.id === frontier;
           const inner = (
             <>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-display text-2xl font-bold">{u.title}</span>
                 {rec.cleared ? (
                   <Check className="size-4 shrink-0 text-good" />
-                ) : unlocked ? (
-                  <span className="text-xs text-muted">{u.short}</span>
                 ) : (
-                  <Lock className="size-4 shrink-0 text-muted" />
+                  <span className="text-xs text-muted">{u.short}</span>
                 )}
               </div>
               <p className={cn("mt-1 text-sm", current ? "text-primary-foreground/80" : "text-muted")}>{u.short}</p>
@@ -156,27 +154,13 @@ function GrammarTrackMapPage() {
             "block w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
             rec.cleared && "bg-card",
             current && "bg-primary text-primary-foreground",
-            unlocked && !current && !rec.cleared && "bg-card",
-            !unlocked && "bg-surface text-muted",
+            !current && !rec.cleared && "bg-card",
           );
           return (
             <li key={u.id}>
-              {unlocked ? (
-                <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(u.id) }} className={cls}>
-                  {inner}
-                </Link>
-              ) : (
-                <div className={cls}>
-                  {inner}
-                  <Link
-                    to="/lessons/$track/$unit"
-                    params={{ track: track.id, unit: String(u.id) }}
-                    className="mt-2 inline-block text-sm font-semibold text-primary"
-                  >
-                    Prepare this unit
-                  </Link>
-                </div>
-              )}
+              <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(u.id) }} className={cls}>
+                {inner}
+              </Link>
             </li>
           );
         })}

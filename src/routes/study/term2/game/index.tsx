@@ -1,13 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
+import { Check } from "lucide-react";
 import { StudyMenu } from "@/components/study-menu";
 import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
 import { useStudy } from "@/lib/store";
 import { term2Lesson } from "@/lib/term2-lessons";
 import {
-  isTerm2ChapterUnlocked,
   term2ChapterPool,
   term2ChapterRecord,
   term2ContinueTarget,
@@ -46,7 +44,6 @@ function Term2GameMap() {
         {Array.from({ length: TERM2_CHAPTER_MAX - TERM2_CHAPTER_MIN + 1 }, (_, n) => TERM2_CHAPTER_MIN + n).map(
           (chapter) => {
             const rec = term2ChapterRecord(term2, chapter);
-            const unlocked = isTerm2ChapterUnlocked(term2, chapter);
             const lesson = term2Lesson(chapter);
             const done = ["recognize", "gloss", "spell-lenient"].filter((id) => rec.stages[id as "recognize"].cleared)
               .length;
@@ -59,10 +56,8 @@ function Term2GameMap() {
                   </span>
                   {rec.cleared ? (
                     <Check className="size-4 shrink-0 text-good" />
-                  ) : unlocked ? (
-                    <span className="text-xs tabular-nums text-muted">{done}/3</span>
                   ) : (
-                    <Lock className="size-4 shrink-0 text-muted" />
+                    <span className="text-xs tabular-nums text-muted">{done}/3</span>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-muted">
@@ -72,22 +67,13 @@ function Term2GameMap() {
             );
             return (
               <li key={chapter}>
-                {unlocked ? (
-                  <Link
-                    to="/study/term2/game/$chapter"
-                    params={{ chapter: String(chapter) }}
-                    className={cn(
-                      "block w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
-                      rec.cleared ? "bg-card" : "bg-card",
-                    )}
-                  >
-                    {inner}
-                  </Link>
-                ) : (
-                  <div className="block w-full rounded-[var(--radius-lg)] bg-surface p-4 text-left text-muted shadow-[var(--shadow-border)]">
-                    {inner}
-                  </div>
-                )}
+                <Link
+                  to="/study/term2/game/$chapter"
+                  params={{ chapter: String(chapter) }}
+                  className="block w-full rounded-[var(--radius-lg)] bg-card p-4 text-left shadow-[var(--shadow-border)]"
+                >
+                  {inner}
+                </Link>
               </li>
             );
           },

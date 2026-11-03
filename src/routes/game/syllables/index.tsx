@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
+import { Check } from "lucide-react";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { SYLLABLE_UNITS } from "@/lib/syllables";
-import { isSyllableUnitUnlocked, syllableUnitRecord } from "@/lib/game";
+import { syllableUnitRecord } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/game/syllables/")({ component: SyllableMapPage });
@@ -26,18 +26,16 @@ function SyllableMapPage() {
       <ol className="grid grid-cols-1 gap-2">
         {SYLLABLE_UNITS.map((u) => {
           const rec = syllableUnitRecord(game, u.id);
-          const unlocked = isSyllableUnitUnlocked(game, u.id);
-          const current = unlocked && !rec.cleared;
+          const frontier = SYLLABLE_UNITS.find((item) => !syllableUnitRecord(game, item.id).cleared)?.id;
+          const current = u.id === frontier;
           const inner = (
             <>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-display text-2xl font-bold">{u.title}</span>
                 {rec.cleared ? (
                   <Check className="size-4 shrink-0 text-good" />
-                ) : unlocked ? (
-                  <span className="text-xs text-muted">{u.short}</span>
                 ) : (
-                  <Lock className="size-4 shrink-0 text-muted" />
+                  <span className="text-xs text-muted">{u.short}</span>
                 )}
               </div>
               <p className={cn("mt-1 text-sm", current ? "text-primary-foreground/80" : "text-muted")}>{u.short}</p>
@@ -52,18 +50,13 @@ function SyllableMapPage() {
             "block w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
             rec.cleared && "bg-card",
             current && "bg-primary text-primary-foreground",
-            unlocked && !current && !rec.cleared && "bg-card",
-            !unlocked && "bg-surface text-muted",
+            !current && !rec.cleared && "bg-card",
           );
           return (
             <li key={u.id}>
-              {unlocked ? (
-                <Link to="/game/syllables/$unit" params={{ unit: String(u.id) }} className={cls}>
-                  {inner}
-                </Link>
-              ) : (
-                <div className={cls}>{inner}</div>
-              )}
+              <Link to="/game/syllables/$unit" params={{ unit: String(u.id) }} className={cls}>
+                {inner}
+              </Link>
             </li>
           );
         })}
