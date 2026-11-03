@@ -35,6 +35,7 @@ import {
 } from "./game";
 import { stampRewards } from "./rewards";
 import { drillKey, type DrillPlace } from "./etch";
+import { applySavedFinalDrill, browserDrillStorage, clearFinalDrillFile, writeFinalDrillRun } from "./final-drill-place";
 import type { ProgressPayload } from "./progress";
 import { twinsOf } from "./confusion";
 import { observeBkt } from "./bkt";
@@ -126,6 +127,8 @@ type StudyState = StudySnapshot & {
   saveWeakRun: (run: WeakRun | null) => void;
   saveDrillRun: (week: number, focus: string, place: DrillPlace | null) => void;
   saveDrillAt: (key: string, place: DrillPlace | null) => void;
+  /** Put a device copy of the final exam drill back, when the server snapshot is older. */
+  keepFinalDrill: () => void;
   saveIibsDrill: (level: string, week: number, focus: string, place: DrillPlace | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   saveVerbQuest: (quest: VerbQuestProgress) => void;
@@ -369,6 +372,7 @@ export const useStudy = create<StudyState>()(
         const drillRuns = { ...(get().game.drillRuns ?? {}) };
         if (place) drillRuns[key] = place;
         else delete drillRuns[key];
+        if (key.startsWith("final:")) writeFinalDrillRun(browserDrillStorage(), get().ownerId, key, place);
         set({ game: { ...get().game, drillRuns } });
       },
       saveIibsDrill: (level, week, focus, place) => {
@@ -419,7 +423,18 @@ export const useStudy = create<StudyState>()(
           sessions: get().lastStudyDay === today ? get().sessions : get().sessions + 1,
         });
       },
-      hydrateRemote: (snap, ownerId) =>
+      keepFinalDrill: () => {
+        const game = get().game;
+        const drillRuns = applySavedFinalDrill(game.drillRuns, get().ownerId);
+        if (drillRuns === game.drillRuns) return;
+        set({ game: { ...game, drillRuns } });
+      },
+      hydrateRemote: (snap, ownerId) => {
+        const game = stampRewards(
+          hydrateGame(snap.game),
+          snap.streak,
+          Number(snap.keepStreak) || Number(snap.game?.keepStreak) || 0,
+        );
         set({
           cards: snap.cards,
           week: snap.week,
@@ -430,10 +445,12 @@ export const useStudy = create<StudyState>()(
           sessions: snap.sessions,
           keepStreak: Number(snap.keepStreak) || Number(snap.game?.keepStreak) || 0,
           lastKeepDay: Number(snap.lastKeepDay) || Number(snap.game?.lastKeepDay) || 0,
-          game: stampRewards(hydrateGame(snap.game), snap.streak, Number(snap.keepStreak) || Number(snap.game?.keepStreak) || 0),
+          game: { ...game, drillRuns: applySavedFinalDrill(game.drillRuns, ownerId) },
           ownerId,
-        }),
-      reset: () =>
+        });
+      },
+      reset: () => {
+        clearFinalDrillFile(browserDrillStorage());
         set({
           cards: {},
           streak: 0,
@@ -444,7 +461,8 @@ export const useStudy = create<StudyState>()(
           focus: "due",
           game: defaultGame(),
           alefQueue: [],
-        }),
+        });
+      },
     }),
     {
       name: "davar-study-v1",
