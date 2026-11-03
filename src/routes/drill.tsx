@@ -6,7 +6,7 @@ import { useStudy } from "@/lib/store";
 import { FocusToggle } from "@/components/focus-toggle";
 import { StudyMenu } from "@/components/study-menu";
 import { DrillSitting } from "@/components/drill-sitting";
-import { drillKey, finalDrillKey } from "@/lib/etch";
+import { drillKey, finalDrillKey, passagePlaceForPool } from "@/lib/etch";
 import { finalExamDrillItems } from "@/lib/final-vocab";
 import { findStudyItem } from "@/lib/tanakh-pool";
 import { iibsPathItems } from "@/lib/iibs-weeks";
@@ -64,7 +64,11 @@ function DrillPage() {
     <DrillSitting
       pool={pool}
       label={label}
-      readPlace={() => useStudy.getState().game.drillRuns?.[placeKey]}
+      readPlace={() => {
+        const place = useStudy.getState().game.drillRuns?.[placeKey];
+        if (!passage || pack?.scope !== "iibs") return place;
+        return passagePlaceForPool(place, pool.map((item) => item.id));
+      }}
       writePlace={(place) => saveDrillAt(placeKey, place)}
       chrome={
         <>

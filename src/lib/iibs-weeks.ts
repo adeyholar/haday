@@ -39,6 +39,8 @@ export function iibsPathItems(): VocabItem[] {
 const WORDS = new Map<IibsVocabLevel, VocabItem[]>();
 const LEGACY = new Map<string, string>();
 let studyIds: Set<string> | null = null;
+let repairsLinked = false;
+let repairsLinking = false;
 
 /** Stable id. It is a hash of the pointed word and its meaning, not its place in the lesson. */
 export function iibsWordId(level: IibsVocabLevel, hebrew: string, gloss: string): string {
@@ -65,16 +67,31 @@ function levelWords(level: IibsVocabLevel): VocabItem[] {
   });
   noteTwinMeanings(out);
   WORDS.set(level, out);
-  if (level === "E") linkLevelERepairs();
   return out;
 }
 
-const FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
-const PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
+type RepairSplit = { from: string; slots: readonly string[] };
+type RepairBook = {
+  freeze: ReadonlyMap<string, string>;
+  prior: ReadonlyMap<string, string>;
+  slots: readonly string[];
+  splits: readonly RepairSplit[];
+};
 
-/** One old id is carried to the first new word and not to any word after it. */
+const E_FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const E_PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
+
+/** One book per level. Only Level E has a frozen repair. The live guard runs after every level is built. */
+const REPAIR_BOOKS: Partial<Record<IibsVocabLevel, RepairBook>> = {
+  E: { freeze: E_FREEZE_ID, prior: E_PRIOR_ID, slots: E_REPAIR_SLOTS, splits: E_SPLITS },
+};
+
+/** One old id is carried to the first real new word and not to any word after it. */
 export function firstRepairTarget(targets: readonly string[]): string | undefined {
-  return targets[0];
+  for (const slot of targets) {
+    if (slot) return slot;
+  }
+  return undefined;
 }
 
 function liveWordIds(): Set<string> {
@@ -91,15 +108,16 @@ function linkOld(live: Set<string>, oldId: string, nextId: string) {
   if (!LEGACY.has(oldId)) LEGACY.set(oldId, nextId);
 }
 
-/** Pre-fix hashes chain to the id the place has now. A later edit chains the id it replaced. A split keeps the first target only. */
-function linkLevelERepairs() {
-  const live = liveWordIds();
-  const slots = new Set<string>([...E_REPAIR_SLOTS, ...PRIOR_ID.keys()]);
+/** Pre-fix hashes chain to the id the place has now. A later edit chains the id it replaced. A split keeps the first live target only. */
+function linkLevelRepairs(level: IibsVocabLevel, live: Set<string>) {
+  const book = REPAIR_BOOKS[level];
+  if (!book) return;
+  const slots = new Set<string>([...book.slots, ...book.prior.keys()]);
   for (const slot of slots) {
-    const from = FREEZE_ID.get(slot);
+    const from = book.freeze.get(slot);
     const current = LEGACY.get(slot);
     if (!from || !current || from === current) continue;
-    const mid = PRIOR_ID.get(slot);
+    const mid = book.prior.get(slot);
     if (mid && mid !== current && mid !== from && !live.has(mid)) {
       linkOld(live, mid, current);
       linkOld(live, from, mid);
@@ -108,7 +126,7 @@ function linkLevelERepairs() {
     }
     if (!live.has(slot)) LEGACY.set(slot, from);
   }
-  for (const split of E_SPLITS) {
+  for (const split of book.splits) {
     const slot = firstRepairTarget(split.slots);
     if (!slot) continue;
     let target = LEGACY.get(slot) ?? slot;
@@ -119,13 +137,24 @@ function linkLevelERepairs() {
       if (!next || next === target) break;
       target = next;
     }
-    if (split.from !== target && !live.has(split.from)) LEGACY.set(split.from, target);
+    if (!live.has(target)) continue;
+    linkOld(live, split.from, target);
   }
+}
+
+function ensureRepairLinks() {
+  if (repairsLinked || repairsLinking) return;
+  repairsLinking = true;
+  for (const level of IIBS_WEEK_LEVELS) levelWords(level);
+  const live = liveWordIds();
+  for (const level of IIBS_WEEK_LEVELS) linkLevelRepairs(level, live);
+  repairsLinked = true;
+  repairsLinking = false;
 }
 
 /** The place-based id dealt on 14 Oct, then any later hash of the same word. A live id is not an old id. */
 export function iibsLegacyId(id: string): string | undefined {
-  for (const level of IIBS_WEEK_LEVELS) levelWords(level);
+  ensureRepairLinks();
   const live = iibsStudyIdSet();
   if (live.has(id)) return undefined;
   let current = id;

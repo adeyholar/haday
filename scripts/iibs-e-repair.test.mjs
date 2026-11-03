@@ -8,11 +8,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { iibsWeekItems, iibsWordId, firstRepairTarget } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { keepStudyCards } = await jiti.import(join(root, "src/lib/card-ids.ts"));
-const { hydrateIibsDrillRuns, drillFingerprint } = await jiti.import(join(root, "src/lib/etch.ts"));
+const { hydrateIibsDrillRuns, hydrateDrillRuns, drillFingerprint, passagePlaceForPool } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { E_SLOT_FREEZE, E_REPAIR_SLOTS, E_PRIOR_IDS } = await jiti.import(join(root, "src/lib/iibs-e-freeze.ts"));
 const { applyIibsLesson, levelCleared, levelUnlocked } = await jiti.import(join(root, "src/lib/iibs-game.ts"));
 const { defaultGame } = await jiti.import(join(root, "src/lib/game.ts"));
 const { vocabLessons } = await jiti.import(join(root, "src/lib/iibs-vocab.ts"));
+const { savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
 
 function cleanGloss(gloss) {
   return gloss.replace(/\s*\([^)]*\)/g, "").replace(/\s+/g, " ").replace(/\s+([,;])/g, "$1").trim();
@@ -133,6 +134,74 @@ test("every repaired Level E place chains its frozen id to the word there now", 
   for (const hebrew of ["מְצֹרָע / צָרוּעַ", "אֵלָה / אֵלוֹן", "אוֹפַן / אוֹפָן", "רַן / רָנַן", "רַע / רָעַע"]) {
     assert.equal(words.filter((item) => item.hebrew === hebrew).length, 1, hebrew);
   }
+});
+
+test("lesson 15.07 cleans to where? whither? and the earlier ids still reach it", () => {
+  const word = vocabLessons("E")[14][6];
+  assert.equal(word.hebrew, "אָן");
+  assert.match(word.gloss, /\[to\] anywhere/);
+  const gloss = cleanGloss(word.gloss);
+  assert.equal(gloss, "where? whither?");
+  const id = iibsWordId("E", word.hebrew, gloss);
+  assert.equal(id, "iibs-e-m2pyj6");
+  for (const oldId of ["iibs-e-1vg87hi", "iibs-e-15-07", "iibs-e-m2pyj6", "iibs-e-19qy7ti"]) {
+    const kept = keepStudyCards({ [oldId]: { reps: 2, interval: 1 } });
+    assert.deepEqual(Object.keys(kept), [id], oldId);
+  }
+});
+
+test("an empty split list has no target", () => {
+  assert.equal(firstRepairTarget([]), undefined);
+  assert.equal(firstRepairTarget([""]), undefined);
+  assert.equal(firstRepairTarget(["", wagonSlot]), wagonSlot);
+});
+
+test("a paused drill keeps its fingerprint when no word id moved", () => {
+  const week = iibsWeekItems("E", 1);
+  const ids = week.map((item) => item.id);
+  const runs = hydrateIibsDrillRuns({
+    "E:1:due": { seed: 3, ids, index: 4, reviews: [], hits: 1, checks: 2, fingerprint: "stale" },
+  });
+  assert.deepEqual(runs["E:1:due"].ids, ids);
+  assert.equal(runs["E:1:due"].fingerprint, "stale");
+});
+
+test("a passage pack and a paused passage sitting follow a frozen Level E id", () => {
+  const bird = levelE().find((item) => item.hebrew === "צִפּוֹר");
+  assert.ok(bird);
+  const mem = new Map();
+  const store = {
+    getItem: (key) => mem.get(key) ?? null,
+    setItem: (key, value) => mem.set(key, value),
+  };
+  savePassagePack({ scope: "iibs", ref: "Gen.1", label: "Genesis 1", ids: [birdFrom, "iibs-e-nope"], back: "/x" }, store);
+  const pack = loadPassagePack(store);
+  assert.deepEqual(pack.ids, [bird.id]);
+  const runs = hydrateDrillRuns({
+    "passage:iibs:Gen.1": {
+      seed: 1,
+      ids: [birdFrom, "iibs-e-nope"],
+      index: 1,
+      reviews: [{ key: `contrast:he:${birdFrom}:0`, at: 2, n: 1 }],
+      hits: 0,
+      checks: 0,
+      fingerprint: "stale",
+    },
+    "passage:bbh:Gen.1": { seed: 1, ids: ["ab"], index: 2, reviews: [], hits: 0, checks: 0, fingerprint: "a" },
+  });
+  const place = runs["passage:iibs:Gen.1"];
+  assert.deepEqual(place.ids, [bird.id]);
+  assert.equal(place.fingerprint, "stale");
+  assert.match(place.reviews[0].key, new RegExp(bird.id));
+  assert.equal(runs["passage:bbh:Gen.1"].fingerprint, "a");
+  const aligned = passagePlaceForPool(place, pack.ids);
+  assert.equal(aligned.fingerprint, drillFingerprint(pack.ids));
+  const missing = passagePlaceForPool({ ...place, ids: [bird.id, "iibs-e-nope"] }, pack.ids);
+  assert.equal(missing.fingerprint, "stale");
+  const gone = hydrateDrillRuns({
+    "passage:iibs:Gen.1": { seed: 1, ids: ["iibs-e-nope"], index: 1, reviews: [], hits: 0, checks: 0, fingerprint: "x" },
+  });
+  assert.equal(gone["passage:iibs:Gen.1"], undefined);
 });
 
 test("clearing the 28 Level E lessons still opens the Reading Lab", () => {
