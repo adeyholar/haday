@@ -7,6 +7,7 @@ import {
   type ConjId,
   type StemId,
 } from "@/lib/verbal-system";
+import { isSibilant } from "@/lib/verbal-marks";
 
 /** Open practice. Ten first answers, and 90% opens the next set. It does not lock a level. */
 export const BINYAN_ROUND = 10;
@@ -188,7 +189,8 @@ export function binyanClue(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): 
 function clueFor(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
   const first = rootById(card.rootId)?.letters[0];
   if (card.stem === "qal") {
-    return card.conj === "imperfect" ? "No stem prefix. The imperfect has only a person prefix." : "No stem prefix.";
+    const plain = "No stem prefix. No doubled middle letter (the dagesh in יִכְתֹּב is only lene).";
+    return card.conj === "imperfect" ? `${plain} The imperfect has only a person prefix.` : plain;
   }
   if (card.stem === "niphal") {
     return card.conj === "imperfect" ? "The first letter is doubled." : "Nun with hireq.";
@@ -197,8 +199,15 @@ function clueFor(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
   if (card.stem === "pual") return "Qibbuts under the first letter, and the middle letter is doubled.";
   if (card.stem === "hiphil") return card.conj === "perfect" ? "He with hireq, and shewa under the first letter." : "Patah under the prefix.";
   if (card.stem === "hophal") return "Qibbuts or qamets hatuf on the prefix, shewa under the first letter, and no doubling.";
-  if (first === "ש" || first === "ז") return "The tav moves after the first letter, and the middle letter is doubled.";
+  if (first && isSibilant(first)) return hithSibilant(first);
   return "Tav after the prefix: הִתְ, יִתְ, תִּתְ, אֶתְ, נִתְ, or מִתְ. The middle letter is doubled.";
+}
+
+function hithSibilant(first: string): string {
+  const moved = "The first letter is a sibilant (ש שׂ ס ז צ), so the tav moves after it";
+  if (first === "ז") return `${moved} and becomes ד after ז: הִזְדַּ… The middle letter is doubled.`;
+  if (first === "צ") return `${moved} and becomes ט after צ: הִצְטַ… The middle letter is doubled.`;
+  return `${moved}: הִשְׁתַּ… The middle letter is doubled.`;
 }
 
 export function dealBinyanRound(

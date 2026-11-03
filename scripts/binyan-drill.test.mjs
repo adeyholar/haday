@@ -50,6 +50,7 @@ test("a round stays inside the open set and 90% opens the next", () => {
   const qal = drill.binyanClue({ stem: "qal", conj: "imperfect", rootId: "shamar" });
   assert.match(qal, /only a person prefix/);
   assert.match(qal, /No stem prefix/);
+  assert.match(qal, /only lene/);
   const hiphil = drill.binyanClue({ stem: "hiphil", conj: "imperfect", rootId: "katav" });
   assert.match(hiphil, /Patah under the prefix/);
   assert.doesNotMatch(hiphil, /He with hireq/);
@@ -57,6 +58,12 @@ test("a round stays inside the open set and 90% opens the next", () => {
   assert.match(hiphilPtc, /Patah under the prefix/);
   const swapped = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "shamar" });
   assert.match(swapped, /tav moves after/);
+  assert.match(swapped, /הִשְׁתַּ/);
+  const zayin = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "zakar" });
+  assert.match(zayin, /tav moves after/);
+  assert.match(zayin, /becomes ד after ז/);
+  assert.match(drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "savav" }), /הִשְׁתַּ/);
+  assert.match(drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "sim" }), /הִשְׁתַּ/);
   const hit = drill.binyanClue({ stem: "hithpael", conj: "imperfect", rootId: "qatal" });
   assert.match(hit, /תִּתְ/);
   assert.match(drill.binyanClue({ stem: "niphal", conj: "perfect", rootId: "qatal" }), /Nun with hireq/);
