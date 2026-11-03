@@ -221,7 +221,19 @@ test("cleanGloss removes a note nested inside a note", () => {
 });
 
 test("no study gloss keeps a parenthesis, and every old nested-note id reaches the live word", () => {
-  const priors = new Map(GLOSS_PRIOR_IDS.map((row) => [row.slot, row.id]));
+  const priors = new Map();
+  for (const row of GLOSS_PRIOR_IDS) {
+    const list = priors.get(row.slot) ?? [];
+    list.push(row.id);
+    priors.set(row.slot, list);
+  }
+  const restored = new Map([
+    ["iibs-b-10-07", { study: "not [prohibition: “do not” / “let him not”]", shortId: "iibs-b-b4vibj" }],
+    ["iibs-b-24-08", { study: "he broke through [also: break down, break out, increase]", shortId: "iibs-b-u5rdge" }],
+    ["iibs-c-28-06", { study: "[so that] not; except, unless", shortId: "iibs-c-1xcifal" }],
+    ["iibs-d-08-05", { study: "surely, indeed; but [rather], unless", shortId: "iibs-d-1lhpv2x" }],
+    ["iibs-d-13-07", { study: "consequence; reward; end; [adverb] because", shortId: "iibs-d-roklih" }],
+  ]);
   let changed = 0;
   for (const level of ["A", "B", "C", "D", "E"]) {
     for (let week = 1; week <= 30; week += 1) {
@@ -234,18 +246,27 @@ test("no study gloss keeps a parenthesis, and every old nested-note id reaches t
         const slot = `iibs-${level.toLowerCase()}-${String(lessonIndex + 1).padStart(2, "0")}-${String(placeIndex + 1).padStart(2, "0")}`;
         const study = cleanGloss(word.gloss);
         const old = legacyClean(word.gloss);
+        const listed = priors.get(slot) ?? [];
+        if (restored.has(slot)) {
+          assert.equal(study, restored.get(slot).study, slot);
+          assert.ok(listed.includes(restored.get(slot).shortId), slot);
+        }
         if (!study || old === study) return;
         changed += 1;
         const oldId = iibsWordId(level, word.hebrew, old);
         const nextId = iibsWordId(level, word.hebrew, study);
-        assert.equal(priors.get(slot), oldId, slot);
-        const fromOld = keepStudyCards({ [oldId]: { reps: 1, interval: 1 } });
-        assert.deepEqual(Object.keys(fromOld), [nextId], slot);
+        if (!restored.has(slot)) assert.ok(listed.includes(oldId), slot);
+        for (const priorId of listed) {
+          const kept = keepStudyCards({ [priorId]: { reps: 1, interval: 1 } });
+          assert.deepEqual(Object.keys(kept), [nextId], `${slot} ${priorId}`);
+        }
         const fromPlace = keepStudyCards({ [slot]: { reps: 1, interval: 1 } });
         assert.deepEqual(Object.keys(fromPlace), [nextId], slot);
       });
     });
   }
-  assert.equal(changed, GLOSS_PRIOR_IDS.length);
   assert.equal(changed, 18);
+  assert.equal(new Set(GLOSS_PRIOR_IDS.map((row) => row.slot)).size, changed);
+  assert.equal(GLOSS_PRIOR_IDS.length, 23);
+  assert.equal(restored.size, 5);
 });
