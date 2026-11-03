@@ -81,6 +81,33 @@ type RepairBook = {
 const E_FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
 const E_PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
 
+/** Ids from before a study gloss was cleaned. A slot may list more than one. Same chain as the freeze. */
+export const GLOSS_PRIOR_IDS: readonly { slot: string; id: string }[] = [
+  { slot: "iibs-a-14-16", id: "iibs-a-1nyfg4t" },
+  { slot: "iibs-b-10-07", id: "iibs-b-1ei05zb" },
+  { slot: "iibs-b-10-07", id: "iibs-b-b4vibj" },
+  { slot: "iibs-b-24-08", id: "iibs-b-ww04e3" },
+  { slot: "iibs-b-24-08", id: "iibs-b-u5rdge" },
+  { slot: "iibs-b-25-09", id: "iibs-b-1o0fj5v" },
+  { slot: "iibs-c-09-02", id: "iibs-c-bxw4cx" },
+  { slot: "iibs-c-09-07", id: "iibs-c-1rem5dj" },
+  { slot: "iibs-c-11-05", id: "iibs-c-u7hrii" },
+  { slot: "iibs-c-19-04", id: "iibs-c-11oywpf" },
+  { slot: "iibs-c-24-08", id: "iibs-c-hdsa70" },
+  { slot: "iibs-c-28-03", id: "iibs-c-cb9a47" },
+  { slot: "iibs-c-28-06", id: "iibs-c-1b6s778" },
+  { slot: "iibs-c-28-06", id: "iibs-c-1xcifal" },
+  { slot: "iibs-c-29-01", id: "iibs-c-6vnddv" },
+  { slot: "iibs-d-04-01", id: "iibs-d-z6rwq7" },
+  { slot: "iibs-d-08-05", id: "iibs-d-1gv6fru" },
+  { slot: "iibs-d-08-05", id: "iibs-d-1lhpv2x" },
+  { slot: "iibs-d-13-01", id: "iibs-d-1ywerk3" },
+  { slot: "iibs-d-13-07", id: "iibs-d-1cg7cwu" },
+  { slot: "iibs-d-13-07", id: "iibs-d-roklih" },
+  { slot: "iibs-e-19-04", id: "iibs-e-1jenyn0" },
+  { slot: "iibs-e-26-04", id: "iibs-e-iozz0a" },
+];
+
 /** One book per level. Only Level E has a frozen repair. The live guard runs after every level is built. */
 const REPAIR_BOOKS: Partial<Record<IibsVocabLevel, RepairBook>> = {
   E: { freeze: E_FREEZE_ID, prior: E_PRIOR_ID, slots: E_REPAIR_SLOTS, splits: E_SPLITS },
@@ -147,6 +174,10 @@ function ensureRepairLinks() {
   repairsLinking = true;
   for (const level of IIBS_WEEK_LEVELS) levelWords(level);
   const live = liveWordIds();
+  for (const row of GLOSS_PRIOR_IDS) {
+    const current = LEGACY.get(row.slot);
+    if (current) linkOld(live, row.id, current);
+  }
   for (const level of IIBS_WEEK_LEVELS) linkLevelRepairs(level, live);
   repairsLinked = true;
   repairsLinking = false;
@@ -193,12 +224,23 @@ function posOf(kind: string): Pos {
   return "noun";
 }
 
-function cleanGloss(gloss: string): string {
-  return gloss
-    .replace(/\s*\([^)]*\)/g, "")
-    .replace(/\s+/g, " ")
-    .replace(/\s+([,;])/g, "$1")
-    .trim();
+/** Drop a parenthetical note, including a note inside a note. A stray parenthesis is dropped too. */
+export function cleanGloss(gloss: string): string {
+  let out = "";
+  let depth = 0;
+  for (const ch of gloss) {
+    if (ch === "(") {
+      if (depth === 0) out = out.replace(/\s+$/, "");
+      depth += 1;
+      continue;
+    }
+    if (ch === ")") {
+      if (depth > 0) depth -= 1;
+      continue;
+    }
+    if (depth === 0) out += ch;
+  }
+  return out.replace(/\s+/g, " ").replace(/\s+([,;])/g, "$1").trim();
 }
 
 function toItem(
