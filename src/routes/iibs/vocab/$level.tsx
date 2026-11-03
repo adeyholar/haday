@@ -142,6 +142,7 @@ function VocabLevelPage() {
         <ol className="grid gap-2">
           {lists.map((row, index) => {
             const n = index + 1;
+            if (row.length === 0) return null;
             const unlocked = lessonUnlocked(progress, level, n, admin);
             const rec = iibsLessonRec(progress, level, n);
             const done = IIBS_STAGES.filter((item) => rec.stages[item.id].cleared).length;

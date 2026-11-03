@@ -72,7 +72,15 @@ test("each Scripture Path level is thirty weeks, and a week is not the whole lev
   assert.equal(baal.length, 2);
   assert.equal(glossMatches(baal[0], baal[1].gloss.split(",")[0].trim()), true);
   assert.equal(glossMatches(baal[1], baal[0].gloss.split(",")[0].trim()), true);
-  const place = { seed: 1, ids: ["iibs-a-x"], index: 2, reviews: [], hits: 1, checks: 2, fingerprint: "abc" };
+  const place = {
+    seed: 1,
+    ids: [first[0].id],
+    index: 2,
+    reviews: [],
+    hits: 1,
+    checks: 2,
+    fingerprint: "abc",
+  };
   const game = hydrateGame({
     drillRuns: { "3:due": place },
     iibsDrillRuns: { "A:1:due": place, "A:99:due": place, "nope": place },
