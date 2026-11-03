@@ -7,7 +7,7 @@ export const IIBS_GAME_LEVELS = ["A", "B", "C", "D", "E"] as const;
 export const IIBS_STAGES = [
   { id: "multiple", name: "Multiple", prompt: "Hebrew, then choose the English" },
   { id: "gloss", name: "Gloss", prompt: "Type the English" },
-  { id: "hebrew", name: "Hebrew", prompt: "The word stays up. Type each consonant and its vowel." },
+  { id: "hebrew", name: "Hebrew", prompt: "English on the card. Type the Hebrew with the keys." },
   { id: "strict", name: "Strict", prompt: "English only. Type the Hebrew, then Check." },
 ] as const;
 
