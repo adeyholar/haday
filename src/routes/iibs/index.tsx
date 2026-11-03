@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { LevelHall, LevelRoom, useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
-import { levelUnlocked } from "@/lib/iibs-game";
-import { leaveIibsRoom } from "@/lib/iibs-room";
 import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/iibs/")({ component: IibsHome });
@@ -29,11 +27,6 @@ function IibsHome() {
   }, []);
 
   const admin = Boolean(gate?.admin);
-
-  useEffect(() => {
-    if (!gate || !room.level) return;
-    if (!levelUnlocked(progress, room.level, admin)) leaveIibsRoom();
-  }, [admin, gate, progress, room.level]);
 
   if (!room.ready || !gate) return <p className="text-sm text-muted">Opening the level.</p>;
   if (error) return <p className="text-sm text-danger">{error}</p>;
