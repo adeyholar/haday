@@ -186,6 +186,8 @@ export function SignedInShell({ children }: { children: ReactNode }) {
         if (useStudy.getState().ownerId !== userId) {
           useStudy.getState().reset();
           useStudy.setState({ ownerId: userId, cards: {}, streak: 0, lastStudyDay: 0, sessions: 0 });
+        } else {
+          useStudy.getState().keepFinalDrill();
         }
       } else {
         useStudy.getState().reset();

@@ -106,7 +106,7 @@ function DrillPage() {
           {final ? (
             <p className="mt-2 text-sm text-ink">
               <span className="font-semibold">Final exam</span>
-              <span className="text-muted"> · the professor’s eighty words · its own saved place</span>
+              <span className="text-muted"> · the professor’s eighty words · closing the app keeps this sitting</span>
             </p>
           ) : passage ? null : (
             <div className="mt-4">
