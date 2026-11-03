@@ -237,7 +237,7 @@ export const ROOTS: VerbRoot[] = [
   { id: "raah", letters: ["ר", "א", "ה"], dots: ["", "", ""], gloss: "see", cls: "III-he", cite: "רָאָה" },
   { id: "hayah", letters: ["ה", "י", "ה"], dots: ["", "", ""], gloss: "be, become", cls: "III-he", cite: "הָיָה" },
   { id: "nafal", letters: ["נ", "פ", "ל"], dots: ["", "", ""], gloss: "fall", cls: "I-nun", cite: "נָפַל" },
-  { id: "nagash", letters: ["נ", "ג", "ש"], dots: ["", "", ""], gloss: "draw near", cls: "I-nun", cite: "נָגַשׁ" },
+  { id: "nagash", letters: ["נ", "ג", "ש"], dots: ["", "", "shin"], gloss: "draw near", cls: "I-nun", cite: "נָגַשׁ" },
   { id: "natan", letters: ["נ", "ת", "ן"], dots: ["", "", ""], gloss: "give", cls: "I-nun", cite: "נָתַן" },
   { id: "yashav", letters: ["י", "ש", "ב"], dots: ["", "shin", ""], gloss: "sit, dwell", cls: "I-yod", cite: "יָשַׁב" },
   { id: "yarad", letters: ["י", "ר", "ד"], dots: ["", "", ""], gloss: "go down", cls: "I-yod", cite: "יָרַד" },
@@ -1696,7 +1696,7 @@ function iiiHe(root: VerbRoot, conj: ConjId): Engine | null {
       ],
       cells: rows.map(([id, label, v1, end]) => seed(id, label, "The final he drops as soon as an ending arrives. 2ms is yod, not the strong tav only.", { v1, end })),
       render: (r, picks) => {
-        const A = M(r, 0, vowelChar(picks.v1), lene(r.letters[0], false) && picks.v1 === "qamets");
+        const A = M(r, 0, vowelChar(picks.v1), lene(r.letters[0], false));
         const bHireq = picks.end === "ita" || picks.end === "it" || picks.end === "iti" || picks.end === "item" || picks.end === "inu";
         const bBare = picks.end === "u";
         const bShewa = picks.end === "tha";
@@ -1712,7 +1712,7 @@ function iiiHe(root: VerbRoot, conj: ConjId): Engine | null {
           it: "ת" + V.shewa,
           iti: "ת" + V.hireq + "י",
           u: SHUREQ,
-          item: "ת" + DAG + V.segol + "ם",
+          item: "ת" + V.segol + "ם",
           inu: "נ" + SHUREQ,
         };
         return A + B + (tails[picks.end ?? ""] ?? "");
@@ -1934,6 +1934,55 @@ function iNun(root: VerbRoot, conj: ConjId): Engine | null {
     };
   }
   if (conj === "imperative") {
+    if (root.id === "nagash") {
+      return {
+        slots: [
+          slot("v1", "Vowel under the first letter", vowels(["patah", "shewa"])),
+          slot("v2", "Vowel under the shin", vowels(["none", "qamets", "hireq", "shewa"])),
+          slot("end", "Ending", [
+            ...IMPF_END,
+            { id: "ah", label: "qamets he", mark: CIRC + V.qamets + "ה" },
+          ]),
+        ],
+        cells: [
+          seed("ms", "masc. sing.", "The nun is gone.", { v1: "patah", v2: "none", end: "none" }),
+          seed("long", "masc. sing. long", "The nun is gone. Qamets he.", { v1: "shewa", v2: "qamets", end: "ah" }),
+          seed("fs", "fem. sing.", "The nun is gone. Hireq yod.", { v1: "shewa", v2: "hireq", end: "iy" }),
+          seed("mp", "masc. plural", "The nun is gone. Shureq.", { v1: "shewa", v2: "none", end: "u" }),
+          seed("fp", "fem. plural", "The nun is gone.", { v1: "patah", v2: "shewa", end: "nah" }),
+        ],
+        render: (r, picks) => {
+          const A = M(r, 1, vowelChar(picks.v1), true);
+          if (picks.end === "ah") return A + M(r, 2, vowelChar(picks.v2)) + "ה";
+          if (picks.end === "iy") return A + M(r, 2, vowelChar(picks.v2)) + "י";
+          if (picks.end === "u") return A + M(r, 2, vowelChar(picks.v2)) + SHUREQ;
+          if (picks.end === "nah") return A + M(r, 2, vowelChar(picks.v2)) + "נ" + V.qamets + "ה";
+          return A + M(r, 2, vowelChar(picks.v2), false, true);
+        },
+        blurb: "I-nun imperative. A patah imperfect drops the nun. The first letter keeps its dagesh.",
+      };
+    }
+    if (root.id === "nafal") {
+      return {
+        slots: [
+          slot("v1", "Vowel under the nun", vowels(["shewa", "hireq"])),
+          slot("v2", "Vowel under the second letter", vowels(["holem", "shewa"])),
+          slot("end", "Ending", IMPF_END),
+        ],
+        cells: [
+          seed("ms", "masc. sing.", "The nun stays.", { v1: "shewa", v2: "holem", end: "none" }),
+          seed("fs", "fem. sing.", "The nun stays. Hireq yod.", { v1: "hireq", v2: "shewa", end: "iy" }),
+          seed("mp", "masc. plural", "The nun stays. Shureq.", { v1: "hireq", v2: "shewa", end: "u" }),
+        ],
+        render: (r, picks) => {
+          const A = M(r, 0, vowelChar(picks.v1), false);
+          const B = M(r, 1, vowelChar(picks.v2), false);
+          const end = endTail(picks.end);
+          return A + B + M(r, 2, end.c3, false, end.final) + end.tail;
+        },
+        blurb: "I-nun imperative. A holem imperfect keeps the nun. No dagesh in the second letter.",
+      };
+    }
     return {
       slots: [
         slot("v2", "Vowel", vowels(["holem", "patah", "shewa"])),
