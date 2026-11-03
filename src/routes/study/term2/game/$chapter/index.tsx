@@ -7,7 +7,6 @@ import { GAME_STAGES } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 import { term2Lesson } from "@/lib/term2-lessons";
 import {
-  isTerm2ChapterUnlocked,
   isTerm2StageUnlocked,
   term2ChapterPool,
   term2ChapterRecord,
@@ -21,7 +20,7 @@ function Term2ChapterHub() {
   const chapter = Number(raw);
   const lesson = term2Lesson(chapter);
   const term2 = useStudy((s) => s.game.term2);
-  if (!lesson || !isTerm2ChapterUnlocked(term2, chapter)) return <Navigate to="/study/term2/game" />;
+  if (!lesson) return <Navigate to="/study/term2/game" />;
   const rec = term2ChapterRecord(term2, chapter);
   const pool = term2ChapterPool(chapter);
 

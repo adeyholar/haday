@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
 import { StudyMenu } from "@/components/study-menu";
 import { StudyContinue } from "@/components/study-continue";
 import { Panel } from "@/components/panel";
-import { STATIONS, isStationUnlocked, lessonsFor, stationComplete } from "@/lib/ladder";
+import { STATIONS, lessonsFor, stationComplete } from "@/lib/ladder";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
 
@@ -30,52 +29,36 @@ function LadderMapPage() {
       </Panel>
       <ol className="flex flex-col gap-2">
         {climb.map((station) => {
-          const open = isStationUnlocked(ladder, station.id);
           const done = stationComplete(ladder, station.id);
-          const current = open && !done && ladder.currentStationId === station.id;
+          const current = !done && ladder.currentStationId === station.id;
           const n = lessonsFor(station.id).length;
           const held = lessonsFor(station.id).filter((l) => ladder.trained[l.id]).length;
           const inner = (
             <>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-display text-2xl font-bold">{station.name}</span>
-                {open ? (
-                  <span className="text-xs font-semibold text-muted">
-                    {station.order === 5 ? "Last stop" : `Station ${station.order} of 5`}
-                  </span>
-                ) : (
-                  <Lock className="size-4 shrink-0 text-muted" />
-                )}
+                <span className="text-xs font-semibold text-muted">
+                  {station.order === 5 ? "Last stop" : `Station ${station.order} of 5`}
+                </span>
               </div>
               <p className="mt-1 font-display text-xl text-primary" dir="rtl" lang="he">
                 {station.hebrew}
               </p>
               <p className={cn("mt-1 text-sm", current ? "text-primary-foreground/80" : "text-muted")}>{station.goal}</p>
-              {open ? (
-                <p className="mt-1 text-sm text-muted">
-                  {done ? "Trained" : `${held} / ${n} lessons`}
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-muted">Finish the station below to open this one.</p>
-              )}
+              <p className="mt-1 text-sm text-muted">{done ? "Trained" : `${held} / ${n} lessons`}</p>
             </>
           );
           const cls = cn(
             "block w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
             done && "bg-card",
             current && "bg-primary text-primary-foreground",
-            open && !current && !done && "bg-card",
-            !open && "bg-surface text-muted",
+            !current && !done && "bg-card",
           );
           return (
             <li key={station.id}>
-              {open ? (
-                <Link to="/study/station/$id" params={{ id: station.id }} className={cls}>
-                  {inner}
-                </Link>
-              ) : (
-                <div className={cls}>{inner}</div>
-              )}
+              <Link to="/study/station/$id" params={{ id: station.id }} className={cls}>
+                {inner}
+              </Link>
             </li>
           );
         })}

@@ -19,8 +19,7 @@ import {
   type GrammarTrack,
 } from "@/lib/grammar";
 import { useStudy } from "@/lib/store";
-import { GAME_STAGE_PASS, grammarUnitOpen } from "@/lib/game";
-import { useOpenTerm } from "@/lib/use-open-term";
+import { GAME_STAGE_PASS } from "@/lib/game";
 import { derangeAgainst, shuffleList } from "@/lib/quiz-draw";
 
 type PlayQ = GrammarQuiz & { key: string; retry?: boolean };
@@ -62,9 +61,6 @@ export function GrammarPlay({
   const unit = track.units.find((u) => u.id === unitId);
   const complete = useStudy((s) => s.completeGrammarUnit);
   const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
-  const game = useStudy((s) => s.game);
-  const term = useOpenTerm();
-  const examOpen = grammarUnitOpen(game, track.id, unitId, term);
   const unitMax = grammarUnitMax(track);
   const seededExam = useMemo(
     () => (mode === "exam" ? examItems(track, unitId) : []),
@@ -334,15 +330,9 @@ export function GrammarPlay({
         </div>
         {doneMatch ? (
           <div className="mt-4 flex flex-col gap-2">
-            {examOpen ? (
-              <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(unitId) }} className="block">
-                <Button className="w-full">Take the exam</Button>
-              </Link>
-            ) : (
-              <p className="text-center text-sm text-muted">
-                Exam locked until the previous Game unit is held at {GAME_STAGE_PASS}%.
-              </p>
-            )}
+            <Link to="/game/lessons/$track/$unit" params={{ track: track.id, unit: String(unitId) }} className="block">
+              <Button className="w-full">Take the exam</Button>
+            </Link>
             <Button variant="outline" onClick={startQuiz}>
               Quiz this unit
             </Button>

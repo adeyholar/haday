@@ -342,20 +342,18 @@ export function TypeSession({
       {mode === "study" ? (
         <div className="mb-3 flex flex-wrap gap-1.5">
           {STUDY_TYPE_RUNGS.map((r, n) => {
-            const open = n <= unlocked;
             const on = n === rung;
             return (
               <button
                 key={r.id}
                 type="button"
-                disabled={!open || done}
+                disabled={done}
                 onClick={() => {
-                  if (!open) return;
                   setRung(n);
                   newStudyBatch();
                 }}
                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                  on ? "bg-ink text-parchment" : open ? "bg-card text-ink shadow-[var(--shadow-border)]" : "bg-surface text-muted"
+                  on ? "bg-ink text-parchment" : "bg-card text-ink shadow-[var(--shadow-border)]"
                 }`}
               >
                 {n + 1}. {r.title}

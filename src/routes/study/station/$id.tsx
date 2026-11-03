@@ -5,7 +5,6 @@ import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import {
   isStationId,
-  isStationUnlocked,
   lessonGateLine,
   lessonsFor,
   stationById,
@@ -22,7 +21,6 @@ function StationPage() {
   const station = isStationId(id) ? stationById(id) : undefined;
 
   if (!station) return <Navigate to="/study" />;
-  if (!isStationUnlocked(ladder, station.id)) return <Navigate to="/study" />;
 
   const lessons = lessonsFor(station.id);
 

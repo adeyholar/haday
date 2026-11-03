@@ -483,10 +483,8 @@ export function chapterRecord(game: GameSnapshot, chapter: number): ChapterRecor
   return game.chapters[String(chapter)] ?? emptyChapter();
 }
 
-export function isChapterUnlocked(game: GameSnapshot, chapter: number): boolean {
-  const n = clampChapter(chapter);
-  if (n <= 1) return true;
-  return n <= game.unlockedChapter;
+export function isChapterUnlocked(_game: GameSnapshot, chapter: number): boolean {
+  return Number.isInteger(chapter) && chapter >= 1 && chapter <= GAME_CHAPTER_MAX;
 }
 
 export function isStageUnlocked(game: GameSnapshot, chapter: number, stage: GameStageId): boolean {
@@ -554,14 +552,6 @@ function demoteAfter(game: GameSnapshot, chapter: number, stage: GameStageId) {
     rec.stages[GAME_STAGES[i].id].cleared = false;
   }
   retally(rec);
-  for (let c = chapter + 1; c <= GAME_CHAPTER_MAX; c++) {
-    const later = game.chapters[String(c)];
-    if (!later) continue;
-    later.cleared = false;
-    for (const s of GAME_STAGES) later.stages[s.id].cleared = false;
-    later.stars = GAME_STAGES.reduce((n, st) => n + later.stages[st.id].stars, 0);
-  }
-  game.unlockedChapter = chapter;
 }
 
 export function applyStageResult(
@@ -604,9 +594,8 @@ export function alefBetLevelRecord(game: GameSnapshot, level: number): StageReco
   return game.alefBet?.levels?.[String(level)] ?? emptyAlefLevel();
 }
 
-export function isAlefBetLevelUnlocked(game: GameSnapshot, level: number): boolean {
-  const n = Math.min(3, Math.max(1, Math.round(level) || 1));
-  return n <= (game.alefBet?.unlockedLevel || 1);
+export function isAlefBetLevelUnlocked(_game: GameSnapshot, level: number): boolean {
+  return Number.isInteger(level) && level >= 1 && level <= 3;
 }
 
 export function applyAlefBetResult(
@@ -712,9 +701,8 @@ export function syllableUnitRecord(game: GameSnapshot, unit: number): StageRecor
   return game.syllables?.units?.[String(unit)] ?? emptyAlefLevel();
 }
 
-export function isSyllableUnitUnlocked(game: GameSnapshot, unit: number): boolean {
-  const n = Math.min(SYLLABLE_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
-  return n <= (game.syllables?.unlockedUnit || 1);
+export function isSyllableUnitUnlocked(_game: GameSnapshot, unit: number): boolean {
+  return Number.isInteger(unit) && unit >= 1 && unit <= SYLLABLE_UNIT_MAX;
 }
 
 export function applySyllableResult(
@@ -750,9 +738,8 @@ export function nounUnitRecord(game: GameSnapshot, unit: number): StageRecord {
   return game.nouns?.units?.[String(unit)] ?? emptyAlefLevel();
 }
 
-export function isNounUnitUnlocked(game: GameSnapshot, unit: number): boolean {
-  const n = Math.min(NOUN_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
-  return n <= (game.nouns?.unlockedUnit || 1);
+export function isNounUnitUnlocked(_game: GameSnapshot, unit: number): boolean {
+  return Number.isInteger(unit) && unit >= 1 && unit <= NOUN_UNIT_MAX;
 }
 
 export function applyNounResult(
@@ -788,9 +775,8 @@ export function articleUnitRecord(game: GameSnapshot, unit: number): StageRecord
   return game.article?.units?.[String(unit)] ?? emptyAlefLevel();
 }
 
-export function isArticleUnitUnlocked(game: GameSnapshot, unit: number): boolean {
-  const n = Math.min(ARTICLE_UNIT_MAX, Math.max(1, Math.round(unit) || 1));
-  return n <= (game.article?.unlockedUnit || 1);
+export function isArticleUnitUnlocked(_game: GameSnapshot, unit: number): boolean {
+  return Number.isInteger(unit) && unit >= 1 && unit <= ARTICLE_UNIT_MAX;
 }
 
 export function applyArticleResult(
@@ -830,22 +816,25 @@ export function grammarUnitRecord(game: GameSnapshot, trackId: GrammarTrackId, u
   return lessonProgress(game, trackId).units?.[String(unit)] ?? emptyAlefLevel();
 }
 
-export function isGrammarUnitUnlocked(game: GameSnapshot, trackId: GrammarTrackId, unit: number): boolean {
+/** How far the learner has reached. Mixes use this so an open screen does not teach a later unit. */
+export function grammarUnitReached(game: GameSnapshot, trackId: GrammarTrackId, unit: number): boolean {
   const cap = grammarTrackCap(trackId);
-  const n = Math.min(cap, Math.max(1, Math.round(unit) || 1));
-  return n <= (lessonProgress(game, trackId).unlockedUnit || 1);
+  if (!Number.isInteger(unit) || unit < 1 || unit > cap) return false;
+  return unit <= (lessonProgress(game, trackId).unlockedUnit || 1);
 }
 
-/** Semester 2 already covered every stem, so those exams are open. Other topics stay gated. */
+export function isGrammarUnitUnlocked(_game: GameSnapshot, trackId: GrammarTrackId, unit: number): boolean {
+  const cap = grammarTrackCap(trackId);
+  return Number.isInteger(unit) && unit >= 1 && unit <= cap;
+}
+
+/** Every unit in range is open. Semester 2 verbs stay open with the rest. */
 export function grammarUnitOpen(
   game: GameSnapshot,
   trackId: GrammarTrackId,
   unit: number,
-  term: 1 | 2 = 1,
+  _term: 1 | 2 = 1,
 ): boolean {
-  const cap = grammarTrackCap(trackId);
-  const n = Math.min(cap, Math.max(1, Math.round(unit) || 1));
-  if (term === 2 && trackId === "verbs" && n >= 1 && n <= cap) return true;
   return isGrammarUnitUnlocked(game, trackId, unit);
 }
 
@@ -929,13 +918,12 @@ export function clearedChapters(game: GameSnapshot): number[] {
   return out;
 }
 
-/** Chapters this student can put in a mix — unlocked on their path. Chapter 1 is always open. */
+/** Chapters this student has reached — the mix stays inside that, even though every chapter screen is open. */
 export function mixableChapters(game: GameSnapshot): number[] {
+  const cap = Math.min(Math.max(game.unlockedChapter || 1, 1), GAME_CHAPTER_MAX);
   const out: number[] = [];
-  for (let n = 1; n <= GAME_CHAPTER_MAX; n++) {
-    if (isChapterUnlocked(game, n)) out.push(n);
-  }
-  return out.length ? out : [1];
+  for (let n = 1; n <= cap; n++) out.push(n);
+  return out;
 }
 
 export function parseChapterList(raw: string | undefined | null): number[] {
@@ -954,7 +942,7 @@ export function parseChapterList(raw: string | undefined | null): number[] {
 }
 
 export function mixableGrammarTracks(game: GameSnapshot): GrammarTrackId[] {
-  return GRAMMAR_TRACK_IDS.filter((id) => isGrammarUnitUnlocked(game, id, 1));
+  return GRAMMAR_TRACK_IDS.filter((id) => grammarUnitReached(game, id, 1));
 }
 
 export function parseTrackList(raw: string | undefined | null): GrammarTrackId[] {

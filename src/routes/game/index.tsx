@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Lock } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GameContinue } from "@/components/game-continue";
 import { GameMenu, WordPlayChoice } from "@/components/game-menu";
@@ -11,7 +11,6 @@ import {
   GAME_CHAPTER_MAX,
   GAME_STAGES,
   chapterRecord,
-  isChapterUnlocked,
 } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
@@ -70,8 +69,7 @@ function GameMapPage() {
       <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {Array.from({ length: GAME_CHAPTER_MAX }, (_, i) => i + 1).map((n) => {
           const rec = chapterRecord(game, n);
-          const unlocked = isChapterUnlocked(game, n);
-          const current = unlocked && !rec.cleared && n <= game.unlockedChapter;
+          const current = !rec.cleared && n <= game.unlockedChapter;
           const meta = CHAPTER_META[n];
           const stagesDone = GAME_STAGES.filter((s) => rec.stages[s.id].cleared).length;
           const inner = (
@@ -83,10 +81,8 @@ function GameMapPage() {
                 </span>
                 {rec.cleared ? (
                   <Check className="size-4 shrink-0 text-good" />
-                ) : unlocked ? (
-                  <span className="text-xs tabular-nums text-muted">{stagesDone}/4</span>
                 ) : (
-                  <Lock className="size-4 shrink-0 text-muted" />
+                  <span className="text-xs tabular-nums text-muted">{stagesDone}/4</span>
                 )}
               </div>
               <p className={cn("mt-1 text-sm", current ? "text-primary-foreground/80" : "text-muted")}>
@@ -103,18 +99,13 @@ function GameMapPage() {
             "block w-full rounded-[var(--radius-lg)] p-4 text-left shadow-[var(--shadow-border)]",
             rec.cleared && "bg-card",
             current && !rec.cleared && "bg-primary text-primary-foreground",
-            unlocked && !current && !rec.cleared && "bg-card",
-            !unlocked && "bg-surface text-muted",
+            !current && !rec.cleared && "bg-card",
           );
           return (
             <li key={n}>
-              {unlocked ? (
-                <Link to="/game/$chapter" params={{ chapter: String(n) }} className={cls}>
-                  {inner}
-                </Link>
-              ) : (
-                <div className={cls}>{inner}</div>
-              )}
+              <Link to="/game/$chapter" params={{ chapter: String(n) }} className={cls}>
+                {inner}
+              </Link>
             </li>
           );
         })}

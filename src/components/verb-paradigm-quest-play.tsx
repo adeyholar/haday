@@ -129,20 +129,18 @@ export function VerbQuestHome({ scripture = false }: { scripture?: boolean }) {
             </button>
           </li>
           {LEVELS.map((row) => {
-            const open = row.id <= quest.unlocked;
             return (
               <li key={row.id}>
                 <button
                   type="button"
-                  disabled={!open}
                   onClick={() => setLevel(row.id)}
-                  className="w-full rounded-[var(--radius-md)] bg-card px-4 py-3 text-left shadow-[var(--shadow-border)] disabled:opacity-40"
+                  className="w-full rounded-[var(--radius-md)] bg-card px-4 py-3 text-left shadow-[var(--shadow-border)]"
                 >
                   <span className="font-semibold text-ink">
                     {row.id}. {row.name}
                   </span>
                   {quest.cleared[row.id] ? <span className="ml-2 text-sm text-good">Cleared</span> : null}
-                  <span className="mt-1 block text-sm text-muted">{open ? row.hint : "90% on the previous level opens this."}</span>
+                  <span className="mt-1 block text-sm text-muted">{row.hint}</span>
                 </button>
               </li>
             );

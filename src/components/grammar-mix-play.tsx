@@ -15,7 +15,7 @@ import {
   type GrammarTrackId,
 } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
-import { isGrammarUnitUnlocked } from "@/lib/game";
+import { grammarUnitReached } from "@/lib/game";
 import { useStudy } from "@/lib/store";
 
 type PlayQ = GrammarQuiz & { key: string; retry?: boolean };
@@ -51,7 +51,7 @@ function shuffleIn<T>(arr: T[]): T[] {
 export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
   const game = useStudy((s) => s.game);
   const tracks = trackIds.map((id) => grammarTrack(id)).filter((t): t is NonNullable<typeof t> => Boolean(t));
-  const unitOk = (id: GrammarTrackId, unit: number) => isGrammarUnitUnlocked(game, id, unit);
+  const unitOk = (id: GrammarTrackId, unit: number) => grammarUnitReached(game, id, unit);
   const poolSize = grammarMixPool(tracks, unitOk).length;
 
   const [items, setItems] = useState<PlayQ[]>(() =>

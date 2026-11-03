@@ -39,7 +39,6 @@ function LessonPage() {
   }, [lesson?.id]);
 
   if (!lesson || !station) return <Navigate to="/study" />;
-  if (!isStationUnlocked(ladder, lesson.stationId)) return <Navigate to="/study" />;
 
   const opened = Boolean(ladder.openedText[lesson.id]);
   const trained = Boolean(ladder.trained[lesson.id]);

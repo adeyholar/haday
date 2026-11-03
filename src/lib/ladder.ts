@@ -398,10 +398,8 @@ export function isStationId(id: string): id is StationId {
   return STATIONS.some((s) => s.id === id);
 }
 
-export function isStationUnlocked(progress: LadderProgress, stationId: StationId): boolean {
-  const station = stationById(stationId);
-  if (!station) return false;
-  return station.order <= progress.unlockedLevel;
+export function isStationUnlocked(_progress: LadderProgress, stationId: StationId): boolean {
+  return Boolean(stationById(stationId));
 }
 
 export function stationComplete(progress: LadderProgress, stationId: StationId): boolean {

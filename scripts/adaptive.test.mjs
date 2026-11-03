@@ -110,7 +110,10 @@ test("quiz week pool stays on class lemmas", () => {
 });
 
 test("lenient opens the next chapter; strict is optional", () => {
-  let game = defaultGame();
+  const fresh = defaultGame();
+  assert.equal(isChapterUnlocked(fresh, 2), true);
+  assert.equal(isChapterUnlocked(fresh, 0), false);
+  let game = fresh;
   for (const stage of ["recognize", "gloss", "spell-lenient"]) {
     game = applyStageResult(game, 1, stage, { stars: 3, score: 90, firstTryRate: 0.9 });
   }
@@ -120,6 +123,22 @@ test("lenient opens the next chapter; strict is optional", () => {
   const missed = applyStageResult(game, 1, "spell-strict", { stars: 1, score: 40, firstTryRate: 0.4 });
   assert.equal(isChapterUnlocked(missed, 2), true);
   assert.equal(missed.chapters["1"].cleared, true);
+});
+
+test("a failed stage does not clear a later chapter", () => {
+  let game = defaultGame();
+  for (const chapter of [2, 3]) {
+    for (const stage of ["recognize", "gloss", "spell-lenient"]) {
+      game = applyStageResult(game, chapter, stage, { stars: 3, score: 90, firstTryRate: 0.9 });
+    }
+  }
+  assert.equal(game.chapters["3"].cleared, true);
+  const kept = game.unlockedChapter;
+  const failed = applyStageResult(game, 2, "recognize", { stars: 1, score: 40, firstTryRate: 0.4 });
+  assert.equal(failed.chapters["2"].stages.recognize.cleared, false);
+  assert.equal(failed.chapters["3"].cleared, true);
+  assert.equal(failed.chapters["3"].stages.recognize.cleared, true);
+  assert.equal(failed.unlockedChapter, kept);
 });
 
 test("a Game stage does not clear below 90%", () => {

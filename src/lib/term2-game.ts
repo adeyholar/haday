@@ -142,10 +142,8 @@ export function term2ChapterRecord(game: Term2Game, chapter: number): Term2Chapt
   return game.chapters[String(chapter)] ?? emptyChapter();
 }
 
-export function isTerm2ChapterUnlocked(game: Term2Game, chapter: number): boolean {
-  const n = clampChapter(chapter);
-  if (!n) return false;
-  return n <= game.unlockedChapter;
+export function isTerm2ChapterUnlocked(_game: Term2Game, chapter: number): boolean {
+  return clampChapter(chapter) !== 0;
 }
 
 export function isTerm2StageUnlocked(game: Term2Game, chapter: number, stage: Term2StageId): boolean {
@@ -174,13 +172,6 @@ function demote(game: Term2Game, chapter: number, stage: Term2StageId) {
   const idx = ALL.indexOf(stage);
   for (let i = idx + 1; i < ALL.length; i++) rec.stages[ALL[i]].cleared = false;
   retally(rec);
-  for (let c = chapter + 1; c <= TERM2_CHAPTER_MAX; c++) {
-    const later = game.chapters[String(c)];
-    if (!later) continue;
-    for (const id of ALL) later.stages[id].cleared = false;
-    retally(later);
-  }
-  game.unlockedChapter = chapter;
 }
 
 export function applyTerm2Stage(
@@ -215,10 +206,8 @@ export function term2ExamRecord(game: Term2Game, chapter: number): Term2StageRec
   return game.exams[String(chapter)] ?? { ...EMPTY_STAGE };
 }
 
-export function isTerm2ExamUnlocked(game: Term2Game, chapter: number): boolean {
-  if (!clampChapter(chapter)) return false;
-  if (chapter === TERM2_CHAPTER_MIN) return true;
-  return Boolean(game.exams[String(chapter - 1)]?.cleared);
+export function isTerm2ExamUnlocked(_game: Term2Game, chapter: number): boolean {
+  return clampChapter(chapter) !== 0;
 }
 
 export function applyTerm2Exam(

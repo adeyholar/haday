@@ -16,9 +16,10 @@ const miss = { stars: 1, score: 89, firstTryRate: 0.89 };
 test("semester 2 game scores stay off the first-term map", () => {
   const start = game.emptyTerm2Game();
   assert.equal(game.isTerm2ChapterUnlocked(start, 20), true);
-  assert.equal(game.isTerm2ChapterUnlocked(start, 21), false);
+  assert.equal(game.isTerm2ChapterUnlocked(start, 21), true);
+  assert.equal(game.isTerm2ChapterUnlocked(start, 19), false);
   assert.equal(game.isTerm2ExamUnlocked(start, 20), true);
-  assert.equal(game.isTerm2ExamUnlocked(start, 21), false);
+  assert.equal(game.isTerm2ExamUnlocked(start, 21), true);
 
   let g = start;
   for (const stage of ["recognize", "gloss", "spell-lenient"]) {
@@ -34,11 +35,11 @@ test("semester 2 game scores stay off the first-term map", () => {
 
   const examMiss = game.applyTerm2Exam(start, 20, { stars: 1, score: 80 });
   assert.equal(examMiss.exams["20"].cleared, false);
-  assert.equal(game.isTerm2ExamUnlocked(examMiss, 21), false);
+  assert.equal(game.isTerm2ExamUnlocked(examMiss, 21), true);
   const examHit = game.applyTerm2Exam(start, 20, { stars: 3, score: 90 });
   assert.equal(examHit.exams["20"].cleared, true);
   assert.equal(game.isTerm2ExamUnlocked(examHit, 21), true);
-  assert.equal(game.applyTerm2Exam(start, 21, { stars: 3, score: 100 }).exams["21"], undefined);
+  assert.equal(game.applyTerm2Exam(start, 21, { stars: 3, score: 100 }).exams["21"].cleared, true);
 
   const sealed = core.hydrateGame({
     unlockedChapter: 4,

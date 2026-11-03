@@ -10,8 +10,6 @@ import {
   chapterPool,
   chapterRecord,
   clampChapter,
-  continueTarget,
-  isChapterUnlocked,
   isStageUnlocked,
 } from "@/lib/game";
 import { useStudy } from "@/lib/store";
@@ -28,12 +26,6 @@ function ChapterHub() {
   const rec = chapterRecord(game, chapter);
   const meta = CHAPTER_META[chapter];
   const pool = chapterPool(chapter);
-  const unlocked = isChapterUnlocked(game, chapter);
-
-  if (!unlocked) {
-    const t = continueTarget(game);
-    return <Navigate to="/game/$chapter/$stage" params={{ chapter: String(t.chapter), stage: t.stage }} />;
-  }
 
   const nextOpen = GAME_STAGES.find((s) => !rec.stages[s.id].cleared) ?? GAME_STAGES[0];
 

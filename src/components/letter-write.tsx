@@ -270,12 +270,11 @@ export function LetterWrite() {
         <KindBtn
           on={level === "stave"}
           onClick={() => {
-            if (!unlocked && !queue.length) return;
             setLevel("stave");
             setBeat("practice");
             resetPad();
           }}
-          label={unlocked || queue.length ? "2 · Lines" : "2 · Lines (locked)"}
+          label="2 · Lines"
         />
       </div>
       <p className="mt-2 text-center text-xs text-muted">

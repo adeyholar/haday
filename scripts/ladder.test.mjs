@@ -63,13 +63,13 @@ function finishAlefLesson(p, id) {
   return trainLadderLesson(p, id);
 }
 
-test("cannot skip rungs; cannot train without text", () => {
+test("a station can be opened; training still needs the text", () => {
   let p = defaultLadder();
   assert.equal(p.unlockedLevel, 1);
   assert.equal(isStationUnlocked(p, "alef"), true);
-  assert.equal(isStationUnlocked(p, "names"), false);
-  const skipped = visitLadder(p, "names", "names-who");
-  assert.equal(skipped.currentStationId, "alef");
+  assert.equal(isStationUnlocked(p, "names"), true);
+  const opened = visitLadder(p, "names", "names-who");
+  assert.equal(opened.currentStationId, "names");
   const noTrain = trainLadderLesson(p, "alef-bereshit");
   assert.equal(noTrain.trained["alef-bereshit"], undefined);
   assert.equal(canTrain(p, "alef-bereshit"), false);
@@ -90,7 +90,7 @@ test("open-text-only does not unlock the next station", () => {
   }
   assert.equal(stationComplete(p, "alef"), false);
   assert.equal(p.unlockedLevel, 1);
-  assert.equal(isStationUnlocked(p, "names"), false);
+  assert.equal(isStationUnlocked(p, "names"), true);
 });
 
 test("training a full station unlocks the next rung", () => {
@@ -101,7 +101,7 @@ test("training a full station unlocks the next rung", () => {
   assert.equal(stationComplete(p, "alef"), true);
   assert.equal(p.unlockedLevel, 2);
   assert.equal(isStationUnlocked(p, "names"), true);
-  assert.equal(isStationUnlocked(p, "verbs"), false);
+  assert.equal(isStationUnlocked(p, "verbs"), true);
 });
 
 test("continue points at first untrained open lesson", () => {

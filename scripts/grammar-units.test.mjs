@@ -8,7 +8,7 @@ const { GRAMMAR_QUIZ_LEN, buildGrammarQuiz, buildGrammarMixQuiz, grammarMixPool,
   new URL("../src/lib/grammar.ts", import.meta.url).pathname,
 );
 const { VOCAB } = await jiti.import(new URL("../src/lib/vocab.ts", import.meta.url).pathname);
-const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, grammarUnitOpen, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
+const { applyGrammarResult, defaultGame, GAME_STAGE_PASS, grammarUnitOpen, grammarUnitReached, isGrammarUnitUnlocked, parseTrackList } = await jiti.import(
   new URL("../src/lib/game.ts", import.meta.url).pathname,
 );
 
@@ -65,24 +65,26 @@ test("a play draws 12 shuffled questions; later units mix review", () => {
   }
 });
 
-test("90% unlocks the next grammar unit; a miss does not", () => {
+test("90% records the next grammar unit; a miss does not", () => {
   let g = defaultGame();
   assert.equal(isGrammarUnitUnlocked(g, "prep", 1), true);
-  assert.equal(isGrammarUnitUnlocked(g, "prep", 2), false);
-  g = applyGrammarResult(g, "prep", 1, { stars: 3, score: GAME_STAGE_PASS, firstTryRate: 1 });
   assert.equal(isGrammarUnitUnlocked(g, "prep", 2), true);
+  assert.equal(grammarUnitReached(g, "prep", 2), false);
+  g = applyGrammarResult(g, "prep", 1, { stars: 3, score: GAME_STAGE_PASS, firstTryRate: 1 });
+  assert.equal(grammarUnitReached(g, "prep", 2), true);
   assert.equal(g.lessons.prep.units["1"].cleared, true);
   g = applyGrammarResult(g, "prep", 2, { stars: 1, score: 80, firstTryRate: 0.5 });
-  assert.equal(isGrammarUnitUnlocked(g, "prep", 3), false);
+  assert.equal(grammarUnitReached(g, "prep", 3), false);
   assert.equal(g.lessons.adj.unlockedUnit, 1);
 });
 
 test("verbs: 90% opens unit 2; unit 17 is the last gate", () => {
   let g = defaultGame();
   assert.equal(isGrammarUnitUnlocked(g, "verbs", 1), true);
-  assert.equal(isGrammarUnitUnlocked(g, "verbs", 2), false);
-  g = applyGrammarResult(g, "verbs", 1, { stars: 3, score: GAME_STAGE_PASS, firstTryRate: 1 });
   assert.equal(isGrammarUnitUnlocked(g, "verbs", 2), true);
+  assert.equal(grammarUnitReached(g, "verbs", 2), false);
+  g = applyGrammarResult(g, "verbs", 1, { stars: 3, score: GAME_STAGE_PASS, firstTryRate: 1 });
+  assert.equal(grammarUnitReached(g, "verbs", 2), true);
   for (let u = 2; u <= 16; u++) {
     g = applyGrammarResult(g, "verbs", u, { stars: 3, score: 90, firstTryRate: 1 });
   }
@@ -91,14 +93,15 @@ test("verbs: 90% opens unit 2; unit 17 is the last gate", () => {
   assert.equal(g.lessons.verbs.unlockedUnit, 17);
 });
 
-test("semester 2 opens every verb stem exam and leaves other topics gated", () => {
+test("every grammar unit in range is open, including semester 2 verbs", () => {
   const g = defaultGame();
   assert.equal(grammarUnitOpen(g, "verbs", 1, 2), true);
   assert.equal(grammarUnitOpen(g, "verbs", 8, 2), true);
   assert.equal(grammarUnitOpen(g, "verbs", 15, 2), true);
   assert.equal(grammarUnitOpen(g, "verbs", 17, 2), true);
-  assert.equal(grammarUnitOpen(g, "verbs", 2, 1), false);
-  assert.equal(grammarUnitOpen(g, "prep", 2, 2), false);
+  assert.equal(grammarUnitOpen(g, "verbs", 2, 1), true);
+  assert.equal(grammarUnitOpen(g, "prep", 2, 2), true);
+  assert.equal(grammarUnitOpen(g, "prep", 99, 2), false);
 });
 
 test("prepositions teach inseparable fusion and min; numbers distinguish cardinal and ordinal", () => {
@@ -121,15 +124,15 @@ test("grammar mix is topics only; unit 1 of each track is always in the open poo
   const prep = GRAMMAR_TRACKS.find((t) => t.id === "prep");
   const adj = GRAMMAR_TRACKS.find((t) => t.id === "adj");
   const g = defaultGame();
-  const open = grammarMixPool([prep, adj], (id, unit) => isGrammarUnitUnlocked(g, id, unit));
+  const open = grammarMixPool([prep, adj], (id, unit) => grammarUnitReached(g, id, unit));
   assert.ok(open.length >= 12);
   const u1 = new Set(
     [...grammarQuizPool(prep, prep.units[0]), ...grammarQuizPool(adj, adj.units[0])].map((q) => q.q),
   );
   assert.ok(open.every((q) => u1.has(q.q)));
-  const built = buildGrammarMixQuiz([prep], (id, unit) => isGrammarUnitUnlocked(g, id, unit));
+  const built = buildGrammarMixQuiz([prep], (id, unit) => grammarUnitReached(g, id, unit));
   assert.equal(built.length, 12);
-  const locked = grammarMixPool([prep], (id, unit) => isGrammarUnitUnlocked(g, id, unit) && unit > 1);
+  const locked = grammarMixPool([prep], (id, unit) => grammarUnitReached(g, id, unit) && unit > 1);
   assert.equal(locked.length, 0);
 });
 
