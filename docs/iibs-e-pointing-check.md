@@ -1,76 +1,11 @@
 # Level E pointing check
 
-Every Level E headword, all 280 rows, compared with the coursebook page after NFC normalization. The check is the whole pointed string, so a dropped dagesh, shureq, or mappiq counts. Mismatches are listed for the Tutor. They were not auto-corrected.
+Every Level E headword, all 280 rows, compared with the coursebook page after NFC normalization. The check is the whole pointed string, so a dropped dagesh, shureq, or mappiq counts.
 
-Checked 280. Still different: 68.
+Checked 280. Still different: 1.
+
+25.09 is an accepted difference. The Chairman chose the lexicon form, so the site keeps זֵרָה. The coursebook page prints זָרָה.
 
 | Lesson | Id | Site | Coursebook | Page |
 | --- | --- | --- | --- | ---: |
-| 1.07 | iibs-e-1yhp9ae | אֶסְתֵר | אֶסְתֵּר | 10 |
-| 2.02 | iibs-e-1oq1gmm | דֶשֶׁא | דֶּשֶׁא | 22 |
-| 2.08 | iibs-e-wo8jgv | גָזַל | גָּזַל | 22 |
-| 3.02 | iibs-e-11ces7b | אֶצְבַע | אֶצְבַּע | 38 |
-| 3.04 | iibs-e-18npep8 | סופָה | סוּפָה | 38 |
-| 4.01 | iibs-e-qil7en | גוֹלָה | גּוֹלָה | 52 |
-| 4.03 | iibs-e-1d4xn7m | מִדָה | מִדָּה | 52 |
-| 4.09 | iibs-e-10igbl | יִרְמְיָהו | יִרְמְיָהוּ | 52 |
-| 5.02 | iibs-e-ahci85 | מְצולָה | מְצוּלָה | 66 |
-| 5.05 | iibs-e-8zfww4 | אַדִיר | אַדִּיר | 66 |
-| 6.04 | iibs-e-18px2ib | דֶבֶר | דֶּבֶר | 80 |
-| 6.07 | iibs-e-inqjra | תְכֵלֶת | תְּכֵלֶת | 80 |
-| 7.01 | iibs-e-17xsojc | בֶצַע | בֶּצַע | 94 |
-| 7.04 | iibs-e-118g9df | מְסִלָה | מְסִלָּה | 94 |
-| 7.09 | iibs-e-kit2dj | הִתְנַדֵב | הִתְנַדֵּב | 94 |
-| 8.02 | iibs-e-1nlipzg | גַאֲוָה | גַּאֲוָה | 108 |
-| 8.03 | iibs-e-1fs14wg | דָגָן | דָּגָן | 108 |
-| 8.04 | iibs-e-1y4gl9r | טַבַעַת | טַבַּעַת | 108 |
-| 9.01 | iibs-e-ej2bt3 | גֹדֶל | גֹּדֶל | 120 |
-| 9.04 | iibs-e-vo6alo | מום | מוּם | 120 |
-| 9.06 | iibs-e-lgc6eb | עַתוד | עַתּוּד | 120 |
-| 9.09 | iibs-e-4yfpwa | תַחְתִי | תַּחְתִּי | 120 |
-| 9.10 | iibs-e-1tu68p3 | הִרְכִיב | הִרְכִּיב | 120 |
-| 10.07 | iibs-e-bs1343 | הִבִיעַ | הִבִּיעַ | 134 |
-| 11.04 | iibs-e-15turkj | קְבורָה | קְבוּרָה | 148 |
-| 11.05 | iibs-e-1imfji6 | תֶבֶן | תֶּבֶן | 148 |
-| 11.07 | iibs-e-1izbafn | גָלַל | גָּלַל | 148 |
-| 11.08 | iibs-e-8eb2zb | מְצֹרָע | מְצֹרָע / צָרוּעַ | 148 |
-| 12.01 | iibs-e-1g1yvev | בְכֹרָה | בְּכֹרָה | 166 |
-| 12.03 | iibs-e-1lr6amh | מַכָה | מַכָּה | 166 |
-| 14.05 | iibs-e-1ei13yu | סַםִים | סַמִּים | 190 |
-| 14.10 | iibs-e-1qj792p | תָר | תָּר | 190 |
-| 15.10 | iibs-e-5t8bdb | נִקָה | נִקָּה | 204 |
-| 16.01 | iibs-e-z7ocgj | אֵלָה | אֵלָה / אֵלוֹן | 216 |
-| 16.03 | iibs-e-skj8m6 | טַבָח | טַבָּח | 216 |
-| 16.04 | iibs-e-del6f5 | כְפִיר | כְּפִיר | 216 |
-| 16.06 | iibs-e-1lwarqz | גָוַע | גָּוַע | 216 |
-| 16.08 | iibs-e-1xruqo6 | לִקֵט | לִקֵּט | 216 |
-| 18.01 | iibs-e-10oeexr | אִגֶרֶת | אִגֶּרֶת | 238 |
-| 18.04 | iibs-e-2ota0a | כְתָב | כְּתָב | 238 |
-| 18.05 | iibs-e-mxudvj | מְנוחָה | מְנוּחָה | 238 |
-| 19.01 | iibs-e-6y52t4 | בִירָה | בִּירָה | 252 |
-| 19.02 | iibs-e-1rhdcaf | גִלולִים | גִּלּוּלִים | 252 |
-| 19.03 | iibs-e-15am9jn | מִלָה | מִלָּה | 252 |
-| 20.02 | iibs-e-x8c85 | דֶשֶׁן | דֶּשֶׁן | 266 |
-| 20.09 | iibs-e-19fozv3 | רַחום | רַחוּם | 266 |
-| 21.01 | iibs-e-1ye7pb9 | בִזָה | בִּזָּה | 282 |
-| 21.03 | iibs-e-1iz00bx | לִשְׁכָה | לִשְׁכָּה | 282 |
-| 21.04 | iibs-e-19kgj21 | כָלָה | כָּלָה | 282 |
-| 22.07 | iibs-e-1lyg7ig | בָחַן | בָּחַן | 294 |
-| 22.08 | iibs-e-c6tqxt | בָצַר | בָּצַר | 294 |
-| 22.09 | iibs-e-lxj3rt | הִתְוַדָה | הִתְוַדָּה | 294 |
-| 23.01 | iibs-e-fu2aoo | אוֹפַן | אוֹפַן / אוֹפָן | 306 |
-| 23.02 | iibs-e-lhd5yr | גְעָרָה | גְּעָרָה | 306 |
-| 23.08 | iibs-e-xntb38 | נִבְדַל | נִבְדַּל | 306 |
-| 23.10 | iibs-e-n04ah9 | נִקְבַץ | נִקְבַּץ | 306 |
-| 25.08 | iibs-e-2kb4k9 | אִםֵץ | אִמֵּץ | 332 |
 | 25.09 | iibs-e-ijpfte | זֵרָה | זָרָה | 332 |
-| 26.01 | iibs-e-ybfl7f | אַרְבֶה | אַרְבֶּה | 344 |
-| 26.09 | iibs-e-io15j2 | קִבֵל | קִבֵּל | 344 |
-| 27.02 | iibs-e-ili6qt | כְלִםָה | כְּלִמָּה | 356 |
-| 27.04 | iibs-e-1t2zmvu | רִםוֹן | רִמּוֹן | 356 |
-| 27.05 | iibs-e-c46m0i | תַחֲנונִים | תַּחֲנוּנִים | 356 |
-| 28.01 | iibs-e-19damaf | בֹשֶׁת | בֹּשֶׁת | 366 |
-| 28.02 | iibs-e-1jt8mnt | דְבִיר | דְּבִיר | 366 |
-| 28.08 | iibs-e-jt87xu | רַן | רַן / רָנַן | 366 |
-| 28.09 | iibs-e-hmp2m7 | רַע | רַע / רָעַע | 366 |
-| 28.10 | iibs-e-1e3b1l7 | שִׁוַע | שִׁוַּע | 366 |

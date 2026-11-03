@@ -12,6 +12,11 @@ const { hydrateIibsDrillRuns, drillFingerprint } = await jiti.import(join(root, 
 const { E_SLOT_FREEZE, E_REPAIR_SLOTS, E_PRIOR_IDS } = await jiti.import(join(root, "src/lib/iibs-e-freeze.ts"));
 const { applyIibsLesson, levelCleared, levelUnlocked } = await jiti.import(join(root, "src/lib/iibs-game.ts"));
 const { defaultGame } = await jiti.import(join(root, "src/lib/game.ts"));
+const { vocabLessons } = await jiti.import(join(root, "src/lib/iibs-vocab.ts"));
+
+function cleanGloss(gloss) {
+  return gloss.replace(/\s*\([^)]*\)/g, "").replace(/\s+/g, " ").replace(/\s+([,;])/g, "$1").trim();
+}
 
 function levelE() {
   const words = [];
@@ -100,6 +105,34 @@ test("a live id is never read as an old id, and a prior repair id still chains",
   const live = keepStudyCards({ [word.id]: { reps: 7, interval: 2 } });
   assert.equal(live[word.id].reps, 7);
   assert.equal(Object.keys(live).length, 1);
+});
+
+test("every repaired Level E place chains its frozen id to the word there now", () => {
+  const words = levelE();
+  const live = new Set(words.map((item) => item.id));
+  const lessons = vocabLessons("E");
+  for (const slot of E_REPAIR_SLOTS) {
+    const from = E_SLOT_FREEZE.find((row) => row.slot === slot).id;
+    const lesson = Number(slot.slice(7, 9));
+    const place = Number(slot.slice(10, 12));
+    const word = lessons[lesson - 1][place - 1];
+    const gloss = cleanGloss(word.gloss);
+    assert.ok(gloss, slot);
+    const expectId = iibsWordId("E", word.hebrew, gloss);
+    assert.equal(live.has(from), false, slot);
+    const kept = keepStudyCards({ [from]: { reps: 1, interval: 1 } });
+    assert.deepEqual(Object.keys(kept), [expectId], slot);
+  }
+  for (const row of E_PRIOR_IDS) {
+    const kept = keepStudyCards({ [row.id]: { reps: 1, interval: 1 } });
+    assert.equal(Object.keys(kept).length, 1, row.slot);
+    assert.equal(live.has(Object.keys(kept)[0]), true, row.slot);
+  }
+  assert.equal(words.filter((item) => item.hebrew === "זֵרָה").length, 1);
+  assert.equal(words.some((item) => item.hebrew === "זָרָה"), false);
+  for (const hebrew of ["מְצֹרָע / צָרוּעַ", "אֵלָה / אֵלוֹן", "אוֹפַן / אוֹפָן", "רַן / רָנַן", "רַע / רָעַע"]) {
+    assert.equal(words.filter((item) => item.hebrew === hebrew).length, 1, hebrew);
+  }
 });
 
 test("clearing the 28 Level E lessons still opens the Reading Lab", () => {
