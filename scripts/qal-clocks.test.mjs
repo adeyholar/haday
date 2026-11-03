@@ -32,7 +32,7 @@ test("practice deals yiqtol, wayyiqtol, and weqatal", () => {
   const cards = clockCards();
   assert.equal(cards.filter((card) => card.clock === "yiqtol").length, 259);
   assert.equal(cards.filter((card) => card.clock === "wayyiqtol").length, 212);
-  assert.equal(cards.filter((card) => card.clock === "weqatal").length, 293);
+  assert.equal(cards.filter((card) => card.clock === "weqatal").length, 297);
   const shamar = cards.find((card) => card.rootId === "shamar" && card.clock === "yiqtol" && card.pgn === "3ms");
   assert.equal(shamar.form, "יִשְׁמֹר");
   const story = cards.find((card) => card.rootId === "shamar" && card.clock === "wayyiqtol" && card.pgn === "3ms");
