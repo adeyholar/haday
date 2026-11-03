@@ -42,13 +42,34 @@ test("Tanakh paradigm forms the class already knows", () => {
   assert.equal(form("bo", "qal", "wayyiqtol", "3ms"), "וַיָּבֹא");
   assert.equal(form("asah", "qal", "perfect", "2ms"), "עָשִׂיתָ");
   assert.equal(form("raah", "qal", "wayyiqtol", "3ms"), "וַיַּרְא");
-  assert.equal([...form("halak", "qal", "wayyiqtol", "3ms")].at(-1), "ך");
-  assert.equal([...form("barak", "piel", "perfect", "3ms")].at(-1), "ך");
-  const hishtammer = "\u05d4\u05b4\u05e9\u05c1\u05b0\u05ea\u05b7\u05de\u05bc\u05b5\u05e8";
-  const hizdakker = "\u05d4\u05b4\u05d6\u05b0\u05d3\u05b7\u05db\u05bc\u05b5\u05e8";
+  assert.equal(form("halak", "qal", "wayyiqtol", "3ms").endsWith("ךְ"), true);
+  assert.equal(form("barak", "piel", "perfect", "3ms").endsWith("ךְ"), true);
+  const hishtammer = "\u05d4\u05b4\u05e9\u05c1\u05b0\u05ea\u05bc\u05b7\u05de\u05bc\u05b5\u05e8";
+  const hizdakker = "\u05d4\u05b4\u05d6\u05b0\u05d3\u05bc\u05b7\u05db\u05bc\u05b5\u05e8";
   assert.equal(form("shamar", "hithpael", "perfect", "3ms"), hishtammer);
   assert.equal(form("zakar", "hithpael", "perfect", "3ms"), hizdakker);
   assert.equal(form("shakan", "qal", "perfect", "1cp"), "\u05e9\u05c1\u05b8\u05db\u05b7\u05ab\u05e0\u05bc\u05d5\u05bc");
+});
+
+test("dagesh lene and final kaf are written where the syllable requires them", () => {
+  const form = (id, stem, conj, cell) => vs.openPattern(id, stem, conj).cells.find((row) => row.id === cell).form;
+  const D = "\u05BC";
+  const tav = form("shamar", "qal", "imperfect", "2ms");
+  assert.equal(tav.startsWith("ת" + D), true, tav);
+  const hiphil = form("katav", "hiphil", "imperfect", "2ms");
+  assert.equal(hiphil.startsWith("ת" + D), true, hiphil);
+  const niphal = form("katav", "niphal", "perfect", "3ms");
+  assert.equal(niphal, "\u05e0\u05b4\u05db\u05b0\u05ea\u05bc\u05b7\u05d1", niphal);
+  const niphalPart = form("zakar", "niphal", "participle", "ms");
+  assert.equal(niphalPart.includes("כ" + D), true, niphalPart);
+  const swapped = form("shamar", "hithpael", "perfect", "3ms");
+  assert.equal(swapped.includes("ת" + D), true, swapped);
+  const dalet = form("zakar", "hithpael", "perfect", "3ms");
+  assert.equal(dalet.includes("ד" + D), true, dalet);
+  const reigned = form("malak", "qal", "perfect", "3ms");
+  assert.equal(reigned.endsWith("ךְ"), true, reigned);
+  const soft = form("katav", "niphal", "imperfect", "3ms");
+  assert.equal(soft.includes("ת" + D), false, soft);
 });
 
 test("a round is ten builds and 90% clears it", () => {

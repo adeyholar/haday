@@ -7,6 +7,7 @@ import {
   type ConjId,
   type StemId,
 } from "@/lib/verbal-system";
+import { BGDKPT, isSibilant } from "@/lib/verbal-marks";
 
 /** Open practice. Ten first answers, and 90% opens the next set. It does not lock a level. */
 export const BINYAN_ROUND = 10;
@@ -20,6 +21,9 @@ export const BINYAN_SETS: readonly (readonly StemId[])[] = [
 ];
 
 const DRILL_CONJ: readonly ConjId[] = ["perfect", "imperfect", "participle"];
+
+/** Tav-prefix imperfects. They stay out of the drill until this pointing is signed. */
+const TAV_PERSON = new Set(["3fs", "2ms", "2fs", "3fp", "2mp", "2fp"]);
 
 export type BinyanMode = "verb-stem" | "stem-verb" | "same-root";
 
@@ -102,6 +106,17 @@ export type BinyanCard = {
   person: string;
 };
 
+/** The shapes the review found. The drill does not show them until they are signed. */
+export function heldFromDrill(card: Pick<BinyanCard, "id" | "stem" | "conj" | "rootId" | "form">): boolean {
+  const cell = card.id.split(":").at(-1) ?? "";
+  if (card.conj === "imperfect" && TAV_PERSON.has(cell)) return true;
+  const root = rootById(card.rootId);
+  if (card.stem === "niphal" && root && BGDKPT.has(root.letters[1])) return true;
+  if (card.stem === "hithpael" && root && isSibilant(root.letters[0])) return true;
+  if (card.form.includes("ך")) return true;
+  return false;
+}
+
 export type BinyanPrompt = {
   hebrew: string;
   line: string;
@@ -121,7 +136,7 @@ export function strongBinyanCards(): BinyanCard[] {
         if (!pattern) continue;
         for (const cell of pattern.cells) {
           if (!cell.form) continue;
-          cards.push({
+          const card: BinyanCard = {
             id: `${root.id}:${stem.id}:${conj}:${cell.id}`,
             rootId: root.id,
             cite: root.cite,
@@ -130,7 +145,9 @@ export function strongBinyanCards(): BinyanCard[] {
             conj,
             form: cell.form,
             person: cell.label,
-          });
+          };
+          if (heldFromDrill(card)) continue;
+          cards.push(card);
         }
       }
     }
@@ -188,9 +205,24 @@ export function binyanPrompt(card: BinyanCard, mode: BinyanMode): BinyanPrompt {
   return { hebrew: card.form, line: conjLabel(card.conj, true) };
 }
 
-export function binyanClue(stem: StemId): string {
-  const card = STEM_CARDS[stem];
-  return `${card.en}. ${card.mark}`;
+export function binyanClue(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
+  const face = STEM_CARDS[card.stem];
+  return `${face.en}. ${clueFor(card)}`;
+}
+
+function clueFor(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
+  const root = rootById(card.rootId);
+  if (card.stem === "hithpael" && root && isSibilant(root.letters[0])) {
+    return "The tav has traded places with the first letter.";
+  }
+  if (card.stem === "qal" && card.conj === "imperfect") return "A person prefix, and no doubling in the middle letter.";
+  if (card.stem === "qal" && card.conj === "participle") return "Holem or shureq, and no person prefix.";
+  if (card.stem === "hiphil" && card.conj === "imperfect") return "Patah under the prefix, and an i-vowel in the stem.";
+  if (card.stem === "hiphil" && card.conj === "participle") return "Mem with patah, and an i-vowel in the stem.";
+  if (card.stem === "hithpael" && card.conj === "imperfect") return "A person prefix, then tav with shewa.";
+  if (card.stem === "hithpael" && card.conj === "participle") return "Mem with hireq, then tav with shewa.";
+  if (card.stem === "hithpael" && card.conj === "perfect") return "He with hireq, then tav with shewa.";
+  return STEM_CARDS[card.stem].mark;
 }
 
 export function dealBinyanRound(

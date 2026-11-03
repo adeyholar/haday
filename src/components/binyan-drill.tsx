@@ -38,18 +38,17 @@ export function BinyanDrill() {
   const [firstCorrect, setFirstCorrect] = useState(0);
   const [report, setReport] = useState<{ correct: number; advanced: boolean } | null>(null);
   const [locked, setLocked] = useState(false);
+  const [choices, setChoices] = useState<BinyanChoice[]>([]);
 
   const cards = useMemo(() => strongBinyanCards(), []);
   const card = round?.[index] ?? null;
-  const choices = useMemo(
-    () => (card && mode ? binyanChoices(card, mode, open) : []),
-    [card, mode, open],
-  );
 
   function begin(next: BinyanMode) {
+    const dealt = dealBinyanRound(open);
     setMode(next);
-    setRound(dealBinyanRound(open));
+    setRound(dealt);
     setIndex(0);
+    setChoices(dealt[0] ? binyanChoices(dealt[0], next, open) : []);
     setPicked(null);
     setFirstCorrect(0);
     setReport(null);
@@ -78,6 +77,7 @@ export function BinyanDrill() {
       return;
     }
     setIndex((value) => value + 1);
+    setChoices(binyanChoices(round[index + 1], mode, open));
     setPicked(null);
     setLocked(false);
   }
@@ -118,7 +118,14 @@ export function BinyanDrill() {
       {picked ? (
         <div className="mt-5 grid gap-3">
           <GradeBanner ok={right} label={right ? "Correct" : "Not quite"} />
-          {right ? null : <p className="text-center text-sm text-ink">{binyanClue(card.stem)}</p>}
+          {right ? null : (
+            <>
+              <p className="he-word text-center font-hebrew text-4xl leading-tight text-ink" dir="rtl" lang="he">
+                {card.form}
+              </p>
+              <p className="text-center text-sm text-ink">{binyanClue(card)}</p>
+            </>
+          )}
           <Button type="button" className="w-full" onClick={nextCard}>
             {done ? "Round" : "Next"}
           </Button>
@@ -180,14 +187,13 @@ function Home({
                 </span>
               </p>
               <p className="mt-1 text-sm text-muted">{face.meaning}</p>
-              <p className="mt-2 text-sm text-ink">{face.mark}</p>
-              <ul className="mt-3 grid gap-1">
+              <ul className="mt-3 grid gap-2">
                 {examples.map((card) => (
                   <li key={card.id} className="text-sm text-ink">
                     <span className="font-hebrew text-xl" dir="rtl" lang="he">
                       {card.form}
                     </span>
-                    <span className="ml-2 text-muted">{card.cite}</span>
+                    <span className="ml-2 text-muted">{binyanClue(card)}</span>
                   </li>
                 ))}
               </ul>

@@ -9,6 +9,7 @@ const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const drill = await jiti.import(join(root, "src/lib/binyan-drill.ts"));
 const game = await jiti.import(join(root, "src/lib/game.ts"));
 const path = await jiti.import(join(root, "src/lib/path.ts"));
+const vs = await jiti.import(join(root, "src/lib/verbal-system.ts"));
 
 test("strong stem cards cover the seven stems and hide the mark", () => {
   const cards = drill.strongBinyanCards();
@@ -41,10 +42,41 @@ test("a round stays inside the open set and 90% opens the next", () => {
   assert.equal(drill.finishBinyanRound({ set: 2, stems: {} }, 10).set, 2);
   const noted = drill.noteBinyanFirst(progress, "qal", false);
   assert.deepEqual(noted.stems.qal, { seen: 1, first: 0 });
-  const clue = drill.binyanClue("piel");
+  const clue = drill.binyanClue({ stem: "piel", conj: "perfect", rootId: "qatal" });
   assert.match(clue, /Piel/);
   assert.match(clue, /Dagesh/);
   assert.doesNotMatch(clue, /wrong/i);
+  const qal = drill.binyanClue({ stem: "qal", conj: "imperfect", rootId: "shamar" });
+  assert.match(qal, /person prefix/);
+  assert.doesNotMatch(qal, /No prefix/);
+  const hiphil = drill.binyanClue({ stem: "hiphil", conj: "imperfect", rootId: "katav" });
+  assert.match(hiphil, /Patah/);
+  assert.doesNotMatch(hiphil, /Hireq under the prefix/);
+  const hiphilPtc = drill.binyanClue({ stem: "hiphil", conj: "participle", rootId: "katav" });
+  assert.match(hiphilPtc, /Mem with patah/);
+  const swapped = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "shamar" });
+  assert.match(swapped, /traded places/);
+  const hit = drill.binyanClue({ stem: "hithpael", conj: "imperfect", rootId: "qatal" });
+  assert.match(hit, /person prefix, then tav/);
+});
+
+test("the drill hides the forms whose pointing is not signed yet", () => {
+  const cards = drill.strongBinyanCards();
+  const tav = new Set(["3fs", "2ms", "2fs", "3fp", "2mp", "2fp"]);
+  const begad = new Set(["ב", "ג", "ד", "כ", "פ", "ת"]);
+  const sibilant = new Set(["ש", "ס", "צ", "ז"]);
+  for (const card of cards) {
+    const cell = card.id.split(":").at(-1);
+    assert.equal(card.conj === "imperfect" && tav.has(cell), false, card.id);
+    const root = vs.rootById(card.rootId);
+    assert.equal(card.stem === "niphal" && begad.has(root.letters[1]), false, card.id);
+    assert.equal(card.stem === "hithpael" && sibilant.has(root.letters[0]), false, card.id);
+    assert.equal(card.form.includes("ך"), false, card.id);
+    const prompt = drill.binyanPrompt(card, "verb-stem");
+    assert.equal(prompt.line.includes(drill.binyanClue(card)), false);
+  }
+  assert.equal(drill.heldFromDrill({ id: "shamar:qal:imperfect:2ms", stem: "qal", conj: "imperfect", rootId: "shamar", form: "תִּשְׁמֹר" }), true);
+  assert.ok(cards.length > 10);
 });
 
 test("hydrateGame keeps per-stem accuracy and drops a foreign stem", () => {
