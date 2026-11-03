@@ -9,7 +9,7 @@ const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { iibsWeekItems, iibsWordId, firstRepairTarget } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { keepStudyCards } = await jiti.import(join(root, "src/lib/card-ids.ts"));
 const { hydrateIibsDrillRuns, drillFingerprint } = await jiti.import(join(root, "src/lib/etch.ts"));
-const { E_SLOT_FREEZE, E_REPAIR_SLOTS } = await jiti.import(join(root, "src/lib/iibs-e-freeze.ts"));
+const { E_SLOT_FREEZE, E_REPAIR_SLOTS, E_PRIOR_IDS } = await jiti.import(join(root, "src/lib/iibs-e-freeze.ts"));
 const { applyIibsLesson, levelCleared, levelUnlocked } = await jiti.import(join(root, "src/lib/iibs-game.ts"));
 const { defaultGame } = await jiti.import(join(root, "src/lib/game.ts"));
 
@@ -80,6 +80,26 @@ test("a paused Level E drill is remapped, and a broken one is dropped", () => {
     "E:1:due": { seed: 1, ids: ["iibs-e-nope"], index: 2, reviews: [], hits: 1, checks: 1, fingerprint: "x" },
   });
   assert.equal(dropped["E:1:due"], undefined);
+});
+
+test("a live id is never read as an old id, and a prior repair id still chains", () => {
+  const words = levelE();
+  const word = words.find((item) => item.hebrew === "מָרְדֳּכַי");
+  assert.ok(word);
+  const slot = "iibs-e-01-09";
+  const prior = E_PRIOR_IDS.find((row) => row.slot === slot).id;
+  const freeze = E_SLOT_FREEZE.find((row) => row.slot === slot).id;
+  assert.notEqual(prior, word.id);
+  assert.notEqual(freeze, word.id);
+  assert.notEqual(prior, freeze);
+  const fromPrior = keepStudyCards({ [prior]: { reps: 3, interval: 1 } });
+  assert.equal(fromPrior[word.id].reps, 3);
+  assert.equal(fromPrior[prior], undefined);
+  const fromFreeze = keepStudyCards({ [freeze]: { reps: 5, interval: 1 } });
+  assert.equal(fromFreeze[word.id].reps, 5);
+  const live = keepStudyCards({ [word.id]: { reps: 7, interval: 2 } });
+  assert.equal(live[word.id].reps, 7);
+  assert.equal(Object.keys(live).length, 1);
 });
 
 test("clearing the 28 Level E lessons still opens the Reading Lab", () => {

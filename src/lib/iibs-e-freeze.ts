@@ -380,6 +380,37 @@ export const E_REPAIR_SLOTS: readonly string[] = [
   "iibs-e-28-05",
 ];
 
+/** Ids after the first coursebook repair, before the tutor's pointing pass.
+ *  A second edit chains this id to the id the place has now.
+ *  Do not regenerate E_SLOT_FREEZE.
+ */
+export const E_PRIOR_IDS: readonly { slot: string; id: string }[] = [
+  { slot: "iibs-e-01-09", id: "iibs-e-pty794" },
+  { slot: "iibs-e-02-07", id: "iibs-e-hzgw9k" },
+  { slot: "iibs-e-03-03", id: "iibs-e-5p3pv0" },
+  { slot: "iibs-e-04-05", id: "iibs-e-4qpjnj" },
+  { slot: "iibs-e-04-08", id: "iibs-e-1rrb298" },
+  { slot: "iibs-e-05-06", id: "iibs-e-jw1j6p" },
+  { slot: "iibs-e-07-06", id: "iibs-e-4n7sjq" },
+  { slot: "iibs-e-12-02", id: "iibs-e-tb38c7" },
+  { slot: "iibs-e-14-06", id: "iibs-e-11ushzg" },
+  { slot: "iibs-e-15-03", id: "iibs-e-mqmf1h" },
+  { slot: "iibs-e-16-07", id: "iibs-e-bk0xxj" },
+  { slot: "iibs-e-18-06", id: "iibs-e-14jmelc" },
+  { slot: "iibs-e-18-09", id: "iibs-e-1d88pqg" },
+  { slot: "iibs-e-19-07", id: "iibs-e-dp6a0c" },
+  { slot: "iibs-e-20-08", id: "iibs-e-wwynj0" },
+  { slot: "iibs-e-21-05", id: "iibs-e-1estgyq" },
+  { slot: "iibs-e-23-07", id: "iibs-e-x4tf9d" },
+  { slot: "iibs-e-24-03", id: "iibs-e-cdfx7o" },
+  { slot: "iibs-e-24-09", id: "iibs-e-lu8gn5" },
+  { slot: "iibs-e-25-05", id: "iibs-e-7rabxy" },
+  { slot: "iibs-e-26-03", id: "iibs-e-1cn7zie" },
+  { slot: "iibs-e-26-04", id: "iibs-e-1cqno3b" },
+  { slot: "iibs-e-27-08", id: "iibs-e-6nlxry" },
+  { slot: "iibs-e-28-03", id: "iibs-e-rz4127" },
+];
+
 /**
  * A saved id that became more than one study word.
  * Progress moves to the first slot only. Level E has no such row:

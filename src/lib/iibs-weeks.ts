@@ -1,4 +1,4 @@
-import { E_REPAIR_SLOTS, E_SLOT_FREEZE, E_SPLITS } from "@/lib/iibs-e-freeze";
+import { E_PRIOR_IDS, E_REPAIR_SLOTS, E_SLOT_FREEZE, E_SPLITS } from "@/lib/iibs-e-freeze";
 import { vocabLessons, type IibsVocabLevel, type IibsVocabWord } from "@/lib/iibs-vocab";
 import type { Pos, VocabItem } from "@/lib/vocab";
 
@@ -70,20 +70,43 @@ function levelWords(level: IibsVocabLevel): VocabItem[] {
 }
 
 const FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
 
 /** One old id is carried to the first new word and not to any word after it. */
 export function firstRepairTarget(targets: readonly string[]): string | undefined {
   return targets[0];
 }
 
-/** Pre-fix hashes chain to the id the place has now. A split keeps the first target only. */
+function liveWordIds(): Set<string> {
+  const live = new Set<string>();
+  for (const items of WORDS.values()) {
+    for (const item of items) live.add(item.id);
+  }
+  return live;
+}
+
+/** A live study id is never stored as an old id. */
+function linkOld(live: Set<string>, oldId: string, nextId: string) {
+  if (!oldId || !nextId || oldId === nextId || live.has(oldId)) return;
+  if (!LEGACY.has(oldId)) LEGACY.set(oldId, nextId);
+}
+
+/** Pre-fix hashes chain to the id the place has now. A later edit chains the id it replaced. A split keeps the first target only. */
 function linkLevelERepairs() {
-  for (const slot of E_REPAIR_SLOTS) {
+  const live = liveWordIds();
+  const slots = new Set<string>([...E_REPAIR_SLOTS, ...PRIOR_ID.keys()]);
+  for (const slot of slots) {
     const from = FREEZE_ID.get(slot);
     const current = LEGACY.get(slot);
     if (!from || !current || from === current) continue;
-    if (!LEGACY.has(from)) LEGACY.set(from, current);
-    LEGACY.set(slot, from);
+    const mid = PRIOR_ID.get(slot);
+    if (mid && mid !== current && mid !== from && !live.has(mid)) {
+      linkOld(live, mid, current);
+      linkOld(live, from, mid);
+    } else {
+      linkOld(live, from, current);
+    }
+    if (!live.has(slot)) LEGACY.set(slot, from);
   }
   for (const split of E_SPLITS) {
     const slot = firstRepairTarget(split.slots);
@@ -96,13 +119,15 @@ function linkLevelERepairs() {
       if (!next || next === target) break;
       target = next;
     }
-    if (split.from !== target) LEGACY.set(split.from, target);
+    if (split.from !== target && !live.has(split.from)) LEGACY.set(split.from, target);
   }
 }
 
-/** The place-based id dealt on 14 Oct, then any later hash of the same word. Unknown keys are left alone. */
+/** The place-based id dealt on 14 Oct, then any later hash of the same word. A live id is not an old id. */
 export function iibsLegacyId(id: string): string | undefined {
   for (const level of IIBS_WEEK_LEVELS) levelWords(level);
+  const live = iibsStudyIdSet();
+  if (live.has(id)) return undefined;
   let current = id;
   const seen = new Set<string>();
   let hopped = false;
@@ -112,6 +137,7 @@ export function iibsLegacyId(id: string): string | undefined {
     if (!next || next === current) break;
     current = next;
     hopped = true;
+    if (live.has(current)) break;
   }
   return hopped ? current : undefined;
 }
