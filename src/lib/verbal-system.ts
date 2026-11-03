@@ -460,7 +460,7 @@ function person(kind: "hireq" | "patah" | "wayy-hireq" | "wayy-patah" | "piel" |
   if (kind === "hireq") {
     return [
       { id: "yi", label: "yod hireq", mark: mark("י", H) },
-      { id: "ti", label: "tav hireq", mark: mark("ת", H) },
+      { id: "ti", label: "tav hireq", mark: mark("ת", H, true) },
       { id: "ee", label: "alef segol", mark: mark("א", E) },
       { id: "ni", label: "nun hireq", mark: mark("נ", H) },
     ];
@@ -468,7 +468,7 @@ function person(kind: "hireq" | "patah" | "wayy-hireq" | "wayy-patah" | "piel" |
   if (kind === "patah") {
     return [
       { id: "ya", label: "yod patah", mark: mark("י", P) },
-      { id: "ta", label: "tav patah", mark: mark("ת", P) },
+      { id: "ta", label: "tav patah", mark: mark("ת", P, true) },
       { id: "ee", label: "alef segol", mark: mark("א", E) },
       { id: "na", label: "nun patah", mark: mark("נ", P) },
     ];
@@ -732,7 +732,7 @@ function qalPtc(root: VerbRoot): Engine {
   return {
     slots: [slot("shape", "Participle shape", [
       { id: "active-ms", label: "holem, tsere", mark: CIRC + V.holem + " " + CIRC + V.tsere },
-      { id: "active-fs", label: "holem, segol, tav", mark: CIRC + V.holem + " " + CIRC + V.segol + "ת" },
+      { id: "active-fs", label: "holem, segol, segol, tav", mark: CIRC + V.holem + " " + CIRC + V.segol + " " + CIRC + V.segol + "ת" },
       { id: "active-mp", label: "holem, then ים", mark: CIRC + V.holem + "ִים" },
       { id: "active-fp", label: "holem, then וֹת", mark: CIRC + V.holem + "וֹת" },
       { id: "active-mpc", label: "holem, then tsere yod", mark: CIRC + V.holem + "ֵי" },
@@ -744,7 +744,7 @@ function qalPtc(root: VerbRoot): Engine {
     cells: rows.map(([id, label, shape]) => seed(id, label, "Holem after the first letter is the active participle. Qamets and shureq is passive.", { shape })),
     render: (r, picks) => {
       const dag = lene(r.letters[0], false);
-      if (picks.shape === "active-fs") return M(r, 0, V.holem, dag) + M(r, 1, V.segol) + M(r, 2, "") + "ת";
+      if (picks.shape === "active-fs") return M(r, 0, V.holem, dag) + M(r, 1, V.segol) + M(r, 2, V.segol) + "ת";
       if (picks.shape === "active-mp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.hireq) + "ים";
       if (picks.shape === "active-fp") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, "") + HOLAM_VAV + "ת";
       if (picks.shape === "active-mpc") return M(r, 0, V.holem, dag) + M(r, 1, V.shewa) + M(r, 2, V.tsere) + "י";
@@ -951,12 +951,12 @@ function hiphilImpf(root: VerbRoot, guttural: boolean, wayy: boolean): Engine {
       ]
     : [
         { id: "ya", label: "yod patah", mark: mark("י", V.patah) },
-        { id: "ta", label: "tav patah", mark: mark("ת", V.patah) },
+        { id: "ta", label: "tav patah", mark: mark("ת", V.patah, true) },
         { id: "aa", label: "alef patah", mark: mark("א", V.patah) },
         { id: "na", label: "nun patah", mark: mark("נ", V.patah) },
       ];
   PRE_MARK.ya = mark("י", V.patah);
-  PRE_MARK.ta = mark("ת", V.patah);
+  PRE_MARK.ta = mark("ת", V.patah, true);
   PRE_MARK.aa = mark("א", V.patah);
   PRE_MARK.na = mark("נ", V.patah);
   PRE_MARK.wya = mark("ו", V.patah) + mark("י", V.patah, true);
@@ -1039,7 +1039,7 @@ function hiphilPtc(root: VerbRoot): Engine {
     ],
     render: (r, picks) => {
       const body = mark("מ", V.patah) + M(r, 0, V.shewa) + M(r, 1, V.hireq, lene(r.letters[1], false)) + "י";
-      if (picks.shape === "mp") return body + M(r, 2, "") + "ים";
+      if (picks.shape === "mp") return body + M(r, 2, V.hireq) + "ים";
       return body + M(r, 2, "", false, true);
     },
     blurb: "Hiphil participle. Mem with patah, not shewa.",
@@ -1137,7 +1137,8 @@ function renderHith(root: VerbRoot, picks: Record<string, string>, prefix: strin
 
 function renderHithSib(root: VerbRoot, picks: Record<string, string>, head: string): string {
   const moved = M(root, 0, V.shewa);
-  const tav = mark(hithTav(root), vowelChar(picks.v1) || V.patah);
+  const tavLetter = hithTav(root);
+  const tav = mark(tavLetter, vowelChar(picks.v1) || V.patah, lene(tavLetter, false));
   const B = M(root, 1, vowelChar(picks.v2), doubled(root, "c2"));
   const end = endTail(picks.end);
   return head + moved + tav + B + M(root, 2, end.c3, false, end.final) + end.tail;
@@ -1277,8 +1278,9 @@ function niphalPerfect(root: VerbRoot): Engine {
     cells: rows.map(([id, label, pref, v1, v2, end]) => seed(id, label, "Niphal perfect opens with nun.", { pref, v1, v2, end })),
     render: (r, picks) => {
       const pre = picks.pref === "se" ? mark("נ", V.segol) : mark("נ", V.hireq);
+      const closed = picks.v1 === "shewa";
       const A = M(r, 0, vowelChar(picks.v1), false);
-      const B = M(r, 1, vowelChar(picks.v2), false);
+      const B = M(r, 1, vowelChar(picks.v2), closed && lene(r.letters[1], false));
       const end = endTail(picks.end);
       return pre + A + B + M(r, 2, end.c3, false, end.final) + end.tail;
     },
@@ -1369,7 +1371,7 @@ function niphalPtc(root: VerbRoot): Engine {
       seed("mp", "masc. plural", "Masculine plural.", { end: "im" }),
     ],
     render: (r, picks) => {
-      const stem = mark("נ", V.hireq) + M(r, 0, V.shewa) + M(r, 1, V.qamets);
+      const stem = mark("נ", V.hireq) + M(r, 0, V.shewa) + M(r, 1, V.qamets, lene(r.letters[1], false));
       if (picks.end === "ah") return stem + M(r, 2, V.qamets) + "ה";
       if (picks.end === "im") return stem + M(r, 2, V.hireq) + "ים";
       return stem + M(r, 2, "", false, true);
@@ -1406,7 +1408,7 @@ function buildEngine(root: VerbRoot, stem: StemId, conj: ConjId): Engine | null 
   if (root.cls === "I-gutt" && stem === "niphal" && (conj === "perfect" || conj === "imperfect")) return conj === "perfect" ? niphalPerfect(root) : niphalImpf(root, false);
 
   const qalFamily = root.cls === "I-gutt" || root.cls === "I-aleph" ? "igutt" : "strong";
-  const theme = root.cls === "III-gutt" ? "patah" : "holem";
+  const theme = root.cls === "III-gutt" || root.id === "lamad" ? "patah" : "holem";
   if (stem === "qal" && strongLike(root) && root.cls !== "III-he" && root.cls !== "III-aleph") {
     if (conj === "perfect") return qalPerfect(root);
     if (conj === "imperfect" && root.cls !== "I-nun" && root.cls !== "I-yod" && root.cls !== "I-aleph") return qalImpf(root, theme, root.cls === "I-gutt" ? "igutt" : "strong");
@@ -1634,7 +1636,7 @@ function hayah(conj: ConjId): Engine | null {
       slots: [slot("pre", "Prefix", [
         { id: "yi", label: "yod hireq", mark: mark("י", V.hireq) },
         { id: "ee", label: "alef segol", mark: mark("א", V.segol) },
-        { id: "ti", label: "tav hireq", mark: mark("ת", V.hireq) },
+        { id: "ti", label: "tav hireq", mark: mark("ת", V.hireq, true) },
       ])],
       cells: [
         seed("3ms", "3rd masc. sing.", "He will be.", { pre: "yi" }),
@@ -1642,7 +1644,7 @@ function hayah(conj: ConjId): Engine | null {
         seed("2ms", "2nd masc. sing.", "Tav with hireq.", { pre: "ti" }),
       ],
       render: (_r, picks) => {
-        const pre = picks.pre === "ee" ? mark("א", V.segol) : picks.pre === "ti" ? mark("ת", V.hireq) : mark("י", V.hireq);
+        const pre = picks.pre === "ee" ? mark("א", V.segol) : picks.pre === "ti" ? mark("ת", V.hireq, true) : mark("י", V.hireq);
         return pre + mark("ה", V.shewa) + mark("י", V.segol) + "ה";
       },
       blurb: "היה imperfect. The he stays as a vowel letter.",

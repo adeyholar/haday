@@ -39,7 +39,8 @@ export function mark(ch: string, vowel = "", dagesh = false, dot: Dot = "", asFi
   const med = medial(ch);
   const base = asFinal ? (FINAL[med] ?? med) : med;
   const point = dot === "shin" ? SHIN : dot === "sin" ? SIN : "";
-  return base + point + (dagesh ? DAG : "") + vowel;
+  const vowelOn = asFinal && med === "כ" && vowel === "" ? V.shewa : vowel;
+  return base + point + (dagesh ? DAG : "") + vowelOn;
 }
 
 export function lene(ch: string, afterVowel: boolean): boolean {

@@ -10,17 +10,18 @@ const drill = await jiti.import(join(root, "src/lib/binyan-drill.ts"));
 const game = await jiti.import(join(root, "src/lib/game.ts"));
 const path = await jiti.import(join(root, "src/lib/path.ts"));
 
-test("strong stem cards cover the seven stems and hide the mark", () => {
+test("strong stem cards cover the seven stems and the full pool", () => {
   const cards = drill.strongBinyanCards();
-  assert.ok(cards.length > 10);
+  assert.equal(cards.length, 1096);
   const stems = new Set(cards.map((card) => card.stem));
   assert.deepEqual([...stems].sort(), ["hiphil", "hithpael", "hophal", "niphal", "piel", "pual", "qal"]);
   for (const card of cards) {
     assert.equal(drill.isStrongCard(card), true);
     for (const mode of ["verb-stem", "stem-verb", "same-root"]) {
       const prompt = drill.binyanPrompt(card, mode);
-      assert.equal(prompt.hebrew.includes(drill.STEM_CARDS[card.stem].mark), false);
-      assert.equal(prompt.line.includes(drill.STEM_CARDS[card.stem].mark), false);
+      const clue = drill.binyanClue(card);
+      assert.equal(prompt.hebrew.includes(clue), false);
+      assert.equal(prompt.line.includes(clue), false);
     }
   }
   for (const stem of stems) {
@@ -41,10 +42,35 @@ test("a round stays inside the open set and 90% opens the next", () => {
   assert.equal(drill.finishBinyanRound({ set: 2, stems: {} }, 10).set, 2);
   const noted = drill.noteBinyanFirst(progress, "qal", false);
   assert.deepEqual(noted.stems.qal, { seen: 1, first: 0 });
-  const clue = drill.binyanClue("piel");
+  const clue = drill.binyanClue({ stem: "piel", conj: "perfect", rootId: "qatal" });
   assert.match(clue, /Piel/);
   assert.match(clue, /Dagesh/);
+  assert.match(clue, /doubled \(forte\), no qibbuts under the first letter/i);
   assert.doesNotMatch(clue, /wrong/i);
+  const qal = drill.binyanClue({ stem: "qal", conj: "imperfect", rootId: "shamar" });
+  assert.match(qal, /only a person prefix/);
+  assert.match(qal, /No stem prefix/);
+  assert.match(qal, /only lene/);
+  const hiphil = drill.binyanClue({ stem: "hiphil", conj: "imperfect", rootId: "katav" });
+  assert.match(hiphil, /Patah under the prefix/);
+  assert.doesNotMatch(hiphil, /He with hireq/);
+  const hiphilPtc = drill.binyanClue({ stem: "hiphil", conj: "participle", rootId: "katav" });
+  assert.match(hiphilPtc, /Patah under the prefix/);
+  const swapped = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "shamar" });
+  assert.match(swapped, /tav moves after/);
+  assert.match(swapped, /הִשְׁתַּ/);
+  const zayin = drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "zakar" });
+  assert.match(zayin, /tav moves after/);
+  assert.match(zayin, /becomes ד after ז/);
+  assert.match(drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "savav" }), /הִשְׁתַּ/);
+  assert.match(drill.binyanClue({ stem: "hithpael", conj: "perfect", rootId: "sim" }), /הִשְׁתַּ/);
+  const hit = drill.binyanClue({ stem: "hithpael", conj: "imperfect", rootId: "qatal" });
+  assert.match(hit, /תִּתְ/);
+  assert.match(drill.binyanClue({ stem: "niphal", conj: "perfect", rootId: "qatal" }), /Nun with hireq/);
+  assert.match(drill.binyanClue({ stem: "niphal", conj: "imperfect", rootId: "qatal" }), /first letter is doubled/);
+  assert.match(drill.binyanClue({ stem: "pual", conj: "perfect", rootId: "qatal" }), /Qibbuts/);
+  assert.match(drill.binyanClue({ stem: "hophal", conj: "perfect", rootId: "qatal" }), /no doubling/);
+  assert.match(drill.binyanClue({ stem: "hiphil", conj: "perfect", rootId: "qatal" }), /shewa under the first letter/);
 });
 
 test("hydrateGame keeps per-stem accuracy and drops a foreign stem", () => {

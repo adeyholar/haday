@@ -103,10 +103,12 @@ test("each tap stays on the form, and the accent is still open until it is typed
 test("an extra dagesh lene is not a miss; a dagesh the form has still counts", () => {
   const D = "\u05BC";
   const fs = form("qatal", "imperfect", "3fs");
-  const withLene = "ת" + D + fs.slice(1);
+  assert.equal(fs.startsWith("ת" + D), true, fs);
   assert.equal(liveMatchParadigm(fs, "ת" + D), "prefix");
-  assert.equal(liveMatchParadigm(fs, withLene), "exact");
-  assert.equal(gradeClock(fs, withLene, true).ok, true);
+  assert.equal(liveMatchParadigm(fs, fs), "exact");
+  assert.equal(gradeClock(fs, fs, true).ok, true);
+  assert.equal(gradeClock(fs, fs.replace(D, ""), true).ok, false);
+  assert.equal(liveMatchParadigm("תִקְטֹל", "תִּקְטֹל"), "exact");
   const story = form("qatal", "wayyiqtol", "3ms");
   assert.equal(liveMatchParadigm(story, story.replace(D, "")), "off");
   const two = form("qatal", "perfect", "2ms");
@@ -138,9 +140,9 @@ test("yiqtol 3fp and 2fp take the accent on the theme vowel", () => {
     assert.equal(liveMatchParadigm(y, bare), "prefix");
     assert.equal(accentStillOpen(y, bare), true);
     assert.equal(gradeClock(y, bare, true).tag, "stress");
-    const withLene = "ת" + D + y.slice(1);
-    assert.equal(liveMatchParadigm(y, withLene), "exact");
-    assert.equal(gradeClock(y, withLene, true).ok, true);
+    assert.equal(y.startsWith("ת" + D), true, y);
+    assert.equal(liveMatchParadigm(y, y), "exact");
+    assert.equal(gradeClock(y, y, true).ok, true);
     const seated = placeChosenMark(bare, y, OLE);
     assert.equal(seated.status, "placed");
     assert.ok(seated.text.includes(HOLEM + OLE));
