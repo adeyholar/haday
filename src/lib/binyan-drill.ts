@@ -7,7 +7,6 @@ import {
   type ConjId,
   type StemId,
 } from "@/lib/verbal-system";
-import { BGDKPT, isSibilant } from "@/lib/verbal-marks";
 
 /** Open practice. Ten first answers, and 90% opens the next set. It does not lock a level. */
 export const BINYAN_ROUND = 10;
@@ -22,9 +21,6 @@ export const BINYAN_SETS: readonly (readonly StemId[])[] = [
 
 const DRILL_CONJ: readonly ConjId[] = ["perfect", "imperfect", "participle"];
 
-/** Tav-prefix imperfects. They stay out of the drill until this pointing is signed. */
-const TAV_PERSON = new Set(["3fs", "2ms", "2fs", "3fp", "2mp", "2fp"]);
-
 export type BinyanMode = "verb-stem" | "stem-verb" | "same-root";
 
 export type StemStat = { seen: number; first: number };
@@ -38,59 +34,51 @@ export type StemCard = {
   id: StemId;
   en: string;
   he: string;
-  mark: string;
   meaning: string;
 };
 
-/** The mark is the clue after a miss. It is not part of the question. */
+/** The clue after a miss comes from the conjugation, not from a single mark. */
 export const STEM_CARDS: Record<StemId, StemCard> = {
   qal: {
     id: "qal",
     en: "Qal",
     he: "קַל",
-    mark: "No prefix, and no doubling in the middle letter.",
     meaning: "The plain stem. He did it.",
   },
   niphal: {
     id: "niphal",
     en: "Niphal",
     he: "נִפְעַל",
-    mark: "A nun, or the dagesh that nun leaves behind.",
     meaning: "Often passive. Sometimes he did it to himself.",
   },
   piel: {
     id: "piel",
     en: "Piel",
     he: "פִּעֵל",
-    mark: "Dagesh in the middle letter.",
     meaning: "Intensive, or he made it so.",
   },
   pual: {
     id: "pual",
     en: "Pual",
     he: "פֻּעַל",
-    mark: "Qibbuts, and the dagesh in the middle letter.",
     meaning: "The passive of Piel.",
   },
   hiphil: {
     id: "hiphil",
     en: "Hiphil",
     he: "הִפְעִיל",
-    mark: "Hireq under the prefix.",
     meaning: "Causative. He caused it.",
   },
   hophal: {
     id: "hophal",
     en: "Hophal",
     he: "הֻפְעַל",
-    mark: "A u or o vowel on the prefix.",
     meaning: "The passive of Hiphil.",
   },
   hithpael: {
     id: "hithpael",
     en: "Hithpael",
     he: "הִתְפַּעֵל",
-    mark: "הִתְ, or יִתְ, or מִתְ.",
     meaning: "He did it to himself, or they did it to one another.",
   },
 };
@@ -105,17 +93,6 @@ export type BinyanCard = {
   form: string;
   person: string;
 };
-
-/** The shapes the review found. The drill does not show them until they are signed. */
-export function heldFromDrill(card: Pick<BinyanCard, "id" | "stem" | "conj" | "rootId" | "form">): boolean {
-  const cell = card.id.split(":").at(-1) ?? "";
-  if (card.conj === "imperfect" && TAV_PERSON.has(cell)) return true;
-  const root = rootById(card.rootId);
-  if (card.stem === "niphal" && root && BGDKPT.has(root.letters[1])) return true;
-  if (card.stem === "hithpael" && root && isSibilant(root.letters[0])) return true;
-  if (card.form.includes("ך")) return true;
-  return false;
-}
 
 export type BinyanPrompt = {
   hebrew: string;
@@ -136,7 +113,7 @@ export function strongBinyanCards(): BinyanCard[] {
         if (!pattern) continue;
         for (const cell of pattern.cells) {
           if (!cell.form) continue;
-          const card: BinyanCard = {
+          cards.push({
             id: `${root.id}:${stem.id}:${conj}:${cell.id}`,
             rootId: root.id,
             cite: root.cite,
@@ -145,9 +122,7 @@ export function strongBinyanCards(): BinyanCard[] {
             conj,
             form: cell.form,
             person: cell.label,
-          };
-          if (heldFromDrill(card)) continue;
-          cards.push(card);
+          });
         }
       }
     }
@@ -218,9 +193,9 @@ function clueFor(card: Pick<BinyanCard, "stem" | "conj" | "rootId">): string {
   if (card.stem === "niphal") {
     return card.conj === "imperfect" ? "The first letter is doubled." : "Nun with hireq.";
   }
-  if (card.stem === "piel") return "Dagesh in the middle letter, after a vowel. Not נִ, הִ, or הֻ.";
+  if (card.stem === "piel") return "Dagesh in the middle letter, doubled (forte), no qibbuts under the first letter, after a vowel. Not נִ, הִ, or הֻ.";
   if (card.stem === "pual") return "Qibbuts under the first letter, and the middle letter is doubled.";
-  if (card.stem === "hiphil") return card.conj === "perfect" ? "He with hireq." : "Patah under the prefix.";
+  if (card.stem === "hiphil") return card.conj === "perfect" ? "He with hireq, and shewa under the first letter." : "Patah under the prefix.";
   if (card.stem === "hophal") return "Qibbuts or qamets hatuf on the prefix, shewa under the first letter, and no doubling.";
   if (first === "ש" || first === "ז") return "The tav moves after the first letter, and the middle letter is doubled.";
   return "Tav after the prefix: הִתְ, יִתְ, תִּתְ, אֶתְ, נִתְ, or מִתְ. The middle letter is doubled.";
