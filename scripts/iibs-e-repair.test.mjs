@@ -136,6 +136,20 @@ test("every repaired Level E place chains its frozen id to the word there now", 
   }
 });
 
+test("lesson 15.07 cleans to where? whither? and the earlier ids still reach it", () => {
+  const word = vocabLessons("E")[14][6];
+  assert.equal(word.hebrew, "אָן");
+  assert.match(word.gloss, /\[to\] anywhere/);
+  const gloss = cleanGloss(word.gloss);
+  assert.equal(gloss, "where? whither?");
+  const id = iibsWordId("E", word.hebrew, gloss);
+  assert.equal(id, "iibs-e-m2pyj6");
+  for (const oldId of ["iibs-e-1vg87hi", "iibs-e-15-07", "iibs-e-m2pyj6", "iibs-e-19qy7ti"]) {
+    const kept = keepStudyCards({ [oldId]: { reps: 2, interval: 1 } });
+    assert.deepEqual(Object.keys(kept), [id], oldId);
+  }
+});
+
 test("an empty split list has no target", () => {
   assert.equal(firstRepairTarget([]), undefined);
   assert.equal(firstRepairTarget([""]), undefined);
