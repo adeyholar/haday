@@ -632,7 +632,7 @@ yasaph	he	יָסַף
 yasaph	en	To add
 yarash	he	יָרַשׁ
 yarash	en	To inherit
-kipper	he	כָּפַר
+kipper	he	כָּ פַר
 kipper	en	To cover
 natah	he	נָטָה
 natah	en	To stretch out

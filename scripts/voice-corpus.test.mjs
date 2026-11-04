@@ -28,6 +28,9 @@ test("corpus covers letters, vowels, names, vocab", () => {
   const ayil = items.find((i) => i.id === "ayil");
   assert.equal(ayil?.glyph, "אַיִל");
   assert.equal(ayil?.speakHe, "אַ יִל");
+  const kipper = items.find((i) => i.id === "kipper");
+  assert.equal(kipper?.glyph, "כָּפַר");
+  assert.equal(kipper?.speakHe, "כָּ פַר");
   const script = corpusScript(items);
   assert.match(script, /^abraham\the\t/m);
   assert.ok(items.length > 200);

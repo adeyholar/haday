@@ -132,12 +132,14 @@ export function hebrewForTts(s: string): string {
 }
 
 /**
- * Hila says אַיִל as one syllable, like “ayl”. The ram is two syllables, AH then yil.
- * The shipped clip is those two pieces joined. A space in this line is not enough
- * for that voice, so do not replace public/audio/neural/ayil.he.mp3 from a fresh synth.
+ * Hila swallows a syllable in these words. The shipped clips are two pieces joined.
+ * A space in this line is not enough for that voice, so do not replace the mp3 from a fresh synth.
+ *   ayil   אַיִל  AH + yil
+ *   kipper כָּפַר  ka + far
  */
 const SPEAK_HE_BY_ID: Record<string, string> = {
   ayil: "אַ יִל",
+  kipper: "כָּ פַר",
 };
 
 export function spokenHebrew(id: string, hebrew: string): string {
