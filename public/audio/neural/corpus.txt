@@ -606,7 +606,7 @@ anah	he	עָנָה
 anah	en	To answer
 ozen	he	אֹזֶן
 ozen	en	Ear
-ayil	he	אַיִל
+ayil	he	אַ יִל
 ayil	en	Ram
 zebah	he	זֶבַח
 zebah	en	Sacrifice

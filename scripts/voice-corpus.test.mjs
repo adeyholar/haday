@@ -25,6 +25,9 @@ test("corpus covers letters, vowels, names, vocab", () => {
   const withEt = items.find((i) => i.id === "et-with");
   assert.ok(et && withEt);
   assert.notEqual(et.speakHe, withEt.speakHe);
+  const ayil = items.find((i) => i.id === "ayil");
+  assert.equal(ayil?.glyph, "אַיִל");
+  assert.equal(ayil?.speakHe, "אַ יִל");
   const script = corpusScript(items);
   assert.match(script, /^abraham\the\t/m);
   assert.ok(items.length > 200);

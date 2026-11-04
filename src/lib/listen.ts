@@ -3,8 +3,8 @@ import { term2Vocab } from "@/lib/vocab-s2";
 import type { ReadingVerse } from "@/lib/reading";
 import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
+import { spokenHebrew, clipLookupIds, hebrewForTts, chapterWordEn } from "@/lib/voice-corpus";
 import { loadNeuralManifest, neuralSrc } from "@/lib/neural-voice";
-import { clipLookupIds, hebrewForTts, chapterWordEn } from "@/lib/voice-corpus";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -734,7 +734,7 @@ export async function speakHebrewWord(item: ListenItem, rate: number, signal: { 
     const ok = await playVocabClip(clip, rate, signal);
     if (ok || signal.stop) return;
   }
-  const he = ttsHebrew(item.hebrew);
+  const he = spokenHebrew(voiceId, item.hebrew);
   const latin = modernLatin(item.translit) || he;
   if (hasHebrewVoice()) {
     const ok = await speakLine(he, "he", rate, signal);

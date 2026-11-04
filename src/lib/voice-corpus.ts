@@ -131,6 +131,19 @@ export function hebrewForTts(s: string): string {
     .trim();
 }
 
+/**
+ * Hila says אַיִל as one syllable, like “ayl”. The ram is two syllables, AH then yil.
+ * The shipped clip is those two pieces joined. A space in this line is not enough
+ * for that voice, so do not replace public/audio/neural/ayil.he.mp3 from a fresh synth.
+ */
+const SPEAK_HE_BY_ID: Record<string, string> = {
+  ayil: "אַ יִל",
+};
+
+export function spokenHebrew(id: string, hebrew: string): string {
+  return hebrewForTts(SPEAK_HE_BY_ID[id] ?? hebrew);
+}
+
 function englishLine(s: string): string {
   const first = s.replace(/;/g, ",").split(",")[0]?.trim() ?? s;
   if (!first) return s.trim();
@@ -185,7 +198,7 @@ export function voiceCorpus(): VoiceCorpusItem[] {
       kind: "vocab",
       group: `Ch. ${item.chapter} · ${ch}`,
       glyph: item.hebrew,
-      speakHe: item.hebrew,
+      speakHe: SPEAK_HE_BY_ID[item.id] ?? item.hebrew,
       speakEn: englishLine(item.gloss),
       aliases: [],
     });
