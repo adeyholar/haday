@@ -422,6 +422,16 @@ export function keepSpeechAlive() {
 let clipEl: HTMLAudioElement | null = null;
 let clipPoll = 0;
 let clipGen = 0;
+let ownPauseAt = 0;
+
+function markOwnPause() {
+  ownPauseAt = Date.now();
+}
+
+/** True when we just paused a word clip ourselves. The lock screen must not treat that as Stop. */
+export function recentOwnPause(): boolean {
+  return Date.now() - ownPauseAt < 1200;
+}
 
 function getClipEl(): HTMLAudioElement | null {
   if (typeof Audio === "undefined") return null;
@@ -435,6 +445,7 @@ function getClipEl(): HTMLAudioElement | null {
 
 function stopClip() {
   clipGen += 1;
+  markOwnPause();
   if (clipPoll) {
     window.clearInterval(clipPoll);
     clipPoll = 0;
@@ -508,8 +519,24 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
     el.volume = 1;
     el.muted = false;
     el.currentTime = start;
-    await el.play();
-    if (mine !== clipGen) return false;
+    const started = await new Promise<boolean>((resolve) => {
+      let settled = false;
+      const done = (ok: boolean) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        resolve(ok);
+      };
+      const timer = window.setTimeout(() => done(false), 2000);
+      el.play().then(
+        () => {
+          if (!el.paused) done(true);
+          else window.setTimeout(() => done(!el.paused), 250);
+        },
+        () => done(false),
+      );
+    });
+    if (!started || signal.stop || mine !== clipGen) return false;
     return await new Promise<boolean>((resolve) => {
       let settled = false;
       const finish = (ok: boolean) => {
@@ -519,6 +546,7 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
         if (clipPoll === poll) clipPoll = 0;
         window.clearTimeout(safety);
         if (mine === clipGen) {
+          markOwnPause();
           try {
             el.pause();
           } catch {
@@ -527,12 +555,22 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
         }
         resolve(ok);
       };
+      let stalled = 0;
       const poll = window.setInterval(() => {
         if (mine !== clipGen || signal.stop) {
           finish(true);
           return;
         }
-        if (el.ended || (Number.isFinite(end) && el.currentTime >= end - 0.02)) finish(true);
+        if (el.ended || (Number.isFinite(end) && el.currentTime >= end - 0.02)) {
+          finish(true);
+          return;
+        }
+        if (el.paused) {
+          stalled += 40;
+          if (stalled > 400) finish(true);
+          return;
+        }
+        stalled = 0;
       }, 40);
       clipPoll = poll;
       el.onended = () => {
@@ -662,21 +700,46 @@ export function pauseMs(ms: number, signal: { stop: boolean }): Promise<void> {
 
 const voiceClipCache = new Map<string, { mime: string; b64: string } | null>();
 let voiceHeIds: Set<string> | null = null;
+let voiceKeys: Set<string> | null = null;
+
+function promiseTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("timeout")), ms);
+    work.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 export function invalidateVoiceCache() {
   voiceClipCache.clear();
   voiceHeIds = null;
+  voiceKeys = null;
+}
+
+async function knownVoiceKeys(): Promise<Set<string>> {
+  if (voiceKeys) return voiceKeys;
+  try {
+    const rows = await promiseTimeout(listVoiceIndex(), 2500);
+    voiceKeys = new Set(rows.map((row) => `${row.vocabId}:${row.part}`));
+    voiceHeIds = new Set(rows.filter((row) => row.part === "he").map((row) => row.vocabId));
+  } catch {
+    voiceKeys = new Set();
+    voiceHeIds = new Set();
+  }
+  return voiceKeys;
 }
 
 export async function recordedHeIds(): Promise<Set<string>> {
-  if (voiceHeIds) return voiceHeIds;
-  try {
-    const rows = await listVoiceIndex();
-    voiceHeIds = new Set(rows.filter((r) => r.part === "he").map((r) => r.vocabId));
-  } catch {
-    voiceHeIds = new Set();
-  }
-  return voiceHeIds;
+  await knownVoiceKeys();
+  return voiceHeIds ?? new Set();
 }
 
 export async function playAdminVoice(
@@ -689,15 +752,20 @@ export async function playAdminVoice(
   let payload = voiceClipCache.get(key);
   if (payload === undefined) {
     payload = null;
-    for (const cid of clipLookupIds(vocabId)) {
-      try {
-        const row = await getVoiceClip({ data: { vocabId: cid, part } });
-        if (row) {
-          payload = { mime: row.mime, b64: row.b64 };
-          break;
+    const keys = await knownVoiceKeys();
+    const ids = clipLookupIds(vocabId);
+    if (ids.some((id) => keys.has(`${id}:${part}`))) {
+      for (const cid of ids) {
+        if (!keys.has(`${cid}:${part}`)) continue;
+        try {
+          const row = await promiseTimeout(getVoiceClip({ data: { vocabId: cid, part } }), 2500);
+          if (row) {
+            payload = { mime: row.mime, b64: row.b64 };
+            break;
+          }
+        } catch {
+          /* try alias, or skip a hung lookup */
         }
-      } catch {
-        /* try alias */
       }
     }
     voiceClipCache.set(key, payload);

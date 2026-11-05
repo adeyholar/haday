@@ -31,6 +31,17 @@ test("the road player uses the Drill voice for one week", () => {
   assert.equal(deck.includes("announce"), false);
 });
 
+test("the road list keeps going when a clip pauses or a lookup hangs", () => {
+  const src = readFileSync(new URL("../src/lib/listen.ts", import.meta.url).pathname, "utf8");
+  const deck = readFileSync(new URL("../src/components/road-deck.tsx", import.meta.url).pathname, "utf8");
+  assert.match(src, /recentOwnPause/);
+  assert.match(src, /setTimeout\(\(\) => done\(false\), 2000\)/);
+  assert.match(src, /promiseTimeout\(listVoiceIndex\(\), 2500\)/);
+  assert.match(deck, /recentOwnPause\(\)/);
+  assert.match(deck, /keepRoadMusicAlive/);
+  assert.match(deck, /a failed word must not end the drive/);
+});
+
 test("the road music slider can go silent and stays under the word", async () => {
   const { musicVolume } = await jiti.import(new URL("../src/lib/road-music.ts", import.meta.url).pathname);
   assert.equal(musicVolume(0), 0);

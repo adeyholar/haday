@@ -3,9 +3,10 @@ import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { isAppleMobile, keepSpeechAlive, speakRoadCard, stopSpeech, unlockSpeech, type ListenItem } from "@/lib/listen";
+import { isAppleMobile, keepSpeechAlive, recentOwnPause, speakRoadCard, stopSpeech, unlockSpeech, type ListenItem } from "@/lib/listen";
 import { loadNeuralManifest } from "@/lib/neural-voice";
 import {
+  keepRoadMusicAlive,
   loadRoadMusic,
   loadRoadMusicLevel,
   pauseRoadMusic,
@@ -82,9 +83,14 @@ export function RoadDeck({
   useEffect(() => {
     if (!playing) return;
     const ms = isAppleMobile() ? 2_000 : 8_000;
-    const id = window.setInterval(keepSpeechAlive, ms);
+    const id = window.setInterval(() => {
+      keepSpeechAlive();
+      if (musicRef.current !== "off") keepRoadMusicAlive();
+    }, ms);
     const onVis = () => {
-      if (document.visibilityState === "visible") keepSpeechAlive();
+      if (document.visibilityState !== "visible") return;
+      keepSpeechAlive();
+      if (musicRef.current !== "off") keepRoadMusicAlive();
     };
     document.addEventListener("visibilitychange", onVis);
     return () => {
@@ -94,24 +100,40 @@ export function RoadDeck({
   }, [playing]);
 
   useEffect(() => {
-    if (!playing || !("mediaSession" in navigator) || !item || !set) return;
+    if (!playing || !("mediaSession" in navigator)) return;
     const ms = navigator.mediaSession;
-    ms.metadata = new MediaMetadata({
-      title: `${item.hebrew} · ${item.gloss}`,
-      artist: "HaDay",
-      album: `${set.title} · ${set.hint}`,
-    });
     ms.playbackState = "playing";
-    ms.setActionHandler("play", () => startFrom(iRef.current, true));
-    ms.setActionHandler("pause", () => halt());
+    ms.setActionHandler("play", () => {
+      if (playingRef.current) {
+        keepSpeechAlive();
+        if (musicRef.current !== "off") keepRoadMusicAlive();
+        return;
+      }
+      startFrom(iRef.current, true);
+    });
+    ms.setActionHandler("pause", () => {
+      if (recentOwnPause()) return;
+      halt();
+    });
     ms.setActionHandler("previoustrack", () => stepRef.current(-1));
     ms.setActionHandler("nexttrack", () => stepRef.current(1));
     return () => {
+      ms.playbackState = "none";
       ms.setActionHandler("play", null);
       ms.setActionHandler("pause", null);
       ms.setActionHandler("previoustrack", null);
       ms.setActionHandler("nexttrack", null);
     };
+  }, [playing]);
+
+  useEffect(() => {
+    if (!playing || !("mediaSession" in navigator) || !item || !set) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: `${item.hebrew} · ${item.gloss}`,
+      artist: "HaDay",
+      album: `${set.title} · ${set.hint}`,
+    });
+    navigator.mediaSession.playbackState = "playing";
   }, [playing, i, item, set]);
 
   useEffect(() => {
@@ -148,8 +170,13 @@ export function RoadDeck({
         if (!card) break;
         setI(at);
         iRef.current = at;
-        await speakRoadCard(card, stopRef.current);
+        try {
+          await speakRoadCard(card, stopRef.current);
+        } catch {
+          /* a failed word must not end the drive */
+        }
         if (stopRef.current.stop || gen !== playGen.current) break;
+        if (musicRef.current !== "off") keepRoadMusicAlive();
         const live = listRef.current;
         at = at + 1 < live.length ? at + 1 : 0;
       }
