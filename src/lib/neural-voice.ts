@@ -11,8 +11,16 @@ export async function loadNeuralManifest(): Promise<NeuralManifest> {
   if (manifest) return manifest;
   load ??= (async () => {
     try {
-      const res = await fetch(MANIFEST_URL, { cache: "force-cache" });
-      if (!res.ok) return {};
+      const res = await Promise.race([
+        fetch(MANIFEST_URL, { cache: "force-cache" }),
+        new Promise<Response>((_, reject) => {
+          window.setTimeout(() => reject(new Error("timeout")), 4000);
+        }),
+      ]);
+      if (!res.ok) {
+        manifest = {};
+        return manifest;
+      }
       const data = (await res.json()) as NeuralManifest;
       manifest = data && typeof data === "object" ? data : {};
       return manifest;

@@ -15,6 +15,7 @@ let bed: HTMLAudioElement | null = null;
 let ctx: AudioContext | null = null;
 let gain: GainNode | null = null;
 let source: MediaElementAudioSourceNode | null = null;
+let wanted = false;
 
 export function isRoadMusicId(value: string | null): value is RoadMusicId {
   return value === "off" || value === "hatikvah" || value === "solemn";
@@ -125,6 +126,7 @@ export function playRoadMusic(id: RoadMusicId, level = loadRoadMusicLevel()) {
   const track = ROAD_MUSIC.find((item) => item.id === id);
   const src = track && "src" in track ? track.src : "";
   if (!src) return;
+  wanted = true;
   arm(el, level);
   if (!el.getAttribute("src")?.endsWith(src)) {
     el.src = src;
@@ -133,7 +135,15 @@ export function playRoadMusic(id: RoadMusicId, level = loadRoadMusicLevel()) {
   void el.play().catch(() => {});
 }
 
+/** Bring the bed back if the phone paused it between words. Does not restart a user pause. */
+export function keepRoadMusicAlive() {
+  if (!wanted || !bed) return;
+  if (ctx && ctx.state === "suspended") void ctx.resume();
+  if (bed.paused) void bed.play().catch(() => {});
+}
+
 export function pauseRoadMusic() {
+  wanted = false;
   try {
     bed?.pause();
   } catch {
