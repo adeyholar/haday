@@ -12,6 +12,7 @@ import { useStudy } from "@/lib/store";
 import { term2Exam, type Term2ExamQ } from "@/lib/term2-exams";
 import { starsForTerm2, TERM2_CHAPTER_MAX, TERM2_PASS } from "@/lib/term2-game";
 import { term2Lesson } from "@/lib/term2-lessons";
+import { hebrewWeakRank, leadWithWeak } from "@/lib/weak-lead";
 
 type PlayQ = Term2ExamQ & { key: string; retry?: boolean };
 
@@ -25,11 +26,14 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function deal(chapter: number): PlayQ[] {
-  return shuffle(term2Exam(chapter)).map((item, n) => ({
-    ...item,
-    key: `${chapter}-${n}`,
-    choices: shuffle(item.choices),
-  }));
+  const cards = useStudy.getState().cards;
+  return leadWithWeak(term2Exam(chapter), (item) => hebrewWeakRank(cards, item.he), (item) => `${item.q}|${item.he ?? ""}`).map(
+    (item, n) => ({
+      ...item,
+      key: `${chapter}-${n}`,
+      choices: shuffle(item.choices),
+    }),
+  );
 }
 
 export function Term2ExamPlay({ chapter }: { chapter: number }) {

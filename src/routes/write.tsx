@@ -14,7 +14,7 @@ import { writingHint } from "@/lib/letter-models";
 import { saveHandSample } from "@/lib/hand-style";
 import { strokeModelCount } from "@/lib/letter-strokes";
 import { queueForFocus, useStudy } from "@/lib/store";
-import { itemsForWeek, POS_LABEL, shuffle, type VocabItem } from "@/lib/vocab";
+import { itemsForWeek, POS_LABEL, type VocabItem } from "@/lib/vocab";
 import { takeWriteCheck, writeChecksLeft, WRITE_DAILY_LIMIT } from "@/lib/write-cap";
 import { cn } from "@/lib/cn";
 import { GradeBanner } from "@/components/grade-banner";
@@ -78,7 +78,7 @@ function WritePage() {
   const [mcPicked, setMcPicked] = useState<string | null>(null);
 
   useEffect(() => {
-    setRound(shuffle(queueForFocus(pool, useStudy.getState().cards, focus, 12)));
+    setRound(queueForFocus(pool, useStudy.getState().cards, focus, 12));
     setI(0);
     setResult(null);
     pad.current?.clear();
@@ -168,7 +168,7 @@ function WritePage() {
   }
 
   function restartRound() {
-    setRound(shuffle(queueForFocus(pool, useStudy.getState().cards, focus, 12)));
+    setRound(queueForFocus(pool, useStudy.getState().cards, focus, 12));
     setI(0);
     setResult(null);
     pad.current?.clear();

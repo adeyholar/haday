@@ -225,6 +225,7 @@ function VocabLevelPage() {
         <IibsVocabPlay
           key={`${level}-${lessonNo}-multiple-${round}`}
           words={playing}
+          level={level}
           pool={pool}
           onFinish={(pct) => finishIibsStage(level, lessonNo, "multiple", pct)}
           onExit={() => setStage(null)}
@@ -238,6 +239,7 @@ function VocabLevelPage() {
           key={`${level}-${lessonNo}-${stage}-${round}`}
           stage={stage}
           words={playing}
+          level={level}
           onFinish={(pct) => finishIibsStage(level, lessonNo, stage, pct)}
           onExit={() => setStage(null)}
           onAgain={() => setRound((n) => n + 1)}

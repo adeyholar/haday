@@ -28,7 +28,7 @@ type PlayQ = GrammarQuiz & { key: string; retry?: boolean };
 export type GrammarPlayMode = "prepare" | "exam";
 
 function examItems(track: GrammarTrack, unitId: number): PlayQ[] {
-  return buildGrammarQuiz(track, unitId).map((item, n) => ({ ...item, key: `${track.id}-${unitId}-${n}` }));
+  return buildGrammarQuiz(track, unitId, useStudy.getState().cards).map((item, n) => ({ ...item, key: `${track.id}-${unitId}-${n}` }));
 }
 
 export function MixHe({ text, className }: { text: string; className?: string }) {
@@ -104,7 +104,7 @@ export function GrammarPlay({
 
   function startQuiz() {
     if (!unit) return;
-    const built = buildGrammarQuiz(track, unitId).map((item, n) => ({ ...item, key: `${track.id}-${unitId}-${n}` }));
+    const built = buildGrammarQuiz(track, unitId, useStudy.getState().cards).map((item, n) => ({ ...item, key: `${track.id}-${unitId}-${n}` }));
     setItems(built);
     setI(0);
     setPicked(null);

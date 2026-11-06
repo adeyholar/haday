@@ -7,6 +7,7 @@ import { drawRound, spliceLater } from "@/lib/quiz-draw";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { cn } from "@/lib/cn";
 import { useStudy } from "@/lib/store";
+import { hebrewWeakRank } from "@/lib/weak-lead";
 import { findHitRange } from "@/lib/hebrew";
 import {
   GRAMMAR_CASES,
@@ -181,8 +182,11 @@ function VerseHunt() {
       list.push(c);
       byRule.set(c.ruleId, list);
     }
+    const cards = useStudy.getState().cards;
+    const rank = (c: GrammarCase) =>
+      Math.max(hebrewWeakRank(cards, c.he), hebrewWeakRank(cards, c.lemma), hebrewWeakRank(cards, c.hit));
     const picks = [...byRule.values()].map((list) => shuffle(list)[0]);
-    return drawRound(picks, HUNT_ROUND_LEN, "hunt:verse", (c) => c.id);
+    return drawRound(picks, HUNT_ROUND_LEN, "hunt:verse", (c) => c.id, rank);
   }, [seed]);
 
   return <HuntRound key={seed} mode="verse" deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
@@ -190,7 +194,12 @@ function VerseHunt() {
 
 function NameHunt() {
   const [seed, setSeed] = useState(0);
-  const deck = useMemo(() => drawRound(GRAMMAR_CASES, HUNT_ROUND_LEN, "hunt:name", (c) => c.id), [seed]);
+  const deck = useMemo(() => {
+    const cards = useStudy.getState().cards;
+    const rank = (c: GrammarCase) =>
+      Math.max(hebrewWeakRank(cards, c.he), hebrewWeakRank(cards, c.lemma), hebrewWeakRank(cards, c.hit));
+    return drawRound(GRAMMAR_CASES, HUNT_ROUND_LEN, "hunt:name", (c) => c.id, rank);
+  }, [seed]);
   return <HuntRound key={seed} mode="name" deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
 }
 

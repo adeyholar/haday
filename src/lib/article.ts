@@ -1,6 +1,7 @@
 import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
 import { ARTICLE_QUIZ_EXTRA } from "@/lib/article-quiz-extra";
 import { hardenQuizChoices } from "@/lib/close-quiz";
+import { hebrewWeakRank, leadWithWeak, type CardBook } from "@/lib/weak-lead";
 
 /** Original teaching notes on the Hebrew article and conjunction ו. Public-domain Masoretic examples. Not a textbook reprint. */
 
@@ -307,16 +308,20 @@ export function articleQuizPool(unit: ArticleUnit): ArticleQuiz[] {
   return [...unit.quiz, ...(ARTICLE_QUIZ_EXTRA[unit.id] ?? [])];
 }
 
-export function buildArticleQuiz(unitId: number): ArticleQuiz[] {
+export function buildArticleQuiz(unitId: number, cards?: CardBook): ArticleQuiz[] {
   const unit = articleUnit(unitId);
   if (!unit) return [];
   const reviewCount = unitId > 1 ? ARTICLE_REVIEW : 0;
   const freshTake = Math.min(ARTICLE_QUIZ_LEN - reviewCount, unit.quiz.length);
   const pool = articleQuizPool(unit);
-  const fresh = drawRound(pool, freshTake, `article:${unitId}`, quizId);
+  const rank = cards ? (q: ArticleQuiz) => hebrewWeakRank(cards, q.he) : undefined;
+  const fresh = drawRound(pool, freshTake, `article:${unitId}`, quizId, rank);
   const prior = ARTICLE_UNITS.filter((u) => u.id < unitId).flatMap((u) => u.quiz);
-  const review = reviewCount ? drawRound(prior, reviewCount, `article-rev:${unitId}`, quizId).map((q) => ({ ...q, review: true })) : [];
-  return shuffle([...fresh, ...review]).map((q) => {
+  const review = reviewCount ? drawRound(prior, reviewCount, `article-rev:${unitId}`, quizId, rank).map((q) => ({ ...q, review: true })) : [];
+  const rows = cards
+    ? leadWithWeak([...fresh, ...review], (q) => hebrewWeakRank(cards, q.he), quizId, shuffle)
+    : shuffle([...fresh, ...review]);
+  return rows.map((q) => {
     const hard = hardenQuizChoices(q);
     return { ...hard, choices: shuffle(hard.choices) };
   });

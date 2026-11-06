@@ -1,6 +1,7 @@
 import { drawRound, quizId, ROUND_LEN } from "@/lib/quiz-draw";
 import { SYLLABLE_QUIZ_EXTRA } from "@/lib/syllable-quiz-extra";
 import { hardenQuizChoices } from "@/lib/close-quiz";
+import { hebrewWeakRank, leadWithWeak, type CardBook } from "@/lib/weak-lead";
 
 /** Public-domain Masoretic examples. Rules are original teaching notes, not a textbook reprint. */
 
@@ -359,9 +360,11 @@ export function syllableQuizPool(unit: SyllableUnit): SyllableQuiz[] {
   return [...unit.quiz, ...(SYLLABLE_QUIZ_EXTRA[unit.id] ?? [])];
 }
 
-export function shuffleQuiz(unit: SyllableUnit): SyllableQuiz[] {
-  const items = drawRound(syllableQuizPool(unit), SYLLABLE_QUIZ_LEN, `syl:${unit.id}`, quizId);
-  return items.map((q) => {
+export function shuffleQuiz(unit: SyllableUnit, cards?: CardBook): SyllableQuiz[] {
+  const rank = cards ? (q: SyllableQuiz) => hebrewWeakRank(cards, q.he) : undefined;
+  const items = drawRound(syllableQuizPool(unit), SYLLABLE_QUIZ_LEN, `syl:${unit.id}`, quizId, rank);
+  const rows = cards ? leadWithWeak(items, (q) => hebrewWeakRank(cards, q.he), quizId, shuffle) : items;
+  return rows.map((q) => {
     const hard = hardenQuizChoices(q);
     return { ...hard, choices: shuffle(hard.choices) };
   });

@@ -5,22 +5,29 @@ import { HebrewType } from "@/components/hebrew-type";
 import { IIBS_LESSON_PASS, iibsGlossHit, type IibsStageId } from "@/lib/iibs-game";
 import { liveMatchAny } from "@/lib/hebrew";
 import { playFeedback } from "@/lib/try-again";
-import type { IibsVocabWord } from "@/lib/iibs-vocab";
+import { cleanGloss, iibsWordId } from "@/lib/iibs-weeks";
+import type { IibsVocabLevel, IibsVocabWord } from "@/lib/iibs-vocab";
+import { useStudy } from "@/lib/store";
+import { leadWithWeak, vocabRank } from "@/lib/weak-lead";
 
-function shuffle<T>(list: T[]): T[] {
-  const next = [...list];
-  for (let i = next.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const swap = next[i]!;
-    next[i] = next[j]!;
-    next[j] = swap;
-  }
-  return next;
+function openQueue(words: IibsVocabWord[], level: IibsVocabLevel) {
+  const cards = useStudy.getState().cards;
+  const indexes = words.map((_, index) => index);
+  return leadWithWeak(
+    indexes,
+    (index) => {
+      const word = words[index];
+      if (!word) return 0;
+      return vocabRank(cards, iibsWordId(level, word.hebrew, cleanGloss(word.gloss)));
+    },
+    (index) => String(index),
+  );
 }
 
 export function IibsWritePlay({
   stage,
   words,
+  level,
   onFinish,
   onExit,
   onAgain,
@@ -29,13 +36,14 @@ export function IibsWritePlay({
 }: {
   stage: Exclude<IibsStageId, "multiple">;
   words: IibsVocabWord[];
+  level: IibsVocabLevel;
   onFinish: (pct: number) => void;
   onExit: () => void;
   onAgain: () => void;
   onNext: (() => void) | null;
   nextLabel: string;
 }) {
-  const [queue, setQueue] = useState(() => shuffle(words.map((_, index) => index)));
+  const [queue, setQueue] = useState(() => openQueue(words, level));
   const [typed, setTyped] = useState("");
   const [missed, setMissed] = useState(false);
   const [scored, setScored] = useState(false);

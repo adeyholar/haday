@@ -33,6 +33,7 @@ import { verseFor } from "@/lib/verses";
 import { scoreboard } from "@/lib/rewards";
 import { useStudy } from "@/lib/store";
 import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
+import { leadWithWeak, vocabRank } from "@/lib/weak-lead";
 import { term2Lesson } from "@/lib/term2-lessons";
 import { term2ChapterPool, term2ChapterRecord, term2ContinueTarget, TERM2_CHAPTER_MAX } from "@/lib/term2-game";
 import { GUESS_MS } from "@/lib/etch";
@@ -46,13 +47,8 @@ function spellTargets(item: VocabItem, stage: GameStageId): { target: string; al
   return { target: item.hebrew, alts };
 }
 
-function shuffleCopy(items: VocabItem[]) {
-  const a = [...items];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function dealQueue(items: VocabItem[]) {
+  return leadWithWeak(items, (item) => vocabRank(useStudy.getState().cards, item.id), (item) => item.id);
 }
 
 type Props = {
@@ -81,7 +77,7 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
     () => (term2 ? term2ChapterPool(chapter) : mixKey ? mixPlayPool(mixKey.split(",").map(Number)) : chapterPlayPool(chapter, stage)),
     [term2, chapter, stage, mixKey],
   );
-  const [queue, setQueue] = useState<VocabItem[]>(() => shuffleCopy(pool));
+  const [queue, setQueue] = useState<VocabItem[]>(() => dealQueue(pool));
   const [total, setTotal] = useState(pool.length);
   const [picked, setPicked] = useState<string | null>(null);
   const [missedChoice, setMissedChoice] = useState<string | null>(null);
@@ -106,7 +102,7 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
   const hearSig = useRef({ stop: false });
 
   useEffect(() => {
-    setQueue(shuffleCopy(pool));
+    setQueue(dealQueue(pool));
     setTotal(pool.length);
     setPicked(null);
     setMissedChoice(null);

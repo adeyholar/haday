@@ -82,7 +82,7 @@ export function ArticlePlay({ unitId }: { unitId: number }) {
 
   function startQuiz() {
     if (!unit) return;
-    const built = buildArticleQuiz(unitId).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
+    const built = buildArticleQuiz(unitId, useStudy.getState().cards).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
     setItems(built);
     setI(0);
     setPicked(null);

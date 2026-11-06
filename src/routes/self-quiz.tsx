@@ -8,6 +8,7 @@ import { SelfQuizPlay, type SelfQuizMode } from "@/components/self-quiz-play";
 import { cn } from "@/lib/cn";
 import { COURSE_WEEKS, GAME_CHAPTER_TITLES, itemsForSelection, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
+import { leadWithWeak, vocabRank } from "@/lib/weak-lead";
 
 type Search = { shell?: "game" | "study" };
 
@@ -37,8 +38,9 @@ function SelfQuizPage() {
   }
 
   function start(from: VocabItem[]) {
+    const cards = useStudy.getState().cards;
     setLastWeak([]);
-    setDeck(from);
+    setDeck(leadWithWeak(from, (item) => vocabRank(cards, item.id), (item) => item.id));
     setRun((n) => n + 1);
   }
 

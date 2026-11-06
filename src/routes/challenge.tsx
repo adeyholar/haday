@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { GameMenu } from "@/components/game-menu";
 import { Panel } from "@/components/panel";
 import { CrownBadge } from "@/components/honor-badge";
-import { bbhVocab, glossMatches, shuffle, type VocabItem } from "@/lib/vocab";
+import { bbhVocab, glossMatches, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
+import { leadWithWeak, vocabRank } from "@/lib/weak-lead";
 import { AppErrorComponent } from "@/lib/error-component";
 import { cn } from "@/lib/cn";
 import { DontKnowButton } from "@/components/dont-know-button";
@@ -37,7 +38,8 @@ function ChallengePage() {
   }, [run?.i]);
 
   function begin() {
-    const ids = shuffle(bbhVocab()).map((item) => item.id);
+    const cards = useStudy.getState().cards;
+    const ids = leadWithWeak(bbhVocab(), (item) => vocabRank(cards, item.id), (item) => item.id).map((item) => item.id);
     setReport(null);
     setTyped("");
     startUltimate(ids);

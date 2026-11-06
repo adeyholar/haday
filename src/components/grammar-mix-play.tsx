@@ -55,7 +55,7 @@ export function GrammarMixPlay({ trackIds }: { trackIds: GrammarTrackId[] }) {
   const poolSize = grammarMixPool(tracks, unitOk).length;
 
   const [items, setItems] = useState<PlayQ[]>(() =>
-    buildGrammarMixQuiz(tracks, unitOk).map((item, n) => ({ ...item, key: `mix-${n}` })),
+    buildGrammarMixQuiz(tracks, unitOk, useStudy.getState().cards).map((item, n) => ({ ...item, key: `mix-${n}` })),
   );
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
