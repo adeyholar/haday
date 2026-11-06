@@ -115,7 +115,22 @@ export function pickKeepRound(
   add(shuffle(rest), "due", n - picked.length);
   add(shuffle([...high, ...weak, ...due, ...cool]), "cool", n - picked.length);
 
-  return shuffle(picked).map(({ item, why }, i) => ({
+  const tier = (row: { item: VocabItem; why: KeepWhy }) => {
+    const c = cards[row.item.id];
+    if (isHighWeak(c)) return 0;
+    if (isWeak(c)) return 1;
+    if (row.why === "due") return 2;
+    return 3;
+  };
+  const ranked = [...picked].sort((a, b) => {
+    const gap = tier(a) - tier(b);
+    if (gap !== 0) return gap;
+    const score = weaknessScore(cards[b.item.id]) - weaknessScore(cards[a.item.id]);
+    if (score !== 0) return score;
+    return a.item.id < b.item.id ? -1 : a.item.id > b.item.id ? 1 : 0;
+  });
+
+  return ranked.map(({ item, why }, i) => ({
     ...item,
     why,
     face: i % 2 === 0 ? "he-en" : "en-he",

@@ -107,7 +107,7 @@ export function NounPlay({ unitId }: { unitId: number }) {
 
   function startQuiz() {
     if (!unit) return;
-    const built = buildNounQuiz(unitId).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
+    const built = buildNounQuiz(unitId, useStudy.getState().cards).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
     setItems(built);
     setI(0);
     setPicked(null);

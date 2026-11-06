@@ -4,6 +4,7 @@ import { DontKnowButton } from "@/components/dont-know-button";
 import { findHitRange } from "@/lib/hebrew";
 import { cn } from "@/lib/cn";
 import { useStudy } from "@/lib/store";
+import { hebrewWeakRank } from "@/lib/weak-lead";
 import { drawRound, ROUND_LEN, spliceLater } from "@/lib/quiz-draw";
 import {
   answerLabel,
@@ -20,10 +21,12 @@ type Phase = "ask" | "retry" | "lead" | "done";
 
 export function ClassifyDrill({ kind }: { kind: ClassifyKind }) {
   const [seed, setSeed] = useState(0);
-  const deck = useMemo(
-    () => drawRound(itemsForKind(kind), ROUND_LEN, `classify:${kind}`, (item) => item.id),
-    [kind, seed],
-  );
+  const deck = useMemo(() => {
+    const cards = useStudy.getState().cards;
+    return drawRound(itemsForKind(kind), ROUND_LEN, `classify:${kind}`, (item) => item.id, (item) =>
+      hebrewWeakRank(cards, item.word),
+    );
+  }, [kind, seed]);
   return <Round key={`${kind}-${seed}`} kind={kind} deck={deck} onAgain={() => setSeed((n) => n + 1)} />;
 }
 

@@ -15,6 +15,8 @@ import {
   WEEK7_ITEMS,
   type Week7Run,
 } from "@/lib/week7-mock";
+import { useStudy } from "@/lib/store";
+import { hebrewWeakRank } from "@/lib/weak-lead";
 
 export const Route = createFileRoute("/game/week7")({ component: Week7MockPage });
 
@@ -54,7 +56,9 @@ function Week7MockPage() {
   }, []);
 
   function begin(fresh: boolean) {
-    const next = fresh || !run || run.index >= run.order.length ? startWeek7Run(Date.now()) : run;
+    const next = fresh || !run || run.index >= run.order.length
+      ? startWeek7Run(Date.now(), (item) => hebrewWeakRank(useStudy.getState().cards, item.hebrew))
+      : run;
     setRun(next);
     saveRun(next);
     setDraft("");
@@ -130,8 +134,8 @@ function Intro({ saved, onStart }: { saved: Week7Run | null; onStart: () => void
     <>
       <p className="mt-3 max-w-prose text-muted">
         This follows the midterm review: gender and number, prefixes, pronoun suffixes, adjectives, pronouns, construct
-        chains, then the review word list. {WEEK7_ITEMS.length} items. Each section stays together. The lines inside it
-        are mixed. The class exam uses different examples of the same kinds, and it is shorter.
+        chains, then the review word list. {WEEK7_ITEMS.length} items. Each section stays together. Missed words in that
+        section come first. The rest of the lines are mixed. The class exam uses different examples of the same kinds, and it is shorter.
       </p>
       <p className="mt-3 max-w-prose text-muted">
         One grade, from your first answer on each item. A miss goes to the back and stays there until you get it. Leave,

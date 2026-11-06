@@ -14,6 +14,7 @@ import {
   takeFinalVocab,
   type FinalVocabRun,
 } from "@/lib/final-vocab";
+import { useStudy } from "@/lib/store";
 
 export const Route = createFileRoute("/game/final-vocab")({ component: FinalVocabPage });
 
@@ -52,7 +53,7 @@ function FinalVocabPage() {
   }, []);
 
   function begin(fresh: boolean) {
-    const next = fresh || !run || run.index >= run.order.length ? startFinalVocab(Date.now()) : run;
+    const next = fresh || !run || run.index >= run.order.length ? startFinalVocab(Date.now(), useStudy.getState().cards) : run;
     setRun(next);
     saveRun(next);
     setMark(null);
@@ -141,7 +142,7 @@ function Intro({ saved, onStart }: { saved: FinalVocabRun | null; onStart: () =>
     <>
       <p className="mt-3 max-w-prose text-muted">
         The same sitting as the Week 7 word list: Hebrew on the card, four meanings, one of them right.{" "}
-        {FINAL_VOCAB.length} words, from the final exam slides. The order is mixed.
+        {FINAL_VOCAB.length} words, from the final exam slides. Words you have missed come first. The rest is mixed.
       </p>
       <p className="mt-3 max-w-prose text-muted">
         One grade, from your first answer on each word. A miss goes to the back and stays there until you get it. Leave,

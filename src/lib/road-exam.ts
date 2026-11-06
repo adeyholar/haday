@@ -1,4 +1,5 @@
 import { closeItems, shuffle, type VocabItem } from "@/lib/vocab";
+import { leadWithWeak, vocabRank, type CardBook } from "@/lib/weak-lead";
 
 export const ROAD_LETTERS = ["A", "B", "C", "D"] as const;
 export type RoadLetter = (typeof ROAD_LETTERS)[number];
@@ -127,8 +128,11 @@ export function roadChoices(item: VocabItem, pool: VocabItem[]): RoadChoice[] {
   }));
 }
 
-export function buildRoadDeck(pool: VocabItem[]): RoadCard[] {
-  return shuffle(pool).map((item, n) => ({
+export function buildRoadDeck(pool: VocabItem[], cards?: CardBook): RoadCard[] {
+  const order = cards
+    ? leadWithWeak(pool, (item) => vocabRank(cards, item.id), (item) => item.id)
+    : shuffle(pool);
+  return order.map((item, n) => ({
     key: `${item.id}:${n}`,
     item,
     choices: roadChoices(item, pool),

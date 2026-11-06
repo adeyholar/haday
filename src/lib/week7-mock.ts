@@ -1,5 +1,7 @@
 /** Week 7 midterm mock. Review-sheet items from the class meeting, not the exam's exact lines. */
 
+import { leadWithWeak } from "@/lib/weak-lead";
+
 export type Week7Kind = "parse" | "type" | "code" | "gloss";
 
 export type Week7Item = {
@@ -240,19 +242,18 @@ export function week7Choices(item: Week7Item, stored?: string[]): string[] {
   return [];
 }
 
-export function startWeek7Run(seed = 1): Week7Run {
+export function startWeek7Run(seed = 1, rankOf?: (item: Week7Item) => number): Week7Run {
   const rng = mulberry(seed);
   const choices: Record<string, string[]> = {};
   for (const item of WEEK7_ITEMS) {
     if (item.kind === "parse") choices[item.id] = shuffle([...PARSE_CHOICES], rng);
     if (item.kind === "gloss") choices[item.id] = glossChoices(item, rng);
   }
-  const order = WEEK7_SECTIONS.flatMap((section) =>
-    shuffle(
-      WEEK7_ITEMS.filter((item) => item.section === section.id).map((item) => item.id),
-      rng,
-    ),
-  );
+  const order = WEEK7_SECTIONS.flatMap((section) => {
+    const rows = WEEK7_ITEMS.filter((item) => item.section === section.id);
+    if (!rankOf) return shuffle(rows.map((item) => item.id), rng);
+    return leadWithWeak(rows, rankOf, (item) => item.id, (list) => shuffle(list, rng)).map((item) => item.id);
+  });
   return { order, index: 0, first: {}, choices };
 }
 

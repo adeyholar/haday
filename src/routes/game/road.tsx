@@ -298,7 +298,7 @@ export function RoadExam({
   function begin(fresh: boolean) {
     unlockSpeech();
     const restored = fresh ? null : unpackRoadRun(run, pool);
-    const deck = restored ? restored.queue : buildRoadDeck(pool);
+    const deck = restored ? restored.queue : buildRoadDeck(pool, useStudy.getState().cards);
     const startAt = restored ? restored.index : 0;
     const startHeard = restored ? restored.heard : 0;
     const startHeld = restored ? restored.held : 0;

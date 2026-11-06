@@ -1,6 +1,7 @@
 import { drawRound, ROUND_LEN } from "@/lib/quiz-draw";
 import { hardenQuizChoices } from "@/lib/close-quiz";
 import type { LearnKind, LearnSample, LearnVerse } from "@/lib/tanakh-learn-note";
+import { hebrewWeakRank, leadWithWeak, type CardBook } from "@/lib/weak-lead";
 
 export type GrammarTrackId = "prep" | "adj" | "pron" | "exist" | "construct" | "numbers" | "verbs";
 
@@ -94,11 +95,12 @@ export function grammarMixPool(
 export function buildGrammarMixQuiz(
   tracks: GrammarTrack[],
   unitUnlocked: (trackId: GrammarTrackId, unitId: number) => boolean,
+  cards?: CardBook,
 ): GrammarQuiz[] {
   const pool = grammarMixPool(tracks, unitUnlocked);
   if (!pool.length) return [];
   const key = `grammar-mix:${tracks.map((t) => t.id).join(",")}`;
-  return drawRound(pool, GRAMMAR_QUIZ_LEN, key, grammarQuizId).map((q) => {
+  return presentQuiz(drawRound(pool, GRAMMAR_QUIZ_LEN, key, grammarQuizId, quizRank(cards)), cards).map((q) => {
     const hard = hardenQuizChoices(q);
     return { ...hard, choices: shuffle(hard.choices) };
   });
@@ -106,6 +108,16 @@ export function buildGrammarMixQuiz(
 
 export function grammarTopicLabel(track: Pick<GrammarTrack, "title">): string {
   return track.title;
+}
+
+function quizRank<T extends { he?: string }>(cards?: CardBook): ((row: T) => number) | undefined {
+  if (!cards) return undefined;
+  return (row) => hebrewWeakRank(cards, row.he);
+}
+
+function presentQuiz<T extends { q: string; he?: string }>(rows: T[], cards?: CardBook): T[] {
+  if (!cards) return shuffle(rows);
+  return leadWithWeak(rows, (row) => hebrewWeakRank(cards, row.he), (row) => `${row.q}|${row.he ?? ""}`, shuffle);
 }
 
 export function grammarNeighborId(id: GrammarTrackId, dir: -1 | 1): GrammarTrackId | undefined {
@@ -130,21 +142,22 @@ export function grammarQuizPool(track: GrammarTrack, unit: GrammarUnit): Grammar
   return [...unit.quiz, ...(track.extra?.[unit.id] ?? [])];
 }
 
-export function buildGrammarQuiz(track: GrammarTrack, unitId: number): GrammarQuiz[] {
+export function buildGrammarQuiz(track: GrammarTrack, unitId: number, cards?: CardBook): GrammarQuiz[] {
   const unit = track.units.find((u) => u.id === unitId);
   if (!unit) return [];
   const reviewCount = unitId > 1 ? GRAMMAR_REVIEW : 0;
   const pool = grammarQuizPool(track, unit);
   const freshTake = Math.min(GRAMMAR_QUIZ_LEN - reviewCount, pool.length);
-  const fresh = drawRound(pool, freshTake, `grammar:${track.id}:${unitId}`, (q) => `${q.q}|${q.answer}`);
+  const rank = quizRank<GrammarQuiz>(cards);
+  const fresh = drawRound(pool, freshTake, `grammar:${track.id}:${unitId}`, (q) => `${q.q}|${q.answer}`, rank);
   const prior = track.units.filter((u) => u.id < unitId).flatMap((u) => u.quiz);
   const review = reviewCount
-    ? drawRound(prior, reviewCount, `grammar-rev:${track.id}:${unitId}`, (q) => `${q.q}|${q.answer}`).map((q) => ({
+    ? drawRound(prior, reviewCount, `grammar-rev:${track.id}:${unitId}`, (q) => `${q.q}|${q.answer}`, rank).map((q) => ({
         ...q,
         review: true,
       }))
     : [];
-  return shuffle([...fresh, ...review]).map((q) => {
+  return presentQuiz([...fresh, ...review], cards).map((q) => {
     const hard = hardenQuizChoices(q);
     return { ...hard, choices: shuffle(hard.choices) };
   });

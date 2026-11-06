@@ -100,7 +100,7 @@ export function SyllablePlay({ unitId }: { unitId: number }) {
 
   function startQuiz() {
     if (!unit) return;
-    const built = shuffleQuiz(unit).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
+    const built = shuffleQuiz(unit, useStudy.getState().cards).map((item, n) => ({ ...item, key: `${unitId}-${n}` }));
     setItems(built);
     setI(0);
     setPicked(null);

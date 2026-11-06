@@ -2,6 +2,7 @@ import { normAnswer } from "@/lib/week7-mock";
 import { lettersOnly } from "@/lib/hebrew";
 import type { ListenItem } from "@/lib/listen";
 import { glossMatches, VOCAB, type Pos, type VocabItem } from "@/lib/vocab";
+import { leadWithWeak, vocabRank, type CardBook } from "@/lib/weak-lead";
 
 /** Final exam vocabulary. The professor's Week 15 slides, in slide order. */
 export type FinalVocabItem = {
@@ -174,11 +175,15 @@ export function finalVocabChoices(item: FinalVocabItem, stored?: string[]): stri
   return stored ?? [item.accept[0]];
 }
 
-export function startFinalVocab(seed = 1): FinalVocabRun {
+export function startFinalVocab(seed = 1, cards?: CardBook): FinalVocabRun {
   const rng = mulberry(seed);
   const choices: Record<string, string[]> = {};
   for (const item of FINAL_VOCAB) choices[item.id] = glossChoices(item, rng);
-  return { order: shuffle(FINAL_VOCAB.map((item) => item.id), rng), index: 0, first: {}, choices };
+  const ids = FINAL_VOCAB.map((item) => item.id);
+  const order = cards
+    ? leadWithWeak(ids, (id) => vocabRank(cards, examStudyId(id)), (id) => id, (list) => shuffle(list, rng))
+    : shuffle(ids, rng);
+  return { order, index: 0, first: {}, choices };
 }
 
 export function takeFinalVocab(run: FinalVocabRun, raw: string): { run: FinalVocabRun; ok: boolean } {
@@ -203,6 +208,12 @@ export function finalVocabGrade(run: FinalVocabRun): { held: number; total: numb
 export function finalVocabCurrent(run: FinalVocabRun): FinalVocabItem | null {
   const id = run.order[run.index];
   return id ? finalVocabItem(id) : null;
+}
+
+function examStudyId(id: string): string {
+  const drill = finalExamDrillItems();
+  const i = FINAL_VOCAB.findIndex((item) => item.id === id);
+  return drill[i]?.id ?? id;
 }
 
 function item(id: string, hebrew: string, answer: string, traps?: string[]): FinalVocabItem {

@@ -3,7 +3,10 @@ import { GradeBanner } from "@/components/grade-banner";
 import { MarkedAnswer } from "@/components/marked-answer";
 import { IIBS_LESSON_PASS } from "@/lib/iibs-game";
 import { playFeedback } from "@/lib/try-again";
-import type { IibsVocabWord } from "@/lib/iibs-vocab";
+import { cleanGloss, iibsWordId } from "@/lib/iibs-weeks";
+import type { IibsVocabLevel, IibsVocabWord } from "@/lib/iibs-vocab";
+import { useStudy } from "@/lib/store";
+import { leadWithWeak, vocabRank } from "@/lib/weak-lead";
 
 function shuffle<T>(list: T[]): T[] {
   const next = [...list];
@@ -26,8 +29,23 @@ function choicesFor(right: string, pool: string[]) {
   return shuffle([right, ...others]);
 }
 
+function openQueue(words: IibsVocabWord[], level: IibsVocabLevel) {
+  const cards = useStudy.getState().cards;
+  const indexes = words.map((_, index) => index);
+  return leadWithWeak(
+    indexes,
+    (index) => {
+      const word = words[index];
+      if (!word) return 0;
+      return vocabRank(cards, iibsWordId(level, word.hebrew, cleanGloss(word.gloss)));
+    },
+    (index) => String(index),
+  );
+}
+
 export function IibsVocabPlay({
   words,
+  level,
   pool,
   onFinish,
   onExit,
@@ -36,6 +54,7 @@ export function IibsVocabPlay({
   nextLabel,
 }: {
   words: IibsVocabWord[];
+  level: IibsVocabLevel;
   pool: string[];
   onFinish: (pct: number) => void;
   onExit: () => void;
@@ -43,7 +62,7 @@ export function IibsVocabPlay({
   onNext: (() => void) | null;
   nextLabel: string;
 }) {
-  const [queue, setQueue] = useState(() => shuffle(words.map((_, index) => index)));
+  const [queue, setQueue] = useState(() => openQueue(words, level));
   const [picked, setPicked] = useState<string | null>(null);
   const [done, setDone] = useState<number | null>(null);
   const first = useRef<Record<number, boolean>>({});

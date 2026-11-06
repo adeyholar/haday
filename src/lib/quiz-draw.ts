@@ -73,15 +73,42 @@ function writeRecent(key: string, ids: string[]) {
   }
 }
 
-export function drawRound<T>(pool: T[], n: number, key: string, idOf: (item: T) => string): T[] {
-  if (pool.length <= n) return shuffle(pool).map((item) => item);
+export function drawRound<T>(
+  pool: T[],
+  n: number,
+  key: string,
+  idOf: (item: T) => string,
+  rankOf?: (item: T) => number,
+): T[] {
+  const rank = rankOf ?? (() => 0);
+  const split = (list: T[]) => {
+    const weak = list
+      .filter((item) => rank(item) > 0)
+      .sort((a, b) => {
+        const gap = rank(b) - rank(a);
+        if (gap !== 0) return gap;
+        const ia = idOf(a);
+        const ib = idOf(b);
+        return ia < ib ? -1 : ia > ib ? 1 : 0;
+      });
+    const ids = new Set(weak.map(idOf));
+    return { weak, rest: list.filter((item) => !ids.has(idOf(item))) };
+  };
+
+  if (pool.length <= n) {
+    const { weak, rest } = split(pool);
+    return [...weak, ...shuffle(rest)];
+  }
   const recent = readRecent(key);
-  const fresh = pool.filter((item) => !recent.includes(idOf(item)));
-  const picked: T[] = [];
-  picked.push(...shuffle(fresh).slice(0, n));
+  const { weak, rest } = split(pool);
+  const picked: T[] = [...weak.slice(0, n)];
+  if (picked.length < n) {
+    const fresh = rest.filter((item) => !recent.includes(idOf(item)));
+    picked.push(...shuffle(fresh).slice(0, n - picked.length));
+  }
   if (picked.length < n) {
     const have = new Set(picked.map(idOf));
-    picked.push(...shuffle(pool.filter((item) => !have.has(idOf(item)))).slice(0, n - picked.length));
+    picked.push(...shuffle(rest.filter((item) => !have.has(idOf(item)))).slice(0, n - picked.length));
   }
   const next = [...picked.map(idOf), ...recent.filter((id) => !picked.some((item) => idOf(item) === id))];
   writeRecent(key, next);
