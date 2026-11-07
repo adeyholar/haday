@@ -73,7 +73,7 @@ test("final exam vocab speaks on the road in slide order", () => {
   const items = finalExamRoadItems();
   assert.equal(items.length, 80);
   assert.equal(items[0].hebrew, "בָּנָה");
-  assert.equal(items[0].plainEnglish, true);
+  assert.equal(items[0].plainEnglish, undefined);
   const classLemma = items.find((item) => item.chapter !== 0);
   assert.ok(classLemma);
   assert.equal(classLemma.heVoiceId, classLemma.id);
@@ -82,10 +82,10 @@ test("final exam vocab speaks on the road in slide order", () => {
   assert.equal(evil.heVoiceId, undefined);
   assert.equal(evil.id, "f-34");
   assert.equal(evil.gloss, "to be evil, be bad");
-  assert.equal(evil.plainEnglish, true);
+  assert.equal(evil.plainEnglish, undefined);
   for (let i = 0; i < FINAL_VOCAB.length; i++) {
     assert.equal(items[i].hebrew, FINAL_VOCAB[i].hebrew);
-    assert.equal(items[i].plainEnglish, true);
+    assert.equal(items[i].plainEnglish, undefined);
     if (items[i].chapter === 0) assert.equal(items[i].heVoiceId, undefined);
     else assert.equal(items[i].heVoiceId, items[i].id);
   }
