@@ -40,6 +40,9 @@ test("the road list keeps going when a clip pauses or a lookup hangs", () => {
   assert.match(deck, /recentOwnPause\(\)/);
   assert.match(deck, /keepRoadMusicAlive/);
   assert.match(deck, /a failed word must not end the drive/);
+  assert.match(src, /holdRoadMusic/);
+  assert.match(src, /el\.currentTime > start \+ 0\.2/);
+  assert.match(src, /heVoiceId !== item\.id/);
 });
 
 test("the road music slider can go silent and stays under the word", async () => {

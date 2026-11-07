@@ -136,12 +136,11 @@ export function finalExamDrillItems(): VocabItem[] {
 
 let roadPool: ListenItem[] | null = null;
 
-/** The same eighty words, for the car. The exam gloss is spoken. A class lemma keeps its Hebrew clip. */
+/** The same eighty words, for the car. Hebrew, then the recorded English meaning. */
 export function finalExamRoadItems(): ListenItem[] {
   if (roadPool) return roadPool;
   roadPool = finalExamDrillItems().map((card) => ({
     ...card,
-    plainEnglish: true as const,
     ...(card.chapter !== 0 ? { heVoiceId: card.id } : {}),
   }));
   return roadPool;

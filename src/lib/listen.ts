@@ -5,6 +5,7 @@ import { vocabClip, type VocabClip } from "@/lib/vocab-clips";
 import { getVoiceClip, listVoiceIndex, type VoicePart } from "@/lib/voice";
 import { spokenHebrew, clipLookupIds, hebrewForTts, chapterWordEn } from "@/lib/voice-corpus";
 import { loadNeuralManifest, neuralSrc } from "@/lib/neural-voice";
+import { holdRoadMusic } from "@/lib/road-music";
 
 const POS_KEY = "haday-listen-i";
 const LOOP_KEY = "haday-listen-loop";
@@ -423,14 +424,21 @@ let clipEl: HTMLAudioElement | null = null;
 let clipPoll = 0;
 let clipGen = 0;
 let ownPauseAt = 0;
+let haltSuppressedUntil = 0;
+let liveUtterance: SpeechSynthesisUtterance | null = null;
 
 function markOwnPause() {
   ownPauseAt = Date.now();
 }
 
+/** Ignore a lock-screen pause that we caused by stopping a clip or a gloss. */
+export function suppressRoadHalt(ms: number) {
+  haltSuppressedUntil = Math.max(haltSuppressedUntil, Date.now() + ms);
+}
+
 /** True when we just paused a word clip ourselves. The lock screen must not treat that as Stop. */
 export function recentOwnPause(): boolean {
-  return Date.now() - ownPauseAt < 1200;
+  return Date.now() - ownPauseAt < 1200 || Date.now() < haltSuppressedUntil;
 }
 
 function getClipEl(): HTMLAudioElement | null {
@@ -443,6 +451,23 @@ function getClipEl(): HTMLAudioElement | null {
   return clipEl;
 }
 
+/** Drop the Hebrew file so the phone can speak. The next clip sets a new source. */
+function releaseClipForSpeech() {
+  markOwnPause();
+  const el = clipEl;
+  if (!el) return;
+  try {
+    el.pause();
+  } catch {
+    /* ignore */
+  }
+  try {
+    el.removeAttribute("src");
+    el.load();
+  } catch {
+    /* ignore */
+  }
+}
 function stopClip() {
   clipGen += 1;
   markOwnPause();
@@ -567,7 +592,7 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
         }
         if (el.paused) {
           stalled += 40;
-          if (stalled > 400) finish(true);
+          if (stalled > 400) finish(el.currentTime > start + 0.2);
           return;
         }
         stalled = 0;
@@ -590,6 +615,7 @@ export async function speakLine(
   lang: "he" | "en",
   rate: number,
   signal: { stop: boolean } = { stop: false },
+  opts?: { mustStart?: boolean },
 ): Promise<boolean> {
   const s = synth();
   const spoken = lang === "he" ? ttsHebrew(text) : text.trim();
@@ -624,26 +650,53 @@ export async function speakLine(
     let settled = false;
     let heard = false;
     let u = makeU();
+    let kick = 0;
     const finish = (ok: boolean) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(safety);
       window.clearTimeout(retry);
+      window.clearTimeout(kick);
+      window.clearTimeout(giveUp);
       window.clearInterval(poll);
+      if (!ok && opts?.mustStart) {
+        try {
+          s.cancel();
+        } catch {
+          /* a gloss that never started must not talk over the recording */
+        }
+      }
       resolve(ok);
     };
     const arm = (utter: SpeechSynthesisUtterance) => {
       utter.onstart = () => {
         heard = true;
       };
-      utter.onend = () => finish(true);
-      utter.onerror = () => finish(heard);
+      utter.onend = () => {
+        if (opts?.mustStart && !heard) return;
+        finish(true);
+      };
+      utter.onerror = () => finish(heard && !opts?.mustStart);
     };
     arm(u);
     const safety = window.setTimeout(
       () => finish(heard),
       Math.min(24_000, 3_200 + spoken.length * (280 / spokenRate)),
     );
+    const giveUp = window.setTimeout(
+      () => {
+        if (opts?.mustStart && !heard) finish(false);
+      },
+      apple ? 1500 : 2000,
+    );
+    const kickTimer = window.setTimeout(() => {
+      try {
+        if (s.paused) s.resume();
+      } catch {
+        /* iPhone stays paused after a clip unless resume runs again */
+      }
+    }, 80);
+    kick = kickTimer;
     const retry = window.setTimeout(() => {
       if (heard || signal.stop || settled) return;
       try {
@@ -652,6 +705,7 @@ export async function speakLine(
         /* ignore */
       }
       u = makeU();
+      liveUtterance = u;
       arm(u);
       try {
         s.speak(u);
@@ -671,6 +725,7 @@ export async function speakLine(
       }
     }, 80);
     try {
+      liveUtterance = u;
       s.speak(u);
     } catch {
       finish(false);
@@ -840,6 +895,20 @@ export async function speakCard(item: ListenItem, rate: number, signal: { stop: 
   await pauseMs(restFor(rate, apple ? 280 : 720), signal);
 }
 
+/** Say a gloss after a Hebrew clip. The phone will not talk over that clip or the music. */
+async function speakGlossOnRoad(en: string, signal: { stop: boolean }): Promise<boolean> {
+  suppressRoadHalt(12000);
+  releaseClipForSpeech();
+  const releaseMusic = holdRoadMusic();
+  try {
+    await pauseMs(160, signal);
+    if (signal.stop) return false;
+    return speakLine(en, "en", 0.85, signal, { mustStart: true });
+  } finally {
+    releaseMusic();
+  }
+}
+
 /** Hebrew, then the meaning. Same clips and pace as Drill. No chapter announcement. */
 export async function speakRoadCard(item: ListenItem, signal: { stop: boolean }): Promise<void> {
   if (signal.stop) return;
@@ -858,15 +927,21 @@ export async function speakRoadCard(item: ListenItem, signal: { stop: boolean })
   await pauseMs(restFor(0.85, 420), signal);
   if (signal.stop) return;
   const en = spokenEnglish(item.gloss);
-  if (en) {
-    if (item.plainEnglish) {
-      await speakLine(en, "en", 0.85, signal);
-    } else {
-      const ownEn = await playAdminVoice(item.id, "en", 0.85, signal);
-      if (!ownEn && !signal.stop) {
-        const neuralEn = await playNeuralVoice(item.id, "en", 0.85, signal);
-        if (!neuralEn && !signal.stop) await speakLine(en, "en", 0.85, signal);
-      }
+  if (!en) return;
+  const voiceId = item.heVoiceId || item.id;
+  if (item.plainEnglish && item.heVoiceId && item.heVoiceId !== item.id) {
+    // This gloss is not the other course's recording. Say the card. If the phone
+    // stays quiet, play that recording anyway so the meaning is not skipped.
+    const said = await speakGlossOnRoad(en, signal);
+    if (!said && !signal.stop) {
+      const ownEn = await playAdminVoice(voiceId, "en", 0.85, signal);
+      if (!ownEn && !signal.stop) await playNeuralVoice(voiceId, "en", 0.85, signal);
+    }
+  } else {
+    const ownEn = await playAdminVoice(voiceId, "en", 0.85, signal);
+    if (!ownEn && !signal.stop) {
+      const neuralEn = await playNeuralVoice(voiceId, "en", 0.85, signal);
+      if (!neuralEn && !signal.stop) await speakGlossOnRoad(en, signal);
     }
   }
   if (signal.stop) return;

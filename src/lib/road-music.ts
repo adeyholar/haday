@@ -16,6 +16,8 @@ let ctx: AudioContext | null = null;
 let gain: GainNode | null = null;
 let source: MediaElementAudioSourceNode | null = null;
 let wanted = false;
+/** While the phone is speaking a gloss, do not restart the bed over it. */
+let speechHold = 0;
 
 export function isRoadMusicId(value: string | null): value is RoadMusicId {
   return value === "off" || value === "hatikvah" || value === "solemn";
@@ -137,9 +139,31 @@ export function playRoadMusic(id: RoadMusicId, level = loadRoadMusicLevel()) {
 
 /** Bring the bed back if the phone paused it between words. Does not restart a user pause. */
 export function keepRoadMusicAlive() {
-  if (!wanted || !bed) return;
+  if (!wanted || !bed || speechHold > 0) return;
   if (ctx && ctx.state === "suspended") void ctx.resume();
   if (bed.paused) void bed.play().catch(() => {});
+}
+
+/**
+ * Pause the bed while a gloss is spoken. The Hebrew clip just used the speakers,
+ * and iPhone will not say the English over that session. Call the result to bring
+ * the bed back. A user who chose Quiet stays quiet.
+ */
+export function holdRoadMusic(): () => void {
+  speechHold += 1;
+  try {
+    bed?.pause();
+  } catch {
+    /* ignore */
+  }
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    speechHold = Math.max(0, speechHold - 1);
+    if (speechHold > 0 || !wanted || !bed) return;
+    void bed.play().catch(() => {});
+  };
 }
 
 export function pauseRoadMusic() {
