@@ -426,9 +426,46 @@ let clipGen = 0;
 let ownPauseAt = 0;
 let haltSuppressedUntil = 0;
 let liveUtterance: SpeechSynthesisUtterance | null = null;
+/** True from our own pause until the next clip's play() has started. Not a timer. */
+let roadGap = false;
+/** The phone can report that pause after the next word is already audible. */
+let roadGapEchoUntil = 0;
+let roadDriveWanted = false;
 
 function markOwnPause() {
   ownPauseAt = Date.now();
+  roadGap = true;
+}
+
+function endRoadGap() {
+  roadGap = false;
+  roadGapEchoUntil = Date.now() + 800;
+}
+
+/** The drive is on. Screen lock and the truck stereo must not end it. */
+export function setRoadDriveWanted(wanted: boolean) {
+  roadDriveWanted = wanted;
+}
+
+/**
+ * Lock-screen Pause is the driver only while a word is actually playing.
+ * The quiet between Hebrew and English, and a pause the phone already took, are not Stop.
+ */
+export function roadPauseIsUser(): boolean {
+  if (roadGap || Date.now() < roadGapEchoUntil) return false;
+  const el = clipEl;
+  if (!el || el.paused || el.ended) return false;
+  return true;
+}
+
+/** iOS keeps a podcast going when the screen dims. A drive should too. */
+export function preferRoadPlayback() {
+  const nav = navigator as Navigator & { audioSession?: { type?: string } };
+  try {
+    if (nav.audioSession) nav.audioSession.type = "playback";
+  } catch {
+    /* older phones have no audio session */
+  }
 }
 
 /** Ignore a lock-screen pause that we caused by stopping a clip or a gloss. */
@@ -438,7 +475,7 @@ export function suppressRoadHalt(ms: number) {
 
 /** True when we just paused a word clip ourselves. The lock screen must not treat that as Stop. */
 export function recentOwnPause(): boolean {
-  return Date.now() - ownPauseAt < 1200 || Date.now() < haltSuppressedUntil;
+  return Date.now() - ownPauseAt < 1200 || Date.now() < haltSuppressedUntil || roadGap;
 }
 
 function getClipEl(): HTMLAudioElement | null {
@@ -447,6 +484,13 @@ function getClipEl(): HTMLAudioElement | null {
     clipEl = new Audio();
     clipEl.preload = "auto";
     clipEl.setAttribute("playsinline", "true");
+    clipEl.addEventListener("pause", () => {
+      // A lock, a stereo, or a ducked session pauses the word. Keep the drive.
+      // A clip that reached its end must not be started over.
+      if (!roadDriveWanted || roadGap || !clipEl || clipEl.ended) return;
+      if (Number.isFinite(clipEl.duration) && clipEl.duration > 0.2 && clipEl.currentTime >= clipEl.duration - 0.08) return;
+      void clipEl.play().catch(() => {});
+    });
   }
   return clipEl;
 }
@@ -492,6 +536,7 @@ function unlockClipAudio() {
     .play()
     .then(() => {
       if (mine !== clipGen) return;
+      markOwnPause();
       el.pause();
       el.muted = false;
     })
@@ -562,6 +607,7 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
       );
     });
     if (!started || signal.stop || mine !== clipGen) return false;
+    endRoadGap();
     return await new Promise<boolean>((resolve) => {
       let settled = false;
       const finish = (ok: boolean) => {
@@ -581,6 +627,7 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
         resolve(ok);
       };
       let stalled = 0;
+      let resumeTries = 0;
       const poll = window.setInterval(() => {
         if (mine !== clipGen || signal.stop) {
           finish(true);
@@ -592,6 +639,13 @@ export async function playVocabClip(clip: VocabClip, rate: number, signal: { sto
         }
         if (el.paused) {
           stalled += 40;
+          // A short system pause is not the end of the word. Try again, then move on.
+          if (roadDriveWanted && resumeTries < 2 && stalled >= 160) {
+            resumeTries += 1;
+            stalled = 0;
+            void el.play().catch(() => {});
+            return;
+          }
           if (stalled > 400) finish(el.currentTime > start + 0.2);
           return;
         }
@@ -803,6 +857,7 @@ export async function playAdminVoice(
   rate: number,
   signal: { stop: boolean },
 ): Promise<boolean> {
+  roadGap = true;
   const key = `${vocabId}:${part}`;
   let payload = voiceClipCache.get(key);
   if (payload === undefined) {
@@ -840,18 +895,30 @@ export async function playNeuralVoice(
   rate: number,
   signal: { stop: boolean },
 ): Promise<boolean> {
+  roadGap = true;
   await loadNeuralManifest();
   const src = neuralSrc(vocabId, part);
   if (!src || signal.stop) return false;
   return playVocabClip({ src, start: 0, end: 0, he: "", kind: "lemma", source: "eliran" }, rate, signal);
 }
 
-export async function speakHebrewWord(item: ListenItem, rate: number, signal: { stop: boolean }): Promise<void> {
+export async function speakHebrewWord(
+  item: ListenItem,
+  rate: number,
+  signal: { stop: boolean },
+  opts?: { preferNeural?: boolean },
+): Promise<void> {
   const voiceId = item.heVoiceId || item.id;
+  if (opts?.preferNeural) {
+    const neural = await playNeuralVoice(voiceId, "he", rate, signal);
+    if (neural || signal.stop) return;
+  }
   const own = await playAdminVoice(voiceId, "he", rate, signal);
   if (own || signal.stop) return;
-  const neural = await playNeuralVoice(voiceId, "he", rate, signal);
-  if (neural || signal.stop) return;
+  if (!opts?.preferNeural) {
+    const neural = await playNeuralVoice(voiceId, "he", rate, signal);
+    if (neural || signal.stop) return;
+  }
   const clip = vocabClip(voiceId);
   if (clip?.source === "eliran" && clip.kind === "lemma") {
     const ok = await playVocabClip(clip, rate, signal);
@@ -912,7 +979,7 @@ async function speakGlossOnRoad(en: string, signal: { stop: boolean }): Promise<
 /** Hebrew, then the meaning. Same clips and pace as Drill. No chapter announcement. */
 export async function speakRoadCard(item: ListenItem, signal: { stop: boolean }): Promise<void> {
   if (signal.stop) return;
-  await speakHebrewWord(item, 0.85, signal);
+  await speakHebrewWord(item, 0.85, signal, { preferNeural: true });
   if (signal.stop) return;
   if (item.alsoHebrew) {
     await pauseMs(restFor(0.85, 280), signal);
@@ -921,6 +988,7 @@ export async function speakRoadCard(item: ListenItem, signal: { stop: boolean })
       { ...item, id: `${item.id}-also`, hebrew: item.alsoHebrew, heVoiceId: undefined, alsoHebrew: undefined },
       0.85,
       signal,
+      { preferNeural: true },
     );
     if (signal.stop) return;
   }
@@ -934,14 +1002,14 @@ export async function speakRoadCard(item: ListenItem, signal: { stop: boolean })
     // stays quiet, play that recording anyway so the meaning is not skipped.
     const said = await speakGlossOnRoad(en, signal);
     if (!said && !signal.stop) {
-      const ownEn = await playAdminVoice(voiceId, "en", 0.85, signal);
-      if (!ownEn && !signal.stop) await playNeuralVoice(voiceId, "en", 0.85, signal);
+      const neuralEn = await playNeuralVoice(voiceId, "en", 0.85, signal);
+      if (!neuralEn && !signal.stop) await playAdminVoice(voiceId, "en", 0.85, signal);
     }
   } else {
-    const ownEn = await playAdminVoice(voiceId, "en", 0.85, signal);
-    if (!ownEn && !signal.stop) {
-      const neuralEn = await playNeuralVoice(voiceId, "en", 0.85, signal);
-      if (!neuralEn && !signal.stop) await speakGlossOnRoad(en, signal);
+    const neuralEn = await playNeuralVoice(voiceId, "en", 0.85, signal);
+    if (!neuralEn && !signal.stop) {
+      const ownEn = await playAdminVoice(voiceId, "en", 0.85, signal);
+      if (!ownEn && !signal.stop) await speakGlossOnRoad(en, signal);
     }
   }
   if (signal.stop) return;

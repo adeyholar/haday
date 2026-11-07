@@ -3,7 +3,7 @@ import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
-import { isAppleMobile, keepSpeechAlive, recentOwnPause, speakRoadCard, stopSpeech, unlockSpeech, type ListenItem } from "@/lib/listen";
+import { isAppleMobile, keepSpeechAlive, preferRoadPlayback, roadPauseIsUser, setRoadDriveWanted, speakRoadCard, stopSpeech, unlockSpeech, type ListenItem } from "@/lib/listen";
 import { loadNeuralManifest } from "@/lib/neural-voice";
 import {
   keepRoadMusicAlive,
@@ -74,6 +74,7 @@ export function RoadDeck({
   useEffect(() => {
     const signal = stopRef.current;
     return () => {
+      setRoadDriveWanted(false);
       signal.stop = true;
       stopSpeech();
       pauseRoadMusic();
@@ -112,7 +113,7 @@ export function RoadDeck({
       startFrom(iRef.current, true);
     });
     ms.setActionHandler("pause", () => {
-      if (recentOwnPause()) return;
+      if (!roadPauseIsUser()) return;
       halt();
     });
     ms.setActionHandler("previoustrack", () => stepRef.current(-1));
@@ -145,6 +146,7 @@ export function RoadDeck({
   }, [set]);
 
   function halt() {
+    setRoadDriveWanted(false);
     stopRef.current.stop = true;
     playGen.current += 1;
     stopSpeech();
@@ -154,6 +156,8 @@ export function RoadDeck({
 
   function startFrom(start: number, kick = false) {
     stopRef.current.stop = false;
+    setRoadDriveWanted(true);
+    preferRoadPlayback();
     const gen = ++playGen.current;
     const words = listRef.current;
     if (!words.length) return;
@@ -181,6 +185,7 @@ export function RoadDeck({
         at = at + 1 < live.length ? at + 1 : 0;
       }
       if (gen === playGen.current) {
+        setRoadDriveWanted(false);
         pauseRoadMusic();
         setPlaying(false);
       }
