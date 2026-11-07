@@ -22,7 +22,7 @@ test("the road player uses the Drill voice for one week", () => {
   const page = readFileSync(new URL("../src/routes/listen/road.tsx", import.meta.url).pathname, "utf8");
   const deck = readFileSync(new URL("../src/components/road-deck.tsx", import.meta.url).pathname, "utf8");
   assert.match(src, /export async function speakRoadCard/);
-  assert.match(src, /speakHebrewWord\(item, 0\.85, signal\)/);
+  assert.match(src, /speakHebrewWord\(item, 0\.85, signal, \{ preferNeural: true \}\)/);
   assert.match(deck, /speakRoadCard/);
   assert.match(page, /On the road/);
   assert.match(deck, /Hatikvah/);
@@ -34,15 +34,29 @@ test("the road player uses the Drill voice for one week", () => {
 test("the road list keeps going when a clip pauses or a lookup hangs", () => {
   const src = readFileSync(new URL("../src/lib/listen.ts", import.meta.url).pathname, "utf8");
   const deck = readFileSync(new URL("../src/components/road-deck.tsx", import.meta.url).pathname, "utf8");
-  assert.match(src, /recentOwnPause/);
+  assert.match(src, /roadPauseIsUser/);
+  assert.match(src, /let roadGap = false/);
+  assert.match(src, /audioSession/);
+  assert.match(src, /resumeTries < 2/);
   assert.match(src, /setTimeout\(\(\) => done\(false\), 2000\)/);
   assert.match(src, /promiseTimeout\(listVoiceIndex\(\), 2500\)/);
-  assert.match(deck, /recentOwnPause\(\)/);
+  assert.match(deck, /roadPauseIsUser\(\)/);
+  assert.match(deck, /setRoadDriveWanted\(false\)/);
+  assert.match(deck, /preferRoadPlayback\(\)/);
   assert.match(deck, /keepRoadMusicAlive/);
   assert.match(deck, /a failed word must not end the drive/);
   assert.match(src, /holdRoadMusic/);
   assert.match(src, /el\.currentTime > start \+ 0\.2/);
   assert.match(src, /heVoiceId !== item\.id/);
+  const road = src.slice(src.indexOf("export async function speakRoadCard"));
+  const neuralEn = road.indexOf('playNeuralVoice(voiceId, "en"');
+  const adminEn = road.indexOf('playAdminVoice(voiceId, "en"');
+  assert.ok(neuralEn >= 0 && adminEn > neuralEn, "road English tries the neural file before the admin bank");
+  const hebrew = src.slice(src.indexOf("export async function speakHebrewWord"), src.indexOf("export async function speakCard"));
+  assert.match(hebrew, /if \(opts\?\.preferNeural\)/);
+  const admin = hebrew.indexOf("playAdminVoice");
+  const neuralAfter = hebrew.indexOf("playNeuralVoice", admin);
+  assert.ok(admin >= 0 && neuralAfter > admin, "drill still asks the teacher bank before the neural file");
 });
 
 test("the road music slider can go silent and stays under the word", async () => {
