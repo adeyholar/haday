@@ -9,7 +9,7 @@ function roomFor(pathname: string): { to: "/hub/learn" | "/hub/practice" | "/hub
   ) {
     return { to: "/hub/play", label: "Play" };
   }
-  if (pathname.startsWith("/listen") || pathname.startsWith("/study/term2/listen")) {
+  if (pathname.startsWith("/listen") || pathname.startsWith("/study/term2/listen") || pathname.startsWith("/parse-lab")) {
     return { to: "/hub/listen", label: "Listen" };
   }
   if (

@@ -61,7 +61,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
         !pathname.startsWith("/iibs/wlc"));
     return [
       { to: "/iibs", label: "Home", icon: House, on: inRoom },
-      { to: "/iibs/learn", label: "Learn", icon: Library, on: pathname.startsWith("/iibs/learn") || pathname.startsWith("/iibs/wlc") },
+      { to: "/iibs/learn", label: "Learn", icon: Library, on: pathname.startsWith("/iibs/learn") || pathname.startsWith("/iibs/wlc") || pathname.startsWith("/iibs/parse-lab") },
       { to: "/iibs/study", label: "Practice", icon: ListChecks, on: pathname.startsWith("/iibs/study") },
       { to: "/iibs/vocab", label: "Play", icon: Compass, on: pathname.startsWith("/iibs/vocab") },
       { to: "/iibs/road", label: "Listen", icon: Headphones, on: pathname.startsWith("/iibs/road") },
@@ -104,7 +104,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
       to: "/hub/listen",
       label: "Listen",
       icon: Headphones,
-      on: pathname.startsWith("/hub/listen") || pathname.startsWith("/listen") || pathname.startsWith("/study/term2/listen"),
+      on: pathname.startsWith("/hub/listen") || pathname.startsWith("/listen") || pathname.startsWith("/study/term2/listen") || pathname.startsWith("/parse-lab"),
     },
   ];
 }

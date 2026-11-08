@@ -41,6 +41,7 @@ type Card = {
     | "/listen/road"
     | "/listen/pet"
     | "/listen/read"
+    | "/parse-lab"
     | "/study/term2"
     | "/study/term2/game"
     | "/study/term2/listen"
@@ -119,6 +120,7 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       },
       { to: "/listen/pet", title: "Alive Pet", line: "The class voice, your weak words first." },
       { to: "/listen/read", title: "Tanakh reader", line: "Torah, Nevi'im, and Ketuvim are inside the reader." },
+      { to: "/parse-lab", title: "Parsing Lab", line: "Up to five verses. Nouns and verbs, then what it means." },
     ],
   },
 };
@@ -175,6 +177,7 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
     cards: [
       { to: "/study/term2/listen", title: "Vocabulary", line: "This chapter." },
       { to: "/study/term2/listen/road", title: "On the road", line: "This chapter, while you drive." },
+      { to: "/parse-lab", title: "Parsing Lab", line: "Up to five verses. Nouns and verbs, then what it means." },
     ],
   },
 };

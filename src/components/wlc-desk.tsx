@@ -8,7 +8,16 @@ import { Link } from "@tanstack/react-router";
 import { MorphLines } from "@/components/morph-lines";
 import { matchInPool } from "@/lib/reading-loop/known";
 import { poolFor } from "@/lib/reading-loop/pool";
+import { isBookId, type BookId } from "@/lib/tanakh-canon";
 import { savePassagePack, type StudyScope } from "@/lib/reading-loop/passage";
+
+function verseParse(ref: string): { book: BookId; chapter: number; verse: number } | undefined {
+  const [raw, ch, v] = ref.split(".");
+  const chapter = Number(ch);
+  const verse = Number(v);
+  if (!raw || !isBookId(raw) || !chapter || !verse) return undefined;
+  return { book: raw, chapter, verse };
+}
 
 /** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
 export const WLC_PAGE_SCROLL_QUERY = "(min-width: 0px)";
@@ -96,10 +105,12 @@ function metegLine(word: WlcWord): string {
 function WordCard({
   word,
   loop,
+  parse,
   onClose,
 }: {
   word: WlcWord;
   loop?: { scope: StudyScope; ref: string; back: string };
+  parse?: { book: BookId; chapter: number; verse: number };
   onClose: () => void;
 }) {
   const qere = word.qere ?? [];
@@ -179,6 +190,15 @@ function WordCard({
           Drill this lemma
         </Link>
       ) : null}
+      {parse ? (
+        <Link
+          to="/iibs/parse-lab"
+          search={{ book: parse.book, ch: parse.chapter, v: parse.verse, n: 1, mode: "guided" }}
+          className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+        >
+          Parse this verse
+        </Link>
+      ) : null}
       {word.morph_note ? <p className="mt-3 text-sm text-muted">{word.morph_note}</p> : null}
       {word.review ? (
         <p className="mt-3 text-sm text-primary">
@@ -211,6 +231,7 @@ export function WlcReading({
   loop?: { scope: StudyScope; ref: string; back: string };
 }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
+  const [pickedRef, setPickedRef] = useState("");
   const frame = useRef<HTMLDivElement>(null);
   const system = chapter.verses[0]?.system === "poetic" ? "Poetry" : "Prose";
   const follow = useFollowScroll(spot ? String(spot.verse) : "");
@@ -352,7 +373,12 @@ export function WlcReading({
               : undefined
           }
         >
-          <WordCard word={picked} loop={loop} onClose={() => closeCard(true)} />
+          <WordCard
+            word={picked}
+            loop={loop}
+            parse={verseParse(pickedRef)}
+            onClose={() => closeCard(true)}
+          />
         </div>
       ) : null}
       {showBack ? (
@@ -398,7 +424,10 @@ export function WlcReading({
                       picked={picked?.id === chain[0].id}
                       spoken={spokenId === chain[0].id}
                       dim={Boolean(dimIds?.has(chain[0].id))}
-                      onPick={setPicked}
+                      onPick={(word) => {
+                        setPicked(word);
+                        setPickedRef(verse.ref);
+                      }}
                     />
                   ) : (
                     <span key={chain[0].id} className="ms-chain" dir="rtl">
@@ -409,7 +438,10 @@ export function WlcReading({
                           picked={picked?.id === word.id}
                           spoken={spokenId === word.id}
                           dim={Boolean(dimIds?.has(word.id))}
-                          onPick={setPicked}
+                          onPick={(word) => {
+                            setPicked(word);
+                            setPickedRef(verse.ref);
+                          }}
                         />
                       ))}
                     </span>
