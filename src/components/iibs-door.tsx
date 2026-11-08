@@ -22,7 +22,7 @@ export function useIibsRoom() {
   return { level, ready };
 }
 
-export function ScriptureTabs({ active, compact = false }: { active: "levels" | "lab"; compact?: boolean }) {
+export function ScriptureTabs({ active, compact = false }: { active: "levels" | "lab" | "parse"; compact?: boolean }) {
   const face = (on: boolean) =>
     `flex min-h-11 items-center justify-center rounded-[var(--radius-md)] px-2 text-xs font-semibold ${
       on ? "bg-ink text-parchment" : "text-muted"
@@ -34,7 +34,10 @@ export function ScriptureTabs({ active, compact = false }: { active: "levels" | 
           Levels
         </Link>
         <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={face(active === "lab")}>
-          Lab
+          Reading
+        </Link>
+        <Link to="/iibs/parse-lab" role="tab" aria-selected={active === "parse"} className={face(active === "parse")}>
+          Parsing
         </Link>
       </div>
     );
@@ -44,12 +47,15 @@ export function ScriptureTabs({ active, compact = false }: { active: "levels" | 
       on ? "bg-ink text-parchment" : "text-muted"
     }`;
   return (
-    <div className="mb-4 grid grid-cols-2 gap-1 rounded-[var(--radius-xl)] bg-card p-1 shadow-[var(--shadow-border)]" role="tablist" aria-label="Scripture Path">
+    <div className="mb-4 grid grid-cols-3 gap-1 rounded-[var(--radius-xl)] bg-card p-1 shadow-[var(--shadow-border)]" role="tablist" aria-label="Scripture Path">
       <Link to="/iibs" role="tab" aria-selected={active === "levels"} className={wide(active === "levels")}>
         Levels
       </Link>
       <Link to="/iibs/wlc" role="tab" aria-selected={active === "lab"} className={wide(active === "lab")}>
         Reading Lab
+      </Link>
+      <Link to="/iibs/parse-lab" role="tab" aria-selected={active === "parse"} className={wide(active === "parse")}>
+        Parsing Lab
       </Link>
     </div>
   );
@@ -220,6 +226,14 @@ export function LevelRoom({
             <ScrollText className="size-5 text-primary" />
             <span className="mt-2 font-display text-xl font-bold">Reading Lab</span>
             <span className="text-sm text-muted">Leningrad Tanakh. Accents stay.</span>
+          </Link>
+          <Link
+            to="/iibs/parse-lab"
+            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+          >
+            <ScrollText className="size-5 text-primary" />
+            <span className="mt-2 font-display text-xl font-bold">Parsing Lab</span>
+            <span className="text-sm text-muted">Up to five verses. Nouns and verbs.</span>
           </Link>
         </div>
       ) : null}

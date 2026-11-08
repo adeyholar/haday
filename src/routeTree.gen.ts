@@ -33,6 +33,7 @@ import { Route as ListenRouteImport } from './routes/listen'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
+import { Route as ParseLabRouteImport } from './routes/parse-lab'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RewardsRouteImport } from './routes/rewards'
@@ -72,6 +73,7 @@ import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as IibsBinyanimRouteImport } from './routes/iibs/binyanim'
 import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
+import { Route as IibsParseLabRouteImport } from './routes/iibs/parse-lab'
 import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfect'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
 import { Route as IibsVerbParadigmQuestRouteImport } from './routes/iibs/verb-paradigm-quest'
@@ -248,6 +250,11 @@ const LoginRoute = LoginRouteImport.update({
 const MatchRoute = MatchRouteImport.update({
   id: '/match',
   path: '/match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParseLabRoute = ParseLabRouteImport.update({
+  id: '/parse-lab',
+  path: '/parse-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuizRoute = QuizRouteImport.update({
@@ -443,6 +450,11 @@ const IibsBinyanimRoute = IibsBinyanimRouteImport.update({
 const IibsLearnRoute = IibsLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsParseLabRoute = IibsParseLabRouteImport.update({
+  id: '/parse-lab',
+  path: '/parse-lab',
   getParentRoute: () => IibsRoute,
 } as any)
 const IibsQalImperfectRoute = IibsQalImperfectRouteImport.update({
@@ -754,6 +766,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -789,6 +802,7 @@ export interface FileRoutesByFullPath {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
@@ -873,6 +887,7 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -908,6 +923,7 @@ export interface FileRoutesByTo {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
@@ -995,6 +1011,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -1030,6 +1047,7 @@ export interface FileRoutesById {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/learn': typeof IibsLearnRoute
+  '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
@@ -1118,6 +1136,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/parse-lab'
     | '/quiz'
     | '/reset-password'
     | '/rewards'
@@ -1153,6 +1172,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/learn'
+    | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
@@ -1237,6 +1257,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/parse-lab'
     | '/quiz'
     | '/reset-password'
     | '/rewards'
@@ -1272,6 +1293,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/learn'
+    | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
@@ -1358,6 +1380,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/parse-lab'
     | '/quiz'
     | '/reset-password'
     | '/rewards'
@@ -1393,6 +1416,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/learn'
+    | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
     | '/iibs/verb-paradigm-quest'
@@ -1480,6 +1504,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
+  ParseLabRoute: typeof ParseLabRoute
   QuizRoute: typeof QuizRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
@@ -1719,6 +1744,13 @@ declare module '@tanstack/react-router' {
       path: '/match'
       fullPath: '/match'
       preLoaderRoute: typeof MatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parse-lab': {
+      id: '/parse-lab'
+      path: '/parse-lab'
+      fullPath: '/parse-lab'
+      preLoaderRoute: typeof ParseLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quiz': {
@@ -1992,6 +2024,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/iibs/learn'
       preLoaderRoute: typeof IibsLearnRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/parse-lab': {
+      id: '/iibs/parse-lab'
+      path: '/parse-lab'
+      fullPath: '/iibs/parse-lab'
+      preLoaderRoute: typeof IibsParseLabRouteImport
       parentRoute: typeof IibsRoute
     }
     '/iibs/qal-imperfect': {
@@ -2423,6 +2462,7 @@ interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
   IibsBinyanimRoute: typeof IibsBinyanimRoute
   IibsLearnRoute: typeof IibsLearnRoute
+  IibsParseLabRoute: typeof IibsParseLabRoute
   IibsQalImperfectRoute: typeof IibsQalImperfectRoute
   IibsRoadRoute: typeof IibsRoadRoute
   IibsVerbParadigmQuestRoute: typeof IibsVerbParadigmQuestRoute
@@ -2440,6 +2480,7 @@ const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
   IibsBinyanimRoute: IibsBinyanimRoute,
   IibsLearnRoute: IibsLearnRoute,
+  IibsParseLabRoute: IibsParseLabRoute,
   IibsQalImperfectRoute: IibsQalImperfectRoute,
   IibsRoadRoute: IibsRoadRoute,
   IibsVerbParadigmQuestRoute: IibsVerbParadigmQuestRoute,
@@ -2502,6 +2543,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
+  ParseLabRoute: ParseLabRoute,
   QuizRoute: QuizRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,

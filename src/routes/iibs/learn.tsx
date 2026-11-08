@@ -9,7 +9,7 @@ function ScriptureLearn() {
     <>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path</p>
       <h1 className="mt-1 font-display text-4xl font-bold text-ink">Learn</h1>
-      <p className="mt-2 max-w-prose text-muted">The word lists live in the level. The Leningrad text lives in the Reading Lab.</p>
+      <p className="mt-2 max-w-prose text-muted">The word lists live in the level. The Leningrad text lives in the Reading Lab. Parsing Lab takes up to five verses.</p>
       <ul className="mt-4 grid gap-2">
         <li>
           <Link to="/iibs" className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]">
@@ -21,6 +21,12 @@ function ScriptureLearn() {
           <Link to="/iibs/wlc" className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]">
             <span className="block font-display text-2xl font-bold">Reading Lab</span>
             <span className="mt-1 block text-sm text-muted">The Leningrad text, accents kept, on its own leaf.</span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/iibs/parse-lab" className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]">
+            <span className="block font-display text-2xl font-bold">Parsing Lab</span>
+            <span className="mt-1 block text-sm text-muted">Up to five verses. Nouns and verbs, then what it means.</span>
           </Link>
         </li>
       </ul>

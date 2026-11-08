@@ -207,6 +207,13 @@ export function WordSheet({
         </Link>
       ) : null}
       <div className="mt-3 flex flex-col gap-2">
+        <Link
+          to="/parse-lab"
+          search={{ book: pick.book, ch: pick.chapter, v: pick.verse, n: 1, at: pick.index, one: true, mode: "guided" }}
+          className="flex min-h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-4 text-sm font-semibold text-primary-foreground"
+        >
+          Parse it
+        </Link>
         {deck ? (
           <Link
             to="/finder/deck"

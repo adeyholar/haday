@@ -217,6 +217,19 @@ function Home() {
       </Link>
 
       <Link
+        to="/parse-lab"
+        className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <BookOpen className="mt-0.5 size-6 shrink-0 text-primary" />
+        <span>
+          <span className="block font-display text-2xl font-bold">Parsing Lab</span>
+          <span className="mt-1 block text-sm text-muted">
+            Up to five verses. Parse the nouns and verbs, then say what it means.
+          </span>
+        </span>
+      </Link>
+
+      <Link
         to="/keep"
         className="mt-3 flex items-start gap-3 rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
       >

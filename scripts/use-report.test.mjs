@@ -13,6 +13,8 @@ test("pages land in the area a student would name", () => {
   assert.equal(areaOf("/admin") , null);
   assert.equal(areaOf("/admin/use"), null);
   assert.equal(areaOf("/iibs/wlc/Gen/1")?.id, "text");
+  assert.equal(areaOf("/iibs/parse-lab")?.id, "parse");
+  assert.equal(areaOf("/parse-lab")?.label, "Parsing Lab");
   assert.equal(areaOf("/listen/read")?.id, "tanakh");
 });
 
