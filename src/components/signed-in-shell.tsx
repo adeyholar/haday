@@ -151,10 +151,22 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   const [doorReady, setDoorReady] = useState(false);
   const [hall, setHall] = useState(false);
   const [hideBars, setHideBars] = useState(false);
+  const [rosterWide, setRosterWide] = useState(false);
   const game = useStudy((s) => s.game);
   const streak = useStudy((s) => s.streak);
   const board = scoreboard(game, streak);
   const honor = board.honor;
+
+  useEffect(() => {
+    const read = () => setRosterWide(window.localStorage.getItem("haday-admin-wide") === "1");
+    read();
+    window.addEventListener("haday-admin-wide", read);
+    window.addEventListener("storage", read);
+    return () => {
+      window.removeEventListener("haday-admin-wide", read);
+      window.removeEventListener("storage", read);
+    };
+  }, []);
 
   useEffect(() => {
     if (isPublic || !userId) {
@@ -339,12 +351,13 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
   const tabRoom = choosingTerm ? "home-only" : iibsOnly ? "scripture" : "grammar";
+  const frame = pathname === "/admin" && rosterWide ? "max-w-none" : "max-w-3xl";
 
   return (
     <div className="min-h-dvh text-fg">
       <VisitorBeacon />
       <header className={`sticky top-0 z-20 border-b border-border bg-card transition-transform ${hideBars ? "shell-hide-top" : ""}`}>
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-2 px-3 pt-[env(safe-area-inset-top)]">
+        <div className={`mx-auto flex h-14 w-full items-center justify-between gap-2 px-3 pt-[env(safe-area-inset-top)] ${frame}`}>
           <BrandLockup linked to={studentHome ?? "/"} />
           <div className="flex min-w-0 items-center gap-0.5">
             <Link
@@ -376,7 +389,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-4 pb-[calc(var(--nav-h)+var(--dock-h,0px)+0.75rem)] pt-6">{children}</main>
+      <main className={`mx-auto w-full px-4 pb-[calc(var(--nav-h)+var(--dock-h,0px)+0.75rem)] pt-6 ${frame}`}>{children}</main>
 
       <nav className={`fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] transition-transform ${hideBars ? "shell-hide-bottom" : ""}`}>
         <ul className={`mx-auto grid max-w-3xl ${tabRoom === "home-only" ? "grid-cols-1" : "grid-cols-5"}`}>

@@ -120,11 +120,15 @@ function AdminPage() {
     <>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · Owner</p>
-        <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Class roster</h1>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Class roster</h1>
+          <RosterWidth />
+        </div>
         <p className="mt-3 max-w-prose text-sm text-muted">
           {people.length} account{people.length === 1 ? "" : "s"}. Name and email come from sign-in.
           Last login is the most recent session; last study is when they saved progress.
           Email accounts stay waiting until they open the confirmation mail.
+          Path is next to the name. Only you can move an account. A student cannot switch paths.
         </p>
         <p className="mt-2 max-w-prose text-sm text-muted">
           {mailer?.configured
@@ -233,13 +237,13 @@ function AdminPage() {
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-3 font-semibold">Name</th>
+              <th className="px-4 py-3 font-semibold">Path</th>
               <th className="px-4 py-3 font-semibold">Email</th>
               <th className="px-4 py-3 font-semibold">Signed up</th>
               <th className="px-4 py-3 font-semibold">Last login</th>
               <th className="px-4 py-3 font-semibold">Last study</th>
               <th className="px-4 py-3 font-semibold tabular-nums">Streak</th>
               <th className="px-4 py-3 font-semibold">Mail</th>
-              <th className="px-4 py-3 font-semibold">Study</th>
               <th className="px-4 py-3 font-semibold">Reset</th>
               <th className="px-4 py-3 font-semibold">Remove</th>
             </tr>
@@ -248,6 +252,14 @@ function AdminPage() {
             {people.map((p) => (
               <tr key={p.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3 font-medium text-ink">{p.name || "—"}</td>
+                <td className="px-4 py-3">
+                  <PathSwitch
+                    person={p}
+                    onChanged={(id, path) =>
+                      setPeople((cur) => (cur ?? []).map((row) => (row.id === id ? { ...row, path } : row)))
+                    }
+                  />
+                </td>
                 <td className="px-4 py-3 text-muted">
                   <span className="block">{p.email || "—"}</span>
                   <span className="mt-0.5 block text-xs text-subtle">{signInLabel(p)}</span>
@@ -258,14 +270,6 @@ function AdminPage() {
                 <td className="px-4 py-3 tabular-nums text-ink">{p.streak}d</td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted">
                   {p.hasPassword ? (p.emailVerified ? "Confirmed" : "Waiting") : "OAuth"}
-                </td>
-                <td className="px-4 py-3">
-                  <PathSwitch
-                    person={p}
-                    onChanged={(id, path) =>
-                      setPeople((cur) => (cur ?? []).map((row) => (row.id === id ? { ...row, path } : row)))
-                    }
-                  />
                 </td>
                 <td className="px-4 py-3">
                   <IssueReset
@@ -288,6 +292,41 @@ function AdminPage() {
         </table>
       </div>
     </>
+  );
+}
+
+function RosterWidth() {
+  const [wide, setWide] = useState(false);
+
+  useEffect(() => {
+    setWide(window.localStorage.getItem("haday-admin-wide") === "1");
+  }, []);
+
+  function choose(next: boolean) {
+    setWide(next);
+    window.localStorage.setItem("haday-admin-wide", next ? "1" : "0");
+    window.dispatchEvent(new Event("haday-admin-wide"));
+  }
+
+  return (
+    <div className="flex rounded-[var(--radius-md)] bg-surface p-1 shadow-[var(--shadow-border)]" role="group" aria-label="Page width">
+      <button
+        type="button"
+        aria-pressed={!wide}
+        className={`min-h-11 rounded-[var(--radius-md)] px-4 text-sm font-semibold ${wide ? "text-muted" : "bg-primary text-primary-foreground"}`}
+        onClick={() => choose(false)}
+      >
+        Narrow
+      </button>
+      <button
+        type="button"
+        aria-pressed={wide}
+        className={`min-h-11 rounded-[var(--radius-md)] px-4 text-sm font-semibold ${wide ? "bg-primary text-primary-foreground" : "text-muted"}`}
+        onClick={() => choose(true)}
+      >
+        Wide
+      </button>
+    </div>
   );
 }
 
