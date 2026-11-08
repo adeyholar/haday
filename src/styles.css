@@ -288,6 +288,13 @@
   }
 }
 
+.roster-hide-bar {
+  scrollbar-width: none;
+}
+.roster-hide-bar::-webkit-scrollbar {
+  display: none;
+}
+
 html {
   --nav-h: calc(3.5rem + env(safe-area-inset-bottom));
   --dock-h: 0px;
