@@ -21,6 +21,11 @@ function Term2ListenPage() {
             On the road
           </Button>
         </Link>
+        <Link to="/parse-lab" className="mt-2 block">
+          <Button className="w-full" variant="outline">
+            Parsing Lab
+          </Button>
+        </Link>
       </Panel>
       <Term2Listen list={list} />
     </>
