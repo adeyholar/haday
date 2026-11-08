@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createJiti } from "jiti";
 
@@ -120,4 +121,9 @@ test("Parsing Lab is open on the Grammar path and on the Scripture path", () => 
   assert.equal(path.secondTermBlock("/parse-lab", 2), null);
   assert.equal(path.ownerDoorBlock("/parse-lab", "bbh"), null);
   assert.equal(path.ownerDoorBlock("/iibs/parse-lab", "iibs"), null);
+  const root = new URL("../", import.meta.url);
+  const home = readFileSync(new URL("src/components/term-door.tsx", root), "utf8");
+  const listen = readFileSync(new URL("src/routes/study/term2/listen/index.tsx", root), "utf8");
+  assert.match(home, /to="\/parse-lab"/);
+  assert.match(listen, /to="\/parse-lab"/);
 });

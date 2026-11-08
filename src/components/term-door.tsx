@@ -191,6 +191,11 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
               </Button>
             </Link>
           </div>
+          <Link to="/parse-lab">
+            <Button className="w-full" variant="outline" size="lg">
+              Parsing Lab
+            </Button>
+          </Link>
           {weak.length > 0 ? (
             <Link to="/weak">
               <Button className="w-full" variant="outline" size="lg" onClick={() => setFocus("weak")}>
