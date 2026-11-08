@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
@@ -128,7 +128,7 @@ function AdminPage() {
           {people.length} account{people.length === 1 ? "" : "s"}. Name and email come from sign-in.
           Last login is the most recent session; last study is when they saved progress.
           Email accounts stay waiting until they open the confirmation mail.
-          Path is next to the name. Only you can move an account. A student cannot switch paths.
+          Path is next to the name. Press the roster and drag with the mouse to slide from one end to the other. Only you can move an account. A student cannot switch paths.
         </p>
         <p className="mt-2 max-w-prose text-sm text-muted">
           {mailer?.configured
@@ -232,7 +232,7 @@ function AdminPage() {
         )}
       </Panel>
 
-      <div className="overflow-x-auto rounded-[var(--radius-xl)] bg-card shadow-[var(--shadow-border)]">
+      <RosterSlide>
         <table className="w-full min-w-[52rem] text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
@@ -290,8 +290,106 @@ function AdminPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </RosterSlide>
     </>
+  );
+}
+
+function RosterSlide({ children }: { children: ReactNode }) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: number; x: number; left: number } | null>(null);
+  const [grabbing, setGrabbing] = useState(false);
+  const [span, setSpan] = useState({ full: 0, view: 0 });
+
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const read = () => setSpan({ full: el.scrollWidth, view: el.clientWidth });
+    read();
+    const obs = new ResizeObserver(read);
+    obs.observe(el);
+    const child = el.firstElementChild;
+    if (child) obs.observe(child);
+    const onWheel = (event: WheelEvent) => {
+      if (el.scrollWidth <= el.clientWidth + 1) return;
+      if (!event.shiftKey && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      el.scrollLeft += delta;
+      const rail = bar.current;
+      if (rail && rail.scrollLeft !== el.scrollLeft) rail.scrollLeft = el.scrollLeft;
+      event.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      obs.disconnect();
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, []);
+
+  function follow(source: HTMLDivElement, dest: HTMLDivElement | null) {
+    if (!dest || dest.scrollLeft === source.scrollLeft) return;
+    dest.scrollLeft = source.scrollLeft;
+  }
+
+  function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    if (!(event.target instanceof Element)) return;
+    if (event.target.closest("button, a, input, textarea, select, label")) return;
+    const el = scroller.current;
+    if (!el || el.scrollWidth <= el.clientWidth + 1) return;
+    drag.current = { id: event.pointerId, x: event.clientX, left: el.scrollLeft };
+    setGrabbing(true);
+    el.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+
+  function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = drag.current;
+    const el = scroller.current;
+    if (!start || !el || start.id !== event.pointerId) return;
+    el.scrollLeft = start.left - (event.clientX - start.x);
+    follow(el, bar.current);
+  }
+
+  function end(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!drag.current || drag.current.id !== event.pointerId) return;
+    drag.current = null;
+    setGrabbing(false);
+    const el = scroller.current;
+    if (el?.hasPointerCapture(event.pointerId)) el.releasePointerCapture(event.pointerId);
+  }
+
+  const overflows = span.full > span.view + 1;
+
+  return (
+    <div>
+      <div
+        ref={scroller}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={end}
+        onPointerCancel={end}
+        onScroll={() => {
+          const el = scroller.current;
+          if (el) follow(el, bar.current);
+        }}
+        className={`roster-hide-bar overflow-x-auto rounded-[var(--radius-xl)] bg-card shadow-[var(--shadow-border)] ${grabbing ? "cursor-grabbing select-none" : overflows ? "cursor-grab" : ""}`}
+      >
+        {children}
+      </div>
+      {overflows ? (
+        <div
+          ref={bar}
+          onScroll={() => follow(bar.current!, scroller.current)}
+          aria-label="Slide the roster sideways"
+          className="sticky z-10 overflow-x-scroll bg-card"
+          style={{ bottom: "calc(var(--nav-h) + 0.25rem)", height: 18 }}
+        >
+          <div style={{ width: span.full, height: 1 }} />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
