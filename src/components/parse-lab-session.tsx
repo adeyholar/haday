@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ScriptureTabs } from "@/components/iibs-door";
 import { StudyMenu } from "@/components/study-menu";
 import { Panel } from "@/components/panel";
+import { GradeBanner } from "@/components/grade-banner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { fetchStrongTags } from "@/lib/strongs";
@@ -274,6 +275,7 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
   const wordDone = Boolean(
     active && active.lines.every((row) => locks[row.id] || (row.id === "lemma" && lemmaMissing)),
   );
+  const wordOk = Boolean(wordDone && active && active.lines.every((row) => locks[row.id] !== "miss"));
   const nounCount = passage?.tasks.filter((item) => item.role === "noun").length ?? 0;
   const verbCount = passage?.tasks.filter((item) => item.role === "verb").length ?? 0;
 
@@ -467,7 +469,9 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
       {phase === "find" && passage ? (
         <Panel className="mt-4">
           <p className="font-semibold text-ink">Tap every common noun and every verb.</p>
-          <p className="mt-1 text-sm text-muted">{tapNote || `${tapped.length} selected.`}</p>
+          <p className={cn("mt-2 text-lg font-bold", tapNote ? "text-danger" : "text-ink")}>
+            {tapNote || `${tapped.length} selected.`}
+          </p>
           <Button type="button" className="mt-4 h-12 w-full" onClick={doneFinding}>
             Done finding
           </Button>
@@ -480,10 +484,11 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
             {active.role === "verb" ? "Verb" : "Noun"} {oneWord ? "" : `${at + 1} of ${passage?.tasks.length ?? 0}`}
             {active.aramaic ? " · Aramaic" : ""}
           </p>
-          <p className="he-word mt-2 text-4xl text-ink" dir="rtl" lang="he">
+          <p className={cn("he-word mt-2 text-4xl", wordDone ? (wordOk ? "text-good" : "text-danger") : "text-ink")} dir="rtl" lang="he">
             {active.surface}
           </p>
           <p className="mt-1 text-sm text-muted">{active.ref}</p>
+          {wordDone ? <GradeBanner className="mt-4" ok={wordOk} label={wordOk ? "Correct" : "Not quite"} /> : null}
           <div className="mt-4 space-y-4">
             {active.lines.filter((row) => !(row.id === "lemma" && lemmaMissing)).map((row) => {
               const lock = locks[row.id];
@@ -498,8 +503,18 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
                   </p>
                 );
               }
+              const answerLabel =
+                row.id === "lemma" ? (lemmas.find((item) => item.id === row.answer)?.he ?? row.answer) : row.answer;
+              const answerHebrew = row.id === "lemma" || /[\u0590-\u05FF]/.test(answerLabel);
               return (
-                <div key={row.id}>
+                <div
+                  key={row.id}
+                  className={cn(
+                    "rounded-[var(--radius-md)]",
+                    lock === "ok" && "bg-good/15 px-3 py-3",
+                    lock === "miss" && "bg-danger/10 px-3 py-3",
+                  )}
+                >
                   <p className="text-sm font-semibold text-ink">{row.label}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {options.map((option) => (
@@ -509,10 +524,10 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
                         disabled={Boolean(lock)}
                         onClick={() => setPicks((prev) => ({ ...prev, [row.id]: option.value }))}
                         className={cn(
-                          "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
-                          option.hebrew && "he-word text-xl",
-                          lock && option.value === row.answer && "bg-primary text-primary-foreground",
-                          lock && picks[row.id] === option.value && option.value !== row.answer && "bg-surface text-muted line-through",
+                          "min-h-12 rounded-[var(--radius-md)] px-3 text-base font-semibold",
+                          option.hebrew && "he-word text-2xl",
+                          lock && option.value === row.answer && "bg-good text-parchment",
+                          lock && picks[row.id] === option.value && option.value !== row.answer && "bg-danger text-parchment line-through",
                           !lock && picks[row.id] === option.value && "bg-ink text-parchment",
                           !lock && picks[row.id] !== option.value && "bg-surface text-ink",
                         )}
@@ -523,11 +538,26 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
                       </button>
                     ))}
                   </div>
-                  {lock === "ok" ? <p className="mt-1 text-xs text-primary">Right.</p> : null}
-                  {lock === "miss" ? (
-                    <p className="mt-1 text-xs text-muted">
-                      The text has {row.id === "lemma" ? (lemmas.find((item) => item.id === row.answer)?.he ?? "a different dictionary form") : row.answer}.
+                  {lock === "ok" ? (
+                    <p role="status" className="grade-pop mt-2 font-display text-2xl font-bold text-good">
+                      Correct
                     </p>
+                  ) : null}
+                  {lock === "miss" ? (
+                    <div role="status" className="mt-2">
+                      <p className="grade-pop font-display text-2xl font-bold text-danger">Not quite</p>
+                      <p className="mt-1 text-base font-semibold text-ink">
+                        The text has{" "}
+                        <span
+                          className={answerHebrew ? "he-word text-3xl" : "text-xl"}
+                          dir={answerHebrew ? "rtl" : undefined}
+                          lang={answerHebrew ? "he" : undefined}
+                        >
+                          {answerLabel}
+                        </span>
+                        .
+                      </p>
+                    </div>
                   ) : null}
                 </div>
               );
@@ -553,17 +583,23 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
 
       {phase === "review" ? (
         <Panel className="mt-4">
-          <h2 className="font-display text-2xl font-bold text-ink">Missed features</h2>
           {misses.length ? (
-            <ul className="mt-3 space-y-2 text-sm text-ink">
-              {misses.map((row) => (
-                <li key={`${row.feature}-${row.ref}-${row.surface}`}>
-                  {row.feature} · <span className="he-word text-xl" dir="rtl" lang="he">{row.surface}</span> · {row.ref}
-                </li>
-              ))}
-            </ul>
+            <>
+              <GradeBanner ok={false} label="Not quite" />
+              <h2 className="mt-4 font-display text-2xl font-bold text-ink">Missed features</h2>
+              <ul className="mt-3 space-y-3 text-base text-ink">
+                {misses.map((row) => (
+                  <li key={`${row.feature}-${row.ref}-${row.surface}`}>
+                    {row.feature} · <span className="he-word text-2xl" dir="rtl" lang="he">{row.surface}</span> · {row.ref}
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
-            <p className="mt-3 text-sm text-muted">No missed lines in this passage.</p>
+            <>
+              <GradeBanner ok label="Correct" />
+              <p className="mt-4 text-center text-lg font-semibold text-ink">Every noun and verb in this passage was right.</p>
+            </>
           )}
           <p className="mt-3 text-xs text-muted">Saved for the next time you open the lab. Not a deck of loose words.</p>
           <Button type="button" className="mt-4 h-12 w-full" onClick={() => setPhase("translate")}>
