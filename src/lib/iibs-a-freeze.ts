@@ -4,11 +4,12 @@
  */
 export const A_SLOT_FREEZE: readonly { slot: string; id: string }[] = [
   { slot: "iibs-a-08-02", id: "iibs-a-1et6eo4" },
+  { slot: "iibs-a-09-02", id: "iibs-a-txnp37" },
   { slot: "iibs-a-14-20", id: "iibs-a-rykh6t" },
 ];
 
 /** Places whose pre-fix word id must chain to the id after the repair. */
-export const A_REPAIR_SLOTS: readonly string[] = ["iibs-a-08-02", "iibs-a-14-20"];
+export const A_REPAIR_SLOTS: readonly string[] = ["iibs-a-08-02", "iibs-a-09-02", "iibs-a-14-20"];
 
 /** No second pass. Do not regenerate A_SLOT_FREEZE. */
 export const A_PRIOR_IDS: readonly { slot: string; id: string }[] = [];

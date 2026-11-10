@@ -11,11 +11,15 @@ const { keepStudyCards } = await jiti.import(join(root, "src/lib/card-ids.ts"));
 const { hydrateIibsDrillRuns, drillFingerprint } = await jiti.import(join(root, "src/lib/etch.ts"));
 const { A_SLOT_FREEZE, A_REPAIR_SLOTS, A_PRIOR_IDS, A_SPLITS } = await jiti.import(join(root, "src/lib/iibs-a-freeze.ts"));
 const { B_SLOT_FREEZE, B_REPAIR_SLOTS, B_PRIOR_IDS, B_SPLITS } = await jiti.import(join(root, "src/lib/iibs-b-freeze.ts"));
+const { C_SLOT_FREEZE, C_REPAIR_SLOTS, C_PRIOR_IDS, C_SPLITS } = await jiti.import(join(root, "src/lib/iibs-c-freeze.ts"));
+const { D_SLOT_FREEZE, D_REPAIR_SLOTS, D_PRIOR_IDS, D_SPLITS } = await jiti.import(join(root, "src/lib/iibs-d-freeze.ts"));
 const { vocabLessons } = await jiti.import(join(root, "src/lib/iibs-vocab.ts"));
 
 const books = [
   { level: "A", freeze: A_SLOT_FREEZE, slots: A_REPAIR_SLOTS, prior: A_PRIOR_IDS, splits: A_SPLITS },
   { level: "B", freeze: B_SLOT_FREEZE, slots: B_REPAIR_SLOTS, prior: B_PRIOR_IDS, splits: B_SPLITS },
+  { level: "C", freeze: C_SLOT_FREEZE, slots: C_REPAIR_SLOTS, prior: C_PRIOR_IDS, splits: C_SPLITS },
+  { level: "D", freeze: D_SLOT_FREEZE, slots: D_REPAIR_SLOTS, prior: D_PRIOR_IDS, splits: D_SPLITS },
 ];
 
 function wordAt(level, slot) {

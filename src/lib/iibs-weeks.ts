@@ -1,5 +1,7 @@
 import { A_PRIOR_IDS, A_REPAIR_SLOTS, A_SLOT_FREEZE, A_SPLITS } from "@/lib/iibs-a-freeze";
 import { B_PRIOR_IDS, B_REPAIR_SLOTS, B_SLOT_FREEZE, B_SPLITS } from "@/lib/iibs-b-freeze";
+import { C_PRIOR_IDS, C_REPAIR_SLOTS, C_SLOT_FREEZE, C_SPLITS } from "@/lib/iibs-c-freeze";
+import { D_PRIOR_IDS, D_REPAIR_SLOTS, D_SLOT_FREEZE, D_SPLITS } from "@/lib/iibs-d-freeze";
 import { E_PRIOR_IDS, E_REPAIR_SLOTS, E_SLOT_FREEZE, E_SPLITS } from "@/lib/iibs-e-freeze";
 import { vocabLessons, type IibsVocabLevel, type IibsVocabWord } from "@/lib/iibs-vocab";
 import type { Pos, VocabItem } from "@/lib/vocab";
@@ -84,6 +86,10 @@ const A_FREEZE_ID = new Map(A_SLOT_FREEZE.map((row) => [row.slot, row.id]));
 const A_PRIOR_ID = new Map(A_PRIOR_IDS.map((row) => [row.slot, row.id]));
 const B_FREEZE_ID = new Map(B_SLOT_FREEZE.map((row) => [row.slot, row.id]));
 const B_PRIOR_ID = new Map(B_PRIOR_IDS.map((row) => [row.slot, row.id]));
+const C_FREEZE_ID = new Map(C_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const C_PRIOR_ID = new Map(C_PRIOR_IDS.map((row) => [row.slot, row.id]));
+const D_FREEZE_ID = new Map(D_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const D_PRIOR_ID = new Map(D_PRIOR_IDS.map((row) => [row.slot, row.id]));
 const E_FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
 const E_PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
 
@@ -105,6 +111,7 @@ export const GLOSS_PRIOR_IDS: readonly { slot: string; id: string }[] = [
   { slot: "iibs-c-28-06", id: "iibs-c-1xcifal" },
   { slot: "iibs-c-29-01", id: "iibs-c-6vnddv" },
   { slot: "iibs-d-04-01", id: "iibs-d-z6rwq7" },
+  { slot: "iibs-d-04-01", id: "iibs-d-81iy5q" },
   { slot: "iibs-d-08-05", id: "iibs-d-1gv6fru" },
   { slot: "iibs-d-08-05", id: "iibs-d-1lhpv2x" },
   { slot: "iibs-d-13-01", id: "iibs-d-1ywerk3" },
@@ -114,10 +121,12 @@ export const GLOSS_PRIOR_IDS: readonly { slot: string; id: string }[] = [
   { slot: "iibs-e-26-04", id: "iibs-e-iozz0a" },
 ];
 
-/** One book per level. A, B, and E have a frozen repair. The live guard runs after every level is built. */
+/** One book per level. A, B, C, D, and E have a frozen repair. The live guard runs after every level is built. */
 const REPAIR_BOOKS: Partial<Record<IibsVocabLevel, RepairBook>> = {
   A: { freeze: A_FREEZE_ID, prior: A_PRIOR_ID, slots: A_REPAIR_SLOTS, splits: A_SPLITS },
   B: { freeze: B_FREEZE_ID, prior: B_PRIOR_ID, slots: B_REPAIR_SLOTS, splits: B_SPLITS },
+  C: { freeze: C_FREEZE_ID, prior: C_PRIOR_ID, slots: C_REPAIR_SLOTS, splits: C_SPLITS },
+  D: { freeze: D_FREEZE_ID, prior: D_PRIOR_ID, slots: D_REPAIR_SLOTS, splits: D_SPLITS },
   E: { freeze: E_FREEZE_ID, prior: E_PRIOR_ID, slots: E_REPAIR_SLOTS, splits: E_SPLITS },
 };
 
