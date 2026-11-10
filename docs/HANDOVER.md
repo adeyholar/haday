@@ -1,41 +1,34 @@
 # Handover
 
-The Chairman merged both 2018 coursebook checks. Do not deploy by hand. Do not apply a 2025 Level B form.
+This branch is not merged. Do not merge it. Do not deploy. Do not apply a 2025 Level B form.
 
-## What landed
+## What this branch repairs
 
-Level C and Level D are on main in pull request #237. 300 rows each. No stored Hebrew was rewritten. No gloss was rewritten. No word id changed. There is no C or D repair book.
-
-Level A and Level B are this branch, pull request #238. Level A: 481 rows. Level B: 300 rows. Four uncontested headwords were repaired. Old ids were frozen before the string edit. No gloss was rewritten. No row was inserted, deleted, or reordered.
+Three Tutor-confirmed headwords were repaired to the 2018 coursebook page. Gloss, plural, and kind were not rewritten. No row was inserted, deleted, or reordered. The old study id was frozen before the string edit, so a saved card and a paused drill follow the new id.
 
 | Level | Place | Old id | New id | Now |
 | --- | --- | --- | --- | --- |
-| A | 8.02 | iibs-a-1et6eo4 | iibs-a-17m2sh7 | אֱדוֹם |
-| A | 14.20 | iibs-a-rykh6t | iibs-a-qw8pzd | יְרוּשָׁלַם / יְרוּשָׁלַיִם |
-| B | 18.08 | iibs-b-x412qb | iibs-b-fob5ss | סָלַח (לְ) |
-| B | 26.05 | iibs-b-a1u5id | iibs-b-1beiq5t | שֵׂכֶל / שֶׂכֶל |
+| A | 9.02 | iibs-a-txnp37 | iibs-a-1l0rl94 | גַּג |
+| C | 9.05 | iibs-c-1xgsae3 | iibs-c-1ndz7hc | נִבָּא |
+| D | 4.01 | iibs-d-po0ue2 | iibs-d-b3oitr | חֹרֶב |
+
+The place slots iibs-a-09-02, iibs-c-09-05, and iibs-d-04-01 chain to those new ids. Level D also still chains the older gloss ids iibs-d-z6rwq7 and iibs-d-81iy5q. The proper name stays in the note only. The Level D vocabulary table is printed page 42 and is stored in the check as page 50. That page number was not changed.
+
+The four repairs already on main were left as they are. Their freeze ids were not regenerated: A 8.02 (iibs-a-1et6eo4), A 14.20 (iibs-a-rykh6t), B 18.08 (iibs-b-x412qb), B 26.05 (iibs-b-a1u5id).
 
 ## Still different
 
 | Level | Lesson | Why it was left |
 | --- | --- | --- |
 | A | 3.11 | Qamats on the page, patah on the site. Id iibs-a-1f0r1bt. Page 74. |
-| A | 9.02 | Patah and dagesh on the page, qamats and dagesh on the site. Id iibs-a-txnp37. Page 239. No lexicon was opened. |
-| C | 9.02 and 9.03 | Word-set. The page has טֻמְאָה then גָּבַהּ. The site has גָּבַהּ then טָהֵר. Not renumbered. |
-| C | 9.05 | Page נִבָּא (qamats). Site נִבֵּא (tsere). Lexicon note agreed with the site. |
-| D | 4.01 | Page חֹרֶב (segol). Site חֹרֵב (tsere). Lexicon note agreed with the site. |
+| C | 9.02 and 9.03 | Word-set. The page has טֻמְאָה then גָּבַהּ. The site keeps גָּבַהּ then טָהֵר. Not renumbered. |
 
-These wait for the Biblical Hebrew Tutor. Do not auto-pick. Same class of decision as Level E 25.09 for the vowel rows.
+Level B was not touched.
 
-## Decisions kept
+## Tests
 
-- Site order was not changed.
-- Five Level A rows that are not in that unit's table were not moved.
-- Level A 14.14 was not reversed.
-- Spacing that already matches after NFC was not a repair.
-- A holam that an extractor hung on the wrong letter was rejected (B 28.07, D 2.04, C 17.02).
-- Footnote rows were not added.
+`npx tsc --noEmit` passed. `node --test scripts/*.test.mjs` passed 663, failed 0, skipped 5.
 
 ## Next step
 
-Tutor sign-off on the rows that still differ. Nothing else is waiting on this check.
+Derek review. Do not merge. Do not deploy.

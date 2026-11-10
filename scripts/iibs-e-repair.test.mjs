@@ -267,6 +267,6 @@ test("no study gloss keeps a parenthesis, and every old nested-note id reaches t
   }
   assert.equal(changed, 18);
   assert.equal(new Set(GLOSS_PRIOR_IDS.map((row) => row.slot)).size, changed);
-  assert.equal(GLOSS_PRIOR_IDS.length, 23);
+  assert.equal(GLOSS_PRIOR_IDS.length, 24);
   assert.equal(restored.size, 5);
 });
