@@ -174,15 +174,30 @@ export function finalVocabChoices(item: FinalVocabItem, stored?: string[]): stri
   return stored ?? [item.accept[0]];
 }
 
-export function startFinalVocab(seed = 1, cards?: CardBook): FinalVocabRun {
+export function startFinalVocab(seed = 1, cards?: CardBook, prior?: Record<string, boolean>): FinalVocabRun {
   const rng = mulberry(seed);
   const choices: Record<string, string[]> = {};
   for (const item of FINAL_VOCAB) choices[item.id] = glossChoices(item, rng);
   const ids = FINAL_VOCAB.map((item) => item.id);
-  const order = cards
-    ? leadWithWeak(ids, (id) => vocabRank(cards, examStudyId(id)), (id) => id, (list) => shuffle(list, rng))
-    : shuffle(ids, rng);
+  const order = prior && Object.keys(prior).length
+    ? nextAfterFinish(ids, prior, cards, rng)
+    : cards
+      ? leadWithWeak(ids, (id) => vocabRank(cards, examStudyId(id)), (id) => id, (list) => shuffle(list, rng))
+      : shuffle(ids, rng);
   return { order, index: 0, first: {}, choices };
+}
+
+/** After a finished sitting: misses lead, and that block is not shuffled. Words held on the first answer are mixed. */
+function nextAfterFinish(ids: string[], prior: Record<string, boolean>, cards: CardBook | undefined, rng: () => number): string[] {
+  const weak = ids
+    .filter((id) => prior[id] === false)
+    .sort((a, b) => {
+      const gap = vocabRank(cards, examStudyId(b)) - vocabRank(cards, examStudyId(a));
+      if (gap !== 0) return gap;
+      return a < b ? -1 : a > b ? 1 : 0;
+    });
+  const lead = new Set(weak);
+  return [...weak, ...shuffle(ids.filter((id) => !lead.has(id)), rng)];
 }
 
 export function takeFinalVocab(run: FinalVocabRun, raw: string): { run: FinalVocabRun; ok: boolean } {
