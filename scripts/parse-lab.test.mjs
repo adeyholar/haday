@@ -127,3 +127,23 @@ test("Parsing Lab is open on the Grammar path and on the Scripture path", () => 
   assert.match(home, /to="\/parse-lab"/);
   assert.match(listen, /to="\/parse-lab"/);
 });
+
+test("a miss says why the other label does not fit", () => {
+  const house = lab.buildPassage("Gen", 1, [
+    { verse: 1, he: "בֵּית", en: "house of", words: ["בֵּית"], tags: ["H1004|HNcmsc"] },
+  ]).tasks[0];
+  const state = house.lines.find((row) => row.id === "state");
+  assert.equal(state.answer, "construct");
+  const why = lab.whyMiss(house, state, "absolute");
+  assert.match(why, /bound form/);
+  assert.match(why, /Absolute is the free form/);
+  assert.doesNotMatch(why, /Gesenius|Davidson|Davison|BBH|§/);
+  const bara = lab.buildPassage("Gen", 1, gen1).tasks.find((item) => item.surface === "בָּרָא");
+  const stem = lab.whyMiss(bara, bara.lines.find((row) => row.id === "stem"), "Piel");
+  assert.match(stem, /simple stem/);
+  assert.match(stem, /You chose Piel/);
+  assert.match(stem, /doubled/);
+  const form = lab.whyMiss(bara, bara.lines.find((row) => row.id === "form"), "imperfect");
+  assert.match(form, /suffix conjugation/);
+  assert.match(form, /You chose imperfect/);
+});
