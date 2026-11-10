@@ -84,6 +84,8 @@ Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FR
 
 | Path | Role |
 |---|---|
+| `src/lib/iibs-c-coursebook.ts` | Level C headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
+| `src/lib/iibs-d-coursebook.ts` | Level D headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
 | `src/lib/vocab.ts` | Class lemmas, chapters 2–19 (source of truth for Game and Study). The Grammar Path follows that chapter order. |
 | Study cards | A save keeps lemma ids, `ch1-` letters, `alef:` letter and vowel cards, and `tv:` Tanakh forms. A junk key is dropped. A real card of those kinds is not. |
 | `src/lib/vocab-clips.json` | One Shmuelof clip per lemma (`scripts/vocab-clips.py`) |

@@ -26,3 +26,17 @@ The coursebook pages, not the broken text layer, were checked against those 280 
 No repaired row becomes two study cards. A later split still keeps progress on the first new word only.
 
 The Reading Lab opens when Level E lesson 30 is satisfied. A lesson with no words is satisfied once the lesson before it is. Clearing the 28 lessons that have words still opens the lab.
+
+## Levels C and D — coursebook check
+
+The 2018 vocabulary tables were checked the same way, 300 rows each. Page numbers are the vocabulary-table pages in those coursebooks.
+
+| What changed | C | D |
+| --- | ---: | ---: |
+| Hebrew headword rebuilt | 0 | 0 |
+| Gloss cleared of a leaked pronunciation or a glued footnote fragment | 0 | 0 |
+| Gloss only, Hebrew letters left as they were | 0 | 0 |
+| Rows whose word id changes | 0 | 0 |
+
+Nothing was repaired, so there is no C or D freeze book. The rows that still differ are listed in the Level C and Level D pointing checks. They wait for the Tutor and the Chairman.
+
