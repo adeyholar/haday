@@ -1,3 +1,5 @@
+import { A_PRIOR_IDS, A_REPAIR_SLOTS, A_SLOT_FREEZE, A_SPLITS } from "@/lib/iibs-a-freeze";
+import { B_PRIOR_IDS, B_REPAIR_SLOTS, B_SLOT_FREEZE, B_SPLITS } from "@/lib/iibs-b-freeze";
 import { E_PRIOR_IDS, E_REPAIR_SLOTS, E_SLOT_FREEZE, E_SPLITS } from "@/lib/iibs-e-freeze";
 import { vocabLessons, type IibsVocabLevel, type IibsVocabWord } from "@/lib/iibs-vocab";
 import type { Pos, VocabItem } from "@/lib/vocab";
@@ -78,6 +80,10 @@ type RepairBook = {
   splits: readonly RepairSplit[];
 };
 
+const A_FREEZE_ID = new Map(A_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const A_PRIOR_ID = new Map(A_PRIOR_IDS.map((row) => [row.slot, row.id]));
+const B_FREEZE_ID = new Map(B_SLOT_FREEZE.map((row) => [row.slot, row.id]));
+const B_PRIOR_ID = new Map(B_PRIOR_IDS.map((row) => [row.slot, row.id]));
 const E_FREEZE_ID = new Map(E_SLOT_FREEZE.map((row) => [row.slot, row.id]));
 const E_PRIOR_ID = new Map(E_PRIOR_IDS.map((row) => [row.slot, row.id]));
 
@@ -108,8 +114,10 @@ export const GLOSS_PRIOR_IDS: readonly { slot: string; id: string }[] = [
   { slot: "iibs-e-26-04", id: "iibs-e-iozz0a" },
 ];
 
-/** One book per level. Only Level E has a frozen repair. The live guard runs after every level is built. */
+/** One book per level. A, B, and E have a frozen repair. The live guard runs after every level is built. */
 const REPAIR_BOOKS: Partial<Record<IibsVocabLevel, RepairBook>> = {
+  A: { freeze: A_FREEZE_ID, prior: A_PRIOR_ID, slots: A_REPAIR_SLOTS, splits: A_SPLITS },
+  B: { freeze: B_FREEZE_ID, prior: B_PRIOR_ID, slots: B_REPAIR_SLOTS, splits: B_SPLITS },
   E: { freeze: E_FREEZE_ID, prior: E_PRIOR_ID, slots: E_REPAIR_SLOTS, splits: E_SPLITS },
 };
 
