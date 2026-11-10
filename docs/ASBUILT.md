@@ -84,6 +84,8 @@ Mailer settings (Azure): `SMTP_USER`, `SMTP_PASS` (Gmail App password), `MAIL_FR
 
 | Path | Role |
 |---|---|
+| `src/lib/iibs-a-coursebook.ts` | Level A headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
+| `src/lib/iibs-b-coursebook.ts` | Level B headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
 | `src/lib/iibs-c-coursebook.ts` | Level C headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
 | `src/lib/iibs-d-coursebook.ts` | Level D headwords from the 2018 coursebook vocabulary pages, for the pointing check. Not lesson text. |
 | `src/lib/vocab.ts` | Class lemmas, chapters 2–19 (source of truth for Game and Study). The Grammar Path follows that chapter order. |
