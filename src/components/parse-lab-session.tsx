@@ -20,6 +20,7 @@ import {
   gradeFind,
   gradeLine,
   hintText,
+  whyMiss,
   loadMisses,
   rememberMisses,
   type ParseLabSearch,
@@ -192,7 +193,14 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
       if (locks[row.id] === "ok") next[row.id] = "ok";
       else {
         next[row.id] = "miss";
-        if (locks[row.id] !== "miss") addMiss({ feature: featureOf(row), ref: current.ref, surface: current.surface });
+        if (locks[row.id] !== "miss") {
+          addMiss({
+            feature: featureOf(row),
+            ref: current.ref,
+            surface: current.surface,
+            why: whyMiss(current, row, picks[row.id] ?? ""),
+          });
+        }
       }
     }
     setLocks(next);
@@ -217,7 +225,12 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
       if (gradeLine(row, picked)) next[row.id] = "ok";
       else {
         next[row.id] = "miss";
-        addMiss({ feature: featureOf(row), ref: active.ref, surface: active.surface });
+        addMiss({
+          feature: featureOf(row),
+          ref: active.ref,
+          surface: active.surface,
+          why: whyMiss(active, row, picked),
+        });
       }
     }
     setLocks(next);
@@ -557,6 +570,7 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
                         </span>
                         .
                       </p>
+                      <p className="mt-2 text-base leading-relaxed text-ink">{whyMiss(active, row, picks[row.id] ?? "")}</p>
                     </div>
                   ) : null}
                 </div>
@@ -590,7 +604,10 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
               <ul className="mt-3 space-y-3 text-base text-ink">
                 {misses.map((row) => (
                   <li key={`${row.feature}-${row.ref}-${row.surface}`}>
-                    {row.feature} · <span className="he-word text-2xl" dir="rtl" lang="he">{row.surface}</span> · {row.ref}
+                    <p>
+                      {row.feature} · <span className="he-word text-2xl" dir="rtl" lang="he">{row.surface}</span> · {row.ref}
+                    </p>
+                    {row.why ? <p className="mt-1 text-base leading-relaxed">{row.why}</p> : null}
                   </li>
                 ))}
               </ul>

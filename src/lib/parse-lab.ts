@@ -270,6 +270,111 @@ export function gradeLine(row: ParseLine, picked: string): boolean {
   return want === row.answer || row.also.includes(want);
 }
 
+const STATE_WHY: Record<string, string> = {
+  absolute: "Absolute is the free form. The noun stands on its own. It is not leaning on the next word.",
+  construct: "Construct is the bound form. The noun leans on the next word, so English says “of,” and the article does not sit on this word.",
+  determined: "Determined is the Aramaic state. The ending itself means “the,” so the noun is definite without a separate article.",
+};
+
+const GENDER_WHY: Record<string, string> = {
+  masculine: "Masculine is the unmarked gender. The form is not asking for a feminine ending.",
+  feminine: "Feminine is the marked gender. It often shows ָה, ת, or וֹת, and some nouns are feminine even without that ending.",
+  common: "Common means this noun is used as masculine and as feminine. One gender is too narrow.",
+  "masculine or feminine": "This form is not locked to one gender. Masculine and feminine both fit.",
+};
+
+const NUMBER_WHY: Record<string, string> = {
+  singular: "Singular is one. Plural would add ִים or וֹת, and dual would add the pair ending ַיִם.",
+  plural: "Plural is more than two. Masculine plural is often ִים, feminine often וֹת. A few nouns swap those endings.",
+  dual: "Dual is a pair, marked by ַיִם. It is not a general plural, and it is not one.",
+};
+
+const HEBREW_STEM_WHY: Record<string, string> = {
+  Qal: "Qal is the simple stem. The verb does the action in its ordinary voice, with no extra prefix and no doubled middle letter.",
+  Niphal: "Niphal turns the simple verb passive or reflexive. Look for a נ, or for that נ hidden in the first root letter.",
+  Piel: "Piel intensifies the simple verb, or it makes a state. The middle root letter is doubled.",
+  Pual: "Pual is the passive of that intensive stem. The middle letter is doubled, and the vowel is the passive one.",
+  Hiphil: "Hiphil is causative. The subject makes someone else do the action. A ה prefix is the usual mark.",
+  Hophal: "Hophal is the passive of the causative. What Hiphil does to someone is suffered here.",
+  Hithpael: "Hithpael is reflexive or reciprocal. הִת stands in front of the root.",
+  "Qal passive": "Qal passive is the simple stem in the passive voice. It is not a Pual or a Hophal.",
+  Polel: "Polel is an intensive stem on a hollow or geminate root. It repeats the last letter instead of doubling the middle one.",
+  Polal: "Polal is the passive of that Polel stem.",
+  Hithpolel: "Hithpolel is the reflexive of Polel. הִת stands in front, and the last letter is repeated.",
+  Hishtaphel: "Hishtaphel is a rare reflexive-causative stem. Do not read it as an ordinary Hithpael.",
+};
+
+const ARAMAIC_STEM_WHY: Record<string, string> = {
+  Peal: "Peal is the simple Aramaic stem, the one that matches Hebrew Qal.",
+  Peil: "Peil is the passive of that simple stem.",
+  Pael: "Pael intensifies, as Hebrew Piel does. The middle root letter is doubled.",
+  Ithpaal: "Ithpaal is the reflexive of Pael.",
+  Haphel: "Haphel is causative, as Hebrew Hiphil is.",
+  Aphel: "Aphel is the same causative stem. The prefix is א instead of ה.",
+  Hophal: "Hophal is the passive of the causative.",
+  Niphal: "Niphal is passive or reflexive of the simple stem.",
+  Saphel: "Saphel is a causative with a ס prefix. It is not an ordinary Haphel.",
+};
+
+const FORM_WHY: Record<string, string> = {
+  perfect: "Perfect is the suffix conjugation. The ending carries the person, and the action is presented as complete.",
+  imperfect: "Imperfect is the prefix conjugation. י, ת, א, or נ stands before the root, and the action is not presented as finished.",
+  wayyiqtol: "Wayyiqtol is the story past. Vav flips the imperfect and carries the narrative on: and then he…",
+  weqatal: "Weqatal is vav on the perfect. After an imperfect it usually carries on what is still ahead, or the result.",
+  imperative: "Imperative is the command. It is the imperfect stem with the person prefix left off.",
+  cohortative: "Cohortative is the first person’s will, often with a final ה: let me, or let us.",
+  jussive: "Jussive is a shortened wish or command, usually for the third person: let him. It is not the story past.",
+  participle: "A participle names the doer, or the action as going on. It agrees like an adjective, so it has gender and number, not a full person ending.",
+  "passive participle": "The passive participle names what has been done to the thing. It is not the finite past.",
+  "infinitive construct": "The infinitive construct is the verb used as a noun, often after ל, “to…”. It has no person.",
+  "infinitive absolute": "The infinitive absolute strengthens a finite verb of the same root, “surely,” or it stands as an adverb. It is not the “to…” form.",
+};
+
+function missNote(answer: string, picked: string, about: Record<string, string>, fallback: string): string {
+  const right = about[answer] ?? fallback;
+  if (!picked || picked === answer) return right;
+  const other = about[picked];
+  if (!other) return `${right} ${picked} is a different choice.`;
+  const first = other.split(". ")[0];
+  return `${right} You chose ${picked}. ${first}.`;
+}
+
+/** Why a marked line is not the choice the student made. Public-domain grammar, said in class words. */
+export function whyMiss(task: ParseTask, row: ParseLine, picked: string): string {
+  const answer = row.answer;
+  const choice = picked.trim();
+  const miss = choice && choice !== answer && !row.also.includes(choice) ? choice : "";
+  if (row.id === "state") return missNote(answer, miss, STATE_WHY, `This noun is ${answer}.`);
+  if (row.id === "gender") return missNote(answer, miss, GENDER_WHY, `This noun is ${answer}.`);
+  if (row.id === "number") return missNote(answer, miss, NUMBER_WHY, `This noun is ${answer}.`);
+  if (row.id === "stem") {
+    const book = task.aramaic ? ARAMAIC_STEM_WHY : HEBREW_STEM_WHY;
+    return missNote(answer, miss, book, `${answer} is the stem of this form.`);
+  }
+  if (row.id === "form") return missNote(answer, miss, FORM_WHY, `This verb is ${answer}.`);
+  if (row.id === "png" || row.id === "gn") {
+    const where =
+      row.id === "gn"
+        ? "A participle agrees like an adjective: gender and number, and no separate person."
+        : "Read the person from the affix. On a perfect, the ending carries it. On an imperfect, the prefix does (י, ת, א, נ).";
+    return miss ? `${where} This form is ${answer}, not ${miss}.` : `${where} This form is ${answer}.`;
+  }
+  if (row.id === "article") {
+    return miss
+      ? "The article is הַ, usually with a dagesh in the next letter. It means “the.” A construct noun cannot wear it. You chose no article, and the הַ is on this word."
+      : "The article is הַ, usually with a dagesh in the next letter. It means “the.” A construct noun cannot wear it. The article goes on the last word of a chain.";
+  }
+  if (row.id === "suffix") {
+    return `A pronominal suffix is a pronoun written on the end: my, your, his, and the rest. On a noun it possesses. On a verb it is the object. This one is ${answer}.`;
+  }
+  if (row.id === "lemma") {
+    return miss
+      ? "The dictionary form is the headword, not the shape in the verse. A verb is listed as its simple perfect. A noun is listed as its free singular. You chose a different headword."
+      : "The dictionary form is the headword, not the shape in the verse. A verb is listed as its simple perfect. A noun is listed as its free singular.";
+  }
+  return `This line is ${answer}.`;
+}
+
 function taskFrom(surface: string, tag: string, verse: number, index: number, book: BookId, chapter: number): ParseToken {
   const ref = `${book} ${chapter}:${verse}`;
   const key = `${book}.${chapter}.${verse}.${index}`;
@@ -383,7 +488,7 @@ export function gradeFind(tokens: ParseToken[], tapped: string[]): FindGrade {
   return { missed, extras, names };
 }
 
-export type StoredMiss = { feature: string; ref: string; surface: string };
+export type StoredMiss = { feature: string; ref: string; surface: string; why?: string };
 
 export function featureOf(row: ParseLine): string {
   if (row.id === "lemma") return "dictionary form";
