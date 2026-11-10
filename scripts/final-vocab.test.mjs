@@ -41,6 +41,20 @@ test("the final vocab list is the professor's 80 words, quizzed like Week 7", ()
   assert.equal(areaOf("/game/final").id, "final");
 });
 
+test("a finished sitting leads with the misses and mixes the words that were held", () => {
+  const first = startFinalVocab(4);
+  const prior = {};
+  const missed = first.order.slice(10, 13);
+  for (const id of first.order) prior[id] = !missed.includes(id);
+  const again = startFinalVocab(11, undefined, prior);
+  const later = startFinalVocab(29, undefined, prior);
+  assert.deepEqual(again.order.slice(0, missed.length), missed.slice().sort());
+  assert.deepEqual(later.order.slice(0, missed.length), missed.slice().sort());
+  assert.deepEqual(again.order.slice(missed.length).sort(), later.order.slice(missed.length).sort());
+  assert.notDeepEqual(again.order.slice(missed.length), later.order.slice(missed.length));
+  assert.equal(again.order.length, FINAL_VOCAB.length);
+});
+
 test("final exam vocab drills as eighty cards and keeps its own place", () => {
   const items = finalExamDrillItems();
   assert.equal(items.length, 80);
