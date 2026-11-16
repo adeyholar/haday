@@ -9,7 +9,7 @@ import { MorphLines } from "@/components/morph-lines";
 import { matchInPool } from "@/lib/reading-loop/known";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { isBookId, type BookId } from "@/lib/tanakh-canon";
-import { savePassagePack, type StudyScope } from "@/lib/reading-loop/passage";
+import { savePassagePack, passageDrillIds, type StudyScope } from "@/lib/reading-loop/passage";
 
 function verseParse(ref: string): { book: BookId; chapter: number; verse: number } | undefined {
   const [raw, ch, v] = ref.split(".");
@@ -105,16 +105,21 @@ function metegLine(word: WlcWord): string {
 function WordCard({
   word,
   loop,
+  neededIds,
   parse,
   onClose,
 }: {
   word: WlcWord;
   loop?: { scope: StudyScope; ref: string; back: string };
+  /** Class lemmas in this passage that are not mastered yet. */
+  neededIds?: readonly string[];
   parse?: { book: BookId; chapter: number; verse: number };
   onClose: () => void;
 }) {
   const qere = word.qere ?? [];
   const lemma = loop ? matchInPool(word.surface, poolFor(loop.scope)) : undefined;
+  const drillIds = lemma ? (neededIds ? passageDrillIds(lemma.id, neededIds) : [lemma.id]) : [];
+  const scripture = loop?.scope === "iibs";
   return (
     <div className="rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
       <div className="flex items-start justify-between gap-3">
@@ -172,23 +177,42 @@ function WordCard({
         </div>
       </dl>
       <MorphLines code={word.morph} />
-      {lemma && loop ? (
-        <Link
-          to="/drill"
-          search={{ set: "passage", from: loop.back }}
-          onClick={() =>
-            savePassagePack({
-              scope: loop.scope,
-              ref: loop.ref,
-              label: lemma.gloss,
-              ids: [lemma.id],
-              back: loop.back,
-            })
-          }
-          className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
-        >
-          Drill this lemma
-        </Link>
+      {lemma && loop && drillIds.length ? (
+        scripture ? (
+          <Link
+            to="/iibs/drill"
+            search={{ from: loop.back }}
+            onClick={() =>
+              savePassagePack({
+                scope: "iibs",
+                ref: loop.ref,
+                label: loop.ref,
+                ids: [...drillIds],
+                back: loop.back,
+              })
+            }
+            className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+          >
+            {drillIds.length === 1 ? "Drill this lemma" : `Drill the lemmas this passage needs · ${drillIds.length}`}
+          </Link>
+        ) : (
+          <Link
+            to="/drill"
+            search={{ set: "passage", from: loop.back }}
+            onClick={() =>
+              savePassagePack({
+                scope: loop.scope,
+                ref: loop.ref,
+                label: lemma.gloss,
+                ids: [...drillIds],
+                back: loop.back,
+              })
+            }
+            className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary"
+          >
+            Drill this lemma
+          </Link>
+        )
       ) : null}
       {parse ? (
         <Link
@@ -218,6 +242,7 @@ export function WlcReading({
   spot,
   resumeTick = 0,
   dimIds,
+  neededIds,
   loop,
 }: {
   chapter: WlcChapter;
@@ -228,6 +253,8 @@ export function WlcReading({
   resumeTick?: number;
   /** Word ids still to learn. Only applied while Dim unknowns is on. */
   dimIds?: ReadonlySet<string>;
+  /** Class lemmas in this passage that are not mastered yet. */
+  neededIds?: readonly string[];
   loop?: { scope: StudyScope; ref: string; back: string };
 }) {
   const [picked, setPicked] = useState<WlcWord | null>(null);
@@ -376,6 +403,7 @@ export function WlcReading({
           <WordCard
             word={picked}
             loop={loop}
+            neededIds={neededIds}
             parse={verseParse(pickedRef)}
             onClose={() => closeCard(true)}
           />

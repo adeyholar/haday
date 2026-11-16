@@ -7,7 +7,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { chapterKnown, matchInPool } = await jiti.import(join(root, "src/lib/reading-loop/known.ts"));
-const { passageDrillKey, isPassageDrillKey, savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
+const { passageDrillKey, isPassageDrillKey, passageDrillIds, savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
 const { noteVerse, peekSession, DAILY_GOAL } = await jiti.import(join(root, "src/lib/reading-loop/session.ts"));
 const { gradeRealForm, realFormDeck, REAL_FORMS } = await jiti.import(join(root, "src/lib/reading-loop/real-forms.ts"));
 const { morphLines, explainMorph } = await jiti.import(join(root, "src/lib/morph-parse.ts"));
@@ -40,6 +40,13 @@ test("known share counts mastered class lemmas only", () => {
   assert.deepEqual(report.unknown.map((item) => item.id), ["ben"]);
   assert.deepEqual(report.unknownWordIds, ["w3"]);
   assert.equal(matchInPool("אָבִיךָ", [ab, ben])?.id, "ab");
+});
+
+test("a known lemma does not replace the lemmas the passage still needs", () => {
+  assert.deepEqual(passageDrillIds("held", ["need-a", "need-b"]), ["need-a", "need-b"]);
+  assert.deepEqual(passageDrillIds("need-b", ["need-a", "need-b", "need-b"]), ["need-b", "need-a"]);
+  assert.deepEqual(passageDrillIds("held", []), ["held"]);
+  assert.deepEqual(passageDrillIds("", ["need-a"]), ["need-a"]);
 });
 
 test("passage pack keeps its own drill key", () => {
