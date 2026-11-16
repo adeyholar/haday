@@ -12,7 +12,7 @@ const { noteVerse, peekSession, DAILY_GOAL } = await jiti.import(join(root, "src
 const { gradeRealForm, realFormDeck, REAL_FORMS } = await jiti.import(join(root, "src/lib/reading-loop/real-forms.ts"));
 const { morphLines, explainMorph } = await jiti.import(join(root, "src/lib/morph-parse.ts"));
 const { hydrateDrillRuns } = await jiti.import(join(root, "src/lib/etch.ts"));
-const { passageChoices, passageGlossHit, stepPassage } = await jiti.import(join(root, "src/lib/reading-loop/passage-quiz.ts"));
+const { passageChoices, passageGlossHit, stepPassage, hydratePassageSittings, openPassageSitting } = await jiti.import(join(root, "src/lib/reading-loop/passage-quiz.ts"));
 const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { glossMatches, VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { newCard, applyRating } = await jiti.import(join(root, "src/lib/srs.ts"));
@@ -71,6 +71,49 @@ test("a passage multiple choice uses look-alike glosses, and a miss comes back o
   assert.deepEqual(afterHit.queue, ["a"]);
   const twice = stepPassage(afterHit.queue, false, afterHit.retried);
   assert.deepEqual(twice.queue, []);
+});
+
+test("an open passage sitting survives a reload and a sign-out", () => {
+  const items = iibsPathItems();
+  const one = items[0];
+  const two = items[1];
+  assert.ok(one && two);
+  const raw = {
+    "iibs:Gen.1": {
+      scope: "iibs",
+      ref: "Gen.1",
+      label: "Genesis 1",
+      back: "/iibs/wlc/Gen/1",
+      ask: "choice",
+      ids: [one.id, two.id],
+      queue: [two.id],
+      retried: [one.id],
+      first: { [one.id]: false },
+      at: 20,
+    },
+    "iibs:Exod.2": {
+      ask: "gloss",
+      ids: [one.id],
+      queue: [one.id],
+      at: 5,
+      scope: "iibs",
+      ref: "Exod.2",
+      label: "Exodus 2",
+      back: "",
+      retried: [],
+      first: {},
+    },
+    "nope": { ask: "choice", ids: [one.id], queue: [one.id] },
+    "iibs:Lev.1": { ask: "choice", ids: ["missing-word"], queue: ["missing-word"], at: 99 },
+  };
+  const sittings = hydratePassageSittings(raw);
+  assert.equal(sittings["nope"], undefined);
+  assert.equal(sittings["iibs:Lev.1"], undefined);
+  assert.deepEqual(sittings["iibs:Gen.1"].queue, [two.id]);
+  assert.equal(sittings["iibs:Gen.1"].first[one.id], false);
+  assert.equal(openPassageSitting(sittings)?.ref, "Gen.1");
+  assert.equal(openPassageSitting(sittings, "iibs:Exod.2")?.ref, "Exod.2");
+  assert.equal(openPassageSitting(sittings, "iibs:Num.1"), null);
 });
 
 test("passage pack keeps its own drill key", () => {

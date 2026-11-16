@@ -1,5 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 import { runPreSignInSignOut, runSignOut } from "../../../scripts/sign-out-plan.mjs";
+import { saveProgress } from "@/lib/progress";
+import { snapshotOf, useStudy } from "@/lib/store";
 import { GOOGLE_PROVIDER_ID, X_PROVIDER_ID } from "./providers";
 
 /**
@@ -131,6 +133,13 @@ export async function signIn(
  * preview the local clear is sufficient, so it always resolves.
  */
 export async function signOut(redirectTo = "/"): Promise<void> {
+  const state = useStudy.getState();
+  if (state.ownerId) {
+    await Promise.race([
+      saveProgress({ data: snapshotOf(state) }).catch(() => {}),
+      new Promise((resolve) => window.setTimeout(resolve, 8000)),
+    ]);
+  }
   await runSignOut({
     livePreview: inLivePreview(),
     hasBearer: Boolean(getBearerToken()),
