@@ -38,6 +38,8 @@ test("the owner must come back to the doors before switching", () => {
   assert.equal(ownerDoorBlock("/bbh", "iibs"), "/");
   assert.equal(ownerDoorBlock("/game", "iibs"), "/");
   assert.equal(ownerDoorBlock("/iibs/A", "iibs"), null);
+  assert.equal(ownerDoorBlock("/iibs/drill", "iibs"), null);
+  assert.equal(ownerDoorBlock("/drill", "iibs"), "/");
   assert.equal(ownerDoorBlock("/bbh", "bbh"), null);
   assert.equal(ownerDoorBlock("/game", null), "/");
   assert.equal(ownerDoorBlock("/", "bbh"), null);

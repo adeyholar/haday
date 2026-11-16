@@ -396,6 +396,7 @@ function WlcChapterPage() {
             resumeTick={resumeTick}
             dimIds={dimIds}
             loop={{ scope: "iibs", ref: refLabel, back }}
+            neededIds={report.unknown.map((item) => item.id)}
           />
         </>
       ) : null}

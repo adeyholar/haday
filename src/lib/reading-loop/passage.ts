@@ -23,6 +23,25 @@ export function isPassageDrillKey(key: string): boolean {
   return /^passage:(bbh|iibs):[A-Za-z0-9.]{1,16}$/.test(key);
 }
 
+/**
+ * Lemmas this passage still needs. The selected lemma leads when it is one of them.
+ * A lemma already held does not replace that list. If nothing is left, the sitting is the one they selected.
+ */
+export function passageDrillIds(selected: string, needed: readonly string[]): string[] {
+  const rest: string[] = [];
+  const seen = new Set<string>();
+  let selectedNeeded = false;
+  for (const id of needed) {
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    if (id === selected) selectedNeeded = true;
+    else rest.push(id);
+  }
+  if (selected && selectedNeeded) return [selected, ...rest];
+  if (rest.length) return rest;
+  return selected ? [selected] : [];
+}
+
 export type PackStore = {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;

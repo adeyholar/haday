@@ -50,22 +50,41 @@ export function ReadingLoopBar({
           {dim ? "Unknowns dimmed" : "Dim unknowns"}
         </button>
         {report.unknown.length ? (
-          <Link
-            to="/drill"
-            search={{ set: "passage", from: back }}
-            onClick={() =>
-              savePassagePack({
-                scope,
-                ref: refLabel,
-                label: refLabel,
-                ids: report.unknown.map((item) => item.id),
-                back,
-              })
-            }
-            className="inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-primary px-3 text-sm font-semibold text-primary-foreground"
-          >
-            Drill unknowns · {report.unknown.length}
-          </Link>
+          scope === "iibs" ? (
+            <Link
+              to="/iibs/drill"
+              search={{ from: back }}
+              onClick={() =>
+                savePassagePack({
+                  scope,
+                  ref: refLabel,
+                  label: refLabel,
+                  ids: report.unknown.map((item) => item.id),
+                  back,
+                })
+              }
+              className="inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-primary px-3 text-sm font-semibold text-primary-foreground"
+            >
+              Drill unknowns · {report.unknown.length}
+            </Link>
+          ) : (
+            <Link
+              to="/drill"
+              search={{ set: "passage", from: back }}
+              onClick={() =>
+                savePassagePack({
+                  scope,
+                  ref: refLabel,
+                  label: refLabel,
+                  ids: report.unknown.map((item) => item.id),
+                  back,
+                })
+              }
+              className="inline-flex min-h-11 items-center rounded-[var(--radius-md)] bg-primary px-3 text-sm font-semibold text-primary-foreground"
+            >
+              Drill unknowns · {report.unknown.length}
+            </Link>
+          )
         ) : report.found ? (
           <p className="inline-flex min-h-11 items-center text-sm text-muted">Every class lemma here is mastered.</p>
         ) : null}
