@@ -12,7 +12,9 @@ const { noteVerse, peekSession, DAILY_GOAL } = await jiti.import(join(root, "src
 const { gradeRealForm, realFormDeck, REAL_FORMS } = await jiti.import(join(root, "src/lib/reading-loop/real-forms.ts"));
 const { morphLines, explainMorph } = await jiti.import(join(root, "src/lib/morph-parse.ts"));
 const { hydrateDrillRuns } = await jiti.import(join(root, "src/lib/etch.ts"));
-const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
+const { passageChoices, passageGlossHit, stepPassage } = await jiti.import(join(root, "src/lib/reading-loop/passage-quiz.ts"));
+const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
+const { glossMatches, VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { newCard, applyRating } = await jiti.import(join(root, "src/lib/srs.ts"));
 
 const ab = VOCAB.find((item) => item.id === "ab");
@@ -47,6 +49,28 @@ test("a known lemma does not replace the lemmas the passage still needs", () => 
   assert.deepEqual(passageDrillIds("need-b", ["need-a", "need-b", "need-b"]), ["need-b", "need-a"]);
   assert.deepEqual(passageDrillIds("held", []), ["held"]);
   assert.deepEqual(passageDrillIds("", ["need-a"]), ["need-a"]);
+});
+
+test("a passage multiple choice uses look-alike glosses, and a miss comes back once", () => {
+  const items = iibsPathItems();
+  const item = items.find((row) => row.pos === "verb" && row.gloss.length > 4);
+  assert.ok(item);
+  const choices = passageChoices(item, items);
+  assert.equal(choices.length, 4);
+  assert.equal(new Set(choices).size, 4);
+  assert.ok(choices.includes(item.gloss));
+  const wrong = choices.filter((choice) => choice !== item.gloss);
+  for (const choice of wrong) assert.equal(glossMatches(item, choice), false);
+  const neighbors = items.filter((row) => row.id !== item.id).slice(0, 3).map((row) => row.gloss).sort();
+  assert.notDeepEqual([...wrong].sort(), neighbors);
+  assert.equal(passageGlossHit(item, item.gloss), true);
+  assert.equal(passageGlossHit(item, wrong[0]), false);
+  const once = stepPassage(["a", "b"], false, new Set());
+  assert.deepEqual(once.queue, ["b", "a"]);
+  const afterHit = stepPassage(once.queue, true, once.retried);
+  assert.deepEqual(afterHit.queue, ["a"]);
+  const twice = stepPassage(afterHit.queue, false, afterHit.retried);
+  assert.deepEqual(twice.queue, []);
 });
 
 test("passage pack keeps its own drill key", () => {
