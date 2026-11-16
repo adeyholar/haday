@@ -10,6 +10,7 @@ import { emptyIibsGame, hydrateIibsGame, type IibsGameProgress } from "@/lib/iib
 import { emptyVerbQuest, hydrateVerbQuest, type VerbQuestProgress } from "@/lib/verb-paradigm-quest";
 import { emptyTerm2Game, hydrateTerm2Game, type Term2Game } from "@/lib/term2-game";
 import { emptyBinyan, hydrateBinyan, type BinyanProgress } from "@/lib/binyan-drill";
+import { hydratePassageSittings, type PassageSitting } from "@/lib/reading-loop/passage-quiz";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -92,6 +93,8 @@ export type GameSnapshot = {
   binyan: BinyanProgress;
   /** Semester 2 vocabulary path and closed-book exams. Not chapters 1–19. */
   term2: Term2Game;
+  /** Open passage sittings. Key is the path and the chapter, such as iibs:Gen.1. */
+  passageSittings: Record<string, PassageSitting>;
 };
 
 export type BalloonProgress = {
@@ -187,6 +190,7 @@ export function defaultGame(): GameSnapshot {
     verbParadigmQuest: emptyVerbQuest(),
     binyan: emptyBinyan(),
     term2: emptyTerm2Game(),
+    passageSittings: {},
   };
 }
 
@@ -278,6 +282,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     verbParadigmQuest: hydrateVerbQuest(r.verbParadigmQuest),
     binyan: hydrateBinyan(r.binyan),
     term2: hydrateTerm2Game(r.term2),
+    passageSittings: hydratePassageSittings(r.passageSittings),
   };
 }
 

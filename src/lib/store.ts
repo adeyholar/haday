@@ -34,6 +34,7 @@ import {
   type UltimateRun,
 } from "./game";
 import { stampRewards } from "./rewards";
+import { hydratePassageSittings, type PassageSitting } from "./reading-loop/passage-quiz";
 import { drillKey, type DrillPlace } from "./etch";
 import { applySavedFinalDrill, browserDrillStorage, clearFinalDrillFile, writeFinalDrillRun } from "./final-drill-place";
 import type { ProgressPayload } from "./progress";
@@ -131,6 +132,7 @@ type StudyState = StudySnapshot & {
   /** Put a device copy of the final exam drill back, when the server snapshot is older. */
   keepFinalDrill: () => void;
   saveIibsDrill: (level: string, week: number, focus: string, place: DrillPlace | null) => void;
+  savePassageSitting: (key: string, place: PassageSitting | null) => void;
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   saveVerbQuest: (quest: VerbQuestProgress) => void;
   saveBinyan: (progress: BinyanProgress) => void;
@@ -384,6 +386,13 @@ export const useStudy = create<StudyState>()(
         if (place) iibsDrillRuns[key] = place;
         else delete iibsDrillRuns[key];
         set({ game: { ...get().game, iibsDrillRuns } });
+      },
+      savePassageSitting: (key, place) => {
+        if (!/^(iibs|bbh):[A-Za-z0-9.]{1,16}$/.test(key)) return;
+        const passageSittings = { ...(get().game.passageSittings ?? {}) };
+        if (place && place.queue.length) passageSittings[key] = place;
+        else delete passageSittings[key];
+        set({ game: { ...get().game, passageSittings: hydratePassageSittings(passageSittings) } });
       },
       finishIibsStage: (level, lesson, stage, pct) => {
         const now = Date.now();

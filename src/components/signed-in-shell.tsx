@@ -180,6 +180,8 @@ export function SignedInShell({ children }: { children: ReactNode }) {
     let unsubHand: (() => void) | undefined;
     let timer: number | undefined;
     let handTimer: number | undefined;
+    let onHide: (() => void) | undefined;
+    let flush: (() => void) | undefined;
 
     (async () => {
       let remote: Awaited<ReturnType<typeof loadProgress>> | undefined;
@@ -237,6 +239,16 @@ export function SignedInShell({ children }: { children: ReactNode }) {
         }, 700);
       });
 
+      flush = () => {
+        if (useStudy.getState().ownerId !== userId) return;
+        void saveProgress({ data: snapshotOf(useStudy.getState()) }).catch(() => {});
+      };
+      onHide = () => {
+        if (document.visibilityState === "hidden") flush?.();
+      };
+      document.addEventListener("visibilitychange", onHide);
+      window.addEventListener("pagehide", flush);
+
       try {
         const remoteHand = await loadHandBank();
         if (!cancelled) mergeHand(remoteHand);
@@ -256,6 +268,8 @@ export function SignedInShell({ children }: { children: ReactNode }) {
       cancelled = true;
       unsub?.();
       unsubHand?.();
+      document.removeEventListener("visibilitychange", onHide ?? (() => {}));
+      if (flush) window.removeEventListener("pagehide", flush);
       if (timer !== undefined) window.clearTimeout(timer);
       if (handTimer !== undefined) window.clearTimeout(handTimer);
     };
