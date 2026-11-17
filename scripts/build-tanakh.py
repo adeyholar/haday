@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Build per-book Tanakh JSON (Hebrew WLC + WEB English) for HaDay reading."""
+"""Build per-book Tanakh JSON (Hebrew WLC + WEB English) for HaDay reading.
+
+Do not run this script as-is. It fetches unpinned Hebrew from tanakh_ai_tutor
+(main) and would replace the pinned data/wlc text. Rebuild Hebrew words with
+scripts/build-strongs.py, which reads data/wlc and keeps the English already
+in public/tanakh/books. ROOT below is not the repo root.
+"""
 from __future__ import annotations
 
 import json

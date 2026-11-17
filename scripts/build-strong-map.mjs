@@ -2,15 +2,17 @@
  * Build the Strong’s → class-lemma map used by passage drills.
  * Run: node scripts/build-strong-map.mjs
  *
- * Provenance: the verse tags are the Open Scriptures Hebrew Bible morphology
- * (OSHB, CC BY 4.0). The lexicon headwords are the Open Scriptures Strong’s
- * Hebrew lexicon (CC BY-SA). The class lists are the Grammar Path vocabulary
- * and the Scripture Path lesson lists. This file only joins those three.
- * It does not copy their glosses into the map.
+ * Provenance: the verse tokens are the pinned data/wlc text (haday-hebrew-data
+ * v1.2.0). Lemma and morph are the Open Scriptures Hebrew Bible morphology
+ * (OSHB, CC BY 4.0) already on those tokens. The lexicon headwords are the
+ * Open Scriptures Strong’s Hebrew lexicon (CC BY-SA). The class lists are the
+ * Grammar Path vocabulary and the Scripture Path lesson lists. This file only
+ * joins those. It does not copy their glosses into the map.
  */
-import { writeFileSync, readdirSync, readFileSync } from "node:fs";
+import { writeFileSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -49,25 +51,24 @@ for (const fn of readdirSync(lexDir)) {
 }
 
 const occurrences = [];
-const strongDir = join(root, "public/tanakh/strongs");
-const bookDir = join(root, "public/tanakh/books");
-for (const fn of readdirSync(strongDir).filter((name) => name.endsWith(".json"))) {
-  const tags = JSON.parse(readFileSync(join(strongDir, fn), "utf8"));
-  const book = JSON.parse(readFileSync(join(bookDir, fn), "utf8"));
-  for (const [ch, verses] of Object.entries(book.chapters)) {
-    for (const verse of verses) {
-      const row = tags[ch]?.[String(verse.v)] ?? [];
-      verse.words.forEach((surface, i) => {
-        const [sid, morph] = String(row[i] || "").split("|");
-        const n = strongNo(sid);
-        if (!n) return;
+const wlcDir = join(root, "data/wlc");
+for (const book of readdirSync(wlcDir)) {
+  const dir = join(wlcDir, book);
+  if (!statSync(dir).isDirectory()) continue;
+  for (const fn of readdirSync(dir).filter((name) => name.endsWith(".json.gz"))) {
+    const chapter = JSON.parse(gunzipSync(readFileSync(join(dir, fn))).toString("utf8"));
+    for (const verse of chapter.verses ?? []) {
+      for (const word of verse.words ?? []) {
+        if (word.kq_role === "qere") continue;
+        const n = strongNo(word.lemma);
+        if (!n) continue;
         occurrences.push({
           n,
-          surface: pointed(surface),
-          kind: morphKind(morph || ""),
-          article: hasReadingArticle(morph || ""),
+          surface: pointed(word.surface),
+          kind: morphKind(word.morph || ""),
+          article: hasReadingArticle(word.morph || ""),
         });
-      });
+      }
     }
   }
 }
