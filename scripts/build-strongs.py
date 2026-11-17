@@ -24,6 +24,7 @@ ALIGN = ROOT / "public" / "tanakh" / "align"
 WLC = ROOT / "data" / "wlc"
 GAPS = ROOT / "docs" / "wlc-rebase-verse-gaps.txt"
 ALIGN_GAPS = ROOT / "docs" / "wlc-align-count-mismatches.txt"
+KETIV = ROOT / "public" / "tanakh" / "ketiv-qere.json"
 GRK_URL = "https://raw.githubusercontent.com/adeyholar/strongs/master/greek/strongs-greek-dictionary.js"
 
 
@@ -115,6 +116,24 @@ def written_words(verse: dict) -> list[dict]:
     return [word for word in verse.get("words") or [] if word.get("kq_role") != "qere"]
 
 
+def ketiv_display(word: dict) -> dict[str, str] | None:
+    """A ketiv whose number is not the qere’s. The read form is `q`; the written form is `k`."""
+    if word.get("kq_role") != "ketiv":
+        return None
+    nested = word.get("qere") or []
+    qlemma = (nested[0].get("lemma") if nested else "") or ""
+    kparts = strong_parts(word.get("lemma") or "")
+    qparts = strong_parts(qlemma)
+    if len(kparts) > 1 or len(qparts) > 1:
+        return None
+    k = kparts[0] if len(kparts) == 1 else ""
+    q = qparts[0] if len(qparts) == 1 else ""
+    if k == q:
+        return None
+    qsurf = " ".join((item.get("surface") or "") for item in nested).strip()
+    return {"q": qsurf, "k": word.get("surface") or ""}
+
+
 def written_line(words: list[dict]) -> str:
     return "".join((word.get("surface") or "") + (word.get("trailer") or "") for word in words)
 
@@ -136,6 +155,7 @@ def main() -> None:
     align_gaps: list[str] = []
     rewritten = 0
     kept = 0
+    ketiv_notes: dict[str, dict[str, dict[str, str]]] = {}
     for path in sorted(BOOKS.glob("*.json")):
         book = path.stem
         dump = json.loads(path.read_text())
@@ -197,6 +217,13 @@ def main() -> None:
                     return pack(word.get("lemma") or "", word.get("morph") or "", qere)
 
                 chapter_tags[vs] = [tag_for(word) for word in token_words]
+                note: dict[str, dict[str, str]] = {}
+                for word_index, word in enumerate(token_words):
+                    shown = ketiv_display(word)
+                    if shown:
+                        note[str(word_index)] = shown
+                if note:
+                    ketiv_notes[ref] = note
                 rewritten += 1
                 if index < len(stamps) and len(stamps[index]) != len(surfaces):
                     align_gaps.append(f"{ref} align {len(stamps[index])} words {len(surfaces)}")
@@ -245,7 +272,8 @@ def main() -> None:
             ]
         )
     )
-    print(f"verses rewritten {rewritten} books-only {kept} gaps {len(unique_gaps)} align-mismatches {len(align_gaps)}")
+    KETIV.write_text(json.dumps(ketiv_notes, ensure_ascii=False, separators=(",", ":")))
+    print(f"verses rewritten {rewritten} books-only {kept} gaps {len(unique_gaps)} align-mismatches {len(align_gaps)} ketiv-differ {len(ketiv_notes)}")
 
 
 if __name__ == "__main__":

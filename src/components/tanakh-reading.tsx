@@ -5,7 +5,6 @@ import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
-import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
@@ -61,8 +60,8 @@ import {
   versesInChapter,
   type ReadSearch,
 } from "@/lib/passage";
-import { englishKeysForWord } from "@/lib/word-card";
 import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
+import { fetchKetivQere, ketivAt, type KetivNotes } from "@/lib/ketiv-qere";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
@@ -119,6 +118,7 @@ export function TanakhReading({
   const [afterMic, setAfterMic] = useState(true);
   const [phrase, setPhrase] = useState<{ from: number; to: number } | null>(null);
   const [strongBook, setStrongBook] = useState<StrongBook>({});
+  const [ketivNotes, setKetivNotes] = useState<KetivNotes>({});
   const strongChapter = strongBook[String(chapter)] ?? {};
   const [i, setI] = useState(0);
   const [wordI, setWordI] = useState(0);
@@ -183,6 +183,16 @@ export function TanakhReading({
       cancelled = true;
     };
   }, [book]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchKetivQere().then((data) => {
+      if (!cancelled) setKetivNotes(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function elAudio(): HTMLAudioElement | null {
     return audioRef.current;
@@ -938,6 +948,7 @@ export function TanakhReading({
           hideTransport={mode === "after"}
           phrase={mode === "after" ? phrase : null}
           strongChapter={strongChapter}
+          ketivNotes={ketivNotes}
           onNudge={nudge}
           onSeek={(t) => seekTo(t)}
           onSeeking={(yes) => {
@@ -1011,7 +1022,7 @@ export function TanakhReading({
       ) : null}
 
       {mode === "grade" && quiz && !done ? (
-        <GradeCard item={quiz[qi]!} qi={qi} total={quiz.length} picked={picked} onPick={pickChoice} />
+        <GradeCard item={quiz[qi]!} qi={qi} total={quiz.length} picked={picked} notes={ketivNotes} onPick={pickChoice} />
       ) : null}
 
       {mode === "grade" && done ? (
@@ -1047,7 +1058,7 @@ export function TanakhReading({
                 } ${
                   (verses.length || vw.to - vw.from + 1) === 1 ? "verse stays" : "verses stay"
                 } on the page and play in one sitting.`
-              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. English stays on the page. 90% first-answer clears the chapter."}
+              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. The English translation stays off this page. Where the ketiv and the qere differ, the qere is the word and the ketiv is noted beside it. 90% first-answer clears the chapter."}
         </p>
         {rec ? (
           <p className="mt-2 text-sm text-muted">
@@ -1132,6 +1143,7 @@ function FollowCard({
   hideTransport,
   phrase,
   strongChapter,
+  ketivNotes,
   onNudge,
   onSeek,
   onSeeking,
@@ -1167,6 +1179,7 @@ function FollowCard({
   hideTransport?: boolean;
   phrase?: { from: number; to: number } | null;
   strongChapter?: Record<string, string[]>;
+  ketivNotes: KetivNotes;
   onNudge: (sec: number) => void;
   onSeek: (t: number) => void;
   onSeeking: (yes: boolean) => void;
@@ -1334,8 +1347,6 @@ function FollowCard({
   const spanLabel = readingSpanLabel(bookId, verse.chapter, fromV, toV);
   const spanRef = readingSpanRef(bookId, verse.chapter, fromV, toV);
   const loopBack = readingSpanHref(bookId, verse.chapter, fromV, toV);
-  const focusWord = pick?.word ?? verse.words[wordI] ?? "";
-  const enKeys = englishKeysForWord(focusWord);
   return (
     <>
       {hideTransport ? null : (
@@ -1488,8 +1499,11 @@ function FollowCard({
                   lang="he"
                   dir="rtl"
                 >
-                  {row.words.map((w, wi) =>
-                    active ? (
+                  {row.words.map((w, wi) => {
+                    const note = ketivAt(ketivNotes, bookId, row.chapter, row.verse, wi);
+                    const face = note?.q ? note.q : w;
+                    const ketiv = note ? { qere: note.q, ketiv: note.k } : {};
+                    return active ? (
                       <button
                         type="button"
                         key={`${row.ref}-${wi}`}
@@ -1524,21 +1538,33 @@ function FollowCard({
                             en: row.en,
                             strong: strong || undefined,
                             morph: morph || undefined,
+                            ...ketiv,
                           });
                         }}
                       >
-                        {hebrewClusters(w).map((part, pi) => (
+                        {note?.q ? (
                           <span
-                            key={`${row.ref}-${wi}-${pi}`}
                             className={
-                              wi === wordI && (clusterI < 0 || pi === clusterI)
-                                ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
-                                : undefined
+                              wi === wordI ? "rounded-sm bg-primary px-0.5 text-primary-foreground" : undefined
                             }
                           >
-                            {part.glyph}
+                            {face}
                           </span>
-                        ))}
+                        ) : (
+                          hebrewClusters(w).map((part, pi) => (
+                            <span
+                              key={`${row.ref}-${wi}-${pi}`}
+                              className={
+                                wi === wordI && (clusterI < 0 || pi === clusterI)
+                                  ? "rounded-sm bg-primary px-0.5 text-primary-foreground"
+                                  : undefined
+                              }
+                            >
+                              {part.glyph}
+                            </span>
+                          ))
+                        )}
+                        {note?.q ? <KetivMark ketiv={note.k} /> : null}
                       </button>
                     ) : (
                       <button
@@ -1561,6 +1587,7 @@ function FollowCard({
                               en: row.en,
                               strong: strong || undefined,
                               morph: morph || undefined,
+                              ...ketiv,
                             });
                             return;
                           }
@@ -1568,18 +1595,12 @@ function FollowCard({
                           else onJump(idx);
                         }}
                       >
-                        {w}
+                        {face}
+                        {note?.q ? <KetivMark ketiv={note.k} /> : null}
                       </button>
-                    ),
-                  )}
+                    );
+                  })}
                 </p>
-                <EnglishVerse
-                  en={row.en}
-                  keys={active ? enKeys : []}
-                  className={`max-w-full break-words leading-relaxed ${
-                    active ? "mt-2 text-base text-ink" : "mt-1 text-sm text-muted"
-                  }`}
-                />
               </li>
             );
           })}
@@ -1682,30 +1703,45 @@ function VerseClipBar({
   );
 }
 
+function KetivMark({ ketiv }: { ketiv: string }) {
+  return (
+    <span className="ms-1 align-middle text-[0.72em] font-normal text-muted" lang="he">
+      <span className="sr-only">, ketiv </span>({ketiv})
+    </span>
+  );
+}
+
 function GradeCard({
   item,
   qi,
   total,
   picked,
+  notes,
   onPick,
 }: {
   item: GradeItem;
   qi: number;
   total: number;
   picked: string | null;
+  notes: KetivNotes;
   onPick: (choice: string, item: GradeItem) => void;
 }) {
+  const bookId = item.verse.book === "Gen" ? "Gen" : item.verse.book;
   return (
     <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">
         {item.verse.ref} · {qi + 1}/{total}
       </p>
       <p className="he-verse mt-4 text-xl sm:text-2xl" lang="he" dir="rtl">
-        {item.verse.words.map((w, wi) => (
-          <span key={`${item.id}-g-${wi}`} className="text-ink">
-            {w}
-          </span>
-        ))}
+        {item.verse.words.map((w, wi) => {
+          const note = ketivAt(notes, bookId, item.verse.chapter, item.verse.verse, wi);
+          return (
+            <span key={`${item.id}-g-${wi}`} className="text-ink">
+              {note?.q || w}
+              {note?.q ? <KetivMark ketiv={note.k} /> : null}
+            </span>
+          );
+        })}
       </p>
       <p className="mt-6 text-sm font-semibold text-ink">Which English is this verse?</p>
       <ul className="mt-3 grid gap-2">

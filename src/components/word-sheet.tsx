@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
-import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, hasGlossInEnglish, vocabLine } from "@/lib/word-card";
+import { classLemmaForWord, describeTags, grammarAskFromTags, vocabLine } from "@/lib/word-card";
 import { MorphLines } from "@/components/morph-lines";
 import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
 import { poolFor } from "@/lib/reading-loop/pool";
@@ -11,7 +11,6 @@ import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
-import { EnglishVerse } from "@/components/english-verse";
 import { StrongGlance } from "@/components/strong-glance";
 import type { WordBalloonPlace } from "@/lib/word-balloon";
 import type { BookId } from "@/lib/tanakh-canon";
@@ -28,6 +27,10 @@ export type WordPick = {
   strong?: string;
   /** Open Scriptures morphology code, such as HVqp3ms. */
   morph?: string;
+  /** Read form, when this ketiv’s Strong’s number is not the qere’s. */
+  qere?: string;
+  /** Written form beside that qere. Empty qere means there is no read form. */
+  ketiv?: string;
 };
 
 export function WordSheet({
@@ -40,11 +43,13 @@ export function WordSheet({
   onClose: () => void;
 }) {
   const tagged = Boolean(pick.strong || pick.morph);
-  const lemma = pick.strong
-    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), { book: pick.book, chapter: pick.chapter, verse: pick.verse })
-    : tagged
-      ? undefined
-      : classLemmaForWord(pick.word);
+  const lemma = pick.ketiv != null
+    ? undefined
+    : pick.strong
+      ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), { book: pick.book, chapter: pick.chapter, verse: pick.verse })
+      : tagged
+        ? undefined
+        : classLemmaForWord(pick.word);
   const [tags, setTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [askOpen, setAskOpen] = useState(false);
@@ -106,7 +111,7 @@ export function WordSheet({
   const context: AskVerseContext = {
     ref: pick.he ? `${pick.book} ${pick.chapter}:${pick.verse}` : ref,
     he: pick.he,
-    en: pick.en,
+    en: pick.ketiv != null ? "" : pick.en,
     word: pick.word,
     tags: labels,
     vocab,
@@ -147,8 +152,14 @@ export function WordSheet({
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">This word</p>
           <p className="he-word mt-1 text-4xl leading-tight text-ink" dir="rtl" lang="he">
-            {pick.word}
+            {pick.qere || pick.word}
           </p>
+          {pick.ketiv != null ? (
+            <p className="mt-1 text-sm text-muted">
+              Ketiv <span className="he-word text-xl text-ink" dir="rtl" lang="he">{pick.ketiv}</span>
+              {pick.qere ? ". No English gloss." : ". No read form, and no English gloss."}
+            </p>
+          ) : null}
         </div>
         <button type="button" className="min-h-11 shrink-0 px-2 text-sm font-semibold text-primary" onClick={onClose}>
           Close
@@ -164,10 +175,6 @@ export function WordSheet({
               </span>
             ))}
           </p>
-          <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
-          {!hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
-            <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
-          ) : null}
         </div>
       ) : null}
       {lemma ? (
@@ -176,7 +183,7 @@ export function WordSheet({
           {" · "}
           {shortGloss(lemma.gloss)}
         </p>
-      ) : (
+      ) : pick.ketiv != null ? null : (
         <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>
       )}
       {busy ? <p className="mt-2 text-sm text-muted">Looking up the form…</p> : null}

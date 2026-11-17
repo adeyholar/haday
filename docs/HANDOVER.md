@@ -14,7 +14,9 @@ No verse is only in `books` or only in `data/wlc`. See [wlc-rebase-verse-gaps.tx
 
 Listen timestamps were not rewritten. 984 verses have a different word count than `public/tanakh/align`. `src/lib/reading.ts` already re-spaces those; it was not changed. The list is [wlc-align-count-mismatches.txt](wlc-align-count-mismatches.txt). Genesis has 14 (Gen 8:17, 13:3, 14:2, 14:8, 14:17, 24:33, 25:23, 27:29, 35:22, 36:5, 36:14, 39:20, 49:10, 49:11). The first verse of each Genesis chapter still matches.
 
-A second rebuild from `data/wlc` is byte-identical (`scripts/build-strong-map.mjs` twice, then `scripts/build-strongs.py`). The query index and `public/tanakh/books` are unchanged. `formOfLexicon` was not tightened. The Zechariah 8:23 override was not moved. The reader does not yet show a qere beside a differing ketiv. That display (rule 1.7) is a follow-up. This branch only withholds the class lemma.
+A second rebuild from `data/wlc` is byte-identical (`scripts/build-strong-map.mjs` twice, then `scripts/build-strongs.py`). The query index and `public/tanakh/books` are unchanged. `formOfLexicon` was not tightened. The Zechariah 8:23 override was not moved.
+
+On the Grammar Path Tanakh (`/listen/read`), the English translation is not on the page and not on the word card. Where a ketiv’s Strong’s number is not the qere’s (250 tokens, in `public/tanakh/ketiv-qere.json`), the word shown is the qere and the ketiv is noted beside it, with no English gloss. 22 of those have no read form, so the written word stays and the card says so. The Grade quiz still asks which English the verse is. The Scripture Path reader was not changed.
 
 ## Class lemmas that changed
 
@@ -62,6 +64,6 @@ Still in force, and still green: object marker, gentilics, compounds, Bamoth H11
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026. TanStack Start is 1.168.60.
 
-`node --test scripts/*.test.mjs`: 691 tests, 686 pass, 0 fail, 5 skipped. New file: `scripts/lemma-hold.test.mjs` (one test for each fix above). `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
+`node --test scripts/*.test.mjs`: 692 tests, 687 pass, 0 fail, 5 skipped. New files: `scripts/lemma-hold.test.mjs` (one test for each fix above) and `scripts/grammar-ketiv.test.mjs` (the Grammar Path qere note, and no English on that page). `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
 
 Branch `fix/wlc-pinned-matching`. This branch is not merged. Do not merge. Do not deploy.
