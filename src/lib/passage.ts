@@ -214,6 +214,34 @@ export function passageLabel(p: Passage): string {
   return `${name} ${p.chapter}:${p.fromV}–${p.toV}`;
 }
 
+export function readingSpanLabel(book: string, chapter: number, fromV: number, toV: number): string {
+  const name = bookMeta(book)?.en ?? book;
+  const last = versesInChapter(book, chapter);
+  const a = Math.max(1, fromV);
+  const b = Math.min(last, Math.max(a, toV));
+  if (a <= 1 && b >= last) return `${name} ${chapter}`;
+  if (a === b) return `${name} ${chapter}:${a}`;
+  return `${name} ${chapter}:${a}–${b}`;
+}
+
+/** Stable id for the verses on the page. A full chapter stays book.chapter. */
+export function readingSpanRef(book: string, chapter: number, fromV: number, toV: number): string {
+  const last = versesInChapter(book, chapter);
+  const a = Math.max(1, fromV);
+  const b = Math.min(last, Math.max(a, toV));
+  if (a <= 1 && b >= last) return `${book}.${chapter}`;
+  return `${book}.${chapter}.${a}.${b}`;
+}
+
+export function readingSpanHref(book: string, chapter: number, fromV: number, toV: number): string {
+  const base = `/listen/read/${book}/${chapter}`;
+  const last = versesInChapter(book, chapter);
+  const a = Math.max(1, fromV);
+  const b = Math.min(last, Math.max(a, toV));
+  if (a <= 1 && b >= last) return base;
+  return `${base}?v1=${a}&v2=${b}`;
+}
+
 export function playingLabel(p: Passage): string {
   const name = bookMeta(p.book)?.en ?? p.book;
   if (p.kind === "verses") return passageLabel(p);

@@ -372,7 +372,7 @@ export const useStudy = create<StudyState>()(
         get().saveDrillAt(drillKey(week, focus), place);
       },
       saveDrillAt: (key, place) => {
-        if (!/^(?:\d+|final):(due|weak)$/.test(key)) return;
+        if (!/^(?:\d+|final):(due|weak)$/.test(key) && !/^passage:(bbh|iibs):[A-Za-z0-9.]{1,24}$/.test(key)) return;
         const drillRuns = { ...(get().game.drillRuns ?? {}) };
         if (place) drillRuns[key] = place;
         else delete drillRuns[key];

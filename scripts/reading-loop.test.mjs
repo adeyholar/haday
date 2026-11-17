@@ -8,6 +8,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { chapterKnown, matchInPool } = await jiti.import(join(root, "src/lib/reading-loop/known.ts"));
 const { passageDrillKey, isPassageDrillKey, passageDrillIds, savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
+const { readingSpanHref, readingSpanLabel, readingSpanRef } = await jiti.import(join(root, "src/lib/passage.ts"));
+const { lemmaForSurface } = await jiti.import(join(root, "src/lib/tanakh-pool.ts"));
 const { noteVerse, peekSession, DAILY_GOAL } = await jiti.import(join(root, "src/lib/reading-loop/session.ts"));
 const { gradeRealForm, realFormDeck, REAL_FORMS } = await jiti.import(join(root, "src/lib/reading-loop/real-forms.ts"));
 const { morphLines, explainMorph } = await jiti.import(join(root, "src/lib/morph-parse.ts"));
@@ -171,4 +173,42 @@ test("morph lines name stem and person without changing the sentence", () => {
   assert.equal(lines.find((row) => row.label === "Form")?.value, "perfect");
   assert.equal(lines.find((row) => row.label === "Person")?.value, "3rd");
   assert.match(explainMorph(code), /Qal perfect/);
+});
+
+test("grammar unknowns are the class lemmas in these verses", () => {
+  const asCard = (surface) => lemmaForSurface(surface);
+  const verse1 = ["בְּרֵאשִׁ֖ית", "בָּרָ֣א", "אֱלֹהִ֑ים", "אֵ֥ת", "הַשָּׁמַ֖יִם", "וְאֵ֥ת", "הָאָֽרֶץ"].map((surface, i) => ({
+    id: `Gen 1:1:${i}`,
+    surface,
+  }));
+  const here = chapterKnown(verse1, VOCAB, {}, Date.now(), asCard);
+  assert.ok(here.unknown.some((item) => item.id === "rosh"));
+  assert.ok(here.unknown.some((item) => item.id === "bara"));
+  assert.equal(here.unknown.some((item) => item.id === "hayah"), false);
+  assert.equal(chapterKnown(verse1, VOCAB, {}).unknown.some((item) => item.id === "rosh"), false);
+  const told = chapterKnown([{ id: "Gen 1:3:4", surface: "וַֽיְהִי" }], VOCAB, {}, Date.now(), asCard);
+  assert.deepEqual(told.unknown.map((item) => item.id), ["hayah"]);
+  assert.equal(matchInPool("וַֽיְהִי", VOCAB), undefined);
+  assert.equal(readingSpanLabel("Gen", 1, 1, 31), "Genesis 1");
+  assert.equal(readingSpanRef("Gen", 1, 1, 31), "Gen.1");
+  assert.equal(readingSpanHref("Gen", 1, 1, 31), "/listen/read/Gen/1");
+  assert.equal(readingSpanLabel("Gen", 1, 1, 3), "Genesis 1:1–3");
+  assert.equal(readingSpanRef("Gen", 1, 1, 3), "Gen.1.1.3");
+  assert.equal(readingSpanHref("Gen", 1, 1, 3), "/listen/read/Gen/1?v1=1&v2=3");
+  assert.equal(isPassageDrillKey(passageDrillKey("bbh", "Gen.1.1.3")), true);
+  const mem = new Map();
+  const store = {
+    getItem: (key) => mem.get(key) ?? null,
+    setItem: (key, value) => mem.set(key, value),
+  };
+  savePassagePack(
+    { scope: "bbh", ref: "Gen.1.1.3", label: "Genesis 1:1–3", ids: ["hayah", "rosh"], back: "/listen/read/Gen/1?v1=1&v2=3" },
+    store,
+  );
+  const pack = loadPassagePack(store);
+  assert.equal(pack.ref, "Gen.1.1.3");
+  assert.equal(pack.label, "Genesis 1:1–3");
+  assert.equal(pack.back, "/listen/read/Gen/1?v1=1&v2=3");
+  const place = { seed: 1, ids: ["hayah"], index: 1, reviews: [], hits: 0, checks: 0, fingerprint: "a" };
+  assert.equal(hydrateDrillRuns({ "passage:bbh:Gen.1.1.3": place })["passage:bbh:Gen.1.1.3"]?.index, 1);
 });
