@@ -11,6 +11,7 @@ import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { chapterKnown } from "@/lib/reading-loop/known";
 import { lemmaForReading, splitReadingTag } from "@/lib/reading-loop/strong-lemma";
+import { fetchKetivQere, ketivAt, type KetivNotes } from "@/lib/ketiv-qere";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
 import { useStudy } from "@/lib/store";
@@ -1179,6 +1180,7 @@ function FollowCard({
   const [vol, setVol] = useState(loadReadVolume);
   const lastVol = useRef(vol || 1);
   const [pick, setPick] = useState<WordPick | null>(null);
+  const [ketivNotes, setKetivNotes] = useState<KetivNotes>({});
   const [balloon, setBalloon] = useState<WordBalloonPlace | null>(null);
   const wordEl = useRef<HTMLButtonElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
@@ -1204,7 +1206,7 @@ function FollowCard({
       list.flatMap((row) =>
         row.words.map((surface, wi) => {
           const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
-          return { id: `${row.ref}:${wi}`, surface, strong, morph, at: { book: String(row.book), chapter: row.chapter, verse: row.verse } };
+          return { id: `${row.ref}:${wi}`, surface, strong, morph, at: { book: String(row.book), chapter: row.chapter, verse: row.verse, index: wi } };
         }),
       ),
     [list, strongChapter],
@@ -1217,6 +1219,7 @@ function FollowCard({
   useEffect(() => {
     setDim(readDimUnknown());
     setSession(peekSession());
+    void fetchKetivQere().then(setKetivNotes);
   }, []);
   useEffect(() => {
     const row = list[i] ?? verse;
@@ -1488,8 +1491,18 @@ function FollowCard({
                   lang="he"
                   dir="rtl"
                 >
-                  {row.words.map((w, wi) =>
-                    active ? (
+                  {row.words.map((w, wi) => {
+                    const note = ketivAt(ketivNotes, bookId, row.chapter, row.verse, wi);
+                    const face = note ? (
+                      <>
+                        <span lang="he">{note.q}</span>
+                        <span className="text-muted" lang="he">
+                          {" "}
+                          ({note.k})
+                        </span>
+                      </>
+                    ) : null;
+                    return active ? (
                       <button
                         type="button"
                         key={`${row.ref}-${wi}`}
@@ -1524,10 +1537,12 @@ function FollowCard({
                             en: row.en,
                             strong: strong || undefined,
                             morph: morph || undefined,
+                            ketiv: note,
                           });
                         }}
                       >
-                        {hebrewClusters(w).map((part, pi) => (
+                        {face ??
+                          hebrewClusters(w).map((part, pi) => (
                           <span
                             key={`${row.ref}-${wi}-${pi}`}
                             className={
@@ -1561,6 +1576,7 @@ function FollowCard({
                               en: row.en,
                               strong: strong || undefined,
                               morph: morph || undefined,
+                              ketiv: note,
                             });
                             return;
                           }
@@ -1568,10 +1584,10 @@ function FollowCard({
                           else onJump(idx);
                         }}
                       >
-                        {w}
+                        {face ?? w}
                       </button>
-                    ),
-                  )}
+                    );
+                  })}
                 </p>
                 <EnglishVerse
                   en={row.en}

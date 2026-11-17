@@ -5,12 +5,39 @@ import { parseOshbLemma } from "@/lib/oshb-lemma";
 import { formFitsLemma } from "@/lib/tanakh-pool";
 import type { Pos, VocabItem } from "@/lib/vocab";
 import map from "@/lib/reading-loop/strong-map.json";
+import overridesFile from "../../../data/lemma-overrides.json";
 
 type Row = [string, 0 | 1];
 type Table = Record<string, Row[]>;
 
 const grammarTable = map.bbh as unknown as Table;
 const scriptureTable = map.iibs as unknown as Table;
+
+type OverrideRow = {
+  ref: string;
+  index: number;
+  surface: string;
+  lemma: string;
+  morph: string;
+  grammar: string | null;
+  scripture: string | null;
+  rule: string;
+  reason: string;
+  reviewer: string;
+  date: string;
+};
+
+const overrideByKey = new Map<string, OverrideRow>(
+  (overridesFile.overrides as OverrideRow[]).map((row) => [`${row.ref}#${row.index}`, row]),
+);
+
+function oshbLemmaMatches(tag: string | undefined, oshb: string): boolean {
+  const head = String(tag ?? "").split("|")[0]?.trim() ?? "";
+  if (head === oshb) return true;
+  const got = contentNumbers(tag);
+  const want = contentNumbers(oshb);
+  return got.length > 0 && got.length === want.length && got.every((n, i) => n === want[i]);
+}
 
 function pointed(s: string): string {
   return foldFinals(String(s ?? "").normalize("NFC").replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6]/g, ""));
@@ -192,8 +219,16 @@ export function lemmaForReading(
   tag: string | undefined,
   morph: string | undefined,
   pool: VocabItem[],
-  at?: { book: string; chapter: number; verse: number; qereNumbers?: number[] },
+  at?: { book: string; chapter: number; verse: number; index?: number; qereNumbers?: number[] },
 ): VocabItem | undefined {
+  const scripture = pool.some((item) => item.id.startsWith("iibs-"));
+  if (at && typeof at.index === "number") {
+    const row = overrideByKey.get(`${at.book}.${at.chapter}.${at.verse}#${at.index}`);
+    if (row && surface === row.surface && String(morph ?? "") === row.morph && oshbLemmaMatches(tag, row.lemma)) {
+      const id = scripture ? row.scripture : row.grammar;
+      return id ? card(pool, id) : undefined;
+    }
+  }
   const numbers = contentNumbers(tag);
   // Rule 1.6. A token that carries two Strong’s numbers is not one class lemma.
   if (numbers.length > 1) return undefined;
@@ -207,7 +242,6 @@ export function lemmaForReading(
   // Rule 3.2. A trailing + is a multi-word name, not one class lemma.
   // Rule 3.3. H884 Beer-sheba keeps the card it already has.
   if (n !== 884 && strongNumberHasPlus(tag)) return undefined;
-  const scripture = pool.some((item) => item.id.startsWith("iibs-"));
   const stem = verbStem(morph);
   // H606 is Aramaic אֱנָשׁ. No Aramaic Strong’s number is a Hebrew card.
   if (n === 606) return undefined;
@@ -227,10 +261,6 @@ export function lemmaForReading(
   if (n === 3526 && stem.stem !== "p") return undefined;
   const byId = new Map(pool.map((item) => [item.id, item]));
   let kind = morphKind(morph);
-  // Zechariah 8:23 יְהוּדִי is tagged as a name. In this verse it is a Jew.
-  if (at?.book === "Zech" && at.chapter === 8 && at.verse === 23 && n === 3064 && lettersOnly(surface).includes("יהודי")) {
-    kind = "gentilic";
-  }
   // A personal name does not take the article. הַלֵּוִי is the Levite, whatever the tag says.
   if ((n === 3878 || n === 3881) && hasReadingArticle(morph)) kind = "gentilic";
   const all = (tableFor(pool)[String(n)] ?? [])

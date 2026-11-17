@@ -24,6 +24,8 @@ ALIGN = ROOT / "public" / "tanakh" / "align"
 WLC = ROOT / "data" / "wlc"
 GAPS = ROOT / "docs" / "wlc-rebase-verse-gaps.txt"
 ALIGN_GAPS = ROOT / "docs" / "wlc-align-count-mismatches.txt"
+OVERRIDES = ROOT / "data" / "lemma-overrides.json"
+NOTES = ROOT / "public" / "tanakh" / "ketiv-qere.json"
 GRK_URL = "https://raw.githubusercontent.com/adeyholar/strongs/master/greek/strongs-greek-dictionary.js"
 
 
@@ -112,9 +114,58 @@ def ketiv_qere_numbers(words: list[dict], index: int) -> list[str] | None:
     return nums
 
 
-def pack(lemma: str, morph: str, qere_nums: list[str] | None = None) -> str:
-    """One Strong’s number, then the morph. Two numbers, or a ketiv whose number is not in the qere, leave the morph only."""
+def load_overrides() -> dict[tuple[str, int], dict]:
+    raw = json.loads(OVERRIDES.read_text())
+    return {(row["ref"], int(row["index"])): row for row in raw["overrides"]}
+
+
+def read_surfaces(word: dict | None) -> str:
+    if not word or word.get("kq_role") != "ketiv":
+        return ""
+    return " ".join(item.get("surface") or "" for item in (word.get("qere") or []) if item.get("surface"))
+
+
+def ketiv_read_surface(words: list[dict], index: int) -> str:
+    """Own qere, else the next ketiv's qere, else the previous. Same rule as src/lib/ketiv-qere.ts."""
+    word = words[index] if 0 <= index < len(words) else None
+    if not word or word.get("kq_role") != "ketiv":
+        return ""
+    own = read_surfaces(word)
+    if own:
+        return own
+    if index + 1 < len(words):
+        nxt = read_surfaces(words[index + 1])
+        if nxt:
+            return nxt
+    if index > 0:
+        return read_surfaces(words[index - 1])
+    return ""
+
+
+def ketiv_display(words: list[dict], index: int) -> dict[str, str] | None:
+    """The read form, with the written form noted, when they differ. No note when no read form exists."""
+    word = words[index]
+    if word.get("kq_role") != "ketiv":
+        return None
+    q = ketiv_read_surface(words, index)
+    if not q:
+        return None
+    k = word.get("surface") or ""
+    if q == k:
+        return None
+    return {"q": q, "k": k}
+
+
+def pack(
+    lemma: str,
+    morph: str,
+    qere_nums: list[str] | None = None,
+    override: dict | None = None,
+) -> str:
+    """One Strong’s number, then the morph. Two numbers, a ketiv whose number is not in the qere, or an override with no lemma, leave the morph only."""
     morph = str(morph or "").strip()
+    if override is not None and override.get("grammar") is None and override.get("scripture") is None:
+        return morph
     parts = strong_parts(lemma)
     if len(parts) != 1:
         return morph
@@ -143,6 +194,8 @@ def written_line(words: list[dict]) -> str:
 def main() -> None:
     LEX.mkdir(parents=True, exist_ok=True)
     TAGS.mkdir(parents=True, exist_ok=True)
+    overrides = load_overrides()
+    notes: dict[str, dict[str, dict[str, str]]] = {}
     print("dictionaries")
     grk_path = LEX / "strongs-greek.json"
     if grk_path.exists():
@@ -215,9 +268,17 @@ def main() -> None:
                         word.get("lemma") or "",
                         word.get("morph") or "",
                         ketiv_qere_numbers(token_words, word_index),
+                        overrides.get((ref, word_index)),
                     )
                     for word_index, word in enumerate(token_words)
                 ]
+                verse_notes: dict[str, dict[str, str]] = {}
+                for word_index, word in enumerate(token_words):
+                    shown = ketiv_display(token_words, word_index)
+                    if shown:
+                        verse_notes[str(word_index)] = shown
+                if verse_notes:
+                    notes[ref] = verse_notes
                 rewritten += 1
                 if index < len(stamps) and len(stamps[index]) != len(surfaces):
                     align_gaps.append(f"{ref} align {len(stamps[index])} words {len(surfaces)}")
@@ -237,6 +298,8 @@ def main() -> None:
         tag_path.write_text(json.dumps(out_tags, ensure_ascii=False, separators=(",", ":")))
         print("tags", book, "rewritten-in-progress")
 
+    NOTES.write_text(json.dumps(notes, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
+    print(f"ketiv notes {sum(len(row) for row in notes.values())}")
     # De-duplicate gap lines (per-verse loop and the chapter sweep can overlap).
     seen: set[str] = set()
     unique_gaps: list[str] = []

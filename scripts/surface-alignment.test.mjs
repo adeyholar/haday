@@ -16,6 +16,12 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { ketivQereNumbers } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
+const overrides = JSON.parse(readFileSync(join(root, "data/lemma-overrides.json"), "utf8"));
+const noLemma = new Set(
+  overrides.overrides
+    .filter((row) => row.grammar == null && row.scripture == null)
+    .map((row) => `${row.ref}#${row.index}`),
+);
 
 function writtenWords(verse) {
   return (verse.words ?? []).filter((word) => word.kq_role !== "qere");
@@ -32,11 +38,12 @@ function strongParts(lemma) {
   return out;
 }
 
-function packedTag(words, index) {
-  // Same rule as scripts/build-strongs.py pack(). Two Strong’s numbers, or a ketiv
-  // whose number is not in the qere that counts, leave the morph only.
+function packedTag(words, index, ref) {
+  // Same rule as scripts/build-strongs.py pack(). Two Strong’s numbers, a ketiv
+  // whose number is not in the qere that counts, or an override with no lemma, leave the morph only.
   const word = words[index];
   const morph = String(word.morph ?? "").trim();
+  if (noLemma.has(`${ref}#${index}`)) return morph;
   const parts = strongParts(word.lemma);
   if (parts.length !== 1) return morph;
   const qere = ketivQereNumbers(words, index);
@@ -85,7 +92,7 @@ test("Grammar Path tokens match the pinned data/wlc surface and Strong’s numbe
         for (let i = 0; i < surfaces.length; i++) {
           tokens += 1;
           if (got[i] !== surfaces[i]) mismatches.push(`${ref} #${i} books ${got[i]} wlc ${surfaces[i]}`);
-          const tag = packedTag(words, i);
+          const tag = packedTag(words, i, ref);
           if (tagRow[i] !== tag) mismatches.push(`${ref} #${i} tag ${tagRow[i]} wlc ${tag}`);
           if (mismatches.length > 12) break;
         }
