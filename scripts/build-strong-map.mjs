@@ -79,6 +79,8 @@ function build(pool) {
   /** @type {Map<number, Map<string, 0 | 1>>} */
   const map = new Map();
   function add(n, id, lexHit) {
+    // H1145 is Benjamite, בֶּן־יְמִינִי. One token is spelled אִישׁ, so the whole number was filed under “man.”
+    if (n === 1145) return;
     const row = map.get(n) ?? new Map();
     row.set(id, row.get(id) === 1 || lexHit ? 1 : 0);
     map.set(n, row);

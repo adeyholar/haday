@@ -306,3 +306,18 @@ test("a gentilic people counts, and Levi the person stays a name", () => {
   assert.equal(lemmaForReading("אֵת", "H855", "", iibs), undefined);
   assert.equal(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.gloss.startsWith("direct object marker"), true);
 });
+
+test("a Benjamite is not man, and the man in the same verse still is", () => {
+  const iibs = iibsPathItems();
+  const man = iibs.find((item) => item.hebrew === "אִישׁ");
+  assert.equal(lemmaForReading("יְמִינִֽי", "H1145", "HNgmsa", iibs), undefined);
+  assert.equal(lemmaForReading("אִ֥ישׁ", "H1145", "HNcmsa", iibs), undefined);
+  assert.equal(lemmaForReading("יְמִינִֽי", "H1145", "HNgmsa", VOCAB), undefined);
+  assert.equal(lemmaForReading("אִ֣ישׁ", "H376", "HNcmsa", iibs)?.id, man?.id);
+  assert.equal(lemmaForReading("אִ֣ישׁ", "H376", "HNcmsa", VOCAB)?.id, "ish");
+  const marker = lemmaForReading("אֹת֑וֹ", "H853", "HTo/Sp3ms", iibs);
+  const withName = lemmaForReading("אֶת", "H854", "HR", iibs);
+  assert.equal(marker?.gloss.startsWith("direct object marker"), true);
+  assert.equal(withName?.gloss.startsWith("with"), true);
+  assert.notEqual(marker?.id, withName?.id);
+});
