@@ -524,8 +524,22 @@ html {
 .manuscript-sheet .ms-spoken {
   box-shadow: inset 0 -2px 0 currentColor;
 }
-.ms-unknown {
-  opacity: 0.38;
+.he-verse > button.ms-unknown {
+  color: #6a5648;
+}
+html[data-lamp="dim"] .he-verse > button.ms-unknown {
+  color: #5c4a3c;
+}
+html[data-lamp="dark"] .he-verse > button.ms-unknown {
+  color: #b5a48c;
+}
+.manuscript-light .ms-word.ms-unknown,
+.manuscript-light .ms-word.ms-unknown .ms-word-face {
+  color: #705848;
+}
+.manuscript-dim .ms-word.ms-unknown,
+.manuscript-dim .ms-word.ms-unknown .ms-word-face {
+  color: #a89880;
 }
 .manuscript-sheet .ms-spoken-verse {
   background: color-mix(in oklab, currentColor 6%, transparent);

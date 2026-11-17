@@ -70,6 +70,7 @@ function DrillPage() {
         return passagePlaceForPool(place, pool.map((item) => item.id));
       }}
       writePlace={(place) => saveDrillAt(placeKey, place)}
+      showChapter={!passage}
       chrome={
         <>
           <StudyMenu />

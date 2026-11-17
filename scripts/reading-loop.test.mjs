@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -7,6 +8,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { chapterKnown, matchInPool } = await jiti.import(join(root, "src/lib/reading-loop/known.ts"));
+const { lemmaForReading, morphKind, strongNo } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 const { passageDrillKey, isPassageDrillKey, passageDrillIds, savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
 const { readingSpanHref, readingSpanLabel, readingSpanRef } = await jiti.import(join(root, "src/lib/passage.ts"));
 const { lemmaForSurface } = await jiti.import(join(root, "src/lib/tanakh-pool.ts"));
@@ -176,7 +178,7 @@ test("morph lines name stem and person without changing the sentence", () => {
 });
 
 test("grammar unknowns are the class lemmas in these verses", () => {
-  const asCard = (surface) => lemmaForSurface(surface);
+  const asCard = (word) => lemmaForSurface(word.surface);
   const verse1 = ["בְּרֵאשִׁ֖ית", "בָּרָ֣א", "אֱלֹהִ֑ים", "אֵ֥ת", "הַשָּׁמַ֖יִם", "וְאֵ֥ת", "הָאָֽרֶץ"].map((surface, i) => ({
     id: `Gen 1:1:${i}`,
     surface,
@@ -211,4 +213,246 @@ test("grammar unknowns are the class lemmas in these verses", () => {
   assert.equal(pack.back, "/listen/read/Gen/1?v1=1&v2=3");
   const place = { seed: 1, ids: ["hayah"], index: 1, reviews: [], hits: 0, checks: 0, fingerprint: "a" };
   assert.equal(hydrateDrillRuns({ "passage:bbh:Gen.1.1.3": place })["passage:bbh:Gen.1.1.3"]?.index, 1);
+});
+
+test("a passage lemma is the word in the verse, not a look-alike", () => {
+  const iibs = iibsPathItems();
+  const byStrong = (surface, tag, morph, pool) => lemmaForReading(surface, tag, morph, pool)?.id;
+  assert.equal(morphKind("HVhv2ms/Sh"), "verb");
+  assert.equal(morphKind("HNcfsc/Sp3mp"), "noun");
+  assert.equal(morphKind("HR/Sp3fs"), "prep");
+  assert.equal(byStrong("הַגִּידָה", "5046", "HVhv2ms/Sh", VOCAB), "higgid");
+  assert.equal(byStrong("הִגִּ֖יד", "5046", "HVhp3ms", VOCAB), "higgid");
+  assert.equal(byStrong("אֲמִתַּ֖י", "573", "HNp", VOCAB), undefined);
+  assert.notEqual(byStrong("אֲמִתַּ֖י", "573", "HNp", iibs), iibs.find((item) => item.gloss.startsWith("firmness"))?.id);
+  assert.equal(byStrong("יוֹנָ֥ה", "3124", "HNp", iibs), undefined);
+  assert.equal(byStrong("הָעִ֥יר", "d/5892 b", "HTd/Ncfsa", VOCAB), "ir");
+  assert.notEqual(byStrong("הָעִ֥יר", "d/5892 b", "HTd/Ncfsa", iibs), iibs.find((item) => item.hebrew === "הֵעִיר")?.id);
+  assert.equal(byStrong("עָלֶ֑יהָ", "5921 a", "HR/Sp3fs", VOCAB), "al");
+  assert.equal(byStrong("דְּבַר", "1697", "HNcmsc", VOCAB), "dabar");
+  assert.equal(byStrong("בֶן", "1121 a", "HNcmsc", VOCAB), "ben");
+  assert.equal(byStrong("וַֽיְהִי֙", "c/1961", "HC/Vqw3ms", VOCAB), "hayah");
+  assert.equal(byStrong("ק֠וּם", "6965 b", "HVqv2ms", iibs), iibs.find((item) => item.hebrew === "קָם")?.id);
+  const evil = byStrong("רָעָתָ֖ם", "7451 a", "HNcfsc/Sp3mp", VOCAB);
+  assert.ok(evil === "ra" || evil === "raah-evil");
+  assert.notEqual(lemmaForReading("בְּרֵאשִׁ֖ית", "H7225|HR/Ncfsa", "HR/Ncfsa", VOCAB)?.id, "rosh");
+  const jonah = [
+    { id: "tell", surface: "הִגִּ֖יד", strong: "5046", morph: "HVhp3ms" },
+    { id: "name", surface: "אֲמִתַּ֖י", strong: "573", morph: "HNp" },
+    { id: "city", surface: "הָעִ֥יר", strong: "d/5892 b", morph: "HTd/Ncfsa" },
+  ];
+  const report = chapterKnown(jonah, VOCAB, {}, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool));
+  assert.deepEqual(report.unknown.map((item) => item.id).sort(), ["higgid", "ir"]);
+  assert.deepEqual(report.unknownWordIds.sort(), ["city", "tell"]);
+});
+
+test("a morph code is not a Strong’s number, and the class list keeps the verse’s own word", () => {
+  const iibs = iibsPathItems();
+  assert.equal(strongNo("HR/Sp1cp"), 0);
+  assert.equal(strongNo("HVhp3ms"), 0);
+  assert.equal(strongNo("l"), 0);
+  assert.equal(strongNo("H5046"), 5046);
+  assert.equal(strongNo("c/1961"), 1961);
+  assert.equal(strongNo("5921 a"), 5921);
+  assert.equal(strongNo("d/5892 b"), 5892);
+  assert.equal(strongNo("H5046|HVhp3ms"), 5046);
+  assert.equal(lemmaForReading("לָ֖נוּ", "HR/Sp1cp", "HR/Sp1cp", VOCAB)?.id, undefined);
+  assert.notEqual(lemmaForReading("לָ֖נוּ", "HR/Sp1cp", "HR/Sp1cp", VOCAB)?.id, "ab");
+  const god = iibs.find((item) => item.hebrew === "אֱלֹהִים");
+  assert.equal(god?.pos, "noun");
+  assert.equal(lemmaForReading("אֱלֹהִ֑ים", "H430", "HNcmpa", iibs)?.id, god?.id);
+  const what = iibs.find((item) => item.hebrew === "מָה" && item.gloss.startsWith("what"));
+  assert.equal(what?.pos, "particle");
+  assert.equal(lemmaForReading("מַה", "H4100", "HTi", iibs)?.id, what?.id);
+  const perhaps = iibs.find((item) => item.hebrew === "אוּלַי");
+  assert.equal(perhaps?.pos, "particle");
+  assert.equal(lemmaForReading("אוּלַ֞י", "H194", "HD", iibs)?.id, perhaps?.id);
+  const great = iibs.find((item) => item.hebrew.startsWith("גָּדוֹל"));
+  assert.equal(lemmaForReading("הַגְּדוֹלָ֖ה", "H1419", "HTd/Aafsa", iibs)?.id, great?.id);
+  const marker = iibs.find((item) => item.gloss.startsWith("direct object marker"));
+  const withPrep = iibs.find((item) => item.hebrew === "אֵת" && item.gloss.startsWith("with"));
+  const youFem = iibs.find((item) => item.hebrew === "אַתְּ");
+  assert.ok(marker && withPrep);
+  assert.equal(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.id, marker.id);
+  assert.equal(lemmaForReading("וְאֵ֥ת", "H853", "HC/To", iibs)?.id, marker.id);
+  assert.notEqual(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.id, withPrep.id);
+  assert.notEqual(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.id, youFem?.id);
+  assert.equal(lemmaForReading("אִתּוֹ", "H854", "HR/Sp3ms", iibs)?.id, withPrep.id);
+  const hebrew = iibs.find((item) => item.hebrew === "עִבְרִי");
+  assert.equal(hebrew?.pos, "gentilic");
+  assert.equal(morphKind("HNgmsa"), "gentilic");
+  assert.equal(lemmaForReading("עִבְרִ֣י", "H5680", "HNgmsa", iibs)?.id, hebrew?.id);
+});
+
+test("a gentilic people counts, and Levi the person stays a name", () => {
+  const iibs = iibsPathItems();
+  const egyptian = iibs.find((item) => item.hebrew === "מִצְרִי");
+  const canaanite = iibs.find((item) => item.hebrew === "כְּנַעֲנִי");
+  const philistine = iibs.find((item) => item.hebrew === "פְּלִשְׁתִּי");
+  const jew = iibs.find((item) => item.hebrew === "יְהוּדִי");
+  const levi = iibs.find((item) => item.hebrew === "לֵוִי" && item.pos === "name");
+  const levite = iibs.find((item) => item.gloss === "Levite" && item.pos === "gentilic");
+  assert.equal(egyptian?.pos, "gentilic");
+  assert.equal(canaanite?.pos, "gentilic");
+  assert.equal(philistine?.pos, "gentilic");
+  assert.equal(jew?.pos, "gentilic");
+  assert.equal(levi?.pos, "name");
+  assert.equal(levite?.pos, "gentilic");
+  assert.notEqual(levite?.id, levi?.id);
+  assert.equal(lemmaForReading("מִצְרִ֔י", "H4713", "HNgmsa", iibs)?.id, egyptian?.id);
+  assert.equal(lemmaForReading("וְהַכְּנַעֲנִ֖י", "H3669", "HC/Td/Ngmsa", iibs)?.id, canaanite?.id);
+  assert.equal(lemmaForReading("פְלִשְׁתִּים", "H6430", "HNgmpa", iibs)?.id, philistine?.id);
+  assert.equal(lemmaForReading("יְהוּדִ֔י", "H3064", "HNgmsa", iibs)?.id, jew?.id);
+  assert.equal(lemmaForReading("הַלֵּוִ֖י", "H3881", "HTd/Ngmsa", iibs)?.id, levite?.id);
+  assert.equal(lemmaForReading("לֵוִ֔י", "H3878", "HNp", iibs)?.id, levi?.id);
+  assert.notEqual(lemmaForReading("הַלֵּוִ֖י", "H3881", "HTd/Ngmsa", iibs)?.id, levi?.id);
+  assert.equal(lemmaForReading("אֵ֥ת", "H853", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵ֥ת", "H854", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵת", "H855", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.gloss.startsWith("direct object marker"), true);
+});
+
+test("a Benjamite is not man, and the man in the same verse still is", () => {
+  const iibs = iibsPathItems();
+  const man = iibs.find((item) => item.hebrew === "אִישׁ");
+  const benjamite = iibs.find((item) => item.gloss === "Benjamite" && item.pos === "gentilic");
+  assert.equal(benjamite?.hebrew, "יְמִינִי");
+  assert.equal(lemmaForReading("יְמִינִֽי", "H1145", "HNgmsa", iibs)?.id, benjamite?.id);
+  assert.equal(lemmaForReading("יְמִינִ֤י", "H1145", "HNgmsa", iibs)?.id, benjamite?.id);
+  assert.equal(lemmaForReading("אִ֥ישׁ", "H1145", "HNcmsa", iibs), undefined);
+  assert.equal(lemmaForReading("בֶן", "H1145", "HNcmsc", iibs), undefined);
+  assert.equal(lemmaForReading("יְמִינִֽי", "H1145", "HNgmsa", VOCAB), undefined);
+  assert.equal(lemmaForReading("אִ֣ישׁ", "H376", "HNcmsa", iibs)?.id, man?.id);
+  assert.equal(lemmaForReading("אִ֣ישׁ", "H376", "HNcmsa", VOCAB)?.id, "ish");
+  const marker = lemmaForReading("אֹת֑וֹ", "H853", "HTo/Sp3ms", iibs);
+  const withName = lemmaForReading("אֶת", "H854", "HR", iibs);
+  assert.equal(marker?.gloss.startsWith("direct object marker"), true);
+  assert.equal(withName?.gloss.startsWith("with"), true);
+  assert.notEqual(marker?.id, withName?.id);
+});
+
+test("a compound name is not one of its words", () => {
+  const iibs = iibsPathItems();
+  const seven = iibs.find((item) => item.hebrew === "שֶׁבַע" && item.gloss === "seven");
+  const four = iibs.find((item) => item.gloss === "four");
+  const beer = iibs.find((item) => item.gloss === "Beer Sheva");
+  const people = iibs.find((item) => item.hebrew === "לְאֹם");
+  assert.ok(seven && four && beer && people);
+  assert.equal(lemmaForReading("בַּת", "H1339", "HNp", iibs), undefined);
+  assert.equal(lemmaForReading("שֶׁ֤בַע", "H1339", "HAcfsa", iibs), undefined);
+  assert.equal(lemmaForReading("שֶׁ֤בַע", "H1339", "HAcfsa", VOCAB), undefined);
+  assert.equal(lemmaForReading("בְּקִרְיַ֥ת", "H7153", "HR/Np", iibs), undefined);
+  assert.equal(lemmaForReading("אַרְבַּ֛ע", "H7153", "HAcfsa", iibs), undefined);
+  assert.equal(lemmaForReading("אַרְבַּ֛ע", "H7153", "HAcfsa", VOCAB), undefined);
+  assert.equal(lemmaForReading("בְּאֵ֣ר", "H884", "HNp", iibs)?.id, beer.id);
+  assert.notEqual(lemmaForReading("בַּל", "H3816", "HTn", VOCAB)?.id, "bal");
+  assert.equal(lemmaForReading("לְאֹם", "H3816", "HNcmsa", iibs)?.id, people.id);
+  assert.equal(lemmaForReading("לְאֹם", "H3816", "HNcmsa", VOCAB)?.id, undefined);
+});
+
+test("Bamoth and Hazerim are the places, not the word inside the citation", () => {
+  const iibs = iibsPathItems();
+  const baal = iibs.find((item) => item.gloss === "Baal");
+  const courtyard = iibs.find((item) => item.gloss === "enclosure, courtyard");
+  const villages = iibs.find((item) => item.gloss === "villages");
+  assert.ok(baal && courtyard && villages);
+  const bamoth = [
+    ["וּבָמ֣וֹת", "H1120", "HC/Np"],
+    ["בַּ֔עַל", "H1120", "HNp"],
+    ["בָּמֽוֹת", "H1120", "HNp"],
+    ["וּמִבָּמ֗וֹת", "H1120", "HC/R/Np"],
+    ["בָּמ֣וֹת", "H1120", "HNp"],
+    ["בָּ֑עַל", "H1120", "HNp"],
+  ];
+  for (const [surface, tag, morph] of bamoth) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs), undefined);
+    assert.equal(lemmaForReading(surface, tag, morph, VOCAB), undefined);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, baal.id);
+  }
+  assert.equal(lemmaForReading("בַּחֲצֵרִ֖ים", "H2699", "HR/Ncmpa", iibs), undefined);
+  assert.equal(lemmaForReading("בַּחֲצֵרִ֖ים", "H2699", "HR/Ncmpa", VOCAB), undefined);
+  assert.equal(lemmaForReading("חֲצֵרִ֖ים", "H2691", "HNcbpa", iibs)?.id, villages.id);
+  assert.equal(lemmaForReading("וְחַצְרֵיהֶם֙", "H2691", "HC/Ncbpc/Sp3mp", iibs)?.id, courtyard.id);
+});
+
+test("the article makes הַלֵּוִי a Levite, and Levi the person stays a name", () => {
+  const iibs = iibsPathItems();
+  const levi = iibs.find((item) => item.hebrew === "לֵוִי" && item.pos === "name");
+  const levite = iibs.find((item) => item.gloss === "Levite" && item.pos === "gentilic");
+  assert.equal(levite?.id, "iibs-a-mk4j9d");
+  assert.equal(levi?.id, "iibs-a-zwt083");
+  const gentilic = [
+    ["הַלֵּוִֽי", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֖י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַ֭לֵּוִי", "H3878", "HTd/Ngmsa"],
+  ];
+  for (const [surface, tag, morph] of gentilic) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs)?.id, levite.id);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, levi.id);
+  }
+  // The article is the Levite, even when the tag says a name. 1Chr 12:27, Mal 2:8, Neh 10:40.
+  for (const [surface, tag, morph] of [
+    ["הַלֵּוִ֔י", "H3878", "HTd/Np"],
+    ["הַלֵּוִ֗י", "H3878", "HTd/Np"],
+  ]) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs)?.id, levite.id);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, levi.id);
+  }
+  // Without the article, the morph still decides. A plain לְ is not the article.
+  assert.equal(lemmaForReading("לֵוִ֔י", "H3878", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֑י", "H3881", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לְלֵוִ֛י", "H3881", "HR/Np", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֗י", "H3881", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֖י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לֵוִ֣י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לֵוִ֗י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לְוִיֵּ֖נוּ", "H3881", "HNgmpc/Sp1cp", iibs)?.id, levite.id);
+  // לַ and בַּ already contain the article.
+  assert.equal(lemmaForReading("לַלְוִיִּ֑ם", "H3881", "HRd/Ngmpa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("בַּלְוִיִּֽם", "H3881", "HRd/Ngmpa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("וְלַלְוִיִּ֗ם", "H3881", "HC/Rd/Ngmpa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("וְלֵוָיֵ֜א", "H3879", "AC/Ngmpd/Td", iibs), undefined);
+});
+
+test("people stays a Scripture Path word without a Strong’s number in the builder", () => {
+  const iibs = iibsPathItems();
+  const people = iibs.find((item) => item.hebrew === "לְאֹם");
+  const src = readFileSync(join(root, "scripts/build-strong-map.mjs"), "utf8");
+  assert.equal(src.includes("n === 3816"), false);
+  assert.equal(people?.id, "iibs-d-1mpxdr6");
+  assert.equal(lemmaForReading("בַּל", "H3816", "HTn", iibs), undefined);
+  assert.equal(lemmaForReading("בַּל", "H3816", "HTn", VOCAB), undefined);
+  assert.equal(lemmaForReading("וּלְאֻמִּ֖ים", "H3816", "HC/Ncmpa", iibs)?.id, people.id);
+  assert.equal(lemmaForReading("אֻמִּֽים", "H3816", "HNcmpa", iibs)?.id, people.id);
+  assert.equal(lemmaForReading("וּלְאֻמִּ֖ים", "H3816", "HC/Ncmpa", VOCAB), undefined);
+});
+
+test("a Mede is not the place, and Zechariah 8:23 is a Jew", () => {
+  const iibs = iibsPathItems();
+  const mede = iibs.find((item) => item.gloss === "Mede" && item.pos === "gentilic");
+  const media = iibs.find((item) => item.gloss === "Media, Medes" && item.pos === "name");
+  const assyrian = iibs.find((item) => item.gloss === "Assyrian" && item.pos === "gentilic");
+  const assyria = iibs.find((item) => item.gloss === "Asshur, Assyria" && item.pos === "name");
+  const chaldean = iibs.find((item) => item.gloss === "Chaldean" && item.pos === "gentilic");
+  const persian = iibs.find((item) => item.gloss === "Persian" && item.pos === "gentilic");
+  const persia = iibs.find((item) => item.gloss === "Persia" && item.pos === "name");
+  const jew = iibs.find((item) => item.hebrew === "יְהוּדִי" && item.pos === "gentilic");
+  assert.ok(mede && media && assyrian && chaldean && persian && jew);
+  assert.notEqual(mede.id, media.id);
+  assert.equal(lemmaForReading("הַמָּדִ֑י", "H4075", "HTd/Ngmsa", iibs)?.id, mede.id);
+  assert.equal(lemmaForReading("לְמָדַ֥י", "H4076", "AR/Ngmsd", iibs)?.id, mede.id);
+  assert.equal(lemmaForReading("וּמָדַ֖י", "H4074", "HC/Np", iibs)?.id, media.id);
+  assert.notEqual(lemmaForReading("וּמָדַ֖י", "H4074", "HC/Np", iibs)?.id, mede.id);
+  assert.equal(lemmaForReading("אַשּׁ֑וּר", "H804", "HNgmsa", iibs)?.id, assyrian.id);
+  assert.equal(lemmaForReading("אַשּׁ֑וּר", "H804", "HNp", iibs)?.id, assyria?.id);
+  assert.equal(lemmaForReading("וְלַכַּשְׂדִּ֔ים", "H3778", "HC/Rd/Ngmpa", iibs)?.id, chaldean.id);
+  assert.equal(lemmaForReading("הַכַּשְׂדִּ֛ים", "H3778", "HTd/Ngmpa", iibs)?.id, chaldean.id);
+  assert.equal(lemmaForReading("וּפָרָֽס", "H6540", "AC/Ngmsd", iibs)?.id, persian.id);
+  assert.notEqual(lemmaForReading("וּפָרָֽס", "H6540", "AC/Ngmsd", iibs)?.id, persia?.id);
+  const zech = { book: "Zech", chapter: 8, verse: 23 };
+  assert.equal(lemmaForReading("יְהוּדִ֜י", "H3064", "HNp", iibs, zech)?.id, jew.id);
+  assert.equal(lemmaForReading("יְהוּדִ֜י", "H3064", "HNp", iibs), undefined);
 });

@@ -10,8 +10,8 @@ import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { chapterKnown } from "@/lib/reading-loop/known";
+import { lemmaForReading, splitReadingTag } from "@/lib/reading-loop/strong-lemma";
 import { poolFor } from "@/lib/reading-loop/pool";
-import { lemmaForSurface } from "@/lib/tanakh-pool";
 import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
 import { useStudy } from "@/lib/store";
 import { Panel } from "@/components/panel";
@@ -63,7 +63,6 @@ import {
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
 import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
-import { splitStrongTag } from "@/lib/morph-parse";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
@@ -1201,11 +1200,17 @@ function FollowCard({
   const [dim, setDim] = useState(false);
   const [session, setSession] = useState<ReadSession>({ day: "", today: 0, goal: DAILY_GOAL, last: null });
   const loopWords = useMemo(
-    () => list.flatMap((row) => row.words.map((surface, wi) => ({ id: `${row.ref}:${wi}`, surface }))),
-    [list],
+    () =>
+      list.flatMap((row) =>
+        row.words.map((surface, wi) => {
+          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
+          return { id: `${row.ref}:${wi}`, surface, strong, morph, at: { book: String(row.book), chapter: row.chapter, verse: row.verse } };
+        }),
+      ),
+    [list, strongChapter],
   );
   const knownReport = useMemo(
-    () => chapterKnown(loopWords, poolFor("bbh"), cards, Date.now(), (surface) => lemmaForSurface(surface)),
+    () => chapterKnown(loopWords, poolFor("bbh"), cards, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool, word.at)),
     [loopWords, cards],
   );
   const unknownKeys = useMemo(() => new Set(knownReport.unknownWordIds), [knownReport]);
@@ -1497,16 +1502,15 @@ function FollowCard({
                               : "text-ink"
                         } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
                           (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
-                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && wi !== wordI ? "ms-unknown" : ""}`}
+                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""}`}
                         data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
-                          const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
-                          const { id: sid, morph } = splitStrongTag(tag);
+                          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
                           if (onWord) {
                             onWord(idx, wi);
                             return;
                           }
-                          if (pick?.index === wi && pick.verse === row.verse && !sid) {
+                          if (pick?.index === wi && pick.verse === row.verse && !strong && !morph) {
                             setPick(null);
                             return;
                           }
@@ -1518,7 +1522,7 @@ function FollowCard({
                             verse: row.verse,
                             he: row.he,
                             en: row.en,
-                            strong: sid || undefined,
+                            strong: strong || undefined,
                             morph: morph || undefined,
                           });
                         }}
@@ -1542,11 +1546,11 @@ function FollowCard({
                         key={`${row.ref}-${wi}`}
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none ${
                           pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""
-                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) ? "ms-unknown" : ""}`}
+                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""}`}
                         data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
-                          const { id: sid, morph } = splitStrongTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
-                          if (!onWord && sid) {
+                          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
+                          if (!onWord && (strong || morph)) {
                             setPick({
                               word: w,
                               index: wi,
@@ -1555,7 +1559,7 @@ function FollowCard({
                               verse: row.verse,
                               he: row.he,
                               en: row.en,
-                              strong: sid,
+                              strong: strong || undefined,
                               morph: morph || undefined,
                             });
                             return;

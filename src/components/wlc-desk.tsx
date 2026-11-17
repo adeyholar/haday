@@ -6,8 +6,8 @@ import { placeDesktopCard, wordFullyOffScreen, desktopCardSheet, type DesktopCar
 import { WlcLexicon } from "@/components/wlc-lexicon";
 import { Link } from "@tanstack/react-router";
 import { MorphLines } from "@/components/morph-lines";
-import { matchInPool } from "@/lib/reading-loop/known";
 import { poolFor } from "@/lib/reading-loop/pool";
+import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
 import { isBookId, type BookId } from "@/lib/tanakh-canon";
 import { savePassagePack, passageDrillIds, type StudyScope } from "@/lib/reading-loop/passage";
 
@@ -60,7 +60,7 @@ function WordFace({
       onClick={() => onPick(word)}
       className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""} ${
         spoken ? "ms-spoken" : ""
-      } ${dim && !picked && !spoken ? "ms-unknown" : ""} ${joinsNext(word) ? "ms-joins" : ""}`}
+      } ${dim && !picked ? "ms-unknown" : ""} ${joinsNext(word) ? "ms-joins" : ""}`}
     >
       <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (
@@ -117,7 +117,7 @@ function WordCard({
   onClose: () => void;
 }) {
   const qere = word.qere ?? [];
-  const lemma = loop ? matchInPool(word.surface, poolFor(loop.scope)) : undefined;
+  const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope), parse) : undefined;
   const drillIds = lemma ? (neededIds ? passageDrillIds(lemma.id, neededIds) : [lemma.id]) : [];
   const scripture = loop?.scope === "iibs";
   return (

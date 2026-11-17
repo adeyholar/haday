@@ -33,10 +33,10 @@ export function iibsWeekLabel(level: string, week: number): string {
   return `Level ${level} · Week ${week}`;
 }
 
-/** Every Scripture Path lemma, levels A–E. Used by the reading loop, not by a week sitting. */
+/** Every Scripture Path lemma, levels A–E, plus the people-words below. Used by the reading loop, not by a week sitting. */
 let iibsAll: VocabItem[] | null = null;
 export function iibsPathItems(): VocabItem[] {
-  if (!iibsAll) iibsAll = IIBS_WEEK_LEVELS.flatMap((level) => levelWords(level));
+  if (!iibsAll) iibsAll = [...IIBS_WEEK_LEVELS.flatMap((level) => levelWords(level)), ...readingLemmas()];
   return iibsAll;
 }
 
@@ -55,6 +55,45 @@ export function iibsWordId(level: IibsVocabLevel, hebrew: string, gloss: string)
     hash = Math.imul(hash, 16777619);
   }
   return `iibs-${level.toLowerCase()}-${(hash >>> 0).toString(36)}`;
+}
+
+/**
+ * People-words the coursebook still files under a place or a person.
+ * Reading-pool only. Not a lesson row, so the lesson counts stay put.
+ * יְמִינִי is the people-word inside בֶן־יְמִינִי, not the compound name.
+ */
+const BENJAMITE = "יְמִינִי";
+let readingAll: VocabItem[] | null = null;
+function readingCard(level: IibsVocabLevel, hebrew: string, gloss: string): VocabItem {
+  return {
+    id: iibsWordId(level, hebrew, gloss),
+    hebrew,
+    translit: "",
+    gloss,
+    alts: [],
+    pos: "gentilic",
+    chapter: 0,
+    freq: 0,
+  };
+}
+function readingLemmas(): VocabItem[] {
+  if (readingAll) return readingAll;
+  const specs: { level: IibsVocabLevel; gloss: string; from: string }[] = [
+    { level: "A", gloss: "Levite", from: "Levi, Levite" },
+    { level: "A", gloss: "Assyrian", from: "Asshur, Assyria" },
+    { level: "B", gloss: "Chaldean", from: "Chaldeans" },
+    { level: "E", gloss: "Mede", from: "Media, Medes" },
+    { level: "E", gloss: "Persian", from: "Persia" },
+  ];
+  const out: VocabItem[] = [];
+  for (const spec of specs) {
+    const hebrew = levelWords(spec.level).find((item) => item.gloss === spec.from)?.hebrew;
+    if (!hebrew) continue;
+    out.push(readingCard(spec.level, hebrew, spec.gloss));
+  }
+  out.push(readingCard("A", BENJAMITE, "Benjamite"));
+  readingAll = out;
+  return out;
 }
 
 function levelWords(level: IibsVocabLevel): VocabItem[] {
@@ -219,25 +258,29 @@ export function iibsLegacyId(id: string): string | undefined {
   return hopped ? current : undefined;
 }
 
-/** Ids the week builder actually deals. A save may keep these and no other `iibs-` key. */
+/** Ids the week builder actually deals, plus the reading-pool people-words. A save may keep these and no other `iibs-` key. */
 export function iibsStudyIdSet(): Set<string> {
   if (studyIds) return studyIds;
   const ids = new Set<string>();
   for (const level of IIBS_WEEK_LEVELS) {
     for (const item of levelWords(level)) ids.add(item.id);
   }
+  for (const item of readingLemmas()) ids.add(item.id);
   studyIds = ids;
   return ids;
 }
 
 function posOf(kind: string): Pos {
   const k = kind.toLowerCase();
+  if (k.includes("gentilic")) return "gentilic";
+  if (k.includes("interrogative")) return "particle";
+  if (k.includes("object marker") || k.includes("direct object")) return "particle";
+  if (k.includes("adverb") || k.includes("particle") || k.includes("conjunction") || k.includes("interjection")) return "particle";
   if (k.includes("verb")) return "verb";
   if (k.includes("adj")) return "adj";
   if (k.includes("prep")) return "prep";
   if (k.includes("pronoun")) return "pron";
   if (k.includes("proper")) return "name";
-  if (k.includes("particle") || k.includes("adverb") || k.includes("conjunction")) return "particle";
   return "noun";
 }
 
@@ -293,6 +336,7 @@ function toItem(
 function noteTwinMeanings(items: VocabItem[]) {
   const twins = new Map<string, VocabItem[]>();
   for (const item of items) {
+    if (item.gloss.toLowerCase().includes("object marker")) continue;
     const group = twins.get(item.hebrew) ?? [];
     group.push(item);
     twins.set(item.hebrew, group);

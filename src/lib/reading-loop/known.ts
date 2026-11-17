@@ -2,7 +2,14 @@ import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { hydrateCard, isMastered, type CardState } from "@/lib/srs";
 import type { VocabItem } from "@/lib/vocab";
 
-export type SurfaceWord = { id: string; surface: string };
+export type SurfaceWord = {
+  id: string;
+  surface: string;
+  strong?: string;
+  morph?: string;
+  /** Verse of this surface, when a people-word is tagged as a name. */
+  at?: { book: string; chapter: number; verse: number };
+};
 
 export type KnownReport = {
   /** Unique class lemmas that actually appear in this passage. */
@@ -108,13 +115,13 @@ export function chapterKnown(
   pool: VocabItem[],
   cards: Record<string, CardState | undefined>,
   now = Date.now(),
-  match: (surface: string, pool: VocabItem[]) => VocabItem | undefined = matchInPool,
+  match: (word: SurfaceWord, pool: VocabItem[]) => VocabItem | undefined = (word, pool) => matchInPool(word.surface, pool),
 ): KnownReport {
   const held = masteredIds(pool, cards, now);
   const seen = new Map<string, VocabItem>();
   const unknownWordIds: string[] = [];
   for (const word of words) {
-    const item = match(word.surface, pool);
+    const item = match(word, pool);
     if (!item) continue;
     if (!seen.has(item.id)) seen.set(item.id, item);
     if (!held.has(item.id)) unknownWordIds.push(word.id);

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { askHaday, type AskTurn, type AskVerseContext } from "@/lib/ask-haday";
 import { classLemmaForWord, describeTags, englishKeysForWord, grammarAskFromTags, hasGlossInEnglish, vocabLine } from "@/lib/word-card";
 import { MorphLines } from "@/components/morph-lines";
-import { matchInPool } from "@/lib/reading-loop/known";
+import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
@@ -39,7 +39,12 @@ export function WordSheet({
   place: WordBalloonPlace;
   onClose: () => void;
 }) {
-  const lemma = classLemmaForWord(pick.word);
+  const tagged = Boolean(pick.strong || pick.morph);
+  const lemma = pick.strong
+    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), { book: pick.book, chapter: pick.chapter, verse: pick.verse })
+    : tagged
+      ? undefined
+      : classLemmaForWord(pick.word);
   const [tags, setTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [askOpen, setAskOpen] = useState(false);
@@ -51,7 +56,7 @@ export function WordSheet({
   const deck = grammarAskFromTags(tags);
   const labels = describeTags(tags);
   const vocab = vocabLine(lemma);
-  const pathLemma = matchInPool(pick.word, poolFor("bbh"));
+  const pathLemma = lemma;
   const back = `/listen/read/${pick.book}/${pick.chapter}`;
   const root = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
