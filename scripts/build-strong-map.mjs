@@ -262,6 +262,13 @@ function build(pool) {
       if (wantAlso ? !alsoCard(item) : alsoCard(item)) row.delete(id);
     }
   }
+  // Rule 3.2. Paddan-aram and Ramoth-negeb are not the Aram card or the Negev card.
+  // The following word repeats the number with no plus, so the key itself goes.
+  // H884 Beer-sheba stays.
+  if (pool.some((item) => String(item.id).startsWith("iibs-"))) {
+    map.delete(6307);
+    map.delete(7418);
+  }
   const out = {};
   for (const [n, row] of [...map.entries()].sort((a, b) => a[0] - b[0])) {
     out[String(n)] = [...row.entries()]

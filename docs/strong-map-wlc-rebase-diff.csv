@@ -1238,7 +1238,7 @@ verse,token_index,surface,old_surface,path,old_lemma,new_lemma
 1Sam.30.21,7,מִלֶּ֣כֶת,מִלֶּ֣כֶת,scripture,,iibs-a-1msybw9 / he walked; he went
 1Sam.30.22,30,וְיֵלֵֽכוּ,וְיֵלֵֽכוּ,grammar,,"halak / to go, walk"
 1Sam.30.22,30,וְיֵלֵֽכוּ,וְיֵלֵֽכוּ,scripture,,iibs-a-1msybw9 / he walked; he went
-1Sam.30.27,4,בְּרָמֽוֹת,בְּרָמֽוֹת,scripture,,iibs-d-1gzt8ob / Negev; south
+1Sam.30.27,5,נֶ֖גֶב,נֶ֖גֶב,scripture,iibs-d-1gzt8ob / Negev; south,
 1Sam.30.6,14,בנו,בנובנובָּנָ֣יווְעַל,grammar,,ben / son
 1Sam.30.6,15,וְעַל,בְּנֹתָ֑יו,grammar,,"al / on, upon, on account of, according to"
 1Sam.30.6,16,בְּנֹתָ֑יו,וַיִּתְחַזֵּ֣ק,grammar,,bat / daughter
@@ -4963,7 +4963,7 @@ Gen.24.61,13,וַיֵּלַֽךְ,וַיֵּלַֽךְ,grammar,,"halak / to go, 
 Gen.24.61,13,וַיֵּלַֽךְ,וַיֵּלַֽךְ,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.24.8,4,לָלֶ֣כֶת,לָלֶ֣כֶת,grammar,,"halak / to go, walk"
 Gen.24.8,4,לָלֶ֣כֶת,לָלֶ֣כֶת,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.25.20,11,מִפַּדַּ֖ן,מִפַּדַּ֖ן,scripture,,iibs-a-1vdejzx / Aram
+Gen.25.20,12,אֲרָ֑ם,אֲרָ֑ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.25.22,9,וַתֵּ֖לֶךְ,וַתֵּ֖לֶךְ,grammar,,"halak / to go, walk"
 Gen.25.22,9,וַתֵּ֖לֶךְ,וַתֵּ֖לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.25.23,4,גיים,גייםגייםגוֹיִם֙בְּבִטְנֵ֔ךְ,grammar,,"goy / nation, people"
@@ -5008,14 +5008,14 @@ Gen.28.15,6,תֵּלֵ֔ךְ,תֵּלֵ֔ךְ,grammar,,"halak / to go, walk"
 Gen.28.15,6,תֵּלֵ֔ךְ,תֵּלֵ֔ךְ,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.28.2,1,לֵךְ֙,לֵךְ֙,grammar,,"halak / to go, walk"
 Gen.28.2,1,לֵךְ֙,לֵךְ֙,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.28.2,2,פַּדֶּ֣נָֽה,פַּדֶּ֣נָֽה,scripture,,iibs-a-1vdejzx / Aram
+Gen.28.2,3,אֲרָ֔ם,אֲרָ֔ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.28.5,4,וַיֵּ֖לֶךְ,וַיֵּ֖לֶךְ,grammar,,"halak / to go, walk"
 Gen.28.5,4,וַיֵּ֖לֶךְ,וַיֵּ֖לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.28.5,5,פַּדֶּ֣נָֽה,פַּדֶּ֣נָֽה,scripture,,iibs-a-1vdejzx / Aram
-Gen.28.6,9,פַּדֶּ֣נָֽה,פַּדֶּ֣נָֽה,scripture,,iibs-a-1vdejzx / Aram
+Gen.28.5,6,אֲרָ֑ם,אֲרָ֑ם,scripture,iibs-a-1vdejzx / Aram,
+Gen.28.6,10,אֲרָ֔ם,אֲרָ֔ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.28.7,6,וַיֵּ֖לֶךְ,וַיֵּ֖לֶךְ,grammar,,"halak / to go, walk"
 Gen.28.7,6,וַיֵּ֖לֶךְ,וַיֵּ֖לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.28.7,7,פַּדֶּ֥נָֽה,פַּדֶּ֥נָֽה,scripture,,iibs-a-1vdejzx / Aram
+Gen.28.7,8,אֲרָֽם,אֲרָֽם,scripture,iibs-a-1vdejzx / Aram,
 Gen.28.9,0,וַיֵּ֥לֶךְ,וַיֵּ֥לֶךְ,grammar,,"halak / to go, walk"
 Gen.28.9,0,וַיֵּ֥לֶךְ,וַיֵּ֥לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.29.1,3,וַיֵּ֖לֶךְ,וַיֵּ֖לֶךְ,grammar,,"halak / to go, walk"
@@ -5035,7 +5035,7 @@ Gen.30.25,11,וְאֵ֣לְכָ֔ה,וְאֵ֣לְכָ֔ה,grammar,,"halak / to 
 Gen.30.25,11,וְאֵ֣לְכָ֔ה,וְאֵ֣לְכָ֔ה,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.30.26,9,וְאֵלֵ֑כָה,וְאֵלֵ֑כָה,grammar,,"halak / to go, walk"
 Gen.30.26,9,וְאֵלֵ֑כָה,וְאֵלֵ֑כָה,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.31.18,13,בְּפַדַּ֣ן,בְּפַדַּ֣ן,scripture,,iibs-a-1vdejzx / Aram
+Gen.31.18,14,אֲרָ֑ם,אֲרָ֑ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.31.44,1,לְכָ֛ה,לְכָ֛ה,grammar,,"halak / to go, walk"
 Gen.31.44,1,לְכָ֛ה,לְכָ֛ה,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.32.1,8,וַיֵּ֛לֶךְ,וַיֵּ֛לֶךְ,grammar,,"halak / to go, walk"
@@ -5046,7 +5046,7 @@ Gen.33.12,2,וְנֵלֵ֑כָה,וְנֵלֵ֑כָה,grammar,,"halak / to go, w
 Gen.33.12,2,וְנֵלֵ֑כָה,וְנֵלֵ֑כָה,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.33.12,3,וְאֵלְכָ֖ה,וְאֵלְכָ֖ה,grammar,,"halak / to go, walk"
 Gen.33.12,3,וְאֵלְכָ֖ה,וְאֵלְכָ֖ה,scripture,,iibs-a-1msybw9 / he walked; he went
-Gen.33.18,9,מִפַּדַּ֣ן,מִפַּדַּ֣ן,scripture,,iibs-a-1vdejzx / Aram
+Gen.33.18,10,אֲרָ֑ם,אֲרָ֑ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.33.20,0,וַיַּצֶּב,וַיַּצֶּב,scripture,,"iibs-c-1jg2v39 / he stationed, he set, he erected"
 Gen.35.14,0,וַיַּצֵּ֨ב,וַיַּצֵּ֨ב,scripture,,"iibs-c-1jg2v39 / he stationed, he set, he erected"
 Gen.35.20,0,וַיַּצֵּ֧ב,וַיַּצֵּ֧ב,scripture,,"iibs-c-1jg2v39 / he stationed, he set, he erected"
@@ -5062,8 +5062,8 @@ Gen.35.22,15,בְנֵֽי,עָשָֽׂר,grammar,,ben / son
 Gen.35.22,16,יַעֲקֹ֖ב,,grammar,,jacob / Jacob
 Gen.35.22,17,שְׁנֵ֥ים,,grammar,,shenayim / two
 Gen.35.22,18,עָשָֽׂר,,grammar,,eser / ten
-Gen.35.26,12,בְּפַדַּ֥ן,בְּפַדַּ֥ן,scripture,,iibs-a-1vdejzx / Aram
-Gen.35.9,6,מִפַּדַּ֣ן,מִפַּדַּ֣ן,scripture,,iibs-a-1vdejzx / Aram
+Gen.35.26,13,אֲרָֽם,אֲרָֽם,scripture,iibs-a-1vdejzx / Aram,
+Gen.35.9,7,אֲרָ֑ם,אֲרָ֑ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.36.14,14,וְאֶת,יַעְלָ֖ם,grammar,,et / direct object marker
 Gen.36.14,15,יַעְלָ֖ם,וְאֶת,grammar,et / direct object marker,
 Gen.36.14,16,וְאֶת,קֹֽרַח,grammar,,et / direct object marker
@@ -5124,8 +5124,9 @@ Gen.45.24,3,וַיֵּלֵ֑כוּ,וַיֵּלֵ֑כוּ,scripture,,iibs-a-1msy
 Gen.45.28,7,אֵֽלְכָ֥ה,אֵֽלְכָ֥ה,grammar,,"halak / to go, walk"
 Gen.45.28,7,אֵֽלְכָ֥ה,אֵֽלְכָ֥ה,scripture,,iibs-a-1msybw9 / he walked; he went
 Gen.46.1,6,בְּאֵ֣רָה,בְּאֵ֣רָה,scripture,,iibs-a-10eyk0o / Beer Sheva
-Gen.46.15,6,בְּפַדַּ֣ן,בְּפַדַּ֣ן,scripture,,iibs-a-1vdejzx / Aram
+Gen.46.15,7,אֲרָ֔ם,אֲרָ֔ם,scripture,iibs-a-1vdejzx / Aram,
 Gen.46.5,2,מִבְּאֵ֣ר,מִבְּאֵ֣ר,scripture,,iibs-a-10eyk0o / Beer Sheva
+Gen.48.7,2,מִפַּדָּ֗ן,מִפַּדָּ֗ן,scripture,iibs-a-1vdejzx / Aram,
 Gen.49.10,13,עַמִּֽים,,grammar,,am / people
 Gen.49.11,4,בְּנִ֣י,אֲתֹנ֑וֹ,grammar,,ben / son
 Gen.49.11,6,כִּבֵּ֤ס,כִּבֵּ֤ס,scripture,,iibs-b-11dtd9c / he washed

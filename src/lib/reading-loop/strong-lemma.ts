@@ -138,6 +138,16 @@ export function ketivQereNumbers(
   return nums;
 }
 
+/**
+ * OSHB marks a multi-word proper name with a trailing `+` on the Strong’s number
+ * (`6307+`, `b/7418+`). The `+` is not a second number.
+ */
+export function strongNumberHasPlus(raw: string | undefined): boolean {
+  const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
+  if (!head) return false;
+  return head.split("/").some((segment) => /\d(?:\s+[a-z])?\+$/.test(segment.trim()));
+}
+
 function alsoCard(item: VocabItem): boolean {
   return /also/i.test(item.gloss) && !/anger|nostril|nose/i.test(item.gloss);
 }
@@ -194,6 +204,9 @@ export function lemmaForReading(
   }
   const n = numbers[0] ?? 0;
   if (!n) return undefined;
+  // Rule 3.2. A trailing + is a multi-word name, not one class lemma.
+  // Rule 3.3. H884 Beer-sheba keeps the card it already has.
+  if (n !== 884 && strongNumberHasPlus(tag)) return undefined;
   const scripture = pool.some((item) => item.id.startsWith("iibs-"));
   const stem = verbStem(morph);
   // H606 is Aramaic אֱנָשׁ. No Aramaic Strong’s number is a Hebrew card.

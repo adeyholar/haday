@@ -20,13 +20,13 @@ The Grammar Path reader display (rule 1.7) is not in this PR. The qere-shown, ke
 
 ## Class lemmas that changed
 
-7,252 tokens changed class lemma against `main` (8,311 CSV rows: 6,959 Grammar Path, 1,352 Scripture Path). 1,059 of those tokens changed on both paths. The full list is [strong-map-wlc-rebase-diff.csv](strong-map-wlc-rebase-diff.csv). Columns: verse, token index, surface, old surface, path, old lemma (`id / gloss`), new lemma.
+7,253 tokens changed class lemma against `main` (8,312 CSV rows: 6,959 Grammar Path, 1,353 Scripture Path). 1,059 of those tokens changed on both paths. The full list is [strong-map-wlc-rebase-diff.csv](strong-map-wlc-rebase-diff.csv). Columns: verse, token index, surface, old surface, path, old lemma (`id / gloss`), new lemma.
 
-Same-surface rows: 1,388 Grammar Path and 1,352 Scripture Path (2,740 rows, 1,704 tokens). Different-surface rows: 5,571, all Grammar Path. Those are a different word at that index, because the old line had smashed or split the token. Scripture Path has no different-surface row. 984 verses changed word count.
+Same-surface rows: 1,388 Grammar Path and 1,353 Scripture Path (2,741 rows, 1,705 tokens). Different-surface rows: 5,571, all Grammar Path. Those are a different word at that index, because the old line had smashed or split the token. Scripture Path has no different-surface row. 984 verses changed word count.
 
 The earlier handover said 1,544 same-surface tokens (351 Grammar Path and 1,194 Scripture Path). Those two counts add to 1,545 rows, and the unique-token count on that CSV was 1,544. The written total was off by one. That figure was also from before this Hebrew review. It is not the live count. The CSV in this commit is the recount above.
 
-The map is still bbh 559 keys. Scripture Path is 1,682 keys. It was 1,683 after the pin landed. H606 was removed. H3212, H3526, and H5324 stay, narrowed by stem in `lemmaForReading` rather than by extra map rows. H1120, H2699, H2691, H3878, H3881, H3816, H884, H1145, H5046, and H1099 are the same rows as PR #245.
+The map is still bbh 559 keys. Scripture Path is 1,680 keys. It was 1,683 after the pin landed. H606 was removed, then H6307 and H7418. H3212, H3526, and H5324 stay, narrowed by stem in `lemmaForReading` rather than by extra map rows. H1120, H2699, H2691, H3878, H3881, H3816, H884, H1145, H5046, and H1099 are the same rows as PR #245. H758 Aram and H5045 Negev stay.
 
 Samples:
 
@@ -56,6 +56,8 @@ Rules are by OSHB stem, not by a verse list, except the tokens named below. Coun
 
 7. **H1323 is daughter, not Zion.** `zion` and `iibs-a-10um24x` are off both paths for 1323. Daughter stays (`bat` / `iibs-a-ugthyp`). Isa 10:32 #8 צִיּוֹן (H1323, `HNp`) was Zion on both paths and is now none. A later overrides PR may put it back. H6726 is untouched.
 
+8. **A trailing `+` is not one lemma (rule 3.2).** OSHB marks a multi-word proper name with `+` on the Strong’s number (`6307+`, `b/7418+`). That token gets no class lemma on either path. The only exception is H884 Beer-sheba (rule 3.3): 34 tokens, every one `884+`, stay בְּאֵר שֶׁבַע `iibs-a-10eyk0o` on the Scripture Path and none on the Grammar Path. The continuation word repeats the number with no `+`, so the Scripture Path keys 6307 and 7418 are gone. That clears every H6307 and H7418 token on this pin. 10 first words of Paddan-aram were Aram (`iibs-a-1vdejzx`). 10 following אֲרָם tokens were the same card. Gen 48:7 #2 מִפַּדָּן is `m/6307` with no plus, and it was Aram too. 1Sam 30:27 #4–#5 were Negev (`iibs-d-1gzt8ob`). 23 tokens, all none now. The review’s 11th אֲרָם is not in this pin, so the total is 23, not 24. Grammar Path already had no card for these numbers. No other `+` token had a class lemma. H758 and H5045 are untouched.
+
 ## PR #245 locks
 
 Still in force, and still green: object marker, gentilics, compounds, Bamoth H1120, Hazerim H2699, H3816 people on the Scripture Path only (35), and the article-first Levite rule including `Rd`. An open sitting is not wiped. Levi/Levite on this pin is still 288 with the article, 58 Levi without it, and 4 gentilic without it.
@@ -64,6 +66,6 @@ Still in force, and still green: object marker, gentilics, compounds, Bamoth H11
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026. TanStack Start is 1.168.60.
 
-`node --test scripts/*.test.mjs`: 691 tests, 686 pass, 0 fail, 5 skipped. `scripts/lemma-hold.test.mjs` has one test for each fix above. `scripts/grammar-ketiv.test.mjs` was the display check and is not on this branch. `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
+`node --test scripts/*.test.mjs`: 693 tests, 688 pass, 0 fail, 5 skipped. `scripts/lemma-hold.test.mjs` has one test for each fix above, including the trailing `+` and the 34 Beer-sheba tokens. `scripts/grammar-ketiv.test.mjs` was the display check and is not on this branch. `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
 
 Branch `fix/wlc-pinned-matching`. This branch is not merged. Do not merge. Do not deploy.

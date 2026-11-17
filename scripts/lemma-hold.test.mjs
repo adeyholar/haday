@@ -8,7 +8,7 @@ import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
-const { lemmaForReading, verbStem, ketivQereNumbers } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
+const { lemmaForReading, verbStem, ketivQereNumbers, strongNumberHasPlus } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 const { parseOshbLemma } = await jiti.import(join(root, "src/lib/oshb-lemma.ts"));
 const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
@@ -331,4 +331,86 @@ test("H1323 is not Zion, and Isaiah 10:32 is unmatched", () => {
   }
   assert.equal(take("Isa", 10, 32, 8).item, undefined);
   hits.push("locked");
+});
+
+test("a trailing plus is not a class lemma, except the number stays on the map for Beer-sheba", () => {
+  const map = JSON.parse(readFileSync(join(root, "src/lib/reading-loop/strong-map.json"), "utf8"));
+  assert.equal(map.iibs["6307"], undefined);
+  assert.equal(map.iibs["7418"], undefined);
+  assert.equal(map.bbh["6307"], undefined);
+  assert.equal(map.bbh["7418"], undefined);
+  assert.ok(map.iibs["884"]);
+  assert.ok(map.iibs["758"]);
+  assert.ok(map.iibs["5045"]);
+  assert.equal(Object.keys(map.bbh).length, 559);
+  assert.equal(Object.keys(map.iibs).length, 1680);
+  let cleared = 0;
+  let otherPlus = 0;
+  for (const book of readdirSync(join(root, "data/wlc"))) {
+    for (const name of readdirSync(join(root, "data/wlc", book))) {
+      if (!name.endsWith(".json.gz")) continue;
+      const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, name))));
+      for (const verse of chapter.verses) {
+        const [bk, ch, vs] = verse.ref.split(".");
+        const words = verse.words.filter((word) => word.kq_role !== "qere");
+        words.forEach((word, index) => {
+          const lemma = String(word.lemma ?? "");
+          const hit = /(^|\/)(6307|7418)\+?(?=\/|$)/.test(lemma);
+          if (!hit && !strongNumberHasPlus(lemma)) return;
+          const at = atFor(bk, Number(ch), Number(vs), words, index);
+          const scripture = lemmaForReading(word.surface, lemma, word.morph, iibs, at);
+          const grammar = lemmaForReading(word.surface, lemma, word.morph, VOCAB, at);
+          if (hit) {
+            cleared += 1;
+            assert.equal(scripture, undefined, `${verse.ref}#${index}`);
+            assert.equal(grammar, undefined, `${verse.ref}#${index}`);
+            return;
+          }
+          const nums = contentNumbers(lemma);
+          if (strongNumberHasPlus(lemma) && !(nums.length === 1 && nums[0] === 884)) {
+            otherPlus += 1;
+            assert.equal(scripture, undefined, `${verse.ref}#${index}`);
+            assert.equal(grammar, undefined, `${verse.ref}#${index}`);
+          }
+        });
+      }
+    }
+  }
+  // 10 first words of Paddan-aram, 10 following אֲרָם, Gen 48:7 #2, and 1Sam 30:27 #4–#5.
+  assert.equal(cleared, 23);
+  assert.equal(otherPlus, 755);
+  assert.equal(take("Gen", 28, 2, 2).item, undefined);
+  assert.equal(take("Gen", 28, 2, 3).item, undefined);
+  assert.equal(take("Gen", 48, 7, 2).item, undefined);
+  assert.equal(take("1Sam", 30, 27, 4).item, undefined);
+  assert.equal(take("1Sam", 30, 27, 5).item, undefined);
+});
+
+test("H884 Beer-sheba keeps its card", () => {
+  const beer = iibs.find((item) => item.gloss === "Beer Sheva");
+  assert.ok(beer);
+  let marked = 0;
+  for (const book of readdirSync(join(root, "data/wlc"))) {
+    for (const name of readdirSync(join(root, "data/wlc", book))) {
+      if (!name.endsWith(".json.gz")) continue;
+      const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, name))));
+      for (const verse of chapter.verses) {
+        const [bk, ch, vs] = verse.ref.split(".");
+        const words = verse.words.filter((word) => word.kq_role !== "qere");
+        words.forEach((word, index) => {
+          if (!strongNumberHasPlus(word.lemma)) return;
+          const nums = contentNumbers(word.lemma);
+          if (!(nums.length === 1 && nums[0] === 884)) return;
+          marked += 1;
+          const at = atFor(bk, Number(ch), Number(vs), words, index);
+          const scripture = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
+          const grammar = lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, at);
+          assert.equal(scripture?.id, beer.id, `${verse.ref}#${index}`);
+          assert.equal(grammar, undefined, `${verse.ref}#${index}`);
+        });
+      }
+    }
+  }
+  assert.equal(marked, 34);
+  assert.equal(lemmaForReading("בְּאֵ֣ר", "H884", "HNp", iibs)?.id, beer.id);
 });
