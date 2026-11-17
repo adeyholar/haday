@@ -41,7 +41,7 @@ export function WordSheet({
 }) {
   const tagged = Boolean(pick.strong || pick.morph);
   const lemma = pick.strong
-    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"))
+    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), { book: pick.book, chapter: pick.chapter, verse: pick.verse })
     : tagged
       ? undefined
       : classLemmaForWord(pick.word);

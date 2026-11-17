@@ -117,7 +117,7 @@ function WordCard({
   onClose: () => void;
 }) {
   const qere = word.qere ?? [];
-  const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope)) : undefined;
+  const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope), parse) : undefined;
   const drillIds = lemma ? (neededIds ? passageDrillIds(lemma.id, neededIds) : [lemma.id]) : [];
   const scripture = loop?.scope === "iibs";
   return (

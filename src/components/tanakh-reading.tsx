@@ -1204,13 +1204,13 @@ function FollowCard({
       list.flatMap((row) =>
         row.words.map((surface, wi) => {
           const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
-          return { id: `${row.ref}:${wi}`, surface, strong, morph };
+          return { id: `${row.ref}:${wi}`, surface, strong, morph, at: { book: String(row.book), chapter: row.chapter, verse: row.verse } };
         }),
       ),
     [list, strongChapter],
   );
   const knownReport = useMemo(
-    () => chapterKnown(loopWords, poolFor("bbh"), cards, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool)),
+    () => chapterKnown(loopWords, poolFor("bbh"), cards, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool, word.at)),
     [loopWords, cards],
   );
   const unknownKeys = useMemo(() => new Set(knownReport.unknownWordIds), [knownReport]);

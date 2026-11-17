@@ -150,13 +150,22 @@ function WlcChapterPage() {
     () =>
       chapter
         ? chapter.verses.flatMap((verse) =>
-            verse.words.filter((word) => word.kq_role !== "qere").map((word) => ({ id: word.id, surface: word.surface, strong: word.lemma, morph: word.morph })),
+            verse.words.filter((word) => word.kq_role !== "qere").map((word) => {
+              const verseNo = Number(verse.ref.split(".")[2]);
+              return {
+                id: word.id,
+                surface: word.surface,
+                strong: word.lemma,
+                morph: word.morph,
+                at: verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined,
+              };
+            }),
           )
         : [],
     [chapter],
   );
   const report = useMemo(
-    () => chapterKnown(words, poolFor("iibs"), cards, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool)),
+    () => chapterKnown(words, poolFor("iibs"), cards, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool, word.at)),
     [words, cards],
   );
   const dimIds = useMemo(() => (dim ? new Set(report.unknownWordIds) : undefined), [dim, report.unknownWordIds]);

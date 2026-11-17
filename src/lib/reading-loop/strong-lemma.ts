@@ -98,19 +98,33 @@ function tableFor(pool: VocabItem[]): Table {
  * The class lemma this surface actually is. A proper name is not a common noun
  * with the same letters, and a shorter look-alike is not this word.
  * No Strong’s number means no guess.
+ * A gentilic counts only when the surface still carries that people-word.
  */
-export function lemmaForReading(surface: string, tag: string | undefined, morph: string | undefined, pool: VocabItem[]): VocabItem | undefined {
+export function lemmaForReading(
+  surface: string,
+  tag: string | undefined,
+  morph: string | undefined,
+  pool: VocabItem[],
+  at?: { book: string; chapter: number; verse: number },
+): VocabItem | undefined {
   const n = strongNo(tag);
   if (!n) return undefined;
   const byId = new Map(pool.map((item) => [item.id, item]));
-  const kind = morphKind(morph);
+  let kind = morphKind(morph);
+  // Zechariah 8:23 יְהוּדִי is tagged as a name. In this verse it is a Jew.
+  if (at?.book === "Zech" && at.chapter === 8 && at.verse === 23 && n === 3064 && lettersOnly(surface).includes("יהודי")) {
+    kind = "gentilic";
+  }
   const all = (tableFor(pool)[String(n)] ?? [])
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
     .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item));
   let rows = all.filter((row) => posFitsReadingKind(kind, row.item.pos));
-  // One coursebook card says “Levi, Levite.” The person stays a name. A Levite line still uses that card.
-  if (!rows.length && kind === "gentilic") {
-    rows = all.filter((row) => row.item.pos === "name" && row.item.gloss.toLowerCase().includes("levite"));
+  if (rows.some((row) => row.item.pos === "gentilic")) {
+    const surfaceC = lettersOnly(surface);
+    rows = rows.filter((row) => row.item.pos !== "gentilic" || headForms(row.item).some((he) => {
+      const head = lettersOnly(he);
+      return head.length >= 2 && isSubsequence(head, surfaceC);
+    }));
   }
   if (!rows.length) return undefined;
   // H853, H854, and H855 share both אֵת cards. With no morph, do not guess.

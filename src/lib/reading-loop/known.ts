@@ -2,7 +2,14 @@ import { foldFinals, lettersOnly } from "@/lib/hebrew";
 import { hydrateCard, isMastered, type CardState } from "@/lib/srs";
 import type { VocabItem } from "@/lib/vocab";
 
-export type SurfaceWord = { id: string; surface: string; strong?: string; morph?: string };
+export type SurfaceWord = {
+  id: string;
+  surface: string;
+  strong?: string;
+  morph?: string;
+  /** Verse of this surface, when a people-word is tagged as a name. */
+  at?: { book: string; chapter: number; verse: number };
+};
 
 export type KnownReport = {
   /** Unique class lemmas that actually appear in this passage. */
