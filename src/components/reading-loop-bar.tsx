@@ -10,6 +10,7 @@ export function ReadingLoopBar({
   dim,
   onDim,
   refLabel,
+  place,
   back,
 }: {
   scope: StudyScope;
@@ -18,22 +19,26 @@ export function ReadingLoopBar({
   dim: boolean;
   onDim: (on: boolean) => void;
   refLabel: string;
+  /** Verses on the page, such as Genesis 1:1–3. Omitted means this chapter. */
+  place?: string;
   back: string;
 }) {
+  const where = place?.trim() || "this chapter";
+  const packLabel = place?.trim() || refLabel;
   const goalMet = session.today >= session.goal;
   return (
     <section className="mb-3 rounded-[var(--radius-lg)] bg-card px-3 py-3 shadow-[var(--shadow-border)]" aria-label="Reading practice">
       <p className="text-sm text-ink">
         {report.found ? (
           <>
-            You know <span className="font-semibold">{report.pct}%</span> of the class lemmas in this chapter
+            You know <span className="font-semibold">{report.pct}%</span> of the class lemmas in {where}
             <span className="text-muted">
               {" "}
               · {report.known} of {report.found}
             </span>
           </>
         ) : (
-          <span className="text-muted">No class lemmas from this path in the chapter yet.</span>
+          <span className="text-muted">No class lemmas from this path in {where} yet.</span>
         )}
       </p>
       <p className="mt-1 text-sm text-muted">
@@ -58,7 +63,7 @@ export function ReadingLoopBar({
                 savePassagePack({
                   scope,
                   ref: refLabel,
-                  label: refLabel,
+                  label: packLabel,
                   ids: report.unknown.map((item) => item.id),
                   back,
                 })
@@ -75,7 +80,7 @@ export function ReadingLoopBar({
                 savePassagePack({
                   scope,
                   ref: refLabel,
-                  label: refLabel,
+                  label: packLabel,
                   ids: report.unknown.map((item) => item.id),
                   back,
                 })

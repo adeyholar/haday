@@ -393,7 +393,7 @@ export function vocabDistance(
 
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
   return remapPassageDrillRuns(
-    takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,16}$/.test(key)),
+    takeDrillRuns(raw, (key) => /^(?:\d+|final):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,24}$/.test(key)),
   );
 }
 

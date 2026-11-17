@@ -102,18 +102,19 @@ export function masteredIds(pool: VocabItem[], cards: Record<string, CardState |
   return ids;
 }
 
-/** Chapter-level known share. Denominator is class lemmas in the text, not every biblical word. */
+/** Chapter or verse-span known share. Denominator is class lemmas in the text, not every biblical word. */
 export function chapterKnown(
   words: SurfaceWord[],
   pool: VocabItem[],
   cards: Record<string, CardState | undefined>,
   now = Date.now(),
+  match: (surface: string, pool: VocabItem[]) => VocabItem | undefined = matchInPool,
 ): KnownReport {
   const held = masteredIds(pool, cards, now);
   const seen = new Map<string, VocabItem>();
   const unknownWordIds: string[] = [];
   for (const word of words) {
-    const item = matchInPool(word.surface, pool);
+    const item = match(word.surface, pool);
     if (!item) continue;
     if (!seen.has(item.id)) seen.set(item.id, item);
     if (!held.has(item.id)) unknownWordIds.push(word.id);

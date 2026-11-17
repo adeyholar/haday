@@ -11,6 +11,7 @@ import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { chapterKnown } from "@/lib/reading-loop/known";
 import { poolFor } from "@/lib/reading-loop/pool";
+import { lemmaForSurface } from "@/lib/tanakh-pool";
 import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
 import { useStudy } from "@/lib/store";
 import { Panel } from "@/components/panel";
@@ -51,6 +52,9 @@ import {
   fromSearch,
   prevPlayLoc,
   resolvePassage,
+  readingSpanHref,
+  readingSpanLabel,
+  readingSpanRef,
   sameLoc,
   takeAutoplay,
   verseWindow,
@@ -413,7 +417,8 @@ export function TanakhReading({
         }
         const rows = versesFromDump(dump, chapter);
         chapterRowsRef.current = rows;
-        const shown = sliceVerses(rows, vw.from, vw.to);
+        const span = verseWindow(passageRef.current);
+        const shown = sliceVerses(rows, span.from, span.to);
         versesRef.current = shown;
         setVerses(shown);
         if (!shown.length) setLoadErr("This passage is empty.");
@@ -424,7 +429,7 @@ export function TanakhReading({
           audioMetaRef.current = guessed;
           setAudioMeta(guessed);
         }
-        const start = verseStartFrom(audioMetaRef.current, shown[0]?.verse ?? vw.from);
+        const start = verseStartFrom(audioMetaRef.current, shown[0]?.verse ?? span.from);
         if (node) {
           node.currentTime = start;
           syncClock(node);
@@ -444,6 +449,27 @@ export function TanakhReading({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book, chapter]);
+
+  useEffect(() => {
+    const rows = chapterRowsRef.current;
+    const head = rows[0];
+    if (!head || String(head.book) !== book || head.chapter !== chapter) return;
+    const shown = sliceVerses(rows, vw.from, vw.to);
+    setVerses(shown);
+    setI(0);
+    iRef.current = 0;
+    setWordI(0);
+    wordRef.current = 0;
+    setClusterI(0);
+    clusterRef.current = 0;
+    const node = elAudio();
+    const start = verseStartFrom(audioMetaRef.current, shown[0]?.verse ?? vw.from);
+    if (node && Number.isFinite(start)) {
+      node.currentTime = start;
+      syncClock(node);
+      setTnow(node.currentTime);
+    }
+  }, [book, chapter, vw.from, vw.to]);
 
   useEffect(() => {
     const el = elAudio();
@@ -1178,7 +1204,10 @@ function FollowCard({
     () => list.flatMap((row) => row.words.map((surface, wi) => ({ id: `${row.ref}:${wi}`, surface }))),
     [list],
   );
-  const knownReport = useMemo(() => chapterKnown(loopWords, poolFor("bbh"), cards), [loopWords, cards]);
+  const knownReport = useMemo(
+    () => chapterKnown(loopWords, poolFor("bbh"), cards, Date.now(), (surface) => lemmaForSurface(surface)),
+    [loopWords, cards],
+  );
   const unknownKeys = useMemo(() => new Set(knownReport.unknownWordIds), [knownReport]);
   useEffect(() => {
     setDim(readDimUnknown());
@@ -1192,10 +1221,10 @@ function FollowCard({
         book: String(row.book),
         chapter: row.chapter,
         verse: row.verse,
-        href: `/listen/read/${row.book}/${row.chapter}`,
+        href: readingSpanHref(String(row.book), row.chapter, fromV, toV),
       }),
     );
-  }, [i, verse.book, verse.chapter, verse.verse]);
+  }, [i, verse.book, verse.chapter, verse.verse, fromV, toV]);
   useEffect(() => {
     setPick(null);
   }, [verse.ref]);
@@ -1297,7 +1326,9 @@ function FollowCard({
   const span = Math.max(0, hi - lo);
   const rel = Math.max(0, Math.min(span, now - lo));
   const bookId = verse.book === "Gen" ? "Gen" : verse.book;
-  const loopBack = `/listen/read/${bookId}/${verse.chapter}`;
+  const spanLabel = readingSpanLabel(bookId, verse.chapter, fromV, toV);
+  const spanRef = readingSpanRef(bookId, verse.chapter, fromV, toV);
+  const loopBack = readingSpanHref(bookId, verse.chapter, fromV, toV);
   const focusWord = pick?.word ?? verse.words[wordI] ?? "";
   const enKeys = englishKeysForWord(focusWord);
   return (
@@ -1424,7 +1455,8 @@ function FollowCard({
               setDim(on);
               writeDimUnknown(on);
             }}
-            refLabel={`${bookId}.${verse.chapter}`}
+            refLabel={spanRef}
+            place={spanLabel}
             back={loopBack}
           />
         )}
