@@ -21,8 +21,9 @@ On the Scripture Path the verse’s own word now stays:
 | כְּנַעֲנִי | H3669 | gentilic, “Canaanite”. This number is back on the map |
 | פְּלִשְׁתִּים | H6430 | gentilic, פְּלִשְׁתִּי “Philistine” |
 | יְהוּדִי | H3064 | gentilic, “Judean, Jew” |
-| הַלֵּוִי | H3881 | gentilic, “Levite”. Not the person |
-| לֵוִי | H3878 | name, “Levi, Levite”. The person stays a name |
+| הַלֵּוִי | H3881 | gentilic, “Levite”. A name tag on this number stays Levi the person |
+| הַלֵּוִי with the article and an Ng morph | H3878 | gentilic, “Levite” |
+| לֵוִי, and הַלֵּוִי with a name morph | H3878 | name, “Levi, Levite”. The person stays a name |
 | יְמִינִי | H1145 | gentilic, “Benjamite” |
 | אִישׁ inside אִישׁ יְמִינִי | H1145 | no class lemma. Not “man”, and not “Benjamite” |
 | אִישׁ | H376 | still “man” |
@@ -34,7 +35,7 @@ On the Scripture Path the verse’s own word now stays:
 
 H853 is never “with” and never אַתְּ. Prefixed numbers (`b/7225`, `c/1961`, `d/5892 b`) still give the content word. הִגִּיד stays H5046. בְּרֵאשִׁית stays H7225, not רֹאשׁ. Names such as Jonah, Amittai, Tarshish, and Jaffa stay full strength.
 
-A compound or a fused name is not the ordinary word inside it. בַּת־שֶׁבַע is not seven. קִרְיַת אַרְבַּע is not four. אִישׁ־בֹּשֶׁת is not man. רַבְשָׁקֵה is not רַב. The full name stays when the class headword is that whole name: בְּאֵר שֶׁבַע stays Beer Sheva, and the “seven” inside it does not. On the Grammar Path, H3816 is לְאֹם “people”, not בַּל. Stem pairs such as הִגִּיד and the lexicon root נָגַד stay. The class word is the stem.
+A compound or a fused name is not the ordinary word inside it. בַּת־שֶׁבַע is not seven. קִרְיַת אַרְבַּע is not four. אִישׁ־בֹּשֶׁת is not man. רַבְשָׁקֵה is not רַב. The full name stays when the class headword is that whole name: בְּאֵר שֶׁבַע stays Beer Sheva, and the “seven” inside it does not. The Grammar Path has no H3816 lemma. On the Scripture Path, H3816 is לְאֹם “people,” and בַּל stays unmatched. Stem pairs such as הִגִּיד and the lexicon root נָגַד stay. The class word is the stem.
 
 The people-cards Levite, Benjamite, Assyrian, Chaldean, Mede, and Persian are reading-pool cards. They are not lesson rows. The coursebook counts stay A 481, B/C/D 300, E 280.
 
@@ -46,12 +47,12 @@ The name יוֹנָה does not say “the word means dove,” and a related form
 
 If אֵת has no morph, the class does not guess between the object marker (H853), “with” (H854), and the hoe (H855). With the morph, the marker and “with” stay apart. Genesis 1:27 אֹתוֹ is the object marker. Genesis 39:2 אֶת־יוֹסֵף is “with.”
 
-H1120 בָּמוֹת is still filed under Baal. The lexicon calls it Bamoth, not a Baal-compound, so the rule left it. Six tokens. The review comment lists every other Strong’s number that lost its class lemma, with each token.
+H1120 Bamoth / Bamoth-baal has no class lemma. The lexicon cites the fuller form בָּמוֹת בַּעַל, so neither בָּמוֹת nor בַּעַל is Baal. Six tokens: Joshua 13:17 (twice), Numbers 21:19, Numbers 21:20, Numbers 22:41 (twice). H2699 Hazerim, Deuteronomy 2:23 בַּחֲצֵרִים, has no class lemma. It is the place, not “villages.” H2691 חָצֵר still has “enclosure, courtyard” and “villages.” H1099 בְּלִימָה is a common noun, “nothing whatever,” not a compound name. It has no class lemma.
 
 ## Tests
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026. TanStack Start is 1.168.60.
 
-`node --test scripts/*.test.mjs` passed 674, failed 0, skipped 5 (679 tests). Local grok files that are not part of this branch were set aside for that run. They are not in the commit.
+`node --test scripts/*.test.mjs` passed 677, failed 0, skipped 5 (682 tests). Local grok files that are not part of this branch were set aside for that run. They are not in the commit.
 
-The GitHub Actions check is the next gate. Do not merge. Do not deploy.
+Branch `fix/passage-strong-lemmas`. This branch is not merged. Do not merge. Do not deploy.

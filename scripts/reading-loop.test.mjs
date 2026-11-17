@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -347,6 +348,71 @@ test("a compound name is not one of its words", () => {
   assert.notEqual(lemmaForReading("בַּל", "H3816", "HTn", VOCAB)?.id, "bal");
   assert.equal(lemmaForReading("לְאֹם", "H3816", "HNcmsa", iibs)?.id, people.id);
   assert.equal(lemmaForReading("לְאֹם", "H3816", "HNcmsa", VOCAB)?.id, undefined);
+});
+
+test("Bamoth and Hazerim are the places, not the word inside the citation", () => {
+  const iibs = iibsPathItems();
+  const baal = iibs.find((item) => item.gloss === "Baal");
+  const courtyard = iibs.find((item) => item.gloss === "enclosure, courtyard");
+  const villages = iibs.find((item) => item.gloss === "villages");
+  assert.ok(baal && courtyard && villages);
+  const bamoth = [
+    ["וּבָמ֣וֹת", "H1120", "HC/Np"],
+    ["בַּ֔עַל", "H1120", "HNp"],
+    ["בָּמֽוֹת", "H1120", "HNp"],
+    ["וּמִבָּמ֗וֹת", "H1120", "HC/R/Np"],
+    ["בָּמ֣וֹת", "H1120", "HNp"],
+    ["בָּ֑עַל", "H1120", "HNp"],
+  ];
+  for (const [surface, tag, morph] of bamoth) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs), undefined);
+    assert.equal(lemmaForReading(surface, tag, morph, VOCAB), undefined);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, baal.id);
+  }
+  assert.equal(lemmaForReading("בַּחֲצֵרִ֖ים", "H2699", "HR/Ncmpa", iibs), undefined);
+  assert.equal(lemmaForReading("בַּחֲצֵרִ֖ים", "H2699", "HR/Ncmpa", VOCAB), undefined);
+  assert.equal(lemmaForReading("חֲצֵרִ֖ים", "H2691", "HNcbpa", iibs)?.id, villages.id);
+  assert.equal(lemmaForReading("וְחַצְרֵיהֶם֙", "H2691", "HC/Ncbpc/Sp3mp", iibs)?.id, courtyard.id);
+});
+
+test("the article makes הַלֵּוִי a Levite, and Levi the person stays a name", () => {
+  const iibs = iibsPathItems();
+  const levi = iibs.find((item) => item.hebrew === "לֵוִי" && item.pos === "name");
+  const levite = iibs.find((item) => item.gloss === "Levite" && item.pos === "gentilic");
+  assert.equal(levite?.id, "iibs-a-mk4j9d");
+  assert.equal(levi?.id, "iibs-a-zwt083");
+  const gentilic = [
+    ["הַלֵּוִֽי", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֖י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַלֵּוִ֔י", "H3878", "HTd/Ngmsa"],
+    ["הַ֭לֵּוִי", "H3878", "HTd/Ngmsa"],
+  ];
+  for (const [surface, tag, morph] of gentilic) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs)?.id, levite.id);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, levi.id);
+  }
+  assert.equal(lemmaForReading("הַלֵּוִ֔י", "H3878", "HTd/Np", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֔י", "H3878", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֑י", "H3881", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לְלֵוִ֛י", "H3881", "HR/Np", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֗י", "H3881", "HNp", iibs)?.id, levi.id);
+  assert.equal(lemmaForReading("לֵוִ֖י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("וְלֵוָיֵ֜א", "H3879", "AC/Ngmpd/Td", iibs), undefined);
+});
+
+test("people stays a Scripture Path word without a Strong’s number in the builder", () => {
+  const iibs = iibsPathItems();
+  const people = iibs.find((item) => item.hebrew === "לְאֹם");
+  const src = readFileSync(join(root, "scripts/build-strong-map.mjs"), "utf8");
+  assert.equal(src.includes("n === 3816"), false);
+  assert.equal(people?.id, "iibs-d-1mpxdr6");
+  assert.equal(lemmaForReading("בַּל", "H3816", "HTn", iibs), undefined);
+  assert.equal(lemmaForReading("בַּל", "H3816", "HTn", VOCAB), undefined);
+  assert.equal(lemmaForReading("וּלְאֻמִּ֖ים", "H3816", "HC/Ncmpa", iibs)?.id, people.id);
+  assert.equal(lemmaForReading("אֻמִּֽים", "H3816", "HNcmpa", iibs)?.id, people.id);
+  assert.equal(lemmaForReading("וּלְאֻמִּ֖ים", "H3816", "HC/Ncmpa", VOCAB), undefined);
 });
 
 test("a Mede is not the place, and Zechariah 8:23 is a Jew", () => {
