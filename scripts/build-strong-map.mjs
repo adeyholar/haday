@@ -1,4 +1,13 @@
-/** Build the Strong’s → class-lemma map used by passage drills. Run: node scripts/build-strong-map.mjs */
+/**
+ * Build the Strong’s → class-lemma map used by passage drills.
+ * Run: node scripts/build-strong-map.mjs
+ *
+ * Provenance: the verse tags are the Open Scriptures Hebrew Bible morphology
+ * (OSHB, CC BY 4.0). The lexicon headwords are the Open Scriptures Strong’s
+ * Hebrew lexicon (CC BY-SA). The class lists are the Grammar Path vocabulary
+ * and the Scripture Path lesson lists. This file only joins those three.
+ * It does not copy their glosses into the map.
+ */
 import { writeFileSync, readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,39 +18,22 @@ const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { foldFinals } = await jiti.import(join(root, "src/lib/hebrew.ts"));
+const { strongNo, morphKind, posFitsReadingKind } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 
 function pointed(s) {
   return foldFinals(String(s ?? "").normalize("NFC").replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6]/g, ""));
 }
 
-function strongNo(raw) {
-  const m = String(raw || "").split("|")[0].match(/(\d+)/);
-  if (!m) return 0;
-  const n = Number(m[1]);
-  return n >= 1 && n <= 8674 ? n : 0;
-}
-
-function morphKind(morph) {
-  const parts = String(morph || "").split("/").filter(Boolean);
-  let core = parts[parts.length - 1] ?? "";
-  if ((core.startsWith("H") || core.startsWith("A")) && core.length > 1) core = core.slice(1);
-  if (!core) return "";
-  if (core.includes("V")) return "verb";
-  if (/N[pg]/.test(core)) return "name";
-  if (core.startsWith("N") || core.startsWith("A")) return "noun";
-  if (core.startsWith("P")) return "pron";
-  if (core.startsWith("R")) return "prep";
-  return "particle";
-}
-
-function kindOk(kind, pos) {
-  if (!kind) return true;
-  if (kind === "verb") return pos === "verb";
-  if (kind === "name") return pos === "name";
-  if (kind === "noun") return pos === "noun" || pos === "adj";
-  if (kind === "pron") return pos === "pron";
-  if (kind === "prep") return pos === "prep" || pos === "particle";
-  return pos === "particle" || pos === "prep" || pos === "pron";
+function headwords(item) {
+  const raw = [item.hebrew, ...(item.hebrewAlts ?? [])];
+  const out = [];
+  for (const he of raw) {
+    for (const part of String(he).split(" / ")) {
+      const piece = part.trim();
+      if (piece) out.push(piece);
+    }
+  }
+  return out;
 }
 
 const lex = new Map();
@@ -76,7 +68,7 @@ for (const fn of readdirSync(strongDir).filter((name) => name.endsWith(".json"))
 function build(pool) {
   const byPoint = new Map();
   for (const item of pool) {
-    for (const he of [item.hebrew, ...(item.hebrewAlts ?? [])]) {
+    for (const he of headwords(item)) {
       const key = pointed(he);
       if ([...key].length < 2) continue;
       const list = byPoint.get(key) ?? [];
@@ -102,7 +94,7 @@ function build(pool) {
   }
   for (const occ of occurrences) {
     for (const item of byPoint.get(occ.surface) ?? []) {
-      if (!kindOk(occ.kind, item.pos)) continue;
+      if (!posFitsReadingKind(occ.kind, item.pos)) continue;
       add(occ.n, item.id, 0);
     }
   }

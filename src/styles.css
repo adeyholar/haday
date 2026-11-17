@@ -524,19 +524,22 @@ html {
 .manuscript-sheet .ms-spoken {
   box-shadow: inset 0 -2px 0 currentColor;
 }
-.ms-unknown,
-button.ms-unknown,
-.he-verse > button.ms-unknown,
-.ms-word.ms-unknown {
-  color: color-mix(in srgb, currentColor 42%, transparent);
+.he-verse > button.ms-unknown {
+  color: #6a5648;
+}
+html[data-lamp="dim"] .he-verse > button.ms-unknown {
+  color: #5c4a3c;
+}
+html[data-lamp="dark"] .he-verse > button.ms-unknown {
+  color: #b5a48c;
 }
 .manuscript-light .ms-word.ms-unknown,
 .manuscript-light .ms-word.ms-unknown .ms-word-face {
-  color: #a89078;
+  color: #705848;
 }
 .manuscript-dim .ms-word.ms-unknown,
 .manuscript-dim .ms-word.ms-unknown .ms-word-face {
-  color: #8a7764;
+  color: #a89880;
 }
 .manuscript-sheet .ms-spoken-verse {
   background: color-mix(in oklab, currentColor 6%, transparent);

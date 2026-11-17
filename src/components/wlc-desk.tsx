@@ -61,7 +61,6 @@ function WordFace({
       className={`ms-word inline-flex min-h-11 items-center px-0.5 py-1 ${picked ? "ms-picked" : ""} ${
         spoken ? "ms-spoken" : ""
       } ${dim && !picked ? "ms-unknown" : ""} ${joinsNext(word) ? "ms-joins" : ""}`}
-      style={dim && !picked ? { color: "color-mix(in srgb, currentColor 42%, transparent)" } : undefined}
     >
       <span className="he-taam ms-word-face" lang="he">
         {clusters.map((cluster, index) => (

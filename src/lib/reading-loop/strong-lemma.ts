@@ -8,46 +8,77 @@ import map from "@/lib/reading-loop/strong-map.json";
 type Row = [string, 0 | 1];
 type Table = Record<string, Row[]>;
 
-const BBH = map.bbh as unknown as Table;
-const IIBS = map.iibs as unknown as Table;
+const grammarTable = map.bbh as unknown as Table;
+const scriptureTable = map.iibs as unknown as Table;
 
 function pointed(s: string): string {
   return foldFinals(String(s ?? "").normalize("NFC").replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6]/g, ""));
 }
 
-/** Strong’s number from a WLC lemma (`c/1961`, `5892 b`) or a tag (`H5046|HVhp3ms`). */
+/**
+ * Strong’s number from a lemma field (`H5046`, `c/1961`, `5921 a`).
+ * A morph code (`HR/Sp1cp`, `HVhp3ms`) is not a number. The person digit is not H1.
+ */
 export function strongNo(raw: string | undefined): number {
-  const head = String(raw ?? "").split("|")[0] ?? "";
-  const match = head.match(/(\d+)/);
+  const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
+  if (!head) return 0;
+  const match = head.match(/^(?:[A-Za-z]+\/)*H?(\d+)(?:\s+[a-z])?$/);
   if (!match) return 0;
   const n = Number(match[1]);
   return n >= 1 && n <= 8674 ? n : 0;
 }
 
-/** Open-scriptures morph, ignoring a leading Hebrew/Aramaic mark. A pronominal suffix is not the word. */
-export function morphKind(morph: string | undefined): "" | "verb" | "name" | "noun" | "pron" | "prep" | "particle" {
+/** A tag is either `strong|morph` or a morph with no Strong’s number. */
+export function splitReadingTag(tag: string | undefined): { strong: string; morph: string } {
+  const raw = String(tag ?? "");
+  const pipe = raw.indexOf("|");
+  const head = (pipe >= 0 ? raw.slice(0, pipe) : raw).trim();
+  const tail = pipe >= 0 ? raw.slice(pipe + 1).trim() : "";
+  if (strongNo(head)) return { strong: head, morph: tail };
+  return { strong: "", morph: tail || head };
+}
+
+/** Open-scriptures morph. A pronominal suffix and the Aramaic article are not the word. */
+export function morphKind(morph: string | undefined): "" | "verb" | "name" | "noun" | "pron" | "prep" | "particle" | "gentilic" {
   const parts = String(morph ?? "").split("/").filter(Boolean);
   if (!parts.length) return "";
-  const cores = parts.map((part) => ((part.startsWith("H") || part.startsWith("A")) && part.length > 1 ? part.slice(1) : part));
-  // Rightmost piece that is not a pronominal suffix (S…) or the Aramaic article (Td).
+  const cores = parts.map((part) => {
+    const mark = part[1];
+    if ((part.startsWith("H") || part.startsWith("A")) && mark && mark !== mark.toLowerCase()) return part.slice(1);
+    return part;
+  });
   const core = [...cores].reverse().find((part) => part && !part.startsWith("S") && part !== "Td") ?? cores[0] ?? "";
   if (!core) return "";
   if (core.includes("V")) return "verb";
-  if (/N[pg]/.test(core)) return "name";
+  if (/Np/.test(core)) return "name";
+  if (/Ng/.test(core)) return "gentilic";
   if (core.startsWith("N") || core.startsWith("A")) return "noun";
   if (core.startsWith("P")) return "pron";
   if (core.startsWith("R")) return "prep";
   return "particle";
 }
 
-function kindOk(kind: string, pos: Pos): boolean {
+export function posFitsReadingKind(kind: string, pos: Pos): boolean {
   if (!kind) return true;
   if (kind === "verb") return pos === "verb";
   if (kind === "name") return pos === "name";
-  if (kind === "noun") return pos === "noun" || pos === "adj";
+  if (kind === "noun") return pos === "noun" || pos === "adj" || pos === "gentilic";
+  if (kind === "gentilic") return pos === "gentilic" || pos === "noun" || pos === "adj";
   if (kind === "pron") return pos === "pron";
-  if (kind === "prep") return pos === "prep" || pos === "particle";
-  return pos === "particle" || pos === "prep" || pos === "pron";
+  if (kind === "prep") return pos === "prep";
+  return pos === "particle" || pos === "pron";
+}
+
+function headForms(item: VocabItem): string[] {
+  const raw = [item.hebrew, ...(item.hebrewAlts ?? [])];
+  const out: string[] = [];
+  for (const he of raw) {
+    for (const part of String(he).split(" / ")) {
+      const piece = part.trim();
+      if (piece) out.push(piece);
+    }
+  }
+  return out;
 }
 
 function isSubsequence(short: string, long: string): boolean {
@@ -60,7 +91,7 @@ function isSubsequence(short: string, long: string): boolean {
 }
 
 function tableFor(pool: VocabItem[]): Table {
-  return pool.some((item) => item.id.startsWith("iibs-")) ? IIBS : BBH;
+  return pool.some((item) => item.id.startsWith("iibs-")) ? scriptureTable : grammarTable;
 }
 
 /**
@@ -75,26 +106,27 @@ export function lemmaForReading(surface: string, tag: string | undefined, morph:
   const kind = morphKind(morph);
   const rows = (tableFor(pool)[String(n)] ?? [])
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
-    .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item) && kindOk(kind, row.item!.pos));
+    .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item) && posFitsReadingKind(kind, row.item!.pos));
   if (!rows.length) return undefined;
   if (rows.length === 1) return rows[0].item;
   const surf = pointed(surface);
-  const exact = rows.filter((row) => {
-    const forms = [row.item.hebrew, ...(row.item.hebrewAlts ?? [])];
-    return forms.some((he) => pointed(he) === surf);
-  });
+  const exact = rows.filter((row) => headForms(row.item).some((he) => pointed(he) === surf));
   if (exact.length === 1) return exact[0].item;
   const lexHits = rows.filter((row) => row.lex);
   if (lexHits.length === 1) return lexHits[0].item;
   const fit = rows.filter((row) => formFitsLemma(surface, row.item));
   if (!fit.length) {
     const surfaceC = lettersOnly(surface);
-    const sub = rows.filter((row) => {
-      const head = lettersOnly(row.item.hebrew);
+    const sub = rows.filter((row) => headForms(row.item).some((he) => {
+      const head = lettersOnly(he);
       return head.length >= 2 && isSubsequence(head, surfaceC);
-    });
+    }));
     if (!sub.length) return undefined;
-    sub.sort((a, b) => lettersOnly(b.item.hebrew).length - lettersOnly(a.item.hebrew).length || b.item.freq - a.item.freq);
+    sub.sort((a, b) => {
+      const alen = Math.max(...headForms(a.item).map((he) => lettersOnly(he).length));
+      const blen = Math.max(...headForms(b.item).map((he) => lettersOnly(he).length));
+      return blen - alen || b.item.freq - a.item.freq;
+    });
     return sub[0]?.item;
   }
   const ranked = fit.slice().sort((a, b) => b.item.freq - a.item.freq || Number(b.lex) - Number(a.lex));

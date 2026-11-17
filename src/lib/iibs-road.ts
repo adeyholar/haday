@@ -15,6 +15,10 @@ for (const item of bbhVocab()) {
 
 function posOf(kind: string): Pos {
   const k = kind.toLowerCase();
+  if (k.includes("gentilic")) return "gentilic";
+  if (k.includes("interrogative")) return "particle";
+  if (k.includes("object marker") || k.includes("direct object")) return "particle";
+  if (k.includes("adverb") || k.includes("particle") || k.includes("conjunction") || k.includes("interjection")) return "particle";
   if (k.includes("verb")) return "verb";
   if (k.includes("adj")) return "adj";
   if (k.includes("prep")) return "prep";

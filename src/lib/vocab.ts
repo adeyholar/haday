@@ -2,7 +2,7 @@ import { CONSONANTS } from "./alphabet";
 import { foldFinals, lettersOnly } from "./hebrew";
 import { isTerm2Week, itemsForTerm2Week, term2StudyMeta } from "./vocab-s2";
 
-export type Pos = "noun" | "verb" | "adj" | "prep" | "particle" | "name" | "pron";
+export type Pos = "noun" | "verb" | "adj" | "prep" | "particle" | "name" | "pron" | "gentilic";
 
 export type VocabItem = {
   id: string;
@@ -907,4 +907,5 @@ export const POS_LABEL: Record<Pos, string> = {
   particle: "Particle",
   name: "Name",
   pron: "Pronoun",
+  gentilic: "Gentilic",
 };

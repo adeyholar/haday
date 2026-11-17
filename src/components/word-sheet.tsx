@@ -39,7 +39,12 @@ export function WordSheet({
   place: WordBalloonPlace;
   onClose: () => void;
 }) {
-  const lemma = pick.strong ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh")) : classLemmaForWord(pick.word);
+  const tagged = Boolean(pick.strong || pick.morph);
+  const lemma = pick.strong
+    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"))
+    : tagged
+      ? undefined
+      : classLemmaForWord(pick.word);
   const [tags, setTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [askOpen, setAskOpen] = useState(false);

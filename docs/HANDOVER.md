@@ -1,34 +1,36 @@
 # Handover
 
-This branch is not merged. Do not merge it. Do not deploy. Do not apply a 2025 Level B form.
+This branch is not merged. Do not merge it. Do not deploy.
 
 ## What this branch repairs
 
-Three Tutor-confirmed headwords were repaired to the 2018 coursebook page. Gloss, plural, and kind were not rewritten. No row was inserted, deleted, or reordered. The old study id was frozen before the string edit, so a saved card and a paused drill follow the new id.
+A passage word is drilled only when the verse’s own Strong’s number names a class lemma. A morph code is not a number. `HR/Sp1cp` does not become H1, so Jonah 1:6, 1:7, and 1:8 לָנוּ are not אָב “father.” A tag with no Strong’s number is not guessed.
 
-| Level | Place | Old id | New id | Now |
-| --- | --- | --- | --- | --- |
-| A | 9.02 | iibs-a-txnp37 | iibs-a-1l0rl94 | גַּג |
-| C | 9.05 | iibs-c-1xgsae3 | iibs-c-1ndz7hc | נִבָּא |
-| D | 4.01 | iibs-d-po0ue2 | iibs-d-b3oitr | חֹרֶב |
+On the Scripture Path the verse’s own word now stays:
 
-The place slots iibs-a-09-02, iibs-c-09-05, and iibs-d-04-01 chain to those new ids. Level D also still chains the older gloss ids iibs-d-z6rwq7 and iibs-d-81iy5q. The proper name stays in the note only. The Level D vocabulary table is printed page 42 and is stored in the check as page 50. That page number was not changed.
-
-The four repairs already on main were left as they are. Their freeze ids were not regenerated: A 8.02 (iibs-a-1et6eo4), A 14.20 (iibs-a-rykh6t), B 18.08 (iibs-b-x412qb), B 26.05 (iibs-b-a1u5id).
-
-## Still different
-
-| Level | Lesson | Why it was left |
+| Word | Strong | Class word |
 | --- | --- | --- |
-| A | 3.11 | Qamats on the page, patah on the site. Id iibs-a-1f0r1bt. Page 74. |
-| C | 9.02 and 9.03 | Word-set. The page has טֻמְאָה then גָּבַהּ. The site keeps גָּבַהּ then טָהֵר. Not renumbered. |
+| אֱלֹהִים | H430 | noun, “God; gods” |
+| מָה | H4100 | particle, “what” |
+| אוּלַי | H194 | particle, “perhaps” |
+| הַגְּדוֹלָה | H1419 | גָּדוֹל. The slash form גָּדוֹל / גָּדֹל is two headwords |
+| אֵת, וְאֵת | H853 | “direct object marker, untranslated” |
+| אִתּוֹ | H854 | “with”, a different word |
+| עִבְרִי | H5680 | gentilic, not a name |
 
-Level B was not touched.
+H853 is never “with” and never אַתְּ. Prefixed numbers (`b/7225`, `c/1961`, `d/5892 b`) still give the content word. הִגִּיד stays H5046. בְּרֵאשִׁית stays H7225, not רֹאשׁ. Names such as Jonah, Amittai, Tarshish, and Jaffa stay full strength.
+
+Dim unknowns is pale and still readable. The manuscript keeps its own ink: `#705848` on `#f6edd8` (5.67:1) and `#a89880` on `#1b1612` (6.38:1). Grammar Listen uses `#6a5648` on the card (6.46:1), `#5c4a3c` when the lamp is dim (5.72:1), and `#b5a48c` when the lamp is dark (6.66:1). No inline color. A word the student has opened stays full strength. The word being read still fades if it is unknown.
+
+An open sitting is not wiped. Continue keeps the old queue. Drill unknowns again, or Start over, to take the new list.
+
+The name יוֹנָה does not say “the word means dove,” and a related form is not labeled “related to.” That teaching note was not added.
 
 ## Tests
 
-`npx tsc --noEmit` passed. `node --test scripts/*.test.mjs` passed 663, failed 0, skipped 5.
+`npx tsc --noEmit` passed (exit 0) on 17 Nov 2026.
 
-## Next step
+`node --test scripts/*.test.mjs` passed 670, failed 0, skipped 5 (675 tests). Local grok files that are not part of this branch were set aside for that run. They are not in the commit.
 
-Derek review. Do not merge. Do not deploy.
+The GitHub Actions check is the next gate. Do not merge. Do not deploy.
+

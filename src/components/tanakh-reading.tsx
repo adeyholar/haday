@@ -10,7 +10,7 @@ import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { chapterKnown } from "@/lib/reading-loop/known";
-import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
+import { lemmaForReading, splitReadingTag } from "@/lib/reading-loop/strong-lemma";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
 import { useStudy } from "@/lib/store";
@@ -63,7 +63,6 @@ import {
 } from "@/lib/passage";
 import { englishKeysForWord } from "@/lib/word-card";
 import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
-import { splitStrongTag } from "@/lib/morph-parse";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
   bookMeta,
@@ -1204,8 +1203,7 @@ function FollowCard({
     () =>
       list.flatMap((row) =>
         row.words.map((surface, wi) => {
-          const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
-          const [strong, morph] = tag.split("|");
+          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
           return { id: `${row.ref}:${wi}`, surface, strong, morph };
         }),
       ),
@@ -1505,16 +1503,14 @@ function FollowCard({
                         } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
                           (strongChapter?.[String(row.verse)]?.[wi] ?? "") ? "underline decoration-dotted decoration-primary/50 underline-offset-4" : ""
                         } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""}`}
-                        style={dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? { color: "color-mix(in srgb, currentColor 42%, transparent)" } : undefined}
                         data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
-                          const tag = strongChapter?.[String(row.verse)]?.[wi] ?? "";
-                          const { id: sid, morph } = splitStrongTag(tag);
+                          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi]);
                           if (onWord) {
                             onWord(idx, wi);
                             return;
                           }
-                          if (pick?.index === wi && pick.verse === row.verse && !sid) {
+                          if (pick?.index === wi && pick.verse === row.verse && !strong && !morph) {
                             setPick(null);
                             return;
                           }
@@ -1526,7 +1522,7 @@ function FollowCard({
                             verse: row.verse,
                             he: row.he,
                             en: row.en,
-                            strong: sid || undefined,
+                            strong: strong || undefined,
                             morph: morph || undefined,
                           });
                         }}
@@ -1551,11 +1547,10 @@ function FollowCard({
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none ${
                           pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""
                         } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""}`}
-                        style={dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? { color: "color-mix(in srgb, currentColor 42%, transparent)" } : undefined}
                         data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
-                          const { id: sid, morph } = splitStrongTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
-                          if (!onWord && sid) {
+                          const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
+                          if (!onWord && (strong || morph)) {
                             setPick({
                               word: w,
                               index: wi,
@@ -1564,7 +1559,7 @@ function FollowCard({
                               verse: row.verse,
                               he: row.he,
                               en: row.en,
-                              strong: sid,
+                              strong: strong || undefined,
                               morph: morph || undefined,
                             });
                             return;

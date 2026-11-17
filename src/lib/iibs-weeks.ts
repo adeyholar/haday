@@ -232,12 +232,15 @@ export function iibsStudyIdSet(): Set<string> {
 
 function posOf(kind: string): Pos {
   const k = kind.toLowerCase();
+  if (k.includes("gentilic")) return "gentilic";
+  if (k.includes("interrogative")) return "particle";
+  if (k.includes("object marker") || k.includes("direct object")) return "particle";
+  if (k.includes("adverb") || k.includes("particle") || k.includes("conjunction") || k.includes("interjection")) return "particle";
   if (k.includes("verb")) return "verb";
   if (k.includes("adj")) return "adj";
   if (k.includes("prep")) return "prep";
   if (k.includes("pronoun")) return "pron";
   if (k.includes("proper")) return "name";
-  if (k.includes("particle") || k.includes("adverb") || k.includes("conjunction")) return "particle";
   return "noun";
 }
 
@@ -293,6 +296,7 @@ function toItem(
 function noteTwinMeanings(items: VocabItem[]) {
   const twins = new Map<string, VocabItem[]>();
   for (const item of items) {
+    if (item.gloss.toLowerCase().includes("object marker")) continue;
     const group = twins.get(item.hebrew) ?? [];
     group.push(item);
     twins.set(item.hebrew, group);
