@@ -441,8 +441,6 @@ verse,token_index,surface,old_surface,path,old_lemma,new_lemma
 1Kgs.17.14,21,הָאֲדָמָֽה,הָאֲדָמָֽה,grammar,,"adamah / ground, land, earth"
 1Kgs.17.15,0,וַתֵּ֥לֶךְ,וַתֵּ֥לֶךְ,grammar,,"halak / to go, walk"
 1Kgs.17.15,0,וַתֵּ֥לֶךְ,וַתֵּ֥לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
-1Kgs.17.15,5,הוא,הוא,grammar,"hu / he, it; that",
-1Kgs.17.15,5,הוא,הוא,scripture,"iibs-a-1hbg9gn / he, it, that",
 1Kgs.17.15,6,והיא,והיאהוא,grammar,,"hu / he, it; that"
 1Kgs.17.15,7,וּבֵיתָ֖הּ,והיאהִֽיא,grammar,,"bayit / house, household"
 1Kgs.17.15,8,יָמִֽים,וָה֛וּאוּבֵיתָ֖הּ,grammar,"bayit / house, household",yom / day
@@ -949,7 +947,7 @@ verse,token_index,surface,old_surface,path,old_lemma,new_lemma
 1Sam.20.1,19,נַפְשִֽׁי,,grammar,,"nephesh / soul, life, person, neck, throat"
 1Sam.20.11,4,לְכָ֖ה,לְכָ֖ה,grammar,,"halak / to go, walk"
 1Sam.20.11,4,לְכָ֖ה,לְכָ֖ה,scripture,,iibs-a-1msybw9 / he walked; he went
-1Sam.20.2,7,עשה,עשה,scripture,iibs-a-cl97b5 / he did; he made,
+1Sam.20.2,7,עשה,עשהלו,grammar,,"asah / to do, make"
 1Sam.20.2,8,אָבִ֜י,עשהלֹֽא,grammar,,"ab / father, ancestor"
 1Sam.20.2,9,דָּבָ֣ר,יַעֲשֶׂ֨האָבִ֜י,grammar,,"dabar / word, matter, thing"
 1Sam.20.2,10,גָּד֗וֹל,דָּבָ֣ר,grammar,"dabar / word, matter, thing","gadol / great, big, large"
@@ -2727,8 +2725,7 @@ verse,token_index,surface,old_surface,path,old_lemma,new_lemma
 2Sam.20.8,22,וַתִּפֹּֽל,,grammar,,naphal / to fall
 2Sam.21.12,0,וַיֵּ֣לֶךְ,וַיֵּ֣לֶךְ,grammar,,"halak / to go, walk"
 2Sam.21.12,0,וַיֵּ֣לֶךְ,וַיֵּ֣לֶךְ,scripture,,iibs-a-1msybw9 / he walked; he went
-2Sam.21.12,22,שם,שם,scripture,"iibs-a-7rxzz0 / there, thither",
-2Sam.21.12,23,הפלשתים,הפלשתים,scripture,iibs-a-1dt3bor / Philistine,
+2Sam.21.12,22,שם,הפלשתיםשם,grammar,,"sham / there, then, at that time"
 2Sam.21.12,24,בְּי֨וֹם,פְּלִשְׁתִּ֔יםבְּי֨וֹם,grammar,,yom / day
 2Sam.21.12,25,הַכּ֧וֹת,הַכּ֧וֹת,grammar,,nakah / to strike
 2Sam.21.12,27,אֶת,אֶת,grammar,,et / direct object marker
@@ -4041,7 +4038,7 @@ Exod.4.18,21,לֵ֥ךְ,לֵ֥ךְ,grammar,,"halak / to go, walk"
 Exod.4.18,21,לֵ֥ךְ,לֵ֥ךְ,scripture,,iibs-a-1msybw9 / he walked; he went
 Exod.4.19,5,לֵ֖ךְ,לֵ֖ךְ,grammar,,"halak / to go, walk"
 Exod.4.19,5,לֵ֖ךְ,לֵ֖ךְ,scripture,,iibs-a-1msybw9 / he walked; he went
-Exod.4.2,3,מזה,מזה,scripture,iibs-a-1x3p6u3 / this,
+Exod.4.2,3,מזה,מזהמזהמַה,grammar,,zeh / this
 Exod.4.2,4,בְיָדֶ֑ךָ,זֶּ֣הבְיָדֶ֑ךָ,grammar,,"yad / hand, power"
 Exod.4.2,5,וַיֹּ֖אמֶר,וַיֹּ֖אמֶר,grammar,,amar / to say
 Exod.4.2,6,מַטֶּֽה,מַטֶּֽה,grammar,,"matteh / staff, rod, tribe"
@@ -4590,9 +4587,6 @@ Ezek.42.14,21,אֶל,אֲשֶׁ֥ר,grammar,,"el / to, toward, into"
 Ezek.42.14,22,אֲשֶׁ֥ר,לָעָֽם,grammar,,"asher / who, that, which"
 Ezek.42.14,23,לָעָֽם,,grammar,,am / people
 Ezek.42.16,6,אמות,אמות,scripture,iibs-a-1a2lky3 / cubit,
-Ezek.42.9,0,ומתחתה,ומתחתה,grammar,"tahat / under, below, instead of",
-Ezek.42.9,0,ומתחתה,ומתחתה,scripture,"iibs-a-xpoxx2 / underneath, below, instead of",
-Ezek.42.9,1,לשכות,לשכות,scripture,"iibs-e-1vra3df / chamber, hall",
 Ezek.42.9,2,הָאֵ֑לֶּה,לשכותוּמִתַּ֖חַת,grammar,,elleh / these
 Ezek.42.9,3,המבוא,הַלְּשָׁכ֣וֹתהָאֵ֑לֶּה,grammar,elleh / these,
 Ezek.42.9,3,המבוא,המבוא,scripture,"iibs-c-e3x3ly / entrance; entering, coming",
@@ -4713,7 +4707,7 @@ Ezek.8.6,18,וְעוֹד֙,וְעוֹד֙,grammar,,"od / again, still, as long a
 Ezek.8.6,19,תָּשׁ֣וּב,תָּשׁ֣וּב,grammar,,"shub / to turn back, return"
 Ezek.8.6,20,תִּרְאֶ֔ה,תִּרְאֶ֔ה,grammar,,"raah / to see, perceive, understand"
 Ezek.8.6,22,גְּדֹלֽוֹת,גְּדֹלֽוֹת,grammar,,"gadol / great, big, large"
-Ezek.9.11,11,כאשר,כאשר,scripture,"iibs-a-1t4mwq9 / that, which, who",
+Ezek.9.11,11,כאשר,כאשרכאשרכְּכֹ֖ל,grammar,,"asher / who, that, which"
 Ezek.9.11,12,צִוִּיתָֽנִי,אֲשֶׁ֥רצִוִּיתָֽנִי,grammar,,tsiwwah / to command
 Ezek.9.4,2,אלו,אלואלואֵלָ֔יועֲבֹר֙,grammar,,"el / to, toward, into"
 Ezek.9.4,3,עֲבֹר֙,בְּת֣וֹךְ,grammar,,"abar / to pass over, through, by"
@@ -5421,7 +5415,6 @@ Isa.52.12,6,תֵלֵכ֑וּן,תֵלֵכ֑וּן,scripture,,iibs-a-1msybw9 / he
 Isa.52.2,5,התפתחו,התפתחוהתפתחוהִֽתְפַּתְּחִי֙מוֹסְרֵ֣י,grammar,,patah / to open
 Isa.52.2,9,בַּת,צִיּֽוֹן,grammar,,bat / daughter
 Isa.52.2,10,צִיּֽוֹן,,grammar,,zion / Zion
-Isa.52.5,1,מי,מי,grammar,mah / what,
 Isa.52.5,3,פֹה֙,לימַה,grammar,,"poh / here, at this place"
 Isa.52.5,4,נְאֻם,לִּי,grammar,,"neum / utterance, announcement, revelation"
 Isa.52.5,5,יְהוָ֔ה,פֹה֙,grammar,"poh / here, at this place","yhwh / Yahweh, the LORD"
@@ -6521,15 +6514,9 @@ Job.37.12,7,יְצַוֵּ֓ם,עַל,grammar,,tsiwwah / to command
 Job.37.12,8,עַל,פְּנֵ֖י,grammar,,"al / on, upon, on account of, according to"
 Job.37.12,9,פְּנֵ֖י,תֵבֵ֣ל,grammar,,"panim / face, front"
 Job.37.12,11,אָֽרְצָה,,grammar,,"erets / land, earth, ground"
-Job.38.1,4,מנ,מנ,grammar,"min / from, out of",
-Job.38.1,4,מנ,מנ,scripture,iibs-a-1wnney / from,
-Job.38.1,5,הסערה,הסערה,scripture,"iibs-b-1qk9yk / tempest, storm-wind",
 Job.38.1,6,וַיֹּאמַֽר,הסערהמִ֥ן,grammar,,amar / to say
 Job.38.1,7,,הַסְּעָרָ֗הוַיֹּאמַֽר,grammar,amar / to say,
-Job.38.12,3,ידעתה,ידעתה,grammar,yada / to know,
-Job.38.12,3,ידעתה,ידעתה,scripture,iibs-a-1vjj7fa / he knew,
 Job.38.12,4,שחר,שחרידעתה,grammar,yada / to know,
-Job.38.12,4,שחר,שחר,scripture,iibs-b-10q1psi / dawn,
 Job.38.12,5,מְקֹמֽוֹ,שחריִדַּ֖עְתָּה,grammar,,"maqom / place, location"
 Job.38.35,2,וְיֵלֵ֑כוּ,וְיֵלֵ֑כוּ,grammar,,"halak / to go, walk"
 Job.38.35,2,וְיֵלֵ֑כוּ,וְיֵלֵ֑כוּ,scripture,,iibs-a-1msybw9 / he walked; he went
@@ -6544,9 +6531,6 @@ Job.39.30,2,דָ֑ם,וּבַאֲשֶׁ֥ר,grammar,,"dam / blood, bloodshed"
 Job.39.30,3,וּבַאֲשֶׁ֥ר,חֲ֝לָלִ֗ים,grammar,,"asher / who, that, which"
 Job.39.30,5,שָׁ֣ם,הֽוּא,grammar,,"sham / there, then, at that time"
 Job.39.30,6,הֽוּא,,grammar,,"hu / he, it; that"
-Job.40.6,4,מנ,מנ,grammar,"min / from, out of",
-Job.40.6,4,מנ,מנ,scripture,iibs-a-1wnney / from,
-Job.40.6,5,סערה,סערה,scripture,"iibs-b-1qk9yk / tempest, storm-wind",
 Job.40.6,6,וַיֹּאמַֽר,סערהמִ֥ן,grammar,,amar / to say
 Job.40.6,7,,סְעָרָ֗הוַיֹּאמַֽר,grammar,amar / to say,
 Job.41.4,0,לא,לא,scripture,"iibs-a-18ay2bo / no, not",
@@ -7450,7 +7434,6 @@ Neh.12.46,9,וְהֹד֖וֹת,לֵֽאלֹהִֽים,grammar,,"yadah / to give 
 Neh.12.46,10,לֵֽאלֹהִֽים,,grammar,,"elohim / God, gods"
 Neh.12.9,2,אֲחֵיהֶ֛ם,לְנֶגְדָּ֖ם,grammar,,ah / brother
 Neh.12.9,3,לְנֶגְדָּ֖ם,לְמִשְׁמָרֽוֹת,grammar,,"neged / opposite, in front of"
-Neh.2.13,16,המפרוצים,המפרוצים,scripture,"iibs-b-149047p / he broke through [also: break down, break out, increase]",
 Neh.2.13,17,וּשְׁעָרֶ֖יהָ,פְּרוּצִ֔יםוּשְׁעָרֶ֖יהָ,grammar,,shaar / gate
 Neh.2.13,18,אֻכְּל֥וּ,אֻכְּל֥וּ,grammar,,"akol / to eat, consume"
 Neh.2.13,19,בָאֵֽשׁ,בָאֵֽשׁ,grammar,,esh / fire

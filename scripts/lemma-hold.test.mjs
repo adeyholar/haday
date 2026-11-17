@@ -8,7 +8,7 @@ import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
-const { lemmaForReading, verbStem } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
+const { lemmaForReading, verbStem, ketivQereNumbers } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 const { parseOshbLemma } = await jiti.import(join(root, "src/lib/oshb-lemma.ts"));
 const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
@@ -18,9 +18,10 @@ function contentNumbers(raw) {
   return parseOshbLemma(String(raw ?? "")).parts.map((part) => Number(part.strong.slice(1))).filter((n) => n > 0);
 }
 
-function atFor(book, chapter, verse, word) {
+function atFor(book, chapter, verse, words, index) {
   const at = { book, chapter, verse };
-  if (word.kq_role === "ketiv") at.qereLemma = word.qere?.[0]?.lemma ?? "";
+  const qereNumbers = ketivQereNumbers(words, index);
+  if (qereNumbers) at.qereNumbers = qereNumbers;
   return at;
 }
 
@@ -30,7 +31,7 @@ function take(book, chapter, verse, index) {
   const row = data.verses.find((verseRow) => verseRow.ref === `${book}.${chapter}.${verse}`);
   const words = row.words.filter((word) => word.kq_role !== "qere");
   const word = words[index];
-  const at = atFor(book, chapter, verse, word);
+  const at = atFor(book, chapter, verse, words, index);
   const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
   return { word, item };
 }
@@ -51,13 +52,13 @@ test("H3212 qal is הָלַךְ, and the hiphil stays הוֹלִיךְ", () => {
         words.forEach((word, index) => {
           const numbers = contentNumbers(word.lemma);
           if (numbers.length !== 1 || (numbers[0] !== 3212 && numbers[0] !== 1980)) return;
-          const at = atFor(bk, Number(ch), Number(vs), word);
+          const at = atFor(bk, Number(ch), Number(vs), words, index);
           const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
           const stem = verbStem(word.morph).stem;
           if (numbers[0] === 3212 && stem === "q") {
             qal += 1;
-            const qere = contentNumbers(word.qere?.[0]?.lemma);
-            const blocked = word.kq_role === "ketiv" && !(qere.length === 1 && qere[0] === 3212);
+            const qereNumbers = ketivQereNumbers(words, index) ?? [];
+            const blocked = word.kq_role === "ketiv" && !qereNumbers.includes(3212);
             if (blocked) assert.equal(item, undefined, `${verse.ref}#${index}`);
             else {
               qalKept += 1;
@@ -97,9 +98,9 @@ test("H5324 niphal is נִצַּב, hophal has no lemma, and hiphil stays הִצ
       for (const verse of chapter.verses) {
         const words = verse.words.filter((word) => word.kq_role !== "qere");
         const [bk, ch, vs] = verse.ref.split(".");
-        words.forEach((word) => {
+        words.forEach((word, index) => {
           if (contentNumbers(word.lemma)[0] !== 5324 || contentNumbers(word.lemma).length !== 1) return;
-          const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), word));
+          const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), words, index));
           const stem = verbStem(word.morph).stem;
           if (stem === "N") {
             niphal += 1;
@@ -136,13 +137,13 @@ test("Aramaic H606 has no Hebrew card", () => {
       const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, name))));
       for (const verse of chapter.verses) {
         const [bk, ch, vs] = verse.ref.split(".");
-        for (const word of verse.words) {
-          if (word.kq_role === "qere") continue;
-          if (contentNumbers(word.lemma).length !== 1 || contentNumbers(word.lemma)[0] !== 606) continue;
+        const words = verse.words.filter((word) => word.kq_role !== "qere");
+        words.forEach((word, index) => {
+          if (contentNumbers(word.lemma).length !== 1 || contentNumbers(word.lemma)[0] !== 606) return;
           n += 1;
-          assert.equal(lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), word)), undefined);
-          assert.equal(lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, atFor(bk, Number(ch), Number(vs), word)), undefined);
-        }
+          assert.equal(lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), words, index)), undefined);
+          assert.equal(lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, atFor(bk, Number(ch), Number(vs), words, index)), undefined);
+        });
       }
     }
   }
@@ -158,9 +159,9 @@ test("H3526 piel stays, and the passive stems and the fuller participles do not"
       for (const verse of chapter.verses) {
         const [bk, ch, vs] = verse.ref.split(".");
         const words = verse.words.filter((word) => word.kq_role !== "qere");
-        words.forEach((word) => {
+        words.forEach((word, index) => {
           if (contentNumbers(word.lemma).length !== 1 || contentNumbers(word.lemma)[0] !== 3526) return;
-          const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), word));
+          const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, atFor(bk, Number(ch), Number(vs), words, index));
           if (verbStem(word.morph).stem === "p") {
             piel += 1;
             assert.equal(item?.id, "iibs-b-11dtd9c");
@@ -198,7 +199,7 @@ test("two Strong’s numbers get no lemma, and H639 anger is not אַף also", (
         const words = verse.words.filter((word) => word.kq_role !== "qere");
         words.forEach((word, index) => {
           const numbers = contentNumbers(word.lemma);
-          const at = atFor(bk, Number(ch), Number(vs), word);
+          const at = atFor(bk, Number(ch), Number(vs), words, index);
           if (numbers.length > 1) {
             found.push(`${verse.ref}#${index}`);
             assert.equal(lemmaForReading(word.surface, word.lemma, word.morph, iibs, at), undefined);
@@ -238,9 +239,37 @@ test("two Strong’s numbers get no lemma, and H639 anger is not אַף also", (
   assert.equal(take("2Sam", 6, 7, 0).item, undefined);
 });
 
-test("a ketiv whose Strong’s number is not the qere’s gets no lemma", () => {
+test("a ketiv keeps its lemma when its number is in the qere", () => {
+  const keep = new Set([
+    "Job.38.1#4",
+    "Job.38.1#5",
+    "Job.38.12#3",
+    "Job.38.12#4",
+    "Job.40.6#4",
+    "Job.40.6#5",
+    "Exod.4.2#3",
+    "1Sam.20.2#7",
+    "2Sam.21.12#22",
+    "2Sam.21.12#23",
+    "Ezek.42.9#0",
+    "Ezek.42.9#1",
+    "Ezek.9.11#11",
+    "Neh.2.13#16",
+    "1Kgs.17.15#5",
+    "Isa.52.5#1",
+  ]);
+  const writtenNotRead = new Set([
+    "2Kgs.5.18#22",
+    "Ezek.48.16#11",
+    "Jer.38.16#9",
+    "Jer.39.12#10",
+    "Jer.51.3#2",
+    "Ruth.3.12#4",
+  ]);
   let differ = 0;
   let same = 0;
+  let appendix = 0;
+  const kept = [];
   for (const book of readdirSync(join(root, "data/wlc"))) {
     for (const name of readdirSync(join(root, "data/wlc", book))) {
       if (!name.endsWith(".json.gz")) continue;
@@ -248,29 +277,47 @@ test("a ketiv whose Strong’s number is not the qere’s gets no lemma", () => 
       for (const verse of chapter.verses) {
         const [bk, ch, vs] = verse.ref.split(".");
         const words = verse.words.filter((word) => word.kq_role !== "qere");
-        words.forEach((word) => {
+        words.forEach((word, index) => {
           if (word.kq_role !== "ketiv") return;
           const kn = contentNumbers(word.lemma);
-          const qn = contentNumbers(word.qere?.[0]?.lemma);
-          const k = kn.length === 1 ? kn[0] : 0;
-          const q = qn.length === 1 ? qn[0] : 0;
-          if (kn.length > 1 || qn.length > 1) return;
-          const at = atFor(bk, Number(ch), Number(vs), word);
+          if (kn.length > 1) return;
+          const qereNumbers = ketivQereNumbers(words, index) ?? [];
+          const at = atFor(bk, Number(ch), Number(vs), words, index);
+          const where = { book: bk, chapter: Number(ch), verse: Number(vs) };
           const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
-          const plain = lemmaForReading(word.surface, word.lemma, word.morph, iibs, { book: bk, chapter: Number(ch), verse: Number(vs) });
-          if (k !== q) {
+          const plain = lemmaForReading(word.surface, word.lemma, word.morph, iibs, where);
+          const grammar = lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, at);
+          const grammarPlain = lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, where);
+          const key = `${verse.ref}#${index}`;
+          const matched = kn.length === 1 && qereNumbers.includes(kn[0]);
+          if (matched) {
+            same += 1;
+            assert.equal(item?.id, plain?.id, key);
+            assert.equal(grammar?.id, grammarPlain?.id, key);
+          } else if (kn.length === 1 || qereNumbers.length) {
             differ += 1;
-            assert.equal(item, undefined, verse.ref);
+            assert.equal(item, undefined, key);
+            assert.equal(grammar, undefined, key);
+            if (plain || grammarPlain) appendix += 1;
           } else {
             same += 1;
-            assert.equal(item?.id, plain?.id);
           }
+          if (keep.has(key)) {
+            kept.push(key);
+            assert.equal(item?.id, plain?.id, key);
+            assert.equal(grammar?.id, grammarPlain?.id, key);
+            assert.ok(plain || grammarPlain, key);
+            if (key === "Isa.52.5#1") assert.equal(grammarPlain?.id, "mah");
+          }
+          if (writtenNotRead.has(key)) assert.equal(item, undefined, key);
         });
       }
     }
   }
-  assert.equal(differ, 250);
-  assert.equal(same, 1018);
+  assert.equal(kept.length, keep.size);
+  assert.equal(same, 1034);
+  assert.equal(differ, 234);
+  assert.equal(appendix, 101);
   assert.equal(take("Isa", 44, 24, 15).item, undefined);
   assert.equal(take("Song", 2, 13, 8).item, undefined);
   assert.equal(take("Isa", 10, 32, 7).item, undefined);

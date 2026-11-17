@@ -90,16 +90,37 @@ def strong_parts(lemma: str) -> list[str]:
     return out
 
 
-def pack(lemma: str, morph: str, qere: str | None = None) -> str:
-    """One Strong’s number, then the morph. Two numbers, or a ketiv that is not the qere’s number, leave the morph only."""
+def qere_content_numbers(qere: list[dict] | None) -> list[str]:
+    out: list[str] = []
+    for item in qere or []:
+        out.extend(strong_parts(item.get("lemma") or ""))
+    return out
+
+
+def ketiv_qere_numbers(words: list[dict], index: int) -> list[str] | None:
+    """Every qere number that counts for this ketiv. An empty qere uses the adjacent ketiv."""
+    word = words[index]
+    if word.get("kq_role") != "ketiv":
+        return None
+    own = word.get("qere") or []
+    if own:
+        return qere_content_numbers(own)
+    nums: list[str] = []
+    if index > 0 and words[index - 1].get("kq_role") == "ketiv":
+        nums.extend(qere_content_numbers(words[index - 1].get("qere")))
+    if index + 1 < len(words) and words[index + 1].get("kq_role") == "ketiv":
+        nums.extend(qere_content_numbers(words[index + 1].get("qere")))
+    return nums
+
+
+def pack(lemma: str, morph: str, qere_nums: list[str] | None = None) -> str:
+    """One Strong’s number, then the morph. Two numbers, or a ketiv whose number is not in the qere, leave the morph only."""
     morph = str(morph or "").strip()
     parts = strong_parts(lemma)
     if len(parts) != 1:
         return morph
-    if qere is not None:
-        qparts = strong_parts(qere)
-        if parts[0] != (qparts[0] if len(qparts) == 1 else ""):
-            return morph
+    if qere_nums is not None and parts[0] not in qere_nums:
+        return morph
     sid = f"H{parts[0]}"
     return f"{sid}|{morph}" if morph else sid
 
@@ -116,21 +137,19 @@ def written_words(verse: dict) -> list[dict]:
     return [word for word in verse.get("words") or [] if word.get("kq_role") != "qere"]
 
 
-def ketiv_display(word: dict) -> dict[str, str] | None:
-    """A ketiv whose number is not the qere’s. The read form is `q`; the written form is `k`."""
-    if word.get("kq_role") != "ketiv":
+def ketiv_display(words: list[dict], index: int) -> dict[str, str] | None:
+    """A ketiv whose number is not in the qere that counts. The read form is `q`; the written form is `k`."""
+    nums = ketiv_qere_numbers(words, index)
+    if nums is None:
         return None
-    nested = word.get("qere") or []
-    qlemma = (nested[0].get("lemma") if nested else "") or ""
-    kparts = strong_parts(word.get("lemma") or "")
-    qparts = strong_parts(qlemma)
-    if len(kparts) > 1 or len(qparts) > 1:
+    word = words[index]
+    parts = strong_parts(word.get("lemma") or "")
+    if len(parts) == 1 and parts[0] in nums:
         return None
-    k = kparts[0] if len(kparts) == 1 else ""
-    q = qparts[0] if len(qparts) == 1 else ""
-    if k == q:
+    if len(parts) != 1 and not nums:
         return None
-    qsurf = " ".join((item.get("surface") or "") for item in nested).strip()
+    own = word.get("qere") or []
+    qsurf = " ".join((item.get("surface") or "") for item in own).strip()
     return {"q": qsurf, "k": word.get("surface") or ""}
 
 
@@ -209,17 +228,17 @@ def main() -> None:
                     gaps.append(f"line-mismatch {ref}")
                 row["words"] = surfaces
                 row["he"] = line
-                def tag_for(word: dict) -> str:
-                    qere = None
-                    if word.get("kq_role") == "ketiv":
-                        nested = word.get("qere") or []
-                        qere = (nested[0].get("lemma") if nested else "") or ""
-                    return pack(word.get("lemma") or "", word.get("morph") or "", qere)
-
-                chapter_tags[vs] = [tag_for(word) for word in token_words]
+                chapter_tags[vs] = [
+                    pack(
+                        word.get("lemma") or "",
+                        word.get("morph") or "",
+                        ketiv_qere_numbers(token_words, word_index),
+                    )
+                    for word_index, word in enumerate(token_words)
+                ]
                 note: dict[str, dict[str, str]] = {}
                 for word_index, word in enumerate(token_words):
-                    shown = ketiv_display(word)
+                    shown = ketiv_display(token_words, word_index)
                     if shown:
                         note[str(word_index)] = shown
                 if note:

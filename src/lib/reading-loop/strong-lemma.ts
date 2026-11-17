@@ -100,7 +100,7 @@ export function verbStem(morph: string | undefined): { stem: string; aspect: str
 }
 
 /** One content number, or every number when the lemma carries more than one. A packed `H639` tag is one number. */
-function contentNumbers(raw: string | undefined): number[] {
+export function contentNumbers(raw: string | undefined): number[] {
   const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
   if (!head) return [];
   if (/^H\d+$/.test(head)) {
@@ -108,6 +108,34 @@ function contentNumbers(raw: string | undefined): number[] {
     return n >= 1 && n <= 8674 ? [n] : [];
   }
   return parseOshbLemma(head).parts.map((part) => strongNo(part.strong)).filter((n) => n > 0);
+}
+
+/** Every content number on a qere list, not only the first word. */
+export function qereContentNumbers(qere: { lemma?: string }[] | undefined): number[] {
+  const out: number[] = [];
+  for (const word of qere ?? []) out.push(...contentNumbers(word.lemma));
+  return out;
+}
+
+/**
+ * The qere numbers that count for this ketiv. A qere on the token counts every word.
+ * An empty qere uses the adjacent ketiv, which is where this pin hangs a split reading.
+ * Undefined when the word is not a ketiv.
+ */
+export function ketivQereNumbers(
+  words: { kq_role?: string | null; qere?: { lemma?: string }[] }[],
+  index: number,
+): number[] | undefined {
+  const word = words[index];
+  if (!word || word.kq_role !== "ketiv") return undefined;
+  const own = word.qere ?? [];
+  if (own.length) return qereContentNumbers(own);
+  const nums: number[] = [];
+  const prev = index > 0 ? words[index - 1] : undefined;
+  const next = index + 1 < words.length ? words[index + 1] : undefined;
+  if (prev?.kq_role === "ketiv") nums.push(...qereContentNumbers(prev.qere));
+  if (next?.kq_role === "ketiv") nums.push(...qereContentNumbers(next.qere));
+  return nums;
 }
 
 function alsoCard(item: VocabItem): boolean {
@@ -154,16 +182,15 @@ export function lemmaForReading(
   tag: string | undefined,
   morph: string | undefined,
   pool: VocabItem[],
-  at?: { book: string; chapter: number; verse: number; qereLemma?: string },
+  at?: { book: string; chapter: number; verse: number; qereNumbers?: number[] },
 ): VocabItem | undefined {
   const numbers = contentNumbers(tag);
   // Rule 1.6. A token that carries two Strong’s numbers is not one class lemma.
   if (numbers.length > 1) return undefined;
-  // A ketiv whose number is not the qere’s number is not given a lemma.
-  if (at && Object.prototype.hasOwnProperty.call(at, "qereLemma")) {
-    const qereNumbers = contentNumbers(at.qereLemma);
-    if (qereNumbers.length > 1) return undefined;
-    if ((numbers[0] ?? 0) !== (qereNumbers[0] ?? 0)) return undefined;
+  // A ketiv keeps its lemma only when its one number is in the qere that counts.
+  if (at && Object.prototype.hasOwnProperty.call(at, "qereNumbers")) {
+    const qereNumbers = at.qereNumbers ?? [];
+    if (numbers.length === 1 && !qereNumbers.includes(numbers[0])) return undefined;
   }
   const n = numbers[0] ?? 0;
   if (!n) return undefined;

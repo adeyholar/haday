@@ -9,6 +9,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { parseOshbLemma } = await jiti.import(join(root, "src/lib/oshb-lemma.ts"));
+const { ketivQereNumbers } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 
 function one(raw) {
   const parts = parseOshbLemma(String(raw ?? "")).parts.map((part) => Number(part.strong.slice(1))).filter((n) => n > 0);
@@ -23,14 +24,13 @@ function differCount() {
       const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, name))));
       for (const verse of chapter.verses) {
         const words = verse.words.filter((word) => word.kq_role !== "qere");
-        for (const word of words) {
-          if (word.kq_role !== "ketiv") continue;
-          const qere = word.qere?.[0];
-          const kparts = parseOshbLemma(String(word.lemma ?? "")).parts;
-          const qparts = parseOshbLemma(String(qere?.lemma ?? "")).parts;
-          if (kparts.length > 1 || qparts.length > 1) continue;
-          if (one(word.lemma) !== one(qere?.lemma)) n += 1;
-        }
+        words.forEach((word, index) => {
+          const kn = parseOshbLemma(String(word.lemma ?? "")).parts;
+          const qere = ketivQereNumbers(words, index) ?? [];
+          const matched = kn.length === 1 && qere.includes(one(word.lemma));
+          const bare = kn.length !== 1 && !qere.length;
+          if (word.kq_role === "ketiv" && !matched && !bare && kn.length < 2) n += 1;
+        });
       }
     }
   }
@@ -41,7 +41,9 @@ test("a differing ketiv is the qere, with the ketiv noted, and the English stays
   const notes = JSON.parse(readFileSync(join(root, "public/tanakh/ketiv-qere.json"), "utf8"));
   const tokens = Object.values(notes).reduce((sum, row) => sum + Object.keys(row).length, 0);
   assert.equal(tokens, differCount());
-  assert.equal(tokens, 250);
+  assert.equal(tokens, 234);
+  assert.equal(notes["Job.38.1"], undefined);
+  assert.equal(notes["Isa.52.5"]?.["1"], undefined);
   assert.equal(notes["Isa.10.32"]["7"].k, "בית");
   assert.match(notes["Isa.10.32"]["7"].q, /בַּת/);
   assert.equal(notes["Isa.44.24"]["15"].k, "מי");
