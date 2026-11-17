@@ -152,12 +152,13 @@ function WlcChapterPage() {
         ? chapter.verses.flatMap((verse) =>
             verse.words.filter((word) => word.kq_role !== "qere").map((word) => {
               const verseNo = Number(verse.ref.split(".")[2]);
+              const at = verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined;
               return {
                 id: word.id,
                 surface: word.surface,
                 strong: word.lemma,
                 morph: word.morph,
-                at: verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined,
+                at: word.kq_role === "ketiv" ? { ...(at ?? { book: chapter.book, chapter: chapter.chapter, verse: verseNo || 0 }), qereLemma: word.qere?.[0]?.lemma ?? "" } : at,
               };
             }),
           )

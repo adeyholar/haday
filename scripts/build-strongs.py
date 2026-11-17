@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,21 +73,34 @@ def compact(raw: dict, kind: str) -> dict:
     return out
 
 
-def strong_of(lemma: str) -> str:
-    num = ""
-    for part in str(lemma or "").replace(" ", "/").split("/"):
-        digits = "".join(ch for ch in part if ch.isdigit())
-        if digits:
-            num = str(int(digits))
-    return f"H{num}" if num else ""
+PART = re.compile(r"^(\d+)(?:\s+[a-z])?\+?$")
+PREFIX = re.compile(r"^[bcdiklms]$")
 
 
-def pack(lemma: str, morph: str) -> str:
-    sid = strong_of(lemma)
+def strong_parts(lemma: str) -> list[str]:
+    out = []
+    for segment in str(lemma or "").split("/"):
+        piece = segment.strip()
+        if not piece or PREFIX.fullmatch(piece):
+            continue
+        match = PART.fullmatch(piece)
+        if match:
+            out.append(str(int(match.group(1))))
+    return out
+
+
+def pack(lemma: str, morph: str, qere: str | None = None) -> str:
+    """One Strong’s number, then the morph. Two numbers, or a ketiv that is not the qere’s number, leave the morph only."""
     morph = str(morph or "").strip()
-    if sid and morph:
-        return f"{sid}|{morph}"
-    return sid or morph
+    parts = strong_parts(lemma)
+    if len(parts) != 1:
+        return morph
+    if qere is not None:
+        qparts = strong_parts(qere)
+        if parts[0] != (qparts[0] if len(qparts) == 1 else ""):
+            return morph
+    sid = f"H{parts[0]}"
+    return f"{sid}|{morph}" if morph else sid
 
 
 def read_wlc_chapter(book: str, chapter: str) -> dict | None:
@@ -175,7 +189,14 @@ def main() -> None:
                     gaps.append(f"line-mismatch {ref}")
                 row["words"] = surfaces
                 row["he"] = line
-                chapter_tags[vs] = [pack(word.get("lemma") or "", word.get("morph") or "") for word in token_words]
+                def tag_for(word: dict) -> str:
+                    qere = None
+                    if word.get("kq_role") == "ketiv":
+                        nested = word.get("qere") or []
+                        qere = (nested[0].get("lemma") if nested else "") or ""
+                    return pack(word.get("lemma") or "", word.get("morph") or "", qere)
+
+                chapter_tags[vs] = [tag_for(word) for word in token_words]
                 rewritten += 1
                 if index < len(stamps) and len(stamps[index]) != len(surfaces):
                     align_gaps.append(f"{ref} align {len(stamps[index])} words {len(surfaces)}")

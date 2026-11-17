@@ -17,16 +17,30 @@ function writtenWords(verse) {
   return (verse.words ?? []).filter((word) => word.kq_role !== "qere");
 }
 
-function packedTag(lemma, morph) {
-  // Same rule as scripts/build-strongs.py pack()/strong_of(). A trailing + is still that number.
-  let num = "";
-  for (const part of String(lemma ?? "").replaceAll(" ", "/").split("/")) {
-    const digits = part.replace(/[^\d]/g, "");
-    if (digits) num = String(Number(digits));
+function strongParts(lemma) {
+  const out = [];
+  for (const segment of String(lemma ?? "").split("/")) {
+    const piece = segment.trim();
+    if (!piece || /^[bcdiklms]$/.test(piece)) continue;
+    const match = piece.match(/^(\d+)(?:\s+[a-z])?\+?$/);
+    if (match) out.push(String(Number(match[1])));
   }
-  const tail = String(morph ?? "").trim();
-  if (num && tail) return `H${num}|${tail}`;
-  return num ? `H${num}` : tail;
+  return out;
+}
+
+function packedTag(word) {
+  // Same rule as scripts/build-strongs.py pack(). Two Strong’s numbers, or a ketiv
+  // whose number is not the qere’s, leave the morph only.
+  const morph = String(word.morph ?? "").trim();
+  const parts = strongParts(word.lemma);
+  if (parts.length !== 1) return morph;
+  if (word.kq_role === "ketiv") {
+    const nested = word.qere ?? [];
+    const qere = nested[0]?.lemma ?? "";
+    const qparts = strongParts(qere);
+    if (parts[0] !== (qparts.length === 1 ? qparts[0] : "")) return morph;
+  }
+  return morph ? `H${parts[0]}|${morph}` : `H${parts[0]}`;
 }
 
 function loadWlc(book) {
@@ -70,7 +84,7 @@ test("Grammar Path tokens match the pinned data/wlc surface and Strong’s numbe
         for (let i = 0; i < surfaces.length; i++) {
           tokens += 1;
           if (got[i] !== surfaces[i]) mismatches.push(`${ref} #${i} books ${got[i]} wlc ${surfaces[i]}`);
-          const tag = packedTag(words[i].lemma, words[i].morph);
+          const tag = packedTag(words[i]);
           if (tagRow[i] !== tag) mismatches.push(`${ref} #${i} tag ${tagRow[i]} wlc ${tag}`);
           if (mismatches.length > 12) break;
         }

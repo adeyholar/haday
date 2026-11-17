@@ -182,6 +182,8 @@ function build(pool) {
     return dp[a.length][b.length];
   }
   function add(n, item, lexHit, viaSurface) {
+    // H606 אֱנָשׁ is Aramaic. It is not the Hebrew card אֲנָשִׁים “men”.
+    if (n === 606) return;
     if (partOfAnotherName(n, item)) {
       const lw = cons(lex.get(n)?.w || "");
       const people = item.pos === "gentilic" && viaSurface && headwords(item).some((he) => lw.includes(cons(he)));
@@ -241,6 +243,23 @@ function build(pool) {
         }
       }
       for (const item of hits) add(occ.n, item, 0, true);
+    }
+  }
+  function alsoCard(item) {
+    return item && /also/i.test(item.gloss) && !/anger|nostril|nose/i.test(item.gloss);
+  }
+  const zion = map.get(1323);
+  if (zion) {
+    zion.delete("zion");
+    zion.delete("iibs-a-10um24x");
+    if (!zion.size) map.delete(1323);
+  }
+  for (const [n, wantAlso] of [[637, true], [639, false]]) {
+    const row = map.get(n);
+    if (!row) continue;
+    for (const id of [...row.keys()]) {
+      const item = pool.find((it) => it.id === id);
+      if (wantAlso ? !alsoCard(item) : alsoCard(item)) row.delete(id);
     }
   }
   const out = {};

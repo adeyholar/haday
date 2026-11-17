@@ -1,6 +1,7 @@
 /** A passage word belongs to a class lemma only when the text’s own Strong’s number says so. */
 
 import { foldFinals, lettersOnly } from "@/lib/hebrew";
+import { parseOshbLemma } from "@/lib/oshb-lemma";
 import { formFitsLemma } from "@/lib/tanakh-pool";
 import type { Pos, VocabItem } from "@/lib/vocab";
 import map from "@/lib/reading-loop/strong-map.json";
@@ -88,6 +89,35 @@ export function hasReadingArticle(morph: string | undefined): boolean {
   });
 }
 
+/** OSHB verb stem letter and the aspect letter after it. `Vq` is qal, `Vh` hiphil, `VN` niphal, `Vp` piel, `VP` pual, `VH` hophal. */
+export function verbStem(morph: string | undefined): { stem: string; aspect: string } {
+  const parts = String(morph ?? "").split("/").filter(Boolean);
+  for (const raw of [...parts].reverse()) {
+    const core = morphCore(raw);
+    if (core.startsWith("V") && core.length >= 2) return { stem: core[1] ?? "", aspect: core[2] ?? "" };
+  }
+  return { stem: "", aspect: "" };
+}
+
+/** One content number, or every number when the lemma carries more than one. A packed `H639` tag is one number. */
+function contentNumbers(raw: string | undefined): number[] {
+  const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
+  if (!head) return [];
+  if (/^H\d+$/.test(head)) {
+    const n = Number(head.slice(1));
+    return n >= 1 && n <= 8674 ? [n] : [];
+  }
+  return parseOshbLemma(head).parts.map((part) => strongNo(part.strong)).filter((n) => n > 0);
+}
+
+function alsoCard(item: VocabItem): boolean {
+  return /also/i.test(item.gloss) && !/anger|nostril|nose/i.test(item.gloss);
+}
+
+function card(pool: VocabItem[], id: string): VocabItem | undefined {
+  return pool.find((item) => item.id === id);
+}
+
 function headForms(item: VocabItem): string[] {
   const raw = [item.hebrew, ...(item.hebrewAlts ?? [])];
   const out: string[] = [];
@@ -124,10 +154,37 @@ export function lemmaForReading(
   tag: string | undefined,
   morph: string | undefined,
   pool: VocabItem[],
-  at?: { book: string; chapter: number; verse: number },
+  at?: { book: string; chapter: number; verse: number; qereLemma?: string },
 ): VocabItem | undefined {
-  const n = strongNo(tag);
+  const numbers = contentNumbers(tag);
+  // Rule 1.6. A token that carries two Strong’s numbers is not one class lemma.
+  if (numbers.length > 1) return undefined;
+  // A ketiv whose number is not the qere’s number is not given a lemma.
+  if (at && Object.prototype.hasOwnProperty.call(at, "qereLemma")) {
+    const qereNumbers = contentNumbers(at.qereLemma);
+    if (qereNumbers.length > 1) return undefined;
+    if ((numbers[0] ?? 0) !== (qereNumbers[0] ?? 0)) return undefined;
+  }
+  const n = numbers[0] ?? 0;
   if (!n) return undefined;
+  const scripture = pool.some((item) => item.id.startsWith("iibs-"));
+  const stem = verbStem(morph);
+  // H606 is Aramaic אֱנָשׁ. No Aramaic Strong’s number is a Hebrew card.
+  if (n === 606) return undefined;
+  // H3212 qal is הָלַךְ, the same card as H1980. Hiphil stays הוֹלִיךְ. Any other stem is none.
+  if (n === 3212) {
+    if (stem.stem === "q") return card(pool, scripture ? "iibs-a-1msybw9" : "halak");
+    if (stem.stem === "h") return scripture ? card(pool, "iibs-c-1tp6utj") : undefined;
+    return undefined;
+  }
+  // H5324 niphal is נִצַּב. Hiphil stays הִצִּיב. Hophal and the rest are none.
+  if (n === 5324) {
+    if (stem.stem === "N") return scripture ? card(pool, "iibs-c-11jl9et") : undefined;
+    if (stem.stem === "h") return scripture ? card(pool, "iibs-c-1jg2v39") : undefined;
+    return undefined;
+  }
+  // H3526 piel stays כִּבֵּס. Passive stems and the qal “fuller” participle do not.
+  if (n === 3526 && stem.stem !== "p") return undefined;
   const byId = new Map(pool.map((item) => [item.id, item]));
   let kind = morphKind(morph);
   // Zechariah 8:23 יְהוּדִי is tagged as a name. In this verse it is a Jew.
@@ -140,6 +197,11 @@ export function lemmaForReading(
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
     .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item));
   let rows = all.filter((row) => posFitsReadingKind(kind, row.item.pos));
+  // H1323 is daughter. The Zion card does not ride on that number.
+  if (n === 1323) rows = rows.filter((row) => row.item.id !== "zion" && row.item.id !== "iibs-a-10um24x");
+  // H637 is אַף “also”. H639 is אַף “anger”. Neither number may reach the other card.
+  if (n === 637) rows = rows.filter((row) => alsoCard(row.item));
+  if (n === 639) rows = rows.filter((row) => !alsoCard(row.item));
   if (rows.some((row) => row.item.pos === "gentilic")) {
     const surfaceC = lettersOnly(surface);
     rows = rows.filter((row) => row.item.pos !== "gentilic" || headForms(row.item).some((he) => {
