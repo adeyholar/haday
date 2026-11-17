@@ -7,6 +7,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { chapterKnown, matchInPool } = await jiti.import(join(root, "src/lib/reading-loop/known.ts"));
+const { lemmaForReading, morphKind } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 const { passageDrillKey, isPassageDrillKey, passageDrillIds, savePassagePack, loadPassagePack } = await jiti.import(join(root, "src/lib/reading-loop/passage.ts"));
 const { readingSpanHref, readingSpanLabel, readingSpanRef } = await jiti.import(join(root, "src/lib/passage.ts"));
 const { lemmaForSurface } = await jiti.import(join(root, "src/lib/tanakh-pool.ts"));
@@ -176,7 +177,7 @@ test("morph lines name stem and person without changing the sentence", () => {
 });
 
 test("grammar unknowns are the class lemmas in these verses", () => {
-  const asCard = (surface) => lemmaForSurface(surface);
+  const asCard = (word) => lemmaForSurface(word.surface);
   const verse1 = ["בְּרֵאשִׁ֖ית", "בָּרָ֣א", "אֱלֹהִ֑ים", "אֵ֥ת", "הַשָּׁמַ֖יִם", "וְאֵ֥ת", "הָאָֽרֶץ"].map((surface, i) => ({
     id: `Gen 1:1:${i}`,
     surface,
@@ -211,4 +212,35 @@ test("grammar unknowns are the class lemmas in these verses", () => {
   assert.equal(pack.back, "/listen/read/Gen/1?v1=1&v2=3");
   const place = { seed: 1, ids: ["hayah"], index: 1, reviews: [], hits: 0, checks: 0, fingerprint: "a" };
   assert.equal(hydrateDrillRuns({ "passage:bbh:Gen.1.1.3": place })["passage:bbh:Gen.1.1.3"]?.index, 1);
+});
+
+test("a passage lemma is the word in the verse, not a look-alike", () => {
+  const iibs = iibsPathItems();
+  const byStrong = (surface, tag, morph, pool) => lemmaForReading(surface, tag, morph, pool)?.id;
+  assert.equal(morphKind("HVhv2ms/Sh"), "verb");
+  assert.equal(morphKind("HNcfsc/Sp3mp"), "noun");
+  assert.equal(morphKind("HR/Sp3fs"), "prep");
+  assert.equal(byStrong("הַגִּידָה", "5046", "HVhv2ms/Sh", VOCAB), "higgid");
+  assert.equal(byStrong("הִגִּ֖יד", "5046", "HVhp3ms", VOCAB), "higgid");
+  assert.equal(byStrong("אֲמִתַּ֖י", "573", "HNp", VOCAB), undefined);
+  assert.notEqual(byStrong("אֲמִתַּ֖י", "573", "HNp", iibs), iibs.find((item) => item.gloss.startsWith("firmness"))?.id);
+  assert.equal(byStrong("יוֹנָ֥ה", "3124", "HNp", iibs), undefined);
+  assert.equal(byStrong("הָעִ֥יר", "d/5892 b", "HTd/Ncfsa", VOCAB), "ir");
+  assert.notEqual(byStrong("הָעִ֥יר", "d/5892 b", "HTd/Ncfsa", iibs), iibs.find((item) => item.hebrew === "הֵעִיר")?.id);
+  assert.equal(byStrong("עָלֶ֑יהָ", "5921 a", "HR/Sp3fs", VOCAB), "al");
+  assert.equal(byStrong("דְּבַר", "1697", "HNcmsc", VOCAB), "dabar");
+  assert.equal(byStrong("בֶן", "1121 a", "HNcmsc", VOCAB), "ben");
+  assert.equal(byStrong("וַֽיְהִי֙", "c/1961", "HC/Vqw3ms", VOCAB), "hayah");
+  assert.equal(byStrong("ק֠וּם", "6965 b", "HVqv2ms", iibs), iibs.find((item) => item.hebrew === "קָם")?.id);
+  const evil = byStrong("רָעָתָ֖ם", "7451 a", "HNcfsc/Sp3mp", VOCAB);
+  assert.ok(evil === "ra" || evil === "raah-evil");
+  assert.notEqual(lemmaForReading("בְּרֵאשִׁ֖ית", "H7225|HR/Ncfsa", "HR/Ncfsa", VOCAB)?.id, "rosh");
+  const jonah = [
+    { id: "tell", surface: "הִגִּ֖יד", strong: "5046", morph: "HVhp3ms" },
+    { id: "name", surface: "אֲמִתַּ֖י", strong: "573", morph: "HNp" },
+    { id: "city", surface: "הָעִ֥יר", strong: "d/5892 b", morph: "HTd/Ncfsa" },
+  ];
+  const report = chapterKnown(jonah, VOCAB, {}, Date.now(), (word, pool) => lemmaForReading(word.surface, word.strong, word.morph, pool));
+  assert.deepEqual(report.unknown.map((item) => item.id).sort(), ["higgid", "ir"]);
+  assert.deepEqual(report.unknownWordIds.sort(), ["city", "tell"]);
 });

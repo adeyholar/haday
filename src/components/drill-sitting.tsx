@@ -37,12 +37,14 @@ export function DrillSitting({
   readPlace,
   writePlace,
   chrome,
+  showChapter = true,
 }: {
   pool: VocabItem[];
   label: string;
   readPlace: () => DrillPlace | undefined;
   writePlace: (place: DrillPlace | null) => void;
   chrome?: ReactNode;
+  showChapter?: boolean;
 }) {
   const focus = useStudy((s) => s.focus);
   const cards = useStudy((s) => s.cards);
@@ -306,6 +308,7 @@ export function DrillSitting({
         total={tasks.length}
         label={drillProgress(tasks, i)}
         showMeOnce={tasks.findIndex((card) => answerIsHebrew(card)) === i}
+        showChapter={showChapter}
         onGrade={onGrade}
       />
     </>

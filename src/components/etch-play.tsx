@@ -39,6 +39,7 @@ export function EtchPlay({
   total,
   label,
   showMeOnce = false,
+  showChapter = true,
   onGrade,
 }: {
   task: EtchTask;
@@ -48,6 +49,8 @@ export function EtchPlay({
   total: number;
   label?: string;
   showMeOnce?: boolean;
+  /** Textbook chapter. Off for a passage sitting, so Ch. 20 is not read as the Bible chapter. */
+  showChapter?: boolean;
   onGrade: (rating: Grade) => void;
 }) {
   const item = task.item;
@@ -297,7 +300,7 @@ export function EtchPlay({
 
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
-          {item.chapter > 0 ? `${POS_LABEL[item.pos]} · Ch. ${item.chapter}` : POS_LABEL[item.pos]}
+          {showChapter && item.chapter > 0 ? `${POS_LABEL[item.pos]} · Ch. ${item.chapter}` : POS_LABEL[item.pos]}
         </p>
         <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-6">
           <div className="min-w-0">
