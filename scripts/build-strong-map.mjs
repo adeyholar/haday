@@ -18,16 +18,10 @@ const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { VOCAB } = await jiti.import(join(root, "src/lib/vocab.ts"));
 const { iibsPathItems } = await jiti.import(join(root, "src/lib/iibs-weeks.ts"));
 const { foldFinals, lettersOnly } = await jiti.import(join(root, "src/lib/hebrew.ts"));
-const { strongNo, morphKind, posFitsReadingKind } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
+const { strongNo, morphKind, posFitsReadingKind, hasReadingArticle } = await jiti.import(join(root, "src/lib/reading-loop/strong-lemma.ts"));
 
 function pointed(s) {
   return foldFinals(String(s ?? "").normalize("NFC").replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6]/g, ""));
-}
-
-/** Hebrew article (הַ), not the Aramaic determined ending. */
-function hasArticle(morph) {
-  const parts = String(morph || "").split("/").filter(Boolean);
-  return parts.some((part, i) => i < parts.length - 1 && /Td$/.test(part));
 }
 
 function headwords(item) {
@@ -71,7 +65,7 @@ for (const fn of readdirSync(strongDir).filter((name) => name.endsWith(".json"))
           n,
           surface: pointed(surface),
           kind: morphKind(morph || ""),
-          article: hasArticle(morph || ""),
+          article: hasReadingArticle(morph || ""),
         });
       });
     }

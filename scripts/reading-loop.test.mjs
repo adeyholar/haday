@@ -393,12 +393,27 @@ test("the article makes הַלֵּוִי a Levite, and Levi the person stays a n
     assert.equal(lemmaForReading(surface, tag, morph, iibs)?.id, levite.id);
     assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, levi.id);
   }
-  assert.equal(lemmaForReading("הַלֵּוִ֔י", "H3878", "HTd/Np", iibs)?.id, levi.id);
+  // The article is the Levite, even when the tag says a name. 1Chr 12:27, Mal 2:8, Neh 10:40.
+  for (const [surface, tag, morph] of [
+    ["הַלֵּוִ֔י", "H3878", "HTd/Np"],
+    ["הַלֵּוִ֗י", "H3878", "HTd/Np"],
+  ]) {
+    assert.equal(lemmaForReading(surface, tag, morph, iibs)?.id, levite.id);
+    assert.notEqual(lemmaForReading(surface, tag, morph, iibs)?.id, levi.id);
+  }
+  // Without the article, the morph still decides. A plain לְ is not the article.
   assert.equal(lemmaForReading("לֵוִ֔י", "H3878", "HNp", iibs)?.id, levi.id);
   assert.equal(lemmaForReading("לֵוִ֑י", "H3881", "HNp", iibs)?.id, levi.id);
   assert.equal(lemmaForReading("לְלֵוִ֛י", "H3881", "HR/Np", iibs)?.id, levi.id);
   assert.equal(lemmaForReading("לֵוִ֗י", "H3881", "HNp", iibs)?.id, levi.id);
   assert.equal(lemmaForReading("לֵוִ֖י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לֵוִ֣י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לֵוִ֗י", "H3881", "HNgmsa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("לְוִיֵּ֖נוּ", "H3881", "HNgmpc/Sp1cp", iibs)?.id, levite.id);
+  // לַ and בַּ already contain the article.
+  assert.equal(lemmaForReading("לַלְוִיִּ֑ם", "H3881", "HRd/Ngmpa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("בַּלְוִיִּֽם", "H3881", "HRd/Ngmpa", iibs)?.id, levite.id);
+  assert.equal(lemmaForReading("וְלַלְוִיִּ֗ם", "H3881", "HC/Rd/Ngmpa", iibs)?.id, levite.id);
   assert.equal(lemmaForReading("וְלֵוָיֵ֜א", "H3879", "AC/Ngmpd/Td", iibs), undefined);
 });
 

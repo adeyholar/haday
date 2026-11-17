@@ -69,6 +69,25 @@ export function posFitsReadingKind(kind: string, pos: Pos): boolean {
   return pos === "particle" || pos === "pron";
 }
 
+function morphCore(part: string): string {
+  const mark = part[1];
+  if ((part.startsWith("H") || part.startsWith("A")) && mark && mark !== mark.toLowerCase()) return part.slice(1);
+  return part;
+}
+
+/**
+ * The Hebrew article. `Td` is הַ. `Rd` is a preposition that already contains it (לַ, בַּ).
+ * A final `Td` is the Aramaic determined ending, not this article. A plain לְ is `R`, not `Rd`.
+ */
+export function hasReadingArticle(morph: string | undefined): boolean {
+  const parts = String(morph ?? "").split("/").filter(Boolean);
+  return parts.some((part, i) => {
+    const core = morphCore(part);
+    if (core === "Rd") return true;
+    return core === "Td" && i < parts.length - 1;
+  });
+}
+
 function headForms(item: VocabItem): string[] {
   const raw = [item.hebrew, ...(item.hebrewAlts ?? [])];
   const out: string[] = [];
@@ -115,6 +134,8 @@ export function lemmaForReading(
   if (at?.book === "Zech" && at.chapter === 8 && at.verse === 23 && n === 3064 && lettersOnly(surface).includes("יהודי")) {
     kind = "gentilic";
   }
+  // A personal name does not take the article. הַלֵּוִי is the Levite, whatever the tag says.
+  if ((n === 3878 || n === 3881) && hasReadingArticle(morph)) kind = "gentilic";
   const all = (tableFor(pool)[String(n)] ?? [])
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
     .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item));
