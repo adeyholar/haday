@@ -16,7 +16,7 @@ Listen timestamps were not rewritten. 984 verses have a different word count tha
 
 A second rebuild from `data/wlc` is byte-identical (`scripts/build-strong-map.mjs` twice, then `scripts/build-strongs.py`). The query index and `public/tanakh/books` are unchanged. `formOfLexicon` was not tightened. The Zechariah 8:23 override was not moved.
 
-On the Grammar Path Tanakh (`/listen/read`), the English translation is not on the page and not on the word card. Where a ketiv’s number is not in the qere that counts (234 tokens, in `public/tanakh/ketiv-qere.json`), the word shown is the qere and the ketiv is noted beside it, with no English gloss. The Grade quiz still asks which English the verse is. The Scripture Path reader was not changed.
+The Grammar Path reader display (rule 1.7) is not in this PR. The qere-shown, ketiv-noted rendering and `public/tanakh/ketiv-qere.json` were added on this branch and then removed. That display is a separate follow-up. Grammar Path verses and word cards show the English translation as they did at `e91f983`. The Grade quiz still asks which English the verse is. The Scripture Path reader was not restyled. This branch only withholds the class lemma. The ketiv counts below are unchanged: 1,268 ketivs, 1,034 match, 234 differ.
 
 ## Class lemmas that changed
 
@@ -64,6 +64,6 @@ Still in force, and still green: object marker, gentilics, compounds, Bamoth H11
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026. TanStack Start is 1.168.60.
 
-`node --test scripts/*.test.mjs`: 692 tests, 687 pass, 0 fail, 5 skipped. New files: `scripts/lemma-hold.test.mjs` (one test for each fix above) and `scripts/grammar-ketiv.test.mjs` (the Grammar Path qere note, and no English on that page). `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
+`node --test scripts/*.test.mjs`: 691 tests, 686 pass, 0 fail, 5 skipped. `scripts/lemma-hold.test.mjs` has one test for each fix above. `scripts/grammar-ketiv.test.mjs` was the display check and is not on this branch. `scripts/surface-alignment.test.mjs` still checks all 305,501 tokens against `data/wlc` and fails on any surface or Strong’s mismatch. The expected tag uses the same pack rule as `build-strongs.py`.
 
 Branch `fix/wlc-pinned-matching`. This branch is not merged. Do not merge. Do not deploy.
