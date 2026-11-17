@@ -104,10 +104,17 @@ export function lemmaForReading(surface: string, tag: string | undefined, morph:
   if (!n) return undefined;
   const byId = new Map(pool.map((item) => [item.id, item]));
   const kind = morphKind(morph);
-  const rows = (tableFor(pool)[String(n)] ?? [])
+  const all = (tableFor(pool)[String(n)] ?? [])
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
-    .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item) && posFitsReadingKind(kind, row.item!.pos));
+    .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item));
+  let rows = all.filter((row) => posFitsReadingKind(kind, row.item.pos));
+  // One coursebook card says “Levi, Levite.” The person stays a name. A Levite line still uses that card.
+  if (!rows.length && kind === "gentilic") {
+    rows = all.filter((row) => row.item.pos === "name" && row.item.gloss.toLowerCase().includes("levite"));
+  }
   if (!rows.length) return undefined;
+  // H853, H854, and H855 share both אֵת cards. With no morph, do not guess.
+  if (!kind && rows.length > 1) return undefined;
   if (rows.length === 1) return rows[0].item;
   const surf = pointed(surface);
   const exact = rows.filter((row) => headForms(row.item).some((he) => pointed(he) === surf));

@@ -282,3 +282,27 @@ test("a morph code is not a Strong’s number, and the class list keeps the vers
   assert.equal(morphKind("HNgmsa"), "gentilic");
   assert.equal(lemmaForReading("עִבְרִ֣י", "H5680", "HNgmsa", iibs)?.id, hebrew?.id);
 });
+
+test("a gentilic people counts, and Levi the person stays a name", () => {
+  const iibs = iibsPathItems();
+  const egyptian = iibs.find((item) => item.hebrew === "מִצְרִי");
+  const canaanite = iibs.find((item) => item.hebrew === "כְּנַעֲנִי");
+  const philistine = iibs.find((item) => item.hebrew === "פְּלִשְׁתִּי");
+  const jew = iibs.find((item) => item.hebrew === "יְהוּדִי");
+  const levi = iibs.find((item) => item.hebrew === "לֵוִי");
+  assert.equal(egyptian?.pos, "gentilic");
+  assert.equal(canaanite?.pos, "gentilic");
+  assert.equal(philistine?.pos, "gentilic");
+  assert.equal(jew?.pos, "gentilic");
+  assert.equal(levi?.pos, "name");
+  assert.equal(lemmaForReading("מִצְרִ֔י", "H4713", "HNgmsa", iibs)?.id, egyptian?.id);
+  assert.equal(lemmaForReading("וְהַכְּנַעֲנִ֖י", "H3669", "HC/Td/Ngmsa", iibs)?.id, canaanite?.id);
+  assert.equal(lemmaForReading("פְלִשְׁתִּים", "H6430", "HNgmpa", iibs)?.id, philistine?.id);
+  assert.equal(lemmaForReading("יְהוּדִ֔י", "H3064", "HNgmsa", iibs)?.id, jew?.id);
+  assert.equal(lemmaForReading("הַלֵּוִי", "H3881", "HTd/Ngmsa", iibs)?.id, levi?.id);
+  assert.equal(lemmaForReading("לֵוִ֔י", "H3878", "HNp", iibs)?.id, levi?.id);
+  assert.equal(lemmaForReading("אֵ֥ת", "H853", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵ֥ת", "H854", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵת", "H855", "", iibs), undefined);
+  assert.equal(lemmaForReading("אֵ֥ת", "H853", "HTo", iibs)?.gloss.startsWith("direct object marker"), true);
+});

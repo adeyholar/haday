@@ -17,6 +17,12 @@ On the Scripture Path the verse’s own word now stays:
 | אֵת, וְאֵת | H853 | “direct object marker, untranslated” |
 | אִתּוֹ | H854 | “with”, a different word |
 | עִבְרִי | H5680 | gentilic, not a name |
+| מִצְרִי | H4713 | gentilic, “Egyptian” |
+| כְּנַעֲנִי | H3669 | gentilic, “Canaanite”. This number is back on the map |
+| פְּלִשְׁתִּים | H6430 | gentilic, פְּלִשְׁתִּי “Philistine” |
+| יְהוּדִי | H3064 | gentilic, “Judean, Jew” |
+| הַלֵּוִי | H3881 | the one card לֵוִי “Levi, Levite” |
+| לֵוִי | H3878 | that same card, and it stays a name |
 
 H853 is never “with” and never אַתְּ. Prefixed numbers (`b/7225`, `c/1961`, `d/5892 b`) still give the content word. הִגִּיד stays H5046. בְּרֵאשִׁית stays H7225, not רֹאשׁ. Names such as Jonah, Amittai, Tarshish, and Jaffa stay full strength.
 
@@ -26,11 +32,15 @@ An open sitting is not wiped. Continue keeps the old queue. Drill unknowns again
 
 The name יוֹנָה does not say “the word means dove,” and a related form is not labeled “related to.” That teaching note was not added.
 
+The coursebook has one לֵוִי, “Levi, Levite.” It was not split, so the card stays a name. A Levite line (H3881) still counts as that card. The person in Numbers 3:6 (H3878) stays a name. No other class headword was a gentilic still labeled a name. Place names such as Canaan, Egypt, and Moab were left as names.
+
+If אֵת has no morph, the class does not guess between the object marker (H853), “with” (H854), and the hoe (H855). With the morph, the marker and “with” stay apart.
+
 ## Tests
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026.
 
-`node --test scripts/*.test.mjs` passed 670, failed 0, skipped 5 (675 tests). Local grok files that are not part of this branch were set aside for that run. They are not in the commit.
+`node --test scripts/*.test.mjs` passed 671, failed 0, skipped 5 (676 tests). Local grok files that are not part of this branch were set aside for that run. They are not in the commit.
 
 The GitHub Actions check is the next gate. Do not merge. Do not deploy.
 
