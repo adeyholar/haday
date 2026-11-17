@@ -10,7 +10,7 @@ import { loadWlcChapter } from "@/lib/wlc-server";
 import type { FollowSpot } from "@/lib/wlc-follow";
 import type { WlcChapter } from "@/lib/wlc";
 import { chapterKnown } from "@/lib/reading-loop/known";
-import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
+import { lemmaForReading, ketivQereNumbers } from "@/lib/reading-loop/strong-lemma";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { noteVerse, peekSession, readDimUnknown, writeDimUnknown, DAILY_GOAL, type ReadSession } from "@/lib/reading-loop/session";
 import { useStudy } from "@/lib/store";
@@ -150,14 +150,16 @@ function WlcChapterPage() {
     () =>
       chapter
         ? chapter.verses.flatMap((verse) =>
-            verse.words.filter((word) => word.kq_role !== "qere").map((word) => {
+            verse.words.filter((word) => word.kq_role !== "qere").map((word, index, shown) => {
               const verseNo = Number(verse.ref.split(".")[2]);
+              const at = verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined;
+              const qereNumbers = ketivQereNumbers(shown, index);
               return {
                 id: word.id,
                 surface: word.surface,
                 strong: word.lemma,
                 morph: word.morph,
-                at: verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined,
+                at: qereNumbers ? { ...(at ?? { book: chapter.book, chapter: chapter.chapter, verse: verseNo || 0 }), qereNumbers } : at,
               };
             }),
           )

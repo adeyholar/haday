@@ -2,27 +2,34 @@
 """Build offline Strong's lookups and per-verse tags for the Tanakh reader.
 
 Dictionaries: adeyholar/strongs (Open Scriptures). CC-BY-SA on the JSON text.
-Verse tags: Open Scriptures Hebrew Bible morphology (CC BY 4.0), lemma numbers only.
+Verse tags and Hebrew words: pinned data/wlc (haday-hebrew-data v1.2.0,
+OSHB morphology CC BY 4.0). English in public/tanakh/books stays the World
+English Bible and is joined only by book, chapter, and verse.
+
+Do not fetch openscriptures/morphhb master. Do not run scripts/build-tanakh.py.
 """
 
 from __future__ import annotations
 
+import gzip
 import json
 import re
-import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LEX = ROOT / "public" / "lexicon"
 TAGS = ROOT / "public" / "tanakh" / "strongs"
 BOOKS = ROOT / "public" / "tanakh" / "books"
+ALIGN = ROOT / "public" / "tanakh" / "align"
+WLC = ROOT / "data" / "wlc"
+GAPS = ROOT / "docs" / "wlc-rebase-verse-gaps.txt"
+ALIGN_GAPS = ROOT / "docs" / "wlc-align-count-mismatches.txt"
 GRK_URL = "https://raw.githubusercontent.com/adeyholar/strongs/master/greek/strongs-greek-dictionary.js"
-WLC = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{}.xml"
-
-CONS = re.compile(r"[\u05d0-\u05ea]")
 
 
 def get(url: str) -> str:
+    import urllib.request
+
     with urllib.request.urlopen(url, timeout=120) as res:
         return res.read().decode("utf-8")
 
@@ -34,6 +41,8 @@ def js_object(text: str) -> dict:
 
 
 def clip(value: object, n: int = 280) -> str:
+    import re
+
     text = re.sub(r"\s+", " ", str(value or "")).strip()
     text = text.replace("{", "").replace("}", "")
     if len(text) > n:
@@ -64,71 +73,71 @@ def compact(raw: dict, kind: str) -> dict:
     return out
 
 
-def strong_of(lemma: str) -> str:
-    num = ""
-    for part in lemma.replace(" ", "/").split("/"):
-        digits = "".join(ch for ch in part if ch.isdigit())
-        if digits:
-            num = str(int(digits))
-    return f"H{num}" if num else ""
+PART = re.compile(r"^(\d+)(?:\s+[a-z])?\+?$")
+PREFIX = re.compile(r"^[bcdiklms]$")
 
 
-def cons(text: str) -> str:
-    return "".join(CONS.findall(text))
-
-
-def pack(lemma: str, morph: str) -> str:
-    sid = strong_of(lemma)
-    morph = morph.strip()
-    if sid and morph:
-        return f"{sid}|{morph}"
-    return sid or morph
-
-
-def verse_tags(oshb: list[tuple[str, str, str]], ours: list[str]) -> list[str]:
-    if len(oshb) == len(ours):
-        return [pack(lem, morph) for lem, morph, _word in oshb]
-    out: list[str] = []
-    i = 0
-    for word in ours:
-        want = cons(word)
-        if not want or i >= len(oshb):
-            out.append("")
+def strong_parts(lemma: str) -> list[str]:
+    out = []
+    for segment in str(lemma or "").split("/"):
+        piece = segment.strip()
+        if not piece or PREFIX.fullmatch(piece):
             continue
-        got = ""
-        chosen = ""
-        morphs: list[str] = []
-        start = i
-        while i < len(oshb) and len(got) < len(want):
-            lem, morph, surface = oshb[i]
-            got += cons(surface)
-            sid = strong_of(lem)
-            if sid:
-                chosen = sid
-            if morph:
-                morphs.append(morph)
-            i += 1
-        if got == want:
-            morph = "+".join(morphs)
-            out.append(f"{chosen}|{morph}" if chosen and morph else chosen or morph)
-        else:
-            out.append("")
-            i = start + 1
+        match = PART.fullmatch(piece)
+        if match:
+            out.append(str(int(match.group(1))))
     return out
 
 
-def wlc_verses(xml: str) -> dict[str, dict[str, list[tuple[str, str, str]]]]:
-    chapters: dict[str, dict[str, list[tuple[str, str, str]]]] = {}
-    for verse in re.finditer(r'<verse\b[^>]*osisID="([A-Za-z0-9]+)\.(\d+)\.(\d+)"[^>]*>(.*?)</verse>', xml, re.S):
-        _book, ch, vs, body = verse.groups()
-        words = []
-        for attrs, surface in re.findall(r"<w\b([^>]*)>(.*?)</w>", body, re.S):
-            lem = re.search(r'lemma="([^"]*)"', attrs)
-            morph = re.search(r'morph="([^"]*)"', attrs)
-            surface = re.sub(r"<[^>]+>", "", surface)
-            words.append((lem.group(1) if lem else "", morph.group(1) if morph else "", surface))
-        chapters.setdefault(ch, {})[vs] = words
-    return chapters
+def qere_content_numbers(qere: list[dict] | None) -> list[str]:
+    out: list[str] = []
+    for item in qere or []:
+        out.extend(strong_parts(item.get("lemma") or ""))
+    return out
+
+
+def ketiv_qere_numbers(words: list[dict], index: int) -> list[str] | None:
+    """Every qere number that counts for this ketiv. An empty qere uses the adjacent ketiv."""
+    word = words[index]
+    if word.get("kq_role") != "ketiv":
+        return None
+    own = word.get("qere") or []
+    if own:
+        return qere_content_numbers(own)
+    nums: list[str] = []
+    if index > 0 and words[index - 1].get("kq_role") == "ketiv":
+        nums.extend(qere_content_numbers(words[index - 1].get("qere")))
+    if index + 1 < len(words) and words[index + 1].get("kq_role") == "ketiv":
+        nums.extend(qere_content_numbers(words[index + 1].get("qere")))
+    return nums
+
+
+def pack(lemma: str, morph: str, qere_nums: list[str] | None = None) -> str:
+    """One Strong’s number, then the morph. Two numbers, or a ketiv whose number is not in the qere, leave the morph only."""
+    morph = str(morph or "").strip()
+    parts = strong_parts(lemma)
+    if len(parts) != 1:
+        return morph
+    if qere_nums is not None and parts[0] not in qere_nums:
+        return morph
+    sid = f"H{parts[0]}"
+    return f"{sid}|{morph}" if morph else sid
+
+
+def read_wlc_chapter(book: str, chapter: str) -> dict | None:
+    path = WLC / book / f"{chapter}.json.gz"
+    if not path.exists():
+        return None
+    return json.loads(gzip.decompress(path.read_bytes()))
+
+
+def written_words(verse: dict) -> list[dict]:
+    """Ketiv and ordinary words. A nested qere is not a token on the line."""
+    return [word for word in verse.get("words") or [] if word.get("kq_role") != "qere"]
+
+
+def written_line(words: list[dict]) -> str:
+    return "".join((word.get("surface") or "") + (word.get("trailer") or "") for word in words)
 
 
 def main() -> None:
@@ -144,30 +153,120 @@ def main() -> None:
         print(f"greek {len(grk)}")
     print("hebrew chunks: node scripts/split-strongs-hebrew.mjs")
 
-    matched = 0
-    missed = 0
+    gaps: list[str] = []
+    align_gaps: list[str] = []
+    rewritten = 0
+    kept = 0
     for path in sorted(BOOKS.glob("*.json")):
         book = path.stem
-        print("tags", book)
-        xml = get(WLC.format(book))
-        oshb = wlc_verses(xml)
         dump = json.loads(path.read_text())
-        out: dict[str, dict[str, list[str]]] = {}
+        old_tags = {}
+        tag_path = TAGS / f"{book}.json"
+        if tag_path.exists():
+            old_tags = json.loads(tag_path.read_text())
+        align = {}
+        align_path = ALIGN / f"{book}.json"
+        if align_path.exists():
+            align = json.loads(align_path.read_text())
+
+        wlc_refs: set[str] = set()
+        if (WLC / book).is_dir():
+            for chapter_path in sorted((WLC / book).glob("*.json.gz")):
+                chapter = json.loads(gzip.decompress(chapter_path.read_bytes()))
+                for verse in chapter.get("verses") or []:
+                    ref = str(verse.get("ref") or "")
+                    if ref:
+                        wlc_refs.add(ref)
+
+        out_tags: dict[str, dict[str, list[str]]] = {}
+        book_refs: set[str] = set()
         for ch, rows in dump["chapters"].items():
-            chapter: dict[str, list[str]] = {}
-            for row in rows:
+            chapter_tags: dict[str, list[str]] = {}
+            wlc = read_wlc_chapter(book, ch)
+            by_verse: dict[str, dict] = {}
+            if wlc:
+                for verse in wlc.get("verses") or []:
+                    ref = str(verse.get("ref") or "")
+                    parts = ref.split(".")
+                    if len(parts) >= 3:
+                        by_verse[parts[-1]] = verse
+            stamps = ((align.get(ch) or {}).get("words") or [])
+            for index, row in enumerate(rows):
                 vs = str(row["v"])
-                ours = row.get("words") or []
-                src = oshb.get(ch, {}).get(vs, [])
-                tags = verse_tags(src, ours)
-                if len(tags) == len(ours) and any(tags):
-                    matched += 1
-                else:
-                    missed += 1
-                chapter[vs] = tags
-            out[ch] = chapter
-        (TAGS / f"{book}.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
-    print(f"verses tagged {matched} weak {missed}")
+                ref = f"{book}.{ch}.{vs}"
+                book_refs.add(ref)
+                src = by_verse.get(vs)
+                if src is None:
+                    gaps.append(f"books-only {ref}")
+                    kept_words = row.get("words") or []
+                    previous = (old_tags.get(ch) or {}).get(vs) or []
+                    chapter_tags[vs] = previous if len(previous) == len(kept_words) else [""] * len(kept_words)
+                    kept += 1
+                    continue
+                token_words = written_words(src)
+                surfaces = [word.get("surface") or "" for word in token_words]
+                line = written_line(token_words)
+                if line != (src.get("text") or ""):
+                    gaps.append(f"line-mismatch {ref}")
+                row["words"] = surfaces
+                row["he"] = line
+                chapter_tags[vs] = [
+                    pack(
+                        word.get("lemma") or "",
+                        word.get("morph") or "",
+                        ketiv_qere_numbers(token_words, word_index),
+                    )
+                    for word_index, word in enumerate(token_words)
+                ]
+                rewritten += 1
+                if index < len(stamps) and len(stamps[index]) != len(surfaces):
+                    align_gaps.append(f"{ref} align {len(stamps[index])} words {len(surfaces)}")
+            for vs, verse in by_verse.items():
+                ref = str(verse.get("ref") or f"{book}.{ch}.{vs}")
+                if ref not in book_refs:
+                    gaps.append(f"wlc-only {ref}")
+            out_tags[ch] = chapter_tags
+        for ref in sorted(wlc_refs):
+            if ref not in book_refs:
+                # Recorded above per chapter when the chapter file exists.
+                # A whole missing chapter still needs a line.
+                parts = ref.split(".")
+                if len(parts) >= 2 and parts[1] not in dump["chapters"]:
+                    gaps.append(f"wlc-only {ref}")
+        path.write_text(json.dumps(dump, ensure_ascii=False, separators=(",", ":")))
+        tag_path.write_text(json.dumps(out_tags, ensure_ascii=False, separators=(",", ":")))
+        print("tags", book, "rewritten-in-progress")
+
+    # De-duplicate gap lines (per-verse loop and the chapter sweep can overlap).
+    seen: set[str] = set()
+    unique_gaps: list[str] = []
+    for line in gaps:
+        if line in seen:
+            continue
+        seen.add(line)
+        unique_gaps.append(line)
+    GAPS.write_text(
+        "\n".join(
+            [
+                f"verses rewritten {rewritten}",
+                f"books-only kept {kept}",
+                f"gap lines {len(unique_gaps)}",
+                *unique_gaps,
+                "",
+            ]
+        )
+    )
+    ALIGN_GAPS.write_text(
+        "\n".join(
+            [
+                f"align word-count mismatches {len(align_gaps)}",
+                "Existing verse-level fallback in src/lib/reading.ts re-spaces these. Timestamps were not invented.",
+                *align_gaps,
+                "",
+            ]
+        )
+    )
+    print(f"verses rewritten {rewritten} books-only {kept} gaps {len(unique_gaps)} align-mismatches {len(align_gaps)}")
 
 
 if __name__ == "__main__":

@@ -411,51 +411,6 @@ ASPECT_CODE = {
     "c": "infcst",
 }
 
-OSHB_DIR = Path("/tmp/oshb")
-OSHB_BASE = "https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc/{book}.xml"
-OSHB_BOOKS = [
-    "Gen",
-    "Exod",
-    "Lev",
-    "Num",
-    "Deut",
-    "Josh",
-    "Judg",
-    "1Sam",
-    "2Sam",
-    "1Kgs",
-    "2Kgs",
-    "Isa",
-    "Jer",
-    "Ezek",
-    "Hos",
-    "Joel",
-    "Amos",
-    "Obad",
-    "Jonah",
-    "Mic",
-    "Nah",
-    "Hab",
-    "Zeph",
-    "Hag",
-    "Zech",
-    "Mal",
-    "Ps",
-    "Prov",
-    "Job",
-    "Song",
-    "Ruth",
-    "Lam",
-    "Eccl",
-    "Esth",
-    "Dan",
-    "Ezra",
-    "Neh",
-    "1Chr",
-    "2Chr",
-]
-
-
 def morph_tags(code: str) -> set[str]:
     tags: set[str] = set()
     if not code:
@@ -498,65 +453,46 @@ def morph_tags(code: str) -> set[str]:
     return tags
 
 
-def fetch_oshb_book(book: str) -> Path:
-    OSHB_DIR.mkdir(parents=True, exist_ok=True)
-    dest = OSHB_DIR / f"{book}.xml"
-    if dest.exists() and dest.stat().st_size > 1000:
-        return dest
-    import urllib.request
+def overlay_wlc(bucket: dict) -> int:
+    """Join pinned data/wlc morphology onto the written forms (OSHB, CC BY 4.0).
 
-    url = OSHB_BASE.format(book=book)
-    print(f"  fetch OSHB {book}")
-    urllib.request.urlretrieve(url, dest)
-    return dest
-
-
-def overlay_oshb(bucket: dict) -> int:
-    """Join Open Scriptures Hebrew morphology onto the WLC forms (CC BY 4.0).
-
-    Aramaic rows are skipped. Tags that fire on under 20% of a spelling (rare
-    homographs) stay off so כָּל is not treated as a verb.
+    Aramaic rows are skipped. A nested qere is not the written word. Tags that
+    fire on under 20% of a spelling (rare homographs) stay off so כָּל is not
+    treated as a verb. Do not fetch morphhb master.
     """
-    import xml.etree.ElementTree as ET
+    import gzip
     from collections import Counter
 
-    ns = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
     freq: dict[str, Counter] = defaultdict(Counter)
     seen: dict[str, int] = defaultdict(int)
     tagged = 0
-    for book in OSHB_BOOKS:
-        try:
-            path = fetch_oshb_book(book)
-        except Exception as exc:  # noqa: BLE001
-            print("OSHB skip", book, exc)
-            continue
-        root = ET.parse(path).getroot()
-        for verse in root.iter(f"{ns}verse"):
-            osis = verse.get("osisID")
-            if not osis:
-                continue
-            ref = osis
-            for w in verse.findall(f"{ns}w"):
-                if w.get("type") == "x-ketiv":
-                    continue
-                morph = w.get("morph") or ""
-                if morph.startswith("A"):
-                    continue
-                raw = (w.text or "").replace("/", "")
-                if not raw:
-                    continue
-                tags = morph_tags(morph)
-                if not tags:
-                    continue
-                wkey = strip_acc(raw)
-                freq[wkey].update(tags)
-                seen[wkey] += 1
-                row = bucket[wkey]
-                if ref not in row["refs"] and len(row["refs"]) < 3:
-                    row["refs"].append(ref)
-                if row["n"] == 0:
-                    row["n"] = 1
-                tagged += 1
+    wlc_root = ROOT / "data" / "wlc"
+    for book_dir in sorted(path for path in wlc_root.iterdir() if path.is_dir()):
+        for chapter_path in sorted(book_dir.glob("*.json.gz")):
+            chapter = json.loads(gzip.decompress(chapter_path.read_bytes()))
+            for verse in chapter.get("verses") or []:
+                ref = verse.get("ref") or ""
+                for word in verse.get("words") or []:
+                    if word.get("kq_role") == "qere":
+                        continue
+                    morph = word.get("morph") or ""
+                    if morph.startswith("A"):
+                        continue
+                    raw = word.get("surface") or ""
+                    if not raw:
+                        continue
+                    tags = morph_tags(morph)
+                    if not tags:
+                        continue
+                    wkey = strip_acc(raw)
+                    freq[wkey].update(tags)
+                    seen[wkey] += 1
+                    row = bucket[wkey]
+                    if ref not in row["refs"] and len(row["refs"]) < 3:
+                        row["refs"].append(ref)
+                    if row["n"] == 0:
+                        row["n"] = 1
+                    tagged += 1
     for wkey, counts in freq.items():
         n = seen[wkey] or 1
         floor = max(1, int(0.2 * n))
@@ -611,7 +547,7 @@ def main() -> None:
                     phrase = chain_phrase(raw, nxt, tags)
                     if phrase:
                         add_form(bucket, phrase, ref, tags | {"chain"})
-    print("OSHB overlay", overlay_oshb(bucket), "words")
+    print("WLC overlay", overlay_wlc(bucket), "words")
     for w, row in list(bucket.items()):
         if MAQQEF in w:
             continue

@@ -7,7 +7,7 @@ import { WlcLexicon } from "@/components/wlc-lexicon";
 import { Link } from "@tanstack/react-router";
 import { MorphLines } from "@/components/morph-lines";
 import { poolFor } from "@/lib/reading-loop/pool";
-import { lemmaForReading } from "@/lib/reading-loop/strong-lemma";
+import { lemmaForReading, ketivQereNumbers } from "@/lib/reading-loop/strong-lemma";
 import { isBookId, type BookId } from "@/lib/tanakh-canon";
 import { savePassagePack, passageDrillIds, type StudyScope } from "@/lib/reading-loop/passage";
 
@@ -17,6 +17,15 @@ function verseParse(ref: string): { book: BookId; chapter: number; verse: number
   const verse = Number(v);
   if (!raw || !isBookId(raw) || !chapter || !verse) return undefined;
   return { book: raw, chapter, verse };
+}
+
+function ketivNumbers(chapter: WlcChapter, word: WlcWord): number[] | undefined {
+  for (const verse of chapter.verses) {
+    const shown = verse.words.filter((item) => item.kq_role !== "qere");
+    const index = shown.findIndex((item) => item.id === word.id);
+    if (index >= 0) return ketivQereNumbers(shown, index);
+  }
+  return undefined;
 }
 
 /** The chapter page scrolls. On a desktop the word card floats and does not reserve a column. */
@@ -107,6 +116,7 @@ function WordCard({
   loop,
   neededIds,
   parse,
+  qereNumbers,
   onClose,
 }: {
   word: WlcWord;
@@ -114,10 +124,12 @@ function WordCard({
   /** Class lemmas in this passage that are not mastered yet. */
   neededIds?: readonly string[];
   parse?: { book: BookId; chapter: number; verse: number };
+  qereNumbers?: number[];
   onClose: () => void;
 }) {
   const qere = word.qere ?? [];
-  const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope), parse) : undefined;
+  const at = parse && qereNumbers ? { ...parse, qereNumbers } : parse;
+  const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope), at) : undefined;
   const drillIds = lemma ? (neededIds ? passageDrillIds(lemma.id, neededIds) : [lemma.id]) : [];
   const scripture = loop?.scope === "iibs";
   return (
@@ -405,6 +417,7 @@ export function WlcReading({
             loop={loop}
             neededIds={neededIds}
             parse={verseParse(pickedRef)}
+            qereNumbers={ketivNumbers(chapter, picked)}
             onClose={() => closeCard(true)}
           />
         </div>

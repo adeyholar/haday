@@ -1,6 +1,7 @@
 /** A passage word belongs to a class lemma only when the text’s own Strong’s number says so. */
 
 import { foldFinals, lettersOnly } from "@/lib/hebrew";
+import { parseOshbLemma } from "@/lib/oshb-lemma";
 import { formFitsLemma } from "@/lib/tanakh-pool";
 import type { Pos, VocabItem } from "@/lib/vocab";
 import map from "@/lib/reading-loop/strong-map.json";
@@ -88,6 +89,73 @@ export function hasReadingArticle(morph: string | undefined): boolean {
   });
 }
 
+/** OSHB verb stem letter and the aspect letter after it. `Vq` is qal, `Vh` hiphil, `VN` niphal, `Vp` piel, `VP` pual, `VH` hophal. */
+export function verbStem(morph: string | undefined): { stem: string; aspect: string } {
+  const parts = String(morph ?? "").split("/").filter(Boolean);
+  for (const raw of [...parts].reverse()) {
+    const core = morphCore(raw);
+    if (core.startsWith("V") && core.length >= 2) return { stem: core[1] ?? "", aspect: core[2] ?? "" };
+  }
+  return { stem: "", aspect: "" };
+}
+
+/** One content number, or every number when the lemma carries more than one. A packed `H639` tag is one number. */
+export function contentNumbers(raw: string | undefined): number[] {
+  const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
+  if (!head) return [];
+  if (/^H\d+$/.test(head)) {
+    const n = Number(head.slice(1));
+    return n >= 1 && n <= 8674 ? [n] : [];
+  }
+  return parseOshbLemma(head).parts.map((part) => strongNo(part.strong)).filter((n) => n > 0);
+}
+
+/** Every content number on a qere list, not only the first word. */
+export function qereContentNumbers(qere: { lemma?: string }[] | undefined): number[] {
+  const out: number[] = [];
+  for (const word of qere ?? []) out.push(...contentNumbers(word.lemma));
+  return out;
+}
+
+/**
+ * The qere numbers that count for this ketiv. A qere on the token counts every word.
+ * An empty qere uses the adjacent ketiv, which is where this pin hangs a split reading.
+ * Undefined when the word is not a ketiv.
+ */
+export function ketivQereNumbers(
+  words: { kq_role?: string | null; qere?: { lemma?: string }[] }[],
+  index: number,
+): number[] | undefined {
+  const word = words[index];
+  if (!word || word.kq_role !== "ketiv") return undefined;
+  const own = word.qere ?? [];
+  if (own.length) return qereContentNumbers(own);
+  const nums: number[] = [];
+  const prev = index > 0 ? words[index - 1] : undefined;
+  const next = index + 1 < words.length ? words[index + 1] : undefined;
+  if (prev?.kq_role === "ketiv") nums.push(...qereContentNumbers(prev.qere));
+  if (next?.kq_role === "ketiv") nums.push(...qereContentNumbers(next.qere));
+  return nums;
+}
+
+/**
+ * OSHB marks a multi-word proper name with a trailing `+` on the Strong’s number
+ * (`6307+`, `b/7418+`). The `+` is not a second number.
+ */
+export function strongNumberHasPlus(raw: string | undefined): boolean {
+  const head = String(raw ?? "").split("|")[0]?.trim() ?? "";
+  if (!head) return false;
+  return head.split("/").some((segment) => /\d(?:\s+[a-z])?\+$/.test(segment.trim()));
+}
+
+function alsoCard(item: VocabItem): boolean {
+  return /also/i.test(item.gloss) && !/anger|nostril|nose/i.test(item.gloss);
+}
+
+function card(pool: VocabItem[], id: string): VocabItem | undefined {
+  return pool.find((item) => item.id === id);
+}
+
 function headForms(item: VocabItem): string[] {
   const raw = [item.hebrew, ...(item.hebrewAlts ?? [])];
   const out: string[] = [];
@@ -124,10 +192,39 @@ export function lemmaForReading(
   tag: string | undefined,
   morph: string | undefined,
   pool: VocabItem[],
-  at?: { book: string; chapter: number; verse: number },
+  at?: { book: string; chapter: number; verse: number; qereNumbers?: number[] },
 ): VocabItem | undefined {
-  const n = strongNo(tag);
+  const numbers = contentNumbers(tag);
+  // Rule 1.6. A token that carries two Strong’s numbers is not one class lemma.
+  if (numbers.length > 1) return undefined;
+  // A ketiv keeps its lemma only when its one number is in the qere that counts.
+  if (at && Object.prototype.hasOwnProperty.call(at, "qereNumbers")) {
+    const qereNumbers = at.qereNumbers ?? [];
+    if (numbers.length === 1 && !qereNumbers.includes(numbers[0])) return undefined;
+  }
+  const n = numbers[0] ?? 0;
   if (!n) return undefined;
+  // Rule 3.2. A trailing + is a multi-word name, not one class lemma.
+  // Rule 3.3. H884 Beer-sheba keeps the card it already has.
+  if (n !== 884 && strongNumberHasPlus(tag)) return undefined;
+  const scripture = pool.some((item) => item.id.startsWith("iibs-"));
+  const stem = verbStem(morph);
+  // H606 is Aramaic אֱנָשׁ. No Aramaic Strong’s number is a Hebrew card.
+  if (n === 606) return undefined;
+  // H3212 qal is הָלַךְ, the same card as H1980. Hiphil stays הוֹלִיךְ. Any other stem is none.
+  if (n === 3212) {
+    if (stem.stem === "q") return card(pool, scripture ? "iibs-a-1msybw9" : "halak");
+    if (stem.stem === "h") return scripture ? card(pool, "iibs-c-1tp6utj") : undefined;
+    return undefined;
+  }
+  // H5324 niphal is נִצַּב. Hiphil stays הִצִּיב. Hophal and the rest are none.
+  if (n === 5324) {
+    if (stem.stem === "N") return scripture ? card(pool, "iibs-c-11jl9et") : undefined;
+    if (stem.stem === "h") return scripture ? card(pool, "iibs-c-1jg2v39") : undefined;
+    return undefined;
+  }
+  // H3526 piel stays כִּבֵּס. Passive stems and the qal “fuller” participle do not.
+  if (n === 3526 && stem.stem !== "p") return undefined;
   const byId = new Map(pool.map((item) => [item.id, item]));
   let kind = morphKind(morph);
   // Zechariah 8:23 יְהוּדִי is tagged as a name. In this verse it is a Jew.
@@ -140,6 +237,11 @@ export function lemmaForReading(
     .map(([id, lex]) => ({ item: byId.get(id), lex: lex === 1 }))
     .filter((row): row is { item: VocabItem; lex: boolean } => Boolean(row.item));
   let rows = all.filter((row) => posFitsReadingKind(kind, row.item.pos));
+  // H1323 is daughter. The Zion card does not ride on that number.
+  if (n === 1323) rows = rows.filter((row) => row.item.id !== "zion" && row.item.id !== "iibs-a-10um24x");
+  // H637 is אַף “also”. H639 is אַף “anger”. Neither number may reach the other card.
+  if (n === 637) rows = rows.filter((row) => alsoCard(row.item));
+  if (n === 639) rows = rows.filter((row) => !alsoCard(row.item));
   if (rows.some((row) => row.item.pos === "gentilic")) {
     const surfaceC = lettersOnly(surface);
     rows = rows.filter((row) => row.item.pos !== "gentilic" || headForms(row.item).some((he) => {

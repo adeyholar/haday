@@ -2,15 +2,17 @@
  * Build the Strong’s → class-lemma map used by passage drills.
  * Run: node scripts/build-strong-map.mjs
  *
- * Provenance: the verse tags are the Open Scriptures Hebrew Bible morphology
- * (OSHB, CC BY 4.0). The lexicon headwords are the Open Scriptures Strong’s
- * Hebrew lexicon (CC BY-SA). The class lists are the Grammar Path vocabulary
- * and the Scripture Path lesson lists. This file only joins those three.
- * It does not copy their glosses into the map.
+ * Provenance: the verse tokens are the pinned data/wlc text (haday-hebrew-data
+ * v1.2.0). Lemma and morph are the Open Scriptures Hebrew Bible morphology
+ * (OSHB, CC BY 4.0) already on those tokens. The lexicon headwords are the
+ * Open Scriptures Strong’s Hebrew lexicon (CC BY-SA). The class lists are the
+ * Grammar Path vocabulary and the Scripture Path lesson lists. This file only
+ * joins those. It does not copy their glosses into the map.
  */
-import { writeFileSync, readdirSync, readFileSync } from "node:fs";
+import { writeFileSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { createJiti } from "jiti";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -49,25 +51,24 @@ for (const fn of readdirSync(lexDir)) {
 }
 
 const occurrences = [];
-const strongDir = join(root, "public/tanakh/strongs");
-const bookDir = join(root, "public/tanakh/books");
-for (const fn of readdirSync(strongDir).filter((name) => name.endsWith(".json"))) {
-  const tags = JSON.parse(readFileSync(join(strongDir, fn), "utf8"));
-  const book = JSON.parse(readFileSync(join(bookDir, fn), "utf8"));
-  for (const [ch, verses] of Object.entries(book.chapters)) {
-    for (const verse of verses) {
-      const row = tags[ch]?.[String(verse.v)] ?? [];
-      verse.words.forEach((surface, i) => {
-        const [sid, morph] = String(row[i] || "").split("|");
-        const n = strongNo(sid);
-        if (!n) return;
+const wlcDir = join(root, "data/wlc");
+for (const book of readdirSync(wlcDir)) {
+  const dir = join(wlcDir, book);
+  if (!statSync(dir).isDirectory()) continue;
+  for (const fn of readdirSync(dir).filter((name) => name.endsWith(".json.gz"))) {
+    const chapter = JSON.parse(gunzipSync(readFileSync(join(dir, fn))).toString("utf8"));
+    for (const verse of chapter.verses ?? []) {
+      for (const word of verse.words ?? []) {
+        if (word.kq_role === "qere") continue;
+        const n = strongNo(word.lemma);
+        if (!n) continue;
         occurrences.push({
           n,
-          surface: pointed(surface),
-          kind: morphKind(morph || ""),
-          article: hasReadingArticle(morph || ""),
+          surface: pointed(word.surface),
+          kind: morphKind(word.morph || ""),
+          article: hasReadingArticle(word.morph || ""),
         });
-      });
+      }
     }
   }
 }
@@ -181,6 +182,8 @@ function build(pool) {
     return dp[a.length][b.length];
   }
   function add(n, item, lexHit, viaSurface) {
+    // H606 אֱנָשׁ is Aramaic. It is not the Hebrew card אֲנָשִׁים “men”.
+    if (n === 606) return;
     if (partOfAnotherName(n, item)) {
       const lw = cons(lex.get(n)?.w || "");
       const people = item.pos === "gentilic" && viaSurface && headwords(item).some((he) => lw.includes(cons(he)));
@@ -241,6 +244,30 @@ function build(pool) {
       }
       for (const item of hits) add(occ.n, item, 0, true);
     }
+  }
+  function alsoCard(item) {
+    return item && /also/i.test(item.gloss) && !/anger|nostril|nose/i.test(item.gloss);
+  }
+  const zion = map.get(1323);
+  if (zion) {
+    zion.delete("zion");
+    zion.delete("iibs-a-10um24x");
+    if (!zion.size) map.delete(1323);
+  }
+  for (const [n, wantAlso] of [[637, true], [639, false]]) {
+    const row = map.get(n);
+    if (!row) continue;
+    for (const id of [...row.keys()]) {
+      const item = pool.find((it) => it.id === id);
+      if (wantAlso ? !alsoCard(item) : alsoCard(item)) row.delete(id);
+    }
+  }
+  // Rule 3.2. Paddan-aram and Ramoth-negeb are not the Aram card or the Negev card.
+  // The following word repeats the number with no plus, so the key itself goes.
+  // H884 Beer-sheba stays.
+  if (pool.some((item) => String(item.id).startsWith("iibs-"))) {
+    map.delete(6307);
+    map.delete(7418);
   }
   const out = {};
   for (const [n, row] of [...map.entries()].sort((a, b) => a[0] - b[0])) {
