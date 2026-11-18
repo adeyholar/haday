@@ -25,6 +25,23 @@ const { englishSlot, englishPlain, hebrewRefLabel, englishRefLabel, NO_ENGLISH, 
 const { ketivDisplay } = await jiti.import(join(root, "src/lib/ketiv-qere.ts"));
 globalThis.React = React;
 const { EnglishAsk, EnglishLines } = await jiti.import(join(root, "src/components/english-ask.tsx"));
+const { SpanScripture } = await jiti.import(join(root, "src/components/paradigms/school-paradigm.tsx"));
+const { routerContext } = await jiti.import(
+  join(root, "node_modules/@tanstack/react-router/dist/esm/routerContext.js"),
+);
+const linkRouter = {
+  isServer: true,
+  protocolAllowlist: [],
+  basepath: "",
+  history: { createHref: (href) => href || "/" },
+  stores: { location: { get: () => ({ pathname: "/", search: {}, searchStr: "", hash: "", state: {}, href: "/" }) } },
+  buildLocation: () => ({ publicHref: "/listen/read/Gen/1", href: "/listen/read/Gen/1" }),
+};
+function renderScripture(cells) {
+  return renderToStaticMarkup(
+    createElement(routerContext.Provider, { value: linkRouter }, createElement(SpanScripture, { cells, labeled: true })),
+  );
+}
 
 const school = JSON.parse(readFileSync(join(root, "data/paradigms/school-paradigm.json"), "utf8"));
 const scripture = JSON.parse(readFileSync(join(root, "data/paradigms/scripture-examples.json"), "utf8"));
@@ -85,7 +102,9 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
         const allowed = [];
         if (file.forms?.length) allowed.push(...file.forms.map((form) => nfc(form)));
         else if (file.form) allowed.push(nfc(file.form));
-        if (file.status === "transcribed" || file.status === "dash-no-form") {
+        if (file.suffixShorthand && file.form) {
+          assert.deepEqual(shown, [nfc(file.form)], cell.id);
+        } else if (file.status === "transcribed" || file.status === "dash-no-form") {
           assert.deepEqual(shown, allowed.filter(Boolean), cell.id);
         } else {
           assert.deepEqual(shown, []);
@@ -134,11 +153,10 @@ test("merged cells span one column and every slot keeps its own row", () => {
             seenIds.set(cell.id, (seenIds.get(cell.id) ?? 0) + 1);
           }
         } else if (place.kind === "span") {
-          assert.equal(place.cells.length, 1, `${page.page} ${binyan} ${row.key}`);
           const cell = place.cells[0];
           assert.equal(place.rowSpan, cell.mergedRows.length, cell.id);
           assert.equal(cell.binyan, binyan);
-          seenIds.set(cell.id, (seenIds.get(cell.id) ?? 0) + 1);
+          for (const item of place.cells) seenIds.set(item.id, (seenIds.get(item.id) ?? 0) + 1);
           const covered = cell.mergedRows.map((slot) => slot.replace(":", "|"));
           const start = table.rows.findIndex((item) => item.key === covered[0]);
           for (let offset = 1; offset < covered.length; offset += 1) {
@@ -170,11 +188,7 @@ test("merged cells span one column and every slot keeps its own row", () => {
     for (const [base, keys] of splitRows) assert.equal(keys.size, 1, `${page.page} ${base}`);
     for (const cell of cells) {
       if (!cell.mergedRows?.length) continue;
-      const count = seenIds.get(cell.id) ?? 0;
-      const first = cells.find(
-        (item) => item.binyan === cell.binyan && item.mergedRows?.join("+") === cell.mergedRows.join("+"),
-      );
-      assert.equal(count, cell.id === first.id ? 1 : 0, cell.id);
+      assert.equal(seenIds.get(cell.id) ?? 0, 1, cell.id);
     }
   }
 
@@ -205,6 +219,47 @@ test("merged cells span one column and every slot keeps its own row", () => {
   assert.equal(fs.byBinyan.Qal.kind, "cells");
   assert.equal(mp.byBinyan.Qal.kind, "cells");
   assert.equal(fp.byBinyan.Qal.kind, "cells");
+});
+
+test("Scripture view of a merged span lists every group cell's examples", () => {
+  const fileExamples = new Map(scripture.cells.map((cell) => [cell.id, (cell.examples ?? []).slice(0, 5)]));
+  let groups = 0;
+  for (const page of school.pages) {
+    const table = schoolTable(page.page);
+    for (const row of table.rows) {
+      for (const place of Object.values(row.byBinyan)) {
+        if (place.kind !== "span") continue;
+        groups += 1;
+        const html = renderScripture(place.cells);
+        let empty = 0;
+        for (const cell of place.cells) {
+          const examples = fileExamples.get(cell.id) ?? [];
+          const label = cell.pgn === "-" ? cell.conjugation : `${cell.conjugation} ${cell.pgn}`;
+          assert.match(html, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+          if (!examples.length) {
+            empty += 1;
+            continue;
+          }
+          for (const example of examples) {
+            assert.ok(html.includes(example.word), `${cell.id} ${example.ref}`);
+            assert.ok(html.includes(example.ref), `${cell.id} ${example.ref}`);
+          }
+        }
+        const misses = html.split("no example found in WLC").length - 1;
+        assert.equal(misses, empty, `${page.page} ${place.cells.map((cell) => cell.id).join(",")}`);
+      }
+    }
+  }
+  assert.ok(groups >= 13);
+  const page8 = schoolTable(8);
+  const piel = page8.rows.find((row) => row.key === "infinitive-absolute|-").byBinyan.Piel;
+  assert.equal(piel.kind, "span");
+  assert.ok(piel.cells.some((cell) => cell.id === "Hollow:Piel.infinitive-construct"));
+  const construct = fileExamples.get("Hollow:Piel.infinitive-construct");
+  assert.equal(construct.length, 5);
+  const html = renderScripture(piel.cells);
+  for (const example of construct) assert.ok(html.includes(example.ref), example.ref);
+  assert.match(html, /no example found in WLC/);
 });
 
 test("the paradigm toggle defaults to School", () => {

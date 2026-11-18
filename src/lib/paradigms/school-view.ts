@@ -22,6 +22,8 @@ export type SchoolCell = {
   position?: { index: number; of: number; order: string } | null;
   schoolMarks?: string[];
   mergedRows?: string[];
+  /** The school prints `form` as one line. `forms` is the search expansion only. */
+  suffixShorthand?: boolean;
 };
 
 export type SchoolNote = { page: number; marker: string; text: string };
@@ -63,6 +65,7 @@ export function schoolCells(page: number): SchoolCell[] {
 
 /** Strings the School view may render for this cell. All of them come from the file. */
 export function schoolShownForms(cell: SchoolCell): string[] {
+  if (cell.suffixShorthand && cell.form) return [cell.form];
   if (cell.status === "dash-no-form" && cell.form) return [cell.form];
   if (cell.status !== "transcribed") return [];
   if (cell.forms.length) return cell.forms;
@@ -139,7 +142,7 @@ export function schoolTable(page: number): SchoolTable {
     const anchor = anchorKey ? rowAt.get(anchorKey) : undefined;
     const binyan = list[0]?.binyan;
     if (!anchor || !binyan || !keys.length) continue;
-    anchor.byBinyan[binyan] = { kind: "span", cells: [list[0]], rowSpan: covered.length };
+    anchor.byBinyan[binyan] = { kind: "span", cells: list, rowSpan: covered.length };
     for (const key of keys.slice(1)) {
       const row = rowAt.get(key);
       if (row) row.byBinyan[binyan] = { kind: "covered" };

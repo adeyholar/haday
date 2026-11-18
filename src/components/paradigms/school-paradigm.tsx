@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  rowLabel,
   schoolMark,
   schoolNotes,
   schoolPages,
@@ -66,7 +67,7 @@ export function SchoolParadigm() {
                       if (place?.kind === "covered") return null;
                       return (
                         <td key={binyan} className="px-2 py-2 align-top" rowSpan={place?.kind === "span" ? place.rowSpan : undefined}>
-                          {place ? <SchoolStack cells={place.cells} view={view} /> : null}
+                          {place ? <SchoolStack cells={place.cells} view={view} span={place.kind === "span"} /> : null}
                         </td>
                       );
                     })}
@@ -94,20 +95,26 @@ function chip(on: boolean): string {
   return `min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold ${on ? "bg-ink text-parchment" : "bg-card text-muted"}`;
 }
 
-function SchoolStack({ cells, view }: { cells: SchoolCell[]; view: ParadigmView }) {
-  if (view === "scripture") {
-    return (
-      <div className="space-y-2">
-        {cells.map((cell) => (
-          <ScriptureFace key={cell.id} id={cell.id} />
-        ))}
-      </div>
-    );
-  }
+function SchoolStack({ cells, view, span = false }: { cells: SchoolCell[]; view: ParadigmView; span?: boolean }) {
+  if (view === "scripture") return <SpanScripture cells={cells} labeled={span} />;
+  const shown = span ? cells.slice(0, 1) : cells;
   return (
     <div>
-      {cells.map((cell) => (
+      {shown.map((cell) => (
         <SchoolFace key={cell.id} cell={cell} />
+      ))}
+    </div>
+  );
+}
+
+export function SpanScripture({ cells, labeled }: { cells: SchoolCell[]; labeled: boolean }) {
+  return (
+    <div className="space-y-2">
+      {cells.map((cell) => (
+        <div key={cell.id}>
+          {labeled ? <p className="text-xs font-semibold text-muted">{rowLabel(cell)}</p> : null}
+          <ScriptureFace id={cell.id} />
+        </div>
       ))}
     </div>
   );
