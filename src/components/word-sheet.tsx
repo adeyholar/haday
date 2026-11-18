@@ -12,7 +12,7 @@ import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
 import { EnglishAsk } from "@/components/english-ask";
-import { asEnglishSlot, type EnglishSlot } from "@/lib/english-line";
+import { NO_ENGLISH, type EnglishSlot } from "@/lib/english-line";
 import { StrongGlance } from "@/components/strong-glance";
 import type { WordBalloonPlace } from "@/lib/word-balloon";
 import type { BookId } from "@/lib/tanakh-canon";
@@ -183,8 +183,9 @@ export function WordSheet({
           </p>
           {hideGloss ? null : (
             <EnglishAsk
-              ylt={pick.yltSlot ?? asEnglishSlot(pick.en)}
-              web={pick.enSlot ?? asEnglishSlot(pick.en)}
+              verseKey={`${pick.book}.${pick.chapter}.${pick.verse}`}
+              ylt={pick.yltSlot ?? { state: "none", message: NO_ENGLISH }}
+              web={pick.enSlot ?? { state: "none", message: NO_ENGLISH }}
               extra={
                 !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
                   <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>

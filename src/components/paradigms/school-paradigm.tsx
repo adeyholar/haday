@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  schoolMark,
   schoolNotes,
   schoolPages,
   schoolShownForms,
@@ -20,7 +21,6 @@ export function SchoolParadigm() {
   if (!page) return null;
   const table = schoolTable(page.page);
   const notes = schoolNotes(page.page);
-  const marker = notes.find((note) => note.marker === "**")?.marker ?? notes[0]?.marker ?? "";
 
   return (
     <div>
@@ -63,8 +63,8 @@ export function SchoolParadigm() {
                     <th className="px-2 py-2 text-xs font-semibold text-muted" scope="row">{row.label}</th>
                     {table.binyanim.map((binyan) => (
                       <td key={binyan} className="px-2 py-2">
-                        {row.byBinyan[binyan] ? (
-                          <SchoolFace cell={row.byBinyan[binyan]} view={view} footnoteMarker={marker} />
+                        {row.byBinyan[binyan]?.length ? (
+                          <SchoolStack cells={row.byBinyan[binyan]} view={view} />
                         ) : null}
                       </td>
                     ))}
@@ -92,25 +92,39 @@ function chip(on: boolean): string {
   return `min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold ${on ? "bg-ink text-parchment" : "bg-card text-muted"}`;
 }
 
-function SchoolFace({
-  cell,
-  view,
-  footnoteMarker,
-}: {
-  cell: SchoolCell;
-  view: ParadigmView;
-  footnoteMarker: string;
-}) {
-  if (view === "scripture") return <ScriptureFace id={cell.id} />;
+function SchoolStack({ cells, view }: { cells: SchoolCell[]; view: ParadigmView }) {
+  if (view === "scripture") {
+    return (
+      <div className="space-y-2">
+        {cells.map((cell) => (
+          <ScriptureFace key={cell.id} id={cell.id} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div>
+      {cells.map((cell) => (
+        <SchoolFace key={cell.id} cell={cell} />
+      ))}
+    </div>
+  );
+}
+
+function SchoolFace({ cell }: { cell: SchoolCell }) {
+  const mark = schoolMark(cell);
   if (cell.status === "shaded-like-strong") {
     return <p className="rounded bg-neutral-200 px-2 py-2 text-xs text-neutral-700">like strong</p>;
   }
   if (cell.status === "blank") return <p className="min-h-11" />;
-  if (cell.status === "footnote-box-area") return <p className="text-xs text-muted">{footnoteMarker}</p>;
+  if (cell.status === "footnote-box-area") return <p className="text-xs text-muted">{mark || "**"}</p>;
   return (
     <div>
       {schoolShownForms(cell).map((form) => (
-        <p key={form} className="he-word text-lg text-ink" lang="he" dir="rtl">{form}</p>
+        <p key={`${cell.id}-${form}`} className="flex items-baseline justify-end gap-2">
+          <span className="he-word text-lg text-ink" lang="he" dir="rtl">{form}</span>
+          {mark ? <span className="text-xs text-muted">{mark}</span> : null}
+        </p>
       ))}
     </div>
   );

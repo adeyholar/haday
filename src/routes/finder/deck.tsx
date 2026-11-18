@@ -203,6 +203,7 @@ function FinderDeckPage() {
                     ))}
                   </p>
                   <EnglishAsk
+                    verseKey={item.r[0] ?? ""}
                     ylt={verse.yltSlot}
                     web={verse.enSlot}
                     extra={

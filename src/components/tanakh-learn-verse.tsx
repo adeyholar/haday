@@ -1,6 +1,5 @@
 import { findHitRange } from "@/lib/hebrew";
-import { EnglishAsk } from "@/components/english-ask";
-import { asEnglishSlot } from "@/lib/english-line";
+import { VerseEnglish } from "@/components/verse-english";
 import { learnNugget } from "@/lib/tanakh-learn-nugget";
 import {
   classVocabInText,
@@ -39,7 +38,6 @@ export function TanakhLearnVerse({
           verse.he
         )}
       </p>
-      <EnglishAsk ylt={asEnglishSlot(verse.en)} web={asEnglishSlot(verse.en)} />
       <p className="mt-3 text-sm text-ink">
         <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
           {explained.chapter ? `Class vocab · Ch. ${explained.chapter}` : "Lemma"}
@@ -47,29 +45,29 @@ export function TanakhLearnVerse({
         <span className="he-word ms-2 text-xl" dir="rtl" lang="he">
           {explained.lemmaHe}
         </span>
-        {explained.lemmaGloss ? <span> · {explained.lemmaGloss}</span> : null}
-        {explained.lemmaTranslit ? <span className="text-muted"> · {explained.lemmaTranslit}</span> : null}
       </p>
-      {also.length > 0 ? (
-        <div className="mt-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Also class vocab in this verse</p>
-          <ul className="mt-1 flex flex-wrap gap-1.5">
-            {also.map((v) => (
-              <li
-                key={v.id}
-                className="rounded-[var(--radius-md)] bg-card px-2 py-1 text-sm text-ink shadow-[var(--shadow-border)]"
-              >
-                <span className="he-word text-lg" dir="rtl" lang="he">
-                  {v.hebrew}
-                </span>
-                <span> · {shortGloss(v.gloss)}</span>
-                <span className="text-xs text-muted"> · Ch. {v.chapter}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      <p className="mt-2 text-sm text-muted">{explained.note}</p>
+      <VerseEnglish
+        verseRef={verse.ref}
+        extra={
+          <>
+            {explained.lemmaGloss ? <p className="text-sm text-muted">Class gloss: {explained.lemmaGloss}</p> : null}
+            {explained.lemmaTranslit ? <p className="text-sm text-muted">{explained.lemmaTranslit}</p> : null}
+            {also.length > 0 ? (
+              <ul className="flex flex-wrap gap-1.5">
+                {also.map((v) => (
+                  <li key={v.id} className="text-sm text-ink">
+                    <span className="he-word text-lg" dir="rtl" lang="he">
+                      {v.hebrew}
+                    </span>
+                    <span> · {shortGloss(v.gloss)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <p className="text-sm text-muted">{explained.note}</p>
+          </>
+        }
+      />
       <p className="mt-3 border-s-2 border-primary ps-3 text-sm text-ink">{nugget}</p>
     </li>
   );

@@ -6,8 +6,7 @@ import { GradeBanner } from "@/components/grade-banner";
 import { MarkedAnswer } from "@/components/marked-answer";
 import { VocabArt } from "@/components/vocab-art";
 import { VerseCard } from "@/components/verse-card";
-import { EnglishAsk } from "@/components/english-ask";
-import { asEnglishSlot } from "@/lib/english-line";
+import { VerseEnglish } from "@/components/verse-english";
 import { cn } from "@/lib/cn";
 import { glossMatches, liveGloss, POS_LABEL, studySenseLine } from "@/lib/vocab";
 import { lettersOnly, guideProgress, guideTarget, liveMatchAny, normalizeHebrewFull } from "@/lib/hebrew";
@@ -655,7 +654,7 @@ export function EtchPlay({
               </form>
             </>
           )}
-          {graded && task.verse ? <EnglishAsk ylt={asEnglishSlot(task.verse.en)} web={asEnglishSlot(task.verse.en)} /> : null}
+          {graded && task.verse ? <VerseEnglish verseRef={task.verse.ref} /> : null}
           {graded && (
             <Button type="button" variant="outline" className="mt-3" onClick={() => speakLine(task.verse?.he || item.hebrew)}>
               Hear the line

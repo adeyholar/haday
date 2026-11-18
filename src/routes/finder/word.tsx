@@ -127,6 +127,7 @@ function FinderWordPage() {
                   ))}
                 </p>
                 <EnglishAsk
+                  verseKey={row.ref}
                   ylt={row.yltSlot}
                   web={row.enSlot}
                   extra={

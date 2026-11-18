@@ -19,6 +19,9 @@ export type SchoolCell = {
   forms: string[];
   status: SchoolStatus;
   root?: string;
+  position?: { index: number; of: number; order: string } | null;
+  schoolMarks?: string[];
+  mergedRows?: string[];
 };
 
 export type SchoolNote = { page: number; marker: string; text: string };
@@ -66,9 +69,9 @@ export function schoolShownForms(cell: SchoolCell): string[] {
   return cell.form ? [cell.form] : [];
 }
 
-export function rowKey(cell: SchoolCell): string {
-  const mark = cell.id.includes("#") ? cell.id.slice(cell.id.indexOf("#")) : "";
-  return `${cell.conjugation}|${cell.pgn}|${mark}`;
+/** One conjugation+PGN slot. The #1 / #2 suffix is a split inside that slot, not a new row. */
+export function slotKey(cell: SchoolCell): string {
+  return `${cell.conjugation}|${cell.pgn}`;
 }
 
 export function rowLabel(cell: SchoolCell): string {
@@ -76,26 +79,65 @@ export function rowLabel(cell: SchoolCell): string {
   return `${cell.conjugation} ${cell.pgn}`;
 }
 
+/** The * or ** printed next to a form. The full note stays in the list under the table. */
+export function schoolMark(cell: SchoolCell): string {
+  const raw = cell.schoolMarks?.[0] ?? "";
+  if (raw.startsWith("**")) return "**";
+  if (raw.startsWith("*")) return "*";
+  return "";
+}
+
+function mergeKey(rows: string[]): string {
+  return `M:${rows.join("+")}`;
+}
+
+function labelForKey(key: string, cell: SchoolCell): string {
+  if (!key.startsWith("M:")) return rowLabel(cell);
+  return key
+    .slice(2)
+    .split("+")
+    .map((slot) => {
+      const [conjugation, pgn] = slot.split(":");
+      if (!pgn || pgn === "-") return conjugation ?? slot;
+      return `${conjugation} ${pgn}`;
+    })
+    .join(" / ");
+}
+
 export type SchoolTable = {
   binyanim: string[];
-  rows: { key: string; label: string; byBinyan: Record<string, SchoolCell | undefined> }[];
+  rows: { key: string; label: string; byBinyan: Record<string, SchoolCell[]> }[];
 };
 
 export function schoolTable(page: number): SchoolTable {
   const cells = schoolCells(page);
+  const groupForSlot = new Map<string, string>();
+  for (const cell of cells) {
+    if (!cell.mergedRows?.length) continue;
+    const key = mergeKey(cell.mergedRows);
+    for (const slot of cell.mergedRows) groupForSlot.set(slot, key);
+  }
   const binyanim: string[] = [];
   const rows: SchoolTable["rows"] = [];
   const rowAt = new Map<string, SchoolTable["rows"][number]>();
   for (const cell of cells) {
     if (!binyanim.includes(cell.binyan)) binyanim.push(cell.binyan);
-    const key = rowKey(cell);
+    const slot = `${cell.conjugation}:${cell.pgn}`;
+    const key = groupForSlot.get(slot) ?? slotKey(cell);
     let row = rowAt.get(key);
     if (!row) {
-      row = { key, label: rowLabel(cell), byBinyan: {} };
+      row = { key, label: labelForKey(key, cell), byBinyan: {} };
       rowAt.set(key, row);
       rows.push(row);
     }
-    row.byBinyan[cell.binyan] = cell;
+    const list = row.byBinyan[cell.binyan] ?? [];
+    list.push(cell);
+    row.byBinyan[cell.binyan] = list;
+  }
+  for (const row of rows) {
+    for (const list of Object.values(row.byBinyan)) {
+      list.sort((a, b) => (a.position?.index ?? 0) - (b.position?.index ?? 0));
+    }
   }
   return { binyanim, rows };
 }

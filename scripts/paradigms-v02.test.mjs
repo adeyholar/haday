@@ -19,12 +19,12 @@ const { schoolShownForms, schoolPages, schoolTable, scriptureExamples } = await 
 );
 const { strongLevels } = await jiti.import(join(root, "src/lib/paradigms/catalog.ts"));
 const { accessCacheFor } = await jiti.import(join(root, "src/lib/paradigms/access-cache.ts"));
-const { englishSlot, englishPlain, hebrewRefLabel, NO_ENGLISH, TRANSLATION_OPTIONS } = await jiti.import(
+const { englishSlot, englishPlain, hebrewRefLabel, englishRefLabel, NO_ENGLISH, TRANSLATION_OPTIONS } = await jiti.import(
   join(root, "src/lib/english-line.ts"),
 );
 const { ketivDisplay } = await jiti.import(join(root, "src/lib/ketiv-qere.ts"));
 globalThis.React = React;
-const { EnglishAsk } = await jiti.import(join(root, "src/components/english-ask.tsx"));
+const { EnglishAsk, EnglishLines } = await jiti.import(join(root, "src/components/english-ask.tsx"));
 
 const school = JSON.parse(readFileSync(join(root, "data/paradigms/school-paradigm.json"), "utf8"));
 const scripture = JSON.parse(readFileSync(join(root, "data/paradigms/scripture-examples.json"), "utf8"));
@@ -77,8 +77,8 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
       [...new Set(school.cells.filter((cell) => cell.page === page.page).map((cell) => cell.binyan))],
     );
     for (const row of table.rows) {
-      for (const cell of Object.values(row.byBinyan)) {
-        if (!cell) continue;
+      for (const stack of Object.values(row.byBinyan)) {
+        for (const cell of stack) {
         const file = school.cells.find((item) => item.id === cell.id);
         const shown = schoolShownForms(cell).map((form) => nfc(form));
         const allowed = [];
@@ -90,7 +90,59 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
           assert.deepEqual(shown, []);
         }
         for (const form of shown) assert.equal(form, nfc(form));
+        }
       }
+    }
+  }
+});
+
+test("each conjugation and PGN slot is one row, and split forms share it", () => {
+  for (const page of school.pages) {
+    const cells = school.cells.filter((cell) => cell.page === page.page);
+    const groupForSlot = new Map();
+    for (const cell of cells) {
+      if (!cell.mergedRows?.length) continue;
+      const key = `M:${cell.mergedRows.join("+")}`;
+      for (const slot of cell.mergedRows) groupForSlot.set(slot, key);
+    }
+    const fileOrder = [];
+    const seen = new Set();
+    for (const cell of cells) {
+      const slot = `${cell.conjugation}:${cell.pgn}`;
+      const key = groupForSlot.get(slot) ?? `${cell.conjugation}|${cell.pgn}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      fileOrder.push(key);
+    }
+    const table = schoolTable(page.page);
+    assert.deepEqual(table.rows.map((row) => row.key), fileOrder, `page ${page.page}`);
+    const slotRows = new Map();
+    const rowOf = new Map();
+    table.rows.forEach((row, index) => {
+      for (const stack of Object.values(row.byBinyan)) {
+        const indexes = stack.map((cell) => cell.position?.index ?? 0);
+        assert.deepEqual(indexes, [...indexes].sort((a, b) => a - b), `${page.page} ${row.key}`);
+        for (const cell of stack) {
+          const slot = `${cell.conjugation}|${cell.pgn}`;
+          const at = slotRows.get(slot) ?? new Set();
+          at.add(index);
+          slotRows.set(slot, at);
+          rowOf.set(cell.id, index);
+        }
+      }
+    });
+    for (const [slot, at] of slotRows) assert.equal(at.size, 1, `${page.page} ${slot}`);
+    const siblings = new Map();
+    for (const cell of cells) {
+      const split = /^(.*)#\d+$/.exec(cell.id);
+      if (!split) continue;
+      const group = siblings.get(split[1]) ?? [];
+      group.push(cell.id);
+      siblings.set(split[1], group);
+    }
+    for (const [base, ids] of siblings) {
+      const rows = new Set(ids.map((id) => rowOf.get(id)));
+      assert.equal(rows.size, 1, `${page.page} ${base}`);
     }
   }
 });
@@ -102,7 +154,7 @@ test("the paradigm toggle defaults to School", () => {
   assert.match(source, /setView\("scripture"\)/);
 });
 
-test("every Scripture-view example is the WLC word at wordIndex", () => {
+test("every scripture example word NFC-equals the reader surface at its index", () => {
   const cache = new Map();
   function verse(book, chapter, osis) {
     const key = `${book}/${chapter}`;
@@ -113,37 +165,25 @@ test("every Scripture-view example is the WLC word at wordIndex", () => {
     return cache.get(key).find((row) => row.ref === osis);
   }
   let examples = 0;
-  const mismatches = [];
   for (const cell of scripture.cells) {
-    const shown = scriptureExamples(cell.id);
-    assert.ok(shown.length <= 5, cell.id);
-    if (!shown.length) continue;
-    for (const example of shown) {
+    assert.ok(scriptureExamples(cell.id).length <= 5, cell.id);
+    for (const example of cell.examples ?? []) {
       examples += 1;
       const [book, chapter] = example.osis.split(".");
       const row = verse(book, chapter, example.osis);
       assert.ok(row, example.osis);
       const word = row.words[example.wordIndex - 1];
-      assert.ok(word, `${example.osis} #${example.wordIndex}`);
-      if (nfc(word.surface) !== nfc(example.word)) {
-        mismatches.push(`${example.osis}#${example.wordIndex}`);
-      }
+      assert.ok(word, `${cell.id} ${example.osis} #${example.wordIndex}`);
+      assert.equal(nfc(word.surface), nfc(example.word), `${cell.id} ${example.osis} #${example.wordIndex}`);
     }
   }
-  assert.ok(examples > 0);
-  // scripture-examples.json is committed unchanged. These `word` strings differ from
-  // the WLC surface by a dagesh or a cantillation mark. The view still prints `word`.
-  assert.deepEqual([...new Set(mismatches)].sort(), [
-    "1Kgs.19.14#3",
-    "2Sam.22.28#7",
-    "Deut.1.42#14",
-    "Ezek.22.5#4",
-    "Josh.2.3#7",
-    "Lam.1.11#4",
-    "Ps.60.3#5",
-    "Ps.62.4#11",
-    "Ps.62.4#3",
-  ]);
+  assert.equal(examples, 3796);
+  const piel = scripture.cells.find((cell) => cell.id === "Piel.participle.mp");
+  assert.equal(piel.examples.some((example) => example.osis === "Lam.1.11"), false);
+  const qatal = scripture.cells.find((cell) => cell.id === "III-Aleph:Piel.qatal.1cs");
+  assert.equal(qatal.examples.some((example) => example.osis === "1Kgs.19.14" && example.wordIndex === 3), false);
+  const absolute = scripture.cells.find((cell) => cell.id === "III-Aleph:Piel.infinitive-absolute");
+  assert.equal(absolute.examples.some((example) => example.osis === "1Kgs.19.14" && example.wordIndex === 2), true);
 });
 
 test("a Scripture cell with no example says no example found in WLC", () => {
@@ -306,5 +346,104 @@ test("Scripture Path verse line is unchanged", () => {
   const page = read("src/routes/iibs/wlc/$book/$ch.tsx");
   assert.equal(desk.includes("EnglishVerse"), false);
   assert.equal(page.includes("EnglishVerse"), false);
+  assert.equal(desk.includes("VerseEnglish"), false);
+  assert.equal(page.includes("VerseEnglish"), false);
   assert.equal(scriptureLine("Gen", 1, "Gen.1.1"), SCRIPTURE_GEN_1_1);
+});
+
+test("no component passes one slot as both YLT and WEB", () => {
+  const files = [];
+  function walk(dir) {
+    for (const name of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, name.name);
+      if (name.isDirectory()) walk(path);
+      else if (name.name.endsWith(".tsx")) files.push(path);
+    }
+  }
+  walk(join(root, "src"));
+  for (const path of files) {
+    const source = readFileSync(path, "utf8");
+    assert.doesNotMatch(source, /ylt=\{([A-Za-z0-9_.]+)\}[^>]*web=\{\1\}/, path);
+    assert.doesNotMatch(source, /ylt=\{asEnglishSlot\(([^)]+)\)\}[^>]*web=\{asEnglishSlot\(\1\)\}/, path);
+  }
+});
+
+test("Num 17:13 and Deut 13:3 use their versemap English refs", () => {
+  const num = JSON.parse(readFileSync(join(root, "public/tanakh/books/Num.json"), "utf8"));
+  const deut = JSON.parse(readFileSync(join(root, "public/tanakh/books/Deut.json"), "utf8"));
+  const numRow = num.chapters["17"].find((row) => row.v === 13);
+  const deutRow = deut.chapters["13"].find((row) => row.v === 3);
+  assert.deepEqual(numRow.en.lines.map((line) => line.ref), ["Num.16.48"]);
+  assert.deepEqual(numRow.ylt.lines.map((line) => line.ref), ["Num.16.48"]);
+  assert.deepEqual(deutRow.en.lines.map((line) => line.ref), ["Deut.13.2"]);
+  assert.deepEqual(deutRow.ylt.lines.map((line) => line.ref), ["Deut.13.2"]);
+  assert.equal(englishRefLabel("Mal.4.1"), "Mal 4:1");
+  assert.equal(englishRefLabel("Num.16.48"), "Num 16:48");
+  const lines = renderToStaticMarkup(createElement(EnglishLines, { slot: numRow.ylt }));
+  assert.match(lines, /Num 16:48/);
+  assert.equal(lines.includes("Num.16.48"), false);
+});
+
+test("the next grade question starts with no English in the DOM", async () => {
+  const { GradeCard } = await jiti.import(join(root, "src/components/tanakh-reading.tsx"));
+  const first = {
+    id: "Gen 1:1:0",
+    verse: {
+      ref: "Gen 1:1",
+      words: ["בְּרֵאשִׁית"],
+      en: "In the beginning, God created the heavens and the earth.",
+      ylt: "In the beginning of God's preparing the heavens and the earth",
+      enSlot: { state: "text", lines: [{ ref: "Gen.1.1", text: "In the beginning, God created the heavens and the earth." }] },
+      yltSlot: { state: "text", lines: [{ ref: "Gen.1.1", text: "In the beginning of God's preparing the heavens and the earth" }] },
+    },
+    choices: ["In the beginning, God created the heavens and the earth.", "A neighbour verse"],
+    answer: "In the beginning, God created the heavens and the earth.",
+    yltChoices: ["In the beginning of God's preparing the heavens and the earth"],
+    yltAnswer: "In the beginning of God's preparing the heavens and the earth",
+  };
+  const second = {
+    ...first,
+    id: "Gen 1:2:1",
+    verse: { ...first.verse, ref: "Gen 1:2", words: ["וְהָאָרֶץ"] },
+    choices: ["And the earth was waste and void."],
+    answer: "And the earth was waste and void.",
+    yltChoices: ["And the earth hath existed waste and void"],
+    yltAnswer: "And the earth hath existed waste and void",
+  };
+  const closed = (item, qi) =>
+    renderToStaticMarkup(createElement(GradeCard, { item, qi, total: 2, picked: null, onPick: () => {} }));
+  const opened = closed(first, 0);
+  assert.match(opened, />English</);
+  assert.equal(opened.includes("God created the heavens"), false);
+  assert.equal(opened.includes("preparing the heavens"), false);
+  const next = closed(second, 1);
+  assert.match(next, />English</);
+  assert.equal(next.includes("waste and void"), false);
+  assert.equal(next.includes("God created the heavens"), false);
+  const reading = read("src/components/tanakh-reading.tsx");
+  assert.match(reading, /<GradeCard key=\{quiz\[qi\]!\.id\}/);
+  assert.match(reading, /openId === item\.id/);
+});
+
+test("a class gloss is absent until the English control is opened", async () => {
+  const { TanakhLearnVerse } = await jiti.import(join(root, "src/components/tanakh-learn-verse.tsx"));
+  const { learnVerseExplain } = await jiti.import(join(root, "src/lib/tanakh-learn-note.ts"));
+  const verse = {
+    ref: "Gen.1.1",
+    he: "בְּרֵאשִׁית בָּרָא אֱלֹהִים",
+    en: "In the beginning God created the heavens and the earth.",
+    hit: "בְּרֵאשִׁית",
+  };
+  const explained = learnVerseExplain(verse, "article", []);
+  const html = renderToStaticMarkup(createElement(TanakhLearnVerse, { verse, kind: "article" }));
+  assert.match(html, />English</);
+  if (explained.lemmaGloss) assert.equal(html.includes(explained.lemmaGloss), false, explained.lemmaGloss);
+  assert.equal(html.includes("In the beginning God created"), false);
+});
+
+test("the paradigms flag clears when the account changes", () => {
+  const source = read("src/components/paradigms/use-paradigm-progress.ts");
+  assert.match(source, /setEnabled\(false\)/);
+  const access = read("src/lib/paradigms/access-cache.ts");
+  assert.match(access, /reuse:/);
 });

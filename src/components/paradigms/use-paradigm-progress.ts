@@ -32,6 +32,7 @@ export function useParadigmAccess() {
 
   useEffect(() => {
     let cancel = false;
+    setEnabled(false);
     setReady(false);
     loadAccess(userId)
       .then((on) => {

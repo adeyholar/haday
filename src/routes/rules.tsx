@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { ClassifyDrill } from "@/components/classify-drill";
+import { VerseEnglish } from "@/components/verse-english";
 import { drawRound, spliceLater } from "@/lib/quiz-draw";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { cn } from "@/lib/cn";
@@ -168,7 +169,7 @@ function TanakhLine({ item }: { item: GrammarCase }) {
           item.he
         )}
       </p>
-      <p className="mt-1 text-sm text-muted">{item.en}</p>
+      <VerseEnglish verseRef={`${item.book}.${item.chapter}.${item.verse}`} />
     </figure>
   );
 }
@@ -515,7 +516,7 @@ function VersePrompt({ item, showEnglish, ask }: { item: GrammarCase; showEnglis
           item.he
         )}
       </p>
-      {showEnglish && <p className="mt-2 text-sm text-muted">{item.en}</p>}
+      {showEnglish ? <VerseEnglish verseRef={`${item.book}.${item.chapter}.${item.verse}`} /> : null}
     </figure>
   );
 }
@@ -549,7 +550,7 @@ function AnswerPanel({
           {item.he}
         </p>
       )}
-      {mode === "verse" && <p className="mt-1 text-sm text-muted">{item.en}</p>}
+      {mode === "verse" ? <VerseEnglish verseRef={`${item.book}.${item.chapter}.${item.verse}`} /> : null}
       {mode === "verse" && siblings.length > 1 && (
         <p className="mt-3 text-xs text-subtle">
           Also accepted:{" "}

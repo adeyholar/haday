@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { passageForRoot } from "@/lib/verbal-passages";
 import { paradigmVerse } from "@/lib/verbal-paradigm-verses";
+import { VerseEnglish } from "@/components/verse-english";
 import { markQueryInVerse } from "@/lib/tanakh-word";
 import {
   CLASS_LABEL,
@@ -477,7 +478,7 @@ export function VerbalSystemBuilder({ scripture = false }: { scripture?: boolean
                   </span>
                 ))}
               </p>
-              <p className="mt-2 text-sm text-muted">{passage.en}</p>
+              <VerseEnglish verseRef={passage.ref} />
               {read.length >= 2 ? (
                 <p className="mt-3">
                   {scripture ? (

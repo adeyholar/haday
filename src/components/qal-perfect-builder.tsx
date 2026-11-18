@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
-import { EnglishAsk } from "@/components/english-ask";
-import { asEnglishSlot } from "@/lib/english-line";
+import { VerseEnglish } from "@/components/verse-english";
 import { MarkedAnswer } from "@/components/marked-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -359,7 +358,7 @@ function OpenedVerse({ verse, letters }: { verse: { ref: string; where: string; 
           </span>
         ))}
       </p>
-      <EnglishAsk ylt={asEnglishSlot(verse.en)} web={asEnglishSlot(verse.en)} />
+      <VerseEnglish verseRef={verse.ref} />
       {book && ch ? (
         <p className="mt-3">
           <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">

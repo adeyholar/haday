@@ -24,8 +24,14 @@ export type EnglishSlot =
   | { state: "text"; lines: EnglishLine[] };
 
 export function hebrewRefLabel(key: string): string {
-  const [book, chapter, verse] = key.split(".");
-  return `${book} ${chapter}:${verse}`;
+  return englishRefLabel(key);
+}
+
+/** "Mal.4.1" prints as "Mal 4:1". A label that is already spaced is left as it is. */
+export function englishRefLabel(ref: string): string {
+  const parts = ref.split(".");
+  if (parts.length === 3 && parts[0] && parts[1] && parts[2]) return `${parts[0]} ${parts[1]}:${parts[2]}`;
+  return ref;
 }
 
 export function asEnglishSlot(value: unknown): EnglishSlot {

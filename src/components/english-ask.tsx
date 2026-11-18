@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { NO_ENGLISH, TRANSLATION_OPTIONS, type EnglishSlot, type TranslationId } from "@/lib/english-line";
+import { NO_ENGLISH, TRANSLATION_OPTIONS, englishRefLabel, type EnglishSlot, type TranslationId } from "@/lib/english-line";
 
 const CHOICE_KEY = "haday.english.choice";
 
@@ -23,12 +23,24 @@ export function rememberTranslation(choice: TranslationId): void {
   }
 }
 
-export function EnglishAsk({ ylt, web, extra }: { ylt: EnglishSlot; web: EnglishSlot; extra?: ReactNode }) {
-  const [open, setOpen] = useState(false);
+export function EnglishAsk({
+  ylt,
+  web,
+  extra,
+  verseKey,
+}: {
+  ylt: EnglishSlot;
+  web: EnglishSlot;
+  extra?: ReactNode;
+  /** When this changes, the control closes again. Each verse needs its own tap. */
+  verseKey?: string;
+}) {
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const [choice, setChoice] = useState<TranslationId | null>(null);
+  const open = openKey !== null && openKey === (verseKey ?? "open");
   if (!open) {
     return (
-      <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => setOpen(true)}>
+      <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => setOpenKey(verseKey ?? "open")}>
         English
       </button>
     );
@@ -68,7 +80,7 @@ export function EnglishLines({ slot }: { slot: EnglishSlot }) {
     <div className="mt-2 space-y-2">
       {slot.lines.map((line) => (
         <p key={`${line.ref}-${line.part ?? ""}`} className="text-sm text-ink">
-          <span className="font-semibold">{line.ref}</span> {line.text}
+          <span className="font-semibold">{englishRefLabel(line.ref)}</span> {line.text}
           {line.alsoCovers ? <span className="mt-1 block text-muted">also covers Heb. {line.alsoCovers}</span> : null}
         </p>
       ))}
@@ -78,4 +90,18 @@ export function EnglishLines({ slot }: { slot: EnglishSlot }) {
 
 export function closedEnglishMessage(): string {
   return NO_ENGLISH;
+}
+
+/** A word gloss stays off the page until this control is tapped. */
+export function GlossAsk({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  if (!text) return null;
+  if (!open) {
+    return (
+      <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => setOpen(true)}>
+        Gloss
+      </button>
+    );
+  }
+  return <p className="mt-1 text-sm text-muted">{text}</p>;
 }

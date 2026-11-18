@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { LadderActionLink } from "@/components/ladder-action";
 import { Button } from "@/components/ui/button";
+import { VerseEnglish } from "@/components/verse-english";
 import { cn } from "@/lib/cn";
 import { hearLetterName, hushHear } from "@/lib/letter-hear";
 import { PSALM_119_STANZAS } from "@/lib/psalm-119-acrostic";
@@ -85,7 +86,7 @@ export function PsalmAcrosticWalk({ lessonId }: { lessonId: string }) {
       <p className="he-word text-center text-lg text-ink" lang="he" dir="rtl">
         {stanza.he}
       </p>
-      <p className="text-center text-sm text-muted">{stanza.en}</p>
+      <VerseEnglish verseRef={`Ps.119.${stanza.v1}`} />
       <p className="text-ink">{stanza.note}</p>
       <ul dir="rtl" className="grid grid-cols-6 gap-1.5 sm:grid-cols-11">
         {stanzas.map((row, n) => (

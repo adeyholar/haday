@@ -5,7 +5,7 @@ import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
-import { EnglishAsk, EnglishLines, rememberTranslation } from "@/components/english-ask";
+import { EnglishAsk, rememberTranslation } from "@/components/english-ask";
 import { TRANSLATION_OPTIONS, type TranslationId } from "@/lib/english-line";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
@@ -1014,7 +1014,7 @@ export function TanakhReading({
       ) : null}
 
       {mode === "grade" && quiz && !done ? (
-        <GradeCard item={quiz[qi]!} qi={qi} total={quiz.length} picked={picked} onPick={pickChoice} />
+        <GradeCard key={quiz[qi]!.id} item={quiz[qi]!} qi={qi} total={quiz.length} picked={picked} onPick={pickChoice} />
       ) : null}
 
       {mode === "grade" && done ? (
@@ -1598,7 +1598,7 @@ function FollowCard({
                     );
                   })}
                 </p>
-                <EnglishAsk ylt={row.yltSlot} web={row.enSlot} />
+                <EnglishAsk verseKey={row.ref} ylt={row.yltSlot} web={row.enSlot} />
               </li>
             );
           })}
@@ -1701,7 +1701,7 @@ function VerseClipBar({
   );
 }
 
-function GradeCard({
+export function GradeCard({
   item,
   qi,
   total,
@@ -1714,12 +1714,12 @@ function GradeCard({
   picked: string | null;
   onPick: (choice: string, item: GradeItem, answer?: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
   const [choice, setChoice] = useState<TranslationId | null>(null);
+  const open = openId === item.id;
   const selected: TranslationId = choice ?? "ylt";
   const choices = selected === "ylt" ? item.yltChoices : item.choices;
   const answer = selected === "ylt" ? item.yltAnswer : item.answer;
-  const slot = selected === "ylt" ? item.verse.yltSlot : item.verse.enSlot;
   return (
     <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -1733,7 +1733,7 @@ function GradeCard({
         ))}
       </p>
       {!open ? (
-        <button type="button" className="mt-4 min-h-11 text-sm font-semibold text-primary" onClick={() => setOpen(true)}>
+        <button type="button" className="mt-4 min-h-11 text-sm font-semibold text-primary" onClick={() => { setOpenId(item.id); setChoice(null); }}>
           English
         </button>
       ) : (
@@ -1757,7 +1757,6 @@ function GradeCard({
               );
             })}
           </div>
-      <EnglishLines slot={slot} />
       {choices.length ? <p className="mt-6 text-sm font-semibold text-ink">Which English is this verse?</p> : null}
       <ul className="mt-3 grid gap-2">
         {choices.map((c) => {

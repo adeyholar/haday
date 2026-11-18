@@ -642,7 +642,11 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
             {passage.verses.map((verseRow) => (
               <div key={verseRow.verse}>
                 <p className="text-xs text-muted">{verseRow.verse}</p>
-                <EnglishAsk ylt={asEnglishSlot(verseRow.yltSlot)} web={asEnglishSlot(verseRow.enSlot)} />
+                <EnglishAsk
+                  verseKey={`${passage.book}.${passage.chapter}.${verseRow.verse}`}
+                  ylt={asEnglishSlot(verseRow.yltSlot)}
+                  web={asEnglishSlot(verseRow.enSlot)}
+                />
               </div>
             ))}
           </div>
