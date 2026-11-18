@@ -15,7 +15,7 @@ function ScriptureQalImperfect() {
           Build from the root
         </Link>
       </p>
-      <QalImperfectBuilder />
+      <QalImperfectBuilder scripture />
     </>
   );
 }

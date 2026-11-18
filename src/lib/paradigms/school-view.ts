@@ -24,6 +24,7 @@ export type SchoolCell = {
   mergedRows?: string[];
   /** The school prints `form` as one line. `forms` is the search expansion only. */
   suffixShorthand?: boolean;
+  tutorNote?: string;
 };
 
 export type SchoolNote = { page: number; marker: string; text: string };
@@ -37,10 +38,19 @@ export type ScriptureExample = {
   word: string;
 };
 
+export type NearestAttested = {
+  ref: string;
+  osis: string;
+  wordIndex: number;
+  word: string;
+};
+
 export type ScriptureCell = {
   id: string;
   examples: ScriptureExample[];
   flag?: string;
+  nearestAttestedNote?: string;
+  nearestAttested?: NearestAttested[];
 };
 
 type SchoolFile = { pages: SchoolPage[]; notes: SchoolNote[]; cells: SchoolCell[] };
@@ -63,13 +73,12 @@ export function schoolCells(page: number): SchoolCell[] {
   return school.cells.filter((cell) => cell.page === page);
 }
 
-/** Strings the School view may render for this cell. All of them come from the file. */
+/** The printed school text. `forms` is the search expansion and is not shown. */
 export function schoolShownForms(cell: SchoolCell): string[] {
-  if (cell.suffixShorthand && cell.form) return [cell.form];
   if (cell.status === "dash-no-form" && cell.form) return [cell.form];
   if (cell.status !== "transcribed") return [];
-  if (cell.forms.length) return cell.forms;
-  return cell.form ? [cell.form] : [];
+  if (cell.form) return [cell.form];
+  return [];
 }
 
 /** One conjugation+PGN slot. The #1 / #2 suffix is a split inside that slot, not a new row. */
@@ -166,4 +175,12 @@ export function scriptureCell(id: string): ScriptureCell | undefined {
 
 export function scriptureExamples(id: string): ScriptureExample[] {
   return (scriptureById.get(id)?.examples ?? []).slice(0, 5);
+}
+
+export function scriptureFlag(id: string): string {
+  return scriptureById.get(id)?.flag ?? "";
+}
+
+export function nearestAttested(id: string): NearestAttested[] {
+  return scriptureById.get(id)?.nearestAttested ?? [];
 }

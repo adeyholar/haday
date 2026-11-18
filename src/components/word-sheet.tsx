@@ -11,7 +11,7 @@ import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
-import { EnglishAsk } from "@/components/english-ask";
+import { EnglishAsk, GlossAsk } from "@/components/english-ask";
 import { NO_ENGLISH, type EnglishSlot } from "@/lib/english-line";
 import { StrongGlance } from "@/components/strong-glance";
 import type { WordBalloonPlace } from "@/lib/word-balloon";
@@ -198,8 +198,7 @@ export function WordSheet({
       {lemma ? (
         <p className="mt-3 text-sm text-ink">
           Class vocab · Ch. {lemma.chapter}: <span className="he-word text-xl" dir="rtl" lang="he">{lemma.hebrew}</span>
-          {" · "}
-          {shortGloss(lemma.gloss)}
+          <GlossAsk text={shortGloss(lemma.gloss)} />
         </p>
       ) : hideGloss ? null : (
         <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>

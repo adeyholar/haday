@@ -102,10 +102,8 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
         const allowed = [];
         if (file.forms?.length) allowed.push(...file.forms.map((form) => nfc(form)));
         else if (file.form) allowed.push(nfc(file.form));
-        if (file.suffixShorthand && file.form) {
+        if ((file.status === "transcribed" || file.status === "dash-no-form") && file.form) {
           assert.deepEqual(shown, [nfc(file.form)], cell.id);
-        } else if (file.status === "transcribed" || file.status === "dash-no-form") {
-          assert.deepEqual(shown, allowed.filter(Boolean), cell.id);
         } else {
           assert.deepEqual(shown, []);
         }
@@ -233,11 +231,13 @@ test("Scripture view of a merged span lists every group cell's examples", () => 
         const html = renderScripture(place.cells);
         let empty = 0;
         for (const cell of place.cells) {
+          const record = scripture.cells.find((item) => item.id === cell.id);
           const examples = fileExamples.get(cell.id) ?? [];
           const label = cell.pgn === "-" ? cell.conjugation : `${cell.conjugation} ${cell.pgn}`;
           assert.match(html, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
           if (!examples.length) {
-            empty += 1;
+            if (record?.flag) assert.ok(html.includes(record.flag), cell.id);
+            else empty += 1;
             continue;
           }
           for (const example of examples) {
@@ -259,7 +259,9 @@ test("Scripture view of a merged span lists every group cell's examples", () => 
   assert.equal(construct.length, 5);
   const html = renderScripture(piel.cells);
   for (const example of construct) assert.ok(html.includes(example.ref), example.ref);
-  assert.match(html, /no example found in WLC/);
+  const absolute = scripture.cells.find((cell) => cell.id === "Hollow:Piel.infinitive-absolute");
+  assert.equal((absolute.examples ?? []).length, 0);
+  assert.ok(html.includes(absolute.flag));
 });
 
 test("the paradigm toggle defaults to School", () => {
@@ -592,6 +594,99 @@ test("book English waits for the tap and shares one download per book", async ()
   assert.match(source, /useVerseSlots\(verseRef, asked\)/);
   assert.match(source, /askedRef === verseRef/);
   assert.match(read("src/components/english-ask.tsx"), /Loading…/);
+});
+
+test("the printed Qal infinitive construct and the page 9 flag come from the data", () => {
+  const printed = school.cells.find((cell) => cell.id === "Qal.infinitive-construct");
+  assert.deepEqual(schoolShownForms(printed).map((form) => nfc(form)), [nfc(printed.form)]);
+  assert.ok(printed.form.includes("w/suffix"));
+  const flagged = scripture.cells.find((cell) => cell.id === "Geminate:Hiphil.wayyiqtol.3ms");
+  assert.equal(flagged.flag, "school print, no strict WLC match");
+  assert.equal(flagged.examples.length, 0);
+  const attested = flagged.nearestAttested[0];
+  assert.equal(attested.ref, "Exod 13:18");
+  const [book, chapter] = attested.osis.split(".");
+  const data = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, `${chapter}.json.gz`))).toString("utf8"));
+  const verse = data.verses.find((row) => row.ref === attested.osis);
+  assert.equal(nfc(verse.words[attested.wordIndex - 1].surface), nfc(attested.word));
+  const view = read("src/components/paradigms/school-paradigm.tsx");
+  assert.match(view, /scriptureFlag/);
+  assert.match(view, /nearestAttested/);
+  assert.match(view, /note\.text\.includes\(cell\.form\)/);
+  assert.equal(/[\u0590-\u05FF]/.test(view), false);
+  const builder = read("src/components/qal-imperfect-builder.tsx");
+  assert.match(builder, /scripture \?/);
+  assert.match(builder, /VerseEnglish verseRef=\{root\.ref\}/);
+  assert.match(read("src/routes/iibs/qal-imperfect.tsx"), /QalImperfectBuilder scripture/);
+});
+
+test("curated Hebrew matches the WLC reader text at its ref", async () => {
+  const { VERSES } = await jiti.import(join(root, "src/lib/verses.ts"));
+  const { PARADIGM_VERSES } = await jiti.import(join(root, "src/lib/verbal-paradigm-verses.ts"));
+  const names = { "1 Sam": "1Sam", "2 Sam": "2Sam", "1 Kgs": "1Kgs", "2 Kgs": "2Kgs", "1 Chr": "1Chr", "2 Chr": "2Chr" };
+  function parseRef(ref) {
+    const dotted = /^(\S+)\.(\d+)\.(\d+)$/.exec(ref);
+    if (dotted) return [dotted[1], dotted[2], dotted[3]];
+    const spaced = /^(.+?)\s+(\d+):(\d+)$/.exec(ref);
+    assert.ok(spaced, ref);
+    return [names[spaced[1]] ?? spaced[1], spaced[2], spaced[3]];
+  }
+  function plain(text) {
+    return nfc(text).replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6\u034F]/g, "").replace(/[־]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  const cache = new Map();
+  function reader(ref) {
+    const [book, chapter, verse] = parseRef(ref);
+    const key = `${book}/${chapter}`;
+    if (!cache.has(key)) {
+      const data = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, `${chapter}.json.gz`))).toString("utf8"));
+      cache.set(key, data.verses);
+    }
+    const row = cache.get(key).find((item) => item.ref === `${book}.${chapter}.${verse}`);
+    assert.ok(row, ref);
+    return row.words.filter((word) => word.kq_role !== "qere").map((word) => word.surface).join(" ");
+  }
+  function matches(row) {
+    return plain(reader(row.ref)).includes(plain(row.he));
+  }
+  for (const [id, row] of Object.entries(PARADIGM_VERSES)) {
+    assert.ok(matches(row), id);
+  }
+  const missed = Object.entries(VERSES).filter(([, row]) => !matches(row)).map(([id]) => id);
+  assert.equal(missed.includes("hattat"), false);
+  assert.equal(missed.includes("ein"), false);
+  assert.deepEqual(missed, [
+    "moses",
+    "jerusalem",
+    "isaac",
+    "saul",
+    "naarah",
+    "zar",
+    "ha-int",
+    "matteh",
+    "zakar-v",
+    "baal",
+    "avon",
+    "lama",
+    "yad",
+    "kohen",
+    "esh",
+    "shabbat",
+    "yatsa",
+    "banah",
+    "lamad",
+    "sane",
+    "salah",
+    "tsaaq",
+    "qadash",
+    "nata",
+    "shabar",
+    "shamad",
+    "nuah",
+    "shakab",
+    "mashal",
+    "nahag",
+  ]);
 });
 
 test("the paradigms flag clears when the account changes", () => {

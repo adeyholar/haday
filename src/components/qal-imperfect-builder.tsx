@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { VerseEnglish } from "@/components/verse-english";
 import { MarkedAnswer } from "@/components/marked-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -297,7 +298,7 @@ export function QalImperfectBuilder({ scripture = false }: { scripture?: boolean
         </div>
       </Panel>
 
-      {score !== null && score >= PASS_AT ? <VerseOpen root={root} /> : null}
+      {score !== null && score >= PASS_AT ? <VerseOpen root={root} scripture={scripture} /> : null}
 
       <p className="text-sm tabular-nums text-muted">
         {stats.rounds
@@ -308,7 +309,7 @@ export function QalImperfectBuilder({ scripture = false }: { scripture?: boolean
   );
 }
 
-function VerseOpen({ root }: { root: BuilderRoot }) {
+function VerseOpen({ root, scripture }: { root: BuilderRoot; scripture: boolean }) {
   const marked = verseParts(root.he, root.c);
   const [book, ch] = root.ref.split(".");
   return (
@@ -321,7 +322,7 @@ function VerseOpen({ root }: { root: BuilderRoot }) {
           </span>
         ))}
       </p>
-      <p className="mt-2 text-sm text-muted">{root.en}</p>
+      {scripture ? <p className="mt-2 text-sm text-muted">{root.en}</p> : <VerseEnglish verseRef={root.ref} />}
       {book && ch ? (
         <p className="mt-3">
           <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">

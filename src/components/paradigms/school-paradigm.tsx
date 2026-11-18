@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  nearestAttested,
   rowLabel,
+  schoolCells,
   schoolMark,
   schoolNotes,
   schoolPages,
   schoolShownForms,
   schoolTable,
   scriptureExamples,
+  scriptureFlag,
   type SchoolCell,
 } from "@/lib/paradigms/school-view";
 import { osisTarget } from "@/lib/paradigms/refs";
@@ -81,6 +84,11 @@ export function SchoolParadigm() {
               {notes.map((note) => (
                 <li key={`${note.marker}-${note.text.slice(0, 12)}`}>
                   {note.marker} {note.text}
+                  {schoolCells(page.page)
+                    .filter((cell) => cell.form && note.text.includes(cell.form) && nearestAttested(cell.id).length)
+                    .map((cell) => (
+                      <CellFlag key={cell.id} id={cell.id} />
+                    ))}
                 </li>
               ))}
             </ul>
@@ -135,35 +143,59 @@ function SchoolFace({ cell }: { cell: SchoolCell }) {
           {mark ? <span className="text-xs text-muted">{mark}</span> : null}
         </p>
       ))}
+      {nearestAttested(cell.id).length ? <CellFlag id={cell.id} /> : null}
+    </div>
+  );
+}
+
+function CellFlag({ id }: { id: string }) {
+  const flag = scriptureFlag(id);
+  const attested = nearestAttested(id);
+  if (!flag && !attested.length) return null;
+  return (
+    <div className="mt-1 space-y-1 text-xs text-muted">
+      {flag ? <p>{flag}</p> : null}
+      {attested.map((item) => (
+        <p key={`${item.osis}-${item.wordIndex}`}>
+          <span className="he-word text-sm text-ink" lang="he" dir="rtl">{item.word}</span> {item.ref}
+        </p>
+      ))}
     </div>
   );
 }
 
 function ScriptureFace({ id }: { id: string }) {
   const examples = scriptureExamples(id);
-  if (!examples.length) return <p className="text-xs text-muted">no example found in WLC</p>;
+  const flag = scriptureFlag(id);
   return (
-    <ul className="space-y-1">
-      {examples.map((example) => {
-        const target = osisTarget(example.osis, example.wordIndex);
-        return (
-          <li key={`${example.osis}-${example.wordIndex}`}>
-            <p className="he-word text-lg text-ink" lang="he" dir="rtl">{example.word}</p>
-            {target ? (
-              <Link
-                to="/listen/read/$book/$ch"
-                params={{ book: target.book, ch: target.ch }}
-                search={{ v1: target.v1, v2: target.v2, w: target.w }}
-                className="text-sm font-semibold text-primary"
-              >
-                {example.ref}
-              </Link>
-            ) : (
-              <span className="text-sm">{example.ref}</span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <div>
+      {examples.length ? (
+        <ul className="space-y-1">
+          {examples.map((example) => {
+            const target = osisTarget(example.osis, example.wordIndex);
+            return (
+              <li key={`${example.osis}-${example.wordIndex}`}>
+                <p className="he-word text-lg text-ink" lang="he" dir="rtl">{example.word}</p>
+                {target ? (
+                  <Link
+                    to="/listen/read/$book/$ch"
+                    params={{ book: target.book, ch: target.ch }}
+                    search={{ v1: target.v1, v2: target.v2, w: target.w }}
+                    className="text-sm font-semibold text-primary"
+                  >
+                    {example.ref}
+                  </Link>
+                ) : (
+                  <span className="text-sm">{example.ref}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : flag ? null : (
+        <p className="text-xs text-muted">no example found in WLC</p>
+      )}
+      <CellFlag id={id} />
+    </div>
   );
 }

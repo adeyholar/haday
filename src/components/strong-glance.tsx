@@ -3,6 +3,7 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { lessonById, stationById } from "@/lib/ladder";
 import { explainMorph } from "@/lib/morph-parse";
 import { lookupStrong, type StrongEntry } from "@/lib/strongs";
+import { GlossAsk } from "@/components/english-ask";
 
 export function StrongGlance({ id, morph }: { id: string; morph?: string }) {
   const [row, setRow] = useState<StrongEntry | null | undefined>(undefined);
@@ -41,7 +42,7 @@ export function StrongGlance({ id, morph }: { id: string; morph?: string }) {
           {row.pron ? <p className="text-sm text-muted">Pronounced {row.pron}</p> : null}
           <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Dictionary</p>
           {row.def ? <p className="mt-1 text-sm leading-relaxed text-ink">{row.def}</p> : null}
-          {row.kjv ? <p className="mt-1 text-xs text-muted">KJV: {row.kjv}</p> : null}
+          {row.kjv ? <GlossAsk text={`KJV: ${row.kjv}`} /> : null}
           {row.derivation ? <p className="mt-1 text-xs text-muted">{row.derivation}</p> : null}
         </>
       ) : null}
