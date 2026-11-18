@@ -142,8 +142,21 @@ def ketiv_read_surface(words: list[dict], index: int) -> str:
     return ""
 
 
+def qere_drawn_on_previous(words: list[dict], index: int) -> bool:
+    """The previous ketiv already drew this qere. Same rule as src/lib/ketiv-qere.ts."""
+    if index <= 0:
+        return False
+    own = read_surfaces(words[index])
+    if not own:
+        return False
+    prev = words[index - 1]
+    if not prev or prev.get("kq_role") != "ketiv" or read_surfaces(prev):
+        return False
+    return ketiv_read_surface(words, index - 1) == own
+
+
 def ketiv_display(words: list[dict], index: int) -> dict[str, str] | None:
-    """The read form, with the written form noted, when they differ. No note when no read form exists."""
+    """The read form, with the written form noted, when they differ. A split group draws the qere once."""
     word = words[index]
     if word.get("kq_role") != "ketiv":
         return None
@@ -153,6 +166,8 @@ def ketiv_display(words: list[dict], index: int) -> dict[str, str] | None:
     k = word.get("surface") or ""
     if q == k:
         return None
+    if qere_drawn_on_previous(words, index):
+        return {"q": "", "k": k}
     return {"q": q, "k": k}
 
 

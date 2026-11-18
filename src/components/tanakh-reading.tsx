@@ -1495,10 +1495,9 @@ function FollowCard({
                     const note = ketivAt(ketivNotes, bookId, row.chapter, row.verse, wi);
                     const face = note ? (
                       <>
-                        <span lang="he">{note.q}</span>
+                        {note.q ? <span lang="he">{note.q}</span> : null}
                         <span className="text-muted" lang="he">
-                          {" "}
-                          ({note.k})
+                          {note.q ? " " : null}({note.k})
                         </span>
                       </>
                     ) : null;

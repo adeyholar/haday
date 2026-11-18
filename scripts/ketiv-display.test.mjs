@@ -142,8 +142,72 @@ test("the ketiv note file matches the display rule, including empty-qere splits"
   assert.ok(tokens > 234);
   assert.equal(notes["2Kgs.5.18"], undefined);
   assert.ok(notes["Isa.44.24"]["15"].q);
+  assert.equal(notes["Isa.44.24"]["16"].q, "");
   assert.ok(notes["Job.38.12"]["3"].q);
+  assert.equal(notes["Job.38.12"]["4"].q, "");
   assert.ok(notes["Gen.30.11"]["2"].q);
+});
+
+function readerLine(words, from, to) {
+  const parts = [];
+  for (let index = from; index <= to; index += 1) {
+    const shown = ketivDisplay(words, index);
+    if (!shown) {
+      parts.push(words[index].surface || "");
+      continue;
+    }
+    parts.push(`${shown.q ? `${shown.q} ` : ""}(${shown.k})`);
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function occurrences(hay, needle) {
+  if (!needle) return 0;
+  let count = 0;
+  let at = 0;
+  while (at <= hay.length) {
+    const found = hay.indexOf(needle, at);
+    if (found < 0) return count;
+    count += 1;
+    at = found + needle.length;
+  }
+  return count;
+}
+
+test("a split group's qere is drawn once, and each ketiv is still noted", () => {
+  const groups = [];
+  for (const book of readdirSync(join(root, "data/wlc"))) {
+    for (const name of readdirSync(join(root, "data/wlc", book))) {
+      if (!name.endsWith(".json.gz")) continue;
+      const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc", book, name))));
+      for (const verse of chapter.verses) {
+        const words = written(verse);
+        words.forEach((word, index) => {
+          const next = words[index + 1];
+          if (word.kq_role !== "ketiv" || (word.qere || []).length) return;
+          if (!next || next.kq_role !== "ketiv" || !(next.qere || []).length) return;
+          groups.push({ ref: verse.ref, index, words, next });
+        });
+      }
+    }
+  }
+  assert.equal(groups.length, 17);
+  for (const group of groups) {
+    const qere = (group.next.qere || [])
+      .map((item) => item.surface || "")
+      .filter(Boolean)
+      .join(" ");
+    const line = readerLine(group.words, group.index, group.index + 1);
+    assert.equal(occurrences(line, qere), 1, `${group.ref}#${group.index} ${line}`);
+    assert.equal(occurrences(line, `(${group.words[group.index].surface})`), 1, group.ref);
+    assert.equal(occurrences(line, `(${group.words[group.index + 1].surface})`), 1, group.ref);
+  }
+  const isa = groups.find((group) => group.ref === "Isa.44.24" && group.index === 15);
+  assert.equal(readerLine(isa.words, 15, 16), "מֵאִתִּֽי (מי) (אתי)");
+  const sam = groups.find((group) => group.ref === "1Sam.20.2" && group.index === 6);
+  assert.equal(readerLine(sam.words, 6, 7), "לֹֽא יַעֲשֶׂ֨ה (לו) (עשה)");
+  const job = groups.find((group) => group.ref === "Job.38.12" && group.index === 3);
+  assert.equal(readerLine(job.words, 3, 4), "יִדַּ֖עְתָּה הַשַּׁ֣חַר (ידעתה) (שחר)");
 });
 
 test("English stays on the Grammar Path verse and word card", () => {

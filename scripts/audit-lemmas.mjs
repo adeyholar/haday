@@ -1,7 +1,9 @@
 /**
- * Read-only lemma audit (LEMMA_RULES §8.1 a–h).
- * Writes nothing in the app. Exits non-zero when a must-be-zero guard fires
- * or the exception report differs from docs/lemma-audit-baseline.json.
+ * Read-only lemma audit (LEMMA_RULES §8.1 a–h, row shape §8.2).
+ * Each exception row has the surface, the OSHB tag (`lemma|morph`), and the
+ * proposed class lemma. Writes nothing in the app. Exits non-zero when a
+ * must-be-zero guard fires or the exception report differs from
+ * docs/lemma-audit-baseline.json.
  * Pass --write to replace the baseline. That is not the CI path.
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -94,8 +96,31 @@ function appSurfaces() {
 const books = appSurfaces();
 const report = { a: [], b: [], c: [], d: [], e: [], f: [], g: [], h: [] };
 
-function add(rule, ref, index, path, id) {
-  report[rule].push({ ref, index, path, id: id || "" });
+function oshbTag(word) {
+  const lemma = word.lemma || "";
+  const morph = word.morph || "";
+  if (lemma && morph) return `${lemma}|${morph}`;
+  return lemma || morph;
+}
+
+function proposedLemma(item) {
+  if (!item) return "";
+  const he = item.hebrew || "";
+  const gloss = item.gloss || "";
+  if (he && gloss) return `${he} (${gloss})`;
+  return he || gloss;
+}
+
+function add(rule, ref, index, path, item, word) {
+  report[rule].push({
+    ref,
+    index,
+    surface: word.surface || "",
+    tag: oshbTag(word),
+    path,
+    id: item?.id || "",
+    proposed: proposedLemma(item),
+  });
 }
 
 for (const book of readdirSync(join(root, "data/wlc"))) {
@@ -108,7 +133,7 @@ for (const book of readdirSync(join(root, "data/wlc"))) {
       const shown = (verse.words ?? []).filter((word) => word.kq_role !== "qere");
       const app = books.get(verse.ref);
       shown.forEach((word, index) => {
-        if (!app || app[index] !== (word.surface || "")) add("h", verse.ref, index, "grammar", "");
+        if (!app || app[index] !== (word.surface || "")) add("h", verse.ref, index, "grammar", null, word);
         const at = { book: parts[0], chapter: Number(parts[1]), verse: Number(parts[2]), index };
         const qereNumbers = ketivQereNumbers(shown, index);
         if (qereNumbers) at.qereNumbers = qereNumbers;
@@ -120,28 +145,28 @@ for (const book of readdirSync(join(root, "data/wlc"))) {
           ["scripture", iibs, map.iibs],
         ]) {
           const item = lemmaForReading(word.surface, word.lemma, morph, pool, at);
-          if (!numbers.length && item) add("c", verse.ref, index, path, item.id);
+          if (!numbers.length && item) add("c", verse.ref, index, path, item, word);
           if (!item) {
-            if (hasNg(morph)) add("b", verse.ref, index, path, "");
-            if (hireqYod(word.surface || "") && hasReadingArticle(morph)) add("f", verse.ref, index, path, "");
+            if (hasNg(morph)) add("b", verse.ref, index, path, null, word);
+            if (hireqYod(word.surface || "") && hasReadingArticle(morph)) add("f", verse.ref, index, path, null, word);
             continue;
           }
-          if (hasNp(morph) && item.pos !== "name") add("a", verse.ref, index, path, item.id);
-          if (hasNg(morph) && item.pos !== "gentilic") add("b", verse.ref, index, path, item.id);
+          if (hasNp(morph) && item.pos !== "name") add("a", verse.ref, index, path, item, word);
+          if (hasNg(morph) && item.pos !== "gentilic") add("b", verse.ref, index, path, item, word);
           const card = bucketOfCard(item);
           const stem = verbStem(morph).stem;
           const text = `${item.stems || ""} ${item.gloss || ""}`;
           const listed = Object.values(STEM).flat().some((mark) => text.includes(mark));
           const stemMiss = listed && stem && !(STEM[stem] || []).some((mark) => text.includes(mark));
-          if ((buckets && card && buckets !== card) || stemMiss) add("d", verse.ref, index, path, item.id);
-          if ((numbers.includes(853) || numbers.includes(854)) && !buckets) add("e", verse.ref, index, path, item.id);
+          if ((buckets && card && buckets !== card) || stemMiss) add("d", verse.ref, index, path, item, word);
+          if ((numbers.includes(853) || numbers.includes(854)) && !buckets) add("e", verse.ref, index, path, item, word);
           if (hireqYod(word.surface || "") && hasReadingArticle(morph) && item.pos !== "gentilic") {
-            add("f", verse.ref, index, path, item.id);
+            add("f", verse.ref, index, path, item, word);
           }
           const n = numbers.length === 1 ? numbers[0] : 0;
           if (n) {
             const home = homeNumbers(table, item.id);
-            if (home.length && !home.includes(n)) add("g", verse.ref, index, path, item.id);
+            if (home.length && !home.includes(n)) add("g", verse.ref, index, path, item, word);
           }
         }
       });

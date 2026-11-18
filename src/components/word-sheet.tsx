@@ -155,7 +155,7 @@ export function WordSheet({
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">This word</p>
           <p className="he-word mt-1 text-4xl leading-tight text-ink" dir="rtl" lang="he">
-            {pick.ketiv ? pick.ketiv.q : pick.word}
+            {pick.ketiv?.q || pick.word}
           </p>
           {pick.ketiv ? (
             <p className="mt-1 text-sm text-muted" dir="rtl" lang="he">

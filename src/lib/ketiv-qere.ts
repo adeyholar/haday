@@ -1,4 +1,5 @@
-/** Where the ketiv and the qere differ, the read form is `q` and the written form is `k`. */
+/** Where the ketiv and the qere differ, the read form is `q` and the written form is `k`.
+ * `q` is empty when this ketiv is the rest of a split group whose qere was already drawn. */
 
 export type KetivNote = { q: string; k: string };
 
@@ -47,7 +48,18 @@ export function ketivReadSurface(words: KetivWord[], index: number): string {
   return readSurfaces(words[index - 1]);
 }
 
-/** A note only when a read form exists and it is not the written word. */
+/** The previous ketiv already drew this qere. Its own qere was empty and it borrowed ours. */
+function qereDrawnOnPrevious(words: KetivWord[], index: number): boolean {
+  if (index <= 0) return false;
+  const own = readSurfaces(words[index]);
+  if (!own) return false;
+  const prev = words[index - 1];
+  if (!prev || prev.kq_role !== "ketiv" || readSurfaces(prev)) return false;
+  return ketivReadSurface(words, index - 1) === own;
+}
+
+/** A note only when a read form exists and it is not the written word.
+ * A split group draws the qere once, on the ketiv that borrowed it, and still notes every ketiv. */
 export function ketivDisplay(words: KetivWord[], index: number): KetivNote | null {
   const word = words[index];
   if (!word || word.kq_role !== "ketiv") return null;
@@ -55,5 +67,6 @@ export function ketivDisplay(words: KetivWord[], index: number): KetivNote | nul
   if (!q) return null;
   const k = word.surface || "";
   if (q === k) return null;
+  if (qereDrawnOnPrevious(words, index)) return { q: "", k };
   return { q, k };
 }
