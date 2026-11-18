@@ -87,59 +87,74 @@ export function schoolMark(cell: SchoolCell): string {
   return "";
 }
 
-function mergeKey(rows: string[]): string {
-  return `M:${rows.join("+")}`;
-}
-
-function labelForKey(key: string, cell: SchoolCell): string {
-  if (!key.startsWith("M:")) return rowLabel(cell);
-  return key
-    .slice(2)
-    .split("+")
-    .map((slot) => {
-      const [conjugation, pgn] = slot.split(":");
-      if (!pgn || pgn === "-") return conjugation ?? slot;
-      return `${conjugation} ${pgn}`;
-    })
-    .join(" / ");
-}
+export type SchoolPlace =
+  | { kind: "cells"; cells: SchoolCell[] }
+  | { kind: "span"; cells: SchoolCell[]; rowSpan: number }
+  | { kind: "covered" };
 
 export type SchoolTable = {
   binyanim: string[];
-  rows: { key: string; label: string; byBinyan: Record<string, SchoolCell[]> }[];
+  rows: { key: string; label: string; byBinyan: Record<string, SchoolPlace> }[];
 };
+
+function rowKeyFromMergedSlot(slot: string): string {
+  const [conjugation, pgn] = slot.split(":");
+  return `${conjugation}|${pgn ?? "-"}`;
+}
 
 export function schoolTable(page: number): SchoolTable {
   const cells = schoolCells(page);
-  const groupForSlot = new Map<string, string>();
-  for (const cell of cells) {
-    if (!cell.mergedRows?.length) continue;
-    const key = mergeKey(cell.mergedRows);
-    for (const slot of cell.mergedRows) groupForSlot.set(slot, key);
-  }
   const binyanim: string[] = [];
-  const rows: SchoolTable["rows"] = [];
+  const order: string[] = [];
   const rowAt = new Map<string, SchoolTable["rows"][number]>();
+  const groups = new Map<string, SchoolCell[]>();
+
   for (const cell of cells) {
     if (!binyanim.includes(cell.binyan)) binyanim.push(cell.binyan);
-    const slot = `${cell.conjugation}:${cell.pgn}`;
-    const key = groupForSlot.get(slot) ?? slotKey(cell);
+    const key = slotKey(cell);
     let row = rowAt.get(key);
     if (!row) {
-      row = { key, label: labelForKey(key, cell), byBinyan: {} };
+      row = { key, label: rowLabel(cell), byBinyan: {} };
       rowAt.set(key, row);
-      rows.push(row);
+      order.push(key);
     }
-    const list = row.byBinyan[cell.binyan] ?? [];
-    list.push(cell);
-    row.byBinyan[cell.binyan] = list;
+    if (cell.mergedRows?.length) {
+      const group = `${cell.binyan}|${cell.mergedRows.join("+")}`;
+      const list = groups.get(group) ?? [];
+      list.push(cell);
+      groups.set(group, list);
+      continue;
+    }
+    const place = row.byBinyan[cell.binyan];
+    const stack = place?.kind === "cells" ? place.cells : [];
+    stack.push(cell);
+    row.byBinyan[cell.binyan] = { kind: "cells", cells: stack };
   }
-  for (const row of rows) {
-    for (const list of Object.values(row.byBinyan)) {
-      list.sort((a, b) => (a.position?.index ?? 0) - (b.position?.index ?? 0));
+
+  for (const list of groups.values()) {
+    const covered = list[0]?.mergedRows ?? [];
+    const keys = covered.map(rowKeyFromMergedSlot).filter((key) => rowAt.has(key));
+    keys.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    const anchorKey = keys[0];
+    const anchor = anchorKey ? rowAt.get(anchorKey) : undefined;
+    const binyan = list[0]?.binyan;
+    if (!anchor || !binyan || !keys.length) continue;
+    anchor.byBinyan[binyan] = { kind: "span", cells: [list[0]], rowSpan: covered.length };
+    for (const key of keys.slice(1)) {
+      const row = rowAt.get(key);
+      if (row) row.byBinyan[binyan] = { kind: "covered" };
     }
   }
-  return { binyanim, rows };
+
+  for (const row of rowAt.values()) {
+    for (const place of Object.values(row.byBinyan)) {
+      if (place.kind === "cells") {
+        place.cells.sort((a, b) => (a.position?.index ?? 0) - (b.position?.index ?? 0));
+      }
+    }
+  }
+
+  return { binyanim, rows: order.map((key) => rowAt.get(key)).filter((row): row is SchoolTable["rows"][number] => Boolean(row)) };
 }
 
 export function scriptureCell(id: string): ScriptureCell | undefined {

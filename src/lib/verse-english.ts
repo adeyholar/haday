@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NO_ENGLISH, asEnglishSlot, type EnglishSlot } from "@/lib/english-line";
-import { fetchTanakhBook, isBookId, TANAKH_BOOKS, type BookId } from "@/lib/tanakh-canon";
+import { fetchTanakhBook, isBookId, TANAKH_BOOKS, type BookId, type TanakhDump } from "@/lib/tanakh-canon";
 
 const NONE: EnglishSlot = { state: "none", message: NO_ENGLISH };
 
@@ -46,11 +46,25 @@ export function osisFromRef(ref: string | undefined): string | null {
   return `${book}.${spaced[2]}.${spaced[3]}`;
 }
 
+const bookFlights = new Map<BookId, Promise<TanakhDump>>();
+
+/** One download per book, including calls that start before the first one finishes. */
+export function shareBookLoad(book: BookId, load: (id: BookId) => Promise<TanakhDump> = fetchTanakhBook): Promise<TanakhDump> {
+  const current = bookFlights.get(book);
+  if (current) return current;
+  const flight = load(book).catch((error: unknown) => {
+    bookFlights.delete(book);
+    throw error;
+  });
+  bookFlights.set(book, flight);
+  return flight;
+}
+
 export async function slotsForOsis(osis: string): Promise<{ ylt: EnglishSlot; web: EnglishSlot }> {
   const [book, chapter, verse] = osis.split(".");
   if (!book || !isBookId(book) || !chapter || !verse) return { ylt: NONE, web: NONE };
   try {
-    const dump = await fetchTanakhBook(book);
+    const dump = await shareBookLoad(book);
     const row = dump.chapters[chapter]?.find((item) => item.v === Number(verse));
     if (!row) return { ylt: NONE, web: NONE };
     return { ylt: asEnglishSlot(row.ylt), web: asEnglishSlot(row.en) };
@@ -59,21 +73,23 @@ export async function slotsForOsis(osis: string): Promise<{ ylt: EnglishSlot; we
   }
 }
 
-export function useVerseSlots(ref: string | undefined): { ylt: EnglishSlot; web: EnglishSlot } {
+export function useVerseSlots(ref: string | undefined, active: boolean): { ylt: EnglishSlot; web: EnglishSlot; loading: boolean } {
   const osis = osisFromRef(ref) ?? "";
-  const [slots, setSlots] = useState<{ ylt: EnglishSlot; web: EnglishSlot }>({ ylt: NONE, web: NONE });
+  const [slots, setSlots] = useState<{ osis: string; ylt: EnglishSlot; web: EnglishSlot } | null>(null);
   useEffect(() => {
-    if (!osis) {
-      setSlots({ ylt: NONE, web: NONE });
-      return;
-    }
+    if (!active || !osis) return;
     let cancel = false;
     void slotsForOsis(osis).then((next) => {
-      if (!cancel) setSlots(next);
+      if (!cancel) setSlots({ osis, ...next });
     });
     return () => {
       cancel = true;
     };
-  }, [osis]);
-  return slots;
+  }, [active, osis]);
+  const ready = slots?.osis === osis;
+  return {
+    ylt: ready && slots ? slots.ylt : NONE,
+    web: ready && slots ? slots.web : NONE,
+    loading: active && osis !== "" && !ready,
+  };
 }

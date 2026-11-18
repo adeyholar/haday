@@ -77,8 +77,9 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
       [...new Set(school.cells.filter((cell) => cell.page === page.page).map((cell) => cell.binyan))],
     );
     for (const row of table.rows) {
-      for (const stack of Object.values(row.byBinyan)) {
-        for (const cell of stack) {
+      for (const place of Object.values(row.byBinyan)) {
+        if (place.kind === "covered") continue;
+        for (const cell of place.cells) {
         const file = school.cells.find((item) => item.id === cell.id);
         const shown = schoolShownForms(cell).map((form) => nfc(form));
         const allowed = [];
@@ -96,55 +97,114 @@ test("School view forms are NFC-equal to school-paradigm.json", () => {
   }
 });
 
-test("each conjugation and PGN slot is one row, and split forms share it", () => {
+test("merged cells span one column and every slot keeps its own row", () => {
   for (const page of school.pages) {
     const cells = school.cells.filter((cell) => cell.page === page.page);
-    const groupForSlot = new Map();
-    for (const cell of cells) {
-      if (!cell.mergedRows?.length) continue;
-      const key = `M:${cell.mergedRows.join("+")}`;
-      for (const slot of cell.mergedRows) groupForSlot.set(slot, key);
-    }
-    const fileOrder = [];
+    const expectedKeys = [];
     const seen = new Set();
     for (const cell of cells) {
-      const slot = `${cell.conjugation}:${cell.pgn}`;
-      const key = groupForSlot.get(slot) ?? `${cell.conjugation}|${cell.pgn}`;
+      const key = `${cell.conjugation}|${cell.pgn}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      fileOrder.push(key);
+      expectedKeys.push(key);
     }
     const table = schoolTable(page.page);
-    assert.deepEqual(table.rows.map((row) => row.key), fileOrder, `page ${page.page}`);
-    const slotRows = new Map();
-    const rowOf = new Map();
-    table.rows.forEach((row, index) => {
-      for (const stack of Object.values(row.byBinyan)) {
-        const indexes = stack.map((cell) => cell.position?.index ?? 0);
-        assert.deepEqual(indexes, [...indexes].sort((a, b) => a - b), `${page.page} ${row.key}`);
-        for (const cell of stack) {
-          const slot = `${cell.conjugation}|${cell.pgn}`;
-          const at = slotRows.get(slot) ?? new Set();
-          at.add(index);
-          slotRows.set(slot, at);
-          rowOf.set(cell.id, index);
+    assert.deepEqual(
+      table.rows.map((row) => row.key),
+      expectedKeys,
+      `page ${page.page}`,
+    );
+    assert.deepEqual(
+      table.rows.map((row) => row.label),
+      expectedKeys.map((key) => {
+        const [conjugation, pgn] = key.split("|");
+        return !pgn || pgn === "-" ? conjugation : `${conjugation} ${pgn}`;
+      }),
+      `page ${page.page} labels`,
+    );
+
+    const seenIds = new Map();
+    for (const row of table.rows) {
+      for (const [binyan, place] of Object.entries(row.byBinyan)) {
+        if (place.kind === "cells") {
+          for (const cell of place.cells) {
+            assert.equal(cell.mergedRows, undefined, `${cell.id} is not a span`);
+            assert.equal(`${cell.conjugation}|${cell.pgn}`, row.key, cell.id);
+            assert.equal(cell.binyan, binyan);
+            seenIds.set(cell.id, (seenIds.get(cell.id) ?? 0) + 1);
+          }
+        } else if (place.kind === "span") {
+          assert.equal(place.cells.length, 1, `${page.page} ${binyan} ${row.key}`);
+          const cell = place.cells[0];
+          assert.equal(place.rowSpan, cell.mergedRows.length, cell.id);
+          assert.equal(cell.binyan, binyan);
+          seenIds.set(cell.id, (seenIds.get(cell.id) ?? 0) + 1);
+          const covered = cell.mergedRows.map((slot) => slot.replace(":", "|"));
+          const start = table.rows.findIndex((item) => item.key === covered[0]);
+          for (let offset = 1; offset < covered.length; offset += 1) {
+            const coveredRow = table.rows[start + offset];
+            assert.equal(coveredRow?.key, covered[offset], cell.id);
+            assert.equal(coveredRow.byBinyan[binyan]?.kind, "covered", cell.id);
+          }
+        } else {
+          assert.equal(place.kind, "covered");
         }
       }
-    });
-    for (const [slot, at] of slotRows) assert.equal(at.size, 1, `${page.page} ${slot}`);
-    const siblings = new Map();
-    for (const cell of cells) {
-      const split = /^(.*)#\d+$/.exec(cell.id);
-      if (!split) continue;
-      const group = siblings.get(split[1]) ?? [];
-      group.push(cell.id);
-      siblings.set(split[1], group);
     }
-    for (const [base, ids] of siblings) {
-      const rows = new Set(ids.map((id) => rowOf.get(id)));
-      assert.equal(rows.size, 1, `${page.page} ${base}`);
+    for (const [id, count] of seenIds) assert.equal(count, 1, id);
+    const splitRows = new Map();
+    for (const row of table.rows) {
+      for (const place of Object.values(row.byBinyan)) {
+        if (place.kind === "covered") continue;
+        const indexes = place.cells.map((cell) => cell.position?.index ?? 0);
+        assert.deepEqual(indexes, [...indexes].sort((a, b) => a - b));
+        for (const cell of place.cells) {
+          const split = /^(.*)#\d+$/.exec(cell.id);
+          if (!split) continue;
+          const at = splitRows.get(split[1]) ?? new Set();
+          at.add(row.key);
+          splitRows.set(split[1], at);
+        }
+      }
+    }
+    for (const [base, keys] of splitRows) assert.equal(keys.size, 1, `${page.page} ${base}`);
+    for (const cell of cells) {
+      if (!cell.mergedRows?.length) continue;
+      const count = seenIds.get(cell.id) ?? 0;
+      const first = cells.find(
+        (item) => item.binyan === cell.binyan && item.mergedRows?.join("+") === cell.mergedRows.join("+"),
+      );
+      assert.equal(count, cell.id === first.id ? 1 : 0, cell.id);
     }
   }
+
+  const page1 = schoolTable(1);
+  const absolute = page1.rows.find((row) => row.key === "infinitive-absolute|-");
+  const construct = page1.rows.find((row) => row.key === "infinitive-construct|-");
+  assert.equal(absolute.label, "infinitive-absolute");
+  assert.equal(construct.label, "infinitive-construct");
+  assert.equal(absolute.byBinyan.Qal.kind, "cells");
+  assert.equal(construct.byBinyan.Qal.kind, "cells");
+  assert.notEqual(absolute.byBinyan.Qal.cells[0].id, construct.byBinyan.Qal.cells[0].id);
+  assert.equal(absolute.byBinyan.Piel.kind, "span");
+  assert.equal(absolute.byBinyan.Piel.rowSpan, 2);
+  assert.equal(construct.byBinyan.Piel.kind, "covered");
+
+  const page8 = schoolTable(8);
+  const fs = page8.rows.find((row) => row.key === "participle|fs");
+  const mp = page8.rows.find((row) => row.key === "participle|mp");
+  const fp = page8.rows.find((row) => row.key === "participle|fp");
+  assert.equal(fs.label, "participle fs");
+  assert.equal(mp.label, "participle mp");
+  assert.equal(fp.label, "participle fp");
+  assert.equal(fs.byBinyan.Pual.kind, "span");
+  assert.equal(fs.byBinyan.Pual.rowSpan, 3);
+  assert.equal(fs.byBinyan.Pual.cells[0].status, "dash-no-form");
+  assert.equal(mp.byBinyan.Pual.kind, "covered");
+  assert.equal(fp.byBinyan.Pual.kind, "covered");
+  assert.equal(fs.byBinyan.Qal.kind, "cells");
+  assert.equal(mp.byBinyan.Qal.kind, "cells");
+  assert.equal(fp.byBinyan.Qal.kind, "cells");
 });
 
 test("the paradigm toggle defaults to School", () => {
@@ -439,6 +499,44 @@ test("a class gloss is absent until the English control is opened", async () => 
   assert.match(html, />English</);
   if (explained.lemmaGloss) assert.equal(html.includes(explained.lemmaGloss), false, explained.lemmaGloss);
   assert.equal(html.includes("In the beginning God created"), false);
+});
+
+test("book English waits for the tap and shares one download per book", async () => {
+  const { shareBookLoad } = await jiti.import(join(root, "src/lib/verse-english.ts"));
+  let calls = 0;
+  const load = () => {
+    calls += 1;
+    return new Promise((resolve) => setTimeout(() => resolve({ id: "Gen", chapters: {} }), 10));
+  };
+  const [first, second] = await Promise.all([shareBookLoad("Gen", load), shareBookLoad("Gen", load)]);
+  assert.equal(calls, 1);
+  assert.equal(first, second);
+  const closed = renderToStaticMarkup(
+    createElement(EnglishAsk, {
+      loading: true,
+      ylt: { state: "none", message: "No English for this verse" },
+      web: { state: "none", message: "No English for this verse" },
+      verseKey: "Gen.1.1",
+    }),
+  );
+  assert.match(closed, />English</);
+  assert.equal(closed.includes("Loading"), false);
+  assert.equal(closed.includes("No English for this verse"), false);
+  const html = renderToStaticMarkup(
+    createElement(EnglishAsk, {
+      loading: true,
+      startOpen: true,
+      ylt: { state: "none", message: "No English for this verse" },
+      web: { state: "none", message: "No English for this verse" },
+      verseKey: "Gen.1.1",
+    }),
+  );
+  assert.match(html, /Loading…/);
+  assert.equal(html.includes("No English for this verse"), false);
+  const source = read("src/components/verse-english.tsx");
+  assert.match(source, /useVerseSlots\(verseRef, asked\)/);
+  assert.match(source, /askedRef === verseRef/);
+  assert.match(read("src/components/english-ask.tsx"), /Loading…/);
 });
 
 test("the paradigms flag clears when the account changes", () => {

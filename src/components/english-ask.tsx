@@ -28,19 +28,32 @@ export function EnglishAsk({
   web,
   extra,
   verseKey,
+  loading = false,
+  onOpen,
+  startOpen = false,
 }: {
   ylt: EnglishSlot;
   web: EnglishSlot;
   extra?: ReactNode;
   /** When this changes, the control closes again. Each verse needs its own tap. */
   verseKey?: string;
+  loading?: boolean;
+  onOpen?: () => void;
+  startOpen?: boolean;
 }) {
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [openKey, setOpenKey] = useState<string | null>(startOpen ? (verseKey ?? "open") : null);
   const [choice, setChoice] = useState<TranslationId | null>(null);
   const open = openKey !== null && openKey === (verseKey ?? "open");
   if (!open) {
     return (
-      <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => setOpenKey(verseKey ?? "open")}>
+      <button
+        type="button"
+        className="min-h-11 text-sm font-semibold text-primary"
+        onClick={() => {
+          setOpenKey(verseKey ?? "open");
+          onOpen?.();
+        }}
+      >
         English
       </button>
     );
@@ -68,7 +81,7 @@ export function EnglishAsk({
           );
         })}
       </div>
-      <EnglishLines slot={slot} />
+      {loading ? <p className="mt-2 text-sm text-muted">Loading…</p> : <EnglishLines slot={slot} />}
       {extra}
     </div>
   );

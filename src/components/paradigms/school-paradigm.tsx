@@ -61,13 +61,15 @@ export function SchoolParadigm() {
                 {table.rows.map((row) => (
                   <tr key={row.key} className="border-b border-border align-top">
                     <th className="px-2 py-2 text-xs font-semibold text-muted" scope="row">{row.label}</th>
-                    {table.binyanim.map((binyan) => (
-                      <td key={binyan} className="px-2 py-2">
-                        {row.byBinyan[binyan]?.length ? (
-                          <SchoolStack cells={row.byBinyan[binyan]} view={view} />
-                        ) : null}
-                      </td>
-                    ))}
+                    {table.binyanim.map((binyan) => {
+                      const place = row.byBinyan[binyan];
+                      if (place?.kind === "covered") return null;
+                      return (
+                        <td key={binyan} className="px-2 py-2 align-top" rowSpan={place?.kind === "span" ? place.rowSpan : undefined}>
+                          {place ? <SchoolStack cells={place.cells} view={view} /> : null}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
