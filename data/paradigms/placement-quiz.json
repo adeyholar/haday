@@ -1,0 +1,235 @@
+{
+ "version": "0.1-draft",
+ "forChairmanReview": true,
+ "noEnglishGlosses": true,
+ "items": [
+  {
+   "n": 1,
+   "level": "L1",
+   "ref": "Josh 13:10 #7",
+   "word": "מָלַ֖ךְ",
+   "oshbMorph": "HVqp3ms",
+   "oshbLemma": "4427 a",
+   "cellId": "Qal.qatal.3ms",
+   "pattern": "קָטַל",
+   "correct": "Qal qatal 3ms",
+   "distractors": [
+    "Qal participle ms",
+    "Qal imperative ms",
+    "Piel qatal 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 2,
+   "level": "L1",
+   "ref": "Exod 3:16 #19",
+   "word": "פָּקַ֨דְתִּי֙",
+   "oshbMorph": "HVqp1cs",
+   "oshbLemma": "6485 a",
+   "cellId": "Qal.qatal.1cs",
+   "pattern": "קָטַלְתִּי",
+   "correct": "Qal qatal 1cs",
+   "distractors": [
+    "Qal qatal 2ms",
+    "Qal qatal 2fs",
+    "Hiphil qatal 1cs"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 3,
+   "level": "L2",
+   "ref": "Prov 2:21 #3",
+   "word": "יִשְׁכְּנוּ",
+   "oshbMorph": "HVqi3mp",
+   "oshbLemma": "7931",
+   "cellId": "Qal.yiqtol.3mp",
+   "pattern": "יִקְטְלוּ",
+   "correct": "Qal yiqtol 3mp",
+   "distractors": [
+    "Qal qatal 3cp",
+    "Qal imperative mp",
+    "Qal yiqtol 2mp"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 4,
+   "level": "L2",
+   "ref": "Gen 36:32 #1",
+   "word": "וַיִּמְלֹ֣ךְ",
+   "oshbMorph": "HC/Vqw3ms",
+   "oshbLemma": "c/4427 a",
+   "cellId": "Qal.wayyiqtol.3ms",
+   "pattern": "וַיִּקְטֹל",
+   "correct": "Qal wayyiqtol 3ms",
+   "distractors": [
+    "Qal yiqtol 3ms with simple ו (weyiqtol)",
+    "Niphal wayyiqtol 3ms",
+    "Hiphil wayyiqtol 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 5,
+   "level": "L3",
+   "ref": "Deut 16:18 #1",
+   "word": "שֹׁפְטִ֣ים",
+   "oshbMorph": "HVqrmpa",
+   "oshbLemma": "8199",
+   "cellId": "Qal.participle-active.mp",
+   "pattern": "קֹטְלִים",
+   "correct": "Qal participle active mp",
+   "distractors": [
+    "Qal participle passive mp",
+    "Piel participle mp",
+    "Qal qatal 3cp"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 6,
+   "level": "L3",
+   "ref": "Deut 28:61 #8",
+   "word": "כָת֔וּב",
+   "oshbMorph": "HVqsmsa",
+   "oshbLemma": "3789",
+   "cellId": "Qal.participle-passive.ms",
+   "pattern": "קָטוּל",
+   "correct": "Qal participle passive ms",
+   "distractors": [
+    "Qal infinitive absolute",
+    "Qal participle active ms",
+    "Pual qatal 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 7,
+   "level": "L4",
+   "ref": "1Kgs 16:18 #5",
+   "word": "נִלְכְּדָ֣ה",
+   "oshbMorph": "HVNp3fs",
+   "oshbLemma": "3920",
+   "cellId": "Niphal.qatal.3fs",
+   "pattern": "נִקְטְלָה",
+   "correct": "Niphal qatal 3fs",
+   "distractors": [
+    "Niphal participle fs",
+    "Qal qatal 3fs",
+    "Niphal qatal 3cp"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 8,
+   "level": "L4",
+   "ref": "Judg 3:26 #9",
+   "word": "וַיִּמָּלֵ֖ט",
+   "oshbMorph": "HC/VNw3ms",
+   "oshbLemma": "c/4422",
+   "cellId": "Niphal.wayyiqtol.3ms",
+   "pattern": "וַיִּקָּטֵל",
+   "correct": "Niphal wayyiqtol 3ms",
+   "distractors": [
+    "Piel wayyiqtol 3ms",
+    "Qal wayyiqtol 3ms",
+    "Hitpael wayyiqtol 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 9,
+   "level": "L5",
+   "ref": "Gen 43:30 #8",
+   "word": "וַיְבַקֵּ֖שׁ",
+   "oshbMorph": "HC/Vpw3ms",
+   "oshbLemma": "c/1245",
+   "cellId": "Piel.wayyiqtol.3ms",
+   "pattern": "וַיְקַטֵּל",
+   "correct": "Piel wayyiqtol 3ms",
+   "distractors": [
+    "Pual wayyiqtol 3ms",
+    "Niphal wayyiqtol 3ms",
+    "Hiphil wayyiqtol 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 10,
+   "level": "L5",
+   "ref": "Exod 12:9 #6",
+   "word": "מְבֻשָּׁ֖ל",
+   "oshbMorph": "HVPsmsa",
+   "oshbLemma": "1310",
+   "cellId": "Pual.participle.ms",
+   "pattern": "מְקֻטָּל",
+   "correct": "Pual participle ms",
+   "distractors": [
+    "Piel participle ms",
+    "Hophal participle ms",
+    "Niphal participle ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 11,
+   "level": "L6",
+   "ref": "2Sam 11:4 #10",
+   "word": "מִתְקַדֶּ֖שֶׁת",
+   "oshbMorph": "HVtrfsa",
+   "oshbLemma": "6942",
+   "cellId": "Hitpael.participle.fs",
+   "pattern": "מִתְקַטֶּלֶת",
+   "correct": "Hitpael participle fs",
+   "distractors": [
+    "Hitpael yiqtol 3fs",
+    "Piel participle fs",
+    "Hitpael qatal 3fs"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 12,
+   "level": "L7",
+   "ref": "Gen 19:27 #1",
+   "word": "וַיַּשְׁכֵּ֥ם",
+   "oshbMorph": "HC/Vhw3ms",
+   "oshbLemma": "c/7925",
+   "cellId": "Hiphil.wayyiqtol.3ms",
+   "pattern": "וַיַּקְטֵל",
+   "correct": "Hiphil wayyiqtol 3ms",
+   "distractors": [
+    "Hiphil yiqtol 3ms with simple ו",
+    "Qal wayyiqtol 3ms",
+    "Piel wayyiqtol 3ms"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  },
+  {
+   "n": 13,
+   "level": "L7",
+   "ref": "Isa 14:19 #2",
+   "word": "הָשְׁלַ֤כְתָּ",
+   "oshbMorph": "HVHp2ms",
+   "oshbLemma": "7993",
+   "cellId": "Hophal.qatal.2ms",
+   "pattern": "הָקְטַלְתָּ",
+   "correct": "Hophal qatal 2ms",
+   "distractors": [
+    "Hiphil qatal 2ms",
+    "Qal qatal 2ms",
+    "Hophal qatal 1cs"
+   ],
+   "verified": "OSHB morph checked; form matches the paradigm cell pattern"
+  }
+ ],
+ "rule": {
+  "order": "Items are shown in order (easy to hard). Each item also offers 'I don't know' (counts as a miss) to cut down guessing.",
+  "placement": "The student is placed at the level of the FIRST item they miss. If they miss nothing, they are placed at L7 (review) with L8 (weak verbs) unlocked when built.",
+  "earlyStop": "Stop the quiz as soon as there are 2 misses in total; the level is still the level of the first miss.",
+  "retake": "The placement quiz can be retaken from settings; the Chairman can also set a student's level by hand.",
+  "levelsWithoutItemsBelow": "Every strong-verb level L1-L7 has at least one item."
+ }
+}

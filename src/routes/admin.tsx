@@ -4,6 +4,8 @@ import { Panel } from "@/components/panel";
 import { GRAMMAR_PATH, SCRIPTURE_PATH } from "@/lib/path-names";
 import { getAdminStatus, getMailerStatus, issuePasswordReset, listLegacyBrokerAccounts, listPendingResets, listRoster, removeUser, revokeAllPasswordResets, revokePasswordReset, type LegacyBrokerAccount, type PendingReset, type RosterPerson } from "@/lib/admin";
 import { setLearnerPath } from "@/lib/learner-path";
+import { ParadigmLevelControl } from "@/components/paradigms/level-control";
+import { listParadigmLevels, type RosterLevel } from "@/lib/paradigms/progress";
 import { listVisits, countryLabel, type VisitStats } from "@/lib/visits";
 import {
   IDEA_AREA_LABEL,
@@ -42,6 +44,7 @@ function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
   const [mailer, setMailer] = useState<{ configured: boolean } | null>(null);
   const [legacy, setLegacy] = useState<{ count: number; accounts: LegacyBrokerAccount[] } | null>(null);
+  const [paradigmLevels, setParadigmLevels] = useState<RosterLevel[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,13 +55,14 @@ function AdminPage() {
         if (cancelled) return;
         setAdmin(status.admin);
         if (!status.admin) return;
-        const [rowsR, trafficR, inboxR, pendingR, mailerR, legacyR] = await Promise.allSettled([
+        const [rowsR, trafficR, inboxR, pendingR, mailerR, legacyR, levelsR] = await Promise.allSettled([
           listRoster(),
           listVisits(),
           listIdeaInbox(),
           listPendingResets(),
           getMailerStatus(),
           listLegacyBrokerAccounts(),
+          listParadigmLevels(),
         ]);
         if (cancelled) return;
         if (rowsR.status === "fulfilled") setPeople(rowsR.value);
@@ -69,6 +73,7 @@ function AdminPage() {
         if (pendingR.status === "fulfilled") setResets(pendingR.value);
         if (mailerR.status === "fulfilled") setMailer(mailerR.value);
         if (legacyR.status === "fulfilled") setLegacy(legacyR.value);
+        if (levelsR.status === "fulfilled") setParadigmLevels(levelsR.value);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Could not load roster.");
@@ -245,6 +250,7 @@ function AdminPage() {
               <th className="px-4 py-3 font-semibold tabular-nums">Streak</th>
               <th className="px-4 py-3 font-semibold">Mail</th>
               <th className="px-4 py-3 font-semibold">Reset</th>
+              <th className="px-4 py-3 font-semibold">Level</th>
               <th className="px-4 py-3 font-semibold">Remove</th>
             </tr>
           </thead>
@@ -278,6 +284,12 @@ function AdminPage() {
                     onIssued={(reset) => {
                       setResets((cur) => [reset, ...cur.filter((r) => r.email !== reset.email)]);
                     }}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <ParadigmLevelControl
+                    userId={p.id}
+                    level={paradigmLevels?.find((row) => row.userId === p.id)?.level ?? null}
                   />
                 </td>
                 <td className="px-4 py-3">

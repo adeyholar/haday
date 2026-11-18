@@ -83,6 +83,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
         pathname.startsWith("/browse") ||
         pathname.startsWith("/finder") ||
         pathname.startsWith("/lessons") ||
+        pathname.startsWith("/paradigms") ||
         (pathname.startsWith("/study") &&
           !pathname.startsWith("/study/term2/game") &&
           !pathname.startsWith("/study/term2/listen") &&

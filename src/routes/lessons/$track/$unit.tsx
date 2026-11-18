@@ -2,6 +2,7 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { StudyMenu } from "@/components/study-menu";
 import { GrammarPlay } from "@/components/grammar-play";
 import { grammarTrack } from "@/lib/grammar-tracks";
+import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
 
 export const Route = createFileRoute("/lessons/$track/$unit")({ component: StudyUnitPage });
 
@@ -15,6 +16,7 @@ function StudyUnitPage() {
   if (!ok) return <Navigate to="/lessons/$track" params={{ track: track.id }} />;
 
   return (
+    <ParadigmLessonGate lessonKey={`grammar:${track.id}:${n}`}>
     <>
       <div className="mb-4">
         <StudyMenu />
@@ -46,5 +48,6 @@ function StudyUnitPage() {
       ) : null}
       <GrammarPlay key={`${track.id}-${n}-prep`} track={track} unitId={n} mode="prepare" />
     </>
+    </ParadigmLessonGate>
   );
 }

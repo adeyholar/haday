@@ -33,6 +33,7 @@ import { Route as ListenRouteImport } from './routes/listen'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
+import { Route as ParadigmsRouteImport } from './routes/paradigms'
 import { Route as ParseLabRouteImport } from './routes/parse-lab'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -251,6 +252,11 @@ const LoginRoute = LoginRouteImport.update({
 const MatchRoute = MatchRouteImport.update({
   id: '/match',
   path: '/match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParadigmsRoute = ParadigmsRouteImport.update({
+  id: '/paradigms',
+  path: '/paradigms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParseLabRoute = ParseLabRouteImport.update({
@@ -772,6 +778,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/paradigms': typeof ParadigmsRoute
   '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -894,6 +901,7 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/paradigms': typeof ParadigmsRoute
   '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -1019,6 +1027,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/login': typeof LoginRoute
   '/match': typeof MatchRoute
+  '/paradigms': typeof ParadigmsRoute
   '/parse-lab': typeof ParseLabRoute
   '/quiz': typeof QuizRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -1145,6 +1154,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/paradigms'
     | '/parse-lab'
     | '/quiz'
     | '/reset-password'
@@ -1267,6 +1277,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/paradigms'
     | '/parse-lab'
     | '/quiz'
     | '/reset-password'
@@ -1391,6 +1402,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/login'
     | '/match'
+    | '/paradigms'
     | '/parse-lab'
     | '/quiz'
     | '/reset-password'
@@ -1516,6 +1528,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
+  ParadigmsRoute: typeof ParadigmsRoute
   ParseLabRoute: typeof ParseLabRoute
   QuizRoute: typeof QuizRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -1756,6 +1769,13 @@ declare module '@tanstack/react-router' {
       path: '/match'
       fullPath: '/match'
       preLoaderRoute: typeof MatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paradigms': {
+      id: '/paradigms'
+      path: '/paradigms'
+      fullPath: '/paradigms'
+      preLoaderRoute: typeof ParadigmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parse-lab': {
@@ -2564,6 +2584,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
+  ParadigmsRoute: ParadigmsRoute,
   ParseLabRoute: ParseLabRoute,
   QuizRoute: QuizRoute,
   ResetPasswordRoute: ResetPasswordRoute,

@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth/client";
 import { getSocialSignInOffered } from "@/lib/auth/google-status";
 import { socialSignInErrorMessage } from "@/lib/auth/google";
 import { X_PROVIDER_ID, accountLinkErrorMessage, canUnlinkSignIn } from "@/lib/auth/x";
 import { Button } from "@/components/ui/button";
+import { useParadigmProgress } from "@/components/paradigms/use-paradigm-progress";
 
 export const Route = createFileRoute("/account")({ component: AccountPage });
 
 type LinkedAccount = { providerId: string; accountId: string };
 
 function AccountPage() {
+  const paradigms = useParadigmProgress();
   const href = useRouterState({ select: (s) => s.location.href });
   const linkError = useMemo(() => {
     try {
@@ -130,6 +132,17 @@ function AccountPage() {
         </section>
       ) : ready ? (
         <p className="mt-6 text-sm text-muted">X sign-in is not offered on this host.</p>
+      ) : null}
+      {paradigms.enabled ? (
+        <section className="mt-6 rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
+          <h2 className="text-sm font-semibold text-ink">Paradigm level</h2>
+          <p className="mt-2 text-sm text-muted">
+            {paradigms.progress.placed ? `You are at ${paradigms.progress.level}.` : "You have not been placed yet."} Retake the placement quiz any time.
+          </p>
+          <Link to="/paradigms" search={{ retake: true }} className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">
+            Retake placement
+          </Link>
+        </section>
       ) : null}
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
     </div>

@@ -17,6 +17,7 @@ import {
   stationById,
 } from "@/lib/ladder";
 import { useStudy } from "@/lib/store";
+import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
 
 export const Route = createFileRoute("/study/lesson/$id")({ component: LessonPage });
 
@@ -52,6 +53,7 @@ function LessonPage() {
   const practice = lesson.actions.filter((a) => a.kind !== "lab");
 
   return (
+    <ParadigmLessonGate lessonKey={`study:${lesson.id}`}>
     <>
       <div className="mb-4">
         <StudyMenu />
@@ -180,5 +182,6 @@ function LessonPage() {
         </Link>
       </div>
     </>
+    </ParadigmLessonGate>
   );
 }

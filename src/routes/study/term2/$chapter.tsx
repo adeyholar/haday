@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useStudy } from "@/lib/store";
 import { term2Lesson, TERM2_LESSONS } from "@/lib/term2-lessons";
 import { weekForTerm2Chapter } from "@/lib/vocab-s2";
+import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
 
 export const Route = createFileRoute("/study/term2/$chapter")({ component: Term2Chapter });
 
@@ -18,6 +19,7 @@ function Term2Chapter() {
   const next = TERM2_LESSONS[index + 1];
 
   return (
+    <ParadigmLessonGate lessonKey={`term2:${lesson.chapter}`}>
     <>
       <Panel>
         <StudyMenu />
@@ -84,5 +86,6 @@ function Term2Chapter() {
         </div>
       </div>
     </>
+    </ParadigmLessonGate>
   );
 }
