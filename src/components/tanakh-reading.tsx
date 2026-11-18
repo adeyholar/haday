@@ -5,7 +5,6 @@ import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
-import { EnglishVerse } from "@/components/english-verse";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
@@ -62,7 +61,6 @@ import {
   versesInChapter,
   type ReadSearch,
 } from "@/lib/passage";
-import { englishKeysForWord } from "@/lib/word-card";
 import { fetchStrongTags, type StrongBook } from "@/lib/strongs";
 import { phraseAt, playPulse, waitForSpeech, waitUntilSaid, type AfterBag } from "@/lib/read-after";
 import {
@@ -1048,7 +1046,7 @@ export function TanakhReading({
                 } ${
                   (verses.length || vw.to - vw.from + 1) === 1 ? "verse stays" : "verses stay"
                 } on the page and play in one sitting.`
-              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. English stays on the page. 90% first-answer clears the chapter."}
+              : "Recorded Hebrew chapter audio — the same Tanakh reading, not a computer voice. 90% first-answer clears the chapter."}
         </p>
         {rec ? (
           <p className="mt-2 text-sm text-muted">
@@ -1337,8 +1335,6 @@ function FollowCard({
   const spanLabel = readingSpanLabel(bookId, verse.chapter, fromV, toV);
   const spanRef = readingSpanRef(bookId, verse.chapter, fromV, toV);
   const loopBack = readingSpanHref(bookId, verse.chapter, fromV, toV);
-  const focusWord = pick?.word ?? verse.words[wordI] ?? "";
-  const enKeys = englishKeysForWord(focusWord);
   return (
     <>
       {hideTransport ? null : (
@@ -1588,13 +1584,6 @@ function FollowCard({
                     );
                   })}
                 </p>
-                <EnglishVerse
-                  en={row.en}
-                  keys={active ? enKeys : []}
-                  className={`max-w-full break-words leading-relaxed ${
-                    active ? "mt-2 text-base text-ink" : "mt-1 text-sm text-muted"
-                  }`}
-                />
               </li>
             );
           })}
