@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { MorphLines } from "@/components/morph-lines";
 import { poolFor } from "@/lib/reading-loop/pool";
 import { lemmaForReading, ketivQereNumbers } from "@/lib/reading-loop/strong-lemma";
+import { ketivDisplay, type KetivNote } from "@/lib/ketiv-qere";
 import { isBookId, type BookId } from "@/lib/tanakh-canon";
 import { savePassagePack, passageDrillIds, type StudyScope } from "@/lib/reading-loop/passage";
 
@@ -20,10 +21,16 @@ function verseParse(ref: string): { book: BookId; chapter: number; verse: number
 }
 
 function ketivNumbers(chapter: WlcChapter, word: WlcWord): number[] | undefined {
+  const place = shownPlace(chapter, word);
+  if (!place) return undefined;
+  return ketivQereNumbers(place.shown, place.index);
+}
+
+function shownPlace(chapter: WlcChapter, word: WlcWord): { shown: WlcWord[]; index: number } | undefined {
   for (const verse of chapter.verses) {
     const shown = verse.words.filter((item) => item.kq_role !== "qere");
     const index = shown.findIndex((item) => item.id === word.id);
-    if (index >= 0) return ketivQereNumbers(shown, index);
+    if (index >= 0) return { shown, index };
   }
   return undefined;
 }
@@ -47,20 +54,21 @@ export type SheetSize = "tight" | "small" | "page" | "large";
 
 function WordFace({
   word,
+  note,
   picked,
   spoken,
   dim,
   onPick,
 }: {
   word: WlcWord;
+  note: KetivNote | null;
   picked: boolean;
   spoken: boolean;
   dim: boolean;
   onPick: (word: WlcWord) => void;
 }) {
-  const clusters = wlcClusters(word.surface);
-  const stressAt = word.stress?.letter_index;
-  const qere = word.qere?.[0];
+  const clusters = wlcClusters(note ? note.q : word.surface);
+  const stressAt = note ? undefined : word.stress?.letter_index;
   return (
     <button
       type="button"
@@ -79,9 +87,9 @@ function WordFace({
           </span>
         ))}
       </span>
-      {qere ? (
+      {note ? (
         <span className="he-taam ms-qere ms-1" lang="he">
-          ({qere.surface})
+          ({note.k})
         </span>
       ) : null}
       {word.trailer ? (
@@ -113,41 +121,48 @@ function metegLine(word: WlcWord): string {
 
 function WordCard({
   word,
+  note,
   loop,
   neededIds,
   parse,
   qereNumbers,
+  tokenIndex,
   onClose,
 }: {
   word: WlcWord;
+  note: KetivNote | null;
   loop?: { scope: StudyScope; ref: string; back: string };
   /** Class lemmas in this passage that are not mastered yet. */
   neededIds?: readonly string[];
   parse?: { book: BookId; chapter: number; verse: number };
   qereNumbers?: number[];
+  tokenIndex?: number;
   onClose: () => void;
 }) {
-  const qere = word.qere ?? [];
-  const at = parse && qereNumbers ? { ...parse, qereNumbers } : parse;
+  const at =
+    parse && (qereNumbers || typeof tokenIndex === "number")
+      ? { ...parse, ...(typeof tokenIndex === "number" ? { index: tokenIndex } : {}), ...(qereNumbers ? { qereNumbers } : {}) }
+      : parse;
   const lemma = loop ? lemmaForReading(word.surface, word.lemma, word.morph, poolFor(loop.scope), at) : undefined;
   const drillIds = lemma ? (neededIds ? passageDrillIds(lemma.id, neededIds) : [lemma.id]) : [];
   const scripture = loop?.scope === "iibs";
+  const face = note?.q || word.surface;
   return (
     <div className="rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
       <div className="flex items-start justify-between gap-3">
         <p className="he-taam text-4xl text-ink" dir="rtl" lang="he">
-          {word.surface}
-          {word.trailer.trim() ? word.trailer.trim() : ""}
+          {face}
+          {!note && word.trailer.trim() ? word.trailer.trim() : ""}
         </p>
         <button type="button" onClick={onClose} className="min-h-11 shrink-0 font-semibold text-primary">
           Close
         </button>
       </div>
-      {qere.length ? (
+      {note ? (
         <p className="mt-1 text-sm text-muted">
-          Qere{" "}
+          Ketiv{" "}
           <span className="he-taam text-2xl text-primary" dir="rtl" lang="he">
-            {qere.map((item) => item.surface).join(" ")}
+            {note.k}
           </span>
         </p>
       ) : null}
@@ -414,10 +429,15 @@ export function WlcReading({
         >
           <WordCard
             word={picked}
+            note={(() => {
+              const place = shownPlace(chapter, picked);
+              return place ? ketivDisplay(place.shown, place.index) : null;
+            })()}
             loop={loop}
             neededIds={neededIds}
             parse={verseParse(pickedRef)}
             qereNumbers={ketivNumbers(chapter, picked)}
+            tokenIndex={shownPlace(chapter, picked)?.index}
             onClose={() => closeCard(true)}
           />
         </div>
@@ -437,7 +457,7 @@ export function WlcReading({
           <p className="manuscript-note">
             {system}
             {chapter.dataset_version ? ` · Leningrad ${chapter.dataset_version}` : ""}. Accents and meteg stay on the word.
-            A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the qere.
+            A signed correction stays in this frame. The line sits under the stressed letter. A word in parentheses is the ketiv.
           </p>
         ) : null}
         <div className="ms-verses">
@@ -462,6 +482,7 @@ export function WlcReading({
                     <WordFace
                       key={chain[0].id}
                       word={chain[0]}
+                      note={ketivDisplay(shown, shown.indexOf(chain[0]))}
                       picked={picked?.id === chain[0].id}
                       spoken={spokenId === chain[0].id}
                       dim={Boolean(dimIds?.has(chain[0].id))}
@@ -476,6 +497,7 @@ export function WlcReading({
                         <WordFace
                           key={word.id}
                           word={word}
+                          note={ketivDisplay(shown, shown.indexOf(word))}
                           picked={picked?.id === word.id}
                           spoken={spokenId === word.id}
                           dim={Boolean(dimIds?.has(word.id))}

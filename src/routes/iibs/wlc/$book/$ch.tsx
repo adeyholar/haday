@@ -152,14 +152,14 @@ function WlcChapterPage() {
         ? chapter.verses.flatMap((verse) =>
             verse.words.filter((word) => word.kq_role !== "qere").map((word, index, shown) => {
               const verseNo = Number(verse.ref.split(".")[2]);
-              const at = verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo } : undefined;
+              const at = verseNo ? { book: chapter.book, chapter: chapter.chapter, verse: verseNo, index } : undefined;
               const qereNumbers = ketivQereNumbers(shown, index);
               return {
                 id: word.id,
                 surface: word.surface,
                 strong: word.lemma,
                 morph: word.morph,
-                at: qereNumbers ? { ...(at ?? { book: chapter.book, chapter: chapter.chapter, verse: verseNo || 0 }), qereNumbers } : at,
+                at: qereNumbers ? { ...(at ?? { book: chapter.book, chapter: chapter.chapter, verse: verseNo || 0, index }), qereNumbers } : at,
               };
             }),
           )

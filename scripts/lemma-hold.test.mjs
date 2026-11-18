@@ -19,7 +19,7 @@ function contentNumbers(raw) {
 }
 
 function atFor(book, chapter, verse, words, index) {
-  const at = { book, chapter, verse };
+  const at = { book, chapter, verse, index };
   const qereNumbers = ketivQereNumbers(words, index);
   if (qereNumbers) at.qereNumbers = qereNumbers;
   return at;
@@ -207,6 +207,14 @@ test("two Strong’s numbers get no lemma, and H639 anger is not אַף also", (
           }
           if (numbers.length !== 1) return;
           const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
+          const grammar = lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, at);
+          if (numbers[0] === 639 && word.morph === "HTa") {
+            anger += 1;
+            assert.equal(item?.id, "iibs-b-qtu1ft", `${verse.ref}#${index}`);
+            assert.equal(grammar?.id, "aph", `${verse.ref}#${index}`);
+            if (item?.id === "iibs-a-1it90xu") angerAlso += 1;
+            return;
+          }
           if (numbers[0] === 639 && item) {
             anger += 1;
             if (item.id === "iibs-a-1it90xu") angerAlso += 1;
@@ -233,8 +241,8 @@ test("two Strong’s numbers get no lemma, and H639 anger is not אַף also", (
   assert.equal(found.length, 8);
   assert.equal(angerAlso, 0);
   assert.equal(alsoAnger, 0);
-  assert.ok(anger > 0);
-  assert.ok(also > 0);
+  assert.equal(anger, 274);
+  assert.equal(also, 134);
   assert.equal(take("Num", 12, 9, 0).item, undefined);
   assert.equal(take("2Sam", 6, 7, 0).item, undefined);
 });
@@ -243,7 +251,6 @@ test("a ketiv keeps its lemma when its number is in the qere", () => {
   const keep = new Set([
     "Job.38.1#4",
     "Job.38.1#5",
-    "Job.38.12#3",
     "Job.38.12#4",
     "Job.40.6#4",
     "Job.40.6#5",
@@ -254,7 +261,6 @@ test("a ketiv keeps its lemma when its number is in the qere", () => {
     "Ezek.42.9#0",
     "Ezek.42.9#1",
     "Ezek.9.11#11",
-    "Neh.2.13#16",
     "1Kgs.17.15#5",
     "Isa.52.5#1",
   ]);
@@ -283,7 +289,7 @@ test("a ketiv keeps its lemma when its number is in the qere", () => {
           if (kn.length > 1) return;
           const qereNumbers = ketivQereNumbers(words, index) ?? [];
           const at = atFor(bk, Number(ch), Number(vs), words, index);
-          const where = { book: bk, chapter: Number(ch), verse: Number(vs) };
+          const where = { book: bk, chapter: Number(ch), verse: Number(vs), index };
           const item = lemmaForReading(word.surface, word.lemma, word.morph, iibs, at);
           const plain = lemmaForReading(word.surface, word.lemma, word.morph, iibs, where);
           const grammar = lemmaForReading(word.surface, word.lemma, word.morph, VOCAB, at);
@@ -321,6 +327,15 @@ test("a ketiv keeps its lemma when its number is in the qere", () => {
   assert.equal(take("Isa", 44, 24, 15).item, undefined);
   assert.equal(take("Song", 2, 13, 8).item, undefined);
   assert.equal(take("Isa", 10, 32, 7).item, undefined);
+  assert.equal(take("Neh", 2, 13, 16).item, undefined);
+  assert.equal(take("Job", 38, 12, 3).item, undefined);
+  const neh = take("Neh", 2, 13, 16);
+  const job = take("Job", 38, 12, 3);
+  const dawn = take("Job", 38, 12, 4);
+  assert.equal(lemmaForReading(neh.word.surface, neh.word.lemma, neh.word.morph, VOCAB, { book: "Neh", chapter: 2, verse: 13, index: 16 }), undefined);
+  assert.equal(lemmaForReading(job.word.surface, job.word.lemma, job.word.morph, VOCAB, { book: "Job", chapter: 38, verse: 12, index: 3 }), undefined);
+  assert.ok(dawn.item);
+  assert.notEqual(dawn.item?.id, "iibs-a-1vjj7fa");
 });
 
 test("H1323 is not Zion, and Isaiah 10:32 is unmatched", () => {

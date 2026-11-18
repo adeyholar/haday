@@ -452,7 +452,8 @@ test("a Mede is not the place, and Zechariah 8:23 is a Jew", () => {
   assert.equal(lemmaForReading("הַכַּשְׂדִּ֛ים", "H3778", "HTd/Ngmpa", iibs)?.id, chaldean.id);
   assert.equal(lemmaForReading("וּפָרָֽס", "H6540", "AC/Ngmsd", iibs)?.id, persian.id);
   assert.notEqual(lemmaForReading("וּפָרָֽס", "H6540", "AC/Ngmsd", iibs)?.id, persia?.id);
-  const zech = { book: "Zech", chapter: 8, verse: 23 };
+  const zech = { book: "Zech", chapter: 8, verse: 23, index: 16 };
   assert.equal(lemmaForReading("יְהוּדִ֜י", "H3064", "HNp", iibs, zech)?.id, jew.id);
+  assert.equal(lemmaForReading("יְהוּדִ֜י", "H3064", "HNp", VOCAB, zech), undefined);
   assert.equal(lemmaForReading("יְהוּדִ֜י", "H3064", "HNp", iibs), undefined);
 });

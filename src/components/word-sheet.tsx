@@ -28,6 +28,8 @@ export type WordPick = {
   strong?: string;
   /** Open Scriptures morphology code, such as HVqp3ms. */
   morph?: string;
+  /** Read form and written form when this ketiv differs. No gloss rides on the note. */
+  ketiv?: { q: string; k: string } | null;
 };
 
 export function WordSheet({
@@ -41,10 +43,16 @@ export function WordSheet({
 }) {
   const tagged = Boolean(pick.strong || pick.morph);
   const lemma = pick.strong
-    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), { book: pick.book, chapter: pick.chapter, verse: pick.verse })
+    ? lemmaForReading(pick.word, pick.strong, pick.morph, poolFor("bbh"), {
+        book: pick.book,
+        chapter: pick.chapter,
+        verse: pick.verse,
+        index: pick.index,
+      })
     : tagged
       ? undefined
       : classLemmaForWord(pick.word);
+  const hideGloss = Boolean(pick.ketiv) && !lemma;
   const [tags, setTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(true);
   const [askOpen, setAskOpen] = useState(false);
@@ -147,8 +155,14 @@ export function WordSheet({
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">This word</p>
           <p className="he-word mt-1 text-4xl leading-tight text-ink" dir="rtl" lang="he">
-            {pick.word}
+            {pick.ketiv?.q || pick.word}
           </p>
+          {pick.ketiv ? (
+            <p className="mt-1 text-sm text-muted" dir="rtl" lang="he">
+              <span dir="ltr">Ketiv </span>
+              {pick.ketiv.k}
+            </p>
+          ) : null}
         </div>
         <button type="button" className="min-h-11 shrink-0 px-2 text-sm font-semibold text-primary" onClick={onClose}>
           Close
@@ -164,8 +178,10 @@ export function WordSheet({
               </span>
             ))}
           </p>
-          <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
-          {!hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
+          {hideGloss ? null : (
+            <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
+          )}
+          {!hideGloss && !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
             <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
           ) : null}
         </div>
@@ -176,7 +192,7 @@ export function WordSheet({
           {" · "}
           {shortGloss(lemma.gloss)}
         </p>
-      ) : (
+      ) : hideGloss ? null : (
         <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>
       )}
       {busy ? <p className="mt-2 text-sm text-muted">Looking up the form…</p> : null}
