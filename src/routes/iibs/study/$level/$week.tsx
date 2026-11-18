@@ -8,6 +8,7 @@ import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { enterIibsRoom } from "@/lib/iibs-room";
 import { iibsWeekCount, iibsWeekItems, iibsWeekLabel, isIibsWeekLevel } from "@/lib/iibs-weeks";
 import { useStudy } from "@/lib/store";
+import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
 
 export const Route = createFileRoute("/iibs/study/$level/$week")({ component: WeekStudy });
 
@@ -80,6 +81,7 @@ function WeekStudy() {
   const next = week < count ? week + 1 : null;
 
   return (
+    <ParadigmLessonGate lessonKey={`iibs:${level}:${week}`}>
     <DrillSitting
       pool={pool}
       label={iibsWeekLabel(level, week)}
@@ -111,5 +113,6 @@ function WeekStudy() {
         </>
       }
     />
+    </ParadigmLessonGate>
   );
 }
