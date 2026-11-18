@@ -1,3 +1,4 @@
+import { asEnglishSlot, englishPlain, type EnglishSlot } from "@/lib/english-line";
 import { clusterAtTime, clusterWeight } from "@/lib/hebrew-phones";
 import raw from "@/lib/genesis-1-5.json";
 import audioRaw from "@/lib/tanakh-audio.json";
@@ -76,6 +77,9 @@ export type ReadingVerse = {
   verse: number;
   he: string;
   en: string;
+  ylt: string;
+  enSlot: EnglishSlot;
+  yltSlot: EnglishSlot;
   words: string[];
   ref: string;
 };
@@ -99,7 +103,7 @@ function rowToVerse(
   book: BookId,
   bookEn: string,
   ch: number,
-  row: { v: number; he: string; en: string; words: string[] },
+  row: { v: number; he: string; en: unknown; ylt?: unknown; words: string[] },
 ): ReadingVerse {
   return {
     book,
@@ -107,7 +111,10 @@ function rowToVerse(
     chapter: ch,
     verse: row.v,
     he: row.he,
-    en: row.en,
+    en: englishPlain(row.en),
+    ylt: englishPlain(row.ylt),
+    enSlot: asEnglishSlot(row.en),
+    yltSlot: asEnglishSlot(row.ylt),
     words: row.words,
     ref: `${book} ${ch}:${row.v}`,
   };
@@ -413,15 +420,26 @@ export type GradeItem = {
   verse: ReadingVerse;
   choices: string[];
   answer: string;
+  yltChoices: string[];
+  yltAnswer: string;
 };
 
 export function gradeFromVerses(verses: ReadingVerse[], n = 10): GradeItem[] {
-  const poolSrc = verses.filter((v) => v.en.length > 8);
+  const poolSrc = verses.filter((v) => v.en.length > 8 || v.ylt.length > 8);
   const pool = shuffle(poolSrc).slice(0, Math.min(n, poolSrc.length));
   return pool.map((verse, i) => {
-    const others = shuffle(poolSrc.filter((v) => v.ref !== verse.ref).map((v) => v.en)).slice(0, 3);
-    const choices = shuffle([verse.en, ...others]);
-    return { id: `${verse.ref}:${i}`, verse, choices, answer: verse.en };
+    const webPool = poolSrc.filter((v) => v.en.length > 8);
+    const yltPool = poolSrc.filter((v) => v.ylt.length > 8);
+    const others = shuffle(webPool.filter((v) => v.ref !== verse.ref).map((v) => v.en)).slice(0, 3);
+    const otherYlt = shuffle(yltPool.filter((v) => v.ref !== verse.ref).map((v) => v.ylt)).slice(0, 3);
+    return {
+      id: `${verse.ref}:${i}`,
+      verse,
+      choices: verse.en.length > 8 ? shuffle([verse.en, ...others]) : [],
+      answer: verse.en,
+      yltChoices: verse.ylt.length > 8 ? shuffle([verse.ylt, ...otherYlt]) : [],
+      yltAnswer: verse.ylt,
+    };
   });
 }
 

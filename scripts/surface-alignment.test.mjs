@@ -125,5 +125,9 @@ test("1 Chronicles 1:11 keeps the ketiv, and Genesis 1:1 is H7225", () => {
   assert.equal(first.v, 1);
   assert.equal(first.words[0], "בְּרֵאשִׁ֖ית");
   assert.equal(genTags["1"]["1"][0].startsWith("H7225|"), true);
-  assert.equal(first.en.toLowerCase().includes("beginning"), true);
+  assert.equal(first.en.state, "text");
+  assert.equal(first.en.lines[0].ref, "Gen.1.1");
+  assert.equal(first.en.lines[0].text.toLowerCase().includes("beginning"), true);
+  assert.equal(first.ylt.state, "text");
+  assert.equal(first.ylt.lines[0].text.toLowerCase().includes("beginning"), true);
 });

@@ -5,6 +5,8 @@ import { hebrewClusters } from "@/lib/hebrew-phones";
 import { Button } from "@/components/ui/button";
 import { StudyReturnBanner } from "@/components/study-return-banner";
 import { EchoVerse, type EchoClock } from "@/components/echo-verse";
+import { EnglishAsk, EnglishLines, rememberTranslation } from "@/components/english-ask";
+import { TRANSLATION_OPTIONS, type TranslationId } from "@/lib/english-line";
 import { WordSheet, type WordPick } from "@/components/word-sheet";
 import { placeWordBalloon, type WordBalloonPlace } from "@/lib/word-balloon";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
@@ -807,9 +809,9 @@ export function TanakhReading({
     setDone(false);
   }
 
-  function pickChoice(choice: string, item: GradeItem) {
+  function pickChoice(choice: string, item: GradeItem, answer = item.answer) {
     if (picked) return;
-    const ok = choice === item.answer;
+    const ok = choice === answer;
     playGrade(ok);
     setPicked(choice);
     const nextHits = hits + (ok ? 1 : 0);
@@ -912,6 +914,8 @@ export function TanakhReading({
           verses={verses}
           i={i}
           wordI={wordI}
+          markWord={search.w}
+          markVerse={search.v1}
           clusterI={clusterI}
           total={verses.length}
           playing={playing}
@@ -1109,6 +1113,8 @@ function FollowCard({
   verses,
   i,
   wordI,
+  markWord,
+  markVerse,
   clusterI,
   total,
   playing,
@@ -1144,6 +1150,8 @@ function FollowCard({
   verses: ReadingVerse[];
   i: number;
   wordI: number;
+  markWord?: number;
+  markVerse?: number;
   clusterI: number;
   total: number;
   playing: boolean;
@@ -1503,7 +1511,7 @@ function FollowCard({
                         key={`${row.ref}-${wi}`}
                         ref={wi === wordI ? wordEl : undefined}
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start shadow-none ${
-                          wi === wordI
+                          wi === wordI || (markWord === wi + 1 && row.verse === markVerse)
                             ? "he-spoken"
                             : phrase && wi >= phrase.from && wi <= phrase.to
                               ? "he-phrase"
@@ -1530,6 +1538,8 @@ function FollowCard({
                             verse: row.verse,
                             he: row.he,
                             en: row.en,
+                            enSlot: row.enSlot,
+                            yltSlot: row.yltSlot,
                             strong: strong || undefined,
                             morph: morph || undefined,
                             ketiv: note,
@@ -1555,8 +1565,10 @@ function FollowCard({
                         type="button"
                         key={`${row.ref}-${wi}`}
                         className={`max-w-full rounded-sm bg-transparent px-0.5 py-1 text-start text-ink shadow-none ${
-                          pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""
-                        } ${dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""}`}
+                          markWord === wi + 1 && row.verse === markVerse ? "he-spoken" : ""
+                        } ${pick?.index === wi && pick.verse === row.verse ? "he-tapped" : ""} ${
+                          dim && unknownKeys.has(`${row.ref}:${wi}`) && !(pick?.index === wi && pick.verse === row.verse) ? "ms-unknown" : ""
+                        }`}
                         data-word-pick={pick?.index === wi && pick.verse === row.verse ? "1" : undefined}
                         onClick={() => {
                           const { strong, morph } = splitReadingTag(strongChapter?.[String(row.verse)]?.[wi] ?? "");
@@ -1569,6 +1581,8 @@ function FollowCard({
                               verse: row.verse,
                               he: row.he,
                               en: row.en,
+                            enSlot: row.enSlot,
+                            yltSlot: row.yltSlot,
                               strong: strong || undefined,
                               morph: morph || undefined,
                               ketiv: note,
@@ -1584,6 +1598,7 @@ function FollowCard({
                     );
                   })}
                 </p>
+                <EnglishAsk ylt={row.yltSlot} web={row.enSlot} />
               </li>
             );
           })}
@@ -1697,8 +1712,14 @@ function GradeCard({
   qi: number;
   total: number;
   picked: string | null;
-  onPick: (choice: string, item: GradeItem) => void;
+  onPick: (choice: string, item: GradeItem, answer?: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const [choice, setChoice] = useState<TranslationId | null>(null);
+  const selected: TranslationId = choice ?? "ylt";
+  const choices = selected === "ylt" ? item.yltChoices : item.choices;
+  const answer = selected === "ylt" ? item.yltAnswer : item.answer;
+  const slot = selected === "ylt" ? item.verse.yltSlot : item.verse.enSlot;
   return (
     <div className="min-w-0 overflow-x-hidden rounded-[var(--radius-xl)] bg-card px-4 py-6 shadow-[var(--shadow-border)] sm:px-5 sm:py-8">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -1711,17 +1732,43 @@ function GradeCard({
           </span>
         ))}
       </p>
-      <p className="mt-6 text-sm font-semibold text-ink">Which English is this verse?</p>
+      {!open ? (
+        <button type="button" className="mt-4 min-h-11 text-sm font-semibold text-primary" onClick={() => setOpen(true)}>
+          English
+        </button>
+      ) : (
+        <>
+          <div className="mt-4 flex gap-2">
+            {TRANSLATION_OPTIONS.map((label) => {
+              const id: TranslationId = label === "YLT" ? "ylt" : "web";
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className="min-h-11 text-sm font-semibold text-primary"
+                  aria-pressed={selected === id}
+                  onClick={() => {
+                    setChoice(id);
+                    rememberTranslation(id);
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+      <EnglishLines slot={slot} />
+      {choices.length ? <p className="mt-6 text-sm font-semibold text-ink">Which English is this verse?</p> : null}
       <ul className="mt-3 grid gap-2">
-        {item.choices.map((c) => {
+        {choices.map((c) => {
           const show = Boolean(picked);
-          const right = c === item.answer;
+          const right = c === answer;
           return (
             <li key={c}>
               <button
                 type="button"
                 disabled={show}
-                onClick={() => onPick(c, item)}
+                onClick={() => onPick(c, item, answer)}
                 className={`w-full rounded-[var(--radius-md)] px-4 py-3 text-start text-sm shadow-[var(--shadow-border)] ${
                   show && right ? "bg-good text-parchment" : show && picked === c ? "bg-danger text-parchment" : "bg-surface text-ink"
                 }`}
@@ -1732,6 +1779,8 @@ function GradeCard({
           );
         })}
       </ul>
+        </>
+      )}
     </div>
   );
 }

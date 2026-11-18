@@ -3,28 +3,37 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { readLocalProgress, writeLocalProgress } from "@/lib/paradigms/local";
 import { getParadigmsAccess, loadParadigmProgress, saveParadigmProgress } from "@/lib/paradigms/progress";
 import { acceptStudentSave } from "@/lib/paradigms/progress-shape";
+import { accessCacheFor } from "@/lib/paradigms/access-cache";
 import { EMPTY_PROGRESS, type ParadigmProgress } from "@/lib/paradigms/types";
 
 function emptyProgress(): ParadigmProgress {
   return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
 }
 
+let accessKey: string | null = null;
 let accessPromise: Promise<boolean> | null = null;
 
-function loadAccess(): Promise<boolean> {
-  accessPromise ??= getParadigmsAccess()
-    .then((row) => row.enabled === true)
-    .catch(() => false);
+function loadAccess(userId: string | null): Promise<boolean> {
+  const cache = accessCacheFor(accessKey, userId);
+  if (!cache.reuse || !accessPromise) {
+    accessKey = cache.userId;
+    accessPromise = getParadigmsAccess()
+      .then((row) => row.enabled === true)
+      .catch(() => false);
+  }
   return accessPromise;
 }
 
 export function useParadigmAccess() {
+  const { user } = useCurrentUserState();
+  const userId = user?.id ?? "";
   const [enabled, setEnabled] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let cancel = false;
-    loadAccess()
+    setReady(false);
+    loadAccess(userId)
       .then((on) => {
         if (!cancel) setEnabled(on);
       })
@@ -34,7 +43,7 @@ export function useParadigmAccess() {
     return () => {
       cancel = true;
     };
-  }, []);
+  }, [userId]);
 
   return { enabled, ready };
 }

@@ -1,4 +1,6 @@
-import { findEnglishHitRange, findHitRange } from "@/lib/hebrew";
+import { findHitRange } from "@/lib/hebrew";
+import { EnglishAsk } from "@/components/english-ask";
+import { asEnglishSlot } from "@/lib/english-line";
 import { learnNugget } from "@/lib/tanakh-learn-nugget";
 import {
   classVocabInText,
@@ -21,10 +23,6 @@ export function TanakhLearnVerse({
   const heRange = findHitRange(verse.he, verse.hit);
   const explained = learnVerseExplain(verse, kind, samples);
   const nugget = learnNugget(kind, verse);
-  const enRange = findEnglishHitRange(verse.en, {
-    hitEn: verse.hitEn,
-    gloss: explained.lemmaGloss,
-  });
   const also = classVocabInText(verse.he).filter((v) => v.id !== explained.vocabId);
 
   return (
@@ -41,17 +39,7 @@ export function TanakhLearnVerse({
           verse.he
         )}
       </p>
-      <p className="mt-2 text-sm text-muted" lang="en" dir="ltr">
-        {enRange ? (
-          <>
-            {verse.en.slice(0, enRange.start)}
-            <mark className="he-hit">{verse.en.slice(enRange.start, enRange.end)}</mark>
-            {verse.en.slice(enRange.end)}
-          </>
-        ) : (
-          verse.en
-        )}
-      </p>
+      <EnglishAsk ylt={asEnglishSlot(verse.en)} web={asEnglishSlot(verse.en)} />
       <p className="mt-3 text-sm text-ink">
         <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
           {explained.chapter ? `Class vocab · Ch. ${explained.chapter}` : "Lemma"}

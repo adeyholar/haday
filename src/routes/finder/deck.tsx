@@ -10,7 +10,8 @@ import { parseFinderSearch } from "@/lib/finder-search";
 import { englishKeysForWord, hasGlossInEnglish, classLemmaForWord } from "@/lib/word-card";
 import { shortGloss } from "@/lib/tanakh-learn-note";
 import { markQueryInVerse } from "@/lib/tanakh-word";
-import { EnglishVerse } from "@/components/english-verse";
+import { EnglishAsk } from "@/components/english-ask";
+import { asEnglishSlot, englishPlain, type EnglishSlot } from "@/lib/english-line";
 import type { TanakhQueryResult } from "@/lib/tanakh-query-server";
 
 export const Route = createFileRoute("/finder/deck")({
@@ -33,7 +34,7 @@ function FinderDeckPage() {
   const [result, setResult] = useState<TanakhQueryResult | null>(null);
   const [card, setCard] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [verse, setVerse] = useState<{ he: string; en: string } | null>(null);
+  const [verse, setVerse] = useState<{ he: string; en: string; enSlot: EnglishSlot; yltSlot: EnglishSlot } | null>(null);
 
   useEffect(() => {
     if (!q) return;
@@ -71,7 +72,11 @@ function FinderDeckPage() {
     void fetchTanakhBook(loc.book).then((dump) => {
       if (cancelled) return;
       const row = dump.chapters[loc.ch]?.find((v) => v.v === Number(loc.v));
-      setVerse(row ? { he: row.he, en: row.en } : null);
+      setVerse(
+        row
+          ? { he: row.he, en: englishPlain(row.en), enSlot: asEnglishSlot(row.en), yltSlot: asEnglishSlot(row.ylt) }
+          : null,
+      );
     });
     return () => {
       cancelled = true;
@@ -197,14 +202,15 @@ function FinderDeckPage() {
                       </span>
                     ))}
                   </p>
-                  <EnglishVerse
-                    en={verse.en}
-                    keys={enKeys}
-                    className="text-sm leading-relaxed text-ink"
+                  <EnglishAsk
+                    ylt={verse.yltSlot}
+                    web={verse.enSlot}
+                    extra={
+                      !hasGlossInEnglish(verse.en, enKeys) && lemma ? (
+                        <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
+                      ) : null
+                    }
                   />
-                  {!hasGlossInEnglish(verse.en, enKeys) && lemma ? (
-                    <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
-                  ) : null}
                 </>
               ) : (
                 <p className="text-sm text-muted">Loading the verse…</p>

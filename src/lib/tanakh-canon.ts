@@ -1,4 +1,5 @@
 import catalogRaw from "@/lib/tanakh-catalog.json";
+import { englishPlain } from "@/lib/english-line";
 
 export type BookId =
   | "Gen"
@@ -83,7 +84,7 @@ export type TanakhDump = {
   section: SectionId;
   heSource: string;
   enSource: string;
-  chapters: Record<string, Array<{ v: number; he: string; en: string; words: string[] }>>;
+  chapters: Record<string, Array<{ v: number; he: string; en: unknown; ylt?: unknown; words: string[] }>>;
 };
 
 const dumpCache = new Map<string, TanakhDump>();
@@ -116,7 +117,7 @@ export async function versesForRefs(
     const dump = dumpCache.get(row.book);
     const verse = dump?.chapters[row.ch]?.find((item) => item.v === row.v);
     if (!verse) continue;
-    out.push({ ref: row.ref, he: verse.he, en: verse.en });
+    out.push({ ref: row.ref, he: verse.he, en: englishPlain(verse.en) });
   }
   return out;
 }

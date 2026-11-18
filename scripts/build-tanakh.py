@@ -19,7 +19,8 @@ CATALOG_OUT = ROOT / "src" / "lib" / "tanakh-catalog.json"
 AUDIO_MAP_OUT = ROOT / "src" / "lib" / "tanakh-audio-map.json"
 
 HE_URL = "https://raw.githubusercontent.com/adeyholar/tanakh_ai_tutor/main/data/tanakh/hebrew_bible_with_nikkud.json"
-WEB_BASE = "https://raw.githubusercontent.com/TehShrike/world-english-bible/master/json"
+WEB_PIN = "68669ba3be9719ae4d1135b19d9e0b6587b7c356"
+WEB_BASE = f"https://raw.githubusercontent.com/TehShrike/world-english-bible/{WEB_PIN}/json"
 
 BOOKS = [
     ("Gen", "Genesis", "בְּרֵאשִׁית", "torah", 50, "genesis"),
@@ -183,7 +184,10 @@ def main() -> None:
                     {
                         "v": vi,
                         "he": " ".join(words),
-                        "en": en_map.get((i + 1, vi), ""),
+                        # Do not pair WEB by the Hebrew verse number. scripts/apply-versemap.mjs
+                        # writes `en` and `ylt` from data/paradigms/versemap.json.
+                        "en": {"state": "none", "message": "No English for this verse"},
+                        "ylt": {"state": "none", "message": "No English for this verse"},
                         "words": words,
                     }
                 )

@@ -11,7 +11,8 @@ import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
-import { EnglishVerse } from "@/components/english-verse";
+import { EnglishAsk } from "@/components/english-ask";
+import { asEnglishSlot, type EnglishSlot } from "@/lib/english-line";
 import { StrongGlance } from "@/components/strong-glance";
 import type { WordBalloonPlace } from "@/lib/word-balloon";
 import type { BookId } from "@/lib/tanakh-canon";
@@ -24,6 +25,8 @@ export type WordPick = {
   verse: number;
   he: string;
   en: string;
+  yltSlot?: EnglishSlot;
+  enSlot?: EnglishSlot;
   /** Strong's number when this surface is tagged, such as H7225. */
   strong?: string;
   /** Open Scriptures morphology code, such as HVqp3ms. */
@@ -179,11 +182,16 @@ export function WordSheet({
             ))}
           </p>
           {hideGloss ? null : (
-            <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
+            <EnglishAsk
+              ylt={pick.yltSlot ?? asEnglishSlot(pick.en)}
+              web={pick.enSlot ?? asEnglishSlot(pick.en)}
+              extra={
+                !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
+                  <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
+                ) : null
+              }
+            />
           )}
-          {!hideGloss && !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
-            <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
-          ) : null}
         </div>
       ) : null}
       {lemma ? (

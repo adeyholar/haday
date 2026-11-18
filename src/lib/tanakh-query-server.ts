@@ -5,6 +5,7 @@ import { queryIndexPaths, wordIndexPaths, bookJsonPaths, WORD_PAGE } from "@/lib
 import { matchFormForWord } from "@/lib/word-card";
 import { listWordRefs, runWordQuery, wordQueryLabel, type WordIndexFile } from "@/lib/tanakh-word";
 import { isBookId, type TanakhDump } from "@/lib/tanakh-canon";
+import { asEnglishSlot, englishPlain, type EnglishSlot } from "@/lib/english-line";
 import {
   kindLabel,
   parseTanakhQuery,
@@ -74,7 +75,13 @@ async function versesForPage(refs: string[]): Promise<WordPassage[]> {
     const dump = bookCache.get(row.book);
     const verse = dump?.chapters[row.ch]?.find((item) => item.v === row.v);
     if (!verse) continue;
-    out.push({ ref: row.ref, he: verse.he, en: verse.en });
+    out.push({
+      ref: row.ref,
+      he: verse.he,
+      en: englishPlain(verse.en),
+      enSlot: asEnglishSlot(verse.en),
+      yltSlot: asEnglishSlot(verse.ylt),
+    });
   }
   return out;
 }
@@ -105,7 +112,13 @@ export const searchTanakhIndex = createServerFn({ method: "POST" })
     return { parsed, label: kindLabel(parsed.kind, parsed.need), total, tokens: index.tokens, items };
   });
 
-export type WordPassage = { ref: string; he: string; en: string };
+export type WordPassage = {
+  ref: string;
+  he: string;
+  en: string;
+  enSlot: EnglishSlot;
+  yltSlot: EnglishSlot;
+};
 
 export type WordPassageResult = {
   parsed: ParsedTanakhQuery;
