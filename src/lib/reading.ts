@@ -123,6 +123,14 @@ export function readingVerses(key: ReadingKey): ReadingVerse[] {
   return out;
 }
 
+/**
+ * Grammar Path reading shows Hebrew only. The WEB `en` string stays in the
+ * book JSON and is not rendered on the verse line.
+ */
+export function grammarPathReadingLine(verse: { he: string; en: string }): { hebrew: string; english: null } {
+  return { hebrew: verse.he, english: null };
+}
+
 export function versesFromDump(dump: TanakhDump, chapter: number | "all"): ReadingVerse[] {
   const keys =
     chapter === "all"
