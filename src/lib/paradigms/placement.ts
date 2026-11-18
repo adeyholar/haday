@@ -50,6 +50,18 @@ export function placementWord(item: PlacementItem): string {
   return nfc(item.word);
 }
 
-export function placementChoices(item: PlacementItem): string[] {
-  return [item.correct, ...item.distractors];
+function shuffle<T>(items: readonly T[], rng: () => number): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    const swap = copy[i];
+    copy[i] = copy[j] as T;
+    copy[j] = swap as T;
+  }
+  return copy;
+}
+
+/** Correct answer and distractors, in a fresh order. The correct line is not fixed first. */
+export function placementChoices(item: PlacementItem, rng: () => number = Math.random): string[] {
+  return shuffle([item.correct, ...item.distractors], rng);
 }

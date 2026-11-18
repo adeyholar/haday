@@ -59,13 +59,6 @@ const PGN_ORDER = [
   "-",
 ];
 
-/**
- * Piel infinitive absolute stores the unattested spelling as `form` and the
- * attested spelling as the first alternate. v1 leads with that alternate.
- * The strings still come from the file; this set only names the cell id.
- */
-const LEAD_WITH_FIRST_ALTERNATE = new Set(["Piel.infinitive-absolute"]);
-
 const byId = new Map<string, StrongCell>();
 for (const cell of strongVerb.cells) byId.set(cell.id, cell);
 
@@ -129,15 +122,9 @@ function fromCell(cell: StrongCell): ShownForm {
   return shown;
 }
 
-/** Main line, then alternates. Piel infinitive absolute leads with its first alternate. */
+/** Main line, then alternates, in the order stored in the data file. */
 export function shownForms(cell: StrongCell): { main: ShownForm; also: ShownForm[] } {
-  const main = fromCell(cell);
-  const also = (cell.alternates ?? []).map(fromAlternate);
-  const lead = also[0];
-  if (LEAD_WITH_FIRST_ALTERNATE.has(cell.id) && lead) {
-    return { main: lead, also: [main, ...also.slice(1)] };
-  }
-  return { main, also };
+  return { main: fromCell(cell), also: (cell.alternates ?? []).map(fromAlternate) };
 }
 
 /** Every spelling the file stores for this cell, NFC. Grading accepts all of them. */

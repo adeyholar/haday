@@ -16,6 +16,9 @@ const placement = await jiti.import(join(root, "src/lib/paradigms/placement.ts")
 const leitner = await jiti.import(join(root, "src/lib/paradigms/leitner.ts"));
 const hide = await jiti.import(join(root, "src/lib/paradigms/hide.ts"));
 const { paradigmsV1ForEmail } = await jiti.import(join(root, "src/lib/paradigms/flag.ts"));
+const { guardParadigmAccess, paradigmDataForClient } = await jiti.import(join(root, "src/lib/paradigms/access.ts"));
+const { acceptStudentSave } = await jiti.import(join(root, "src/lib/paradigms/progress-shape.ts"));
+const { readLocalProgress, writeLocalProgress } = await jiti.import(join(root, "src/lib/paradigms/local.ts"));
 const { ADMIN_EMAILS } = await jiti.import(join(root, "src/lib/admin-access.ts"));
 const shape = await jiti.import(join(root, "src/lib/paradigms/progress-shape.ts"));
 const { isBookId } = await jiti.import(join(root, "src/lib/tanakh-canon.ts"));
@@ -70,18 +73,24 @@ test("every shown paradigm form matches the file by NFC", () => {
   }
 });
 
-test("lead forms follow the file, with the Piel infinitive absolute alternate first", () => {
-  for (const id of ["Niphal.yiqtol.3fp", "Niphal.yiqtol.2fp", "Niphal.imperative.fp", "Hophal.qatal.3ms", "Hophal.participle.fs", "Hophal.participle.mp"]) {
-    const cell = catalog.cellById(id);
-    assert.equal(catalog.shownForms(cell).main.form, nfc(cell.form), id);
-    assert.equal(catalog.shownForms(cell).also[0].form, nfc(cell.alternates[0].form), id);
+test("forms render in data order, and Piel infinitive absolute leads with the attested spelling", () => {
+  for (const cell of catalog.allCells()) {
+    const shown = catalog.shownForms(cell);
+    assert.equal(shown.main.form, nfc(cell.form), cell.id);
+    cell.alternates?.forEach((alt, index) => {
+      assert.equal(shown.also[index].form, nfc(alt.form), cell.id);
+    });
   }
   const piel = catalog.cellById("Piel.infinitive-absolute");
-  const lead = catalog.shownForms(piel);
-  assert.equal(lead.main.form, nfc(piel.alternates[0].form));
-  assert.equal(lead.main.status, "attested-example");
-  assert.equal(lead.also[0].form, nfc(piel.form));
-  assert.equal(lead.also[0].status, "paradigm-standard");
+  assert.equal(piel.status, "attested-example");
+  assert.equal(piel.exampleRef, "Exod 21:36 #12");
+  assert.equal(piel.exampleStrongs, "H7999");
+  assert.equal(piel.attestedTokenCount, 28);
+  assert.equal([...piel.exampleWord].map((ch) => ch.codePointAt(0)).join(","), "1513,1463,1473,1500,1461,1468,1448,1501");
+  assert.equal(piel.alternates[0].status, "paradigm-standard");
+  assert.equal(piel.alternates[0].exampleWord, undefined);
+  assert.equal(catalog.shownForms(piel).main.form, nfc(piel.form));
+  assert.equal(catalog.shownForms(piel).also[0].form, nfc(piel.alternates[0].form));
 });
 
 test("paradigm components hard-code no Hebrew and no copyrighted gloss", () => {
@@ -97,16 +106,23 @@ test("paradigm components hard-code no Hebrew and no copyrighted gloss", () => {
   }
 });
 
-test("no gloss renders unless a translation is asked, and then only YLT", () => {
+test("no gloss and no translation control when the table has no YLT line", () => {
+  const board = readFileSync(join(root, "src/components/paradigms/paradigm-board.tsx"), "utf8");
+  assert.equal(board.includes("YLT is not in this copy"), false);
+  assert.equal(board.includes("Translation"), false);
   for (const cell of catalog.allCells()) {
-    const quiet = cellView(cell, false);
-    assert.equal(quiet.gloss, null);
-    assert.equal(quiet.translation, null);
-    const asked = cellView(cell, true);
-    assert.equal(asked.gloss, null);
-    assert.equal(asked.translation.source, "YLT");
-    assert.equal(asked.translation.text, null);
+    const view = cellView(cell);
+    assert.equal(view.gloss, null);
+    assert.equal(view.translation, null);
   }
+  const fs = catalog.cellById("Qal.participle-active.fs");
+  const view = cellView(fs);
+  assert.ok(view.example);
+  assert.equal(view.example.word, nfc(fs.exampleWord));
+  const alt = view.also.find((row) => row.exampleWord);
+  assert.ok(alt);
+  assert.equal(alt.exampleWord, nfc(fs.alternates[0].exampleWord));
+  assert.equal(alt.exampleRef, fs.alternates[0].exampleRef);
 });
 
 test("the check can always be skipped and a skip does not move a box", () => {
@@ -304,4 +320,108 @@ test("check results are the Hebrew forms and nothing else", () => {
     assert.equal(/[A-Za-z]/.test(line.theirs), false, line.theirs);
     assert.ok(catalog.acceptedForms(catalog.cellById(item.cellId)).includes(nfc(line.right)));
   }
+});
+
+test("unauthorized paradigm access is denied and returns no table data", () => {
+  assert.throws(() => guardParadigmAccess(false), /Forbidden/);
+  assert.deepEqual(paradigmDataForClient(false, { cells: 207 }), { enabled: false });
+  assert.equal(paradigmDataForClient(true, { cells: 207 }).data.cells, 207);
+  assert.equal(paradigmsV1ForEmail("student@school.edu"), false);
+});
+
+test("a student cannot assign source chairman", () => {
+  const cellId = "Qal.qatal.3ms";
+  const spoof = { level: "L7", placed: true, source: "chairman", boxes: { [cellId]: 4 }, skips: [], updatedAt: "2026-11-18T01:00:00.000Z" };
+  const fresh = acceptStudentSave(null, spoof);
+  assert.equal(fresh.source, "unset");
+  assert.equal(fresh.level, "L1");
+  assert.equal(fresh.placed, false);
+  assert.equal(fresh.boxes[cellId], 4);
+  const placed = shape.sanitizeProgress({ level: "L3", placed: true, source: "quiz", boxes: {}, skips: [], updatedAt: "2026-11-18T00:00:00.000Z" });
+  const kept = acceptStudentSave(placed, spoof);
+  assert.equal(kept.level, "L3");
+  assert.equal(kept.source, "quiz");
+  const chairman = shape.sanitizeProgress({ level: "L6", placed: true, source: "chairman", boxes: {}, skips: [], updatedAt: "2026-11-18T00:00:00.000Z" });
+  const still = acceptStudentSave(chairman, { ...spoof, level: "L1" });
+  assert.equal(still.level, "L6");
+  assert.equal(still.source, "chairman");
+});
+
+test("local progress is stored per account", () => {
+  const memory = new Map();
+  const previous = globalThis.window;
+  globalThis.window = {
+    localStorage: {
+      getItem: (key) => (memory.has(key) ? memory.get(key) : null),
+      setItem: (key, value) => memory.set(key, String(value)),
+      removeItem: (key) => memory.delete(key),
+    },
+  };
+  try {
+    writeLocalProgress("student-a", { level: "L4", placed: true, source: "quiz", boxes: { "Qal.qatal.3ms": 3 }, skips: [], updatedAt: "2026-11-18T00:00:00.000Z" });
+    writeLocalProgress("student-b", { level: "L1", placed: true, source: "skip", boxes: {}, skips: [], updatedAt: "2026-11-18T00:00:00.000Z" });
+    assert.equal(readLocalProgress("student-a").level, "L4");
+    assert.equal(readLocalProgress("student-a").boxes["Qal.qatal.3ms"], 3);
+    assert.equal(readLocalProgress("student-b").level, "L1");
+    assert.equal(readLocalProgress("student-b").boxes["Qal.qatal.3ms"], undefined);
+    assert.equal(memory.has("haday.paradigms.v1"), false);
+  } finally {
+    if (previous === undefined) delete globalThis.window;
+    else globalThis.window = previous;
+  }
+});
+
+test("placement choices are shuffled and the correct answer is not fixed first", () => {
+  const rng = mulberry32(4);
+  let leading = 0;
+  for (const item of quiz.items) {
+    const choices = placement.placementChoices(item, rng);
+    assert.deepEqual([...choices].sort(), [item.correct, ...item.distractors].sort());
+    if (choices[0] === item.correct) leading += 1;
+  }
+  assert.ok(leading > 0 && leading < quiz.items.length, String(leading));
+});
+
+test("ordinary lesson sources do not carry the owner list or the paradigm tables", () => {
+  const lessons = [
+    "src/routes/study/lesson/$id.tsx",
+    "src/routes/lessons/$track/$unit.tsx",
+    "src/routes/study/term2/$chapter.tsx",
+    "src/routes/iibs/study/$level/$week.tsx",
+  ];
+  const seen = new Set();
+  function walkFile(rel) {
+    if (seen.has(rel)) return;
+    seen.add(rel);
+    const abs = join(root, rel);
+    const text = readFileSync(abs, "utf8");
+    const specifiers = [];
+    for (const match of text.matchAll(/import\s+(?!type\b)[^;]*?\sfrom\s+["']([^"']+)["']/g)) {
+      specifiers.push(match[1]);
+    }
+    for (const spec of specifiers) {
+      if (!spec.startsWith("@/") && !spec.startsWith(".")) continue;
+      const base = spec.startsWith("@/") ? join(root, "src", spec.slice(2)) : join(root, rel, "..", spec);
+      const file = [".ts", ".tsx", ""].map((ext) => base + ext).find((path) => {
+        try {
+          return readFileSync(path, "utf8").length >= 0;
+        } catch {
+          return false;
+        }
+      });
+      if (!file || !file.startsWith(join(root, "src"))) continue;
+      const relPath = file.slice(root.endsWith("/") ? root.length : root.length + 1);
+      walkFile(relPath);
+    }
+  }
+  for (const lesson of lessons) walkFile(lesson);
+  const paradigmFiles = [...seen].filter((rel) => rel.includes("/paradigms/"));
+  assert.ok(paradigmFiles.includes("src/components/paradigms/lesson-gate.tsx"));
+  assert.equal(paradigmFiles.some((rel) => rel.endsWith("flag.ts") || rel.endsWith("catalog.ts") || rel.endsWith("data.ts")), false);
+  const banned = ["talk2pastoradeolaade@yahoo.com", "adeolaa@jcdisn.com", "adeyholar@aol.com", "ADMIN_EMAILS", "strong-verb.json"];
+  for (const rel of paradigmFiles) {
+    const text = readFileSync(join(root, rel), "utf8");
+    for (const token of banned) assert.equal(text.includes(token), false, `${rel} contains ${token}`);
+  }
+  assert.equal([...seen].some((rel) => rel.includes("strong-verb.json")), false);
 });

@@ -7,9 +7,9 @@ export type CellView = {
   mainStandard: boolean;
   also: { form: string; standard: boolean; exampleWord?: string; exampleRef?: string }[];
   example: { word: string; ref: string } | null;
-  /** English meaning. Null until the student asks, and this table has no YLT line. */
+  /** English meaning. This table has none, so the view stays null. */
   gloss: string | null;
-  translation: { source: "YLT"; text: string | null } | null;
+  translation: null;
 };
 
 function exampleOf(form: ShownForm): { word: string; ref: string } | null {
@@ -18,7 +18,7 @@ function exampleOf(form: ShownForm): { word: string; ref: string } | null {
   return { word: form.exampleWord, ref: form.exampleRef };
 }
 
-export function cellView(cell: StrongCell, askTranslation = false): CellView {
+export function cellView(cell: StrongCell): CellView {
   const shown = shownForms(cell);
   return {
     cellId: cell.id,
@@ -32,7 +32,7 @@ export function cellView(cell: StrongCell, askTranslation = false): CellView {
     })),
     example: exampleOf(shown.main),
     gloss: null,
-    translation: askTranslation ? { source: "YLT", text: null } : null,
+    translation: null,
   };
 }
 

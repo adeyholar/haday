@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { answerPlacement, placementChoices, placementItem, placementWord, skipPlacement, startPlacement, type PlacementStep } from "@/lib/paradigms/placement";
 import type { LevelId } from "@/lib/paradigms/types";
@@ -10,6 +10,8 @@ export function PlacementQuiz({
 }) {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState<PlacementStep>(() => startPlacement());
+  const item = placementItem(step);
+  const choices = useMemo(() => (item ? placementChoices(item) : []), [item]);
 
   function skip() {
     const left = skipPlacement();
@@ -34,8 +36,6 @@ export function PlacementQuiz({
     );
   }
 
-  const item = placementItem(step);
-
   function choose(miss: boolean) {
     const next = answerPlacement(step, miss);
     setStep(next);
@@ -57,7 +57,7 @@ export function PlacementQuiz({
       </p>
       <p className="mt-2 text-center text-sm text-muted">{item.ref}</p>
       <div className="mt-4 flex flex-col gap-2">
-        {placementChoices(item).map((label) => (
+        {choices.map((label) => (
           <Button key={label} type="button" variant="outline" onClick={() => choose(label !== item.correct)}>
             {label}
           </Button>

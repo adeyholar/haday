@@ -41,8 +41,8 @@ function FormFace({
   onToggle: () => void;
 }) {
   const [exampleOn, setExampleOn] = useState(false);
-  const [asked, setAsked] = useState(false);
-  const view = cellView(cell, asked);
+  const [openAlt, setOpenAlt] = useState<string | null>(null);
+  const view = cellView(cell);
 
   return (
     <div className="min-w-0">
@@ -64,6 +64,23 @@ function FormFace({
             <span key={alt.form} className="he-word text-ink" lang="he" dir="rtl">
               {alt.form}
               {alt.standard ? <span className="ms-1 text-xs text-muted">standard form</span> : null}{" "}
+              {alt.exampleWord && alt.exampleRef ? (
+                <button
+                  type="button"
+                  className="ms-1 text-sm font-semibold text-primary"
+                  onClick={() => setOpenAlt((current) => (current === alt.form ? null : alt.form))}
+                >
+                  Example
+                </button>
+              ) : null}
+              {openAlt === alt.form && alt.exampleWord && alt.exampleRef ? (
+                <span className="ms-1 text-sm">
+                  <span className="he-word text-xl" lang="he" dir="rtl">
+                    {alt.exampleWord}
+                  </span>{" "}
+                  <VerseLink reference={alt.exampleRef} />
+                </span>
+              ) : null}
             </span>
           ))}
         </p>
@@ -80,16 +97,6 @@ function FormFace({
               </span>{" "}
               <VerseLink reference={view.example.ref} />
             </p>
-          ) : null}
-          {exampleOn ? (
-            <div className="mt-1">
-              <button type="button" className="text-sm font-semibold text-primary" onClick={() => setAsked(true)}>
-                Translation
-              </button>
-              {view.translation ? (
-                <p className="text-sm text-muted">{view.translation.text ?? "YLT is not in this copy."}</p>
-              ) : null}
-            </div>
           ) : null}
         </div>
       ) : null}

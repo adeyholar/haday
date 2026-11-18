@@ -1,58 +1,31 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ParadigmCheck } from "@/components/paradigms/paradigm-check";
-import { PlacementQuiz } from "@/components/paradigms/placement-quiz";
-import { useParadigmProgress } from "@/components/paradigms/use-paradigm-progress";
-import { nextBox } from "@/lib/paradigms/leitner";
-import type { LevelId, PlacementSource } from "@/lib/paradigms/types";
+import { useParadigmAccess } from "@/components/paradigms/use-paradigm-progress";
+import { loadParadigmLessonSession } from "@/components/paradigms/load-session";
 
-type GateStep = "placement" | "check" | "lesson";
+type SessionProps = { lessonKey: string; children: ReactNode };
 
 export function ParadigmLessonGate({ lessonKey, children }: { lessonKey: string; children: ReactNode }) {
-  const { enabled, progress, update } = useParadigmProgress();
-  const [step, setStep] = useState<GateStep>(progress.placed ? "check" : "placement");
+  const { enabled } = useParadigmAccess();
+  const [Session, setSession] = useState<ComponentType<SessionProps> | null>(null);
 
   useEffect(() => {
-    if (progress.placed && step === "placement") setStep("check");
-  }, [progress.placed, step]);
+    if (!enabled) return;
+    let cancel = false;
+    loadParadigmLessonSession().then((mod) => {
+      if (!cancel) setSession(() => mod.ParadigmLessonSession);
+    });
+    return () => {
+      cancel = true;
+    };
+  }, [enabled]);
 
-  if (!enabled || step === "lesson") return children;
-
-  function place(level: LevelId, source: Extract<PlacementSource, "quiz" | "skip">) {
-    void update((current) => ({ ...current, level, placed: true, source }));
-    setStep("check");
-  }
-
-  function logSkip(itemId: string | null) {
-    void update((current) => ({
-      ...current,
-      skips: [...current.skips, { at: new Date().toISOString(), lessonKey, itemId }],
-    }));
-  }
-
-  function grade(cellId: string, correct: boolean) {
-    void update((current) => ({
-      ...current,
-      boxes: { ...current.boxes, [cellId]: nextBox(current.boxes[cellId], correct) },
-    }));
-  }
-
-  if (step === "placement") return <PlacementQuiz onPlace={place} />;
-
-  return (
-    <ParadigmCheck
-      lessonKey={lessonKey}
-      level={progress.level}
-      boxes={progress.boxes}
-      onSkip={logSkip}
-      onAnswer={grade}
-      onDone={() => setStep("lesson")}
-    />
-  );
+  if (!enabled || !Session) return children;
+  return <Session lessonKey={lessonKey}>{children}</Session>;
 }
 
 export function ParadigmsLearnLink() {
-  const { enabled } = useParadigmProgress();
+  const { enabled } = useParadigmAccess();
   if (!enabled) return null;
   return (
     <Link

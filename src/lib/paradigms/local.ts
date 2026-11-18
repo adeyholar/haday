@@ -1,23 +1,43 @@
 import { EMPTY_PROGRESS, type ParadigmProgress } from "@/lib/paradigms/types";
 import { sanitizeProgress } from "@/lib/paradigms/progress-shape";
 
-const KEY = "haday.paradigms.v1";
+const PREFIX = "haday.paradigms.v1.";
+const LEGACY_KEY = "haday.paradigms.v1";
 
-export function readLocalProgress(): ParadigmProgress {
-  if (typeof window === "undefined") return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
+function empty(): ParadigmProgress {
+  return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
+}
+
+export function progressStorageKey(userId: string): string {
+  return `${PREFIX}${userId}`;
+}
+
+function dropLegacy(): void {
+  if (typeof window === "undefined") return;
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
-    return sanitizeProgress(JSON.parse(raw));
+    window.localStorage.removeItem(LEGACY_KEY);
   } catch {
-    return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
+    /* private mode */
   }
 }
 
-export function writeLocalProgress(progress: ParadigmProgress): void {
-  if (typeof window === "undefined") return;
+export function readLocalProgress(userId: string): ParadigmProgress {
+  dropLegacy();
+  if (!userId || typeof window === "undefined") return empty();
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(sanitizeProgress(progress)));
+    const raw = window.localStorage.getItem(progressStorageKey(userId));
+    if (!raw) return empty();
+    return sanitizeProgress(JSON.parse(raw));
+  } catch {
+    return empty();
+  }
+}
+
+export function writeLocalProgress(userId: string, progress: ParadigmProgress): void {
+  dropLegacy();
+  if (!userId || typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(progressStorageKey(userId), JSON.stringify(sanitizeProgress(progress)));
   } catch {
     /* private mode */
   }

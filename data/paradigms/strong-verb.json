@@ -1431,21 +1431,19 @@
    "binyan": "Piel",
    "conjugation": "infinitive absolute",
    "pgn": "-",
-   "form": "קַטֹּל",
+   "form": "קַטֵּל",
    "translit": null,
-   "status": "paradigm-standard",
-   "exampleRef": null,
-   "exampleWord": null,
+   "status": "attested-example",
+   "exampleRef": "Exod 21:36 #12",
+   "exampleWord": "שַׁלֵּ֨ם",
+   "exampleStrongs": "H7999",
+   "exampleRootClass": "strong",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 28,
    "alternates": [
     {
-     "form": "קַטֵּל",
-     "status": "attested-example",
-     "exampleRef": "Exod 21:36 #12",
-     "exampleWord": "שַׁלֵּ֨ם",
-     "exampleStrongs": "H7999",
-     "exampleRootClass": "strong",
-     "exampleHasWawPrefix": false,
-     "attestedTokenCount": 28
+     "form": "קַטֹּל",
+     "status": "paradigm-standard"
     }
    ]
   },

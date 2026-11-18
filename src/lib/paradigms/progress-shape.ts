@@ -50,6 +50,25 @@ export function sanitizeProgress(input: unknown): ParadigmProgress {
   };
 }
 
+/**
+ * A student save may set quiz or skip. `source: "chairman"` is ignored:
+ * only the server manual level-set path may assign it.
+ */
+export function acceptStudentSave(existing: ParadigmProgress | null, incoming: unknown): ParadigmProgress {
+  const parsed = sanitizeProgress(incoming);
+  if (parsed.source !== "chairman") return mergeStudentSave(existing, parsed);
+  const kept = existing ?? { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
+  const source = kept.source === "chairman" || kept.source === "quiz" || kept.source === "skip" ? kept.source : "unset";
+  return sanitizeProgress({
+    level: kept.level,
+    placed: kept.placed,
+    source,
+    boxes: parsed.boxes,
+    skips: parsed.skips,
+    updatedAt: parsed.updatedAt || new Date().toISOString(),
+  });
+}
+
 /** A fresh placement replaces a hand-set level. Box practice does not. */
 export function mergeStudentSave(existing: ParadigmProgress | null, incoming: ParadigmProgress): ParadigmProgress {
   const next = sanitizeProgress(incoming);

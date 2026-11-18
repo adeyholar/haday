@@ -1,59 +1,102 @@
 import { useEffect, useRef, useState } from "react";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { paradigmsV1ForEmail } from "@/lib/paradigms/flag";
 import { readLocalProgress, writeLocalProgress } from "@/lib/paradigms/local";
-import { loadParadigmProgress, saveParadigmProgress } from "@/lib/paradigms/progress";
-import { mergeStudentSave, sanitizeProgress } from "@/lib/paradigms/progress-shape";
-import type { ParadigmProgress } from "@/lib/paradigms/types";
+import { getParadigmsAccess, loadParadigmProgress, saveParadigmProgress } from "@/lib/paradigms/progress";
+import { acceptStudentSave } from "@/lib/paradigms/progress-shape";
+import { EMPTY_PROGRESS, type ParadigmProgress } from "@/lib/paradigms/types";
 
-export function useParadigmsEnabled(): boolean {
-  const { user, isPending } = useCurrentUserState();
-  if (isPending || !user) return false;
-  return paradigmsV1ForEmail(user.primaryEmail);
+function emptyProgress(): ParadigmProgress {
+  return { ...EMPTY_PROGRESS, boxes: {}, skips: [] };
 }
 
-export function useParadigmProgress() {
-  const enabled = useParadigmsEnabled();
-  const [progress, setProgress] = useState<ParadigmProgress>(() => readLocalProgress());
+let accessPromise: Promise<boolean> | null = null;
+
+function loadAccess(): Promise<boolean> {
+  accessPromise ??= getParadigmsAccess()
+    .then((row) => row.enabled === true)
+    .catch(() => false);
+  return accessPromise;
+}
+
+export function useParadigmAccess() {
+  const [enabled, setEnabled] = useState(false);
   const [ready, setReady] = useState(false);
-  const progressRef = useRef(progress);
-  const chain = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
-    if (!enabled) return;
     let cancel = false;
-    loadParadigmProgress()
-      .then((remote) => {
-        if (cancel) return;
-        if (remote) {
-          const merged = mergeLoad(progressRef.current, remote);
-          progressRef.current = merged;
-          writeLocalProgress(merged);
-          setProgress(merged);
-        }
-        setReady(true);
+    loadAccess()
+      .then((on) => {
+        if (!cancel) setEnabled(on);
       })
-      .catch(() => {
+      .finally(() => {
         if (!cancel) setReady(true);
       });
     return () => {
       cancel = true;
     };
-  }, [enabled]);
+  }, []);
+
+  return { enabled, ready };
+}
+
+export function useParadigmProgress() {
+  const { user } = useCurrentUserState();
+  const userId = user?.id ?? "";
+  const { enabled, ready: accessReady } = useParadigmAccess();
+  const [progress, setProgress] = useState<ParadigmProgress>(emptyProgress);
+  const progressRef = useRef(progress);
+  const chain = useRef<Promise<void>>(Promise.resolve());
+  const userRef = useRef(userId);
+  userRef.current = userId;
+
+  useEffect(() => {
+    if (!userId) {
+      const blank = emptyProgress();
+      progressRef.current = blank;
+      setProgress(blank);
+      return;
+    }
+    const local = readLocalProgress(userId);
+    progressRef.current = local;
+    setProgress(local);
+    if (!enabled) return;
+    let cancel = false;
+    loadParadigmProgress()
+      .then((remote) => {
+        if (cancel || !remote) return;
+        const merged = mergeLoad(readLocalProgress(userId), remote);
+        progressRef.current = merged;
+        writeLocalProgress(userId, merged);
+        setProgress(merged);
+      })
+      .catch(() => {
+        /* Unauthorized or offline: keep this account's local copy. */
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [userId, enabled]);
 
   function update(recipe: (current: ParadigmProgress) => ParadigmProgress): Promise<void> {
+    const id = userRef.current;
+    if (!id) return Promise.resolve();
     const run = chain.current.then(async () => {
-      const stamped = sanitizeProgress({ ...recipe(progressRef.current), updatedAt: new Date().toISOString() });
+      const stamped = acceptStudentSave(progressRef.current, {
+        ...recipe(progressRef.current),
+        updatedAt: new Date().toISOString(),
+      });
       progressRef.current = stamped;
-      writeLocalProgress(stamped);
+      writeLocalProgress(id, stamped);
       setProgress(stamped);
+      if (!enabled) return;
       try {
         const saved = await saveParadigmProgress({ data: stamped });
-        progressRef.current = saved;
-        writeLocalProgress(saved);
-        setProgress(saved);
+        const accepted = acceptStudentSave(stamped, saved);
+        progressRef.current = accepted;
+        writeLocalProgress(id, accepted);
+        setProgress(accepted);
       } catch {
-        /* The local copy is enough while offline. */
+        /* The local copy for this account is enough while offline. */
       }
     });
     chain.current = run.then(
@@ -63,12 +106,12 @@ export function useParadigmProgress() {
     return run;
   }
 
-  return { enabled, progress, ready: enabled ? ready : true, update };
+  return { enabled, ready: accessReady, progress, update };
 }
 
 function mergeLoad(local: ParadigmProgress, remote: ParadigmProgress): ParadigmProgress {
   const remoteTime = Date.parse(remote.updatedAt) || 0;
   const localTime = Date.parse(local.updatedAt) || 0;
   if (remoteTime >= localTime) return remote;
-  return mergeStudentSave(remote, local);
+  return acceptStudentSave(remote, local);
 }
