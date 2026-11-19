@@ -1,0 +1,167 @@
+{
+  "ref": "Gen.1.3",
+  "book": "Gen",
+  "chapter": 1,
+  "verse": 3,
+  "oshb": "3d15126fb1ef74867fc1434be1942e837932691f",
+  "dataset": "1.2.0",
+  "text": "וַיֹּ֥אמֶר אֱלֹהִ֖ים יְהִ֣י א֑וֹר וַֽיְהִי־אֽוֹר׃",
+  "words": [
+    {
+      "n": 1,
+      "id": "01thY",
+      "surface": "וַיֹּ֥אמֶר",
+      "trailer": " ",
+      "lemma": "c/559",
+      "morph": "HC/Vqw3ms",
+      "consonants": "ויאמר"
+    },
+    {
+      "n": 2,
+      "id": "01JM7",
+      "surface": "אֱלֹהִ֖ים",
+      "trailer": " ",
+      "lemma": "430",
+      "morph": "HNcmpa",
+      "consonants": "אלהים"
+    },
+    {
+      "n": 3,
+      "id": "01fpo",
+      "surface": "יְהִ֣י",
+      "trailer": " ",
+      "lemma": "1961",
+      "morph": "HVqj3ms",
+      "consonants": "יהי"
+    },
+    {
+      "n": 4,
+      "id": "01W26",
+      "surface": "א֑וֹר",
+      "trailer": " ",
+      "lemma": "216",
+      "morph": "HNcbsa",
+      "consonants": "אור"
+    },
+    {
+      "n": 5,
+      "id": "01yw4",
+      "surface": "וַֽיְהִי",
+      "trailer": "־",
+      "lemma": "c/1961",
+      "morph": "HC/Vqw3ms",
+      "consonants": "ויהי"
+    },
+    {
+      "n": 6,
+      "id": "01jbg",
+      "surface": "אֽוֹר",
+      "trailer": "׃",
+      "lemma": "216",
+      "morph": "HNcbsa",
+      "consonants": "אור"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "c1",
+      "words": [
+        1
+      ],
+      "role": "verb",
+      "particles": [
+        "ו"
+      ],
+      "literal": "and he said",
+      "smooth": "said",
+      "wrong": [
+        "and he promised",
+        "and he commanded"
+      ],
+      "wrongSource": [
+        "BDB H559 sense: promise",
+        "BDB H559 sense: command"
+      ]
+    },
+    {
+      "id": "c2",
+      "words": [
+        2
+      ],
+      "role": "subject",
+      "particles": [],
+      "literal": "God",
+      "smooth": "God",
+      "wrong": [
+        "gods",
+        "judges"
+      ],
+      "wrongSource": [
+        "BDB H430 sense: gods",
+        "BDB H430 sense: judges"
+      ]
+    },
+    {
+      "id": "c3",
+      "words": [
+        3
+      ],
+      "role": "verb",
+      "particles": [],
+      "literal": "let [there] be",
+      "smooth": "let there be",
+      "wrong": [
+        "let it come to pass",
+        "let him become"
+      ],
+      "wrongSource": [
+        "BDB H1961 sense: come to pass",
+        "BDB H1961 sense: become"
+      ]
+    },
+    {
+      "id": "c4",
+      "words": [
+        4
+      ],
+      "role": "object",
+      "particles": [],
+      "literal": "light",
+      "smooth": "light",
+      "wrong": [
+        "daylight",
+        "lightning"
+      ],
+      "wrongSource": [
+        "BDB H216 sense: daylight",
+        "BDB H216 sense: lightning"
+      ]
+    },
+    {
+      "id": "c5",
+      "words": [
+        5,
+        6
+      ],
+      "role": "verb",
+      "particles": [
+        "ו"
+      ],
+      "literal": "and [there] was light",
+      "smooth": "and there was light",
+      "wrong": [
+        "and lightning came to pass",
+        "and it became daylight"
+      ],
+      "wrongSource": [
+        "BDB H1961 come to pass + H216 lightning, not the wayyiqtol",
+        "OSHB misparse: H1961 as become and H216 as daylight"
+      ]
+    }
+  ],
+  "readings": {
+    "ylt": "and God saith, 'Let light be;' and light is.",
+    "web": "God said, “Let there be light,” and there was light.",
+    "jps": "And God said: ‘Let there be light.’ And there was light."
+  }
+}

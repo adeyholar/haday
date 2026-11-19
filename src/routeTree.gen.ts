@@ -74,6 +74,7 @@ import { Route as IibsIndexRouteImport } from './routes/iibs/index'
 import { Route as IibsLevelRouteImport } from './routes/iibs/$level'
 import { Route as IibsBinyanimRouteImport } from './routes/iibs/binyanim'
 import { Route as IibsDrillRouteImport } from './routes/iibs/drill'
+import { Route as IibsLabRouteImport } from './routes/iibs/lab'
 import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
 import { Route as IibsParseLabRouteImport } from './routes/iibs/parse-lab'
 import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfect'
@@ -85,6 +86,7 @@ import { Route as LearningHebrabbaiSlugRouteImport } from './routes/learning-heb
 import { Route as LearningHebrabbaiRssDotxmlRouteImport } from './routes/learning-hebrabbai/rss[.]xml'
 import { Route as LessonsIndexRouteImport } from './routes/lessons/index'
 import { Route as ListenIndexRouteImport } from './routes/listen/index'
+import { Route as ListenLabRouteImport } from './routes/listen/lab'
 import { Route as ListenPetRouteImport } from './routes/listen/pet'
 import { Route as ListenRoadRouteImport } from './routes/listen/road'
 import { Route as StudyIndexRouteImport } from './routes/study/index'
@@ -459,6 +461,11 @@ const IibsDrillRoute = IibsDrillRouteImport.update({
   path: '/drill',
   getParentRoute: () => IibsRoute,
 } as any)
+const IibsLabRoute = IibsLabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
+  getParentRoute: () => IibsRoute,
+} as any)
 const IibsLearnRoute = IibsLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -513,6 +520,11 @@ const LessonsIndexRoute = LessonsIndexRouteImport.update({
 const ListenIndexRoute = ListenIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => ListenRoute,
+} as any)
+const ListenLabRoute = ListenLabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
   getParentRoute: () => ListenRoute,
 } as any)
 const ListenPetRoute = ListenPetRouteImport.update({
@@ -815,6 +827,7 @@ export interface FileRoutesByFullPath {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/drill': typeof IibsDrillRoute
+  '/iibs/lab': typeof IibsLabRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
@@ -823,6 +836,7 @@ export interface FileRoutesByFullPath {
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
   '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
+  '/listen/lab': typeof ListenLabRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -938,6 +952,7 @@ export interface FileRoutesByTo {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/drill': typeof IibsDrillRoute
+  '/iibs/lab': typeof IibsLabRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
@@ -946,6 +961,7 @@ export interface FileRoutesByTo {
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
   '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
+  '/listen/lab': typeof ListenLabRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -1064,6 +1080,7 @@ export interface FileRoutesById {
   '/iibs/$level': typeof IibsLevelRoute
   '/iibs/binyanim': typeof IibsBinyanimRoute
   '/iibs/drill': typeof IibsDrillRoute
+  '/iibs/lab': typeof IibsLabRoute
   '/iibs/learn': typeof IibsLearnRoute
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
@@ -1072,6 +1089,7 @@ export interface FileRoutesById {
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
   '/learning-hebrabbai/rss.xml': typeof LearningHebrabbaiRssDotxmlRoute
+  '/listen/lab': typeof ListenLabRoute
   '/listen/pet': typeof ListenPetRoute
   '/listen/road': typeof ListenRoadRoute
   '/teachings/$slug': typeof TeachingsSlugRoute
@@ -1191,6 +1209,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/drill'
+    | '/iibs/lab'
     | '/iibs/learn'
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
@@ -1199,6 +1218,7 @@ export interface FileRouteTypes {
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
     | '/learning-hebrabbai/rss.xml'
+    | '/listen/lab'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1314,6 +1334,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/drill'
+    | '/iibs/lab'
     | '/iibs/learn'
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
@@ -1322,6 +1343,7 @@ export interface FileRouteTypes {
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
     | '/learning-hebrabbai/rss.xml'
+    | '/listen/lab'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -1439,6 +1461,7 @@ export interface FileRouteTypes {
     | '/iibs/$level'
     | '/iibs/binyanim'
     | '/iibs/drill'
+    | '/iibs/lab'
     | '/iibs/learn'
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
@@ -1447,6 +1470,7 @@ export interface FileRouteTypes {
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
     | '/learning-hebrabbai/rss.xml'
+    | '/listen/lab'
     | '/listen/pet'
     | '/listen/road'
     | '/teachings/$slug'
@@ -2058,6 +2082,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IibsDrillRouteImport
       parentRoute: typeof IibsRoute
     }
+    '/iibs/lab': {
+      id: '/iibs/lab'
+      path: '/lab'
+      fullPath: '/iibs/lab'
+      preLoaderRoute: typeof IibsLabRouteImport
+      parentRoute: typeof IibsRoute
+    }
     '/iibs/learn': {
       id: '/iibs/learn'
       path: '/learn'
@@ -2133,6 +2164,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/listen/'
       preLoaderRoute: typeof ListenIndexRouteImport
+      parentRoute: typeof ListenRoute
+    }
+    '/listen/lab': {
+      id: '/listen/lab'
+      path: '/lab'
+      fullPath: '/listen/lab'
+      preLoaderRoute: typeof ListenLabRouteImport
       parentRoute: typeof ListenRoute
     }
     '/listen/pet': {
@@ -2501,6 +2539,7 @@ interface IibsRouteChildren {
   IibsLevelRoute: typeof IibsLevelRoute
   IibsBinyanimRoute: typeof IibsBinyanimRoute
   IibsDrillRoute: typeof IibsDrillRoute
+  IibsLabRoute: typeof IibsLabRoute
   IibsLearnRoute: typeof IibsLearnRoute
   IibsParseLabRoute: typeof IibsParseLabRoute
   IibsQalImperfectRoute: typeof IibsQalImperfectRoute
@@ -2520,6 +2559,7 @@ const IibsRouteChildren: IibsRouteChildren = {
   IibsLevelRoute: IibsLevelRoute,
   IibsBinyanimRoute: IibsBinyanimRoute,
   IibsDrillRoute: IibsDrillRoute,
+  IibsLabRoute: IibsLabRoute,
   IibsLearnRoute: IibsLearnRoute,
   IibsParseLabRoute: IibsParseLabRoute,
   IibsQalImperfectRoute: IibsQalImperfectRoute,
@@ -2538,6 +2578,7 @@ const IibsRouteChildren: IibsRouteChildren = {
 const IibsRouteWithChildren = IibsRoute._addFileChildren(IibsRouteChildren)
 
 interface ListenRouteChildren {
+  ListenLabRoute: typeof ListenLabRoute
   ListenPetRoute: typeof ListenPetRoute
   ListenRoadRoute: typeof ListenRoadRoute
   ListenIndexRoute: typeof ListenIndexRoute
@@ -2547,6 +2588,7 @@ interface ListenRouteChildren {
 }
 
 const ListenRouteChildren: ListenRouteChildren = {
+  ListenLabRoute: ListenLabRoute,
   ListenPetRoute: ListenPetRoute,
   ListenRoadRoute: ListenRoadRoute,
   ListenIndexRoute: ListenIndexRoute,

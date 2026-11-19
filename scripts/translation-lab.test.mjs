@@ -1,0 +1,149 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+import { gunzipSync } from "node:zlib";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createJiti } from "jiti";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
+const { translationLabFlagOn } = await jiti.import(join(root, "src/lib/translation-lab/flag.ts"));
+const { LAB_CREDITS, ADONAI_NOTE } = await jiti.import(join(root, "src/lib/translation-lab/credits.ts"));
+const { GEN_1_3, chunkHebrew, verseHebrew, nfcHebrew, maqafGroups, hasDivineName } = await jiti.import(
+  join(root, "src/lib/translation-lab/verse.ts"),
+);
+const {
+  gradeChunks,
+  gradeSay,
+  gradeAssemble,
+  sayChoices,
+  acceptedOrders,
+  lookReadings,
+  publishedEnglishVisible,
+  glossVisible,
+  isPublishedReading,
+  chunksFollowMaqaf,
+  assembleTiles,
+} = await jiti.import(join(root, "src/lib/translation-lab/grade.ts"));
+
+const labDir = join(root, "src/lib/translation-lab");
+const labFiles = ["flag.ts", "credits.ts", "verse.ts", "grade.ts"].map((name) => readFileSync(join(labDir, name), "utf8"));
+labFiles.push(readFileSync(join(root, "src/components/translation-lab.tsx"), "utf8"));
+labFiles.push(readFileSync(join(root, "src/routes/listen/lab.tsx"), "utf8"));
+labFiles.push(readFileSync(join(root, "src/routes/iibs/lab.tsx"), "utf8"));
+
+test("the lab flag is off unless the build turns it on", () => {
+  assert.equal(translationLabFlagOn(undefined), false);
+  assert.equal(translationLabFlagOn(""), false);
+  assert.equal(translationLabFlagOn("false"), false);
+  assert.equal(translationLabFlagOn("true"), true);
+  const flag = readFileSync(join(labDir, "flag.ts"), "utf8");
+  assert.match(flag, /VITE_TRANSLATION_LAB === "true"/);
+  const page = readFileSync(join(root, "src/components/translation-lab.tsx"), "utf8");
+  assert.match(page, /translationLabEnabled\(\)/);
+  assert.match(page, /This lab is closed/);
+  assert.doesNotMatch(readFileSync(join(root, "src/components/listen-menu.tsx"), "utf8"), /\/listen\/lab/);
+  assert.doesNotMatch(readFileSync(join(root, "src/routes/iibs/index.tsx"), "utf8"), /\/iibs\/lab/);
+});
+
+test("the manuscript desk and the Scripture reader are untouched", () => {
+  const desk = readFileSync(join(root, "src/components/wlc-desk.tsx"), "utf8");
+  const reader = readFileSync(join(root, "src/routes/iibs/wlc/$book/$ch.tsx"), "utf8");
+  assert.doesNotMatch(desk, /translation-lab/);
+  assert.doesNotMatch(reader, /translation-lab/);
+});
+
+test("the lab pins its snapshot and does not call Sefaria", () => {
+  const file = readFileSync(join(root, "data/translation-lab/gen-1-3.json"));
+  const [hex, name] = readFileSync(join(root, "data/translation-lab/SHA256SUMS"), "utf8").trim().split(/\s+/);
+  assert.equal(name, "gen-1-3.json");
+  assert.equal(createHash("sha256").update(file).digest("hex"), hex);
+  assert.equal(GEN_1_3.oshb, "3d15126fb1ef74867fc1434be1942e837932691f");
+  assert.equal(GEN_1_3.dataset, "1.2.0");
+  const joined = labFiles.join("\n");
+  assert.doesNotMatch(joined, /sefaria\.org/);
+  assert.doesNotMatch(joined, /askHaday/);
+  assert.doesNotMatch(joined, /<textarea/);
+  assert.doesNotMatch(joined, /fetch\(/);
+});
+
+test("Genesis 1:3 is the pinned OSHB verse, in NFC, and the maqqef stays one chunk", () => {
+  const chapter = JSON.parse(gunzipSync(readFileSync(join(root, "data/wlc/Gen/1.json.gz"))).toString("utf8"));
+  const verse = chapter.verses.find((item) => item.ref === "Gen.1.3");
+  assert.equal(GEN_1_3.words.length, verse.words.length);
+  GEN_1_3.words.forEach((word, index) => {
+    const source = verse.words[index];
+    assert.equal(word.id, source.id);
+    assert.equal(word.surface, source.surface);
+    assert.equal(word.trailer, source.trailer);
+    assert.equal(word.lemma, source.lemma);
+    assert.equal(word.morph, source.morph);
+    assert.equal(nfcHebrew(word.surface), word.surface.normalize("NFC"));
+  });
+  assert.equal(verseHebrew(), verse.text.normalize("NFC"));
+  assert.equal(verseHebrew(), verseHebrew().normalize("NFC"));
+  assert.equal(chunksFollowMaqaf(), true);
+  assert.deepEqual(
+    maqafGroups().map((group) => group.map((word) => word.n)),
+    [[1], [2], [3], [4], [5, 6]],
+  );
+  assert.ok(chunkHebrew(GEN_1_3.chunks[4]).includes("־"));
+  const reader = JSON.parse(readFileSync(join(root, "src/lib/genesis-1-5.json"), "utf8"));
+  const dropped = reader.chapters["1"].find((item) => item.v === 3).words;
+  assert.equal(dropped.some((word) => word.includes("־")), false);
+  assert.equal(GEN_1_3.readings.web, reader.chapters["1"].find((item) => item.v === 3).en);
+});
+
+test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
+  assert.equal(GEN_1_3.chunks.length, 5);
+  assert.equal(GEN_1_3.chunks.reduce((n, chunk) => n + chunk.wrong.length, 0), 10);
+  for (const chunk of GEN_1_3.chunks) {
+    assert.equal(gradeSay(chunk.id, chunk.literal), true);
+    assert.equal(gradeSay(chunk.id, chunk.smooth), true);
+    assert.equal(gradeSay(chunk.id, chunk.wrong[0]), false);
+    assert.equal(gradeSay(chunk.id, chunk.wrong[1]), false);
+    const choices = sayChoices(chunk);
+    assert.equal(choices.length, 3);
+    assert.ok(choices.includes(chunk.literal));
+    assert.equal(isPublishedReading(chunk.wrong[0]), false);
+    assert.equal(isPublishedReading(chunk.wrong[1]), false);
+    assert.notEqual(chunk.wrong[0], GEN_1_3.readings.ylt);
+    assert.notEqual(chunk.wrong[1], GEN_1_3.readings.web);
+    assert.equal(chunk.wrongSource[0].length > 0, true);
+    assert.equal(chunk.wrongSource[1].length > 0, true);
+  }
+  assert.equal(isPublishedReading(GEN_1_3.readings.ylt), true);
+  assert.equal(isPublishedReading(GEN_1_3.readings.web), true);
+  assert.equal(isPublishedReading(GEN_1_3.readings.jps), true);
+  const [literal, smooth] = acceptedOrders();
+  assert.equal(gradeAssemble(literal), true);
+  assert.equal(gradeAssemble(smooth), true);
+  assert.equal(gradeAssemble(assembleTiles().map((tile) => tile.label)), false);
+  const marks = GEN_1_3.chunks.map((chunk) => ({ id: chunk.id, role: chunk.role, particles: chunk.particles }));
+  assert.equal(gradeChunks(marks).ok, true);
+  marks[0] = { ...marks[0], role: "object" };
+  assert.deepEqual(gradeChunks(marks).missed, ["c1"]);
+  const look = lookReadings();
+  assert.equal(look.ylt, GEN_1_3.readings.ylt);
+  assert.equal(look.web, GEN_1_3.readings.web);
+  assert.equal(look.jps, GEN_1_3.readings.jps);
+  assert.equal(look.note, null);
+  assert.equal(lookReadings({ ...GEN_1_3, text: "בְּיוֹם עֲשׂוֹת יְהוָה" }).note, ADONAI_NOTE);
+  assert.equal(hasDivineName(GEN_1_3.text), false);
+  assert.equal(publishedEnglishVisible("read"), false);
+  assert.equal(publishedEnglishVisible("chunk"), false);
+  assert.equal(publishedEnglishVisible("say"), false);
+  assert.equal(publishedEnglishVisible("assemble"), false);
+  assert.equal(publishedEnglishVisible("look"), true);
+  assert.equal(glossVisible("bbh", false), false);
+  assert.equal(glossVisible("bbh", true), true);
+  assert.equal(glossVisible("iibs", false), true);
+  assert.equal(LAB_CREDITS, "Morphology: STEP Bible, www.STEPBible.org (CC BY 4.0). Lexicon: Brown-Driver-Briggs (1906). English: YLT, WEB, JPS 1917 (public domain).");
+  const page = readFileSync(join(root, "src/components/translation-lab.tsx"), "utf8");
+  assert.match(page, /LAB_CREDITS/);
+  assert.match(page, /Young's Literal Translation/);
+  assert.match(page, /World English Bible/);
+  assert.match(page, /JPS 1917/);
+});
