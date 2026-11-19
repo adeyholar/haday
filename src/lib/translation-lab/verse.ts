@@ -20,7 +20,8 @@ export type LabWord = {
 export type LabChunk = {
   id: string;
   words: number[];
-  role: LabRole;
+  /** One role per word, in word order. A maqqef group stays one chunk. */
+  roles: LabRole[];
   particles: LabParticle[];
   literal: string;
   smooth: string;
