@@ -8,6 +8,9 @@ FROM deps AS build
 COPY . .
 ENV NITRO_PRESET=node-server
 ENV VITE_AUTH_ENABLED=true
+# Empty unless the image build passes VITE_TRANSLATION_LAB=true.
+ARG VITE_TRANSLATION_LAB
+ENV VITE_TRANSLATION_LAB=${VITE_TRANSLATION_LAB}
 ENV PATH="/app/node_modules/.bin:${PATH}"
 RUN node scripts/with-app-env.mjs vite build
 

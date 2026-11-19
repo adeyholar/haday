@@ -35,6 +35,8 @@ jobs:
           push: true
           tags: hadayjemacr-g0e6f4axe0fgdxfj.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_E97B94A5850F4327B110DF13D00FEDBC }}/haday:${{ github.sha }}
           file: ./Dockerfile
+          build-args: |
+            VITE_TRANSLATION_LAB=true
 
   deploy:
     runs-on: ubuntu-latest
