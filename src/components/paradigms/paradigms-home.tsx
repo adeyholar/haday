@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ParadigmBoard } from "@/components/paradigms/paradigm-board";
+import { SchoolParadigm } from "@/components/paradigms/school-paradigm";
 import { PlacementQuiz } from "@/components/paradigms/placement-quiz";
 import { useParadigmProgress } from "@/components/paradigms/use-paradigm-progress";
 import type { LevelId, PlacementSource } from "@/lib/paradigms/types";
@@ -18,5 +18,5 @@ export function ParadigmsHome({ retake }: { retake: boolean }) {
   }
 
   if (placing) return <PlacementQuiz onPlace={place} />;
-  return <ParadigmBoard />;
+  return <SchoolParadigm />;
 }

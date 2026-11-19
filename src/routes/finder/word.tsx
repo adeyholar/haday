@@ -9,7 +9,7 @@ import { parseRef } from "@/lib/tanakh-query";
 import { markQueryInVerse } from "@/lib/tanakh-word";
 import { classLemmaForWord, englishKeysForWord, hasGlossInEnglish } from "@/lib/word-card";
 import { shortGloss } from "@/lib/tanakh-learn-note";
-import { EnglishVerse } from "@/components/english-verse";
+import { EnglishAsk } from "@/components/english-ask";
 import { cn } from "@/lib/cn";
 import type { WordPassageResult } from "@/lib/tanakh-query-server";
 
@@ -126,10 +126,14 @@ function FinderWordPage() {
                     </span>
                   ))}
                 </p>
-                <EnglishVerse en={row.en} keys={keys} className="mt-2 text-sm leading-relaxed text-ink" />
-                {!enHit && lemma ? (
-                  <p className="mt-1 text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
-                ) : null}
+                <EnglishAsk
+                  verseKey={row.ref}
+                  ylt={row.yltSlot}
+                  web={row.enSlot}
+                  extra={
+                    !enHit && lemma ? <p className="mt-1 text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p> : null
+                  }
+                />
                 {isBookId(loc.book) ? (
                   <Link
                     to="/listen/read/$book/$ch"

@@ -1016,7 +1016,12 @@ export async function speakRoadCard(item: ListenItem, signal: { stop: boolean })
   await pauseMs(restFor(0.85, 720), signal);
 }
 
-export async function speakReadingVerse(verse: ReadingVerse, rate: number, signal: { stop: boolean }): Promise<void> {
+export async function speakReadingVerse(
+  verse: ReadingVerse,
+  rate: number,
+  signal: { stop: boolean },
+  english = false,
+): Promise<void> {
   if (signal.stop) return;
   const apple = isAppleMobile();
   await speakLine(`Genesis ${chapterWordEn(verse.chapter)}, verse ${chapterWordEn(verse.verse)}.`, "en", Math.min(rate, 1), signal);
@@ -1027,8 +1032,10 @@ export async function speakReadingVerse(verse: ReadingVerse, rate: number, signa
   }
   if (signal.stop) return;
   await pauseMs(restFor(rate, apple ? 220 : 380), signal);
-  if (signal.stop) return;
-  await speakLine(verse.en, "en", rate, signal);
+  if (signal.stop || !english) return;
+  const line = verse.ylt || verse.en;
+  if (!line) return;
+  await speakLine(line, "en", rate, signal);
   if (signal.stop) return;
   await pauseMs(restFor(rate, apple ? 280 : 720), signal);
 }

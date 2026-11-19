@@ -10,6 +10,8 @@ import { fetchStrongTags } from "@/lib/strongs";
 import { lookupStrong } from "@/lib/strongs";
 import { TANAKH_BOOKS, bookMeta, type BookId } from "@/lib/tanakh-canon";
 import { fetchTanakhBook } from "@/lib/tanakh-canon";
+import { EnglishAsk } from "@/components/english-ask";
+import { asEnglishSlot, englishPlain } from "@/lib/english-line";
 import { versesInChapter } from "@/lib/passage";
 import {
   PARSE_VERSE_CAP,
@@ -46,7 +48,10 @@ async function loadPassage(book: BookId, chapter: number, from: number, count: n
     .map((row) => ({
       verse: row.v,
       he: row.he,
-      en: row.en,
+      en: englishPlain(row.en),
+      ylt: englishPlain(row.ylt),
+      enSlot: row.en,
+      yltSlot: row.ylt,
       words: row.words,
       tags: strong[String(chapter)]?.[String(row.v)] ?? [],
     }));
@@ -77,7 +82,6 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
   const [misses, setMisses] = useState<StoredMiss[]>([]);
   const [saved, setSaved] = useState<StoredMiss[]>(() => loadMisses());
   const [english, setEnglish] = useState("");
-  const [showEn, setShowEn] = useState(false);
   const [oneWord, setOneWord] = useState(Boolean(search.one));
 
   const chapterMax = bookMeta(book)?.chapters ?? 1;
@@ -175,7 +179,6 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
     resetWord();
     setMisses([]);
     setEnglish("");
-    setShowEn(false);
   }
 
   function addMiss(row: StoredMiss) {
@@ -635,19 +638,18 @@ export function ParseLabSession({ door, search }: { door: Door; search: ParseLab
             onChange={(event) => setEnglish(event.target.value)}
             placeholder="In the beginning…"
           />
-          <Button type="button" className="mt-3 h-12 w-full" onClick={() => setShowEn(true)}>
-            Show the English
-          </Button>
-          {showEn ? (
-            <div className="mt-4 space-y-2 text-sm text-ink">
-              {passage.verses.map((verseRow) => (
-                <p key={verseRow.verse}>
-                  <span className="text-muted">{verseRow.verse} </span>
-                  {verseRow.en}
-                </p>
-              ))}
-            </div>
-          ) : null}
+          <div className="mt-4 space-y-3">
+            {passage.verses.map((verseRow) => (
+              <div key={verseRow.verse}>
+                <p className="text-xs text-muted">{verseRow.verse}</p>
+                <EnglishAsk
+                  verseKey={`${passage.book}.${passage.chapter}.${verseRow.verse}`}
+                  ylt={asEnglishSlot(verseRow.yltSlot)}
+                  web={asEnglishSlot(verseRow.enSlot)}
+                />
+              </div>
+            ))}
+          </div>
           <div className="mt-4 flex flex-col gap-2">
             {oneWord ? (
               <Button

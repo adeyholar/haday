@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { HebrewType } from "@/components/hebrew-type";
 import { Panel } from "@/components/panel";
+import { VerseEnglish } from "@/components/verse-english";
 import { QalPerfectBuilder } from "@/components/qal-perfect-builder";
 import { Button } from "@/components/ui/button";
 import { MarkedAnswer } from "@/components/marked-answer";
@@ -178,7 +179,7 @@ function QuestVerse({ letters }: { letters: string }) {
           </span>
         ))}
       </p>
-      <p className="mt-2 text-sm text-muted">{verse.en}</p>
+      <VerseEnglish verseRef={verse.ref} />
       {book && ch ? (
         <p className="mt-3">
           <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">

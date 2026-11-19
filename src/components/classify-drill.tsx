@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { GlossAsk } from "@/components/english-ask";
+import { VerseEnglish } from "@/components/verse-english";
 import { DontKnowButton } from "@/components/dont-know-button";
 import { findHitRange } from "@/lib/hebrew";
 import { cn } from "@/lib/cn";
@@ -169,7 +171,7 @@ function Round({
           <Highlighted word={item.word} hit={item.hit} />
         </p>
         <p className="mt-3 text-sm font-medium text-ink">{item.markOn}</p>
-        {revealed && <p className="mt-1 text-sm text-muted">{item.gloss}</p>}
+        {revealed ? <GlossAsk key={item.id} text={item.gloss} /> : null}
       </div>
 
       <form
@@ -314,7 +316,7 @@ function Result({ item, ok }: { item: ClassifyItem; ok: boolean }) {
         <p className="he-word mt-2 text-xl leading-relaxed" lang="he">
           <Highlighted word={item.he} hit={item.verseHit} />
         </p>
-        <p className="mt-1 text-sm text-muted">{item.en}</p>
+        <VerseEnglish verseRef={`${item.book}.${item.chapter}.${item.verse}`} />
       </figure>
     </div>
   );

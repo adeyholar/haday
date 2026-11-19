@@ -19,7 +19,6 @@ CATALOG_OUT = ROOT / "src" / "lib" / "tanakh-catalog.json"
 AUDIO_MAP_OUT = ROOT / "src" / "lib" / "tanakh-audio-map.json"
 
 HE_URL = "https://raw.githubusercontent.com/adeyholar/tanakh_ai_tutor/main/data/tanakh/hebrew_bible_with_nikkud.json"
-WEB_BASE = "https://raw.githubusercontent.com/TehShrike/world-english-bible/master/json"
 
 BOOKS = [
     ("Gen", "Genesis", "בְּרֵאשִׁית", "torah", 50, "genesis"),
@@ -133,22 +132,6 @@ def clean_words(words: list[str]) -> list[str]:
     return out
 
 
-def web_verses(blob: list[dict]) -> dict[tuple[int, int], str]:
-    verses: dict[tuple[int, int], list[str]] = {}
-    for item in blob:
-        if not isinstance(item, dict):
-            continue
-        if "value" not in item:
-            continue
-        c = item.get("chapterNumber")
-        v = item.get("verseNumber")
-        val = item.get("value")
-        if not isinstance(c, int) or not isinstance(v, int) or not isinstance(val, str):
-            continue
-        verses.setdefault((c, v), []).append(val)
-    return {k: re.sub(r"\s+", " ", " ".join(parts)).strip() for k, parts in verses.items()}
-
-
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     print("Downloading Hebrew Tanakh…")
@@ -160,8 +143,7 @@ def main() -> None:
         book_he = he.get(bid)
         if not isinstance(book_he, list):
             raise SystemExit(f"Missing Hebrew book {bid}")
-        web = json.loads(fetch(f"{WEB_BASE}/{web_name}.json").decode("utf-8"))
-        en_map = web_verses(web)
+        del web_name
         chs: dict[str, list[dict]] = {}
         files: dict[str, str] = {}
         n_ch = min(chapters, len(book_he))
@@ -183,7 +165,10 @@ def main() -> None:
                     {
                         "v": vi,
                         "he": " ".join(words),
-                        "en": en_map.get((i + 1, vi), ""),
+                        # Do not pair WEB by the Hebrew verse number. scripts/apply-versemap.mjs
+                        # writes `en` and `ylt` from data/paradigms/versemap.json.
+                        "en": {"state": "none", "message": "No English for this verse"},
+                        "ylt": {"state": "none", "message": "No English for this verse"},
                         "words": words,
                     }
                 )
@@ -218,6 +203,7 @@ def main() -> None:
     print("Wrote", CATALOG_OUT)
     print("Wrote", AUDIO_MAP_OUT)
     print("Books in", OUT_DIR)
+    print("English is still empty. From the repo root, run: node scripts/apply-versemap.mjs")
 
 
 if __name__ == "__main__":

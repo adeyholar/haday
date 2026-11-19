@@ -210,12 +210,13 @@ test("a split group's qere is drawn once, and each ketiv is still noted", () => 
   assert.equal(readerLine(job.words, 3, 4), "יִדַּ֖עְתָּה הַשַּׁ֣חַר (ידעתה) (שחר)");
 });
 
-test("the Grammar Path verse line does not render English, and the word card still can", () => {
+test("the Grammar Path verse line and the word card keep English behind a tap", () => {
   const reading = readFileSync(join(root, "src/components/tanakh-reading.tsx"), "utf8");
   const sheet = readFileSync(join(root, "src/components/word-sheet.tsx"), "utf8");
   assert.doesNotMatch(reading, /EnglishVerse/);
-  assert.doesNotMatch(reading, /English stays on the page/);
-  assert.match(sheet, /EnglishVerse/);
+  assert.doesNotMatch(sheet, /EnglishVerse/);
+  assert.match(reading, /EnglishAsk/);
+  assert.match(sheet, /EnglishAsk/);
   assert.match(reading, /ketivAt/);
   assert.match(readFileSync(join(root, "src/components/wlc-desk.tsx"), "utf8"), /ketivDisplay/);
 });

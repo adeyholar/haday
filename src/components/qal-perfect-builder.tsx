@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
+import { VerseEnglish } from "@/components/verse-english";
 import { MarkedAnswer } from "@/components/marked-answer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -357,7 +358,7 @@ function OpenedVerse({ verse, letters }: { verse: { ref: string; where: string; 
           </span>
         ))}
       </p>
-      <p className="mt-2 text-sm text-muted">{verse.en}</p>
+      <VerseEnglish verseRef={verse.ref} />
       {book && ch ? (
         <p className="mt-3">
           <Link to="/listen/read/$book/$ch" params={{ book, ch }} className="font-semibold text-primary">

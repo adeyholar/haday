@@ -19,6 +19,8 @@ export type ReadSearch = {
   scope?: "book" | "all";
   loop?: boolean;
   from?: string;
+  /** 1-based word index to highlight in the verse. */
+  w?: number;
 };
 
 export type Passage = {
@@ -68,6 +70,8 @@ export function parseReadSearch(s: Record<string, unknown>): ReadSearch {
   if (c2 != null && c2 > 0) out.c2 = c2;
   if (s.scope === "book" || s.scope === "all") out.scope = s.scope;
   if (s.loop === true || s.loop === 1 || s.loop === "1" || s.loop === "true") out.loop = true;
+  const w = asInt(s.w);
+  if (w != null && w > 0) out.w = w;
   return out;
 }
 

@@ -106,6 +106,9 @@ export type ParseVerse = {
   ref: string;
   he: string;
   en: string;
+  ylt?: string;
+  enSlot?: unknown;
+  yltSlot?: unknown;
   tokens: ParseToken[];
 };
 
@@ -125,6 +128,9 @@ export type VerseRow = {
   verse: number;
   he: string;
   en: string;
+  ylt?: string;
+  enSlot?: unknown;
+  yltSlot?: unknown;
   words: string[];
   /** Strong tag per word, such as H1254|HVqp3ms. Missing tags are skipped words. */
   tags: string[];
@@ -440,6 +446,9 @@ export function buildPassage(book: BookId, chapter: number, rows: VerseRow[]): P
     ref: `${book} ${chapter}:${row.verse}`,
     he: row.he,
     en: row.en,
+    ylt: row.ylt,
+    enSlot: row.enSlot,
+    yltSlot: row.yltSlot,
     tokens: row.words.map((surface, index) => taskFrom(surface, row.tags[index] ?? "", row.verse, index, book, chapter)),
   }));
   const tasks = verses.flatMap((verse) => verse.tokens.flatMap((token) => (token.task ? [token.task] : [])));

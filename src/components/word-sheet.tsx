@@ -11,7 +11,8 @@ import { savePassagePack } from "@/lib/reading-loop/passage";
 import { lookupTanakhWord } from "@/lib/tanakh-query-server";
 import { markFormInVerse } from "@/lib/tanakh-query";
 import { shortGloss } from "@/lib/tanakh-learn-note";
-import { EnglishVerse } from "@/components/english-verse";
+import { EnglishAsk, GlossAsk } from "@/components/english-ask";
+import { NO_ENGLISH, type EnglishSlot } from "@/lib/english-line";
 import { StrongGlance } from "@/components/strong-glance";
 import type { WordBalloonPlace } from "@/lib/word-balloon";
 import type { BookId } from "@/lib/tanakh-canon";
@@ -24,6 +25,8 @@ export type WordPick = {
   verse: number;
   he: string;
   en: string;
+  yltSlot?: EnglishSlot;
+  enSlot?: EnglishSlot;
   /** Strong's number when this surface is tagged, such as H7225. */
   strong?: string;
   /** Open Scriptures morphology code, such as HVqp3ms. */
@@ -179,19 +182,24 @@ export function WordSheet({
             ))}
           </p>
           {hideGloss ? null : (
-            <EnglishVerse en={pick.en} keys={englishKeysForWord(pick.word)} className="text-base leading-relaxed text-ink" />
+            <EnglishAsk
+              verseKey={`${pick.book}.${pick.chapter}.${pick.verse}`}
+              ylt={pick.yltSlot ?? { state: "none", message: NO_ENGLISH }}
+              web={pick.enSlot ?? { state: "none", message: NO_ENGLISH }}
+              extra={
+                !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
+                  <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
+                ) : null
+              }
+            />
           )}
-          {!hideGloss && !hasGlossInEnglish(pick.en, englishKeysForWord(pick.word)) && lemma ? (
-            <p className="text-xs text-muted">Class gloss: {shortGloss(lemma.gloss)}</p>
-          ) : null}
         </div>
       ) : null}
       {lemma ? (
-        <p className="mt-3 text-sm text-ink">
+        <div className="mt-3 text-sm text-ink">
           Class vocab · Ch. {lemma.chapter}: <span className="he-word text-xl" dir="rtl" lang="he">{lemma.hebrew}</span>
-          {" · "}
-          {shortGloss(lemma.gloss)}
-        </p>
+          <GlossAsk label="Meaning" text={shortGloss(lemma.gloss)} />
+        </div>
       ) : hideGloss ? null : (
         <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>
       )}
