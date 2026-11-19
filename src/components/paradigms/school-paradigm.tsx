@@ -166,17 +166,17 @@ export function AttestedSpellingNote({ id }: { id: string }) {
       <p className="font-semibold">How the Hebrew Bible writes it</p>
       <p>
         The chart prints this form without the dot (dagesh) in the yod:{" "}
-        <bdi className="he-word" lang="he" dir="rtl">{spelling.printed}</bdi>
+        <bdi className="he-word text-2xl" lang="he" dir="rtl">{spelling.printed}</bdi>
         . In the Hebrew Bible it always has the dot:{" "}
-        <bdi className="he-word" lang="he" dir="rtl">{spelling.attested}</bdi>
-        {" "}(all {spelling.count} places below). Learn it with the dot.
+        <bdi className="he-word text-2xl" lang="he" dir="rtl">{spelling.attested}</bdi>
+        {" "}(all {spelling.count} places below). Learn it with the dot. The dot doubles the y: the &apos;and&apos; prefix (wa-) of this past-tense form doubles the letter after it.
       </p>
       <ul className="space-y-1 text-xs text-muted">
         {nearestAttested(id).map((item) => {
           const target = osisTarget(item.osis, item.wordIndex);
           return (
             <li key={`${item.osis}-${item.wordIndex}`}>
-              <span className="he-word text-sm text-ink" lang="he" dir="rtl">{item.word}</span>{" "}
+              <span className="he-word text-lg text-ink" lang="he" dir="rtl">{item.word}</span>{" "}
               <bdi>
                 {target ? (
                   <Link

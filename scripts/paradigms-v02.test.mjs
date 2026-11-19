@@ -634,6 +634,9 @@ test("the printed Qal infinitive construct and the page 9 flag come from the dat
   assert.match(noteHtml, new RegExp(`all ${spelling.count} places below`));
   assert.match(noteHtml, /<bdi><a [^>]*>Exod 13:18<\/a><\/bdi>/);
   assert.match(noteHtml, /<bdi><a [^>]*>2Sam 20:12<\/a><\/bdi>/);
+  assert.match(noteHtml, /class="he-word text-2xl"/);
+  assert.match(noteHtml, /class="he-word text-lg text-ink"/);
+  assert.match(noteHtml, /The dot doubles the y/);
   const sheet = read("src/components/word-sheet.tsx");
   assert.match(sheet, /<div className="mt-3 text-sm text-ink">/);
   assert.match(sheet, /label="Meaning"/);
@@ -648,7 +651,13 @@ test("the printed Qal infinitive construct and the page 9 flag come from the dat
   const glance = read("src/components/strong-glance.tsx");
   assert.equal((glance.match(/<GlossAsk/g) ?? []).length, 1);
   assert.equal(glance.includes("{row.def ?"), false);
+  assert.equal(glance.includes("{row.derivation ?"), false);
+  assert.match(glance, /label="Meaning"/);
   assert.match(glance, /KJV: \$\{row\.kjv\}/);
+  assert.match(glance, /row\.derivation/);
+  const rootHead = read("src/routes/__root.tsx");
+  assert.match(rootHead, /Frank\+Ruhl\+Libre:wght@400;500;600;700/);
+  assert.match(read("src/styles.css"), /\.he-word \{\s*font-family: var\(--font-hebrew\)/);
   const builder = read("src/components/qal-imperfect-builder.tsx");
   assert.match(builder, /VerseEnglish verseRef=\{root\.ref\}/);
   assert.equal(builder.includes("root.en"), false);
