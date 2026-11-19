@@ -196,10 +196,10 @@ export function WordSheet({
         </div>
       ) : null}
       {lemma ? (
-        <p className="mt-3 text-sm text-ink">
+        <div className="mt-3 text-sm text-ink">
           Class vocab · Ch. {lemma.chapter}: <span className="he-word text-xl" dir="rtl" lang="he">{lemma.hebrew}</span>
-          <GlossAsk text={shortGloss(lemma.gloss)} />
-        </p>
+          <GlossAsk label="Meaning" text={shortGloss(lemma.gloss)} />
+        </div>
       ) : hideGloss ? null : (
         <p className="mt-3 text-sm text-muted">Not on the class word list — tags below are from the form in this verse.</p>
       )}

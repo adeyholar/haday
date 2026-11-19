@@ -106,15 +106,22 @@ export function closedEnglishMessage(): string {
 }
 
 /** A word gloss stays off the page until this control is tapped. */
-export function GlossAsk({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
+export function GlossAsk({ text, label = "Gloss", startOpen = false }: { text: string; label?: string; startOpen?: boolean }) {
+  const [open, setOpen] = useState(startOpen);
   if (!text) return null;
   if (!open) {
     return (
       <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => setOpen(true)}>
-        Gloss
+        {label}
       </button>
     );
   }
-  return <p className="mt-1 text-sm text-muted">{text}</p>;
+  const lines = text.split("\n").filter((line) => line.length > 0);
+  return (
+    <div className="mt-1 space-y-1">
+      {lines.map((line, index) => (
+        <p key={`${index}-${line}`} className="text-sm text-muted">{line}</p>
+      ))}
+    </div>
+  );
 }

@@ -1,3 +1,5 @@
+import { stripNiqqud } from "@/lib/hebrew";
+import { nfc } from "@/lib/paradigms/nfc";
 import schoolFile from "../../../data/paradigms/school-paradigm.json";
 import scriptureFile from "../../../data/paradigms/scripture-examples.json";
 
@@ -183,4 +185,31 @@ export function scriptureFlag(id: string): string {
 
 export function nearestAttested(id: string): NearestAttested[] {
   return scriptureById.get(id)?.nearestAttested ?? [];
+}
+
+/** Vowels and dagesh stay. Cantillation is display-only and is not part of the spelling. */
+function pointed(value: string): string {
+  return nfc(value).replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6\u034F]/g, "");
+}
+
+export type BibleSpelling = {
+  printed: string;
+  attested: string;
+  count: number;
+};
+
+/** The chart spelling and the Bible spelling, taken from the note and the attested words. */
+export function bibleSpelling(id: string): BibleSpelling | null {
+  const items = nearestAttested(id);
+  const first = items[0];
+  if (!first) return null;
+  const attested = pointed(first.word);
+  if (!attested || !items.every((item) => pointed(item.word) === attested)) return null;
+  const note = scriptureById.get(id)?.nearestAttestedNote ?? "";
+  const letters = stripNiqqud(attested);
+  const printed = (note.match(/[\u0590-\u05FF]+/g) ?? [])
+    .map((token) => nfc(token))
+    .find((token) => token !== attested && stripNiqqud(token) === letters);
+  if (!printed) return null;
+  return { printed, attested, count: items.length };
 }

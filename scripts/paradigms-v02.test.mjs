@@ -14,7 +14,7 @@ const jiti = createJiti(import.meta.url, {
 });
 
 const { nfc } = await jiti.import(join(root, "src/lib/paradigms/nfc.ts"));
-const { schoolShownForms, schoolPages, schoolTable, scriptureExamples } = await jiti.import(
+const { bibleSpelling, schoolShownForms, schoolPages, schoolTable, scriptureExamples } = await jiti.import(
   join(root, "src/lib/paradigms/school-view.ts"),
 );
 const { strongLevels } = await jiti.import(join(root, "src/lib/paradigms/catalog.ts"));
@@ -24,8 +24,8 @@ const { englishSlot, englishPlain, hebrewRefLabel, englishRefLabel, NO_ENGLISH, 
 );
 const { ketivDisplay } = await jiti.import(join(root, "src/lib/ketiv-qere.ts"));
 globalThis.React = React;
-const { EnglishAsk, EnglishLines } = await jiti.import(join(root, "src/components/english-ask.tsx"));
-const { SpanScripture } = await jiti.import(join(root, "src/components/paradigms/school-paradigm.tsx"));
+const { EnglishAsk, EnglishLines, GlossAsk } = await jiti.import(join(root, "src/components/english-ask.tsx"));
+const { AttestedSpellingNote, SpanScripture } = await jiti.import(join(root, "src/components/paradigms/school-paradigm.tsx"));
 const { routerContext } = await jiti.import(
   join(root, "node_modules/@tanstack/react-router/dist/esm/routerContext.js"),
 );
@@ -613,7 +613,42 @@ test("the printed Qal infinitive construct and the page 9 flag come from the dat
   assert.match(view, /scriptureFlag/);
   assert.match(view, /nearestAttested/);
   assert.match(view, /note\.text\.includes\(cell\.form\)/);
+  assert.match(view, /Bible spelling differs\. See the note below\./);
+  assert.match(view, /How the Hebrew Bible writes it/);
+  assert.match(view, /<bdi>/);
   assert.equal(/[\u0590-\u05FF]/.test(view), false);
+  const schoolCell = school.cells.find((cell) => cell.id === "Geminate:Hiphil.wayyiqtol.3ms");
+  const spelling = bibleSpelling(schoolCell.id);
+  assert.equal(nfc(spelling.printed), nfc(schoolCell.form));
+  assert.equal(spelling.count, flagged.nearestAttested.length);
+  assert.equal(nfc(spelling.attested), nfc(flagged.nearestAttested[0].word).replace(/[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3-\u05C6\u034F]/g, ""));
+  const cellHtml = renderScripture([{ id: schoolCell.id, conjugation: "wayyiqtol", pgn: "3ms" }]);
+  assert.match(cellHtml, /Bible spelling differs\. See the note below\./);
+  assert.equal(cellHtml.includes("Exod 13:18"), false);
+  const noteHtml = renderToStaticMarkup(
+    createElement(routerContext.Provider, { value: linkRouter }, createElement(AttestedSpellingNote, { id: schoolCell.id })),
+  );
+  assert.match(noteHtml, /How the Hebrew Bible writes it/);
+  assert.ok(noteHtml.includes(spelling.printed));
+  assert.ok(noteHtml.includes(spelling.attested));
+  assert.match(noteHtml, new RegExp(`all ${spelling.count} places below`));
+  assert.match(noteHtml, /<bdi><a [^>]*>Exod 13:18<\/a><\/bdi>/);
+  assert.match(noteHtml, /<bdi><a [^>]*>2Sam 20:12<\/a><\/bdi>/);
+  const sheet = read("src/components/word-sheet.tsx");
+  assert.match(sheet, /<div className="mt-3 text-sm text-ink">/);
+  assert.match(sheet, /label="Meaning"/);
+  assert.equal(sheet.includes('<p className="mt-3 text-sm text-ink">'), false);
+  const closed = renderToStaticMarkup(createElement(GlossAsk, { text: "beginning", label: "Meaning" }));
+  assert.match(closed, />Meaning</);
+  assert.equal(closed.includes("beginning"), false);
+  const opened = renderToStaticMarkup(createElement(GlossAsk, { text: "a primitive root\nKJV: to turn", label: "Meaning", startOpen: true }));
+  assert.match(opened, /a primitive root/);
+  assert.match(opened, /KJV: to turn/);
+  assert.equal(opened.includes(">Meaning<"), false);
+  const glance = read("src/components/strong-glance.tsx");
+  assert.equal((glance.match(/<GlossAsk/g) ?? []).length, 1);
+  assert.equal(glance.includes("{row.def ?"), false);
+  assert.match(glance, /KJV: \$\{row\.kjv\}/);
   const builder = read("src/components/qal-imperfect-builder.tsx");
   assert.match(builder, /scripture \?/);
   assert.match(builder, /VerseEnglish verseRef=\{root\.ref\}/);

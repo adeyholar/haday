@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  bibleSpelling,
   nearestAttested,
   rowLabel,
   schoolCells,
@@ -85,9 +86,9 @@ export function SchoolParadigm() {
                 <li key={`${note.marker}-${note.text.slice(0, 12)}`}>
                   {note.marker} {note.text}
                   {schoolCells(page.page)
-                    .filter((cell) => cell.form && note.text.includes(cell.form) && nearestAttested(cell.id).length)
+                    .filter((cell) => cell.form && note.text.includes(cell.form) && bibleSpelling(cell.id))
                     .map((cell) => (
-                      <CellFlag key={cell.id} id={cell.id} />
+                      <AttestedSpellingNote key={cell.id} id={cell.id} />
                     ))}
                 </li>
               ))}
@@ -143,23 +144,57 @@ function SchoolFace({ cell }: { cell: SchoolCell }) {
           {mark ? <span className="text-xs text-muted">{mark}</span> : null}
         </p>
       ))}
-      {nearestAttested(cell.id).length ? <CellFlag id={cell.id} /> : null}
+      {bibleSpelling(cell.id) ? <CellFlag id={cell.id} /> : null}
     </div>
   );
 }
 
 function CellFlag({ id }: { id: string }) {
+  if (bibleSpelling(id)) {
+    return <p className="mt-1 text-xs text-muted">Bible spelling differs. See the note below.</p>;
+  }
   const flag = scriptureFlag(id);
-  const attested = nearestAttested(id);
-  if (!flag && !attested.length) return null;
+  if (!flag) return null;
+  return <p className="mt-1 text-xs text-muted">{flag}</p>;
+}
+
+export function AttestedSpellingNote({ id }: { id: string }) {
+  const spelling = bibleSpelling(id);
+  if (!spelling) return null;
   return (
-    <div className="mt-1 space-y-1 text-xs text-muted">
-      {flag ? <p>{flag}</p> : null}
-      {attested.map((item) => (
-        <p key={`${item.osis}-${item.wordIndex}`}>
-          <span className="he-word text-sm text-ink" lang="he" dir="rtl">{item.word}</span> {item.ref}
-        </p>
-      ))}
+    <div className="mt-2 space-y-1 text-sm text-ink">
+      <p className="font-semibold">How the Hebrew Bible writes it</p>
+      <p>
+        The chart prints this form without the dot (dagesh) in the yod:{" "}
+        <bdi className="he-word" lang="he" dir="rtl">{spelling.printed}</bdi>
+        . In the Hebrew Bible it always has the dot:{" "}
+        <bdi className="he-word" lang="he" dir="rtl">{spelling.attested}</bdi>
+        {" "}(all {spelling.count} places below). Learn it with the dot.
+      </p>
+      <ul className="space-y-1 text-xs text-muted">
+        {nearestAttested(id).map((item) => {
+          const target = osisTarget(item.osis, item.wordIndex);
+          return (
+            <li key={`${item.osis}-${item.wordIndex}`}>
+              <span className="he-word text-sm text-ink" lang="he" dir="rtl">{item.word}</span>{" "}
+              <bdi>
+                {target ? (
+                  <Link
+                    to="/listen/read/$book/$ch"
+                    params={{ book: target.book, ch: target.ch }}
+                    search={{ v1: target.v1, v2: target.v2, w: target.w }}
+                    className="font-semibold text-primary"
+                  >
+                    {item.ref}
+                  </Link>
+                ) : (
+                  <span>{item.ref}</span>
+                )}
+              </bdi>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
