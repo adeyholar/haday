@@ -128,7 +128,7 @@
         "it will be"
       ],
       "wrongSource": [
-        "misparse: HVqj3ms read as HVqw3ms",
+        "misparse: HVqj3ms read as HC/Vqw3ms (word 5)",
         "misparse: HVqj3ms read as HVqi3ms"
       ]
     },
@@ -184,6 +184,6 @@
   "readings": {
     "ylt": "and God saith, 'Let light be;' and light is.",
     "web": "God said, “Let there be light,” and there was light.",
-    "jps": "And God said: ‘Let there be light.’ And there was light."
+    "jps": "And God said: 'Let there be light.' And there was light."
   }
 }

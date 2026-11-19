@@ -3,7 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/panel";
 import { LAB_CREDITS } from "@/lib/translation-lab/credits";
+import jpsGen13File from "../../data/translation-lab/jps1917/GEN.1.3.txt?raw";
 import {
+  assembleEnglishVisible,
   assembleTiles,
   glossVisible,
   gradeAssemble,
@@ -29,6 +31,7 @@ import {
   type LabStep,
 } from "@/lib/translation-lab/verse";
 
+const JPS_GEN_1_3 = jpsGen13File.endsWith("\n") ? jpsGen13File.slice(0, -1) : jpsGen13File;
 const ROLES: LabRole[] = ["subject", "verb", "object", "particle"];
 const STEPS: LabStep[] = ["read", "chunk", "say", "assemble", "look"];
 const NAME = "יהוה";
@@ -68,6 +71,7 @@ export function OpenLab({ path }: { path: LabPath }) {
   const [placed, setPlaced] = useState<string[]>([]);
   const [assembleNote, setAssembleNote] = useState("");
   const [lookOpen, setLookOpen] = useState(false);
+  const [assembleOpen, setAssembleOpen] = useState(false);
   const shownChunks = chunkMiss ? verse.chunks.filter((chunk) => chunkMiss.includes(chunk.id)) : verse.chunks;
   const sayChunk = verse.chunks[sayAt];
   const look = lookReadings(verse);
@@ -120,6 +124,7 @@ export function OpenLab({ path }: { path: LabPath }) {
     if (sayAt + 1 >= verse.chunks.length) {
       setPlaced([]);
       setAssembleNote("");
+      setAssembleOpen(false);
       setLookOpen(false);
       setStep("assemble");
       return;
@@ -300,28 +305,43 @@ export function OpenLab({ path }: { path: LabPath }) {
       {step === "assemble" ? (
         <Panel className="mt-4">
           <p className="text-sm text-muted">Put the tiles in Hebrew order.</p>
-          <p className="mt-3 min-h-12 text-base text-ink">{placed.map((id) => verse.chunks.find((chunk) => chunk.id === id)?.literal).join(" · ") || "Tap a tile."}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {bank.map((tile) => (
-              <button
-                key={tile.id}
-                type="button"
-                className="min-h-12 rounded-[var(--radius-md)] bg-surface px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
-                onClick={() => setPlaced((prev) => [...prev, tile.id])}
-              >
-                {tile.label}
-              </button>
-            ))}
-          </div>
-          {assembleNote ? <p className="mt-3 text-sm text-primary">{assembleNote}</p> : null}
-          <div className="mt-4 flex gap-2">
-            <Button type="button" variant="outline" onClick={() => setPlaced((prev) => prev.slice(0, -1))}>
-              Undo
-            </Button>
-            <Button type="button" onClick={checkAssemble}>
-              Check the order
-            </Button>
-          </div>
+          {path === "iibs" ? (
+            <button
+              type="button"
+              className="mt-3 min-h-11 font-semibold text-primary"
+              aria-expanded={assembleOpen}
+              aria-controls="lab-assemble"
+              onClick={() => setAssembleOpen(true)}
+            >
+              English
+            </button>
+          ) : null}
+          {assembleEnglishVisible(path, assembleOpen) ? (
+            <div id="lab-assemble">
+              <p className="mt-3 min-h-12 text-base text-ink">{placed.map((id) => verse.chunks.find((chunk) => chunk.id === id)?.literal).join(" · ") || "Tap a tile."}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {bank.map((tile) => (
+                  <button
+                    key={tile.id}
+                    type="button"
+                    className="min-h-12 rounded-[var(--radius-md)] bg-surface px-3 text-sm font-semibold text-ink shadow-[var(--shadow-border)]"
+                    onClick={() => setPlaced((prev) => [...prev, tile.id])}
+                  >
+                    {tile.label}
+                  </button>
+                ))}
+              </div>
+              {assembleNote ? <p className="mt-3 text-sm text-primary">{assembleNote}</p> : null}
+              <div className="mt-4 flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setPlaced((prev) => prev.slice(0, -1))}>
+                  Undo
+                </Button>
+                <Button type="button" onClick={checkAssemble}>
+                  Check the order
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </Panel>
       ) : null}
 
@@ -345,7 +365,7 @@ export function OpenLab({ path }: { path: LabPath }) {
               <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted">World English Bible</h2>
               <p className="mt-1 text-base text-ink">{look.web}</p>
               <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted">JPS 1917</h2>
-              <p className="mt-1 text-base text-ink">{look.jps}</p>
+              <p className="mt-1 text-base text-ink">{JPS_GEN_1_3}</p>
               {look.note ? (
                 <p className="mt-4 text-sm text-primary">
                   <AdonaiNote note={look.note} />

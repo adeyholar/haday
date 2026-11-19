@@ -176,6 +176,20 @@ export function sayChoicesVisible(path: LabPath, revealed: boolean): boolean {
   }
 }
 
+/** /iibs/lab hides the assemble tiles until a tap. /listen/lab shows them. */
+export function assembleEnglishVisible(path: LabPath, revealed: boolean): boolean {
+  switch (path) {
+    case "iibs":
+      return revealed;
+    case "bbh":
+      return true;
+    default: {
+      const exhaustive: never = path;
+      return exhaustive;
+    }
+  }
+}
+
 /** /iibs/lab hides Look until a tap. /listen/lab shows it once the step is Look. */
 export function lookEnglishVisible(path: LabPath, step: LabStep, revealed: boolean): boolean {
   if (!publishedEnglishVisible(step)) return false;

@@ -17,14 +17,13 @@ Genesis 1:3 only. YLT and WEB in `gen-1-3.json` are copies of the pinned texts n
 
 ## JPS 1917
 
-JPS 1917 is not in the versemap. The line in `gen-1-3.json` `readings.jps` is a copy.
+JPS 1917 is not in the versemap. The Look line is the verse text in `data/translation-lab/jps1917/GEN.1.3.txt`. That file is one line copied from a public-domain export, not retyped.
 
-- Version title: The Holy Scriptures: A New Translation (JPS 1917)
-- Page: https://www.sefaria.org/Genesis.1.3?ven=The_Holy_Scriptures:_A_New_Translation_(JPS_1917)
-- API: https://www.sefaria.org/api/texts/Genesis.1.3?context=0&commentary=0&ven=The%20Holy%20Scriptures:%20A%20New%20Translation%20(JPS%201917)
-- Version source recorded by that API: http://opensiddur.org/2010/08/%D7%AA%D7%A0%D7%B4%D7%9A-the-holy-scriptures-a-new-translation-jps-1917/
-- License recorded by that API: Public Domain
-- Export snapshot: 2026-11-19. The API `text` field was `And God said: ‘Let there be light.’ And there was light.`
-- SHA256 of that `text` field: `b5508f218fed94b3a490692377b241b33e9b4bcc5b8232b54472f89e818fbe1d`
+- Local file: `data/translation-lab/jps1917/GEN.1.3.txt`
+- Upstream: [BibleNLP/ebible](https://github.com/BibleNLP/ebible) `corpus/eng-engjps.txt` at commit `7c76696c0ab2a5b69258342522fdb2c5db055200` (blob `050e194f2903d831541b7d28b569190c4d07dde9`)
+- Verse index: `metadata/vref.txt` line `GEN 1:3` in that same commit (blob `93eeaf7efa57b877a3ed2be5de3fa595a99e069f`)
+- Work: The Holy Scriptures According to the Masoretic Text, Jewish Publication Society, 1917
+- License: Public Domain. eBible.org distributes this Old JPS text as public domain. This file is the verse line only.
+- Text: `And God said: 'Let there be light.' And there was light.`
 
-`SHA256SUMS` pins `gen-1-3.json`, which holds this copy.
+`SHA256SUMS` pins `gen-1-3.json` and `jps1917/GEN.1.3.txt`. `gen-1-3.json` `readings.jps` must equal the verse line.

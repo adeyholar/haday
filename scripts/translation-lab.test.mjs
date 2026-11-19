@@ -24,6 +24,7 @@ const {
   glossVisible,
   sayChoicesVisible,
   lookEnglishVisible,
+  assembleEnglishVisible,
   isPublishedReading,
   chunksFollowMaqaf,
   assembleTiles,
@@ -63,10 +64,17 @@ test("the manuscript desk and the Scripture reader are untouched", () => {
 });
 
 test("the lab pins its snapshot and does not call Sefaria", () => {
-  const file = readFileSync(join(root, "data/translation-lab/gen-1-3.json"));
-  const [hex, name] = readFileSync(join(root, "data/translation-lab/SHA256SUMS"), "utf8").trim().split(/\s+/);
-  assert.equal(name, "gen-1-3.json");
-  assert.equal(createHash("sha256").update(file).digest("hex"), hex);
+  const sums = readFileSync(join(root, "data/translation-lab/SHA256SUMS"), "utf8")
+    .trim()
+    .split("\n");
+  const names = [];
+  for (const line of sums) {
+    const [hex, name] = line.trim().split(/\s+/);
+    names.push(name);
+    const file = readFileSync(join(root, "data/translation-lab", name));
+    assert.equal(createHash("sha256").update(file).digest("hex"), hex, name);
+  }
+  assert.deepEqual(names, ["gen-1-3.json", "jps1917/GEN.1.3.txt"]);
   assert.equal(GEN_1_3.oshb, "3d15126fb1ef74867fc1434be1942e837932691f");
   assert.equal(GEN_1_3.dataset, "1.2.0");
   const joined = labFiles.join("\n");
@@ -139,9 +147,15 @@ test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
       if (!source.startsWith("misparse")) continue;
       const codes = source.match(/[HA][A-Z][A-Za-z0-9]*(?:\/[A-Za-z0-9]+)*/g) ?? [];
       assert.ok(codes.some((code) => tags.has(code)), source);
-      assert.ok(codes.some((code) => !tags.has(code)), source);
+      const misread = source.match(/read as (\S+)/)?.[1];
+      assert.equal(typeof misread, "string", source);
+      assert.ok(codes.includes(misread), source);
+      assert.equal(tags.has(misread), false, source);
     }
   }
+  const c3 = GEN_1_3.chunks.find((chunk) => chunk.id === "c3");
+  assert.equal(c3.wrongSource[0], "misparse: HVqj3ms read as HC/Vqw3ms (word 5)");
+  assert.equal(c3.wrongSource[0].match(/read as (\S+)/)[1], "HC/Vqw3ms");
   const accepted = new Set(GEN_1_3.chunks.flatMap((chunk) => [chunk.literal, ...chunk.also]));
   for (const chunk of GEN_1_3.chunks) {
     for (const tile of chunk.wrong) assert.equal(accepted.has(tile), false, tile);
@@ -192,6 +206,9 @@ test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
   assert.equal(lookEnglishVisible("iibs", "look", false), false);
   assert.equal(lookEnglishVisible("iibs", "look", true), true);
   assert.equal(lookEnglishVisible("iibs", "say", true), false);
+  assert.equal(assembleEnglishVisible("bbh", false), true);
+  assert.equal(assembleEnglishVisible("iibs", false), false);
+  assert.equal(assembleEnglishVisible("iibs", true), true);
   assert.equal(LAB_CREDITS, "Morphology: STEP Bible, www.STEPBible.org (CC BY 4.0). Lexicon: Brown-Driver-Briggs (1906). English: YLT, WEB, JPS 1917 (public domain).");
   const page = readFileSync(join(root, "src/components/translation-lab-open.tsx"), "utf8");
   assert.match(page, /LAB_CREDITS/);
@@ -202,14 +219,19 @@ test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
   assert.match(page, /aria-pressed/);
   assert.match(page, /aria-expanded/);
   assert.match(page, /aria-controls/);
+  assert.match(page, /aria-controls="lab-assemble"/);
+  assert.match(page, /jps1917\/GEN\.1\.3\.txt\?raw/);
   const ylt = JSON.parse(readFileSync(join(root, "data/paradigms/ylt.json"), "utf8"));
   const book = JSON.parse(readFileSync(join(root, "public/tanakh/books/Gen.json"), "utf8"));
   const row = book.chapters["1"].find((item) => item.v === 3);
   assert.equal(GEN_1_3.readings.ylt, ylt.verses["Gen.1.3"]);
   assert.equal(GEN_1_3.readings.ylt, row.ylt.lines[0].text);
   assert.equal(GEN_1_3.readings.web, row.en.lines[0].text);
+  const jpsVerse = readFileSync(join(root, "data/translation-lab/jps1917/GEN.1.3.txt"), "utf8").replace(/\n$/, "");
+  assert.equal(GEN_1_3.readings.jps, jpsVerse);
   const sources = readFileSync(join(root, "data/translation-lab/SOURCES.md"), "utf8");
-  assert.match(sources, /The Holy Scriptures: A New Translation \(JPS 1917\)/);
-  assert.match(sources, /https:\/\/www\.sefaria\.org\/Genesis\.1\.3\?ven=The_Holy_Scriptures:_A_New_Translation_\(JPS_1917\)/);
-  assert.match(sources, /b5508f218fed94b3a490692377b241b33e9b4bcc5b8232b54472f89e818fbe1d/);
+  assert.match(sources, /7c76696c0ab2a5b69258342522fdb2c5db055200/);
+  assert.match(sources, /jps1917\/GEN\.1\.3\.txt/);
+  assert.match(sources, /Public Domain/);
+  assert.doesNotMatch(sources, /sefaria/i);
 });
