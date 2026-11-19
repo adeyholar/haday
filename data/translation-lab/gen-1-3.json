@@ -1,0 +1,189 @@
+{
+  "ref": "Gen.1.3",
+  "book": "Gen",
+  "chapter": 1,
+  "verse": 3,
+  "oshb": "3d15126fb1ef74867fc1434be1942e837932691f",
+  "dataset": "1.2.0",
+  "text": "וַיֹּ֥אמֶר אֱלֹהִ֖ים יְהִ֣י א֑וֹר וַֽיְהִי־אֽוֹר׃",
+  "words": [
+    {
+      "n": 1,
+      "id": "01thY",
+      "surface": "וַיֹּ֥אמֶר",
+      "trailer": " ",
+      "lemma": "c/559",
+      "morph": "HC/Vqw3ms",
+      "consonants": "ויאמר"
+    },
+    {
+      "n": 2,
+      "id": "01JM7",
+      "surface": "אֱלֹהִ֖ים",
+      "trailer": " ",
+      "lemma": "430",
+      "morph": "HNcmpa",
+      "consonants": "אלהים"
+    },
+    {
+      "n": 3,
+      "id": "01fpo",
+      "surface": "יְהִ֣י",
+      "trailer": " ",
+      "lemma": "1961",
+      "morph": "HVqj3ms",
+      "consonants": "יהי"
+    },
+    {
+      "n": 4,
+      "id": "01W26",
+      "surface": "א֑וֹר",
+      "trailer": " ",
+      "lemma": "216",
+      "morph": "HNcbsa",
+      "consonants": "אור"
+    },
+    {
+      "n": 5,
+      "id": "01yw4",
+      "surface": "וַֽיְהִי",
+      "trailer": "־",
+      "lemma": "c/1961",
+      "morph": "HC/Vqw3ms",
+      "consonants": "ויהי"
+    },
+    {
+      "n": 6,
+      "id": "01jbg",
+      "surface": "אֽוֹר",
+      "trailer": "׃",
+      "lemma": "216",
+      "morph": "HNcbsa",
+      "consonants": "אור"
+    }
+  ],
+  "chunks": [
+    {
+      "id": "c1",
+      "words": [
+        1
+      ],
+      "roles": [
+        "verb"
+      ],
+      "particles": [
+        "ו"
+      ],
+      "literal": "and he said",
+      "also": [
+        "and said"
+      ],
+      "smooth": "said",
+      "wrong": [
+        "and answered",
+        "and I said"
+      ],
+      "wrongSource": [
+        "Strong's H559 sense: answer",
+        "misparse: HC/Vqw3ms read as HC/Vqw1cs"
+      ]
+    },
+    {
+      "id": "c2",
+      "words": [
+        2
+      ],
+      "roles": [
+        "subject"
+      ],
+      "particles": [],
+      "literal": "God",
+      "also": [],
+      "smooth": "God",
+      "wrong": [
+        "Adonai",
+        "gods"
+      ],
+      "wrongSource": [
+        "Chairman ruling: Adonai reads יהוה, not H430",
+        "Strong's H430 sense: gods"
+      ]
+    },
+    {
+      "id": "c3",
+      "words": [
+        3
+      ],
+      "roles": [
+        "verb"
+      ],
+      "particles": [],
+      "literal": "let [there] be",
+      "also": [
+        "let be"
+      ],
+      "smooth": "let there be",
+      "wrong": [
+        "and there was",
+        "it will be"
+      ],
+      "wrongSource": [
+        "misparse: HVqj3ms read as HC/Vqw3ms (word 5)",
+        "misparse: HVqj3ms read as HVqi3ms"
+      ]
+    },
+    {
+      "id": "c4",
+      "words": [
+        4
+      ],
+      "roles": [
+        "subject"
+      ],
+      "particles": [],
+      "literal": "light",
+      "also": [],
+      "smooth": "light",
+      "wrong": [
+        "lightning",
+        "morning"
+      ],
+      "wrongSource": [
+        "Strong's H216 sense: lightning",
+        "Strong's H216 sense: morning"
+      ]
+    },
+    {
+      "id": "c5",
+      "words": [
+        5,
+        6
+      ],
+      "roles": [
+        "verb",
+        "subject"
+      ],
+      "particles": [
+        "ו"
+      ],
+      "literal": "and [there] was light",
+      "also": [
+        "and light was"
+      ],
+      "smooth": "and there was light",
+      "wrong": [
+        "and let there be light",
+        "and there will be light"
+      ],
+      "wrongSource": [
+        "misparse: HC/Vqw3ms read as HC/Vqj3ms",
+        "misparse: HC/Vqw3ms read as HC/Vqi3ms"
+      ]
+    }
+  ],
+  "readings": {
+    "ylt": "and God saith, 'Let light be;' and light is.",
+    "web": "God said, “Let there be light,” and there was light.",
+    "jps": "And God said: 'Let there be light.' And there was light."
+  }
+}
