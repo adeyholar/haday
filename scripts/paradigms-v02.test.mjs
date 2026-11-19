@@ -596,7 +596,7 @@ test("book English waits for the tap and shares one download per book", async ()
   assert.match(read("src/components/english-ask.tsx"), /Loading…/);
 });
 
-test("the printed Qal infinitive construct and the page 9 flag come from the data", () => {
+test("the printed Qal infinitive construct and the page 9 flag come from the data", async () => {
   const printed = school.cells.find((cell) => cell.id === "Qal.infinitive-construct");
   assert.deepEqual(schoolShownForms(printed).map((form) => nfc(form)), [nfc(printed.form)]);
   assert.ok(printed.form.includes("w/suffix"));
@@ -650,9 +650,18 @@ test("the printed Qal infinitive construct and the page 9 flag come from the dat
   assert.equal(glance.includes("{row.def ?"), false);
   assert.match(glance, /KJV: \$\{row\.kjv\}/);
   const builder = read("src/components/qal-imperfect-builder.tsx");
-  assert.match(builder, /scripture \?/);
   assert.match(builder, /VerseEnglish verseRef=\{root\.ref\}/);
-  assert.match(read("src/routes/iibs/qal-imperfect.tsx"), /QalImperfectBuilder scripture/);
+  assert.equal(builder.includes("root.en"), false);
+  const iibs = read("src/routes/iibs/qal-imperfect.tsx");
+  assert.match(iibs, /<QalImperfectBuilder \/>/);
+  assert.equal(iibs.includes("QalImperfectBuilder scripture"), false);
+  const { IMPERFECT_PASSAGES } = await jiti.import(join(root, "src/lib/qal-imperfect-roots.ts"));
+  const targets = { "Deut.13.17": "Deut.13.16", "Deut.23.7": "Deut.23.6", "Exod.22.16": "Exod.22.17" };
+  for (const [ref, englishRef] of Object.entries(targets)) {
+    assert.ok(IMPERFECT_PASSAGES.some((item) => item.ref === ref), ref);
+    assert.equal(versemap.verses[ref].ylt[0].ref, englishRef);
+    assert.equal(versemap.verses[ref].web[0].ref, englishRef);
+  }
 });
 
 test("curated Hebrew matches the WLC reader text at its ref", async () => {
