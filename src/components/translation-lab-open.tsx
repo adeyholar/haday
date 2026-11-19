@@ -268,8 +268,19 @@ export function OpenLab({ path }: { path: LabPath }) {
             <He>{chunkHebrew(sayChunk)}</He>
           </p>
           <p className="mt-2 text-sm text-muted">Pick a meaning.</p>
+          {path === "iibs" ? (
+            <button
+              type="button"
+              className="mt-3 min-h-11 font-semibold text-primary"
+              aria-expanded={sayOpen}
+              aria-controls={`lab-say-${sayChunk.id}`}
+              onClick={() => setSayOpen(true)}
+            >
+              English
+            </button>
+          ) : null}
           {sayChoicesVisible(path, sayOpen) ? (
-            <div className="mt-3 flex flex-col gap-2">
+            <div id={`lab-say-${sayChunk.id}`} className="mt-3 flex flex-col gap-2">
               {sayChoices(sayChunk).map((choice) => (
                 <button
                   key={choice}
@@ -281,11 +292,7 @@ export function OpenLab({ path }: { path: LabPath }) {
                 </button>
               ))}
             </div>
-          ) : (
-            <button type="button" className="mt-3 min-h-11 font-semibold text-primary" onClick={() => setSayOpen(true)}>
-              English
-            </button>
-          )}
+          ) : null}
           {sayNote ? <p className="mt-3 text-sm text-primary">{sayNote}</p> : null}
         </Panel>
       ) : null}
@@ -320,8 +327,19 @@ export function OpenLab({ path }: { path: LabPath }) {
 
       {step === "look" ? (
         <Panel className="mt-4">
+          {path === "iibs" ? (
+            <button
+              type="button"
+              className="min-h-11 font-semibold text-primary"
+              aria-expanded={lookOpen}
+              aria-controls="lab-look"
+              onClick={() => setLookOpen(true)}
+            >
+              English
+            </button>
+          ) : null}
           {lookEnglishVisible(path, step, lookOpen) ? (
-            <>
+            <div id="lab-look">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Young's Literal Translation</h2>
               <p className="mt-1 text-base text-ink">{look.ylt}</p>
               <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted">World English Bible</h2>
@@ -334,12 +352,8 @@ export function OpenLab({ path }: { path: LabPath }) {
                 </p>
               ) : null}
               <p className="mt-4 text-xs text-muted">{LAB_CREDITS}</p>
-            </>
-          ) : (
-            <button type="button" className="min-h-11 font-semibold text-primary" onClick={() => setLookOpen(true)}>
-              English
-            </button>
-          )}
+            </div>
+          ) : null}
         </Panel>
       ) : null}
     </main>
@@ -369,12 +383,20 @@ function ParseBlock({
           {explainMorph(word.morph)}
         </p>
       ))}
-      {showGloss ? <p className="mt-2">Class gloss: {chunk.literal}</p> : null}
-      {!showGloss ? (
-        <button type="button" className="mt-2 min-h-11 font-semibold text-primary" onClick={onEnglish}>
-          Show the English for this word
-        </button>
+      {showGloss ? (
+        <p id={`lab-gloss-${chunk.id}`} className="mt-2">
+          Class gloss: {chunk.literal}
+        </p>
       ) : null}
+      <button
+        type="button"
+        className="mt-2 min-h-11 font-semibold text-primary"
+        aria-expanded={showGloss}
+        aria-controls={`lab-gloss-${chunk.id}`}
+        onClick={onEnglish}
+      >
+        Show the English for this word
+      </button>
     </div>
   );
 }

@@ -24,6 +24,8 @@ export type LabChunk = {
   roles: LabRole[];
   particles: LabParticle[];
   literal: string;
+  /** Extra literal forms accepted beside `literal`. */
+  also: string[];
   smooth: string;
   wrong: [string, string];
   wrongSource: [string, string];

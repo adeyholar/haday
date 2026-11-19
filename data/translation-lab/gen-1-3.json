@@ -75,14 +75,17 @@
         "ו"
       ],
       "literal": "and he said",
+      "also": [
+        "and said"
+      ],
       "smooth": "said",
       "wrong": [
-        "and he promised",
-        "and he commanded"
+        "and answered",
+        "and I said"
       ],
       "wrongSource": [
-        "BDB H559 sense: promise",
-        "BDB H559 sense: command"
+        "Strong's H559 sense: answer",
+        "misparse: HC/Vqw3ms read as HC/Vqw1cs"
       ]
     },
     {
@@ -95,14 +98,15 @@
       ],
       "particles": [],
       "literal": "God",
+      "also": [],
       "smooth": "God",
       "wrong": [
-        "gods",
-        "judges"
+        "Adonai",
+        "gods"
       ],
       "wrongSource": [
-        "BDB H430 sense: gods",
-        "BDB H430 sense: judges"
+        "Chairman ruling: Adonai reads יהוה, not H430",
+        "Strong's H430 sense: gods"
       ]
     },
     {
@@ -115,14 +119,17 @@
       ],
       "particles": [],
       "literal": "let [there] be",
+      "also": [
+        "let be"
+      ],
       "smooth": "let there be",
       "wrong": [
-        "let it come to pass",
-        "let him become"
+        "and there was",
+        "it will be"
       ],
       "wrongSource": [
-        "BDB H1961 sense: come to pass",
-        "BDB H1961 sense: become"
+        "misparse: HVqj3ms read as HVqw3ms",
+        "misparse: HVqj3ms read as HVqi3ms"
       ]
     },
     {
@@ -135,14 +142,15 @@
       ],
       "particles": [],
       "literal": "light",
+      "also": [],
       "smooth": "light",
       "wrong": [
-        "daylight",
-        "lightning"
+        "lightning",
+        "morning"
       ],
       "wrongSource": [
-        "BDB H216 sense: daylight",
-        "BDB H216 sense: lightning"
+        "Strong's H216 sense: lightning",
+        "Strong's H216 sense: morning"
       ]
     },
     {
@@ -159,14 +167,17 @@
         "ו"
       ],
       "literal": "and [there] was light",
+      "also": [
+        "and light was"
+      ],
       "smooth": "and there was light",
       "wrong": [
-        "and lightning came to pass",
-        "and it became daylight"
+        "and let there be light",
+        "and there will be light"
       ],
       "wrongSource": [
-        "BDB H1961 come to pass + H216 lightning, not the wayyiqtol",
-        "OSHB misparse: H1961 as become and H216 as daylight"
+        "misparse: HC/Vqw3ms read as HC/Vqj3ms",
+        "misparse: HC/Vqw3ms read as HC/Vqi3ms"
       ]
     }
   ],

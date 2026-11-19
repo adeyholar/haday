@@ -130,7 +130,25 @@ test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
     assert.notEqual(chunk.wrong[1], GEN_1_3.readings.web);
     assert.equal(chunk.wrongSource[0].length > 0, true);
     assert.equal(chunk.wrongSource[1].length > 0, true);
+    const words = chunk.words.map((n) => GEN_1_3.words.find((word) => word.n === n));
+    if (words.some((word) => word.consonants === "אלהים")) {
+      assert.deepEqual(new Set(chunk.wrong), new Set(["Adonai", "gods"]));
+    }
+    const tags = new Set(words.map((word) => word.morph));
+    for (const source of chunk.wrongSource) {
+      if (!source.startsWith("misparse")) continue;
+      const codes = source.match(/[HA][A-Z][A-Za-z0-9]*(?:\/[A-Za-z0-9]+)*/g) ?? [];
+      assert.ok(codes.some((code) => tags.has(code)), source);
+      assert.ok(codes.some((code) => !tags.has(code)), source);
+    }
   }
+  const accepted = new Set(GEN_1_3.chunks.flatMap((chunk) => [chunk.literal, ...chunk.also]));
+  for (const chunk of GEN_1_3.chunks) {
+    for (const tile of chunk.wrong) assert.equal(accepted.has(tile), false, tile);
+  }
+  assert.equal(gradeSay("c1", "and said"), true);
+  assert.equal(gradeSay("c3", "let be"), true);
+  assert.equal(gradeSay("c5", "and light was"), true);
   assert.equal(new Set(literalSlots).size > 1, true);
   assert.equal(literalSlots.every((slot) => slot === 1), false);
   assert.equal(isPublishedReading(GEN_1_3.readings.ylt), true);
@@ -182,6 +200,8 @@ test("say, assemble, and look follow the lab rules for Genesis 1:3", () => {
   assert.match(page, /JPS 1917/);
   assert.match(page, /<bdi lang="he" dir="rtl">/);
   assert.match(page, /aria-pressed/);
+  assert.match(page, /aria-expanded/);
+  assert.match(page, /aria-controls/);
   const ylt = JSON.parse(readFileSync(join(root, "data/paradigms/ylt.json"), "utf8"));
   const book = JSON.parse(readFileSync(join(root, "public/tanakh/books/Gen.json"), "utf8"));
   const row = book.chapters["1"].find((item) => item.v === 3);

@@ -83,9 +83,14 @@ export function gradeChunks(marks: readonly ChunkMark[], verse: LabVerse = GEN_1
   return { ok: missed.length === 0, missed };
 }
 
-/** The literal gloss is the accepted Say tile. Smooth waits for a later lab. */
+/** The chunk literal, plus any extra literal forms. Smooth waits for a later lab. */
+export function acceptedGlosses(chunk: LabChunk): readonly string[] {
+  return [chunk.literal, ...chunk.also];
+}
+
 export function sayAccepted(chunk: LabChunk, choice: string): boolean {
-  return choice.trim() === chunk.literal;
+  const text = choice.trim();
+  return acceptedGlosses(chunk).some((gloss) => gloss === text);
 }
 
 export function gradeSay(chunkId: string, choice: string, verse: LabVerse = GEN_1_3): boolean {
