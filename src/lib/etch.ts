@@ -401,9 +401,14 @@ export function suffixDrillKey(focus: string | undefined): string {
   return `suffixes:${focus === "weak" ? "weak" : "due"}`;
 }
 
+/** Qal imperfect suffixes keep their own sitting. It does not replace the open week. */
+export function yiqtolDrillKey(focus: string | undefined): string {
+  return `yiqtol:${focus === "weak" ? "weak" : "due"}`;
+}
+
 export function hydrateDrillRuns(raw: unknown): DrillRuns {
   return remapPassageDrillRuns(
-    takeDrillRuns(raw, (key) => /^(?:\d+|final|pronouns|suffixes):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,24}$/.test(key)),
+    takeDrillRuns(raw, (key) => /^(?:\d+|final|pronouns|suffixes|yiqtol):(due|weak)$/.test(key) || /^passage:(bbh|iibs):[A-Za-z0-9.]{1,24}$/.test(key)),
   );
 }
 

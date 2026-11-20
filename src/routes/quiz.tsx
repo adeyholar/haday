@@ -9,6 +9,7 @@ import { quizDeck, useStudy } from "@/lib/store";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { independentPronounItems } from "@/lib/independent-pronouns";
 import { pronominalSuffixItems } from "@/lib/pronominal-suffixes";
+import { qalImperfectSuffixItems } from "@/lib/qal-imperfect-suffixes";
 import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
@@ -21,25 +22,32 @@ import { VocabArt } from "@/components/vocab-art";
 import { isTerm2Week } from "@/lib/vocab-s2";
 
 export const Route = createFileRoute("/quiz")({
-  validateSearch: (search: Record<string, unknown>): { set?: "pronouns" | "suffixes" } => ({
-    set: search.set === "pronouns" || search.set === "suffixes" ? search.set : undefined,
+  validateSearch: (search: Record<string, unknown>): { set?: "pronouns" | "suffixes" | "yiqtol" } => ({
+    set: search.set === "pronouns" || search.set === "suffixes" || search.set === "yiqtol" ? search.set : undefined,
   }),
   component: QuizPage,
 });
 
 type Mode = "choice" | "type";
-type ModuleSet = "pronouns" | "suffixes";
+type ModuleSet = "pronouns" | "suffixes" | "yiqtol";
+
+const MODULE_COPY: Record<ModuleSet, { title: string; line: string }> = {
+  pronouns: { title: "Independent pronouns", line: "Eleven persons. “You” is not one answer." },
+  suffixes: { title: "Pronominal suffixes", line: "Qal perfect 3ms. He killed him, her, you, me, them, us." },
+  yiqtol: {
+    title: "Qal imperfect suffixes",
+    line: "The preformative stays. Holem becomes sheva before a suffix, unless the form already has an ending. 3fp and 2fp take none.",
+  },
+};
 
 function QuizSetBar({ set }: { set?: ModuleSet }) {
-  if (set !== "pronouns" && set !== "suffixes") return <WeekSelect />;
-  const suffixes = set === "suffixes";
+  if (!set) return <WeekSelect />;
+  const copy = MODULE_COPY[set];
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Every module</p>
-      <h1 className="mt-1 font-display text-3xl font-bold text-ink">{suffixes ? "Pronominal suffixes" : "Independent pronouns"}</h1>
-      <p className="mt-1 text-sm text-muted">
-        {suffixes ? "Qal perfect 3ms. He killed him, her, you, me, them, us." : "Eleven persons. “You” is not one answer."}
-      </p>
+      <h1 className="mt-1 font-display text-3xl font-bold text-ink">{copy.title}</h1>
+      <p className="mt-1 text-sm text-muted">{copy.line}</p>
       <p className="mt-2 text-sm">
         <Link to="/drill" search={{ set }} className="font-semibold text-primary">
           Drill these
@@ -57,16 +65,18 @@ function QuizPage() {
   const { set } = Route.useSearch();
   const pronouns = set === "pronouns";
   const suffixes = set === "suffixes";
-  const moduleSet = pronouns || suffixes;
+  const yiqtol = set === "yiqtol";
+  const moduleSet = pronouns || suffixes || yiqtol;
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const rate = useStudy((s) => s.rate);
   const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
   const pool = useMemo(() => {
+    if (yiqtol) return qalImperfectSuffixItems();
     if (suffixes) return pronominalSuffixItems();
     if (pronouns) return independentPronounItems();
     return weekPlayPool(week);
-  }, [suffixes, pronouns, week]);
+  }, [yiqtol, suffixes, pronouns, week]);
   const [mode, setMode] = useState<Mode>("choice");
   const [seed, setSeed] = useState(0);
   const [deck, setDeck] = useState<VocabItem[]>([]);
@@ -178,7 +188,7 @@ function QuizPage() {
           </div>
           <FocusToggle pool={moduleSet ? pool : undefined} />
           <p className="mt-4 text-sm text-muted">
-            Nothing in the weak book for {suffixes ? "these suffixes" : pronouns ? "these pronouns" : isTerm2Week(week) ? "this chapter" : "this week"}. A miss puts a word here, most misses first. Words you know stay out.
+            Nothing in the weak book for {yiqtol ? "these imperfect forms" : suffixes ? "these suffixes" : pronouns ? "these pronouns" : isTerm2Week(week) ? "this chapter" : "this week"}. A miss puts a word here, most misses first. Words you know stay out.
           </p>
         </Panel>
       </>
@@ -232,7 +242,11 @@ function QuizPage() {
           </Button>
         </div>
         <p className="mt-4 text-sm text-muted">
-          {suffixes
+          {yiqtol
+            ? focus === "weak"
+              ? "Qal imperfect suffixes. Missed forms only, most misses first."
+              : "Qal imperfect suffixes. The same chart on every module. Weak and due come first."
+            : suffixes
             ? focus === "weak"
               ? "Pronominal suffixes. Missed persons only, most misses first."
               : "Pronominal suffixes. Qal perfect 3ms on every module. Weak and due come first."
