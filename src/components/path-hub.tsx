@@ -56,6 +56,8 @@ type Card = {
   pronouns?: "quiz" | "drill";
   /** Qal perfect 3ms with an object suffix. Same quiz and drill on every module. */
   suffixes?: "quiz" | "drill";
+  /** Qal imperfect before a pronominal suffix. Same quiz and drill on every module. */
+  yiqtol?: "quiz" | "drill";
   /** Final exam vocab on the road. Not the scored quiz, and not the drill. */
   examRoad?: boolean;
 };
@@ -84,6 +86,8 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/drill", pronouns: "drill", title: "Independent pronouns drill", line: "The same eleven forms, every way." },
       { to: "/quiz", suffixes: "quiz", title: "Pronominal suffixes", line: "Qal perfect 3ms. He killed him, her, you, me, them, us." },
       { to: "/drill", suffixes: "drill", title: "Pronominal suffixes drill", line: "The same ten forms, every way." },
+      { to: "/quiz", yiqtol: "quiz", title: "Qal imperfect suffixes", line: "The stem before a pronominal suffix. Holem becomes sheva." },
+      { to: "/drill", yiqtol: "drill", title: "Qal imperfect suffixes drill", line: "The same chart, every way. 3fp and 2fp take none." },
       { to: "/write", title: "Write", line: "Type the meaning, or write it by hand." },
       { to: "/match", title: "Match", line: "Pair the Hebrew with the English." },
       { to: "/weak", title: "Weak words", line: "Words you miss will gather here." },
@@ -153,6 +157,8 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/drill", pronouns: "drill", title: "Independent pronouns drill", line: "The same eleven forms, every way." },
       { to: "/quiz", suffixes: "quiz", title: "Pronominal suffixes", line: "Qal perfect 3ms. He killed him, her, you, me, them, us." },
       { to: "/drill", suffixes: "drill", title: "Pronominal suffixes drill", line: "The same ten forms, every way." },
+      { to: "/quiz", yiqtol: "quiz", title: "Qal imperfect suffixes", line: "The stem before a pronominal suffix. Holem becomes sheva." },
+      { to: "/drill", yiqtol: "drill", title: "Qal imperfect suffixes drill", line: "The same chart, every way. 3fp and 2fp take none." },
       { to: "/write", title: "Write", line: "Type the meaning." },
       { to: "/match", title: "Match", line: "Select the pairs." },
       { to: "/weak", title: "Weak words", line: "Words you miss will gather here." },
@@ -245,6 +251,24 @@ export function PathHub({ kind }: { kind: HubKind }) {
               <Link
                 to="/drill"
                 search={{ set: "suffixes" }}
+                className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="block font-display text-2xl font-bold">{card.title}</span>
+                <span className="mt-1 block text-sm text-muted">{card.line}</span>
+              </Link>
+            ) : card.yiqtol === "quiz" ? (
+              <Link
+                to="/quiz"
+                search={{ set: "yiqtol" }}
+                className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+              >
+                <span className="block font-display text-2xl font-bold">{card.title}</span>
+                <span className="mt-1 block text-sm text-muted">{card.line}</span>
+              </Link>
+            ) : card.yiqtol === "drill" ? (
+              <Link
+                to="/drill"
+                search={{ set: "yiqtol" }}
                 className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
               >
                 <span className="block font-display text-2xl font-bold">{card.title}</span>

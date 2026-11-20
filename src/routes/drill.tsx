@@ -6,20 +6,21 @@ import { useStudy } from "@/lib/store";
 import { FocusToggle } from "@/components/focus-toggle";
 import { StudyMenu } from "@/components/study-menu";
 import { DrillSitting } from "@/components/drill-sitting";
-import { drillKey, finalDrillKey, passagePlaceForPool, pronounDrillKey, suffixDrillKey } from "@/lib/etch";
+import { drillKey, finalDrillKey, passagePlaceForPool, pronounDrillKey, suffixDrillKey, yiqtolDrillKey } from "@/lib/etch";
 import { finalExamDrillItems } from "@/lib/final-vocab";
 import { independentPronounItems } from "@/lib/independent-pronouns";
 import { pronominalSuffixItems } from "@/lib/pronominal-suffixes";
+import { qalImperfectSuffixItems } from "@/lib/qal-imperfect-suffixes";
 import { findStudyItem } from "@/lib/tanakh-pool";
 import { iibsPathItems } from "@/lib/iibs-weeks";
 import { loadPassagePack, passageDrillKey } from "@/lib/reading-loop/passage";
 import { cn } from "@/lib/cn";
 
-type DrillSearch = { set?: "final" | "passage" | "pronouns" | "suffixes"; from?: string };
+type DrillSearch = { set?: "final" | "passage" | "pronouns" | "suffixes" | "yiqtol"; from?: string };
 
 export const Route = createFileRoute("/drill")({
   validateSearch: (search: Record<string, unknown>): DrillSearch => ({
-    set: search.set === "final" || search.set === "passage" || search.set === "pronouns" || search.set === "suffixes" ? search.set : undefined,
+    set: search.set === "final" || search.set === "passage" || search.set === "pronouns" || search.set === "suffixes" || search.set === "yiqtol" ? search.set : undefined,
     from: typeof search.from === "string" && search.from ? search.from : undefined,
   }),
   component: DrillPage,
@@ -32,11 +33,13 @@ function DrillPage() {
   const final = set === "final";
   const pronouns = set === "pronouns";
   const suffixes = set === "suffixes";
+  const yiqtol = set === "yiqtol";
   const pack = useMemo(() => (passage ? loadPassagePack() : null), [passage]);
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const saveDrillAt = useStudy((s) => s.saveDrillAt);
   const pool = useMemo(() => {
+    if (yiqtol) return qalImperfectSuffixItems();
     if (suffixes) return pronominalSuffixItems();
     if (pronouns) return independentPronounItems();
     if (passage) {
@@ -49,25 +52,29 @@ function DrillPage() {
       return items;
     }
     return final ? finalExamDrillItems() : itemsForWeek(week);
-  }, [suffixes, pronouns, passage, pack, final, week]);
-  const label = suffixes
-    ? "Pronominal suffixes"
-    : pronouns
-      ? "Independent pronouns"
-      : passage
-        ? (pack?.label ?? "This passage")
-        : final
-          ? "Final exam"
-          : studySetMeta(week).label;
-  const placeKey = suffixes
-    ? suffixDrillKey(focus)
-    : pronouns
-      ? pronounDrillKey(focus)
-      : passage && pack
-        ? passageDrillKey(pack.scope, pack.ref)
-        : final
-          ? finalDrillKey(focus)
-          : drillKey(week, focus);
+  }, [yiqtol, suffixes, pronouns, passage, pack, final, week]);
+  const label = yiqtol
+    ? "Qal imperfect suffixes"
+    : suffixes
+      ? "Pronominal suffixes"
+      : pronouns
+        ? "Independent pronouns"
+        : passage
+          ? (pack?.label ?? "This passage")
+          : final
+            ? "Final exam"
+            : studySetMeta(week).label;
+  const placeKey = yiqtol
+    ? yiqtolDrillKey(focus)
+    : suffixes
+      ? suffixDrillKey(focus)
+      : pronouns
+        ? pronounDrillKey(focus)
+        : passage && pack
+          ? passageDrillKey(pack.scope, pack.ref)
+          : final
+            ? finalDrillKey(focus)
+            : drillKey(week, focus);
   const back = pack?.back || from;
 
   if (passage && !pack) {
@@ -92,7 +99,7 @@ function DrillPage() {
         return passagePlaceForPool(place, pool.map((item) => item.id));
       }}
       writePlace={(place) => saveDrillAt(placeKey, place)}
-      showChapter={!passage && !pronouns && !suffixes}
+      showChapter={!passage && !pronouns && !suffixes && !yiqtol}
       chrome={
         <>
           <StudyMenu />
@@ -108,7 +115,7 @@ function DrillPage() {
                 onClick={() => navigate({ search: (prev) => ({ ...prev, set: undefined }) })}
                 className={cn(
                   "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
-                  final || pronouns || suffixes ? "bg-card text-muted shadow-[var(--shadow-border)]" : "bg-ink text-parchment",
+                  final || pronouns || suffixes || yiqtol ? "bg-card text-muted shadow-[var(--shadow-border)]" : "bg-ink text-parchment",
                 )}
               >
                 Study set
@@ -135,6 +142,16 @@ function DrillPage() {
               </button>
               <button
                 type="button"
+                onClick={() => navigate({ search: (prev) => ({ ...prev, set: "yiqtol" }) })}
+                className={cn(
+                  "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
+                  yiqtol ? "bg-ink text-parchment" : "bg-card text-muted shadow-[var(--shadow-border)]",
+                )}
+              >
+                Imperfect
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate({ search: (prev) => ({ ...prev, set: "final" }) })}
                 className={cn(
                   "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
@@ -150,7 +167,12 @@ function DrillPage() {
               Back to the reading
             </a>
           ) : null}
-          {suffixes ? (
+          {yiqtol ? (
+            <p className="mt-2 text-sm text-ink">
+              <span className="font-semibold">Qal imperfect suffixes</span>
+              <span className="text-muted"> · preformative stays · holem becomes sheva before a suffix · 3fp and 2fp take none · its own saved place</span>
+            </p>
+          ) : suffixes ? (
             <p className="mt-2 text-sm text-ink">
               <span className="font-semibold">Pronominal suffixes</span>
               <span className="text-muted"> · Qal perfect 3ms · he killed him, her, you, me, them, us · its own saved place</span>
@@ -170,7 +192,7 @@ function DrillPage() {
               <WeekSelect />
             </div>
           )}
-          <FocusToggle pool={final || passage || pronouns || suffixes ? pool : undefined} />
+          <FocusToggle pool={final || passage || pronouns || suffixes || yiqtol ? pool : undefined} />
         </>
       }
     />

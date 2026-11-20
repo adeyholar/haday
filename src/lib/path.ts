@@ -129,11 +129,11 @@ const TERM2_VERBS = [
   "/lessons/verbs",
 ];
 
-/** Independent pronouns and the Qal perfect suffix chart. Either open door may open them. */
+/** Independent pronouns, the Qal perfect suffix chart, and the Qal imperfect before a suffix. Either open door may open them. */
 export function moduleSittingPath(pathname: string, search?: unknown): boolean {
   if (pathname !== "/quiz" && pathname !== "/drill") return false;
   const set = searchSet(search);
-  return set === "pronouns" || set === "suffixes";
+  return set === "pronouns" || set === "suffixes" || set === "yiqtol";
 }
 
 /** The independent-pronoun sitting is on every module, so either open door may open it. */
