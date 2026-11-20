@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
+import { translationLabEnabled } from "@/lib/translation-lab/flag";
+import { showTranslationLabListenCard } from "@/lib/translation-lab/listen-card";
 import { useOpenTerm } from "@/lib/use-open-term";
 
 type HubKind = "learn" | "practice" | "play" | "listen";
@@ -31,6 +33,7 @@ type Card = {
     | "/game/final-vocab"
     | "/challenge"
     | "/listen"
+    | "/listen/lab"
     | "/listen/road"
     | "/listen/pet"
     | "/listen/read"
@@ -172,6 +175,11 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
 export function PathHub({ kind }: { kind: HubKind }) {
   const term = useOpenTerm();
   const room = (term === 2 ? TERM2 : TERM1)[kind];
+  const labCard: Card | null =
+    kind === "listen" && showTranslationLabListenCard(term, translationLabEnabled())
+      ? { to: "/listen/lab", title: "Translation Lab", line: "Translate Genesis 1:3 word by word." }
+      : null;
+  const cards = labCard ? [...room.cards, labCard] : room.cards;
   return (
     <>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar Path</p>
@@ -183,7 +191,7 @@ export function PathHub({ kind }: { kind: HubKind }) {
             <VerbLabCard from={kind} path="grammar" />
           </li>
         ) : null}
-        {room.cards.map((card) => (
+        {cards.map((card) => (
           <li key={card.title}>
             {card.final ? (
               <Link
