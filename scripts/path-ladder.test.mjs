@@ -4,7 +4,7 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, { alias: { "@": new URL("../src", import.meta.url).pathname } });
-const { blockedDestination, claimPathIntent, clearPathIntent, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, publishTerm, readPathIntent, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, stashPathIntent, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
+const { blockedDestination, claimPathIntent, clearPathIntent, homeForAccount, levelOpen, noteServerTerm, ownerDoorBlock, pathForHeard, pronounSittingPath, publishTerm, readPathIntent, readTerm, secondTermBlock, shouldShowPathChooser, signInLanding, stashPathIntent, termForAccount, termRevisionNow } = await jiti.import(new URL("../src/lib/path.ts", import.meta.url).pathname);
 
 test("every Scripture Path level is open", () => {
   assert.equal(levelOpen("A", null, false), true);
@@ -40,6 +40,13 @@ test("the owner must come back to the doors before switching", () => {
   assert.equal(ownerDoorBlock("/iibs/A", "iibs"), null);
   assert.equal(ownerDoorBlock("/iibs/drill", "iibs"), null);
   assert.equal(ownerDoorBlock("/drill", "iibs"), "/");
+  assert.equal(ownerDoorBlock("/drill", "iibs", { set: "pronouns" }), null);
+  assert.equal(ownerDoorBlock("/quiz", "iibs", "?set=pronouns"), null);
+  assert.equal(blockedDestination("/quiz", { path: "iibs", admin: false }, { set: "pronouns" }), null);
+  assert.equal(blockedDestination("/quiz", { path: "iibs", admin: false }), "/");
+  assert.equal(blockedDestination("/drill", { path: "bbh", admin: false }, { set: "pronouns" }), null);
+  assert.equal(secondTermBlock("/quiz", 1, true, { set: "pronouns" }), null);
+  assert.equal(pronounSittingPath("/game", { set: "pronouns" }), false);
   assert.equal(ownerDoorBlock("/bbh", "bbh"), null);
   assert.equal(ownerDoorBlock("/game", null), "/");
   assert.equal(ownerDoorBlock("/", "bbh"), null);

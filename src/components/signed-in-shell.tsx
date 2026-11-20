@@ -137,6 +137,7 @@ function moreItems(admin: boolean, iibsSide: boolean): NavItem[] {
 
 export function SignedInShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.search });
   const { sessionUser } = useRouteContext({ from: "__root__" });
   const { user, isPending } = useCurrentUserState();
   const openReading = isPublicReadingPath(pathname);
@@ -355,14 +356,14 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   const studentHome = pathGate ? homeForAccount(pathGate) : null;
   const blocked =
     pathGate?.admin && doorReady
-      ? ownerDoorBlock(pathname, currentDoor())
+      ? ownerDoorBlock(pathname, currentDoor(), search)
       : pathGate && !pathGate.admin
-        ? blockedDestination(pathname, pathGate)
+        ? blockedDestination(pathname, pathGate, search)
         : null;
   if (blocked) return <Navigate to={blocked} />;
   const term = pathGate ? termForAccount(pathGate) : 1;
   const choosingTerm = hall && !onIibs;
-  const termHome = secondTermBlock(pathname, term, choosingTerm);
+  const termHome = secondTermBlock(pathname, term, choosingTerm, search);
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
   const tabRoom = choosingTerm ? "home-only" : iibsOnly ? "scripture" : "grammar";
