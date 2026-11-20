@@ -129,6 +129,13 @@ const TERM2_VERBS = [
   "/lessons/verbs",
 ];
 
+/** Independent pronouns and the Qal perfect suffix chart. Either open door may open them. */
+export function moduleSittingPath(pathname: string, search?: unknown): boolean {
+  if (pathname !== "/quiz" && pathname !== "/drill") return false;
+  const set = searchSet(search);
+  return set === "pronouns" || set === "suffixes";
+}
+
 /** The independent-pronoun sitting is on every module, so either open door may open it. */
 export function pronounSittingPath(pathname: string, search?: unknown): boolean {
   if (pathname !== "/quiz" && pathname !== "/drill") return false;
@@ -149,7 +156,7 @@ function searchSet(search: unknown): string | undefined {
 
 /** A semester room is closed while the other is open, and while they are still choosing. */
 export function secondTermBlock(pathname: string, term: GrammarTerm, hall = false, search?: unknown): "/bbh" | null {
-  if (pronounSittingPath(pathname, search)) return null;
+  if (moduleSittingPath(pathname, search)) return null;
   if (term !== 2 && !hall) return null;
   if (pathname === "/" || pathname === "/bbh") return null;
   if (isPublicReadingPath(pathname)) return null;
@@ -261,7 +268,7 @@ function onIibsPath(pathname: string): boolean {
 
 /** The owner may hold one open door. The other study sends them back to the two squares. */
 export function ownerDoorBlock(pathname: string, door: StudyPath | null, search?: unknown): "/" | null {
-  if (pronounSittingPath(pathname, search)) return null;
+  if (moduleSittingPath(pathname, search)) return null;
   if (isShared(pathname, true)) return null;
   if (onIibsPath(pathname)) return door === "iibs" ? null : "/";
   return door === "bbh" ? null : "/";
@@ -272,7 +279,7 @@ export function blockedDestination(
   gate: { path: StudyPath | null; admin: boolean },
   search?: unknown,
 ): "/" | null {
-  if (pronounSittingPath(pathname, search)) return null;
+  if (moduleSittingPath(pathname, search)) return null;
   if (gate.admin) return null;
   const shared = isShared(pathname);
   if (gate.path === null) return shared ? null : "/";

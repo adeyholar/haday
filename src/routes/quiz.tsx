@@ -8,6 +8,7 @@ import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/voca
 import { quizDeck, useStudy } from "@/lib/store";
 import { weekPlayPool } from "@/lib/tanakh-pool";
 import { independentPronounItems } from "@/lib/independent-pronouns";
+import { pronominalSuffixItems } from "@/lib/pronominal-suffixes";
 import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
@@ -20,23 +21,27 @@ import { VocabArt } from "@/components/vocab-art";
 import { isTerm2Week } from "@/lib/vocab-s2";
 
 export const Route = createFileRoute("/quiz")({
-  validateSearch: (search: Record<string, unknown>): { set?: "pronouns" } => ({
-    set: search.set === "pronouns" ? "pronouns" : undefined,
+  validateSearch: (search: Record<string, unknown>): { set?: "pronouns" | "suffixes" } => ({
+    set: search.set === "pronouns" || search.set === "suffixes" ? search.set : undefined,
   }),
   component: QuizPage,
 });
 
 type Mode = "choice" | "type";
+type ModuleSet = "pronouns" | "suffixes";
 
-function QuizSetBar({ pronouns }: { pronouns: boolean }) {
-  if (!pronouns) return <WeekSelect />;
+function QuizSetBar({ set }: { set?: ModuleSet }) {
+  if (set !== "pronouns" && set !== "suffixes") return <WeekSelect />;
+  const suffixes = set === "suffixes";
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Every module</p>
-      <h1 className="mt-1 font-display text-3xl font-bold text-ink">Independent pronouns</h1>
-      <p className="mt-1 text-sm text-muted">Eleven persons. “You” is not one answer.</p>
+      <h1 className="mt-1 font-display text-3xl font-bold text-ink">{suffixes ? "Pronominal suffixes" : "Independent pronouns"}</h1>
+      <p className="mt-1 text-sm text-muted">
+        {suffixes ? "Qal perfect 3ms. He killed him, her, you, me, them, us." : "Eleven persons. “You” is not one answer."}
+      </p>
       <p className="mt-2 text-sm">
-        <Link to="/drill" search={{ set: "pronouns" }} className="font-semibold text-primary">
+        <Link to="/drill" search={{ set }} className="font-semibold text-primary">
           Drill these
         </Link>
         <span className="text-muted"> · </span>
@@ -51,11 +56,17 @@ function QuizSetBar({ pronouns }: { pronouns: boolean }) {
 function QuizPage() {
   const { set } = Route.useSearch();
   const pronouns = set === "pronouns";
+  const suffixes = set === "suffixes";
+  const moduleSet = pronouns || suffixes;
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const rate = useStudy((s) => s.rate);
   const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
-  const pool = useMemo(() => (pronouns ? independentPronounItems() : weekPlayPool(week)), [pronouns, week]);
+  const pool = useMemo(() => {
+    if (suffixes) return pronominalSuffixItems();
+    if (pronouns) return independentPronounItems();
+    return weekPlayPool(week);
+  }, [suffixes, pronouns, week]);
   const [mode, setMode] = useState<Mode>("choice");
   const [seed, setSeed] = useState(0);
   const [deck, setDeck] = useState<VocabItem[]>([]);
@@ -151,7 +162,7 @@ function QuizPage() {
   if (!pool.length) {
     return (
       <>
-        <QuizSetBar pronouns={pronouns} />
+        <QuizSetBar set={set} />
         <p className="mt-6 text-muted">No words in this set.</p>
       </>
     );
@@ -163,11 +174,11 @@ function QuizPage() {
         <Panel className="mb-4">
           <StudyMenu />
           <div className="mt-4">
-            <QuizSetBar pronouns={pronouns} />
+            <QuizSetBar set={set} />
           </div>
-          <FocusToggle pool={pronouns ? pool : undefined} />
+          <FocusToggle pool={moduleSet ? pool : undefined} />
           <p className="mt-4 text-sm text-muted">
-            Nothing in the weak book for {pronouns ? "these pronouns" : isTerm2Week(week) ? "this chapter" : "this week"}. A miss puts a word here, most misses first. Words you know stay out.
+            Nothing in the weak book for {suffixes ? "these suffixes" : pronouns ? "these pronouns" : isTerm2Week(week) ? "this chapter" : "this week"}. A miss puts a word here, most misses first. Words you know stay out.
           </p>
         </Panel>
       </>
@@ -176,7 +187,7 @@ function QuizPage() {
   if (!ready || (deck.length > 0 && !item && i === 0)) {
     return (
       <>
-        <QuizSetBar pronouns={pronouns} />
+        <QuizSetBar set={set} />
         <p className="mt-8 text-sm text-muted">Dealing a round…</p>
       </>
     );
@@ -186,7 +197,7 @@ function QuizPage() {
     const total = score.right + score.wrong;
     return (
       <>
-        <QuizSetBar pronouns={pronouns} />
+        <QuizSetBar set={set} />
         <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Round complete</h1>
           <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
@@ -209,9 +220,9 @@ function QuizPage() {
       <Panel className="mb-4">
         <StudyMenu />
         <div className="mt-4">
-          <QuizSetBar pronouns={pronouns} />
+          <QuizSetBar set={set} />
         </div>
-        <FocusToggle pool={pronouns ? pool : undefined} />
+        <FocusToggle pool={moduleSet ? pool : undefined} />
         <div className="mt-4 flex gap-2">
           <Button size="sm" variant={mode === "choice" ? "primary" : "outline"} onClick={() => { setMode("choice"); resetRound(); }}>
             Multiple choice
@@ -221,7 +232,11 @@ function QuizPage() {
           </Button>
         </div>
         <p className="mt-4 text-sm text-muted">
-          {pronouns
+          {suffixes
+            ? focus === "weak"
+              ? "Pronominal suffixes. Missed persons only, most misses first."
+              : "Pronominal suffixes. Qal perfect 3ms on every module. Weak and due come first."
+            : pronouns
             ? focus === "weak"
               ? "Independent pronouns. Missed persons only, most misses first."
               : "Independent pronouns. The same list on every module. Weak and due come first."
