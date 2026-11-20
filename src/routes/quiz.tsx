@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { VerseCard } from "@/components/verse-card";
 import { WeekSelect } from "@/components/week-select";
@@ -7,6 +7,7 @@ import { FocusToggle } from "@/components/focus-toggle";
 import { glossMatches, liveGloss, quizChoices, type VocabItem } from "@/lib/vocab";
 import { quizDeck, useStudy } from "@/lib/store";
 import { weekPlayPool } from "@/lib/tanakh-pool";
+import { independentPronounItems } from "@/lib/independent-pronouns";
 import { cn } from "@/lib/cn";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
@@ -18,16 +19,43 @@ import { MarkedAnswer } from "@/components/marked-answer";
 import { VocabArt } from "@/components/vocab-art";
 import { isTerm2Week } from "@/lib/vocab-s2";
 
-export const Route = createFileRoute("/quiz")({ component: QuizPage });
+export const Route = createFileRoute("/quiz")({
+  validateSearch: (search: Record<string, unknown>): { set?: "pronouns" } => ({
+    set: search.set === "pronouns" ? "pronouns" : undefined,
+  }),
+  component: QuizPage,
+});
 
 type Mode = "choice" | "type";
 
+function QuizSetBar({ pronouns }: { pronouns: boolean }) {
+  if (!pronouns) return <WeekSelect />;
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Every module</p>
+      <h1 className="mt-1 font-display text-3xl font-bold text-ink">Independent pronouns</h1>
+      <p className="mt-1 text-sm text-muted">Eleven persons. “You” is not one answer.</p>
+      <p className="mt-2 text-sm">
+        <Link to="/drill" search={{ set: "pronouns" }} className="font-semibold text-primary">
+          Drill these
+        </Link>
+        <span className="text-muted"> · </span>
+        <Link to="/quiz" search={{ set: undefined }} className="font-semibold text-primary">
+          This week’s quiz
+        </Link>
+      </p>
+    </div>
+  );
+}
+
 function QuizPage() {
+  const { set } = Route.useSearch();
+  const pronouns = set === "pronouns";
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const rate = useStudy((s) => s.rate);
   const noteActiveStudy = useStudy((s) => s.noteActiveStudy);
-  const pool = useMemo(() => weekPlayPool(week), [week]);
+  const pool = useMemo(() => (pronouns ? independentPronounItems() : weekPlayPool(week)), [pronouns, week]);
   const [mode, setMode] = useState<Mode>("choice");
   const [seed, setSeed] = useState(0);
   const [deck, setDeck] = useState<VocabItem[]>([]);
@@ -123,7 +151,7 @@ function QuizPage() {
   if (!pool.length) {
     return (
       <>
-        <WeekSelect />
+        <QuizSetBar pronouns={pronouns} />
         <p className="mt-6 text-muted">No words in this set.</p>
       </>
     );
@@ -135,11 +163,11 @@ function QuizPage() {
         <Panel className="mb-4">
           <StudyMenu />
           <div className="mt-4">
-            <WeekSelect />
+            <QuizSetBar pronouns={pronouns} />
           </div>
-          <FocusToggle />
+          <FocusToggle pool={pronouns ? pool : undefined} />
           <p className="mt-4 text-sm text-muted">
-            Nothing in the weak book for this {isTerm2Week(week) ? "chapter" : "week"}. A miss puts a word here, most misses first. Words you know stay out.
+            Nothing in the weak book for {pronouns ? "these pronouns" : isTerm2Week(week) ? "this chapter" : "this week"}. A miss puts a word here, most misses first. Words you know stay out.
           </p>
         </Panel>
       </>
@@ -148,7 +176,7 @@ function QuizPage() {
   if (!ready || (deck.length > 0 && !item && i === 0)) {
     return (
       <>
-        <WeekSelect />
+        <QuizSetBar pronouns={pronouns} />
         <p className="mt-8 text-sm text-muted">Dealing a round…</p>
       </>
     );
@@ -158,7 +186,7 @@ function QuizPage() {
     const total = score.right + score.wrong;
     return (
       <>
-        <WeekSelect />
+        <QuizSetBar pronouns={pronouns} />
         <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Round complete</h1>
           <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
@@ -181,9 +209,9 @@ function QuizPage() {
       <Panel className="mb-4">
         <StudyMenu />
         <div className="mt-4">
-          <WeekSelect />
+          <QuizSetBar pronouns={pronouns} />
         </div>
-        <FocusToggle />
+        <FocusToggle pool={pronouns ? pool : undefined} />
         <div className="mt-4 flex gap-2">
           <Button size="sm" variant={mode === "choice" ? "primary" : "outline"} onClick={() => { setMode("choice"); resetRound(); }}>
             Multiple choice
@@ -193,9 +221,13 @@ function QuizPage() {
           </Button>
         </div>
         <p className="mt-4 text-sm text-muted">
-          {focus === "weak"
-            ? "Weak book. Missed words only, most misses first. Words you know stay out."
-            : `Every word in this ${isTerm2Week(week) ? "chapter" : "week"}. Weak and due come first.`}
+          {pronouns
+            ? focus === "weak"
+              ? "Independent pronouns. Missed persons only, most misses first."
+              : "Independent pronouns. The same list on every module. Weak and due come first."
+            : focus === "weak"
+              ? "Weak book. Missed words only, most misses first. Words you know stay out."
+              : `Every word in this ${isTerm2Week(week) ? "chapter" : "week"}. Weak and due come first.`}
         </p>
         <p className="mt-4 text-sm font-medium tabular-nums text-ink">
           {i + 1} / {deck.length} · {score.right} correct

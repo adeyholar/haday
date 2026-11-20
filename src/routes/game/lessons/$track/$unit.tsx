@@ -5,6 +5,7 @@ import { grammarTrack } from "@/lib/grammar-tracks";
 import { grammarUnitOpen } from "@/lib/game";
 import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/game/lessons/$track/$unit")({ component: GrammarUnitPage });
 
@@ -30,6 +31,7 @@ function GrammarUnitPage() {
       <div className="mb-4">
         <GameMenu />
       </div>
+      <IndependentPronounLinks />
       <GrammarPlay key={`${track.id}-${n}-exam`} track={track} unitId={n} mode="exam" />
     </>
   );

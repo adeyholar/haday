@@ -7,6 +7,7 @@ import { grammarTopicLabel } from "@/lib/grammar";
 import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
 import { grammarUnitRecord, lessonProgress } from "@/lib/game";
 import { useStudy } from "@/lib/store";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/game/lessons/")({ component: LessonsHubPage });
 
@@ -40,6 +41,7 @@ function LessonsHubPage() {
           </Link>
           <span className="text-muted">.</span>
         </p>
+        <IndependentPronounLinks />
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
         {GRAMMAR_TRACKS.map((t) => {

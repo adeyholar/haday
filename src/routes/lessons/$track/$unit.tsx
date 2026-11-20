@@ -3,6 +3,7 @@ import { StudyMenu } from "@/components/study-menu";
 import { GrammarPlay } from "@/components/grammar-play";
 import { grammarTrack } from "@/lib/grammar-tracks";
 import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/lessons/$track/$unit")({ component: StudyUnitPage });
 
@@ -21,6 +22,7 @@ function StudyUnitPage() {
       <div className="mb-4">
         <StudyMenu />
       </div>
+      <IndependentPronounLinks />
       {track.id === "verbs" ? (
         <p className="mb-4 text-sm">
           <Link to="/game/verbal-system" className="font-semibold text-primary">

@@ -9,6 +9,7 @@ import { enterIibsRoom } from "@/lib/iibs-room";
 import { iibsWeekCount, iibsWeekItems, iibsWeekLabel, isIibsWeekLevel } from "@/lib/iibs-weeks";
 import { useStudy } from "@/lib/store";
 import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/iibs/study/$level/$week")({ component: WeekStudy });
 
@@ -109,6 +110,7 @@ function WeekStudy() {
               </Link>
             ) : null}
           </div>
+          <IndependentPronounLinks />
           <FocusToggle />
         </>
       }
