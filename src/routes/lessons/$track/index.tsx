@@ -4,6 +4,7 @@ import { MixHe } from "@/components/grammar-play";
 import { Panel } from "@/components/panel";
 import { grammarTopicLabel, grammarNeighborId } from "@/lib/grammar";
 import { grammarTrack } from "@/lib/grammar-tracks";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 import { grammarUnitRecord, grammarUnitOpen } from "@/lib/game";
 import { useOpenTerm } from "@/lib/use-open-term";
 import { useStudy } from "@/lib/store";
@@ -71,6 +72,7 @@ function StudyTrackPage() {
             </>
           ) : null}
         </p>
+        <IndependentPronounLinks />
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
         {track.units.map((u) => {

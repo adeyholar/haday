@@ -7,15 +7,18 @@ export const PRON_UNITS: GrammarUnit[] = [
     title: "I, you, he",
     short: "Independent pronouns",
     rule:
-      "Independent pronouns stand as their own words: אֲנִי / אָנֹכִי “I,” אַתָּה “you” (ms), הוּא “he,” הִיא “she,” אֲנַחְנוּ “we,” אַתֶּם “you” (mp), הֵם “they.” They often add emphasis or complete a predicate: קָדוֹשׁ אֲנִי. Hebrew verbs already hide their subject, so a written pronoun is doing extra work — stress, contrast, or a verbless clause.",
+      "Independent pronouns stand as their own words: אֲנִי / אָנֹכִי “I,” אַתָּה “you” (ms), אַתְּ “you” (fs), הוּא “he,” הִיא “she,” אֲנַחְנוּ “we,” אַתֶּם “you” (mp), אַתֵּן / אַתֵּנָה “you” (fp), הֵם / הֵמָּה “they” (mp), הֵנָּה / הֵן “they” (fp). They often add emphasis or complete a predicate: קָדוֹשׁ אֲנִי. Hebrew verbs already hide their subject, so a written pronoun is doing extra work — stress, contrast, or a verbless clause. The same eleven persons are quizzed and drilled on every module.",
     teach:
-      "A written pronoun is extra work — stress, contrast, or a verbless clause. Memorize אֲנִי / אָנֹכִי, אַתָּה, הוּא, הִיא, אֲנַחְנוּ, אַתֶּם, הֵם as this topic’s set.",
+      "A written pronoun is extra work — stress, contrast, or a verbless clause. Memorize אֲנִי / אָנֹכִי, אַתָּה, אַתְּ, הוּא, הִיא, אֲנַחְנוּ, אַתֶּם, אַתֵּן, הֵם, הֵנָּה. Quiz and drill that set from every module, not only this one.",
     samples: [
       { word: "אֲנִי", gloss: "I", tag: "1cs", note: "Class. Shorter cousin of אָנֹכִי.", ref: "Lev 19:2" },
       { word: "אָנֹכִי", gloss: "I", tag: "1cs", note: "Heavier “I.” Exod 20:2.", ref: "Exod 20:2" },
       { word: "אַתָּה", gloss: "you (ms)", tag: "2ms", note: "Class.", ref: "Gen 49:8" },
       { word: "הוּא", gloss: "he, it; that", tag: "3ms", note: "Also a far demonstrative “that.”", ref: "Deut 7:21" },
       { word: "הִיא", gloss: "she, it; that", tag: "3fs", note: "Sometimes spelled הִוא.", ref: "Gen 2:23" },
+      { word: "אַתְּ", gloss: "you (fs)", tag: "2fs", note: "Feminine singular. Not אַתָּה. Pausal אָתְּ." },
+      { word: "אַתֵּן", gloss: "you (fp)", tag: "2fp", note: "Also אַתֵּנָה. Not אַתֶּם." },
+      { word: "הֵנָּה", gloss: "they (fp)", tag: "3fp", note: "Also הֵן. Not the particle הֵן “behold.” Exod 1:19." },
     ],
     verses: [
       { ref: "Exod 20:2", he: "אָנֹכִי יְהוָה אֱלֹהֶיךָ", en: "I am YHWH your God.", hit: "אָנֹכִי", hitEn: "I", vocabId: "anoki" },
@@ -32,6 +35,9 @@ export const PRON_UNITS: GrammarUnit[] = [
       { q: "הִיא is…", he: "הִיא", choices: ["She / it", "We", "You ms"], answer: "She / it", why: "Class." },
       { q: "אֲנַחְנוּ is…", he: "אֲנַחְנוּ", choices: ["We", "They", "I"], answer: "We", why: "Class." },
       { q: "הֵם / הֵמָּה is…", he: "הֵם", choices: ["They, those", "I", "You fs"], answer: "They, those", why: "Class." },
+      { q: "אַתְּ is…", he: "אַתְּ", choices: ["You (feminine singular)", "You (masculine singular)", "They"], answer: "You (feminine singular)", why: "Not אַתָּה." },
+      { q: "אַתֵּן / אַתֵּנָה is…", he: "אַתֵּן", choices: ["You (feminine plural)", "You (masculine plural)", "We"], answer: "You (feminine plural)", why: "The feminine you." },
+      { q: "הֵנָּה is…", he: "הֵנָּה", choices: ["They (feminine)", "Behold, if", "She"], answer: "They (feminine)", why: "Independent pronoun. The particle הֵן “behold” is a different word." },
       { q: "A written independent pronoun often…", choices: ["Adds emphasis or completes a verbless clause", "Replaces the object marker", "Is the article"], answer: "Adds emphasis or completes a verbless clause", why: "The verb already has a subject." },
       { q: "Exod 20:2 starts with אָנֹכִי because…", he: "אָנֹכִי", ref: "Exod 20:2", choices: ["The speaker stresses “I” — YHWH himself", "It is a preposition", "It is dual"], answer: "The speaker stresses “I” — YHWH himself", why: "I am YHWH your God." },
       { q: "קָדוֹשׁ אֲנִי pairs a class adjective with…", ref: "Lev 19:2", choices: ["The pronoun “I”", "The article", "מִן"], answer: "The pronoun “I”", why: "I am holy." },

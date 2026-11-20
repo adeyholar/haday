@@ -6,6 +6,7 @@ import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { enterIibsRoom } from "@/lib/iibs-room";
 import { IIBS_LEVELS, isIibsLevel } from "@/lib/path";
 import { iibsWeekCount, iibsWeekItems, isIibsWeekLevel } from "@/lib/iibs-weeks";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/iibs/study/$level")({ component: LevelWeeks });
 
@@ -82,6 +83,7 @@ function LevelWeeks() {
         <Link to="/iibs" className="mt-4 inline-block font-semibold text-primary">
           Back to this level
         </Link>
+        <IndependentPronounLinks />
       </Panel>
       <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {Array.from({ length: weeks }, (_, n) => {

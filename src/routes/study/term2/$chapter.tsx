@@ -6,6 +6,7 @@ import { useStudy } from "@/lib/store";
 import { term2Lesson, TERM2_LESSONS } from "@/lib/term2-lessons";
 import { weekForTerm2Chapter } from "@/lib/vocab-s2";
 import { ParadigmLessonGate } from "@/components/paradigms/lesson-gate";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/study/term2/$chapter")({ component: Term2Chapter });
 
@@ -56,6 +57,7 @@ function Term2Chapter() {
             Drill chapter {lesson.chapter}
           </Button>
         </Link>
+        <IndependentPronounLinks />
         <div className="grid grid-cols-2 gap-2">
           {prev ? (
             <Link to="/study/term2/$chapter" params={{ chapter: String(prev.chapter) }}>

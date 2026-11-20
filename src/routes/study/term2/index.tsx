@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { TERM2_LESSONS } from "@/lib/term2-lessons";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/study/term2/")({ component: Term2Lessons });
 
@@ -15,6 +16,7 @@ function Term2Lessons() {
         <p className="mt-3 max-w-prose text-muted">
           Read the chapter, then sit its closed-book exam. Drill its words from the chapter page. These lessons stay in this room.
         </p>
+        <IndependentPronounLinks />
       </Panel>
       <ul className="mt-3 grid gap-2">
         {TERM2_LESSONS.map((lesson) => (

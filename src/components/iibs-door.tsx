@@ -7,6 +7,7 @@ import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
 import { IIBS_LEVELS } from "@/lib/path";
 import { LEVEL_LEAVE, LEVEL_WHICH, LEVEL_WHICH_LINE } from "@/lib/path-names";
 import { isIibsWeekLevel } from "@/lib/iibs-weeks";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 import type { IibsGameProgress } from "@/lib/iibs-game";
 
 export function useIibsRoom() {
@@ -121,6 +122,7 @@ export function LevelHall({
           Any level. Choose the consonant, pass every form, then read the verse.
         </span>
       </Link>
+      <IndependentPronounLinks />
     </>
   );
 }
@@ -237,6 +239,7 @@ export function LevelRoom({
           </Link>
         </div>
       ) : null}
+      {lesson === null ? <IndependentPronounLinks /> : null}
 
       {lists && lesson === null ? (
         <ol className="mt-4 grid gap-2">

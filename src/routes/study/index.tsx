@@ -6,6 +6,7 @@ import { Panel } from "@/components/panel";
 import { STATIONS, isStationUnlocked, lessonsFor, stationComplete } from "@/lib/ladder";
 import { useStudy } from "@/lib/store";
 import { cn } from "@/lib/cn";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/study/")({ component: LadderMapPage });
 
@@ -27,6 +28,7 @@ function LadderMapPage() {
         <div className="mt-4">
           <StudyContinue />
         </div>
+        <IndependentPronounLinks />
       </Panel>
       <ol className="flex flex-col gap-2">
         {climb.map((station) => {

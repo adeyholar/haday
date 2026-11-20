@@ -3,6 +3,7 @@ import { StudyMenu } from "@/components/study-menu";
 import { Panel } from "@/components/panel";
 import { grammarTopicLabel } from "@/lib/grammar";
 import { GRAMMAR_TRACKS } from "@/lib/grammar-tracks";
+import { IndependentPronounLinks } from "@/components/independent-pronouns";
 
 export const Route = createFileRoute("/lessons/")({ component: StudyLessonsHubPage });
 
@@ -22,6 +23,7 @@ function StudyLessonsHubPage() {
             Game · exams
           </Link>
         </p>
+        <IndependentPronounLinks />
       </Panel>
       <ol className="grid grid-cols-1 gap-2">
         {GRAMMAR_TRACKS.map((t) => (

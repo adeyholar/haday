@@ -6,18 +6,19 @@ import { useStudy } from "@/lib/store";
 import { FocusToggle } from "@/components/focus-toggle";
 import { StudyMenu } from "@/components/study-menu";
 import { DrillSitting } from "@/components/drill-sitting";
-import { drillKey, finalDrillKey, passagePlaceForPool } from "@/lib/etch";
+import { drillKey, finalDrillKey, passagePlaceForPool, pronounDrillKey } from "@/lib/etch";
 import { finalExamDrillItems } from "@/lib/final-vocab";
+import { independentPronounItems } from "@/lib/independent-pronouns";
 import { findStudyItem } from "@/lib/tanakh-pool";
 import { iibsPathItems } from "@/lib/iibs-weeks";
 import { loadPassagePack, passageDrillKey } from "@/lib/reading-loop/passage";
 import { cn } from "@/lib/cn";
 
-type DrillSearch = { set?: "final" | "passage"; from?: string };
+type DrillSearch = { set?: "final" | "passage" | "pronouns"; from?: string };
 
 export const Route = createFileRoute("/drill")({
   validateSearch: (search: Record<string, unknown>): DrillSearch => ({
-    set: search.set === "final" || search.set === "passage" ? search.set : undefined,
+    set: search.set === "final" || search.set === "passage" || search.set === "pronouns" ? search.set : undefined,
     from: typeof search.from === "string" && search.from ? search.from : undefined,
   }),
   component: DrillPage,
@@ -28,11 +29,13 @@ function DrillPage() {
   const navigate = Route.useNavigate();
   const passage = set === "passage";
   const final = set === "final";
+  const pronouns = set === "pronouns";
   const pack = useMemo(() => (passage ? loadPassagePack() : null), [passage]);
   const week = useStudy((s) => s.week);
   const focus = useStudy((s) => s.focus);
   const saveDrillAt = useStudy((s) => s.saveDrillAt);
   const pool = useMemo(() => {
+    if (pronouns) return independentPronounItems();
     if (passage) {
       const ids = pack?.ids ?? [];
       const items: VocabItem[] = [];
@@ -43,9 +46,15 @@ function DrillPage() {
       return items;
     }
     return final ? finalExamDrillItems() : itemsForWeek(week);
-  }, [passage, pack, final, week]);
-  const label = passage ? (pack?.label ?? "This passage") : final ? "Final exam" : studySetMeta(week).label;
-  const placeKey = passage && pack ? passageDrillKey(pack.scope, pack.ref) : final ? finalDrillKey(focus) : drillKey(week, focus);
+  }, [pronouns, passage, pack, final, week]);
+  const label = pronouns ? "Independent pronouns" : passage ? (pack?.label ?? "This passage") : final ? "Final exam" : studySetMeta(week).label;
+  const placeKey = pronouns
+    ? pronounDrillKey(focus)
+    : passage && pack
+      ? passageDrillKey(pack.scope, pack.ref)
+      : final
+        ? finalDrillKey(focus)
+        : drillKey(week, focus);
   const back = pack?.back || from;
 
   if (passage && !pack) {
@@ -70,7 +79,7 @@ function DrillPage() {
         return passagePlaceForPool(place, pool.map((item) => item.id));
       }}
       writePlace={(place) => saveDrillAt(placeKey, place)}
-      showChapter={!passage}
+      showChapter={!passage && !pronouns}
       chrome={
         <>
           <StudyMenu />
@@ -80,22 +89,32 @@ function DrillPage() {
               <span className="text-muted"> · unknowns from this passage · its own saved place</span>
             </p>
           ) : (
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => navigate({ search: (prev) => ({ ...prev, set: undefined }) })}
                 className={cn(
-                  "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
-                  final ? "bg-card text-muted shadow-[var(--shadow-border)]" : "bg-ink text-parchment",
+                  "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
+                  final || pronouns ? "bg-card text-muted shadow-[var(--shadow-border)]" : "bg-ink text-parchment",
                 )}
               >
                 Study set
               </button>
               <button
                 type="button"
+                onClick={() => navigate({ search: (prev) => ({ ...prev, set: "pronouns" }) })}
+                className={cn(
+                  "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
+                  pronouns ? "bg-ink text-parchment" : "bg-card text-muted shadow-[var(--shadow-border)]",
+                )}
+              >
+                Pronouns
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate({ search: (prev) => ({ ...prev, set: "final" }) })}
                 className={cn(
-                  "min-h-11 rounded-[var(--radius-md)] px-3 text-sm font-semibold",
+                  "min-h-11 rounded-[var(--radius-md)] px-2 text-sm font-semibold",
                   final ? "bg-ink text-parchment" : "bg-card text-muted shadow-[var(--shadow-border)]",
                 )}
               >
@@ -108,7 +127,12 @@ function DrillPage() {
               Back to the reading
             </a>
           ) : null}
-          {final ? (
+          {pronouns ? (
+            <p className="mt-2 text-sm text-ink">
+              <span className="font-semibold">Independent pronouns</span>
+              <span className="text-muted"> · eleven persons · the same drill on every module · its own saved place</span>
+            </p>
+          ) : final ? (
             <p className="mt-2 text-sm text-ink">
               <span className="font-semibold">Final exam</span>
               <span className="text-muted"> · the professor’s eighty words · closing the app keeps this sitting</span>
@@ -118,7 +142,7 @@ function DrillPage() {
               <WeekSelect />
             </div>
           )}
-          <FocusToggle pool={final || passage ? pool : undefined} />
+          <FocusToggle pool={final || passage || pronouns ? pool : undefined} />
         </>
       }
     />
