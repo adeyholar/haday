@@ -136,6 +136,9 @@ export function hebrewForTts(s: string): string {
  * A space in this line is not enough for that voice, so do not replace the mp3 from a fresh synth.
  *   ayil   אַיִל  AH + yil
  *   kipper כָּפַר  ka + far
+ *
+ * asah (עָשָׂה) is not in this map. Hila says etzeh. The shipped Hebrew clip is
+ * the human reading of Genesis 1:31. Do not resynth that file.
  */
 const SPEAK_HE_BY_ID: Record<string, string> = {
   ayil: "אַ יִל",

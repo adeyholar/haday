@@ -1,6 +1,6 @@
 import { resolveCorpusId } from "@/lib/voice-corpus";
 
-const MANIFEST_URL = "/audio/neural/manifest.json?v=2026-11-04-kipper";
+const MANIFEST_URL = "/audio/neural/manifest.json?v=2026-11-21-asah";
 
 export type NeuralManifest = Record<string, { he?: string; en?: string }>;
 
