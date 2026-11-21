@@ -10,6 +10,7 @@ import { createJiti } from "jiti";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const { translationLabFlagOn } = await jiti.import(join(root, "src/lib/translation-lab/flag.ts"));
+const { showTranslationLabListenCard } = await jiti.import(join(root, "src/lib/translation-lab/listen-card.ts"));
 const { LAB_CREDITS, ADONAI_NOTE } = await jiti.import(join(root, "src/lib/translation-lab/credits.ts"));
 const { GEN_1_3, chunkHebrew, verseHebrew, maqafGroups, hasDivineName } = await jiti.import(
   join(root, "src/lib/translation-lab/verse.ts"),
@@ -54,6 +55,17 @@ test("the lab flag is off unless the build turns it on", () => {
   assert.doesNotMatch(page, /gen-1-3/);
   assert.doesNotMatch(readFileSync(join(root, "src/components/listen-menu.tsx"), "utf8"), /\/listen\/lab/);
   assert.doesNotMatch(readFileSync(join(root, "src/routes/iibs/index.tsx"), "utf8"), /\/iibs\/lab/);
+});
+
+test("the listen menu shows the lab card only while the flag is on", () => {
+  assert.equal(showTranslationLabListenCard(1, true), true);
+  assert.equal(showTranslationLabListenCard(1, false), false);
+  assert.equal(showTranslationLabListenCard(2, true), false);
+  const hub = readFileSync(join(root, "src/components/path-hub.tsx"), "utf8");
+  assert.match(hub, /title: "Translation Lab"/);
+  assert.match(hub, /to: "\/listen\/lab"/);
+  assert.match(hub, /line: "Translate Genesis 1:3 word by word\."/);
+  assert.match(hub, /showTranslationLabListenCard\(term, translationLabEnabled\(\)\)/);
 });
 
 test("the manuscript desk and the Scripture reader are untouched", () => {
