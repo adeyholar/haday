@@ -1,18 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { QalClockPractice } from "@/components/qal-clock-practice";
-import { StudyMenu } from "@/components/study-menu";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { legacyVerbTarget } from "@/lib/verb-lab/redirects";
 
 export const Route = createFileRoute("/study/verb-lab/qal-clocks")({
-  component: QalClocksPage,
+  beforeLoad: ({ location }) => {
+    const target = legacyVerbTarget(location.pathname, location.hash);
+    if (target?.to === "/verb-lab") throw redirect({ to: "/verb-lab", search: target.search });
+  },
 });
-
-function QalClocksPage() {
-  return (
-    <>
-      <div className="mb-4">
-        <StudyMenu />
-      </div>
-      <QalClockPractice />
-    </>
-  );
-}

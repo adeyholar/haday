@@ -11,6 +11,7 @@ import { emptyVerbQuest, hydrateVerbQuest, type VerbQuestProgress } from "@/lib/
 import { emptyTerm2Game, hydrateTerm2Game, type Term2Game } from "@/lib/term2-game";
 import { emptyBinyan, hydrateBinyan, type BinyanProgress } from "@/lib/binyan-drill";
 import { hydratePassageSittings, type PassageSitting } from "@/lib/reading-loop/passage-quiz";
+import { EMPTY_VERB_LAB, hydrateVerbLab, type VerbLabProgress } from "@/lib/verb-lab/progress";
 
 export const GAME_CHAPTER_MAX = 19;
 export const SYLLABLE_UNIT_MAX = 8;
@@ -95,6 +96,8 @@ export type GameSnapshot = {
   term2: Term2Game;
   /** Open passage sittings. Key is the path and the chapter, such as iibs:Gen.1. */
   passageSittings: Record<string, PassageSitting>;
+  /** Verb Lab: practice boxes, exam clears, and the due pile. Missing on older saves. */
+  verbLab: VerbLabProgress;
 };
 
 export type BalloonProgress = {
@@ -191,6 +194,7 @@ export function defaultGame(): GameSnapshot {
     binyan: emptyBinyan(),
     term2: emptyTerm2Game(),
     passageSittings: {},
+    verbLab: { ...EMPTY_VERB_LAB, boxes: {}, due: {}, cleared: [] },
   };
 }
 
@@ -283,6 +287,7 @@ export function hydrateGame(raw: unknown): GameSnapshot {
     binyan: hydrateBinyan(r.binyan),
     term2: hydrateTerm2Game(r.term2),
     passageSittings: hydratePassageSittings(r.passageSittings),
+    verbLab: hydrateVerbLab(r.verbLab),
   };
 }
 

@@ -1,0 +1,499 @@
+{
+ "root": "אכל",
+ "rootStrongs": "H398",
+ "class": "I-Aleph (Pe-Aleph, quiescent: אבד, אבה, אכל, אמר, אפה) — Qal differing squares only",
+ "level": "I-Aleph (sub-chip; Chairman ruling 2026-11-21 3:54 PM ET)",
+ "rootNote": "Teaching root אָכַל (tutor ruling 2026-11-21 4:09 PM ET). It is the root GKC Paradigm I, Davidson §35 and K&J print, it is regular (wayyiqtol וַיֹּאכַל with pataḥ, pausal ṣere יֹאכֵל), and it attests the same 12 of 14 squares as אמר. אָמַר keeps its attested forms where they matter: וַיֹּאמֶר is the wayyiqtol alternate (attested example from אמר) and לֵאמֹר is a note on the infinitive construct square.",
+ "source": "GKC §68 and Paradigm I (PDF pp. 480-481); Davidson §35 p. 171; OSHB/WLC; STEPBible TAHOT",
+ "verificationMethod": "Each form was matched (consonants + vowel points, accents ignored, dagesh lene and plene/defective ḥolem, shureq and ḥireq-yod spellings normalized) against OSHB morphhb-wlc tokens with the same OSHB morph slot. R1 is the literal quiescent א; R2/R3 positional; a begadkefat radical's dagesh in dagesh-lene position is optional; Hitpael is matched both with and without sibilant metathesis (הִשְׁתַּ- / הִתְ-). The example's root (with shin/sin dot) was checked against the Strong's headword for its lemma number. Example roots: only אבד (H6), אכל (H398), אמר (H559); אבה and אפה are also III-He and never examples. Ketiv excluded. Infinitives construct may carry a preposition (examplePrefix). Example preference: teaching root, then אמר/אבד; each in order no prefix, ו, preposition. Every matched token was cross-checked against STEPBible TAHOT; tokens where TAHOT disagrees are never used as examples.",
+ "oshbPin": "morphhb-wlc as used in haday-hebrew-data v1.2.0 (OSHB 3d15126)",
+ "tahotPin": "STEPBible-Data commit 5de0a47f35f0fc13dfe1430d104e5db8a4285f9c (2026-11-02T17:54Z), CC BY 4.0, fetched Sat Nov 21 15:34:26 EST 2026",
+ "fields": {
+  "status": "attested-example | paradigm-standard (no clean attestation in WLC for this slot; the form is the GKC Paradigm I / Davidson §35 pattern or the regular pattern, see formBasis)",
+  "exampleRootClass": "teaching-root (H398 אכל) | I-Aleph (H559 אמר or H6 אבד, same vowel pattern)",
+  "formBasis": "book (printed in GKC Paradigm I or Davidson p. 171) | rule (none in this file)",
+  "sourceRef": "where the form comes from",
+  "teachingRootTokenCount": "how many of attestedTokenCount are from אכל itself",
+  "tahot": "STEPBible TAHOT reading of the chosen example token: its morph, and whether morph and Strong's number agree with OSHB",
+  "displayMark": "'standard form, not in the Bible' on every square (and alternate) whose status is paradigm-standard, rule-built and printed-but-unattested alike (Chairman's ruling 2026-11-21 4:56 PM ET)",
+  "parseEligible": "true only for attested-example; paradigm-standard squares are never parse items"
+ },
+ "notes": {
+  "scope": "This file holds only the Qal squares where the five quiescent I-Aleph verbs differ from weak-iguttural.json. All other squares: see 'sameAsIGuttural'.",
+  "fiveVerbs": "GKC §68.1: אָבַד, אָבָה, אָכַל, אָמַר, אָפָה. אבה and אפה are also III-He, so they are never used as examples here. Other I-Aleph verbs (אסף, אחז, אהב) quiesce only sometimes (יֹאסֵף/יֶאֱסֹף, יֹאחֵז/יֶאֱחֹז) and are not examples.",
+  "cohortative": "Cohortative 1cs אֹכְלָה (Davidson p. 171), אֹמְרָה. Note only.",
+  "jussive": "Jussive = yiqtol."
+ },
+ "noFormSlots": [],
+ "cells": [
+  {
+   "id": "Qal.yiqtol.3ms",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "3ms",
+   "form": "יֹאכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 49:27 #5",
+   "exampleWord": "יֹ֣אכַל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 100,
+   "teachingRootTokenCount": 44,
+   "tahot": {
+    "morph": "HVqi3ms",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "alternates": [
+    {
+     "form": "יֹאכֵל",
+     "status": "attested-example",
+     "exampleRef": "Lev 21:22 #7",
+     "exampleWord": "יֹאכֵֽל",
+     "exampleStrongs": "H398",
+     "exampleRootClass": "teaching-root",
+     "exampleHasWawPrefix": false,
+     "attestedTokenCount": 16,
+     "teachingRootTokenCount": 13,
+     "tahot": {
+      "morph": "HVqi3ms",
+      "agreesWithOSHB": true,
+      "comparison": "agree"
+     },
+     "parseEligible": true
+    }
+   ],
+   "note": "א quiesces in ḥolem: *yaʾkul → yōkal (GKC §68.1). In pause the second vowel is usually ṣere (יֹאכֵל, printed by GKC). אָמַר is the exception: it keeps pataḥ in pause in 3ms/1cs (יֹאמַר, אֹמַר) (GKC §68.1).",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.3fs",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "3fs",
+   "form": "תֹּאכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Exod 23:11 #8",
+   "exampleWord": "תֹּאכַ֖ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 30,
+   "teachingRootTokenCount": 19,
+   "tahot": {
+    "morph": "HVqi3fs",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.2ms",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "2ms",
+   "form": "תֹּאכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 2:17 #6",
+   "exampleWord": "תֹאכַ֖ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 60,
+   "teachingRootTokenCount": 20,
+   "tahot": {
+    "morph": "HVqi2ms",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "alternates": [
+    {
+     "form": "תֹּאכֵל",
+     "status": "attested-example",
+     "exampleRef": "Gen 2:16 #11",
+     "exampleWord": "תֹּאכֵֽל",
+     "exampleStrongs": "H398",
+     "exampleRootClass": "teaching-root",
+     "exampleHasWawPrefix": false,
+     "attestedTokenCount": 10,
+     "teachingRootTokenCount": 9,
+     "tahot": {
+      "morph": "HVqi2ms",
+      "agreesWithOSHB": true,
+      "comparison": "agree"
+     },
+     "parseEligible": true
+    }
+   ],
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.2fs",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "2fs",
+   "form": "תֹּאכְלִי",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "1Sam 1:8 #10",
+   "exampleWord": "תֹֽאכְלִ֔י",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 7,
+   "teachingRootTokenCount": 2,
+   "tahot": {
+    "morph": "HVqi2fs",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "tahotDisputedTokens": [
+    "Ruth 3:5 #5 תֹּאמְרִ֥י"
+   ],
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "note": "Before a vowel ending the second vowel becomes vocal shewa; the א stays silent.",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.1cs",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "1cs",
+   "form": "אֹכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 24:33 #6",
+   "exampleWord": "אֹכַ֔ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 24,
+   "teachingRootTokenCount": 7,
+   "tahot": {
+    "morph": "HVqi1cs",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "note": "The radical א is not written after the preformative א: אֹכַל for אֹאכַל (GKC §68.2). Plene וָאוֹמַר also occurs (Neh 2:7).",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.3mp",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "3mp",
+   "form": "יֹאכְלוּ",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 32:33 #4",
+   "exampleWord": "יֹאכְל֨וּ",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 87,
+   "teachingRootTokenCount": 28,
+   "tahot": {
+    "morph": "HVqi3mp",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "alternates": [
+    {
+     "form": "יֹאכֵלוּ",
+     "status": "attested-example",
+     "exampleRef": "Deut 18:8 #3",
+     "exampleWord": "יֹאכֵ֑לוּ",
+     "exampleStrongs": "H398",
+     "exampleRootClass": "teaching-root",
+     "exampleHasWawPrefix": false,
+     "attestedTokenCount": 31,
+     "teachingRootTokenCount": 15,
+     "tahot": {
+      "morph": "HVqi3mp",
+      "agreesWithOSHB": true,
+      "comparison": "agree"
+     },
+     "parseEligible": true
+    }
+   ],
+   "note": "Pausal יֹאכֵלוּ (ṣere) is attested (alternate).",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.3fp",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "3fp",
+   "form": "תֹּאכַלְנָה",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Lam 2:20 #8",
+   "exampleWord": "תֹּאכַ֨לְנָה",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 4,
+   "teachingRootTokenCount": 2,
+   "tahot": {
+    "morph": "HVqi3fp",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171; GKC §68.1: always תֹּאכַלְנָה (Zc 11:9)",
+   "note": "GKC §68.1: the 3fp is always of this form (תֹּאכַלְנָה Zc 11:9).",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.2mp",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "2mp",
+   "form": "תֹּאכְלוּ",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 3:1 #19",
+   "exampleWord": "תֹֽאכְל֔וּ",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 46,
+   "teachingRootTokenCount": 24,
+   "tahot": {
+    "morph": "HVqi2mp",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.yiqtol.2fp",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "2fp",
+   "form": "תֹּאכַלְנָה",
+   "translit": null,
+   "status": "paradigm-standard",
+   "exampleRef": null,
+   "exampleWord": null,
+   "formBasis": "book",
+   "sourceRef": "Davidson §35 paradigm, p. 171; bracketed in GKC",
+   "displayMark": "standard form, not in the Bible",
+   "parseEligible": false
+  },
+  {
+   "id": "Qal.yiqtol.1cp",
+   "binyan": "Qal",
+   "conjugation": "yiqtol",
+   "pgn": "1cp",
+   "form": "נֹאכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Num 11:5 #5",
+   "exampleWord": "נֹאכַ֥ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 5,
+   "teachingRootTokenCount": 2,
+   "tahot": {
+    "morph": "HVqi1cp",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.wayyiqtol.3ms",
+   "binyan": "Qal",
+   "conjugation": "wayyiqtol",
+   "pgn": "3ms",
+   "form": "וַיֹּאכַל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 3:6 #21",
+   "exampleWord": "וַיֹּאכַֽל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 143,
+   "teachingRootTokenCount": 21,
+   "tahot": {
+    "morph": "Hc/Vqw3ms",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I, PDF p. 481 (prints וַיֹּאכַל and וַיֹּאמֶר); Davidson p. 171; GKC §68.1",
+   "alternates": [
+    {
+     "form": "וַיֹּאמֶר",
+     "status": "attested-example",
+     "exampleRef": "Gen 1:3 #1",
+     "exampleWord": "וַיֹּ֥אמֶר",
+     "exampleStrongs": "H559",
+     "exampleRootClass": "I-Aleph",
+     "exampleHasWawPrefix": false,
+     "attestedTokenCount": 1945,
+     "teachingRootTokenCount": 0,
+     "tahot": {
+      "morph": "Hc/Vqw3ms",
+      "agreesWithOSHB": true,
+      "comparison": "agree"
+     },
+     "parseEligible": true
+    }
+   ],
+   "note": "With the tone drawn back אכל and אבד take pataḥ (וַיֹּאכַל). אָמַר takes seghol out of pause (וַיֹּאמֶר, the alternate, 1945 WLC tokens) and pataḥ in pause (וַיֹּאמַר) (GKC §68.1). 1cs וָאֹכַל / וָאֹמַר.",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.imperative.ms",
+   "binyan": "Qal",
+   "conjugation": "imperative",
+   "pgn": "ms",
+   "form": "אֱכֹל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "1Sam 9:24 #14",
+   "exampleWord": "אֱכֹ֔ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 61,
+   "teachingRootTokenCount": 12,
+   "tahot": {
+    "morph": "HVqv2ms",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171",
+   "note": "Not quiescent: א is a consonant with ḥaṭeph seghol (GKC Paradigm I; §63 Rem. on Qal). Differs from I-Guttural עֲמֹד only in the ḥaṭeph vowel. אמר: אֱמֹר, pausal אֱמָר.",
+   "parseEligible": true
+  },
+  {
+   "id": "Qal.imperative.fp",
+   "binyan": "Qal",
+   "conjugation": "imperative",
+   "pgn": "fp",
+   "form": "אֱכֹלְנָה",
+   "translit": null,
+   "status": "paradigm-standard",
+   "exampleRef": null,
+   "exampleWord": null,
+   "formBasis": "book",
+   "sourceRef": "Davidson §35 paradigm, p. 171; bracketed in GKC",
+   "displayMark": "standard form, not in the Bible",
+   "parseEligible": false
+  },
+  {
+   "id": "Qal.infinitive-construct",
+   "binyan": "Qal",
+   "conjugation": "infinitive-construct",
+   "pgn": "-",
+   "form": "אֱכֹל",
+   "translit": null,
+   "status": "attested-example",
+   "exampleRef": "Gen 24:33 #3",
+   "exampleWord": "לֶאֱכֹ֔ל",
+   "exampleStrongs": "H398",
+   "exampleRootClass": "teaching-root",
+   "exampleHasWawPrefix": false,
+   "attestedTokenCount": 57,
+   "teachingRootTokenCount": 53,
+   "tahot": {
+    "morph": "HR/Vqcc",
+    "agreesWithOSHB": true,
+    "comparison": "agree"
+   },
+   "examplePrefix": "preposition (HR/Vqc)",
+   "formBasis": "book",
+   "sourceRef": "GKC Paradigm I (Weak Verbs פ״א), PDF pp. 480-481; Davidson §35 paradigm, p. 171 (GKC prints אֱכֹל and אֲכֹל)",
+   "alternates": [
+    {
+     "form": "אֲכֹל",
+     "status": "attested-example",
+     "exampleRef": "Deut 12:23 #4",
+     "exampleWord": "אֲכֹ֣ל",
+     "exampleStrongs": "H398",
+     "exampleRootClass": "teaching-root",
+     "exampleHasWawPrefix": false,
+     "attestedTokenCount": 6,
+     "teachingRootTokenCount": 3,
+     "tahot": {
+      "morph": "HVqcc",
+      "agreesWithOSHB": true,
+      "comparison": "agree"
+     },
+     "parseEligible": true
+    }
+   ],
+   "note": "With ל: לֶאֱכֹל. For אָמַר the infinitive with ל is always לֵאמֹר 'saying', with quiescent א and ṣere (GKC §68.1 end; 936 WLC tokens incl. לֵּאמֹר, לֵאמוֹר); without ל it is אֱמֹר (בֶּאֱמֹר, כֶּאֱמֹר).",
+   "parseEligible": true
+  }
+ ],
+ "sameAsIGuttural": [
+  {
+   "squares": "Qal.qatal.*",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.qatal.*",
+   "note": "אָכַל, אָכְלָה, אֲכַלְתֶּם … = עָמַד pattern (GKC Paradigm I: 'Like verbs primae gutturalis')."
+  },
+  {
+   "squares": "Qal.imperative.fs",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.imperative.fs",
+   "note": "אִכְלִי = עִמְדִי pattern."
+  },
+  {
+   "squares": "Qal.imperative.mp",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.imperative.mp",
+   "note": "אִכְלוּ = עִמְדוּ pattern."
+  },
+  {
+   "squares": "Qal.infinitive-absolute",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.infinitive-absolute",
+   "note": "אָכוֹל = עָמוֹד pattern."
+  },
+  {
+   "squares": "Qal.participle-active.*",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.participle-active.*",
+   "note": "אֹכֵל … = עֹמֵד pattern."
+  },
+  {
+   "squares": "Qal.participle-passive.*",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "Qal.participle-passive.*",
+   "note": "אָכוּל … = עָמוּד pattern."
+  },
+  {
+   "squares": "Niphal.*, Hiphil.*, Hophal.*",
+   "seeFile": "weak-iguttural.json",
+   "seeIds": "same ids in weak-iguttural.json",
+   "note": "Derived stems are like verbs primae gutturalis (GKC Paradigm I; §68 Rem. 1), with ḥaṭeph seghol under א (נֶאֱכַל, הֶאֱכִיל, יַאֲכִיל). Only isolated quiescent forms occur (GKC §68 Rem. 1). Piel/Pual/Hitpael are regular."
+  }
+ ]
+}

@@ -46,14 +46,12 @@ test("semester 2 words stay off the first-term list", () => {
   assert.equal(secondTermBlock("/game/lessons/verbs/3", 2), null);
   assert.equal(secondTermBlock("/game/lessons/prep", 2), "/bbh");
   assert.equal(secondTermBlock("/lessons/verbs", 2), null);
+  assert.equal(secondTermBlock("/verb-lab", 2), null);
   const hub = readFileSync(new URL("../src/components/path-hub.tsx", import.meta.url).pathname, "utf8");
   const home = readFileSync(new URL("../src/components/term-door.tsx", import.meta.url).pathname, "utf8");
-  const menu = readFileSync(new URL("../src/lib/verb-stem-menu.ts", import.meta.url).pathname, "utf8");
-  assert.match(hub, /VERB_STEM_MENU/);
-  assert.match(home, /VERB_STEM_MENU/);
-  for (const stem of ["Qal", "Niphal", "Piel", "Pual", "Hiphil", "Hophal", "Hithpael"]) {
-    assert.match(menu, new RegExp(`Verb Lab · ${stem}`));
-  }
+  assert.match(hub, /VerbLabCard/);
+  assert.match(home, /VerbLabCard/);
+  assert.equal(hub.includes("VERB_STEM_MENU"), false);
   assert.equal(TERM2_LESSONS.length, 16);
   assert.equal(TERM2_LESSONS[0].chapter, 20);
   assert.equal(TERM2_LESSONS[15].chapter, 35);

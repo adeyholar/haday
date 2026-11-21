@@ -48,28 +48,40 @@ type ShellTab = {
   on: boolean;
 };
 
-function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string): ShellTab[] {
+function tabFrom(search: unknown): "learn" | "practice" | "play" | null {
+  if (!search || typeof search !== "object" || !("from" in search)) return null;
+  const from = (search as { from?: unknown }).from;
+  return from === "learn" || from === "practice" || from === "play" ? from : null;
+}
+
+function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string, search: unknown): ShellTab[] {
+  const from = tabFrom(search);
   if (room === "home-only") return [{ to: "/bbh", label: "Home", icon: House, on: pathname === "/bbh" }];
   if (room === "scripture") {
+    const verbLab = pathname === "/iibs/verb-lab" || pathname.startsWith("/iibs/verb-lab/");
     const inRoom =
-      pathname === "/iibs" ||
-      (pathname.startsWith("/iibs/") &&
-        !pathname.startsWith("/iibs/learn") &&
-        !pathname.startsWith("/iibs/study") &&
-        !pathname.startsWith("/iibs/vocab") &&
-        !pathname.startsWith("/iibs/road") &&
-        !pathname.startsWith("/iibs/wlc"));
+      !verbLab &&
+      (pathname === "/iibs" ||
+        (pathname.startsWith("/iibs/") &&
+          !pathname.startsWith("/iibs/learn") &&
+          !pathname.startsWith("/iibs/study") &&
+          !pathname.startsWith("/iibs/vocab") &&
+          !pathname.startsWith("/iibs/road") &&
+          !pathname.startsWith("/iibs/wlc")));
     return [
       { to: "/iibs", label: "Home", icon: House, on: inRoom },
-      { to: "/iibs/learn", label: "Learn", icon: Library, on: pathname.startsWith("/iibs/learn") || pathname.startsWith("/iibs/wlc") || pathname.startsWith("/iibs/parse-lab") },
-      { to: "/iibs/study", label: "Practice", icon: ListChecks, on: pathname.startsWith("/iibs/study") },
-      { to: "/iibs/vocab", label: "Play", icon: Compass, on: pathname.startsWith("/iibs/vocab") },
+      { to: "/iibs/learn", label: "Learn", icon: Library, on: pathname.startsWith("/iibs/learn") || pathname.startsWith("/iibs/wlc") || pathname.startsWith("/iibs/parse-lab") || (verbLab && from === "learn") },
+      { to: "/iibs/study", label: "Practice", icon: ListChecks, on: pathname.startsWith("/iibs/study") || (verbLab && (from === "practice" || from == null)) },
+      { to: "/iibs/vocab", label: "Play", icon: Compass, on: pathname.startsWith("/iibs/vocab") || (verbLab && from === "play") },
       { to: "/iibs/road", label: "Listen", icon: Headphones, on: pathname.startsWith("/iibs/road") },
     ];
   }
-  const practice = ["/hub/practice", "/drill", "/quiz", "/write", "/match", "/weak", "/cards", "/type", "/self-quiz", "/keep"].some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  const verbLab = pathname === "/verb-lab" || pathname.startsWith("/verb-lab/");
+  const practice = verbLab
+    ? from === "practice" || from == null
+    : ["/hub/practice", "/drill", "/quiz", "/write", "/match", "/weak", "/cards", "/type", "/self-quiz", "/keep"].some(
+        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+      );
   return [
     { to: "/bbh", label: "Home", icon: House, on: pathname === "/bbh" },
     {
@@ -77,6 +89,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
       label: "Learn",
       icon: Library,
       on:
+        (verbLab && from === "learn") ||
         pathname.startsWith("/hub/learn") ||
         pathname.startsWith("/rules") ||
         pathname.startsWith("/alphabet") ||
@@ -95,6 +108,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
       label: "Play",
       icon: Compass,
       on:
+        (verbLab && from === "play") ||
         pathname.startsWith("/hub/play") ||
         pathname.startsWith("/game") ||
         pathname.startsWith("/challenge") ||
@@ -367,7 +381,8 @@ export function SignedInShell({ children }: { children: ReactNode }) {
   if (termHome) return <Navigate to={termHome} replace />;
   const secondRoom = (term === 2 || choosingTerm) && !onIibs;
   const tabRoom = choosingTerm ? "home-only" : iibsOnly ? "scripture" : "grammar";
-  const frame = pathname === "/admin" && rosterWide ? "max-w-none" : "max-w-3xl";
+  const verbLabWide = pathname === "/verb-lab" || pathname.startsWith("/iibs/verb-lab");
+  const frame = pathname === "/admin" && rosterWide ? "max-w-none" : verbLabWide ? "max-w-6xl" : "max-w-3xl";
 
   return (
     <div className="min-h-dvh text-fg">
@@ -409,7 +424,7 @@ export function SignedInShell({ children }: { children: ReactNode }) {
 
       <nav className={`fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] transition-transform ${hideBars ? "shell-hide-bottom" : ""}`}>
         <ul className={`mx-auto grid max-w-3xl ${tabRoom === "home-only" ? "grid-cols-1" : "grid-cols-5"}`}>
-          {shellTabs(tabRoom, pathname).map((tab) => (
+          {shellTabs(tabRoom, pathname, search).map((tab) => (
             <li key={tab.label}>
               <Link
                 to={tab.to}

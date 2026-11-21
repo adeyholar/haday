@@ -19,6 +19,7 @@ import { enterIibsRoom } from "@/lib/iibs-room";
 import { vocabLessons, type IibsVocabLevel } from "@/lib/iibs-vocab";
 import { IIBS_LEVELS } from "@/lib/path";
 import { useStudy } from "@/lib/store";
+import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 
 export const Route = createFileRoute("/iibs/vocab/$level")({ component: VocabLevelPage });
 
@@ -110,6 +111,11 @@ function VocabLevelPage() {
 
   return (
     <>
+      {lesson === null ? (
+        <div className="mb-4">
+          <VerbLabCard from="play" path="scripture" />
+        </div>
+      ) : null}
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path · vocab builder</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">

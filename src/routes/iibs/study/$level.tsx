@@ -7,6 +7,7 @@ import { enterIibsRoom } from "@/lib/iibs-room";
 import { IIBS_LEVELS, isIibsLevel } from "@/lib/path";
 import { iibsWeekCount, iibsWeekItems, isIibsWeekLevel } from "@/lib/iibs-weeks";
 import { IndependentPronounLinks } from "@/components/independent-pronouns";
+import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 
 export const Route = createFileRoute("/iibs/study/$level")({ component: LevelWeeks });
 
@@ -74,6 +75,9 @@ function LevelWeeks() {
 
   return (
     <>
+      <div className="mb-4">
+        <VerbLabCard from="practice" path="scripture" />
+      </div>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path · study</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">{meta.title}</h1>
