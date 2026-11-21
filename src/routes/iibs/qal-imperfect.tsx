@@ -1,21 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ScriptureTabs } from "@/components/iibs-door";
-import { QalImperfectBuilder } from "@/components/qal-imperfect-builder";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { legacyVerbTarget } from "@/lib/verb-lab/redirects";
 
 export const Route = createFileRoute("/iibs/qal-imperfect")({
-  component: ScriptureQalImperfect,
+  beforeLoad: ({ location }) => {
+    const target = legacyVerbTarget(location.pathname, location.hash);
+    if (target?.to === "/iibs/verb-lab") throw redirect({ to: "/iibs/verb-lab", search: target.search });
+  },
 });
-
-function ScriptureQalImperfect() {
-  return (
-    <>
-      <ScriptureTabs active="levels" />
-      <p className="mb-4 text-sm">
-        <Link to="/iibs/verb-paradigm-quest" className="font-semibold text-primary">
-          Build from the root
-        </Link>
-      </p>
-      <QalImperfectBuilder />
-    </>
-  );
-}

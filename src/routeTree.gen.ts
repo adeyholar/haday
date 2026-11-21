@@ -42,6 +42,7 @@ import { Route as RulesRouteImport } from './routes/rules'
 import { Route as SelfQuizRouteImport } from './routes/self-quiz'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TypeRouteImport } from './routes/type'
+import { Route as VerbLabRouteImport } from './routes/verb-lab'
 import { Route as WeakRouteImport } from './routes/weak'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminBlogsRouteImport } from './routes/admin.blogs'
@@ -79,6 +80,7 @@ import { Route as IibsLearnRouteImport } from './routes/iibs/learn'
 import { Route as IibsParseLabRouteImport } from './routes/iibs/parse-lab'
 import { Route as IibsQalImperfectRouteImport } from './routes/iibs/qal-imperfect'
 import { Route as IibsRoadRouteImport } from './routes/iibs/road'
+import { Route as IibsVerbLabRouteImport } from './routes/iibs/verb-lab'
 import { Route as IibsVerbParadigmQuestRouteImport } from './routes/iibs/verb-paradigm-quest'
 import { Route as IibsVerbalSystemRouteImport } from './routes/iibs/verbal-system'
 import { Route as LearningHebrabbaiIndexRouteImport } from './routes/learning-hebrabbai/index'
@@ -301,6 +303,11 @@ const TypeRoute = TypeRouteImport.update({
   path: '/type',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerbLabRoute = VerbLabRouteImport.update({
+  id: '/verb-lab',
+  path: '/verb-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WeakRoute = WeakRouteImport.update({
   id: '/weak',
   path: '/weak',
@@ -484,6 +491,11 @@ const IibsQalImperfectRoute = IibsQalImperfectRouteImport.update({
 const IibsRoadRoute = IibsRoadRouteImport.update({
   id: '/road',
   path: '/road',
+  getParentRoute: () => IibsRoute,
+} as any)
+const IibsVerbLabRoute = IibsVerbLabRouteImport.update({
+  id: '/verb-lab',
+  path: '/verb-lab',
   getParentRoute: () => IibsRoute,
 } as any)
 const IibsVerbParadigmQuestRoute = IibsVerbParadigmQuestRouteImport.update({
@@ -799,6 +811,7 @@ export interface FileRoutesByFullPath {
   '/self-quiz': typeof SelfQuizRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
+  '/verb-lab': typeof VerbLabRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/blogs': typeof AdminBlogsRoute
@@ -832,6 +845,7 @@ export interface FileRoutesByFullPath {
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-lab': typeof IibsVerbLabRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
@@ -924,6 +938,7 @@ export interface FileRoutesByTo {
   '/self-quiz': typeof SelfQuizRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
+  '/verb-lab': typeof VerbLabRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/blogs': typeof AdminBlogsRoute
@@ -957,6 +972,7 @@ export interface FileRoutesByTo {
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-lab': typeof IibsVerbLabRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
@@ -1052,6 +1068,7 @@ export interface FileRoutesById {
   '/self-quiz': typeof SelfQuizRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/type': typeof TypeRoute
+  '/verb-lab': typeof VerbLabRoute
   '/weak': typeof WeakRoute
   '/write': typeof WriteRoute
   '/admin/blogs': typeof AdminBlogsRoute
@@ -1085,6 +1102,7 @@ export interface FileRoutesById {
   '/iibs/parse-lab': typeof IibsParseLabRoute
   '/iibs/qal-imperfect': typeof IibsQalImperfectRoute
   '/iibs/road': typeof IibsRoadRoute
+  '/iibs/verb-lab': typeof IibsVerbLabRoute
   '/iibs/verb-paradigm-quest': typeof IibsVerbParadigmQuestRoute
   '/iibs/verbal-system': typeof IibsVerbalSystemRoute
   '/learning-hebrabbai/$slug': typeof LearningHebrabbaiSlugRoute
@@ -1181,6 +1199,7 @@ export interface FileRouteTypes {
     | '/self-quiz'
     | '/sitemap.xml'
     | '/type'
+    | '/verb-lab'
     | '/weak'
     | '/write'
     | '/admin/blogs'
@@ -1214,6 +1233,7 @@ export interface FileRouteTypes {
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-lab'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
@@ -1306,6 +1326,7 @@ export interface FileRouteTypes {
     | '/self-quiz'
     | '/sitemap.xml'
     | '/type'
+    | '/verb-lab'
     | '/weak'
     | '/write'
     | '/admin/blogs'
@@ -1339,6 +1360,7 @@ export interface FileRouteTypes {
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-lab'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
@@ -1433,6 +1455,7 @@ export interface FileRouteTypes {
     | '/self-quiz'
     | '/sitemap.xml'
     | '/type'
+    | '/verb-lab'
     | '/weak'
     | '/write'
     | '/admin/blogs'
@@ -1466,6 +1489,7 @@ export interface FileRouteTypes {
     | '/iibs/parse-lab'
     | '/iibs/qal-imperfect'
     | '/iibs/road'
+    | '/iibs/verb-lab'
     | '/iibs/verb-paradigm-quest'
     | '/iibs/verbal-system'
     | '/learning-hebrabbai/$slug'
@@ -1561,6 +1585,7 @@ export interface RootRouteChildren {
   SelfQuizRoute: typeof SelfQuizRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TypeRoute: typeof TypeRoute
+  VerbLabRoute: typeof VerbLabRoute
   WeakRoute: typeof WeakRoute
   WriteRoute: typeof WriteRoute
   ApiHealthRoute: typeof ApiHealthRoute
@@ -1858,6 +1883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TypeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verb-lab': {
+      id: '/verb-lab'
+      path: '/verb-lab'
+      fullPath: '/verb-lab'
+      preLoaderRoute: typeof VerbLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/weak': {
       id: '/weak'
       path: '/weak'
@@ -2115,6 +2147,13 @@ declare module '@tanstack/react-router' {
       path: '/road'
       fullPath: '/iibs/road'
       preLoaderRoute: typeof IibsRoadRouteImport
+      parentRoute: typeof IibsRoute
+    }
+    '/iibs/verb-lab': {
+      id: '/iibs/verb-lab'
+      path: '/verb-lab'
+      fullPath: '/iibs/verb-lab'
+      preLoaderRoute: typeof IibsVerbLabRouteImport
       parentRoute: typeof IibsRoute
     }
     '/iibs/verb-paradigm-quest': {
@@ -2544,6 +2583,7 @@ interface IibsRouteChildren {
   IibsParseLabRoute: typeof IibsParseLabRoute
   IibsQalImperfectRoute: typeof IibsQalImperfectRoute
   IibsRoadRoute: typeof IibsRoadRoute
+  IibsVerbLabRoute: typeof IibsVerbLabRoute
   IibsVerbParadigmQuestRoute: typeof IibsVerbParadigmQuestRoute
   IibsVerbalSystemRoute: typeof IibsVerbalSystemRoute
   IibsIndexRoute: typeof IibsIndexRoute
@@ -2564,6 +2604,7 @@ const IibsRouteChildren: IibsRouteChildren = {
   IibsParseLabRoute: IibsParseLabRoute,
   IibsQalImperfectRoute: IibsQalImperfectRoute,
   IibsRoadRoute: IibsRoadRoute,
+  IibsVerbLabRoute: IibsVerbLabRoute,
   IibsVerbParadigmQuestRoute: IibsVerbParadigmQuestRoute,
   IibsVerbalSystemRoute: IibsVerbalSystemRoute,
   IibsIndexRoute: IibsIndexRoute,
@@ -2635,6 +2676,7 @@ const rootRouteChildren: RootRouteChildren = {
   SelfQuizRoute: SelfQuizRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TypeRoute: TypeRoute,
+  VerbLabRoute: VerbLabRoute,
   WeakRoute: WeakRoute,
   WriteRoute: WriteRoute,
   ApiHealthRoute: ApiHealthRoute,

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 import { useOpenTerm } from "@/lib/use-open-term";
-import { VERB_STEM_MENU } from "@/lib/verb-stem-menu";
 
 type HubKind = "learn" | "practice" | "play" | "listen";
 
@@ -25,13 +25,6 @@ type Card = {
     | "/game/syllables"
     | "/game/nouns"
     | "/game/article"
-    | "/game/verbal-system"
-    | "/game/verb-paradigm-quest"
-    | "/game/qal-perfect"
-    | "/study/verb-lab/qal-perfect"
-    | "/study/verb-lab/qal-clocks"
-    | "/game/qal-imperfect"
-    | "/game/lessons/$track"
     | "/game/road"
     | "/game/week7"
     | "/game/final"
@@ -93,8 +86,6 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/weak", title: "Weak words", line: "Words you miss will gather here." },
       { to: "/cards", title: "Cards", line: "Turn a card. Say it before you look." },
       { to: "/keep", title: "Zakhor", line: "A short keep for today." },
-      { to: "/study/verb-lab/qal-perfect", title: "Verb Lab · Qal perfect practice", line: "Drill strong and weak roots by verb class, with hints." },
-      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Start with קטל. Three rounds. Each tap is marked. Not the graded test." },
     ],
   },
   play: {
@@ -107,10 +98,6 @@ const TERM1: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/game/syllables", title: "Syllables", line: "Open, closed, and shewa." },
       { to: "/game/nouns", title: "Nouns", line: "Gender and number." },
       { to: "/game/article", title: "Article and vav", line: "The, and." },
-      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
-      { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
-      { to: "/game/qal-perfect", title: "Qal perfect test", line: "Graded, stress-checked. Builds mastery." },
-      { to: "/game/qal-imperfect", title: "Verb Lab · Qal imperfect", line: "Ten forms. Class roots, then the Tanakh." },
       { to: "/game/road", title: "Exam prep · Week 7 road", line: "Say A, B, C, or D." },
       { to: "/game/week7", title: "Exam prep · Week 7 mock", line: "Grammar, then the word list." },
       { to: "/game/final", title: "Exam prep · Week 15 road", line: "All the words, on the road." },
@@ -162,31 +149,13 @@ const TERM2: Record<HubKind, { title: string; line: string; cards: Card[] }> = {
       { to: "/write", title: "Write", line: "Type the meaning." },
       { to: "/match", title: "Match", line: "Select the pairs." },
       { to: "/weak", title: "Weak words", line: "Words you miss will gather here." },
-      { to: "/study/verb-lab/qal-perfect", title: "Verb Lab · Qal perfect practice", line: "Drill strong and weak roots by verb class, with hints." },
-      { to: "/study/verb-lab/qal-clocks", title: "Verb Lab · Yiqtol, wayyiqtol, weqatal", line: "Start with קטל. Three rounds. Each tap is marked. Not the graded test." },
     ],
   },
   play: {
     title: "Play",
-    line: "Semester 2 game. This term’s words, and every verb form. A stage clears at 90% on the first answer.",
+    line: "Semester 2 game. This term’s words. A stage clears at 90% on the first answer.",
     cards: [
       { to: "/study/term2/game", title: "Chapter path", line: "This semester’s vocabulary. Recognize, gloss, then spell." },
-      { to: "/game/verbal-system", title: "Verb Lab · Verbal System", line: "Choose the consonant. Pass every form." },
-      { to: "/game/verb-paradigm-quest", title: "Verb Lab · Paradigm Quest", line: "Only the root. You add the vowels." },
-      { to: "/game/qal-perfect", title: "Qal perfect test", line: "Graded, stress-checked. Builds mastery." },
-      { to: "/game/qal-imperfect", title: "Verb Lab · Qal imperfect", line: "Ten forms. Class roots, then the Tanakh." },
-      ...VERB_STEM_MENU.map((stem) => ({
-        to: "/game/verbal-system" as const,
-        hash: stem.id,
-        title: stem.title,
-        line: stem.line,
-      })),
-      {
-        to: "/game/lessons/$track",
-        params: { track: "verbs" },
-        title: "Verb Lab · Stem exams",
-        line: "Qal through Hithpael. Every unit is open in this room. 90% clears it.",
-      },
     ],
   },
   listen: {
@@ -209,6 +178,11 @@ export function PathHub({ kind }: { kind: HubKind }) {
       <h1 className="mt-1 font-display text-4xl font-bold text-ink">{room.title}</h1>
       <p className="mt-2 max-w-prose text-muted">{room.line}</p>
       <ul className="mt-4 grid gap-2">
+        {kind === "learn" || kind === "practice" || kind === "play" ? (
+          <li>
+            <VerbLabCard from={kind} path="grammar" />
+          </li>
+        ) : null}
         {room.cards.map((card) => (
           <li key={card.title}>
             {card.final ? (

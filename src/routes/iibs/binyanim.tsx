@@ -1,21 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { BinyanDrill } from "@/components/binyan-drill";
-import { ScriptureTabs } from "@/components/iibs-door";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { legacyVerbTarget } from "@/lib/verb-lab/redirects";
 
 export const Route = createFileRoute("/iibs/binyanim")({
-  component: ScriptureBinyanim,
+  beforeLoad: ({ location }) => {
+    const target = legacyVerbTarget(location.pathname, location.hash);
+    if (target?.to === "/iibs/verb-lab") throw redirect({ to: "/iibs/verb-lab", search: target.search });
+  },
 });
-
-function ScriptureBinyanim() {
-  return (
-    <>
-      <ScriptureTabs active="levels" />
-      <p className="mb-4 text-sm">
-        <Link to="/iibs" className="font-semibold text-primary">
-          Levels
-        </Link>
-      </p>
-      <BinyanDrill />
-    </>
-  );
-}

@@ -8,6 +8,7 @@ import { IIBS_LEVELS } from "@/lib/path";
 import { LEVEL_LEAVE, LEVEL_WHICH, LEVEL_WHICH_LINE } from "@/lib/path-names";
 import { isIibsWeekLevel } from "@/lib/iibs-weeks";
 import { IndependentPronounLinks } from "@/components/independent-pronouns";
+import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 import type { IibsGameProgress } from "@/lib/iibs-game";
 
 export function useIibsRoom() {
@@ -95,33 +96,9 @@ export function LevelHall({
           );
         })}
       </div>
-      <Link
-        to="/iibs/verb-paradigm-quest"
-        className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
-      >
-        <span className="font-display text-2xl font-bold">Build from the root</span>
-        <span className="mt-1 block text-sm text-muted">
-          Qal perfect. Only the three letters. You add the vowels, the accent, and the meteg.
-        </span>
-      </Link>
-      <Link
-        to="/iibs/binyanim"
-        className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
-      >
-        <span className="font-display text-2xl font-bold">Seven stems</span>
-        <span className="mt-1 block text-sm text-muted">
-          Name the stem. Open practice. It does not lock a level.
-        </span>
-      </Link>
-      <Link
-        to="/iibs/verbal-system"
-        className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
-      >
-        <span className="font-display text-2xl font-bold">Verbal System</span>
-        <span className="mt-1 block text-sm text-muted">
-          Any level. Choose the consonant, pass every form, then read the verse.
-        </span>
-      </Link>
+      <div className="mt-3">
+        <VerbLabCard from="learn" path="scripture" />
+      </div>
       <IndependentPronounLinks />
     </>
   );
@@ -197,30 +174,9 @@ export function LevelRoom({
             <span className="mt-2 font-display text-xl font-bold">Listen</span>
             <span className="text-sm text-muted">This level, on the road</span>
           </Link>
-          <Link
-            to="/iibs/verb-paradigm-quest"
-            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
-          >
-            <ScrollText className="size-5 text-primary" />
-            <span className="mt-2 font-display text-xl font-bold">Build from the root</span>
-            <span className="text-sm text-muted">Qal perfect. Vowels, accent, and meteg.</span>
-          </Link>
-          <Link
-            to="/iibs/binyanim"
-            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
-          >
-            <ScrollText className="size-5 text-primary" />
-            <span className="mt-2 font-display text-xl font-bold">Seven stems</span>
-            <span className="text-sm text-muted">Name the stem. It does not lock a level.</span>
-          </Link>
-          <Link
-            to="/iibs/verbal-system"
-            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
-          >
-            <ScrollText className="size-5 text-primary" />
-            <span className="mt-2 font-display text-xl font-bold">Verbal System</span>
-            <span className="text-sm text-muted">Any level. Choose the consonant.</span>
-          </Link>
+          <div className="sm:col-span-2">
+            <VerbLabCard from="learn" path="scripture" />
+          </div>
           <Link
             to="/iibs/wlc"
             className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"

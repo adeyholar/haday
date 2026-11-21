@@ -478,9 +478,9 @@ test("practice lives in study and the test stays graded", () => {
   const game = readFileSync(new URL("../src/routes/game/qal-perfect.tsx", import.meta.url), "utf8");
   const lab = readFileSync(new URL("../src/components/paradigm-lab.tsx", import.meta.url), "utf8");
   const hub = readFileSync(new URL("../src/components/path-hub.tsx", import.meta.url), "utf8");
-  assert.match(study, /StudyLab/);
+  assert.match(study, /legacyVerbTarget/);
   assert.equal(study.includes("schedule"), false);
-  assert.match(game, /GameTest/);
+  assert.match(game, /legacyVerbTarget/);
   assert.equal(game.includes("hintFor"), false);
   const studyFn = lab.slice(lab.indexOf("export function StudyLab"), lab.indexOf("export function GameTest"));
   const gameFn = lab.slice(lab.indexOf("export function GameTest"), lab.indexOf("function Prompt"));
@@ -491,9 +491,10 @@ test("practice lives in study and the test stays graded", () => {
   assert.match(gameFn, /with the accent and the meteg/);
   assert.match(gameFn, /Meteg is ignored/);
   const door = readFileSync(new URL("../src/components/term-door.tsx", import.meta.url), "utf8");
-  assert.match(door, /with the accent and the meteg/);
-  assert.equal((hub.match(/Qal perfect practice/g) ?? []).length, 2);
-  assert.equal((hub.match(/Qal perfect test/g) ?? []).length, 2);
+  assert.match(door, /VerbLabCard/);
+  assert.match(hub, /VerbLabCard/);
+  assert.equal(hub.includes("Qal perfect practice"), false);
+  assert.equal(hub.includes("Qal perfect test"), false);
   const banned = [["Chapter", "14"].join(" "), ["ch", "14"].join(""), ["chapter", "Cells"].join("")];
   const roots = [new URL("../src", import.meta.url).pathname, new URL("../scripts", import.meta.url).pathname];
   const leaks = [];

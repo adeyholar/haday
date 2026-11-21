@@ -662,7 +662,8 @@ test("the printed Qal infinitive construct and the page 9 flag come from the dat
   assert.match(builder, /VerseEnglish verseRef=\{root\.ref\}/);
   assert.equal(builder.includes("root.en"), false);
   const iibs = read("src/routes/iibs/qal-imperfect.tsx");
-  assert.match(iibs, /<QalImperfectBuilder \/>/);
+  assert.match(iibs, /legacyVerbTarget/);
+  assert.match(iibs, /\/iibs\/verb-lab/);
   assert.equal(iibs.includes("QalImperfectBuilder scripture"), false);
   const { IMPERFECT_PASSAGES } = await jiti.import(join(root, "src/lib/qal-imperfect-roots.ts"));
   const targets = { "Deut.13.17": "Deut.13.16", "Deut.23.7": "Deut.23.6", "Exod.22.16": "Exod.22.17" };

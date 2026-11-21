@@ -46,6 +46,7 @@ import type { GrammarTrackId } from "./grammar";
 import { noticeLadderWalk, openLadderText, passLadderDrill, trainLadderLesson, visitLadder } from "./ladder";
 import type { VerbQuestProgress } from "./verb-paradigm-quest";
 import type { BinyanProgress } from "./binyan-drill";
+import { hydrateVerbLab, type VerbLabProgress } from "./verb-lab/progress";
 import { applyIibsStage, type IibsStageId } from "./iibs-game";
 import { applyTerm2Exam, applyTerm2Stage, type Term2StageId } from "./term2-game";
 import type { RoadRun } from "./road-exam";
@@ -136,6 +137,7 @@ type StudyState = StudySnapshot & {
   finishIibsStage: (level: string, lesson: number, stage: IibsStageId, pct: number) => void;
   saveVerbQuest: (quest: VerbQuestProgress) => void;
   saveBinyan: (progress: BinyanProgress) => void;
+  saveVerbLab: (progress: VerbLabProgress) => void;
   finishUltimate: (pct: number) => void;
   finishKeep: () => void;
   /** A real study answer (quiz, rules, classify) — same day, streak, and session as Drill. */
@@ -409,6 +411,9 @@ export const useStudy = create<StudyState>()(
       },
       saveBinyan: (progress) => {
         set({ game: { ...get().game, binyan: progress } });
+      },
+      saveVerbLab: (progress) => {
+        set({ game: { ...get().game, verbLab: hydrateVerbLab(progress) } });
       },
       finishUltimate: (pct) => {
         const now = Date.now();

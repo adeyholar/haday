@@ -121,6 +121,7 @@ const TERM2_STUDY = ["/drill", "/quiz", "/write", "/match", "/browse", "/weak", 
 
 /** Verb games belong to both semesters. Semester 1 exams and the first-term word path do not. */
 const TERM2_VERBS = [
+  "/verb-lab",
   "/game/verbal-system",
   "/game/verb-paradigm-quest",
   "/game/qal-perfect",

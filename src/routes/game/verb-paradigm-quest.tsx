@@ -1,18 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { GameMenu } from "@/components/game-menu";
-import { VerbQuestHome } from "@/components/verb-paradigm-quest-play";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { legacyVerbTarget } from "@/lib/verb-lab/redirects";
 
 export const Route = createFileRoute("/game/verb-paradigm-quest")({
-  component: VerbParadigmQuestPage,
+  beforeLoad: ({ location }) => {
+    const target = legacyVerbTarget(location.pathname, location.hash);
+    if (target?.to === "/verb-lab") throw redirect({ to: "/verb-lab", search: target.search });
+  },
 });
-
-function VerbParadigmQuestPage() {
-  return (
-    <>
-      <div className="mb-4">
-        <GameMenu />
-      </div>
-      <VerbQuestHome />
-    </>
-  );
-}
