@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { VerbLabChart } from "@/components/verb-lab/verb-lab-chart";
 import { VerbLabExam } from "@/components/verb-lab/verb-lab-exam";
 import { VerbLabPractice } from "@/components/verb-lab/verb-lab-practice";
@@ -92,8 +93,8 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
   if (view === "exam" && search.exam) {
     const stem = search.stem ?? "Qal";
     return (
-      <div>
-        <button type="button" className="mb-3 min-h-11 text-sm font-semibold text-primary" onClick={() => go({ view: "room", stem })}>
+      <Panel className="grid gap-3">
+        <button type="button" className="min-h-11 w-fit text-sm font-semibold text-primary" onClick={() => go({ view: "room", stem })}>
           ‹ Verb Lab
         </button>
         <VerbLabExam
@@ -107,7 +108,7 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
             go({ view: "room", stem });
           }}
         />
-      </div>
+      </Panel>
     );
   }
 
@@ -136,7 +137,7 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
 
   return (
     <div className="grid gap-4">
-      <div>
+      <Panel>
         <p className="min-h-11 text-sm font-semibold text-primary">
           <HubBack path={path} from={search.from} />
         </p>
@@ -147,8 +148,8 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
             About the stems
           </button>
         </p>
-      </div>
-      <section className="grid content-start gap-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)] max-lg:min-h-[calc(100dvh-12rem)]" aria-label="Next">
+      </Panel>
+      <Panel className="grid content-start gap-4 max-lg:min-h-[calc(100dvh-12rem)]">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Next</p>
         {review.total > 0 && review.id ? (
           <>
@@ -182,78 +183,80 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
           </button>
         </div>
         <p className="text-center text-xs text-muted lg:hidden">The seven stems are below</p>
-      </section>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-2xl font-semibold text-ink">All forms</h2>
-        <p className="text-xs text-muted">{showAll ? "Showing every square" : "Showing what you have been taught"}</p>
-      </div>
-      <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Root type">
-        <ClassChip
-          pressed={classId === "strong"}
-          title="Strong verb"
-          sub={`root ${teachingCite("strong")}`}
-          onClick={() => go({ view: "room" })}
-        />
-        {WEAK_CLASSES.map((item) => (
+      </Panel>
+      <Panel className="grid gap-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-2xl font-semibold text-ink">All forms</h2>
+          <p className="text-xs text-muted">{showAll ? "Showing every square" : "Showing what you have been taught"}</p>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Root type">
           <ClassChip
-            key={item.id}
-            pressed={classId === item.id}
-            title={item.id}
-            sub={`${item.subtitle} · ${teachingCite(item.id)}`}
-            onClick={() => go({ view: "room", weak: item.id })}
+            pressed={classId === "strong"}
+            title="Strong verb"
+            sub={`root ${teachingCite("strong")}`}
+            onClick={() => go({ view: "room" })}
           />
-        ))}
-      </div>
-      {classId !== "strong" ? (
-        <p className="rounded-[var(--radius-md)] border border-dashed border-primary bg-surface px-3 py-2 text-sm text-ink">
-          {classId} uses the verified chart for <span className="he-word" lang="he" dir="rtl">{teachingCite(classId)}</span>. Squares with no chart are not drawn. Weak roots have no exam yet.
-        </p>
-      ) : null}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={showAll}
-        className="flex items-center gap-2 text-sm text-ink"
-        onClick={() => setShowAll((value) => !value)}
-      >
-        <span className={`relative h-6 w-10 rounded-full ${showAll ? "bg-primary" : "bg-border"}`}>
-          <span className={`absolute top-1 size-4 rounded-full bg-card ${showAll ? "start-5" : "start-1"}`} />
-        </span>
-        Show all
-      </button>
-      <p className="text-sm text-muted">Dimmed stems are coming. Your class opens them.</p>
-      <div className="hidden lg:block">
-        <WideGrid
-          path={path}
-          classId={classId}
-          taught={taught}
-          showAll={showAll}
-          also={also}
-          progress={progress}
-          onAlso={setAlso}
-          onOpen={(square) => go({ view: "square", square, weak: classId === "strong" ? undefined : classId, tab: "chart" })}
-          onExam={(exam, stem) => go({ view: "exam", exam, stem })}
-        />
-      </div>
-      <div className="grid gap-2 lg:hidden">
-        {stemOrder(path).map((stem) => (
-          <PhoneStem
-            key={stem}
+          {WEAK_CLASSES.map((item) => (
+            <ClassChip
+              key={item.id}
+              pressed={classId === item.id}
+              title={item.id}
+              sub={`${item.subtitle} · ${teachingCite(item.id)}`}
+              onClick={() => go({ view: "room", weak: item.id })}
+            />
+          ))}
+        </div>
+        {classId !== "strong" ? (
+          <p className="rounded-[var(--radius-md)] border border-dashed border-primary bg-surface px-3 py-2 text-sm text-ink">
+            {classId} uses the verified chart for <span className="he-word" lang="he" dir="rtl">{teachingCite(classId)}</span>. Squares with no chart are not drawn. Weak roots have no exam yet.
+          </p>
+        ) : null}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showAll}
+          className="flex items-center gap-2 text-sm text-ink"
+          onClick={() => setShowAll((value) => !value)}
+        >
+          <span className={`relative h-6 w-10 rounded-full ${showAll ? "bg-primary" : "bg-border"}`}>
+            <span className={`absolute top-1 size-4 rounded-full bg-card ${showAll ? "start-5" : "start-1"}`} />
+          </span>
+          Show all
+        </button>
+        <p className="text-sm text-muted">Dimmed stems are coming. Your class opens them.</p>
+        <div className="hidden lg:block">
+          <WideGrid
             path={path}
-            stem={stem}
             classId={classId}
             taught={taught}
             showAll={showAll}
-            open={openStem === stem}
-            also={also === stem}
+            also={also}
             progress={progress}
-            onToggle={() => setOpenStem((current) => (current === stem ? null : stem))}
-            onAlso={() => setAlso((current) => (current === stem ? null : stem))}
-            onOpen={(square) => go({ view: "square", square, weak: classId === "strong" ? undefined : classId, tab: "chart", stem })}
-            onExam={(exam) => go({ view: "exam", exam, stem })}
+            onAlso={setAlso}
+            onOpen={(square) => go({ view: "square", square, weak: classId === "strong" ? undefined : classId, tab: "chart" })}
+            onExam={(exam, stem) => go({ view: "exam", exam, stem })}
           />
-        ))}
-      </div>
+        </div>
+        <div className="grid gap-2 lg:hidden">
+          {stemOrder(path).map((stem) => (
+            <PhoneStem
+              key={stem}
+              path={path}
+              stem={stem}
+              classId={classId}
+              taught={taught}
+              showAll={showAll}
+              open={openStem === stem}
+              also={also === stem}
+              progress={progress}
+              onToggle={() => setOpenStem((current) => (current === stem ? null : stem))}
+              onAlso={() => setAlso((current) => (current === stem ? null : stem))}
+              onOpen={(square) => go({ view: "square", square, weak: classId === "strong" ? undefined : classId, tab: "chart", stem })}
+              onExam={(exam) => go({ view: "exam", exam, stem })}
+            />
+          ))}
+        </div>
+      </Panel>
     </div>
   );
 }
@@ -274,7 +277,7 @@ function ClassChip({ pressed, title, sub, onClick }: { pressed: boolean; title: 
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`min-w-28 shrink-0 rounded-[var(--radius-md)] border px-3 py-2 text-start text-sm ${pressed ? "border-primary text-ink" : "border-border text-muted"}`}
+      className={`min-w-28 shrink-0 rounded-[var(--radius-md)] border bg-card px-3 py-2 text-start text-sm shadow-[var(--shadow-border)] ${pressed ? "border-primary text-ink" : "border-border text-muted"}`}
     >
       <span className="block font-semibold">{title}</span>
       <span className="block text-xs">{sub}</span>
@@ -498,7 +501,7 @@ function PhoneStem({
   const unlocked = taught >= stemGate(path, stem);
   const canOpen = unlocked || showAll;
   return (
-    <section id={`stem-${stem}`} className={`rounded-[var(--radius-lg)] border ${unlocked ? "border-border bg-card" : "border-dashed border-border"}`}>
+    <section id={`stem-${stem}`} className={`rounded-[var(--radius-lg)] border bg-card shadow-[var(--shadow-border)] ${unlocked ? "border-border" : "border-dashed border-border"}`}>
       <div className="flex items-start gap-2 p-3">
         <button type="button" className="min-h-11 px-1 text-muted" aria-expanded={canOpen ? open : undefined} aria-disabled={!canOpen} disabled={!canOpen} onClick={onToggle}>
           {canOpen ? (open ? "▾" : "▸") : "·"}
@@ -572,7 +575,7 @@ function SquarePage({
   const exams = examsForSquare(squareId, classId);
   const ready = practiceIsStrong(box) && !cleared && exams.length > 0 && taught >= (record ? columnLevel(record.stem, record.column, path) : 1);
   return (
-    <div className="grid gap-4">
+    <Panel className="grid gap-4">
       <div>
         <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={onBack}>
           ‹ Verb Lab
@@ -609,6 +612,6 @@ function SquarePage({
       ) : (
         <VerbLabPractice key={`${classId}:${squareId}:${mode}`} classId={classId} squareId={squareId} mode={mode} onMode={onMode} onAnswer={onAnswer} />
       )}
-    </div>
+    </Panel>
   );
 }

@@ -52,7 +52,7 @@ export function VerbLabPractice({
             key={item}
             type="button"
             aria-pressed={mode === item}
-            className={`min-h-11 px-4 text-sm font-semibold ${mode === item ? "bg-primary text-primary-foreground" : "bg-card text-muted"}`}
+            className={`min-h-11 px-4 text-sm font-semibold ${mode === item ? "bg-primary text-primary-foreground" : "bg-surface text-muted"}`}
             onClick={() => onMode(item)}
           >
             {item === "quiz" ? "Quiz" : "Drill"}
@@ -61,7 +61,7 @@ export function VerbLabPractice({
       </div>
       <p className="text-sm text-muted">One builder for every stem. Quiz and drill are modes of the same tool.</p>
       {mode === "quiz" ? (
-        <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-card p-5 text-center shadow-[var(--shadow-border)]">
+        <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-surface p-5 text-center shadow-[var(--shadow-border)]">
           <p className="text-sm text-muted">Which person is this?</p>
           <p className="he-word text-4xl text-ink" lang="he" dir="rtl">
             {prompt.form}
@@ -99,7 +99,7 @@ export function VerbLabPractice({
           </button>
         </section>
       ) : (
-        <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-card p-5 text-center shadow-[var(--shadow-border)]">
+        <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-surface p-5 text-center shadow-[var(--shadow-border)]">
           <p className="text-sm text-muted">Say it, then reveal</p>
           <p className="text-lg font-semibold text-ink">{prompt.person}</p>
           <p className="he-word min-h-12 text-4xl text-ink" lang="he" dir="rtl">

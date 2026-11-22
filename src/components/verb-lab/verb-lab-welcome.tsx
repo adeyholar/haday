@@ -1,3 +1,4 @@
+import { Panel } from "@/components/panel";
 import { welcomeRow } from "@/lib/verb-lab/welcome";
 import { stemFace, stemPairs, type VerbPath } from "@/lib/verb-lab/stems";
 
@@ -22,7 +23,7 @@ function Cell({ form, count }: { form: string | null; count: number | null }) {
 export function VerbLabWelcome({ path, onEnter }: { path: VerbPath; onEnter: () => void }) {
   const hitpael = stemFace(path, "Hitpael").en;
   return (
-    <div className="grid gap-4">
+    <Panel className="grid gap-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Verb Lab · about the stems</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">Seven stems</h1>
@@ -85,6 +86,6 @@ export function VerbLabWelcome({ path, onEnter }: { path: VerbPath; onEnter: () 
       <button type="button" className="min-h-11 w-fit rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground" onClick={onEnter}>
         Enter the Verb Lab
       </button>
-    </div>
+    </Panel>
   );
 }
