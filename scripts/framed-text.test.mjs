@@ -19,6 +19,12 @@ test("hub titles and the public return sit in the card panel", () => {
   }
   assert.match(read("src/components/public-footer.tsx"), /<Panel>\s*<nav aria-label="Site"/);
   assert.equal(read("src/components/public-footer.tsx").includes("bg-card/90"), false);
+  const blogIndex = read("src/components/blog-index.tsx");
+  assert.match(
+    blogIndex,
+    /<Panel>\s*<p className="text-sm text-muted">[\s\S]*<Link to="\/"[\s\S]*<\/p>\s*<h1 className="mt-4 font-display/,
+  );
+  assert.equal(/<main[\s\S]*?<p className="text-sm text-muted">[\s\S]*?<\/p>\s*<Panel/.test(blogIndex), false);
   assert.match(read("src/components/room-link.tsx"), /bg-card px-4 font-semibold text-primary shadow-\[var\(--shadow-border\)\]/);
   assert.match(read("src/styles.css"), /\.wlc-toolbar \{[\s\S]*background: var\(--color-card\);/);
   assert.equal(read("src/styles.css").includes("color-mix(in oklab, var(--color-card) 92%, transparent)"), false);
