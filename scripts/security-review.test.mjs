@@ -49,6 +49,18 @@ test("security headers middleware sets framing and sniff protection", () => {
   assert.match(src, /Strict-Transport-Security/);
 });
 
+test("security headers send a report-only CSP, a Permissions-Policy and a one-year HSTS", () => {
+  const src = readFileSync(new URL("../server/middleware/00.security-headers.ts", import.meta.url), "utf8");
+  assert.match(src, /"Content-Security-Policy": "frame-ancestors 'none'"/);
+  assert.match(src, /"Content-Security-Policy-Report-Only"/);
+  assert.match(src, /default-src 'self'/);
+  assert.match(src, /object-src 'none'/);
+  assert.match(src, /microphone=\(self\)/);
+  assert.match(src, /camera=\(\)/);
+  assert.match(src, /max-age=31536000; includeSubDomains/);
+  assert.doesNotMatch(src, /max-age=15552000/);
+});
+
 test("blog cache uses the one section list", async () => {
   const security = readFileSync(new URL("../server/middleware/00.security-headers.ts", import.meta.url), "utf8");
   const grok = readFileSync(new URL("../server/middleware/grok-pwa.ts", import.meta.url), "utf8");
