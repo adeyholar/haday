@@ -3,8 +3,8 @@
 Draft only. Do not merge. Do not deploy. Merging is the Chairman's call.
 
 Branch: `cursor/framed-text-c04b`
+Implementation commit: `c072dcdabf69c12a444677f84dc66c0fc56e64dc`
 Base: `main` at `ff09520` (PR #261, Verb Lab frame).
-This file's commit hash is filled in the follow-up note at the bottom once the branch is committed.
 
 ## Framed text
 
