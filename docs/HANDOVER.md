@@ -4,7 +4,7 @@ This branch is not merged. Do not merge it. Merging is the Chairman's call. The 
 
 Branch: `cursor/framed-text-dccc`
 
-Rebased onto `main` at `97d5411` (PR #268, the Listen choice fix).
+Code commit: `5c3bca9` (rebased onto `main` at `97d5411`, PR #268).
 
 No secrets are in this note.
 
@@ -35,7 +35,13 @@ The Verb Lab frames from PR #261 were already on main and were not edited.
 
 ## Tests actually run
 
-Recorded after the rebase onto `97d5411`. The counts below are filled once that run finishes.
+On 26 Nov 2026, Node v22.23.4, after the rebase onto `97d5411`:
+
+- `npx tsc --noEmit` — exit 0
+- `node --test scripts/*.test.mjs` — 781 tests, 776 pass, 0 fail, 5 skipped. That includes “a listen card never shows two choices with the same Hebrew” from PR #268, which still passes.
+- `node scripts/audit-lemmas.mjs` — exit 0. Counts: a 4, b 2762, c 0, d 12993, e 0, f 760, g 6572, h 0. This branch did not touch lemma data.
+- `npx eslint` on the file list in `.github/workflows/checks.yml`, plus the public, account, and sign-in files, with `--max-warnings 0` — exit 0
+- `npm run build` — exit 0. `db:migrate` skipped because `DATABASE_URL` is not set in this workspace.
 
 ## Left open
 
