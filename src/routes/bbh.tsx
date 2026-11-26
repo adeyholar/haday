@@ -72,7 +72,13 @@ function Home() {
     };
   }, []);
 
-  if (!ready || !gate) return <p className="text-sm text-muted">Opening the term.</p>;
+  if (!ready || !gate) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening the term.</p>
+      </Panel>
+    );
+  }
   if (hall) {
     return (
       <SemesterHall

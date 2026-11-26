@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth/client";
 import { getSocialSignInOffered } from "@/lib/auth/google-status";
 import { socialSignInErrorMessage } from "@/lib/auth/google";
 import { X_PROVIDER_ID, accountLinkErrorMessage, canUnlinkSignIn } from "@/lib/auth/x";
+import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { useParadigmProgress } from "@/components/paradigms/use-paradigm-progress";
 
@@ -106,8 +107,10 @@ function AccountPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg">
-      <h1 className="font-display text-3xl font-bold text-ink">Account</h1>
-      <p className="mt-2 text-sm text-muted">How you sign in to HaDay.</p>
+      <Panel>
+        <h1 className="font-display text-3xl font-bold text-ink">Account</h1>
+        <p className="mt-2 text-sm text-muted">How you sign in to HaDay.</p>
+      </Panel>
       {xOn ? (
         <section className="mt-6 rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
           <h2 className="text-sm font-semibold text-ink">X</h2>
@@ -131,7 +134,9 @@ function AccountPage() {
           )}
         </section>
       ) : ready ? (
-        <p className="mt-6 text-sm text-muted">X sign-in is not offered on this host.</p>
+        <Panel className="mt-6">
+          <p className="text-sm text-muted">X sign-in is not offered on this host.</p>
+        </Panel>
       ) : null}
       {paradigms.enabled ? (
         <section className="mt-6 rounded-[var(--radius-xl)] bg-card p-4 shadow-[var(--shadow-border)]">
@@ -144,7 +149,11 @@ function AccountPage() {
           </Link>
         </section>
       ) : null}
-      {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+      {error ? (
+        <Panel className="mt-4">
+          <p className="text-sm text-danger">{error}</p>
+        </Panel>
+      ) : null}
     </div>
   );
 }

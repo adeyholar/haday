@@ -156,7 +156,8 @@ function LessonPage() {
         <p className="mt-2 text-sm text-muted">{lesson.hearAgain}</p>
       </Panel>
 
-      <div className="mt-4 flex flex-col gap-2">
+      <Panel className="mt-4">
+        <div className="flex flex-col gap-2">
         {trained ? (
           <p className="text-center text-sm font-semibold text-muted">This lesson is trained.</p>
         ) : (
@@ -180,7 +181,8 @@ function LessonPage() {
         <Link to="/study" className="text-center text-sm font-semibold text-primary">
           All stations
         </Link>
-      </div>
+        </div>
+      </Panel>
     </>
     </ParadigmLessonGate>
   );

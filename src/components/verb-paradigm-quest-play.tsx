@@ -384,7 +384,7 @@ function VerbQuestSitting({
       <Board forms={forms} filled={filled} active={pgn} />
 
       {level === 3 ? (
-        <div className="mt-4">
+        <Panel className="mt-4">
           <p className="text-center">
             <Pointed form={card.form} pgn={card.pgn} className="text-5xl" />
           </p>
@@ -422,11 +422,11 @@ function VerbQuestSitting({
               Next
             </Button>
           ) : null}
-        </div>
+        </Panel>
       ) : null}
 
       {building ? (
-        <div className="mt-4">
+        <Panel className="mt-4">
           <HebrewType
             value={built}
             onChange={setBuilt}
@@ -480,10 +480,11 @@ function VerbQuestSitting({
               </Button>
             )}
           </div>
-        </div>
+        </Panel>
       ) : null}
 
-      <p className="mt-6 text-center text-sm">
+      <Panel className="mt-6 text-center">
+        <p className="text-sm">
         {scripture ? (
           <Link to="/iibs/verbal-system" className="font-medium text-primary">
             Verbal System
@@ -493,7 +494,8 @@ function VerbQuestSitting({
             Perfect endings lesson
           </Link>
         )}
-      </p>
+        </p>
+      </Panel>
     </div>
   );
 }

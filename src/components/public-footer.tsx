@@ -12,7 +12,7 @@ export { FOOTER_NAV };
 export function PublicFooter() {
   return (
     <footer className="mt-8 w-full pb-8">
-      <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5 rounded-[var(--radius-xl)] bg-card/90 px-4 shadow-[var(--shadow-border)]">
+      <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5 rounded-[var(--radius-xl)] bg-card px-4 shadow-[var(--shadow-border)]">
         {FOOTER_NAV.map((item) => (
           <Link
             key={item.label}

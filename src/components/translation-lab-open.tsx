@@ -145,6 +145,7 @@ export function OpenLab({ path }: { path: LabPath }) {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-8" data-lab-open="1">
+      <Panel>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Translation lab</p>
       <h1 className="mt-1 font-display text-3xl font-bold text-ink">Genesis 1:3</h1>
       <p className="mt-2 text-sm text-muted">
@@ -168,6 +169,7 @@ export function OpenLab({ path }: { path: LabPath }) {
           </li>
         ))}
       </ol>
+      </Panel>
 
       {step === "read" ? (
         <Panel className="mt-4">

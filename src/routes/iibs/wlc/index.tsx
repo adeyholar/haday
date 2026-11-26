@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ScriptureTabs } from "@/components/iibs-door";
+import { Panel } from "@/components/panel";
 import { SECTIONS, booksIn } from "@/lib/tanakh-canon";
 
 export const Route = createFileRoute("/iibs/wlc/")({
@@ -19,13 +20,15 @@ function WlcLibrary() {
       </section>
       {SECTIONS.map((section) => (
         <section key={section.id} className="mb-6">
-          <h2 className="font-display text-2xl font-bold text-ink">
-            {section.en}{" "}
-            <span className="he-word text-xl text-muted" dir="rtl" lang="he">
-              {section.he}
-            </span>
-          </h2>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <Panel className="mb-2">
+            <h2 className="font-display text-2xl font-bold text-ink">
+              {section.en}{" "}
+              <span className="he-word text-xl text-muted" dir="rtl" lang="he">
+                {section.he}
+              </span>
+            </h2>
+          </Panel>
+          <div className="grid gap-2 sm:grid-cols-2">
             {booksIn(section.id).map((book) => (
               <Link
                 key={book.id}

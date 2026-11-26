@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { AttemptBanner } from "@/components/attempt-banner";
 import { DontKnowButton } from "@/components/dont-know-button";
@@ -288,18 +289,20 @@ export function EtchPlay({
 
   return (
     <>
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-        {label ?? `${etchLabel(task.kind)} · ${index + 1} / ${total}`}
-      </p>
-      <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue, showMeOnce)}</p>
-      {guessFast && !graded && (
-        <p className="mt-2 text-center text-sm font-semibold text-danger">Too fast — name it, don’t tap the pattern.</p>
-      )}
-      {tries >= 1 && !graded && (
-        <AttemptBanner className="mt-2" kind="retry" />
-      )}
+      <Panel className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          {label ?? `${etchLabel(task.kind)} · ${index + 1} / ${total}`}
+        </p>
+        <p className="mt-1 text-sm text-muted">{etchHint(task.kind, task.cue, showMeOnce)}</p>
+        {guessFast && !graded && (
+          <p className="mt-2 text-center text-sm font-semibold text-danger">Too fast — name it, don’t tap the pattern.</p>
+        )}
+        {tries >= 1 && !graded && (
+          <AttemptBanner className="mt-2" kind="retry" />
+        )}
+      </Panel>
 
-      <div className="mt-3 rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
+      <div className="rounded-[var(--radius-xl)] bg-card px-5 py-8 text-center shadow-[var(--shadow-border)]">
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
           {showChapter && item.chapter > 0 ? `${POS_LABEL[item.pos]} · Ch. ${item.chapter}` : POS_LABEL[item.pos]}
         </p>

@@ -8,6 +8,7 @@ import { X_PRIVACY_BEFORE, X_PRIVACY_LINK, X_PROVIDER_ID, showXPrivacyNotice } f
 import { loginVerificationNote, verificationSendResult } from "@/lib/auth/confirm-hold";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { XSignInButton } from "@/components/x-sign-in-button";
+import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { cn } from "@/lib/cn";
@@ -43,7 +44,9 @@ function GoToStudy() {
   if (!to) {
     return (
       <main className="grid min-h-dvh place-items-center px-5">
-        <p className="text-sm text-muted">Opening your study.</p>
+        <Panel>
+          <p className="text-sm text-muted">Opening your study.</p>
+        </Panel>
       </main>
     );
   }

@@ -15,6 +15,7 @@ import {
   type SchoolCell,
 } from "@/lib/paradigms/school-view";
 import { osisTarget } from "@/lib/paradigms/refs";
+import { Panel } from "@/components/panel";
 
 export type ParadigmView = "school" | "scripture";
 
@@ -28,7 +29,7 @@ export function SchoolParadigm() {
   const notes = schoolNotes(page.page);
 
   return (
-    <div>
+    <Panel>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Paradigms</p>
       <h1 className="mt-1 font-display text-3xl font-bold text-ink">{page.title}</h1>
       <p className="mt-1 text-sm text-muted">
@@ -96,7 +97,7 @@ export function SchoolParadigm() {
           ) : null}
         </article>
       </div>
-    </div>
+    </Panel>
   );
 }
 

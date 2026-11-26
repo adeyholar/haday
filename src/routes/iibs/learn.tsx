@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 
 export const Route = createFileRoute("/iibs/learn")({
@@ -8,9 +9,11 @@ export const Route = createFileRoute("/iibs/learn")({
 function ScriptureLearn() {
   return (
     <>
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path</p>
-      <h1 className="mt-1 font-display text-4xl font-bold text-ink">Learn</h1>
-      <p className="mt-2 max-w-prose text-muted">The word lists live in the level. The Leningrad text lives in the Reading Lab. Parsing Lab takes up to five verses.</p>
+      <Panel>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Scripture Path</p>
+        <h1 className="mt-1 font-display text-4xl font-bold text-ink">Learn</h1>
+        <p className="mt-2 max-w-prose text-muted">The word lists live in the level. The Leningrad text lives in the Reading Lab. Parsing Lab takes up to five verses.</p>
+      </Panel>
       <div className="mt-4">
         <VerbLabCard from="learn" path="scripture" />
       </div>
