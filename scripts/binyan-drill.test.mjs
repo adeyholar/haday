@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +10,7 @@ const jiti = createJiti(import.meta.url, { alias: { "@": join(root, "src") } });
 const drill = await jiti.import(join(root, "src/lib/binyan-drill.ts"));
 const game = await jiti.import(join(root, "src/lib/game.ts"));
 const path = await jiti.import(join(root, "src/lib/path.ts"));
+const vocab = await jiti.import(join(root, "src/lib/iibs-vocab.ts"));
 
 test("strong stem cards cover the seven stems and the full pool", () => {
   const cards = drill.strongBinyanCards();
@@ -86,4 +88,18 @@ test("hydrateGame keeps per-stem accuracy and drops a foreign stem", () => {
   assert.equal(game.hydrateGame({}).binyan.set, 0);
   assert.equal(path.blockedDestination("/iibs/binyanim", { path: "bbh", admin: false }), "/");
   assert.equal(path.blockedDestination("/iibs/binyanim", { path: "iibs", admin: false }), null);
+});
+
+test("the Scripture Path menu opens the drill, and Verb Lab does not take that url", () => {
+  const route = readFileSync(join(root, "src/routes/iibs/binyanim.tsx"), "utf8");
+  assert.match(route, /<BinyanDrill \/>/);
+  assert.equal(route.includes("legacyVerbTarget"), false);
+  const door = readFileSync(join(root, "src/components/iibs-door.tsx"), "utf8");
+  assert.equal((door.match(/to="\/iibs\/binyanim"/g) ?? []).length, 2);
+  const learn = readFileSync(join(root, "src/routes/iibs/learn.tsx"), "utf8");
+  assert.equal(learn.includes('to="/iibs/binyanim"'), false);
+  assert.equal(vocab.IIBS_VOCAB.E[24][8].hebrew, "זֵרָה");
+  for (const id of ["A", "B", "C", "D", "E"]) {
+    assert.equal(path.levelOpen(id, null, false), true, id);
+  }
 });

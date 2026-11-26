@@ -99,6 +99,15 @@ export function LevelHall({
       <div className="mt-3">
         <VerbLabCard from="learn" path="scripture" />
       </div>
+      <Link
+        to="/iibs/binyanim"
+        className="mt-3 block rounded-[var(--radius-xl)] bg-card p-5 text-ink shadow-[var(--shadow-border)]"
+      >
+        <span className="font-display text-2xl font-bold">Seven stems</span>
+        <span className="mt-1 block text-sm text-muted">
+          Name the stem. Open practice. It does not lock a level.
+        </span>
+      </Link>
       <IndependentPronounLinks />
     </>
   );
@@ -177,6 +186,14 @@ export function LevelRoom({
           <div className="sm:col-span-2">
             <VerbLabCard from="learn" path="scripture" />
           </div>
+          <Link
+            to="/iibs/binyanim"
+            className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"
+          >
+            <ScrollText className="size-5 text-primary" />
+            <span className="mt-2 font-display text-xl font-bold">Seven stems</span>
+            <span className="text-sm text-muted">Name the stem. It does not lock a level.</span>
+          </Link>
           <Link
             to="/iibs/wlc"
             className="flex min-h-24 flex-col justify-center rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]"

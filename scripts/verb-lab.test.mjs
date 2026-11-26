@@ -90,7 +90,7 @@ test("old verb urls redirect, and the hubs register one Verb Lab card", () => {
   assert.equal(redirects.legacyVerbTarget("/game/verbal-system", "#piel").search.stem, "Piel");
   assert.equal(redirects.legacyVerbTarget("/game/qal-perfect").search.exam, "qal-perfect");
   assert.equal(redirects.legacyVerbTarget("/study/verb-lab/qal-perfect").search.square, "Qal.qatal");
-  assert.equal(redirects.legacyVerbTarget("/iibs/binyanim").search.view, "welcome");
+  assert.equal(redirects.legacyVerbTarget("/iibs/binyanim"), null);
   assert.equal(redirects.legacyVerbTarget("/game/lessons/verbs"), null);
   const oldLinks = [
     "/game/verbal-system",
@@ -102,7 +102,6 @@ test("old verb urls redirect, and the hubs register one Verb Lab card", () => {
     "/iibs/verbal-system",
     "/iibs/verb-paradigm-quest",
     "/iibs/qal-imperfect",
-    "/iibs/binyanim",
   ];
   for (const file of HUBS) {
     const text = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
@@ -111,6 +110,8 @@ test("old verb urls redirect, and the hubs register one Verb Lab card", () => {
       const linked = text.includes(`to="${link}"`) || text.includes(`to: "${link}"`);
       assert.equal(linked, false, `${file} still links ${link}`);
     }
+    const namesStems = text.includes('to="/iibs/binyanim"');
+    assert.equal(namesStems, file === "src/components/iibs-door.tsx", `${file} binyanim link`);
   }
 });
 

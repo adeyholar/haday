@@ -63,7 +63,6 @@ const EXACT: Record<string, VerbLabSearch> = {
   "/iibs/qal-imperfect": { view: "square", square: "Qal.yiqtol", tab: "practice" },
   "/iibs/verb-paradigm-quest": { view: "square", square: "Qal.qatal", tab: "practice" },
   "/iibs/verbal-system": { view: "room" },
-  "/iibs/binyanim": { view: "welcome" },
 };
 
 export function legacyVerbTarget(pathname: string, hash = ""): LegacyTarget | null {
