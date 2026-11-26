@@ -22,7 +22,7 @@ test("hub titles and the public return sit in the card panel", () => {
   const blogIndex = read("src/components/blog-index.tsx");
   assert.match(
     blogIndex,
-    /<Panel>\s*<p className="text-sm text-muted">[\s\S]*<Link to="\/"[\s\S]*<\/p>\s*<h1 className="mt-4 font-display/,
+    /<Panel>\s*<nav aria-label="Breadcrumb">\s*<p className="text-sm text-muted">[\s\S]*<Link to="\/"[\s\S]*<\/p>\s*<\/nav>\s*<h1 className="mt-4 font-display/,
   );
   assert.equal(/<main[\s\S]*?<p className="text-sm text-muted">[\s\S]*?<\/p>\s*<Panel/.test(blogIndex), false);
   assert.match(read("src/components/room-link.tsx"), /bg-card px-4 font-semibold text-primary shadow-\[var\(--shadow-border\)\]/);
@@ -35,4 +35,16 @@ test("quiz and drill feedback copy uses the card panel", () => {
   assert.match(read("src/components/marked-answer.tsx"), /<Panel className="mt-4 grid gap-3 text-center">/);
   assert.match(read("src/routes/quiz.tsx"), /<Panel>\s*<QuizSetBar set=\{set\} \/>\s*<p className="mt-6 text-muted">No words in this set\.<\/p>/);
   assert.match(read("src/components/paradigms/school-paradigm.tsx"), /return \(\s*<Panel>/);
+});
+
+test("blog index breadcrumbs use a Breadcrumb landmark and mark the current page", () => {
+  const src = read("src/components/blog-index.tsx");
+  assert.match(src, /<nav aria-label="Breadcrumb">\s*<p className="text-sm text-muted">/);
+  assert.match(src, /filter === "all" \? \(\s*<span aria-current="page">Blog<\/span>/);
+  assert.match(src, /<span aria-current="page">\{TEACHING_SECTIONS\[filter\]\.label\}<\/span>/);
+  assert.match(read("src/routes/blogs/index.tsx"), /<BlogIndex filter=\{filter\} posts=\{posts\} \/>/);
+  assert.match(
+    read("src/routes/learning-hebrabbai/index.tsx"),
+    /<BlogIndex filter="learning-hebrabbai" posts=\{posts\} \/>/,
+  );
 });
