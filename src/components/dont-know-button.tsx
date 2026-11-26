@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 
 export function DontKnowButton({
@@ -25,12 +26,12 @@ export function DontKnowButton({
   return (
     <>
       {waiting ? (
-        <>
-          <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
+        <Panel className="mt-3 text-center">
+          <p className="try-flash text-lg font-bold uppercase tracking-wide text-danger">
             Try again
           </p>
-          <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-        </>
+          <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+        </Panel>
       ) : null}
       <Button type="button" variant="outline" size="lg" className="mt-3 w-full text-lg font-bold" onClick={tap}>
         Tell me

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { RoadDeck, type RoadSet } from "@/components/road-deck";
 import { useIibsRoom } from "@/components/iibs-door";
 import { iibsRoadList } from "@/lib/iibs-road";
@@ -16,7 +17,13 @@ function IibsRoadPage() {
     return [{ id: room.level, label: room.level, title: `Level ${room.level}`, hint: `${items.length} words`, items }];
   }, [room.level]);
 
-  if (!room.ready) return <p className="text-sm text-muted">Opening this level…</p>;
+  if (!room.ready) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening this level…</p>
+      </Panel>
+    );
+  }
   if (!room.level) return <Navigate to="/iibs" />;
 
   const set = sets[0];
@@ -24,11 +31,11 @@ function IibsRoadPage() {
 
   return (
     <>
-      <p className="mb-3 text-sm">
-        <Link to="/iibs" className="font-semibold text-primary">
+      <Panel className="mb-3 text-sm">
+        <Link to="/iibs" className="inline-flex min-h-11 items-center font-semibold text-primary">
           This level
         </Link>
-      </p>
+      </Panel>
       <RoadDeck
         kicker="Scripture Path · audio"
         sets={sets}

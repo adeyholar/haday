@@ -4,6 +4,7 @@ import { WeekSelect } from "@/components/week-select";
 import { itemsForWeek, studySetMeta, type VocabItem } from "@/lib/vocab";
 import { useStudy } from "@/lib/store";
 import { FocusToggle } from "@/components/focus-toggle";
+import { Panel } from "@/components/panel";
 import { StudyMenu } from "@/components/study-menu";
 import { DrillSitting } from "@/components/drill-sitting";
 import { drillKey, finalDrillKey, passagePlaceForPool, pronounDrillKey, suffixDrillKey, yiqtolDrillKey } from "@/lib/etch";
@@ -79,13 +80,13 @@ function DrillPage() {
 
   if (passage && !pack) {
     return (
-      <>
+      <Panel>
         <StudyMenu />
         <p className="mt-4 text-sm text-ink">Open a chapter and choose Drill unknowns. This sitting keeps its own place.</p>
         <Link to="/drill" search={{ from }} className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">
           Study set
         </Link>
-      </>
+      </Panel>
     );
   }
 

@@ -375,8 +375,7 @@ html {
   position: sticky;
   top: 3.5rem;
   z-index: 20;
-  background: color-mix(in oklab, var(--color-card) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--color-card);
 }
 .manuscript-sheet {
   min-height: 0;

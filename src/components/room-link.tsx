@@ -33,7 +33,10 @@ export function RoomLink() {
   const room = roomFor(pathname);
   return (
     <p className="mb-3 text-sm">
-      <Link to={room.to} className="font-semibold text-primary">
+      <Link
+        to={room.to}
+        className="inline-flex min-h-11 items-center rounded-[var(--radius-xl)] bg-card px-4 font-semibold text-primary shadow-[var(--shadow-border)]"
+      >
         {room.label}
       </Link>
     </p>

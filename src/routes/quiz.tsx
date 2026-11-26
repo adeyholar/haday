@@ -171,10 +171,10 @@ function QuizPage() {
 
   if (!pool.length) {
     return (
-      <>
+      <Panel>
         <QuizSetBar set={set} />
         <p className="mt-6 text-muted">No words in this set.</p>
-      </>
+      </Panel>
     );
   }
 
@@ -196,10 +196,10 @@ function QuizPage() {
   }
   if (!ready || (deck.length > 0 && !item && i === 0)) {
     return (
-      <>
+      <Panel>
         <QuizSetBar set={set} />
         <p className="mt-8 text-sm text-muted">Dealing a round…</p>
-      </>
+      </Panel>
     );
   }
 
@@ -207,7 +207,9 @@ function QuizPage() {
     const total = score.right + score.wrong;
     return (
       <>
-        <QuizSetBar set={set} />
+        <Panel className="mb-4">
+          <QuizSetBar set={set} />
+        </Panel>
         <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Round complete</h1>
           <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
@@ -319,20 +321,22 @@ function QuizPage() {
           })}
         </ul>
         {missedChoice && !picked && (
-          <>
-            {missedChoice !== "__nudge__" ? <AttemptBanner className="mt-4" kind="retry" /> : null}
-            <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+          <Panel className="mt-4 text-center">
+            {missedChoice !== "__nudge__" ? <AttemptBanner kind="retry" /> : null}
+            <p className="try-flash mt-2 text-lg font-bold uppercase tracking-wide text-danger">
               Try again
             </p>
-            <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-          </>
+            <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+          </Panel>
         )}
         {picked && (
           <>
             <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
             <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
             {gaveUp && (
-              <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              <Panel className="mt-2 text-center">
+                <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+              </Panel>
             )}
           </>
         )}
@@ -385,25 +389,31 @@ function QuizPage() {
             />
           )}
           {!revealed && liveGloss(item, typed) === "prefix" && (
-            <p className="mt-2 text-center text-sm font-medium text-muted">Keep going.</p>
+            <Panel className="mt-2 text-center">
+              <p className="text-sm font-medium text-muted">Keep going.</p>
+            </Panel>
           )}
           {!revealed && liveGloss(item, typed) === "empty" && (
-            <p className="mt-2 text-center text-sm font-medium text-muted">Type the English gloss.</p>
+            <Panel className="mt-2 text-center">
+              <p className="text-sm font-medium text-muted">Type the English gloss.</p>
+            </Panel>
           )}
           {typeTries >= 1 && !revealed && (
-            <>
-              <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+            <Panel className="mt-2 text-center">
+              <p className="try-flash text-lg font-bold uppercase tracking-wide text-danger">
                 Try again
               </p>
-              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-            </>
+              <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </Panel>
           )}
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={glossMatches(item, typed) ? "strong" : "fail"} />
               <MarkedAnswer ok={glossMatches(item, typed)} given={typed} answer={item.gloss} />
               {gaveUp && (
-                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+                <Panel className="mt-1 text-center">
+                  <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+                </Panel>
               )}
             </div>
           )}

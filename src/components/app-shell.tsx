@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { useRouteContext, useRouterState } from "@tanstack/react-router";
 import { BrandLockup } from "@/components/brand-lockup";
+import { Panel } from "@/components/panel";
 import { PublicHeader } from "@/components/public-header";
 import { VisitorBeacon } from "@/components/visitor-beacon";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -66,7 +67,9 @@ function ShellSkeleton() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl px-4 pt-6">
-        <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
+        <Panel>
+          <p className="text-xs font-semibold tracking-[0.08em] text-primary">HaDay · HebRabbAi Mentor</p>
+        </Panel>
         <div className="mt-3 h-10 w-2/3 animate-pulse rounded-[var(--radius-md)] bg-surface/80" />
       </main>
     </div>

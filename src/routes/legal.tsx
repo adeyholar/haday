@@ -19,10 +19,12 @@ function LegalPage() {
   const { user } = useCurrentUserState();
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
-      <div className="mb-6 flex justify-center">
+      <Panel className="mb-6 flex flex-col items-center text-center">
         <BrandLockup size="hero" linked />
-      </div>
-      <PublicReturn />
+        <div className="mt-4">
+          <PublicReturn className="mb-0" />
+        </div>
+      </Panel>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · BIBL 630</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Privacy and disclaimer</h1>
@@ -117,7 +119,7 @@ function LegalPage() {
         </p>
       </Panel>
 
-      <p className="mt-5 text-center text-sm">
+      <Panel className="mt-5 text-center text-sm">
         {user ? (
           <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
             Back to class
@@ -131,7 +133,7 @@ function LegalPage() {
         <Link to="/credits" className="font-semibold text-primary underline-offset-4 hover:underline">
           Credits
         </Link>
-      </p>
+      </Panel>
       <PublicFooter />
     </main>
   );

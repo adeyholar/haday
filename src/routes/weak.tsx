@@ -256,17 +256,21 @@ function WeakPoolPage() {
         })}
       </ul>
       {missedChoice && !picked ? (
-        <>
-          {missedChoice !== "__nudge__" ? <AttemptBanner className="mt-4" kind="retry" /> : null}
-          <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">Try again</p>
-          <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-        </>
+        <Panel className="mt-4 text-center">
+          {missedChoice !== "__nudge__" ? <AttemptBanner kind="retry" /> : null}
+          <p className="try-flash mt-2 text-lg font-bold uppercase tracking-wide text-danger">Try again</p>
+          <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+        </Panel>
       ) : null}
       {picked ? (
         <>
           <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
           <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
-          {gaveUp ? <p className="mt-2 text-center text-sm text-muted">It stays in the next pool.</p> : null}
+          {gaveUp ? (
+            <Panel className="mt-2 text-center">
+              <p className="text-sm text-muted">It stays in the next pool.</p>
+            </Panel>
+          ) : null}
         </>
       ) : null}
       {showVerse ? <VerseCard item={item} /> : null}

@@ -178,7 +178,8 @@ function DoorsPage() {
       ) : (
       <>
       {askHeard ? (
-        <fieldset className="mb-3 grid gap-2">
+        <Panel className="mb-3">
+        <fieldset className="grid gap-2">
           <legend className="mb-1 text-sm font-medium text-muted">{HEARD_PROMPT} Optional.</legend>
           {(
             [
@@ -206,6 +207,7 @@ function DoorsPage() {
             <p className="text-sm text-muted">You can skip this and open a door.</p>
           )}
         </fieldset>
+        </Panel>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <Door

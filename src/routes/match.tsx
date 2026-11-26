@@ -153,19 +153,21 @@ function MatchPage() {
 
   if (!pool.length) {
     return (
-      <>
+      <Panel>
         <WeekSelect />
         <p className="mt-4 text-sm text-muted">Pick a study set first.</p>
-      </>
+      </Panel>
     );
   }
 
   if (phase === "done") {
     return (
       <>
-        <WeekSelect />
-        <FocusToggle />
-        <Panel className="mt-4 text-center">
+        <Panel className="mb-4">
+          <WeekSelect />
+          <FocusToggle />
+        </Panel>
+        <Panel className="text-center">
           <p className="font-display text-5xl font-bold tabular-nums text-ink">
             {right + wrongN ? Math.round((right / (right + wrongN)) * 100) : 0}%
           </p>
@@ -186,9 +188,11 @@ function MatchPage() {
     const ok = pickSel === item?.id;
     return (
       <>
-        <WeekSelect />
-        <FocusToggle />
-        <Panel className="mt-4">
+        <Panel className="mb-4">
+          <WeekSelect />
+          <FocusToggle />
+        </Panel>
+        <Panel>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Select the Hebrew · {pickI + 1} / {pickOrder.length}
           </p>
@@ -227,7 +231,9 @@ function MatchPage() {
               answer={item?.hebrew ?? ""}
             />
             {gaveUp && (
-              <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+              <Panel className="mt-2 text-center">
+                <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+              </Panel>
             )}
             <Button className="mt-3 w-full" onClick={nextPick}>
               {pickI + 1 >= pickOrder.length && !(gaveUp && item && !retryIds.has(item.id)) ? "See score" : "Next"}
@@ -251,9 +257,11 @@ function MatchPage() {
 
   return (
     <>
-      <WeekSelect />
-      <FocusToggle />
-      <Panel className="mt-4">
+      <Panel className="mb-4">
+        <WeekSelect />
+        <FocusToggle />
+      </Panel>
+      <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Match</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">Select the pair</h1>
         <p className="mt-2 text-sm text-muted">

@@ -579,20 +579,22 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
             })}
           </ul>
           {(missedChoice || tries >= 1) && !picked && (
-            <>
-              {missedChoice && missedChoice !== "__nudge__" ? <AttemptBanner className="mt-4" kind="retry" /> : null}
-              <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+            <Panel className="mt-4 text-center">
+              {missedChoice && missedChoice !== "__nudge__" ? <AttemptBanner kind="retry" /> : null}
+              <p className="try-flash mt-2 text-lg font-bold uppercase tracking-wide text-danger">
                 Try again
               </p>
-              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-            </>
+              <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </Panel>
           )}
           {picked && (
             <>
               <AttemptBanner className="mt-4" kind={picked === item.gloss ? "strong" : "fail"} />
               <MarkedAnswer ok={picked === item.gloss} given={picked} answer={item.gloss} />
               {picked !== item.gloss && (
-                <p className="mt-2 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+                <Panel className="mt-2 text-center">
+                  <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+                </Panel>
               )}
               <Button className="mt-4 w-full" onClick={advanceAfterReveal}>
                 Next
@@ -639,25 +641,31 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
             <GradeBanner className="mt-3" size="live" ok={liveGloss(item, typed) === "exact"} />
           )}
           {!revealed && liveGloss(item, typed) === "prefix" && (
-            <p className="mt-2 text-center text-sm font-medium text-muted">Keep going.</p>
+            <Panel className="mt-2 text-center">
+              <p className="text-sm font-medium text-muted">Keep going.</p>
+            </Panel>
           )}
           {!revealed && liveGloss(item, typed) === "empty" && (
-            <p className="mt-2 text-center text-sm font-medium text-muted">Type the English gloss — no list.</p>
+            <Panel className="mt-2 text-center">
+              <p className="text-sm font-medium text-muted">Type the English gloss — no list.</p>
+            </Panel>
           )}
           {tries >= 1 && !revealed && (
-            <>
-              <p className="try-flash mt-2 text-center text-lg font-bold uppercase tracking-wide text-danger">
+            <Panel className="mt-2 text-center">
+              <p className="try-flash text-lg font-bold uppercase tracking-wide text-danger">
                 Try again
               </p>
-              <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-            </>
+              <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+            </Panel>
           )}
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={typedOk ? "strong" : "fail"} />
               <MarkedAnswer ok={typedOk} given={typed} answer={item.gloss} />
               {!typedOk && (
-                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+                <Panel className="mt-1 text-center">
+                  <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+                </Panel>
               )}
             </div>
           )}
@@ -699,37 +707,37 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
             guide={guide}
           />
           {coaching && (
-            <div className="mt-3 text-center">
+            <Panel className="mt-3 text-center">
               {nod && <p className="text-lg font-bold text-good">Yes.</p>}
               <p className="mt-1 text-sm font-medium text-ink">{coachLine(progress, guideDepth)}</p>
-            </div>
+            </Panel>
           )}
           {built && (
-            <div className="mt-3 text-center">
+            <Panel className="mt-3 text-center">
               <p className="text-lg font-bold text-good">You built it.</p>
               <p className="mt-1 text-sm font-medium text-ink">
                 {item && helpedIds.current.has(item.id)
                   ? "We’ll bring it back next time."
                   : "It comes back once, with no help."}
               </p>
-            </div>
+            </Panel>
           )}
           {tries >= 1 && !revealed && !built && (
-            <>
-              <p className="try-flash mt-3 text-center text-lg font-bold uppercase tracking-wide text-danger">
+            <Panel className="mt-3 text-center">
+              <p className="try-flash text-lg font-bold uppercase tracking-wide text-danger">
                 Try again
               </p>
-              <p className="mt-1 text-center text-sm font-medium text-ink">
+              <p className="mt-1 text-sm font-medium text-ink">
                 {stage === "spell-strict" ? "Attempt it before I show you." : "Attempt it before I tell you."}
               </p>
-            </>
+            </Panel>
           )}
           {revealed && (
             <div className="mt-3">
               <AttemptBanner kind={typedOk ? "strong" : "fail"} />
               <MarkedAnswer ok={typedOk} given={typed} answer={item.hebrew} />
               {typedOk && spell.alts.some((a) => a !== item.hebrew) && (
-                <p className="mt-2 text-center text-sm text-muted">
+                <Panel className="mt-2 text-center text-sm text-muted">
                   Lemma <span className="he-word text-lg text-ink">{item.hebrew}</span>
                   {verseFor(item.id)?.hit && verseFor(item.id)!.hit !== item.hebrew ? (
                     <>
@@ -737,10 +745,12 @@ export function GameStagePlay({ chapter, stage, mixChapters, room = "class" }: P
                       · this verse <span className="he-word text-lg text-ink">{verseFor(item.id)!.hit}</span>
                     </>
                   ) : null}
-                </p>
+                </Panel>
               )}
               {!typedOk && (
-                <p className="mt-1 text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+                <Panel className="mt-1 text-center">
+                  <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+                </Panel>
               )}
             </div>
           )}

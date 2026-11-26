@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { LevelHall, LevelRoom, useIibsRoom } from "@/components/iibs-door";
 import { getMyPath, type MyPath } from "@/lib/learner-path";
 import { useStudy } from "@/lib/store";
@@ -28,8 +29,20 @@ function IibsHome() {
 
   const admin = Boolean(gate?.admin);
 
-  if (!room.ready || !gate) return <p className="text-sm text-muted">Opening the level.</p>;
-  if (error) return <p className="text-sm text-danger">{error}</p>;
+  if (!room.ready || !gate) {
+    return (
+      <Panel>
+        <p className="text-sm text-muted">Opening the level.</p>
+      </Panel>
+    );
+  }
+  if (error) {
+    return (
+      <Panel>
+        <p className="text-sm text-danger">{error}</p>
+      </Panel>
+    );
+  }
   if (!room.level) return <LevelHall progress={progress} admin={admin} />;
   return <LevelRoom level={room.level} progress={progress} admin={admin} />;
 }

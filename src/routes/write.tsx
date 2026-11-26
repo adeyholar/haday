@@ -285,26 +285,28 @@ function WritePage() {
 
   if (!pool.length) {
     return (
-      <>
+      <Panel>
         <WeekSelect />
         <p className="mt-6 text-muted">No words in this set.</p>
-      </>
+      </Panel>
     );
   }
 
   if (!ready) {
     return (
-      <>
+      <Panel>
         <WeekSelect />
         <p className="mt-8 text-sm text-muted">Preparing a writing round…</p>
-      </>
+      </Panel>
     );
   }
 
   if (!item) {
     return (
       <>
-        <WeekSelect />
+        <Panel className="mb-4">
+          <WeekSelect />
+        </Panel>
         <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Pad complete</h1>
           <p className="mt-2 text-muted">You worked this writing round. Start another, or drill the weak list.</p>
