@@ -158,7 +158,9 @@ function LessonPage() {
 
       <div className="mt-4 flex flex-col gap-2">
         {trained ? (
-          <p className="text-center text-sm font-semibold text-muted">This lesson is trained.</p>
+          <Panel className="text-center">
+            <p className="text-sm font-semibold text-muted">This lesson is trained.</p>
+          </Panel>
         ) : (
           <Button className="w-full" disabled={!canTrain(ladder, lesson.id)} onClick={() => train(lesson.id)}>
             Mark trained
@@ -177,9 +179,11 @@ function LessonPage() {
             </Button>
           </Link>
         )}
-        <Link to="/study" className="text-center text-sm font-semibold text-primary">
-          All stations
-        </Link>
+        <Panel className="text-center text-sm">
+          <Link to="/study" className="inline-flex min-h-11 items-center font-semibold text-primary">
+            All stations
+          </Link>
+        </Panel>
       </div>
     </>
     </ParadigmLessonGate>

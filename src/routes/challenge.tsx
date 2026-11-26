@@ -119,9 +119,11 @@ function ChallengePage() {
         )}
         <div className="mt-4 flex flex-col gap-2">
           <Button onClick={begin}>Try again</Button>
-          <Link to="/" className="text-center text-sm font-semibold text-primary">
-            Back home
-          </Link>
+          <Panel className="text-center text-sm">
+            <Link to="/" className="inline-flex min-h-11 items-center font-semibold text-primary">
+              Back home
+            </Link>
+          </Panel>
         </div>
       </>
     );

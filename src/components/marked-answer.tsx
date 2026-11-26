@@ -1,3 +1,4 @@
+import { Panel } from "@/components/panel";
 import { markedLines } from "@/lib/marked-answer";
 import { cn } from "@/lib/cn";
 
@@ -32,9 +33,9 @@ export function MarkedAnswer({ ok, given, answer }: Props) {
   const lines = markedLines(ok, given, answer);
   if (!lines.answer && !lines.wrote) return null;
   return (
-    <div className="mt-4 grid gap-3 text-center">
+    <Panel className="mt-4 grid gap-3 text-center">
       {lines.wrote ? <Line label="You wrote" text={lines.wrote} good={false} /> : null}
       {lines.answer ? <Line label="Answer" text={lines.answer} good /> : null}
-    </div>
+    </Panel>
   );
 }

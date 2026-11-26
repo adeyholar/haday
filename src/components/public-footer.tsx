@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { getMyPath } from "@/lib/learner-path";
 import { homeForAccount } from "@/lib/path";
@@ -12,18 +13,20 @@ export { FOOTER_NAV };
 export function PublicFooter() {
   return (
     <footer className="mt-8 w-full pb-8">
-      <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5 rounded-[var(--radius-xl)] bg-card/90 px-4 shadow-[var(--shadow-border)]">
-        {FOOTER_NAV.map((item) => (
-          <Link
-            key={item.label}
-            to={item.to}
-            hash={"hash" in item ? item.hash : undefined}
-            className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      <Panel>
+        <nav aria-label="Site" className="flex flex-wrap items-center justify-center gap-x-5">
+          {FOOTER_NAV.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              hash={"hash" in item ? item.hash : undefined}
+              className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </Panel>
     </footer>
   );
 }
@@ -48,7 +51,7 @@ export function ContactLink({ className }: { className?: string }) {
 }
 
 /** Top of a public page. A signed-in student returns to their study, not a dead end. */
-export function PublicReturn() {
+export function PublicReturn({ className }: { className?: string }) {
   const { user } = useCurrentUserState();
   const [to, setTo] = useState<"/" | "/bbh" | "/iibs">("/");
 
@@ -68,7 +71,7 @@ export function PublicReturn() {
   }, [user]);
 
   return (
-    <p className="mb-6">
+    <p className={className ?? "mb-6"}>
       <Link to={to} className="text-sm font-semibold text-primary underline-offset-4 hover:underline">
         {user ? "Back to your study" : "Back to HaDay"}
       </Link>

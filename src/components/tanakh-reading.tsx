@@ -851,7 +851,7 @@ export function TanakhReading({
   return (
     <>
       <StudyReturnBanner />
-      <div className="mb-3 flex items-center gap-1.5">
+      <Panel className="mb-3 flex items-center gap-1.5">
         <h1 className="shrink-0 font-display text-lg font-bold text-ink">
           <Link to="/listen/read/$book" params={{ book }} search={fromSearch(passage.from)} className="hover:underline">
             {meta?.en ?? book} {chapter}
@@ -905,7 +905,7 @@ export function TanakhReading({
         <p className="shrink-0 text-xs font-semibold tabular-nums text-muted">
           {verse ? `${verse.verse} of ${versesInChapter(book, chapter)}` : ""}
         </p>
-      </div>
+      </Panel>
 
       {(mode === "follow" || mode === "after") && verse ? (
         <FollowCard

@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 
 type Props = {
@@ -14,6 +15,7 @@ export function GradeBanner({ ok, label, size = "result", className }: Props) {
   const live = size === "live";
 
   return (
+    <Panel className={cn("text-center", className)}>
     <p
       role="status"
       aria-live="polite"
@@ -21,7 +23,6 @@ export function GradeBanner({ ok, label, size = "result", className }: Props) {
         "grade-pop flex items-center justify-center gap-2 text-center font-display font-bold leading-none tracking-tight",
         live ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl",
         ok ? "text-good" : "text-danger",
-        className,
       )}
     >
       <Icon
@@ -30,5 +31,6 @@ export function GradeBanner({ ok, label, size = "result", className }: Props) {
       />
       {text}
     </p>
+    </Panel>
   );
 }

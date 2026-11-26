@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 import { VerbLabCard } from "@/components/verb-lab/verb-lab-card";
 import { translationLabEnabled } from "@/lib/translation-lab/flag";
 import { showTranslationLabListenCard } from "@/lib/translation-lab/listen-card";
@@ -182,10 +183,12 @@ export function PathHub({ kind }: { kind: HubKind }) {
   const cards = labCard ? [...room.cards, labCard] : room.cards;
   return (
     <>
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar Path</p>
-      <h1 className="mt-1 font-display text-4xl font-bold text-ink">{room.title}</h1>
-      <p className="mt-2 max-w-prose text-muted">{room.line}</p>
-      <ul className="mt-4 grid gap-2">
+      <Panel className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Grammar Path</p>
+        <h1 className="mt-1 font-display text-4xl font-bold text-ink">{room.title}</h1>
+        <p className="mt-2 max-w-prose text-muted">{room.line}</p>
+      </Panel>
+      <ul className="grid gap-2">
         {kind === "learn" || kind === "practice" || kind === "play" ? (
           <li>
             <VerbLabCard from={kind} path="grammar" />
@@ -279,11 +282,11 @@ export function PathHub({ kind }: { kind: HubKind }) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-sm">
-        <Link to="/guide" className="font-semibold text-primary">
+      <Panel className="mt-4 text-sm">
+        <Link to="/guide" className="inline-flex min-h-11 items-center font-semibold text-primary">
           How this room works
         </Link>
-      </p>
+      </Panel>
     </>
   );
 }

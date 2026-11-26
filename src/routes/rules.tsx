@@ -349,9 +349,11 @@ function HuntRound({
 
   return (
     <>
-      <p className="mb-3 text-sm font-medium tabular-nums text-ink">
-        {i + 1} / {items.length} · {score.right} correct
-      </p>
+      <Panel className="mb-3">
+        <p className="text-sm font-medium tabular-nums text-ink">
+          {i + 1} / {items.length} · {score.right} correct
+        </p>
+      </Panel>
 
       {mode === "verse" ? (
         <div className="rounded-[var(--radius-xl)] bg-card px-5 py-6 shadow-[var(--shadow-border)]">
@@ -460,16 +462,18 @@ function HuntRound({
         )}
 
         {tries > 0 && !revealed && (
-          <div className="rounded-[var(--radius-md)] bg-danger/10 px-3 py-2 text-center">
+          <Panel className="text-center">
             <p className="try-flash text-xl font-bold uppercase tracking-wide text-danger">One more try</p>
             {hint && <p className="mt-1 text-sm font-medium text-ink">{hint}</p>}
             <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
-          </div>
+          </Panel>
         )}
 
         {revealed && <AnswerPanel item={matched ?? item} rule={rule} ok={ok} mode={mode} siblings={siblings} />}
         {gaveUp && revealed && (
-          <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+          <Panel className="text-center">
+            <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+          </Panel>
         )}
         {!revealed && (
           <DontKnowButton

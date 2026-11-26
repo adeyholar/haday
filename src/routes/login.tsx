@@ -10,6 +10,7 @@ import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { XSignInButton } from "@/components/x-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
+import { Panel } from "@/components/panel";
 import { cn } from "@/lib/cn";
 import { markTermHall, pathForHeard, rememberDoor, signInLanding, stashPathIntent, type HeardSource, type StudyPath } from "@/lib/path";
 import { getMyPath } from "@/lib/learner-path";
@@ -43,7 +44,9 @@ function GoToStudy() {
   if (!to) {
     return (
       <main className="grid min-h-dvh place-items-center px-5">
-        <p className="text-sm text-muted">Opening your study.</p>
+        <Panel>
+          <p className="text-sm text-muted">Opening your study.</p>
+        </Panel>
       </main>
     );
   }

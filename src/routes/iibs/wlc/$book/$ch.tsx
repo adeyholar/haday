@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { WlcReading, type SheetSize, type SheetTone } from "@/components/wlc-desk";
 import { WlcPlayer } from "@/components/wlc-player";
+import { Panel } from "@/components/panel";
 import { ScriptureTabs } from "@/components/iibs-door";
 import { ReadingLoopBar } from "@/components/reading-loop-bar";
 import { bookMeta, isBookId, parseChapter } from "@/lib/tanakh-canon";
@@ -239,9 +240,11 @@ function WlcChapterPage() {
 
   if (!meta || chapterNo == null) {
     return (
-      <p className="text-sm text-danger">
-        That chapter is not in the Tanakh. <Link to="/iibs/wlc">Back to the books.</Link>
-      </p>
+      <Panel>
+        <p className="text-sm text-danger">
+          That chapter is not in the Tanakh. <Link to="/iibs/wlc">Back to the books.</Link>
+        </p>
+      </Panel>
     );
   }
 
@@ -379,7 +382,11 @@ function WlcChapterPage() {
           {wideRoom ? null : <p className="text-sm text-muted">Same as Normal here.</p>}
         </div>
       ) : null}
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {error ? (
+        <Panel className="mb-3">
+          <p className="text-sm text-danger">{error}</p>
+        </Panel>
+      ) : null}
       <WlcPlayer
         book={meta.id}
         chapter={chapterNo}

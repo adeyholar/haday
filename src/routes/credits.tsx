@@ -26,10 +26,12 @@ function CreditsPage() {
           className="w-full rounded-[var(--radius-xl)] shadow-[var(--shadow-border)]"
         />
       </div>
-      <div className="mb-6 flex justify-center">
+      <Panel className="mb-6 flex flex-col items-center text-center">
         <BrandLockup size="hero" linked />
-      </div>
-      <PublicReturn />
+        <div className="mt-4">
+          <PublicReturn className="mb-0" />
+        </div>
+      </Panel>
       <Panel className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HaDay · BIBL 630</p>
         <h1 className="mt-1 font-display text-4xl font-bold tracking-tight text-ink">Credits</h1>
@@ -144,7 +146,7 @@ function CreditsPage() {
         </p>
       </Panel>
 
-      <p className="mt-5 text-center text-sm">
+      <Panel className="mt-5 text-center text-sm">
         <Link to="/legal" className="font-semibold text-primary underline-offset-4 hover:underline">
           Privacy and disclaimer
         </Link>
@@ -158,7 +160,7 @@ function CreditsPage() {
             Back to sign in
           </Link>
         )}
-      </p>
+      </Panel>
       <PublicFooter />
     </main>
   );

@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { Panel } from "@/components/panel";
 import { Button } from "@/components/ui/button";
 import { GlossAsk } from "@/components/english-ask";
 import { VerseEnglish } from "@/components/verse-english";
@@ -250,27 +251,29 @@ function Round({
         </ul>
 
         {phase === "retry" && (
-          <>
-            <p className="try-flash mt-1 text-center text-xl font-bold uppercase tracking-wide text-danger sm:text-2xl">
+          <Panel className="mt-1 text-center">
+            <p className="try-flash text-xl font-bold uppercase tracking-wide text-danger sm:text-2xl">
               One more try
             </p>
-            <p className="mt-1 text-center text-sm font-medium text-ink">Attempt it before I tell you.</p>
-          </>
+            <p className="mt-1 text-sm font-medium text-ink">Attempt it before I tell you.</p>
+          </Panel>
         )}
 
         {phase === "lead" && (
-          <div className="rounded-[var(--radius-md)] bg-danger/10 px-4 py-3 text-start">
+          <Panel className="text-start">
             <p className="try-flash text-center text-xl font-bold uppercase tracking-wide text-danger">
               Think it through
             </p>
             <p className="mt-2 text-sm font-medium text-ink">{item.lead}</p>
             <p className="mt-1 text-xs text-muted">Answer again from the question — then we will tell you.</p>
-          </div>
+          </Panel>
         )}
 
         {revealed && <Result item={item} ok={ok} />}
         {gaveUp && revealed && (
-          <p className="text-center text-sm text-muted">Back in the pool — you will see it again.</p>
+          <Panel className="text-center">
+            <p className="text-sm text-muted">Back in the pool — you will see it again.</p>
+          </Panel>
         )}
 
         {!revealed && (
