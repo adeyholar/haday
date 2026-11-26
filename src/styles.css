@@ -84,6 +84,18 @@
   line-height: 1.2;
 }
 
+/* Verb Lab only. Noto Serif Hebrew is a free pointed face; the lab lines need room for the vowels. */
+.verb-lab .he-word {
+  font-family: "Noto Serif Hebrew", "Frank Ruhl Libre", "Times New Roman", serif;
+  line-height: 1.9;
+  unicode-bidi: isolate;
+}
+
+.verb-lab .verb-lab-form {
+  line-height: 2.25;
+  padding-block: 0.08em;
+}
+
 /* Scripture Path Text. Ezra SIL carries the te‘amim; Frank Ruhl does not. */
 @font-face {
   font-family: "Ezra SIL";

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { examById } from "@/lib/verb-lab/registry";
-import { drawExam, squarePassed, type ExamAnswer, type PracticePrompt } from "@/lib/verb-lab/session";
+import { drawExam, examPassed, formPercent, GAME_STAGE_PASS, squarePassed, type ExamAnswer, type PracticePrompt } from "@/lib/verb-lab/session";
 import { squareTitle, type StemId, type VerbPath } from "@/lib/verb-lab/stems";
 
 function mulberry32(seed: number): () => number {
@@ -70,6 +70,7 @@ export function VerbLabExam({
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Exam</p>
         <h1 className="font-display text-3xl font-bold text-ink">{exam.title(path)}</h1>
         <p className="text-sm text-ink">
+          {formPercent(answers)}% of the forms. {examPassed(answers) ? "This exam is cleared." : `${GAME_STAGE_PASS}% clears it.`}{" "}
           {passed.length} square{passed.length === 1 ? "" : "s"} cleared.
           {missed.length ? ` ${missed.length} went to the due pile on Next.` : " Nothing missed."}
         </p>
@@ -118,11 +119,11 @@ export function VerbLabExam({
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Exam</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-ink">{exam.title(path)}</h1>
         <p className="mt-2 text-sm text-muted">
-          Covers {exam.covers.join(", ")}. A square clears at 90%. Question {step + 1} of {prompts.length}.
+          Covers {exam.covers.join(", ")}. Clears at {GAME_STAGE_PASS}% of the forms you answer. Question {step + 1} of {prompts.length}.
         </p>
       </div>
       <p className="text-center text-sm text-muted">{squareTitle(path, prompt.squareId)}</p>
-      <p className="he-word text-center text-4xl text-ink" lang="he" dir="rtl">
+      <p className="he-word verb-lab-form text-center text-4xl text-ink" lang="he" dir="rtl">
         {prompt.form}
       </p>
       {prompt.standard ? <p className="text-center text-xs font-semibold uppercase tracking-wide text-primary">standard form, not in the Bible</p> : null}

@@ -6,7 +6,7 @@ import { VerbLabExam } from "@/components/verb-lab/verb-lab-exam";
 import { VerbLabPractice } from "@/components/verb-lab/verb-lab-practice";
 import { VerbLabWelcome } from "@/components/verb-lab/verb-lab-welcome";
 import { WEAK_CLASSES, isWeakClassId, type ClassId } from "@/lib/verb-lab/data";
-import { hydrateVerbLab } from "@/lib/verb-lab/progress";
+import { hydrateVerbLab, progressKey, readProgressKey } from "@/lib/verb-lab/progress";
 import { readLocalProgress } from "@/lib/paradigms/local";
 import {
   chartRows,
@@ -17,7 +17,7 @@ import {
   squareRecord,
   teachingCite,
 } from "@/lib/verb-lab/registry";
-import type { VerbLabMode, VerbLabSearch, VerbLabTab } from "@/lib/verb-lab/redirects";
+import { hubBackTarget, type VerbLabMode, type VerbLabSearch, type VerbLabTab } from "@/lib/verb-lab/redirects";
 import { applyExam, notePractice, reviewTarget } from "@/lib/verb-lab/session";
 import {
   GRID_COLUMNS,
@@ -29,6 +29,7 @@ import {
   stemFace,
   stemGate,
   stemOrder,
+  anyStemDimmed,
   taughtLevel,
   type StemId,
   type VerbPath,
@@ -79,6 +80,7 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
 
   if (!progress.welcomed || view === "welcome") {
     return (
+      <div className="verb-lab">
       <VerbLabWelcome
         path={path}
         onEnter={() => {
@@ -87,12 +89,14 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
           go({ ...search, view: nextView });
         }}
       />
+      </div>
     );
   }
 
   if (view === "exam" && search.exam) {
     const stem = search.stem ?? "Qal";
     return (
+      <div className="verb-lab">
       <Panel className="grid gap-3">
         <button type="button" className="min-h-11 w-fit text-sm font-semibold text-primary" onClick={() => go({ view: "room", stem })}>
           ‹ Verb Lab
@@ -109,34 +113,40 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
           }}
         />
       </Panel>
+      </div>
     );
   }
 
   const openSquare = search.square;
   if (view === "square" && openSquare && classHasChart(classId, openSquare)) {
     return (
-      <SquarePage
-        path={path}
-        classId={classId}
-        squareId={openSquare}
-        tab={search.tab ?? "chart"}
-        mode={search.mode ?? "quiz"}
-        taught={taught}
-        cleared={progress.cleared.includes(openSquare)}
-        box={progress.boxes[openSquare]}
-        onBack={() => go({ view: "room", weak: classId === "strong" ? undefined : classId, stem: squareRecord(openSquare)?.stem })}
-        onTab={(tab) => go({ ...search, view: "square", tab })}
-        onMode={(mode) => go({ ...search, view: "square", mode })}
-        onAnswer={(correct) => save(notePractice(progress, openSquare, correct))}
-      />
+      <div className="verb-lab">
+        <SquarePage
+          path={path}
+          classId={classId}
+          squareId={openSquare}
+          tab={search.tab ?? "chart"}
+          mode={search.mode ?? "quiz"}
+          taught={taught}
+          cleared={progress.cleared.includes(progressKey(classId, openSquare))}
+          box={progress.boxes[progressKey(classId, openSquare)]}
+          onBack={() => go({ view: "room", weak: classId === "strong" ? undefined : classId, stem: squareRecord(openSquare)?.stem })}
+          onTab={(tab) => go({ ...search, view: "square", tab })}
+          onMode={(mode) => go({ ...search, view: "square", mode })}
+          onAnswer={(correct) => save(notePractice(progress, classId, openSquare, correct))}
+        />
+      </div>
     );
   }
 
   const review = reviewTarget(progress);
-  const continueId = progress.continueId && classHasChart("strong", progress.continueId) ? progress.continueId : "Qal.qatal";
+  const savedContinue = readProgressKey(progress.continueId ?? "");
+  const continueReady = savedContinue != null && classHasChart(savedContinue.classId, savedContinue.squareId);
+  const continueClass = continueReady && savedContinue ? savedContinue.classId : "strong";
+  const continueSquare = continueReady && savedContinue ? savedContinue.squareId : "Qal.qatal";
 
   return (
-    <div className="grid gap-4">
+    <div className="verb-lab grid gap-4">
       <Panel>
         <p className="min-h-11 text-sm font-semibold text-primary">
           <HubBack path={path} from={search.from} />
@@ -151,19 +161,27 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
       </Panel>
       <Panel className="grid content-start gap-4 max-lg:min-h-[calc(100dvh-12rem)]">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Next</p>
-        {review.total > 0 && review.id ? (
+        {review.total > 0 && review.squareId && review.classId ? (
           <>
             <div className="flex items-center gap-4">
               <p className="font-display text-6xl font-semibold text-primary">{review.total}</p>
               <div>
                 <p className="font-semibold text-ink">forms due</p>
-                <p className="text-sm text-muted">{squareTitle(path, review.id)}</p>
+                <p className="text-sm text-muted">{squareTitle(path, review.squareId)}</p>
               </div>
             </div>
             <button
               type="button"
               className="min-h-11 w-fit rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground"
-              onClick={() => go({ view: "square", square: review.id ?? undefined, tab: "practice", mode: "quiz" })}
+              onClick={() =>
+                go({
+                  view: "square",
+                  square: review.squareId ?? undefined,
+                  weak: review.classId === "strong" ? undefined : review.classId ?? undefined,
+                  tab: "practice",
+                  mode: "quiz",
+                })
+              }
             >
               Review due forms
             </button>
@@ -173,11 +191,19 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
         )}
         <div className="border-t border-border pt-3">
           <p className="text-sm text-muted">Continue where you stopped</p>
-          <p className="font-semibold text-ink">{squareTitle(path, continueId)} · Practice</p>
+          <p className="font-semibold text-ink">{squareTitle(path, continueSquare)} · Practice</p>
           <button
             type="button"
             className="mt-2 min-h-11 text-sm font-semibold text-primary"
-            onClick={() => go({ view: "square", square: continueId, tab: "practice", mode: "quiz" })}
+            onClick={() =>
+              go({
+                view: "square",
+                square: continueSquare,
+                weak: continueClass === "strong" ? undefined : continueClass,
+                tab: "practice",
+                mode: "quiz",
+              })
+            }
           >
             Continue
           </button>
@@ -223,7 +249,7 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
           </span>
           Show all
         </button>
-        <p className="text-sm text-muted">Dimmed stems are coming. Your class opens them.</p>
+        {anyStemDimmed(path, taught) ? <p className="text-sm text-muted">Dimmed stems are coming. Your class opens them.</p> : null}
         <div className="hidden lg:block">
           <WideGrid
             path={path}
@@ -262,13 +288,30 @@ export function VerbLabRoom({ path, search }: { path: VerbPath; search: VerbLabS
 }
 
 function HubBack({ path, from }: { path: VerbPath; from: VerbLabSearch["from"] }) {
-  const label = from === "learn" ? "Learn" : from === "play" ? "Play" : "Practice";
-  if (path === "scripture") {
-    const to = from === "learn" ? "/iibs/learn" : from === "play" ? "/iibs/vocab" : "/iibs/study";
-    return <Link to={to}>‹ {label}</Link>;
+  const target = hubBackTarget(path, from);
+  const label = `‹ ${target.label}`;
+  switch (target.to) {
+    case "/bbh":
+      return <Link to="/bbh">{label}</Link>;
+    case "/iibs":
+      return <Link to="/iibs">{label}</Link>;
+    case "/iibs/learn":
+      return <Link to="/iibs/learn">{label}</Link>;
+    case "/iibs/vocab":
+      return <Link to="/iibs/vocab">{label}</Link>;
+    case "/iibs/study":
+      return <Link to="/iibs/study">{label}</Link>;
+    case "/hub/learn":
+      return <Link to="/hub/learn">{label}</Link>;
+    case "/hub/play":
+      return <Link to="/hub/play">{label}</Link>;
+    case "/hub/practice":
+      return <Link to="/hub/practice">{label}</Link>;
+    default: {
+      const unreachable: never = target.to;
+      return unreachable;
+    }
   }
-  const to = from === "learn" ? "/hub/learn" : from === "play" ? "/hub/play" : "/hub/practice";
-  return <Link to={to}>‹ {label}</Link>;
 }
 
 function ClassChip({ pressed, title, sub, onClick }: { pressed: boolean; title: string; sub: string; onClick: () => void }) {
@@ -452,8 +495,8 @@ function WideGrid({
                               classId={classId}
                               squareId={id}
                               taught={open && squareTaught}
-                              box={progress.boxes[id]}
-                              cleared={progress.cleared.includes(id)}
+                              box={progress.boxes[progressKey(classId, id)]}
+                              cleared={progress.cleared.includes(progressKey(classId, id))}
                               onOpen={onOpen}
                             />
                           );
@@ -528,8 +571,8 @@ function PhoneStem({
                 classId={classId}
                 squareId={id}
                 taught={unlocked && squareTaught}
-                box={progress.boxes[id]}
-                cleared={progress.cleared.includes(id)}
+                box={progress.boxes[progressKey(classId, id)]}
+                cleared={progress.cleared.includes(progressKey(classId, id))}
                 onOpen={onOpen}
               />
             );

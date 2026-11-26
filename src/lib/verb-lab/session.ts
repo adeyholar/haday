@@ -1,6 +1,6 @@
 import { schedule } from "@/lib/paradigm/srs";
 import { chartRows, coveredSquareIds, examById, type ChartRow } from "@/lib/verb-lab/registry";
-import { dueTotal, firstDueId, type VerbLabProgress } from "@/lib/verb-lab/progress";
+import { dueTotal, firstDueId, progressKey, readProgressKey, type VerbLabProgress } from "@/lib/verb-lab/progress";
 import { isNoFormSquare, pgnLabel, pgnRank, type VerbPath } from "@/lib/verb-lab/stems";
 import type { ClassId } from "@/lib/verb-lab/data";
 import { GAME_STAGE_PASS } from "@/lib/game";
@@ -24,11 +24,12 @@ export function nextPracticeBox(box: number | undefined, correct: boolean): numb
   return schedule(box == null ? undefined : { box, due: 0 }, correct, 0).box;
 }
 
-export function notePractice(progress: VerbLabProgress, squareId: string, correct: boolean): VerbLabProgress {
+export function notePractice(progress: VerbLabProgress, classId: ClassId, squareId: string, correct: boolean): VerbLabProgress {
+  const key = progressKey(classId, squareId);
   return {
     ...progress,
-    boxes: { ...progress.boxes, [squareId]: nextPracticeBox(progress.boxes[squareId], correct) },
-    continueId: squareId,
+    boxes: { ...progress.boxes, [key]: nextPracticeBox(progress.boxes[key], correct) },
+    continueId: key,
   };
 }
 
@@ -94,11 +95,23 @@ export function drawExam(classId: ClassId, examId: string, path: VerbPath, taugh
   return prompts;
 }
 
+/** Whole-exam percent. Four forms in one square used to hide a 100% bar behind a 90% label. */
+export function formPercent(answers: readonly ExamAnswer[]): number {
+  if (answers.length === 0) return 0;
+  const right = answers.filter((answer) => answer.correct).length;
+  return Math.round((right / answers.length) * 100);
+}
+
+export function examPassed(answers: readonly ExamAnswer[]): boolean {
+  return answers.length > 0 && formPercent(answers) >= GAME_STAGE_PASS;
+}
+
 export function squarePassed(answers: readonly ExamAnswer[], squareId: string): boolean {
   const mine = answers.filter((answer) => answer.squareId === squareId);
   if (mine.length === 0) return false;
+  if (examPassed(answers)) return true;
   const right = mine.filter((answer) => answer.correct).length;
-  return (right / mine.length) * 100 >= GAME_STAGE_PASS;
+  return Math.round((right / mine.length) * 100) >= GAME_STAGE_PASS;
 }
 
 export function applyExam(progress: VerbLabProgress, answers: readonly ExamAnswer[]): VerbLabProgress {
@@ -106,19 +119,25 @@ export function applyExam(progress: VerbLabProgress, answers: readonly ExamAnswe
   const due = { ...progress.due };
   const cleared = new Set(progress.cleared);
   for (const squareId of squares) {
+    const key = progressKey("strong", squareId);
     const mine = answers.filter((answer) => answer.squareId === squareId);
     const missed = mine.filter((answer) => !answer.correct).length;
     if (squarePassed(answers, squareId)) {
-      cleared.add(squareId);
+      cleared.add(key);
+      cleared.delete(squareId);
+      delete due[key];
       delete due[squareId];
     } else if (missed > 0) {
+      cleared.delete(key);
       cleared.delete(squareId);
-      due[squareId] = (due[squareId] ?? 0) + missed;
+      due[key] = (due[key] ?? 0) + missed;
+      delete due[squareId];
     }
   }
   return { ...progress, due, cleared: [...cleared] };
 }
 
-export function reviewTarget(progress: VerbLabProgress): { id: string | null; total: number } {
-  return { id: firstDueId(progress), total: dueTotal(progress) };
+export function reviewTarget(progress: VerbLabProgress): { classId: ClassId | null; squareId: string | null; total: number } {
+  const parsed = readProgressKey(firstDueId(progress) ?? "");
+  return { classId: parsed?.classId ?? null, squareId: parsed?.squareId ?? null, total: dueTotal(progress) };
 }

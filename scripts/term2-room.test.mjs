@@ -50,7 +50,8 @@ test("semester 2 words stay off the first-term list", () => {
   const hub = readFileSync(new URL("../src/components/path-hub.tsx", import.meta.url).pathname, "utf8");
   const home = readFileSync(new URL("../src/components/term-door.tsx", import.meta.url).pathname, "utf8");
   assert.match(hub, /VerbLabCard/);
-  assert.match(home, /VerbLabCard/);
+  assert.match(home, /VerbLabCard from="home"/);
+  assert.equal(home.includes('from="play"'), false);
   assert.equal(hub.includes("VERB_STEM_MENU"), false);
   assert.equal(TERM2_LESSONS.length, 16);
   assert.equal(TERM2_LESSONS[0].chapter, 20);

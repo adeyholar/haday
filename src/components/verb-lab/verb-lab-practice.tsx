@@ -63,7 +63,7 @@ export function VerbLabPractice({
       {mode === "quiz" ? (
         <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-surface p-5 text-center shadow-[var(--shadow-border)]">
           <p className="text-sm text-muted">Which person is this?</p>
-          <p className="he-word text-4xl text-ink" lang="he" dir="rtl">
+          <p className="he-word verb-lab-form text-4xl text-ink" lang="he" dir="rtl">
             {prompt.form}
           </p>
           {prompt.standard ? <p className="text-xs font-semibold uppercase tracking-wide text-primary">standard form, not in the Bible</p> : null}
@@ -94,7 +94,15 @@ export function VerbLabPractice({
               {picked === prompt.pgn ? "Right." : `Not quite. This is ${prompt.person}.`}
             </p>
           ) : null}
-          <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => load(index + 1)}>
+          <button
+            type="button"
+            className="min-h-11 text-sm font-semibold text-primary disabled:text-muted"
+            disabled={picked == null}
+            onClick={() => {
+              if (picked == null) return;
+              load(index + 1);
+            }}
+          >
             Next
           </button>
         </section>
@@ -102,7 +110,7 @@ export function VerbLabPractice({
         <section className="grid justify-items-center gap-4 rounded-[var(--radius-xl)] bg-surface p-5 text-center shadow-[var(--shadow-border)]">
           <p className="text-sm text-muted">Say it, then reveal</p>
           <p className="text-lg font-semibold text-ink">{prompt.person}</p>
-          <p className="he-word min-h-12 text-4xl text-ink" lang="he" dir="rtl">
+          <p className="he-word verb-lab-form min-h-12 text-4xl text-ink" lang="he" dir="rtl">
             {shown ? prompt.form : ""}
           </p>
           {shown && prompt.standard ? <p className="text-xs font-semibold uppercase tracking-wide text-primary">standard form, not in the Bible</p> : null}
