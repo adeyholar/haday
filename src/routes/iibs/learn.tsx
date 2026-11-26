@@ -16,6 +16,12 @@ function ScriptureLearn() {
       </div>
       <ul className="mt-4 grid gap-2">
         <li>
+          <Link to="/iibs/binyanim" className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]">
+            <span className="block font-display text-2xl font-bold">Seven stems</span>
+            <span className="mt-1 block text-sm text-muted">Name the stem. Open practice. It does not lock a level.</span>
+          </Link>
+        </li>
+        <li>
           <Link to="/iibs" className="block rounded-[var(--radius-xl)] bg-card p-4 text-ink shadow-[var(--shadow-border)]">
             <span className="block font-display text-2xl font-bold">Lessons</span>
             <span className="mt-1 block text-sm text-muted">Thirty lessons in the level you are in.</span>
