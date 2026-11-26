@@ -33,7 +33,7 @@ Browsers POST violation reports here. The handler always returns 204.
 - Allowed types: `application/csp-report`, `application/reports+json`, and `application/json`. Other types are ignored.
 - If `Content-Length` is over 8,192 bytes, the request is rejected before any body is read.
 - The body stream is also hard-capped at 8,192 bytes, so a missing or false `Content-Length` cannot fill memory. Oversized bodies are dropped, not logged.
-- A simple in-memory limit allows 30 reports a minute per IP (the last hop in `X-Forwarded-For`, or `X-Real-IP`). Extra reports get a 204 with no log line.
+- A simple in-memory limit allows 30 reports a minute per IP (the last hop in `X-Forwarded-For`, or `X-Real-IP`). Extra reports get a 204 with no log line. The map holds at most 10,000 IPs. After expired rows are removed, a new IP that would go past that cap is treated as limited (silent 204) and is not inserted, so a burst of unique or spoofed addresses cannot grow the map.
 
 ## YouTube fullscreen
 

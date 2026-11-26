@@ -169,6 +169,40 @@ test("the CSP report endpoint returns 204, caps the body, and rate-limits", asyn
   }
 });
 
+test("the CSP report rate-limit map stays bounded under unique IPs", async () => {
+  const { handleCspReport, resetCspReportRateLimit, CSP_REPORT_RATE_MAX_IPS, cspReportRateMapSize } = securityMod;
+  resetCspReportRateLimit();
+  const original = console.warn;
+  let logged = 0;
+  console.warn = () => {
+    logged += 1;
+  };
+  try {
+    for (let i = 0; i < CSP_REPORT_RATE_MAX_IPS; i += 1) {
+      const res = await handleCspReport(reportEvent({ ip: `203.0.113.${i}`, body: '{"n":1}' }));
+      assert.equal(res.status, 204);
+    }
+    assert.equal(cspReportRateMapSize(), CSP_REPORT_RATE_MAX_IPS);
+    assert.equal(logged, CSP_REPORT_RATE_MAX_IPS);
+
+    logged = 0;
+    for (let i = 0; i < 25; i += 1) {
+      const res = await handleCspReport(reportEvent({ ip: `198.51.100.${i}`, body: '{"n":2}' }));
+      assert.equal(res.status, 204);
+      assert.equal(cspReportRateMapSize(), CSP_REPORT_RATE_MAX_IPS);
+    }
+    assert.equal(logged, 0);
+
+    const known = await handleCspReport(reportEvent({ ip: "203.0.113.0", body: '{"n":3}' }));
+    assert.equal(known.status, 204);
+    assert.equal(cspReportRateMapSize(), CSP_REPORT_RATE_MAX_IPS);
+    assert.equal(logged, 1);
+  } finally {
+    console.warn = original;
+    resetCspReportRateLimit();
+  }
+});
+
 test("blog cache uses the one section list", async () => {
   const security = readFileSync(new URL("../server/middleware/00.security-headers.ts", import.meta.url), "utf8");
   const grok = readFileSync(new URL("../server/middleware/grok-pwa.ts", import.meta.url), "utf8");
