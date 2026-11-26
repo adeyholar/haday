@@ -1,5 +1,5 @@
 import { CONSONANTS } from "./alphabet";
-import { foldFinals, lettersOnly } from "./hebrew";
+import { displayedHebrew, foldFinals, lettersOnly } from "./hebrew";
 import { isTerm2Week, itemsForTerm2Week, term2StudyMeta } from "./vocab-s2";
 
 export type Pos = "noun" | "verb" | "adj" | "prep" | "particle" | "name" | "pron" | "gentilic";
@@ -851,10 +851,11 @@ export function closeItems(item: VocabItem, pool: VocabItem[], n = 3): VocabItem
     .map((other) => ({ other, score: distractorScore(item, other) }))
     .sort((a, b) => b.score - a.score);
   const out: VocabItem[] = [];
-  const seenHe = new Set([item.hebrew]);
+  const seenHe = new Set([displayedHebrew(item.hebrew)]);
   for (const { other } of ranked) {
-    if (seenHe.has(other.hebrew)) continue;
-    seenHe.add(other.hebrew);
+    const face = displayedHebrew(other.hebrew);
+    if (seenHe.has(face)) continue;
+    seenHe.add(face);
     out.push(other);
     if (out.length >= n) break;
   }

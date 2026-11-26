@@ -1,5 +1,124 @@
 # Handover
 
+This branch is not merged. Do not merge it. Merging is the Chairman's call. This PR stays a draft.
+
+Branch: `cursor/listen-choice-dupes-baf3`
+
+Implementation commit: `6c35bd059026089f4439c000adf72f99729ab6f3`
+
+Starts from `main` at `d9b1674` (PR #267).
+
+No secrets are in this note. No vocabulary row was edited or deleted.
+
+## What this branch does
+
+The Listen card (“Listen, then pick the Hebrew”) and the other multiple-choice drills that use the same distractor picker no longer deal two buttons with the same displayed Hebrew.
+
+The picker is `closeItems` in `src/lib/vocab.ts`. Listen uses it through `drillCardChoices` (`contrast` + `audio`) in `src/lib/etch.ts`. The same picker fills the other Hebrew contrast cards, the study and verse boards, and `contrastChoices`. The English-button fallback (`englishMates`) uses the same displayed form, so a short list does not put the skipped twin back.
+
+A distractor is skipped when its displayed Hebrew equals the answer or a distractor already chosen. Displayed Hebrew is NFC, then cantillation (U+0591–U+05AF) removed. Vowel points stay. Dagesh and the shin/sin dots stay. The picker keeps walking the ranked pool until it has enough distinct buttons. If the pool runs out, the card has fewer buttons. It does not repeat a form.
+
+`displayedHebrew` lives in `src/lib/hebrew.ts`.
+
+## The Chairman’s card
+
+Verb, Ch. 12, the Listen card. The screenshot was read as רָעָה, אָכַל, אָמַר, אָכַל.
+
+`אָכַל` is stored once on the Grammar Path: `akol`, chapter 12, “to eat, consume”. Scripture Path has one `אָכַל` (`iibs-a-1yjcxrd`, “he ate, he consumed”) and one `אֹכֶל` (`iibs-e-1lni4kl`, “food”), which keeps different vowels. The final-exam list uses the same `akol` once.
+
+On a week-15 sitting with seed 42, the Listen card for `akol` deals רָעָה (`raah-pasture`), אָכַל (`akol`), אָמַר (`amar`), אָבַל (`abal`, chapter 20, “to mourn”). Bet and kaf are lookalikes, so the picker prefers `abal`. That pair is not the same displayed spelling, and this branch does not remove lookalike traps. The Chairman can decide whether אָבַל beside אָכַל should stay.
+
+The test that fails on the old picker puts a second `אָכַל` in the pool with a tipcha (`אָכַ֖ל`), plus an exact copy and an NFD copy. The Listen card then has four buttons and none of those copies.
+
+## Identical displayed Hebrew
+
+Compared with `displayedHebrew`. Left for the Chairman. Nothing below was changed.
+
+### Grammar Path `VOCAB` (422 items, 4 groups, same stored string)
+
+- אַף — `aph` (ch 9, noun, “nostril, nose, anger”); `aph-also` (ch 15, particle, “also, indeed, even”)
+- זָקֵן — `zaqen` (ch 7, adj, “old; elder, old man”); `zaqen-v` (ch 20, verb, “to be old”)
+- עָנָה — `anah` (ch 15, verb, “to answer, respond, testify”); `anah-sing` (ch 20, verb, “to sing, answer”)
+- רָעָה — `raah-evil` (ch 7, noun, “evil, wickedness, calamity, disaster”); `raah-pasture` (ch 18, verb, “to pasture, shepherd, feed”)
+
+### Semester 2 `VOCAB_S2` (206 items, 3 groups, same stored string)
+
+- טָמֵא — `s2-20-1` (ch 20, verb, “to be unclean, become unclean”); `s2-26-14` (ch 26, adj, “unclean”)
+- פָּלָא — `s2-24-12` (ch 24, verb, “to be extraordinary, be wonderful, be too difficult”); `s2-32-3` (ch 32, verb, “to be extraordinary, wonderful”)
+- שִׁיר — `s2-25-14` (ch 25, noun, “song”); `s2-26-10` (ch 26, verb, “to sing”)
+
+### Scripture Path `iibsPathItems` (1,665 items, 45 groups)
+
+Five groups match only after NFC. The stored mark order differs, so the old raw-string check treated them as different buttons:
+
+- גִּבְעָה — `iibs-b-wfaz6f` (noun, “hill”); `iibs-d-1e886m8` (name, “Gibeah”)
+- גֶּפֶן — `iibs-a-1cnmw38` (noun, “vine”); `iibs-d-gta6b0` (noun, “vine”)
+- כֵּן — `iibs-a-1tmpzvy` (particle, “so, thus”); `iibs-d-5ncgxe` (noun, “base, pedestal; place, position”)
+- מֶמְשָׁלָה — `iibs-a-1w8hrg6` (noun, “Dominion”); `iibs-d-1p5xev7` (noun, “dominion, rule, kingdom”)
+- שְׁכֶם — `iibs-a-1cgr0bj` (noun, “shoulder”); `iibs-c-bafrgs` (name, “Shechem”)
+
+The other 40 groups are the same stored string, with two meanings (טוֹב has three):
+
+- אֱדוֹם — `iibs-a-17m2sh7` (name, “Edom”); `iibs-b-17m2sh7` (name, “Edom”)
+- אֵי — `iibs-a-bg21i8` (particle, “where”); `iibs-d-4c6p59` (particle, “where?”)
+- אֵיךְ — `iibs-a-1n8cuib` (particle, “how”); `iibs-e-p93w6c` (particle, “how?”)
+- אַל — `iibs-a-1bbovii` (particle, “do not”); `iibs-b-octpkz` (particle, “not [prohibition]”)
+- אֳנִיָּה — `iibs-a-192ctob` (noun, “Ship”); `iibs-b-gis657` (noun, “ship”)
+- אַף — `iibs-a-1it90xu` (particle, “also, more than this”); `iibs-b-qtu1ft` (noun, “nostril, nose, face, anger”)
+- אַשּׁוּר — `iibs-a-1al3aff` (name, “Asshur, Assyria”); `iibs-a-w88ren` (gentilic, “Assyrian”)
+- אֵת — `iibs-a-p1czcu` (prep, “with”); `iibs-a-64hl1l` (particle, “direct object marker, untranslated”)
+- בַּעַל — `iibs-a-1ne6iwr` (noun, “owner, lord, husband”); `iibs-a-1kored0` (name, “Baal”)
+- בְּרָכָה — `iibs-a-109995c` (noun, “blessing”); `iibs-b-1c3s93x` (noun, “blessing; gift”)
+- דָּבַק — `iibs-a-33nzx8` (verb, “he clinged”); `iibs-b-1ey8avt` (verb, “he clung”)
+- הֵנָּה — `iibs-a-xdqaxq` (pron, “they”); `iibs-b-h1zudg` (particle, “hither”)
+- זָקֵן — `iibs-a-qv0rz` (adj, “old”); `iibs-d-1mbgq9n` (verb, “he was/became old”)
+- חָסֵר — `iibs-d-16daspt` (adj, “lacking”); `iibs-d-4ut1fp` (verb, “he lacked, was lacking/in want; it diminished”)
+- טָהֵר — `iibs-b-1ahsfdb` (verb, “he was clean”); `iibs-c-zbnlpx` (verb, “he was/became clean”)
+- טוֹב — `iibs-a-763rt6` (adj, “good, pleasing”); `iibs-b-1in3fej` (noun, “a good thing, benefit, welfare”); `iibs-c-1l442ey` (verb, “he was good, well, glad, pleasing”)
+- טָמֵא — `iibs-a-gsmbe` (adj, “unclean”); `iibs-c-1k3opjq` (verb, “he was/became unclean”)
+- יָרֵחַ — `iibs-a-1rv77to` (noun, “moon”); `iibs-b-pu4nsu` (noun, “moon, month”)
+- כָּלָה — `iibs-c-126a6uk` (verb, “it was finished, ended, determined, exhausted; he perished”); `iibs-e-1v02ftt` (noun, “completion, complete destruction”)
+- כַּשְׂדִּים — `iibs-b-oaqs2e` (name, “Chaldeans”); `iibs-b-1hhwjoh` (gentilic, “Chaldean”)
+- לָבָן — `iibs-a-1ujpsqb` (name, “Laban”); `iibs-d-sw4bk6` (adj, “white”)
+- לֵוִי — `iibs-a-zwt083` (name, “Levi, Levite”); `iibs-a-mk4j9d` (gentilic, “Levite”)
+- מַדּוּעַ — `iibs-a-t7a4j` (particle, “why”); `iibs-b-16fq126` (particle, “why? for what reason?”)
+- מָדַי — `iibs-e-1mgo7n8` (name, “Media, Medes”); `iibs-e-mpyxmr` (gentilic, “Mede”)
+- מִין — `iibs-a-10o14yj` (noun, “species”); `iibs-e-1yu3d6d` (noun, “kind, species”)
+- מָלֵא — `iibs-a-rc4hjb` (adj, “full”); `iibs-c-o7bayn` (verb, “he was full; he filled”)
+- נֵבֶל — `iibs-d-1v9zqa` (noun, “harp, lute”); `iibs-e-1rxuv7f` (noun, “skin, jar”)
+- נִחַם — `iibs-b-l5gswc` (verb, “he comforted, he consoled”); `iibs-c-15gcabo` (verb, “he regretted, relented, repented; he comforted himself”)
+- עַד — `iibs-a-15cc04s` (prep, “as far as, up to, until”); `iibs-c-okkf2j` (noun, “eternity”)
+- עֵזֶר — `iibs-a-e4glo4` (noun, “help, support”); `iibs-b-17a3f6l` (noun, “help, aid”)
+- עֳנִי — `iibs-a-ynnaz1` (noun, “affliction, misery”); `iibs-d-wcdwa7` (noun, “affliction, misery; poverty”)
+- פָּרָה — `iibs-c-1be1qh4` (verb, “he/it bore fruit, was fruitful”); `iibs-e-14qlxqz` (noun, “cow, heifer”)
+- פָּרַס — `iibs-e-gqs0in` (name, “Persia”); `iibs-e-1up7fqb` (gentilic, “Persian”)
+- צְבִי — `iibs-d-17uk4mv` (noun, “gazelle”); `iibs-e-yvusfq` (noun, “glory”)
+- צַר — `iibs-b-14l704l` (noun, “adversary, enemy”); `iibs-c-138hg97` (noun, “distress, narrowness”)
+- צָרַר — `iibs-e-d9qqo4` (verb, “he bound, tied up, shut up; he was cramped, impeded, distressed”); `iibs-e-zkwvqk` (verb, “he was hostile toward; he vexed, harassed”)
+- רָעָה — `iibs-a-1x3gx40` (noun, “evil, misery, distress, injury”); `iibs-b-t31bct` (verb, “he pastured, he tended, he grazed”)
+- שָׁבַר — `iibs-a-nb90ol` (verb, “he broke”); `iibs-e-1hj3j5s` (verb, “he bought [grain]”)
+- שֵׂעָר — `iibs-a-upxfd5` (noun, “hair”); `iibs-b-upxfd5` (noun, “hair”)
+- תֵּבָה — `iibs-a-1pvdrmj` (noun, “ark”); `iibs-b-1pvdrmj` (noun, “ark”)
+
+Final exam (80), independent pronouns (11), pronominal suffixes (10), and Qal imperfect suffixes (12) have no display-identical group.
+
+## Tests actually run
+
+On 26 Nov 2026, Node v22.23.4, on this branch after the edits:
+
+- `npm run typecheck` (`tsc --noEmit`) — exit 0
+- `node --test scripts/*.test.mjs` — 779 tests, 774 pass, 0 fail, 5 skipped. The new test is “a listen card never shows two choices with the same Hebrew”. It watched the old picker fail first (the card was אָכַל, אָמַר, הָלַךְ, אָכַל).
+- `npx eslint` on the file list in `.github/workflows/checks.yml`, with `--max-warnings 0` — exit 0
+- `npm run build` — exit 0. `db:migrate` skipped because `DATABASE_URL` is not set. That is the local path in `scripts/migrate.mjs`.
+
+`npx eslint src/lib/hebrew.ts src/lib/vocab.ts src/lib/etch.ts` still reports `no-misleading-character-class` on older regexes that contain a literal combining mark (`consonantsOf`, and three sites in `hebrew.ts`). Those lines were already on main. The new check uses `\u0591-\u05AF`. CI does not lint those files. This branch does not change those regexes.
+
+## Record already on main
+
+The note below was already on `main` at `d9b1674`. It describes PR #267.
+
+# Handover
+
 This branch is not merged. Do not merge it. Merging is the Chairman's call.
 
 Branch: `cursor/pe-aleph-rulings-d911`
