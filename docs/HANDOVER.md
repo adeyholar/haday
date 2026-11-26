@@ -4,6 +4,8 @@ This branch is not merged. Do not merge it. Merging is the Chairman's call. The 
 
 Branch: `cursor/binyanim-drill-dccc`
 
+Code commit: `da02ea3ce5ee8a0fbccb8d0382600a6e32e870b6`
+
 Starts from `main` at `d9b1674` (PR #267).
 
 No secrets are in this note.
