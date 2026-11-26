@@ -1,5 +1,24 @@
 # Handover
 
+PR #253 (`cursor/listen-lab-card-2d6d`) is rebased onto `main` at `ff09520b19d1ac44316ed7cc6485539bdc00d97d`. It is not merged.
+
+The rebased app commit these tests cover is `d1620584043d0c6ea025ec00a50e9324a28ad4fd`. This note is the commit after that. It does not change the app. The branch head is the commit that adds this section.
+
+## Tests
+
+Run on 26 Nov 2026, Node v22.23.4, on `d1620584043d0c6ea025ec00a50e9324a28ad4fd`:
+
+- `npm run typecheck` (`tsc --noEmit`) passed (exit 0).
+- `node --test scripts/*.test.mjs`: 769 tests, 764 pass, 0 fail, 5 skipped.
+- `node scripts/audit-lemmas.mjs` passed (exit 0). Counts: a 4, b 2,762, c 0, d 12,993, e 0, f 760, g 6,572, h 0.
+- `npx eslint` on the file list in `.github/workflows/checks.yml`, with `--max-warnings 0`, passed (exit 0).
+
+`src/components/path-hub.tsx` was the only rebase conflict. Both import sides were kept: `VerbLabCard` from main, and `translationLabEnabled` plus `showTranslationLabListenCard` from this branch. The Learn, Practice, and Play menus still render `VerbLabCard`. The card list still has the quiz and drill entries main added after PR #252: independent pronouns, pronominal suffixes, and Qal imperfect suffixes, on both semesters. The Verb Lab frame from PR #261 was already on main and was not in the conflict. The Translation Lab card is still appended only when the menu is Listen, `translationLabEnabled()` is on, and `showTranslationLabListenCard` is true (open term Semester 1).
+
+## Earlier record
+
+The notes below were already on `main`. They describe the lemma work from `4eac58a` (PR #246, merged 17 Nov 2026). That branch was not merged again from here. Do not treat the 17 Nov test line as this run.
+
 This branch is not merged. Do not merge it. Do not deploy.
 
 It starts from `main` at `4eac58a` (PR #246, merged 17 Nov 2026, 6:11 PM America/Indianapolis). Production is already on that SHA. This branch does not deploy it again.
@@ -39,8 +58,8 @@ Still green, from this pin:
 
 A second rebuild from `data/wlc` plus `data/lemma-overrides.json` is byte-identical (`scripts/build-strong-map.mjs` twice, then `scripts/build-strongs.py` twice). The query index was not rebuilt. `scripts/build-tanakh.py` was not run.
 
-## Tests
+## Earlier tests (17 Nov 2026)
 
 `npx tsc --noEmit` passed (exit 0) on 17 Nov 2026. TanStack Start is 1.168.60.
 
-`node --test scripts/*.test.mjs`: 700 tests, 695 pass, 0 fail, 5 skipped. That covers the locks above, the split-qere display (the qere of each of the 17 groups is drawn once), Gen 30:11, the six written-not-read tokens, the override drift test, and the English-still-on-the-page test. `node scripts/audit-lemmas.mjs` passed against the committed baseline.
+`node --test scripts/*.test.mjs`: 700 tests, 695 pass, 0 fail, 5 skipped. That covers the locks above, the split-qere display (the qere of each of the 17 groups is drawn once), Gen 30:11, the six written-not-read tokens, the override drift test, and the English-still-on-the-page test. `node scripts/audit-lemmas.mjs` passed against the committed baseline. This is the earlier record, not the 26 Nov run at the top.
