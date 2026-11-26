@@ -18,23 +18,25 @@ export function BlogIndex({ filter, posts }: { filter: BlogFilter; posts: Teachi
     <main className="mx-auto w-full max-w-2xl px-5 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogIndexJsonLd(filter, posts)) }} />
       <Panel>
-        <p className="text-sm text-muted">
-          <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Home
-          </Link>
-          {" / "}
-          {filter === "all" ? (
-            <span>Blog</span>
-          ) : (
-            <>
-              <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
-                Blog
-              </Link>
-              {" / "}
-              <span>{TEACHING_SECTIONS[filter].label}</span>
-            </>
-          )}
-        </p>
+        <nav aria-label="Breadcrumb">
+          <p className="text-sm text-muted">
+            <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Home
+            </Link>
+            {" / "}
+            {filter === "all" ? (
+              <span aria-current="page">Blog</span>
+            ) : (
+              <>
+                <Link to="/blogs" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  Blog
+                </Link>
+                {" / "}
+                <span aria-current="page">{TEACHING_SECTIONS[filter].label}</span>
+              </>
+            )}
+          </p>
+        </nav>
         <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-ink">{heading}</h1>
         <p className="mt-3 max-w-prose text-muted">{intro}</p>
         <nav aria-label="Blog" className="mt-4 flex flex-wrap gap-2">
