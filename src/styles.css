@@ -96,6 +96,59 @@
   padding-block: 0.08em;
 }
 
+/* Phone charts stack inside the panel. A 36rem table was wider than a 360–390px screen and scrolled the page. */
+@media (max-width: 639px) {
+  .verb-lab .verb-chart {
+    display: block;
+  }
+  .verb-lab .verb-chart thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .verb-lab .verb-chart tbody,
+  .verb-lab .verb-chart tr,
+  .verb-lab .verb-chart td,
+  .verb-lab .verb-chart th {
+    display: block;
+    width: auto;
+    min-width: 0;
+    text-align: start;
+  }
+  .verb-lab .verb-chart tr {
+    padding-block: 0.85rem;
+  }
+  .verb-lab .verb-chart td,
+  .verb-lab .verb-chart th {
+    padding: 0.15rem 0;
+  }
+  .verb-lab .verb-chart .verb-chart-person {
+    padding-top: 0.2rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .verb-lab .verb-chart .verb-chart-skip {
+    display: none;
+  }
+  .verb-lab .verb-chart [data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.12rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .verb-lab .verb-chart [data-label] .verb-lab-form {
+    display: block;
+    text-align: end;
+  }
+}
+
 /* Scripture Path Text. Ezra SIL carries the te‘amim; Frank Ruhl does not. */
 @font-face {
   font-family: "Ezra SIL";

@@ -2,16 +2,16 @@ import { Panel } from "@/components/panel";
 import { welcomeRow } from "@/lib/verb-lab/welcome";
 import { stemFace, stemPairs, type VerbPath } from "@/lib/verb-lab/stems";
 
-function Cell({ form, count }: { form: string | null; count: number | null }) {
+function Cell({ form, count, label }: { form: string | null; count: number | null; label: string }) {
   if (!form) {
     return (
-      <td className="px-2 py-2 text-end">
+      <td className="px-2 py-2 text-end" data-label={label}>
         <span className="text-xs font-semibold uppercase tracking-wide text-muted">Not in the Bible</span>
       </td>
     );
   }
   return (
-    <td className="px-2 py-2 text-end">
+    <td className="px-2 py-2 text-end" data-label={label}>
       <span className="he-word text-xl text-ink" lang="he" dir="rtl">
         {form}
       </span>
@@ -31,8 +31,8 @@ export function VerbLabWelcome({ path, onEnter }: { path: VerbPath; onEnter: () 
       <p className="max-w-prose text-ink">
         A Hebrew verb root can be built in up to seven stems. Each stem has its own voice. Six of them come in pairs, an active stem and its passive. {hitpael} stands alone: reflexive / reciprocal.
       </p>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+      <div className="min-w-0 max-w-full">
+        <table className="verb-chart w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
               <th className="px-2 py-2 font-semibold">Stem</th>
@@ -57,15 +57,15 @@ export function VerbLabWelcome({ path, onEnter }: { path: VerbPath; onEnter: () 
                 const alone = group.length === 1;
                 return (
                   <tr key={stem} className={`border-b border-border ${alone ? "border-s border-dashed border-primary" : index === 0 ? "border-s-2 border-primary" : "border-s-2 border-primary"}`}>
-                    <th className="px-2 py-2 text-start font-semibold text-ink" scope="row">
+                    <th className="verb-chart-person px-2 py-2 text-start font-semibold text-ink" scope="row">
                       {face.en}{" "}
                       <span className="he-word font-normal" lang="he" dir="rtl">
                         {face.he}
                       </span>
                     </th>
-                    <td className="px-2 py-2 text-muted">{row.voice}</td>
-                    <Cell form={row.paqad} count={row.paqadCount} />
-                    <Cell form={row.shamar} count={row.shamarCount} />
+                    <td className="px-2 py-2 text-muted" data-label="Voice">{row.voice}</td>
+                    <Cell form={row.paqad} count={row.paqadCount} label="פקד" />
+                    <Cell form={row.shamar} count={row.shamarCount} label="שמר" />
                   </tr>
                 );
               }),
