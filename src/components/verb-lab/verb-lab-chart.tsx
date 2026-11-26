@@ -32,7 +32,7 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
   }
   const heading = columnLabel(column);
   return (
-    <div>
+    <div className="min-w-0 max-w-full">
       <p className="text-sm text-muted">
         Root <span className="he-word text-ink" lang="he" dir="rtl">{nfc(file.root)}</span>
         {rootNote(classId) ? (
@@ -42,9 +42,9 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
         ) : null}
       </p>
       {[...groups.entries()].map(([subtype, group]) => (
-        <div key={subtype || "main"} className="mt-4 overflow-x-auto">
+        <div key={subtype || "main"} className="mt-4 min-w-0 max-w-full">
           {subtype ? <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">{subtype}</p> : null}
-          <table className="w-full min-w-[36rem] text-left text-sm">
+          <table className="verb-chart w-full text-left text-sm">
             <caption className="sr-only">
               {heading.label}
               {heading.sub ? ` ${heading.sub}` : ""}
@@ -60,8 +60,8 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
             <tbody>
               {group.map((row) => (
                 <tr key={row.key} className="border-b border-border align-top">
-                  <td className="px-2 py-2 text-muted">{pgnLabel(row.pgn)}</td>
-                  <td className="px-2 py-2 text-end">
+                  <td className="verb-chart-person px-2 py-2 text-muted">{pgnLabel(row.pgn)}</td>
+                  <td className="px-2 py-2 text-end" data-label="Form">
                     <FormLine row={row} />
                     {row.alternates.map((alt) => (
                       <div key={alt.key}>
@@ -84,14 +84,16 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-2 py-2 text-end">
+                  <td className={`px-2 py-2 text-end ${row.exampleWord ? "" : "verb-chart-skip"}`} data-label="In the Bible">
                     {row.exampleWord ? (
                       <span className="he-word verb-lab-form text-lg text-ink" lang="he" dir="rtl">
                         {row.exampleWord}
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-2 py-2 text-xs text-muted">{row.exampleRef?.replace(/ #\d+$/, "")}</td>
+                  <td className={`px-2 py-2 text-xs text-muted ${row.exampleRef ? "" : "verb-chart-skip"}`} data-label="Where">
+                    {row.exampleRef?.replace(/ #\d+$/, "")}
+                  </td>
                 </tr>
               ))}
             </tbody>

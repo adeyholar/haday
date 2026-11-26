@@ -313,7 +313,31 @@ test("the Pe-Aleph chart is filled and the kept Qal cells stay", () => {
     assert.equal(cell.form.normalize("NFC"), form.normalize("NFC"), id);
   }
   const imperative = file.cells.find((item) => item.id === "Qal.imperative.ms");
-  assert.match(imperative.note, /עֲמֹד/);
+  assert.equal(imperative.note.includes("עֲמֹד"), false);
+  assert.match(imperative.note, /ḥaṭeph seghol/);
+  assert.match(imperative.note, /אֱמֹר/);
+  const niphal = file.cells.find((item) => item.id === "Niphal.qatal.3ms");
+  assert.equal(niphal.exampleRef, "Num 27:13 #9");
+  assert.equal(niphal.exampleWord.normalize("NFC"), "נֶאֱסַ֖ף".normalize("NFC"));
+  assert.equal(niphal.exampleStrongs, "H622");
+  assert.equal(niphal.exampleHasWawPrefix, false);
+  assert.equal(niphal.attestedTokenCount, 5);
+  assert.equal(niphal.tahot.morph, "HVNp3ms");
+  assert.equal(niphal.exampleRef.includes("Exod 22:5"), false);
+  const pual = file.cells.find((item) => item.id === "Pual.yiqtol.2mp");
+  assert.equal(pual.status, "attested-example");
+  assert.equal(pual.exampleRef, "Isa 1:20 #5");
+  assert.equal(pual.exampleWord.normalize("NFC"), "תְּאֻכְּל֔וּ".normalize("NFC"));
+  assert.equal(pual.exampleStrongs, "H398");
+  assert.equal(pual.parseEligible, true);
+  assert.equal(pual.displayMark, undefined);
+  assert.match(pual.note, /Qal passive/);
+  assert.match(pual.note, /Pual/);
+  assert.equal(pual.tahot.agreesWithOSHB, false);
+  const hiphil = file.cells.find((item) => item.id === "Hiphil.participle.mp");
+  assert.equal(hiphil.exampleRef, "Deut 1:32 #4");
+  assert.match(hiphil.note, /without the yod \(defective\)/);
+  assert.match(hiphil.note, /same vowels/);
   const qatal = registry.chartRows("I-Aleph", "Qal.qatal").find((row) => row.pgn === "3ms");
   assert.equal(qatal.exampleRef, "Exod 34:28 #11");
   assert.ok(qatal.exampleWord);
@@ -359,5 +383,40 @@ test("the Semester 2 home card returns home, and the quiz waits for an answer", 
   const rootHtml = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
   assert.match(css, /Noto Serif Hebrew/);
   assert.match(css, /\.verb-lab \.verb-lab-form/);
+  assert.match(css, /\.verb-lab \.verb-chart/);
   assert.match(rootHtml, /Noto\+Serif\+Hebrew/);
+  const welcome = readFileSync(new URL("../src/components/verb-lab/verb-lab-welcome.tsx", import.meta.url), "utf8");
+  const chart = readFileSync(new URL("../src/components/verb-lab/verb-lab-chart.tsx", import.meta.url), "utf8");
+  assert.equal(chart.includes("min-w-[36rem]"), false);
+  assert.equal(welcome.includes("min-w-[36rem]"), false);
+  assert.match(chart, /verb-chart/);
+  assert.match(chart, /min-w-0/);
+});
+
+test("eleven Pe-Aleph squares show the non-nun/resh examples", () => {
+  const file = data.VERB_FILES["I-Aleph"];
+  const expected = [
+    ["Qal.qatal.2fs", "Ezek 26:17 #7", "אָבַ֔דְתְּ", "H6", 9],
+    ["Qal.imperative.fs", "Jer 10:17 #1", "אִסְפִּ֥י", "H622", 7],
+    ["Qal.participle-active.fp", "Jer 50:6 #2", "אֹֽבְדוֹת֙", "H6", 2],
+    ["Qal.participle-passive.ms", "Prov 15:17 #7", "אָ֝ב֗וּס", "H75", 7],
+    ["Qal.participle-passive.mp", "1Kgs 5:3 #14", "אֲבוּסִֽים", "H75", 7],
+    ["Niphal.qatal.3fs", "Jer 48:33 #1", "וְנֶאֶסְפָ֨ה", "H622", 2],
+    ["Niphal.yiqtol.2ms", "Num 31:2 #8", "תֵּאָסֵ֥ף", "H622", 6],
+    ["Niphal.participle.ms", "Gen 49:29 #6", "נֶאֱסָ֣ף", "H622", 16],
+    ["Niphal.participle.mp", "1Sam 13:11 #19", "נֶאֱסָפִ֥ים", "H622", 9],
+    ["Hiphil.qatal.2ms", "Job 14:19 #10", "הֶאֱבַֽדְתָּ", "H6", 2],
+    ["Pual.participle.ms", "Ezek 38:12 #12", "מְאֻסָּ֣ף", "H622", 2],
+  ];
+  assert.equal(expected.length, 11);
+  for (const [id, ref, word, strongs, count] of expected) {
+    const cell = file.cells.find((item) => item.id === id);
+    assert.equal(cell.exampleRef, ref, id);
+    assert.equal(cell.exampleWord.normalize("NFC"), word.normalize("NFC"), id);
+    assert.equal(cell.exampleStrongs, strongs, id);
+    assert.equal(cell.attestedTokenCount, count, id);
+  }
+  const participle = file.cells.find((item) => item.id === "Niphal.participle.ms");
+  assert.equal(participle.tahot.morph, "HVNrmsa");
+  assert.equal(participle.tahot.comparison, "agree");
 });

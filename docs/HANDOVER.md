@@ -2,57 +2,35 @@
 
 This branch is not merged. Do not merge it. Merging is the Chairman's call.
 
-Branch: `cursor/verb-lab-nov25-3c1f`
+Branch: `cursor/pe-aleph-rulings-d911`
 
-Rebased onto `main` at `0e3f85f` (PR #253, Translation Lab card, squash-merged). The rebased code commit is `3e48fd43829f106bb792b7125b05b612b94882f2`.
-
-The only conflict was `docs/HANDOVER.md`. `src/components/path-hub.tsx` did not conflict. It still has both sides: `VerbLabCard` on Learn, Practice, and Play, and the Translation Lab card appended on Listen when `translationLabEnabled()` is on and `showTranslationLabListenCard` is true (Semester 1). The Tutor's Pe-Aleph file is byte for byte the file from the Nov 25 check.
+Starts from `main` at `566f639` (PR #266, the filled Pe-Aleph chart).
 
 No secrets are in this note.
 
 ## What this branch does
 
-The Nov 25 read-only check, against the Biblical Hebrew Tutor's filled Pe-Aleph file.
+Chairman rulings on `data/paradigms/weak-ialeph.json`, plus a phone fit for the Verb Lab charts. No other Hebrew file was edited. The file still has 207 cells.
 
-1. **Pe-Aleph chart.** `data/paradigms/weak-ialeph.json` is the Tutor's file, byte for byte. 207 cells. `sameAsIGuttural` is `[]`. `noFormSlots` is the Pual and Hophal imperatives. The 14 original Qal cells match the previous file. The chart draws every cell, the label `standard form, not in the Bible` where the data carries it, and the verse where a cell or an alternate has one. No עמד or קטל example was added. The kept Qal imperative ms note still names עֲמֹד.
+1. **Qal imperative ms.** The note no longer contains the sentence that names עֲמֹד. The rest of that note stays: א is a consonant with ḥaṭeph seghol, and אמר has אֱמֹר, pausal אֱמָר.
 
-2. **90% is the exam, not each square of four.** The screen says the exam clears at 90% of the forms you answer. That is the number `formPercent` compares with `GAME_STAGE_PASS`. A miss inside one square no longer fails that square when the whole sitting is still at 90% (15 of 16 is 94%, and the square that was 3 of 4 still clears). A sitting that is only those four forms is 75% and does not clear. Fewer than ten forms still need every answer to reach 90%, because 8 of 9 is 89% and 3 of 4 is 75%.
+2. **Pual yiqtol 2mp.** Was `paradigm-standard` with the label `standard form, not in the Bible`. It is now an attested example, Isa 1:20 #5, teaching root אכל (H398). The example word is the WLC token, normalized to NFC, including its accent. The note says OSHB tags it Qal passive and STEPBible tags it Pual. OSHB on that token is `HVQi2mp`. The tahot morph is recorded as `HVPi2mp` (Pual imperfect 2mp in this file's codes), `agreesWithOSHB` false, comparison `stem`. `parseEligible` is true. The display mark is gone. `attestedTokenCount` is 1 and `teachingRootTokenCount` is 1, for this approved token.
 
-3. **Progress keys.** Boxes, due, cleared, and continue are `class|square`. An old save with a bare square id is kept as `strong|square`. A class key already stored wins over the bare id. Pe-Aleph practice does not move the strong verb's box.
+3. **Niphal qatal 3ms.** The displayed example is no longer Exod 22:5 (a weqatal). It is Num 27:13 #9, the WLC token נֶאֱסַ֖ף (patah under the samekh, with the tipcha), root אסף H622, `exampleRootClass` I-Aleph, no waw prefix. tahot is `HVNp3ms` and agrees. `attestedTokenCount` stays 5 and `teachingRootTokenCount` stays 1.
 
-4. **Level 7.** "Dimmed stems are coming" is hidden when `anyStemDimmed` is false. At level 7 every stem is open.
+4. **Hiphil participle mp** (Deut 1:32 מַאֲמִינִם). A spelling note was added: written without the yod (defective), with the same vowels. The example word and the reference were not changed.
 
-5. **Semester 2 home.** The Verb Lab card on that home uses `from=home`. Back goes to `/bbh`, and the Home tab is the one that lights. Play is still `/hub/play`.
+5. **Eleven displayed examples.** Only `exampleWord`, `exampleRef`, and `exampleStrongs` changed, copied NFC from the approved list. `attestedTokenCount` and every other field on those cells stayed. 1Kgs 5:3 is the file's existing reference style (`1Kgs 12:18` is already in the file). That verse is Hebrew numbering; English 1 Kings 4:23 is the same verse. Niphal.participle.ms is the Tutor's warning: the example was swapped to Gen 49:29 #6, and the cell's tahot was left as it was (`HVNrmsa`, comparison `agree`). OSHB on that token is `HVNsmsa`. The two tags differ only by the participle letter (s versus r).
 
-6. **Quiz Next.** The button stays disabled until an answer is chosen.
-
-7. **Pointed type, inside the Verb Lab panels only.** Noto Serif Hebrew (Google Fonts, free) is the lab face. Hebrew runs inside English lines are `dir=rtl` spans with `unicode-bidi: isolate`. Form lines use a taller line height. The rest of the app still uses Frank Ruhl Libre. Stem names, the Hophal pair of spellings, and the welcome table were left as they were.
-
-## For the Chairman and the Tutor
-
-(a) Kept cell `Qal.imperative.ms` still has the note that names עֲמֹד. It was kept byte for byte. The Chairman decides whether that note stays.
-
-(b) Nineteen attested squares depend on allowing a third radical נ or ר (אמן and אמר). They need a second reader. The Tutor's note is the source of that count. This branch did not re-check them.
-
-(c) The other warnings in the Tutor's notes, verbatim:
-
-2. **Piel.infinitive-absolute אַכֵּל:** OSHB has 4 matching tokens (אַבֵּד Deut 12:2; וְאַבֵּד Esth 9:6, 9:12; Jer 12:17), but TAHOT disagrees on all, so it stays standard form.
-
-3. **Qal-passive look-alikes of אכל:** אֻכְּלוּ (Neh 2:3, 2:13; Nah 1:10) and תְּאֻכְּלוּ (Isa 1:20) have exactly the Pual qatal 3cp / yiqtol 2mp shape, but OSHB parses them as Qal passive, so they were not used. Pual.qatal.3cp is attested anyway (אֻסְּרוּ Isa 22:3); Pual.yiqtol.2mp stays standard form.
-
-5. **Dropped unattested alternates** (I-Aleph house rule): Piel inf. abs. אַכֹּל, Hiphil ptc fs מַאֲכִילָה, Hophal ptc fs מָאֳכָלָה.
-
-6. **Single-token or other-root squares:** 57 of 77 attested filled squares use another I-Aleph root (shown above). Qal.participle-passive.fs rests on one token, Ezek 16:30 אֲמֻלָה (אמל), which OSHB and TAHOT both tag as a Qal passive participle.
-
-7. **Hophal:** 0 of 26 attested (all standard form).
+6. **Phone width.** On main, the strong-verb chart and the Pe-Aleph chart both use one table with `min-w-[36rem]` (576px). At a 390px viewport the page scroll width was 611px, so the page scrolled sideways. The same was true of the strong Qal perfect chart. Under 640px the Verb Lab charts, including the seven-stems welcome table, now stack each row inside the panel. Noto Serif Hebrew and the form line-height from PR #266 stay. At 390px the page scroll width equals the client width (374px) and the table is 303px. At 360px the page scroll width equals the client width (345px) and the table is 273px.
 
 ## Tests actually run
 
-On 26 Nov 2026, after the rebase onto `0e3f85f`, on the tree at `3e48fd43829f106bb792b7125b05b612b94882f2`:
+On 26 Nov 2026, Node v22.23.4, on this branch after the edits:
 
 - `npx tsc --noEmit` — exit 0
-- `node --test scripts/*.test.mjs` — 777 tests, 772 pass, 0 fail, 5 skipped
-- The lemma audit on the previous head of this branch, before the rebase, was a 4, b 2762, c 0, d 12993, e 0, f 760, g 6572, h 0. This rebase did not touch lemma data.
+- `node --test scripts/*.test.mjs` — 778 tests, 773 pass, 0 fail, 5 skipped
+- `node scripts/audit-lemmas.mjs` — exit 0. Counts: a 4, b 2762, c 0, d 12993, e 0, f 760, g 6572, h 0. This branch did not touch lemma data.
 
 ## Record already on main
 
