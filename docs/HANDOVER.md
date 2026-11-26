@@ -4,6 +4,8 @@ This branch is not merged. Do not merge it. Merging is the Chairman's call. This
 
 Branch: `cursor/listen-choice-dupes-baf3`
 
+Implementation commit: `6c35bd059026089f4439c000adf72f99729ab6f3`
+
 Starts from `main` at `d9b1674` (PR #267).
 
 No secrets are in this note. No vocabulary row was edited or deleted.
