@@ -1,4 +1,4 @@
-import { lettersOnly } from "@/lib/hebrew";
+import { displayedHebrew, lettersOnly } from "@/lib/hebrew";
 import { verseFor, type VerseEx } from "@/lib/verses";
 import { tanakhVerseFor, isInflected } from "@/lib/tanakh-pool";
 import { closeItems, glossMatches, sharesSense, shuffle, type VocabItem } from "@/lib/vocab";
@@ -266,15 +266,32 @@ function choiceKey(itemId: string, pool: VocabItem[], mode: string): string {
 /** Wrong buttons for “pick the English.” Skip a lemma that lists a sense of the answer. */
 function englishMates(item: VocabItem, pool: VocabItem[], n: number): VocabItem[] {
   const ranked = closeItems(item, pool, Math.max(n * 6, 12)).filter((other) => !sharesSense(item, other));
-  if (ranked.length >= n) return ranked.slice(0, n);
-  const seen = new Set([item.id, ...ranked.map((other) => other.id)]);
+  const out: VocabItem[] = [];
+  const seen = new Set<string>([item.id]);
+  const seenHe = new Set<string>([displayedHebrew(item.hebrew)]);
+  const take = (other: VocabItem) => {
+    const face = displayedHebrew(other.hebrew);
+    if (seen.has(other.id) || seenHe.has(face) || sharesSense(item, other)) return;
+    seen.add(other.id);
+    seenHe.add(face);
+    out.push(other);
+  };
+  for (const other of ranked) {
+    if (out.length >= n) break;
+    take(other);
+  }
+  if (out.length >= n) return out;
   const rest = pool
     .filter((other) => !seen.has(other.id) && !sharesSense(item, other))
     .sort((a, b) => {
       const near = (v: VocabItem) => (v.chapter === item.chapter ? 0 : Math.abs(v.chapter - item.chapter) + (v.pos === item.pos ? 0 : 2));
       return near(a) - near(b);
     });
-  return [...ranked, ...rest].slice(0, n);
+  for (const other of rest) {
+    if (out.length >= n) break;
+    take(other);
+  }
+  return out;
 }
 
 /** Look-alikes for the card on screen. The same seed and word deal the same set. */

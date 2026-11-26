@@ -1,3 +1,11 @@
+/**
+ * Hebrew as a multiple-choice button shows it.
+ * NFC, cantillation removed. Vowel points stay, and so do dagesh and shin/sin dots.
+ */
+export function displayedHebrew(s: string): string {
+  return s.normalize("NFC").replace(/[\u0591-\u05AF]/g, "");
+}
+
 /** Strip niqqud and cantillation. Final letters are kept as-is. */
 export function stripNiqqud(s: string): string {
   return s

@@ -392,6 +392,63 @@ test("a drill shows the sitting left and the week's words left", () => {
   assert.match(play, /These words/);
 });
 
+/** Pointed Hebrew as a choice button shows it. NFC, cantillation removed, vowel points kept. */
+function shownHebrew(s) {
+  return s.normalize("NFC").replace(/[\u0591-\u05AF]/g, "");
+}
+
+function isolated(id, hebrew, gloss) {
+  return { id, hebrew, translit: "", gloss, alts: [], pos: "zzz", chapter: 9999, freq: 1 };
+}
+
+function assertDistinctShown(choices, label) {
+  const keys = choices.map((item) => shownHebrew(item.hebrew));
+  assert.equal(new Set(keys).size, keys.length, `${label}: ${keys.join(" | ")}`);
+}
+
+test("a listen card never shows two choices with the same Hebrew", () => {
+  const answer = isolated("ans", "אָכַל", "to eat");
+  const withAccent = isolated("accent", "אָכַ֖ל", "to eat, accented");
+  const sameSpelling = isolated("same", "אָכַל", "to consume");
+  const markOrder = isolated("order", "אָכַל".normalize("NFD"), "to eat, reordered");
+  const say = isolated("say", "אָמַר", "to say");
+  const go = isolated("go", "הָלַךְ", "to go");
+  const see = isolated("see", "רָאָה", "to see");
+  const pool = [answer, withAccent, sameSpelling, markOrder, say, go, see];
+  const listen = {
+    kind: "contrast",
+    cue: "audio",
+    item: answer,
+    baseKey: "contrast:audio:ans:dup",
+    choices: [],
+    key: "contrast:audio:ans:dup",
+    group: 0,
+    back: 0,
+  };
+  const dealt = drillCardChoices(listen, pool, 11);
+  assertDistinctShown(dealt, "listen");
+  assert.equal(dealt.length, 4);
+  assert.ok(dealt.some((item) => item.id === "ans"));
+  assert.equal(dealt.some((item) => item.id === "accent" || item.id === "same" || item.id === "order"), false);
+  const board = contrastChoices(answer, pool, 4);
+  assertDistinctShown(board, "contrast");
+  assert.equal(board.length, 4);
+
+  const short = contrastChoices(answer, [answer, withAccent, sameSpelling, say], 4);
+  assertDistinctShown(short, "short pool");
+  assert.equal(short.length, 2);
+  assert.ok(short.some((item) => item.id === "ans"));
+  assert.ok(short.some((item) => item.id === "say"));
+
+  const week = itemsForWeek(15);
+  const sitting = buildEtchSitting(week, {}, undefined, Date.now(), undefined, 42);
+  for (const task of sitting) {
+    const choices = drillCardChoices(task, week, 42);
+    if (choices.length < 2) continue;
+    assertDistinctShown(choices, task.key);
+  }
+});
+
 test("a tap that leaves with the last card does not grade the next one", () => {
   const shown = 1_000;
   assert.equal(tapCarriesOver(shown, shown + GUESS_MS - 1), true);
