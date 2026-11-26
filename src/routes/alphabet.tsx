@@ -311,13 +311,19 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
   }
 
   if (!ready) {
-    return <p className="mt-8 text-sm text-muted">Dealing a round…</p>;
+    return (
+      <Panel className="mt-8">
+        <p className="text-sm text-muted">Dealing a round…</p>
+      </Panel>
+    );
   }
 
   if (done || !prompt) {
     return (
       <div className="mt-5">
-        <QuizPicker kind={kind} onKind={(k) => { setKind(k); setSeed((s) => s + 1); }} />
+        <Panel>
+          <QuizPicker kind={kind} onKind={(k) => { setKind(k); setSeed((s) => s + 1); }} />
+        </Panel>
         <div className="mt-4 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <p className="font-display text-5xl font-bold tabular-nums text-ink">
             {total ? Math.round((right / total) * 100) : 0}%
@@ -370,6 +376,7 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
           </Button>
         </div>
       ) : null}
+      <Panel className="mt-4">
       <QuizPicker kind={kind} onKind={(k) => { setKind(k); setSeed((s) => s + 1); }} />
       {queue.length > 0 && (
         <p className="mt-2 text-sm font-medium text-primary">Serving closed-book misses first.</p>
@@ -377,6 +384,7 @@ function FoundationQuiz({ fromLesson }: { fromLesson?: string }) {
       <p className="mt-4 text-sm font-medium tabular-nums text-ink">
         {i + 1} / {total} · {right} correct
       </p>
+      </Panel>
       <div className="mt-3 rounded-[var(--radius-xl)] bg-card py-10 text-center shadow-[var(--shadow-border)]">
         {promptNode()}
         {kind === "vowel-name" && vowel && (

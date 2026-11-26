@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Panel } from "@/components/panel";
 
 function roomFor(pathname: string): { to: "/hub/learn" | "/hub/practice" | "/hub/play" | "/hub/listen"; label: string } {
   if (
@@ -32,10 +33,12 @@ export function RoomLink() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const room = roomFor(pathname);
   return (
-    <p className="mb-3 text-sm">
-      <Link to={room.to} className="font-semibold text-primary">
-        {room.label}
-      </Link>
-    </p>
+    <Panel className="mb-3 p-3">
+      <p className="text-sm">
+        <Link to={room.to} className="font-semibold text-primary">
+          {room.label}
+        </Link>
+      </p>
+    </Panel>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/paradigms/catalog";
 import { isHidden, OPEN_HIDE, tapCell, tapRow, toggleHideAll, type HideState } from "@/lib/paradigms/hide";
 import { cellView } from "@/lib/paradigms/present";
+import { Panel } from "@/components/panel";
 import { verseTarget } from "@/lib/paradigms/refs";
 import type { StrongCell } from "@/lib/paradigms/types";
 
@@ -183,7 +184,7 @@ export function ParadigmBoard() {
 
   return (
     <div>
-      <header>
+      <Panel>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Paradigms</p>
         <h1 className="mt-1 font-display text-4xl font-bold text-ink">
           <span className="he-word" lang="he" dir="rtl">
@@ -191,7 +192,7 @@ export function ParadigmBoard() {
           </span>
         </h1>
         <p className="mt-2 text-sm text-muted">One binyan at a time. Swipe for the next. Tap a form to hide it.</p>
-      </header>
+      </Panel>
 
       <div className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto md:hidden">
         {names.map((binyan) => {
@@ -226,7 +227,7 @@ export function ParadigmBoard() {
         })}
       </div>
 
-      <div className="mt-4 hidden md:block">
+      <Panel className="mt-4 hidden md:block">
         <div className="flex items-center justify-between gap-2">
           <BlockTabs blocks={CONJUGATION_BLOCKS} current={wideBlock.id} onPick={setGridBlock} />
           <button
@@ -283,7 +284,7 @@ export function ParadigmBoard() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

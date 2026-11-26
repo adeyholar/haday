@@ -194,10 +194,10 @@ export function DrillSitting({
 
   if (!pool.length) {
     return (
-      <>
+      <Panel>
         {chrome}
         <p className="mt-6 text-muted">No words in this set.</p>
-      </>
+      </Panel>
     );
   }
 
@@ -281,10 +281,10 @@ export function DrillSitting({
 
   if (!task) {
     return (
-      <>
+      <Panel>
         {chrome}
         <p className="mt-8 text-sm text-muted">Dealing a round…</p>
-      </>
+      </Panel>
     );
   }
 

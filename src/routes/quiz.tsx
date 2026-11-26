@@ -171,10 +171,10 @@ function QuizPage() {
 
   if (!pool.length) {
     return (
-      <>
+      <Panel>
         <QuizSetBar set={set} />
         <p className="mt-6 text-muted">No words in this set.</p>
-      </>
+      </Panel>
     );
   }
 
@@ -196,10 +196,10 @@ function QuizPage() {
   }
   if (!ready || (deck.length > 0 && !item && i === 0)) {
     return (
-      <>
+      <Panel>
         <QuizSetBar set={set} />
         <p className="mt-8 text-sm text-muted">Dealing a round…</p>
-      </>
+      </Panel>
     );
   }
 
@@ -207,8 +207,10 @@ function QuizPage() {
     const total = score.right + score.wrong;
     return (
       <>
-        <QuizSetBar set={set} />
-        <div className="mt-8 rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
+        <Panel className="mb-4">
+          <QuizSetBar set={set} />
+        </Panel>
+        <div className="rounded-[var(--radius-xl)] bg-card p-8 text-center shadow-[var(--shadow-border)]">
           <h1 className="font-display text-3xl font-semibold">Round complete</h1>
           <p className="mt-2 font-display text-5xl font-bold tabular-nums text-ink">
             {total ? Math.round((score.right / total) * 100) : 0}%

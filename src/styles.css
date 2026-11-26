@@ -310,8 +310,14 @@ html {
   position: sticky;
   top: 3.5rem;
   z-index: 20;
-  background: color-mix(in oklab, var(--color-card) 92%, transparent);
-  backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  background: var(--color-card);
+  box-shadow: var(--shadow-border);
+}
+/* Grammar hubs frame the title with the cards. The cards step in so the frame stays visible. path-hub.tsx stays untouched. */
+.hub-frame > ul > li > a,
+.hub-frame > a {
+  background-color: var(--color-surface);
 }
 .manuscript-sheet {
   min-height: 0;
