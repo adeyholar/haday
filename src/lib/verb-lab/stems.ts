@@ -147,6 +147,11 @@ export function stemGate(path: VerbPath, stem: StemId): number {
   return PATH_GATE[path][stem];
 }
 
+/** Level 7 has opened every stem, so the “coming” line has nothing left to explain. */
+export function anyStemDimmed(path: VerbPath, taught: number): boolean {
+  return stemOrder(path).some((stem) => taught < stemGate(path, stem));
+}
+
 /** Scripture Path stems are already open practice. Grammar term 2 has every stem on the menu today. Term 1 has Qal. */
 export function defaultTaughtLevel(path: VerbPath, term: 1 | 2): number {
   if (path === "scripture") return 7;

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { HebrewRun } from "@/components/verb-lab/hebrew-run";
 import { chartRows, columnNotes, rootNote, type ChartRow } from "@/lib/verb-lab/registry";
 import { columnLabel, pgnLabel } from "@/lib/verb-lab/stems";
 import type { ClassId } from "@/lib/verb-lab/data";
@@ -8,7 +9,7 @@ import { nfc } from "@/lib/paradigms/nfc";
 function FormLine({ row, also = false }: { row: ChartRow; also?: boolean }) {
   return (
     <div className={also ? "mt-1" : undefined}>
-      <span className="he-word text-2xl text-ink" lang="he" dir="rtl">
+      <span className="he-word verb-lab-form text-2xl text-ink" lang="he" dir="rtl">
         {row.form}
       </span>
       {also ? <span className="ms-2 text-xs text-muted">also</span> : null}
@@ -34,7 +35,11 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
     <div>
       <p className="text-sm text-muted">
         Root <span className="he-word text-ink" lang="he" dir="rtl">{nfc(file.root)}</span>
-        {rootNote(classId) ? <span className="mt-1 block">{rootNote(classId)}</span> : null}
+        {rootNote(classId) ? (
+          <span className="mt-1 block">
+            <HebrewRun text={rootNote(classId)} />
+          </span>
+        ) : null}
       </p>
       {[...groups.entries()].map(([subtype, group]) => (
         <div key={subtype || "main"} className="mt-4 overflow-x-auto">
@@ -59,13 +64,29 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
                   <td className="px-2 py-2 text-end">
                     <FormLine row={row} />
                     {row.alternates.map((alt) => (
-                      <FormLine key={alt.key} row={alt} also />
+                      <div key={alt.key}>
+                        <FormLine row={alt} also />
+                        {alt.exampleWord || alt.exampleRef ? (
+                          <span className="mt-1 block text-xs text-muted">
+                            {alt.exampleWord ? (
+                              <span className="he-word verb-lab-form text-base text-ink" lang="he" dir="rtl">
+                                {alt.exampleWord}
+                              </span>
+                            ) : null}
+                            {alt.exampleRef ? <span className="ms-2">{alt.exampleRef.replace(/ #\d+$/, "")}</span> : null}
+                          </span>
+                        ) : null}
+                      </div>
                     ))}
-                    {row.note ? <span className="mt-1 block text-xs text-muted">{row.note}</span> : null}
+                    {row.note ? (
+                      <span className="mt-1 block text-xs text-muted">
+                        <HebrewRun text={row.note} />
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-2 py-2 text-end">
                     {row.exampleWord ? (
-                      <span className="he-word text-lg text-ink" lang="he" dir="rtl">
+                      <span className="he-word verb-lab-form text-lg text-ink" lang="he" dir="rtl">
                         {row.exampleWord}
                       </span>
                     ) : null}
@@ -81,7 +102,7 @@ export function VerbLabChart({ classId, squareId }: { classId: ClassId; squareId
         <ul className="mt-4 space-y-2 text-sm text-muted">
           {notes.map((note) => (
             <li key={note.slice(0, 24)} className="border-s-2 border-primary ps-3">
-              {note}
+              <HebrewRun text={note} />
             </li>
           ))}
         </ul>

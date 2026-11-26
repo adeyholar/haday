@@ -207,7 +207,7 @@ export function SecondTerm({ onLeave }: { onLeave: () => void }) {
       </div>
 
       <section className="mt-4">
-        <VerbLabCard from="play" path="grammar" />
+        <VerbLabCard from="home" path="grammar" />
       </section>
 
       <section className="mt-4 rounded-[var(--radius-xl)] bg-card p-5 shadow-[var(--shadow-border)]">

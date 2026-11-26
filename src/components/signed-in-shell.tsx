@@ -48,10 +48,10 @@ type ShellTab = {
   on: boolean;
 };
 
-function tabFrom(search: unknown): "learn" | "practice" | "play" | null {
+function tabFrom(search: unknown): "learn" | "practice" | "play" | "home" | null {
   if (!search || typeof search !== "object" || !("from" in search)) return null;
   const from = (search as { from?: unknown }).from;
-  return from === "learn" || from === "practice" || from === "play" ? from : null;
+  return from === "learn" || from === "practice" || from === "play" || from === "home" ? from : null;
 }
 
 function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string, search: unknown): ShellTab[] {
@@ -69,7 +69,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
           !pathname.startsWith("/iibs/road") &&
           !pathname.startsWith("/iibs/wlc")));
     return [
-      { to: "/iibs", label: "Home", icon: House, on: inRoom },
+      { to: "/iibs", label: "Home", icon: House, on: inRoom || (verbLab && from === "home") },
       { to: "/iibs/learn", label: "Learn", icon: Library, on: pathname.startsWith("/iibs/learn") || pathname.startsWith("/iibs/wlc") || pathname.startsWith("/iibs/parse-lab") || (verbLab && from === "learn") },
       { to: "/iibs/study", label: "Practice", icon: ListChecks, on: pathname.startsWith("/iibs/study") || (verbLab && (from === "practice" || from == null)) },
       { to: "/iibs/vocab", label: "Play", icon: Compass, on: pathname.startsWith("/iibs/vocab") || (verbLab && from === "play") },
@@ -83,7 +83,7 @@ function shellTabs(room: "scripture" | "grammar" | "home-only", pathname: string
         (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
       );
   return [
-    { to: "/bbh", label: "Home", icon: House, on: pathname === "/bbh" },
+    { to: "/bbh", label: "Home", icon: House, on: pathname === "/bbh" || (verbLab && from === "home") },
     {
       to: "/hub/learn",
       label: "Learn",

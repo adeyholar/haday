@@ -1,6 +1,6 @@
-import { stemByAlias, type StemId } from "@/lib/verb-lab/stems";
+import { stemByAlias, type StemId, type VerbPath } from "@/lib/verb-lab/stems";
 
-export type VerbLabFrom = "learn" | "practice" | "play";
+export type VerbLabFrom = "learn" | "practice" | "play" | "home";
 export type VerbLabView = "room" | "welcome" | "square" | "exam";
 export type VerbLabTab = "chart" | "practice";
 export type VerbLabMode = "quiz" | "drill";
@@ -21,7 +21,7 @@ export type LegacyTarget = {
   search: VerbLabSearch;
 };
 
-const FROM: readonly VerbLabFrom[] = ["learn", "practice", "play"];
+const FROM: readonly VerbLabFrom[] = ["learn", "practice", "play", "home"];
 const VIEWS: readonly VerbLabView[] = ["room", "welcome", "square", "exam"];
 const TABS: readonly VerbLabTab[] = ["chart", "practice"];
 const MODES: readonly VerbLabMode[] = ["quiz", "drill"];
@@ -81,4 +81,20 @@ export function legacyVerbTarget(pathname: string, hash = ""): LegacyTarget | nu
 
 export function legacyVerbPaths(): string[] {
   return Object.keys(EXACT);
+}
+
+type HubBackTo = "/bbh" | "/iibs" | "/iibs/learn" | "/iibs/vocab" | "/iibs/study" | "/hub/learn" | "/hub/play" | "/hub/practice";
+
+/** Where Verb Lab’s back control returns. The Semester 2 home is the home route, not Play. */
+export function hubBackTarget(path: VerbPath, from: VerbLabFrom | undefined): { to: HubBackTo; label: string } {
+  if (from === "home") {
+    return path === "scripture" ? { to: "/iibs", label: "Home" } : { to: "/bbh", label: "Home" };
+  }
+  const label = from === "learn" ? "Learn" : from === "play" ? "Play" : "Practice";
+  if (path === "scripture") {
+    const to = from === "learn" ? "/iibs/learn" : from === "play" ? "/iibs/vocab" : "/iibs/study";
+    return { to, label };
+  }
+  const to = from === "learn" ? "/hub/learn" : from === "play" ? "/hub/play" : "/hub/practice";
+  return { to, label };
 }
