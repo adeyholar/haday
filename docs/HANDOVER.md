@@ -3,8 +3,8 @@
 Draft only. Do not merge. Do not deploy. Merging is the Chairman's call.
 
 Branch: `cursor/binyanim-drill-c04b`
+Implementation commit: `0f574beaae4e2716514a37deaf66ca17873817de`
 Base: `main` at `ff09520`.
-The commit hash is added in the next commit on this branch.
 
 ## Binyanim identification drill
 
