@@ -34,6 +34,7 @@ export const CSP_REPORT_PATH = "/api/csp-report";
 export const CSP_REPORT_MAX_BYTES = 8192;
 export const CSP_REPORT_RATE_LIMIT = 30;
 export const CSP_REPORT_WINDOW_MS = 60_000;
+export const CSP_REPORT_RATE_MAX_IPS = 10_000;
 const CSP_REPORT_TYPES = new Set(["application/csp-report", "application/reports+json", "application/json"]);
 
 /** The microphone stays on for this site because the recorder, echo and read-aloud lessons use it. */
@@ -93,6 +94,11 @@ export function resetCspReportRateLimit(): void {
   rateHits.clear();
 }
 
+/** Test-only: how many IPs are in the rate-limit map. */
+export function cspReportRateMapSize(): number {
+  return rateHits.size;
+}
+
 function noContent(): Response {
   return new Response(null, { status: 204, headers: { "Cache-Control": "no-store", Connection: "close" } });
 }
@@ -120,20 +126,26 @@ function clientIp(event: HeaderEvent): string {
   return headerValue(event.req?.headers, "x-real-ip") || "unknown";
 }
 
+function evictExpiredRateHits(now: number): void {
+  for (const [key, value] of rateHits) {
+    if (now - value.start >= CSP_REPORT_WINDOW_MS) rateHits.delete(key);
+  }
+}
+
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const row = rateHits.get(ip);
-  if (!row || now - row.start >= CSP_REPORT_WINDOW_MS) {
-    rateHits.set(ip, { start: now, count: 1 });
-    if (rateHits.size > 10_000) {
-      for (const [key, value] of rateHits) {
-        if (now - value.start >= CSP_REPORT_WINDOW_MS) rateHits.delete(key);
-      }
-    }
-    return false;
+  if (row && now - row.start < CSP_REPORT_WINDOW_MS) {
+    row.count += 1;
+    return row.count > CSP_REPORT_RATE_LIMIT;
   }
-  row.count += 1;
-  return row.count > CSP_REPORT_RATE_LIMIT;
+  evictExpiredRateHits(now);
+  // A burst of unique or spoofed IPs can fill the window. Do not grow past the
+  // cap, and do not drop older rows (that would reset their counts). New IPs
+  // are treated as limited until a slot expires.
+  if (rateHits.size >= CSP_REPORT_RATE_MAX_IPS) return true;
+  rateHits.set(ip, { start: now, count: 1 });
+  return false;
 }
 
 function mediaType(value: string): string {
